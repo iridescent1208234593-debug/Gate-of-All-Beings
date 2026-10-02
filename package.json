@@ -1,0 +1,10 @@
+{
+  "name": "iridescently",
+  "private": true,
+  "workspaces": [
+    "shared/shared-ui",
+    "shared/shared-types",
+    "shared/shared-data",
+    "shared/shared-session"
+  ]
+}
