@@ -35,12 +35,10 @@ Iridescently/
 │  ├─ huiguan/                 # 西木会馆（设计系统真身目录已被 shared-ui 取代 → 反向 junction）
 │  ├─ oc/                      # 三足乌·虹 人设站
 │  └─ activation-core/         # Next.js 应用
-├─ ops/                        # 运维
-│  ├─ 网站恢复/                # 网站管家（一键重启全部站点 + 隧道）
-│  └─ _verification/           # 验证脚本
 ├─ assets/                     # 素材：素材 / 网站素材 / 罗小黑战记数据库 / 罗小黑组件合成
-├─ _archive/                   # 归档（历史状态、旧 public 归档）
-└─ _quarantine/                # 隔离区（可疑/临时文件，可删）
+└─ ops/                        # 运维
+   ├─ 网站恢复/                # 网站管家（一键重启全部站点 + 隧道）
+   └─ _verification/           # 验证脚本
 ```
 
 根 `package.json` 用 npm workspaces 管理 `shared/*`，导入用包名 `@lxh/shared-*`（根 `npm install` 维护链接）。

@@ -12,7 +12,6 @@ server/app/modules/
 
 # 大体积素材与归档（保留在本地，不纳入 git）
 /assets/
-/_archive/
 /conversations.json
 罗小黑素材引用关系排查报告.md
 
