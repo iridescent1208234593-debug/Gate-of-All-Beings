@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.vite/
+*.log
+.DS_Store
+
+# === 整合前快照 20260927 追加 ===
+dist/
+*.log
+*.db
+*.db.bak_*
+*.mp4
+*.mov
+*.psd
+_archive/
+.edge_cdp11/

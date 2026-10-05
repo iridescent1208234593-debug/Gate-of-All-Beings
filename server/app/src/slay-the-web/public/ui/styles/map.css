@@ -1,0 +1,476 @@
+/* ============ 逐格寻路地图（重生之门） ============
+   设计目标：可逐格寻找的设计空间 —— 节点严格按格排列，
+   类型图标醒目、路径清晰、每格可悬停查看说明。 */
+.MapContainer {
+	position: relative;
+	z-index: 500;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.MapFooter {
+	align-self: flex-end;
+	text-align: right;
+	padding: 1.4rem 2rem 2rem;
+	background: linear-gradient(90deg, transparent, var(--qc-gold-glow));
+	border-radius: 0.8em 0 0 0;
+}
+
+/* 楼层地点主题：当前层世界观地点名与描述 */
+.MapLocation {
+	font-size: 1.1rem;
+	font-weight: 600;
+	color: var(--qc-gold);
+	margin: 0.4rem 0 0.2rem;
+	letter-spacing: 0.1em;
+}
+
+.MapLocationDesc {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 400;
+	color: var(--qc-dim);
+	margin-top: 0.2rem;
+	max-width: 22rem;
+	line-height: 1.4;
+}
+
+.MapLocationFlavor {
+	display: block;
+	font-size: 0.78rem;
+	font-weight: 400;
+	color: var(--game-text-dim);
+	margin-top: 0.35rem;
+	max-width: 24rem;
+	line-height: 1.5;
+	letter-spacing: 0.03em;
+}
+
+/* ---------- 天时相位预告：当前楼层五行天时 ----------
+   与战斗 weatherForFloor 同源；五行色取自 tokens --qc-elem-*。 */
+.MapWeather {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: flex-end;
+	gap: 0.5em 0.7em;
+	margin: 0.6rem 0 0.1rem;
+	padding: 0.5em 0.8em;
+	border: 1px solid var(--game-warn-border);
+	border-radius: 0.7em;
+	background: linear-gradient(90deg, transparent, var(--game-warn-glow-dim));
+	max-width: 24rem;
+	margin-left: auto;
+}
+.MapWeatherBadge {
+	font-size: 0.72rem;
+	letter-spacing: 0.18em;
+	padding: 0.18em 0.55em;
+	border-radius: 0.4em;
+	color: var(--game-ink);
+	background: var(--game-gold);
+	font-weight: 700;
+}
+.MapWeatherName {
+	font-size: 1rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+}
+.MapWeatherFlavor {
+	font-size: 0.78rem;
+	color: var(--game-text-dim);
+}
+.MapWeatherHint {
+	width: 100%;
+	font-size: 0.72rem;
+	color: var(--game-text-dim);
+	opacity: 0.85;
+	letter-spacing: 0.04em;
+}
+/* 五行天时色：木青 / 火赤 / 土金 / 金吉金 / 水鸦青 */
+.MapWeather[data-element='木'] { border-color: var(--qc-elem-wood-line); background: linear-gradient(90deg, transparent, var(--qc-elem-wood-bg)); }
+.MapWeather[data-element='木'] .MapWeatherName { color: var(--qc-elem-wood); }
+.MapWeather[data-element='火'] { border-color: var(--qc-elem-fire-line); background: linear-gradient(90deg, transparent, var(--qc-elem-fire-bg)); }
+.MapWeather[data-element='火'] .MapWeatherName { color: var(--qc-elem-fire); }
+.MapWeather[data-element='土'] { border-color: var(--qc-elem-earth-line); background: linear-gradient(90deg, transparent, var(--qc-elem-earth-bg)); }
+.MapWeather[data-element='土'] .MapWeatherName { color: var(--qc-elem-earth); }
+.MapWeather[data-element='金'] { border-color: var(--qc-elem-metal-line); background: linear-gradient(90deg, transparent, var(--qc-elem-metal-bg)); }
+.MapWeather[data-element='金'] .MapWeatherName { color: var(--qc-elem-metal); }
+.MapWeather[data-element='水'] { border-color: var(--qc-elem-water-line); background: linear-gradient(90deg, transparent, var(--qc-elem-water-bg)); }
+.MapWeather[data-element='水'] .MapWeatherName { color: var(--qc-elem-water); }
+
+/* ---------- 行轴天时标记：每层五行相位小圆点（与地点轴并存） ---------- */
+slay-map-row::after {
+	content: attr(data-weather);
+	position: absolute;
+	left: -2.3em;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 1.5em;
+	height: 1.5em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 0.66rem;
+	line-height: 1;
+	border-radius: 50%;
+	border: 1px solid currentColor;
+	color: var(--qc-dim);
+	background: var(--qc-panel);
+	opacity: 0.6;
+	pointer-events: none;
+	transition: color 200ms, opacity 200ms;
+	font-family: 'KaiTi', 'STKaiti', 'Noto Serif SC', serif;
+}
+slay-map-row[data-weather='木']::after { color: var(--qc-elem-wood); }
+slay-map-row[data-weather='火']::after { color: var(--qc-elem-fire); }
+slay-map-row[data-weather='土']::after { color: var(--qc-elem-earth); }
+slay-map-row[data-weather='金']::after { color: var(--qc-elem-metal); }
+slay-map-row[data-weather='水']::after { color: var(--qc-elem-water); }
+/* 灵机共振行：今日当值五行与该行天时同向时，行轴标记变为紫金并带光晕 */
+slay-map-row[data-resonance]:not([data-resonance=''])::after {
+	content: attr(data-weather) '·振';
+	color: var(--qc-resonance-bright) !important;
+	text-shadow: 0 0 6px var(--qc-resonance-line);
+}
+.MapWeather--resonance {
+	border-color: var(--qc-resonance);
+	background: linear-gradient(90deg, transparent, var(--qc-resonance-bg));
+	box-shadow: 0 0 10px var(--qc-resonance-glow);
+}
+.MapWeather--resonance .MapWeatherName,
+.MapWeather--resonance .MapWeatherBadge {
+	color: var(--qc-resonance-bright);
+}
+slay-map-row[current]::after {
+	opacity: 1;
+	color: var(--qc-gold);
+	text-shadow: 0 0 0.6em var(--qc-gold-glow);
+}
+
+/* 地图画布：宣纸墨底（左侧留出地点轴空间） */
+slay-map {
+	--rows: 12;
+	--columns: 6;
+	--pathColor: #4a443a;
+	--highlight: var(--qc-gold);
+	box-sizing: border-box;
+	display: grid;
+	width: 92%;
+	margin: auto;
+	min-height: 58rem;
+	padding: 1.2em 1em 1.2em 3.4em;
+	position: relative;
+	border-radius: 1.2em;
+	background:
+		radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+		linear-gradient(180deg, #f6f1e6, #ede3cc 55%, #e0d4b8);
+	box-shadow: inset 0 0 4em rgba(212, 168, 64, 0.16), 0 0 1.6em rgba(90, 158, 143, 0.12);
+}
+
+/* ---------- 逐格水墨背景层：远山 / 雾霭 / 飞鸟 / 墨点（纯装饰，不遮挡寻路） ---------- */
+.MapInkScenery {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	overflow: hidden;
+	pointer-events: none;
+	border-radius: inherit;
+}
+.MapInkMountains {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	height: 70%;
+	min-height: 26rem;
+}
+.MapInkMtn--far { fill: rgba(58, 54, 44, 0.06); }
+.MapInkMtn--mid { fill: rgba(58, 54, 44, 0.1); }
+.MapInkMtn--near { fill: rgba(58, 54, 44, 0.15); }
+.MapInkMist {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(18px);
+	background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.6), transparent 70%);
+	pointer-events: none;
+}
+.MapInkMist--1 { width: 42%; height: 10%; left: -8%; top: 28%; }
+.MapInkMist--2 { width: 38%; height: 8%; right: -6%; top: 50%; }
+.MapInkBird {
+	position: absolute;
+	width: 34px;
+	height: 12px;
+	opacity: 0.5;
+	pointer-events: none;
+}
+.MapInkBird::before,
+.MapInkBird::after {
+	content: '';
+	position: absolute;
+	width: 14px;
+	height: 2px;
+	border-radius: 2px;
+	background: rgba(58, 54, 44, 0.55);
+}
+.MapInkBird::before { left: 0; top: 8px; transform: rotate(24deg); }
+.MapInkBird::after { right: 0; top: 8px; transform: rotate(-24deg); }
+.MapInkBird--1 { left: 18%; top: 12%; }
+.MapInkBird--2 { left: 26%; top: 21%; transform: scale(0.75); }
+.MapInkDot {
+	position: absolute;
+	border-radius: 50%;
+	background: radial-gradient(circle at 35% 35%, rgba(58, 54, 44, 0.28), rgba(58, 54, 44, 0.06) 70%);
+	animation: mapInkDrift 9s ease-in-out infinite alternate;
+	pointer-events: none;
+}
+.MapInkDot--1 { width: 26px; height: 26px; right: 10%; top: 16%; }
+.MapInkDot--2 { width: 14px; height: 14px; right: 16%; top: 30%; animation-delay: -3s; }
+.MapInkDot--3 { width: 8px; height: 8px; right: 8%; top: 42%; animation-delay: -6s; }
+@keyframes mapInkDrift {
+	from { transform: translateY(0); opacity: 0.55; }
+	to { transform: translateY(-14px); opacity: 0.2; }
+}
+
+/* 每一行是一个楼层，行内按列排布 */
+slay-map-row {
+	display: grid;
+	grid-template-columns: repeat(var(--columns), 1fr);
+	grid-gap: 0.6em;
+	align-items: center;
+	position: relative; /* 保证行绘制在水墨背景层之上 */
+}
+
+/* 行左侧地点轴：每层世界观地点名（竖排），当前楼层高亮 */
+slay-map-row::before {
+	content: attr(data-loc);
+	position: absolute;
+	right: calc(100% + 0.55em);
+	top: 50%;
+	transform: translateY(-50%);
+	writing-mode: vertical-rl;
+	letter-spacing: 0.22em;
+	font-family: 'KaiTi', 'STKaiti', 'Noto Serif SC', serif;
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--qc-dim);
+	opacity: 0.75;
+	white-space: nowrap;
+	pointer-events: none;
+	transition: color 200ms, opacity 200ms;
+}
+slay-map-row[current]::before {
+	color: var(--qc-gold);
+	opacity: 1;
+	text-shadow: 0 0 0.8em var(--qc-gold-glow);
+}
+
+/* 起点/终点行：节点横跨居中 */
+slay-map-row:first-of-type,
+slay-map-row:last-of-type {
+	grid-template-columns: repeat(var(--rows), 1fr);
+}
+slay-map-row:first-of-type slay-map-node,
+slay-map-row:last-of-type slay-map-node {
+	grid-column-start: 6;
+	grid-column-end: 8;
+	transform: none !important;
+}
+
+/* 节点：水墨印章圆格，默认隐藏；有链接才显示 */
+slay-map-node {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: center;
+	align-items: center;
+	font-size: 1.15em;
+	line-height: 1.1;
+	border: 3px dashed transparent;
+	position: relative;
+	z-index: 2;
+	border-radius: 50%;
+	min-height: 3.2em;
+	transition: opacity 250ms, border-color 250ms, transform 120ms;
+	/* All nodes are disabled by default */
+	pointer-events: none;
+	visibility: hidden;
+}
+slay-map-node[linked] {
+	visibility: visible;
+}
+slay-map-node[did-visit] {
+	border-color: var(--qc-gold);
+	opacity: 0.85;
+}
+slay-map-node:not([did-visit]) {
+	opacity: 0.5;
+}
+slay-map-node[current][type] {
+	border-color: var(--highlight);
+	background-color: var(--qc-gold-glow);
+	opacity: 1;
+	z-index: 2;
+	box-shadow: 0 0 1em var(--qc-gold-glow);
+}
+slay-map-node[can-visit] {
+	pointer-events: auto;
+	opacity: 1;
+	cursor: pointer;
+	cursor: url(../images/cursors/point.png) 10 0, auto;
+}
+slay-map-node[type]:hover {
+	border-color: var(--qc-gold);
+	transform: scale(1.12);
+	z-index: 5;
+}
+
+/* 节点图标（水墨印章字：墨底朱印宣纸字） */
+slay-map-node .node-icon {
+	transition: transform 300ms ease-in-out;
+	transform-origin: center;
+	user-select: none;
+	min-width: 2.1em;
+	min-height: 2.1em;
+	border-radius: 50%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-family: 'KaiTi', 'STKaiti', 'Noto Serif SC', serif;
+	font-weight: 700;
+	color: #f6f0e2;
+	background-color: #3d3226;
+	box-shadow: 0 0 0 2px rgba(212, 168, 64, 0.4), inset 0 0 0.5em rgba(0, 0, 0, 0.3);
+}
+slay-map-node[type]:hover .node-icon {
+	transform: scale(1.18);
+	transition-duration: 100ms;
+}
+
+/* 节点类型标签（常显小字，逐格可读） */
+slay-map-node .node-label {
+	font-size: 0.62rem;
+	letter-spacing: 0.14em;
+	color: var(--qc-accent);
+	background: var(--qc-panel);
+	border: 1px solid var(--qc-border);
+	border-radius: 0.5em;
+	padding: 0.08em 0.5em;
+	margin-top: 0.3em;
+	white-space: nowrap;
+	user-select: none;
+}
+
+/* 悬停提示：逐格说明（data-desc） */
+slay-map-node[type]::after {
+	content: attr(data-desc);
+	position: absolute;
+	top: 105%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-0.2em);
+	background: var(--qc-nav-bg);
+	color: var(--qc-panel);
+	font-size: 0.72rem;
+	letter-spacing: 0.06em;
+	padding: 0.3em 0.7em;
+	border: 1px solid var(--qc-gold);
+	border-radius: 0.5em;
+	white-space: nowrap;
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition: opacity 150ms, transform 150ms;
+	z-index: 20;
+}
+slay-map-node[type]:hover::after {
+	opacity: 1;
+	visibility: visible;
+	transform: translateX(-50%) translateY(0);
+}
+
+/* 起点/终点/特殊节点放大 */
+slay-map-node[node-type='start'],
+slay-map-node[node-type='boss'] {
+	font-size: 2.6rem;
+}
+slay-map-node[node-type='start'] .node-label,
+slay-map-node[node-type='boss'] .node-label {
+	font-size: 0.7rem;
+}
+/* footstep to the bottom */
+slay-map-node[node-type='start'][current] .node-icon {
+	transform: rotate(180deg);
+}
+/* 篝火休整 */
+slay-map-node[node-type='C'] {
+	border-style: dotted;
+}
+/* 守门 Boss */
+slay-map-node[node-type='B'] .node-icon {
+	box-shadow: 0 0 0 2px var(--qc-danger), inset 0 0 0.5em rgba(0, 0, 0, 0.25);
+}
+/* 最终 Boss：重生之门，朱砂流光 */
+slay-map-node[node-type='boss'] {
+	border-color: var(--qc-danger);
+	animation-name: nodeTypeBoss;
+	animation-duration: 3000ms;
+	animation-direction: alternate;
+	animation-iteration-count: infinite;
+	border-width: 0.45rem;
+}
+slay-map-node[node-type='boss'] .node-icon {
+	box-shadow: 0 0 0 2px var(--qc-danger), 0 0 1em rgba(179, 84, 63, 0.4);
+}
+
+/* 路径线：青黛虚线，逐格可循 */
+slay-map svg.paths {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+	pointer-events: none;
+}
+slay-map svg.paths line {
+	stroke: var(--pathColor);
+	stroke-width: 4px;
+	stroke-dasharray: 0.6em 0.5em;
+	opacity: 0.55;
+}
+
+/* ---------- 逐格水墨 · 入场与笔触动画 ----------
+   设计目标：节点如墨滴入水，逐行晕染浮现；路径如笔墨逐段划过纸面，
+   强化"逐格水墨地图"的落墨质感（纯装饰动画，不参与寻路与点击）。 */
+slay-map-node[linked] {
+	animation: mapNodeInkIn 520ms ease-out backwards;
+	animation-delay: calc(var(--node-i, 0) * 70ms);
+}
+@keyframes mapNodeInkIn {
+	from {
+		opacity: 0;
+		transform: scale(0.6);
+		filter: blur(4px);
+	}
+}
+slay-map svg.paths line {
+	animation: mapInkStroke 640ms ease-out forwards;
+	animation-delay: calc(var(--path-i, 0) * 160ms);
+}
+@keyframes mapInkStroke {
+	from { stroke-dashoffset: var(--line-len, 40); }
+	to { stroke-dashoffset: 0; }
+}
+
+/* map animations */
+@keyframes nodeTypeBoss {
+	0% {
+		border-color: var(--qc-danger);
+		box-shadow: 0 0 0.8em rgba(179, 84, 63, 0.5);
+	}
+	100% {
+		border-color: var(--qc-gold);
+		box-shadow: 0 0 1.6em var(--qc-gold-glow);
+	}
+}

@@ -6,5 +6,11 @@
     "shared/shared-types",
     "shared/shared-data",
     "shared/shared-session"
-  ]
+  ],
+  "scripts": {
+    "build:homepage": "node portal/www/scripts/build-homepage.mjs",
+    "dev:homepage": "node portal/www/scripts/build-homepage.mjs --dev",
+    "build:modules": "node server/app/scripts/build-modules.mjs",
+    "test:portal": "python server/verify_portal.py"
+  }
 }

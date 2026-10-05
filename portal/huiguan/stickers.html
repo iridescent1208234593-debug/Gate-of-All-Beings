@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>罗小黑表情包收录 · 西木会馆</title>
+<link rel="icon" href="favicon.png">
+<style>
+:root{--bg:#f5f0e8;--panel:#fbf8f2;--border:#d4cfbe;--text:#3a4a3e;--dim:#7a8a7e;--accent:#5a9e8f;--gold:#d4a840;--danger:#b3543f}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:"Noto Serif SC","Source Han Serif SC",serif;min-height:100vh;padding:48px 16px 60px}
+.wrap{max-width:900px;margin:0 auto}
+.back{display:inline-block;margin-bottom:14px;color:var(--dim);font-size:13px;text-decoration:none}
+.back:hover{color:var(--accent)}
+.head{text-align:center;margin-bottom:8px}
+.head h1{font-size:24px;letter-spacing:3px;margin-bottom:8px}
+.head .sub{color:var(--dim);font-size:14px}
+.head .sub b{color:var(--accent);font-weight:600}
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;margin:16px 0 4px}
+.btn{display:inline-block;padding:8px 18px;border:1px solid var(--accent);border-radius:20px;background:var(--accent);color:#fff;font-family:inherit;font-size:14px;cursor:pointer;transition:opacity .15s,background .15s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.5;cursor:default}
+.switch{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--dim);cursor:pointer;user-select:none}
+.switch input{accent-color:var(--gold);width:15px;height:15px;cursor:pointer}
+.login-tip{text-align:center;color:var(--dim);font-size:13px;margin:16px 0 4px}
+.login-tip a{color:var(--gold);text-decoration:none;font-weight:600}
+.login-tip a:hover{text-decoration:underline}
+.panel{display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;margin:12px auto;max-width:560px;text-align:left;box-shadow:0 4px 16px rgba(0,0,0,.05)}
+.panel.show{display:block}
+.panel .pt{font-size:16px;font-weight:600;margin-bottom:2px}
+.panel .ps{font-size:12px;color:var(--dim);margin-bottom:4px}
+.panel label{display:block;font-size:13px;color:var(--dim);margin:10px 0 4px}
+.panel input[type=text],.panel input[type=file],.panel textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;font-family:inherit;font-size:14px;color:var(--text);box-sizing:border-box}
+.panel input[type=file]{padding:6px 10px}
+.panel textarea{resize:vertical;min-height:52px}
+.char-search{position:relative}
+.char-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:8px;max-height:200px;overflow:auto;z-index:20;box-shadow:0 6px 18px rgba(0,0,0,.1);display:none}
+.char-list.show{display:block}
+.char-list div{padding:8px 12px;font-size:14px;cursor:pointer}
+.char-list div:hover,.char-list div.hover{background:var(--bg)}
+.char-sel{display:none;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--accent);margin-top:6px}
+.char-sel.show{display:flex}
+.char-sel .clear{color:var(--danger);cursor:pointer;font-size:12px;text-decoration:underline}
+.pmsg{font-size:13px;margin-top:10px;min-height:18px;text-align:center}
+.pmsg.err{color:var(--danger)}
+.pmsg.ok{color:var(--accent)}
+.loading{text-align:center;padding:70px 0;color:var(--dim);font-size:15px}
+.empty{background:var(--panel);border:1px dashed var(--border);border-radius:12px;padding:50px 24px;color:var(--dim);font-size:14px;line-height:2.1;text-align:center}
+.group{margin:22px 0 10px;display:flex;align-items:baseline;gap:8px;border-bottom:2px solid var(--accent);padding-bottom:6px}
+.group h2{font-size:17px;letter-spacing:1px}
+.group .cnt{font-size:12px;color:var(--dim)}
+.grid{display:flex;flex-wrap:wrap;gap:12px;justify-content:flex-start}
+.card{width:140px;background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:zoom-in;transition:transform .15s,box-shadow .15s}
+.card:hover{transform:scale(1.04);box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.card .ph{width:140px;height:140px;display:flex;align-items:center;justify-content:center;background:#fff}
+.card .ph img{max-width:132px;max-height:132px;object-fit:contain;display:block}
+.card .meta{min-height:22px;padding:3px 6px;font-size:11px;color:var(--dim);line-height:1.6;display:flex;align-items:center;justify-content:space-between;gap:4px;border-top:1px solid var(--border);flex-wrap:wrap}
+.card .meta .who{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .meta .who b{color:var(--accent);font-weight:600}
+.badge-mine{color:var(--gold);font-weight:700;letter-spacing:.5px;white-space:nowrap}
+#lightbox{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(10,14,12,.88);cursor:zoom-out;padding:24px}
+#lightbox.show{display:flex}
+#lightbox img{max-width:94vw;max-height:92vh;object-fit:contain;border-radius:8px;box-shadow:0 10px 50px rgba(0,0,0,.6)}
+.tip{margin-top:26px;text-align:center;color:var(--dim);font-size:13px;line-height:1.9}
+.tip a{color:var(--gold);text-decoration:none}
+.tip a:hover{text-decoration:underline}
+@media (max-width:520px){
+  .card,.card .ph{width:min(140px,42vw);height:min(140px,42vw)}
+  .card .ph img{max-width:calc(min(140px,42vw) - 8px);max-height:calc(min(140px,42vw) - 8px)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="gallery.html">← 返回角色画廊</a>
+  <div class="head">
+    <h1>罗小黑表情包收录</h1>
+    <p class="sub">小黑与伙伴们的趣味表情包合集 · 已收录 <b id="stickerCount">0</b> 张</p>
+  </div>
+
+  <div class="toolbar" id="toolbar"></div>
+
+  <div class="panel" id="upPanel">
+    <div class="pt">上传表情包</div>
+    <div class="ps">支持 JPG / PNG / WebP（≤8MB）与 GIF 动图（≤5MB）；可归到角色，也可作为站友投稿。</div>
+    <label for="upFile">选择图片</label>
+    <input type="file" id="upFile" accept="image/gif,image/jpeg,image/png,image/webp">
+    <label for="upCharQ">角色归属（选填，不选则为站友投稿）</label>
+    <div class="char-search">
+      <input type="text" id="upCharQ" placeholder="输入角色名搜索并点选…" autocomplete="off">
+      <div class="char-list" id="upCharList"></div>
+    </div>
+    <div class="char-sel" id="upCharSel"><span id="upCharName"></span><span class="clear" onclick="clearChar()">清除归属</span></div>
+    <label for="upDesc">描述（选填）</label>
+    <textarea id="upDesc" placeholder="一句话说明，例如：小黑得意.gif"></textarea>
+    <div style="text-align:center;margin-top:14px">
+      <button class="btn" id="upBtn" onclick="doUpload()">提交上传</button>
+    </div>
+    <div class="pmsg" id="upMsg"></div>
+  </div>
+
+  <div id="stickerBody"><div class="loading">表情包加载中…</div></div>
+
+  <div class="tip">
+    现在登录用户即可投稿表情包（支持 GIF 动图，≤5MB）<br>
+    想管理表情包？进入 <a href="gallery.html">角色画廊</a> 某角色 → 「补充 / 编辑设定」→ 图片管理中把图片分类选为「表情包」，即可出现在本页。<br>
+    想加交流群投稿？QQ群：878029597
+  </div>
+</div>
+<div id="lightbox" onclick="this.classList.remove('show')"><img id="lbImg" alt=""></div>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function zoom(src){document.getElementById('lbImg').src=src;document.getElementById('lightbox').classList.add('show');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('lightbox').classList.remove('show');});
+function imgUrl(id,thumb){return '/api/official/img-id?id='+id+(thumb?'&t=1':'');}
+
+var ALL=[];
+var MINE_ON=false;
+var LOGGED=false;
+var SEL_CHAR=null;
+var charTimer=null;
+
+async function checkLogin(){
+  const tb=document.getElementById('toolbar');
+  try{
+    const r=await fetch('/api/user',{credentials:'same-origin'});
+    const d=await r.json();
+    LOGGED=!!(d&&d.logged_in);
+  }catch(e){ LOGGED=false; }
+  if(LOGGED){
+    tb.innerHTML='<button class="btn" id="upBtnToggle" onclick="togglePanel()">上传表情包</button>'
+      +'<label class="switch"><input type="checkbox" id="onlyMine" onchange="toggleMine(this.checked)">只看我上传的</label>';
+  }else{
+    tb.innerHTML='<div class="login-tip">登录后可投稿表情包 → <a href="/?openauth=1">登录 / 注册</a></div>';
+  }
+}
+
+function togglePanel(){
+  const p=document.getElementById('upPanel');
+  p.classList.toggle('show');
+  setMsg('','');
+  if(p.classList.contains('show')) setMsg('','');
+}
+
+function toggleMine(on){ MINE_ON=on; render(); }
+
+function isGif(st){ return /\.gif$/i.test(st.image_path||''); }
+function cardSrc(st){ return imgUrl(st.id, !isGif(st)); }
+
+function render(){
+  const bodyEl=document.getElementById('stickerBody');
+  const list=MINE_ON?ALL.filter(s=>s.mine):ALL;
+  document.getElementById('stickerCount').textContent=list.length;
+  if(!list.length){
+    bodyEl.innerHTML=ALL.length&&MINE_ON
+      ?'<div class="empty">你还没有上传过表情包<br>点击上方「上传表情包」投稿第一张吧。</div>'
+      :'<div class="empty">表情包内容正在收录中，敬请期待<br>现在登录即可投稿，也可到角色页把某张图分类为「表情包」。</div>';
+    return;
+  }
+  const groups={};
+  list.forEach(st=>{ const k=st.character_name||'未分组角色'; (groups[k]=groups[k]||[]).push(st); });
+  bodyEl.innerHTML=Object.keys(groups).map(name=>{
+    const imgs=groups[name];
+    return '<div class="group"><h2>'+esc(name)+'</h2><span class="cnt">'+imgs.length+' 张</span></div>'
+      +'<div class="grid">'+imgs.map(st=>{
+        const who=st.uploader?'<span class="who">@<b>'+esc(st.uploader)+'</b> 上传</span>':'<span class="who"></span>';
+        const badge=st.mine?'<span class="badge-mine">我上传的</span>':'';
+        return '<div class="card" title="'+esc(st.description||name)+'" onclick="zoom(\''+esc(imgUrl(st.id,false))+'\')">'
+          +'<div class="ph"><img src="'+esc(cardSrc(st))+'" alt="'+esc((st.description||name)+' · 表情包')+'" loading="lazy" decoding="async" onerror="this.closest(\'.card\').style.display=\'none\'"></div>'
+          +'<div class="meta">'+who+badge+'</div>'
+          +'</div>';
+      }).join('')+'</div>';
+  }).join('');
+}
+
+async function loadStickers(){
+  const bodyEl=document.getElementById('stickerBody');
+  try{
+    const r=await fetch('/api/official/stickers?_='+Date.now());
+    const d=await r.json();
+    if(!r.ok){ bodyEl.innerHTML='<div class="empty">'+esc(d.error||'加载失败')+'</div>'; return; }
+    ALL=d.stickers||[];
+    render();
+  }catch(e){
+    bodyEl.innerHTML='<div class="empty">加载失败，请刷新重试。</div>';
+  }
+}
+
+function setMsg(t,cls){ const m=document.getElementById('upMsg'); m.textContent=t; m.className='pmsg'+(cls?' '+cls:''); }
+
+function togglePanelBtn(t){ const b=document.getElementById('upBtnToggle'); if(b)b.textContent=t; }
+
+function clearChar(){
+  SEL_CHAR=null;
+  document.getElementById('upCharQ').value='';
+  document.getElementById('upCharList').classList.remove('show');
+  document.getElementById('upCharSel').classList.remove('show');
+}
+
+async function searchChar(kw){
+  const box=document.getElementById('upCharList');
+  if(!kw.trim()){ box.classList.remove('show'); box.innerHTML=''; return; }
+  try{
+    const r=await fetch('/api/official/characters?q='+encodeURIComponent(kw.trim())+'&limit=6&max=8');
+    const d=await r.json();
+    const arr=(d&&d.characters)||[];
+    if(!arr.length){ box.innerHTML='<div style="color:var(--dim);cursor:default">没有匹配角色</div>'; box.classList.add('show'); return; }
+    box.innerHTML=arr.map(c=>'<div data-id="'+c.id+'" data-name="'+esc(c.name)+'" onclick="pickChar(this)">'+esc(c.name)+'</div>').join('');
+    box.classList.add('show');
+  }catch(e){ /* 静默 */ }
+}
+
+function pickChar(el){
+  SEL_CHAR={id:el.dataset.id,name:el.dataset.name};
+  document.getElementById('upCharName').textContent='将归到：'+SEL_CHAR.name;
+  document.getElementById('upCharSel').classList.add('show');
+  document.getElementById('upCharQ').value='';
+  document.getElementById('upCharList').classList.remove('show');
+}
+
+function validateFile(file){
+  if(!file)return '请先选择图片文件';
+  if(!/^image\/(gif|jpeg|png|webp)$/i.test(file.type))return '仅支持 GIF / JPG / PNG / WebP 图片';
+  const gif=/^image\/gif$/i.test(file.type);
+  const limit=gif?5*1024*1024:8*1024*1024;
+  if(file.size>limit)return gif?'动图需≤5MB':'图片过大（≤8MB）';
+  return '';
+}
+
+async function doUpload(){
+  const msg=document.getElementById('upMsg');
+  const btn=document.getElementById('upBtn');
+  const file=document.getElementById('upFile').files[0];
+  const verr=validateFile(file);
+  if(verr){ setMsg(verr,'err'); return; }
+  const desc=(document.getElementById('upDesc').value||'').trim();
+  btn.disabled=true; setMsg('上传中…','');
+  try{
+    const dataURL=await new Promise((res,rej)=>{
+      const fr=new FileReader();
+      fr.onload=()=>res(fr.result);
+      fr.onerror=()=>rej(new Error('read error'));
+      fr.readAsDataURL(file);
+    });
+    const r=await fetch('/api/official/sticker/upload',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        character_id:SEL_CHAR?parseInt(SEL_CHAR.id,10):null,
+        filename:file.name,
+        description:desc||file.name,
+        data:dataURL
+      })
+    });
+    let d={};
+    try{ d=await r.json(); }catch(e){}
+    if(r.status===401){ setMsg('登录状态已失效，请先 <a href="/?openauth=1" style="color:var(--gold)">重新登录</a>','err'); return; }
+    if(!r.ok||!d.ok){ setMsg(d.error||'上传失败，请重试','err'); return; }
+    setMsg('上传成功 ✔','ok');
+    document.getElementById('upFile').value='';
+    document.getElementById('upDesc').value='';
+    clearChar();
+    document.getElementById('upPanel').classList.remove('show');
+    await loadStickers();
+  }catch(e){
+    setMsg('上传失败，请重试','err');
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('upCharQ').addEventListener('input',function(){
+    clearTimeout(charTimer);
+    const v=this.value;
+    charTimer=setTimeout(()=>searchChar(v),300);
+  });
+  document.addEventListener('click',function(e){
+    const p=document.getElementById('upPanel');
+    if(!p.classList.contains('show'))return;
+    const box=document.getElementById('upCharList');
+    if(!e.target.closest('.char-search'))box.classList.remove('show');
+  });
+  checkLogin().then(loadStickers);
+});
+</script>
+<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c12"></script>
+</body>
+</html>

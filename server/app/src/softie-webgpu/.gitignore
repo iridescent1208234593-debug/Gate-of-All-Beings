@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.DS_Store
+artifacts
+.playwright-mcp
+.codegraph/
+.local/
+
+# 环境变量与敏感文件
+.env
+.env.*
+*.pem
+*.key
+*.cert

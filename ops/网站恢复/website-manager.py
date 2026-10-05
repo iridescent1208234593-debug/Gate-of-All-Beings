@@ -33,8 +33,9 @@ import webbrowser
 # ------------------------------------------------------------------ 路径与常量
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
 LOGS = HERE / 'logs'
-PYTHON = Path(r'C:\Users\hp\AppData\Local\Python\pythoncore-3.14-64\python.exe')
+PYTHON = Path.home() / 'AppData/Local/Python/pythoncore-3.14-64/python.exe'
 NODE = Path(r'C:\Program Files\nodejs\node.exe')
 NPX_CMD = Path(r'C:\Program Files\nodejs\npx.cmd')
 CMD = Path(os.environ.get('ComSpec', r'C:\Windows\System32\cmd.exe'))
@@ -46,7 +47,7 @@ PUBLIC_MAIN = 'https://iridescently.xyz/'
 OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 # ------------------------------------------------------- 西木会馆 · Design Tokens
-# 与 E:\Projects\portal\huiguan\design-system\design-system.css 的 :root 一一对应，
+# 与 portal/huiguan/design-system/design-system.css 的 :root 一一对应，
 # 仅在此处做映射，界面代码不出现任何硬编码色值。
 QC = {
     'bg': '#f5f0e8',       # --qc-bg     页面底 · 乳白宣纸
@@ -89,38 +90,38 @@ TONE = {
 VITE = 'node_modules/vite/bin/vite.js'
 
 SITES = [
-    dict(key='portal', name='统一门户 · www/huiguan/oc', cwd=r'E:\Projects\server',
+    dict(key='portal', name='统一门户 · www/huiguan/oc', cwd=str(ROOT / 'server'),
          domains=['iridescently.xyz', 'www.iridescently.xyz',
                   'huiguan.iridescently.xyz', 'oc.iridescently.xyz'],
          port=8080, runner='python', args=['-u', 'portal_server.py'], wait=30,
          note='统一入口：按 Host 分发 www/huiguan/oc（旧单站 8088/8089/8090 已由它接管）'),
-    dict(key='zszm', name='众生之门 · 前端', cwd=r'E:\Projects\server\app\src\cards',
-         domains=['zszm.iridescently.xyz'], port=5173,
+    dict(key='zszm', name='众生之门 · 前端（构建产物预览）', cwd=r'D:\Projects\zszm',
+         domains=['zszm.iridescently.xyz'], port=5178,
          runner='node',
-         args=[VITE, '--host', '127.0.0.1', '--port', '5173', '--strictPort'], wait=45,
-         note='Vite 开发服务器（源码已并入 server/app/src/cards）'),
-    dict(key='zszm-oauth', name='众生之门 · OAuth 代理', cwd=r'E:\Projects\server\app\src\cards',
+         args=[VITE, 'preview', '--host', '127.0.0.1', '--port', '5178', '--strictPort'], wait=45,
+         note='Vite 预览 dist 构建产物（开发源码在 D:\\Projects\\zszm）'),
+    dict(key='zszm-oauth', name='众生之门 · OAuth 代理', cwd=str(ROOT / 'server/app/src/cards'),
          domains=[], port=5174, runner='python', args=['-u', 'server.py'], wait=25,
          note='无独立域名，供 zszm 站内回调使用'),
-    dict(key='game', name='旧卡牌入口 · 转向众生之门', cwd=r'E:\Projects\server\app\src\cards',
+    dict(key='game', name='旧卡牌入口 · 转向众生之门', cwd=str(ROOT / 'server/app/src/cards'),
          domains=['game.iridescently.xyz'], port=5176, runner='node',
          args=['scripts/legacy-redirect.mjs'], wait=25,
          note='旧网址自动转向新版，不运行旧工程'),
-    dict(key='juling', name='众生之门 · 聚灵', cwd=r'E:\Projects\server\app\src\juling',
+    dict(key='juling', name='众生之门 · 聚灵', cwd=str(ROOT / 'server/app/src/juling'),
          domains=['juling.iridescently.xyz'], port=5177, runner='node',
          args=['server.js'], env={'PORT': '5177'}, wait=25, note='Node 服务，端口取自 PORT 变量'),
-    dict(key='softie', name='软乎乎 · 预览（统一入口 API 上游）', cwd=r'E:\Projects\server\app\src\softie-webgpu',
-         domains=[], port=4173, runner='node',
+    dict(key='softie', name='灵体互动 · 独立域名 / 软乎乎 API 上游', cwd=str(ROOT / 'server/app/src/softie-webgpu'),
+         domains=['spirit.iridescently.xyz'], port=4173, runner='node',
          args=[VITE, 'preview', '--host', '127.0.0.1', '--port', '4173'], wait=25,
-         note='供统一入口 /app/modules/softie/api 使用'),
-    dict(key='lingjing', name='灵境 · 会馆', cwd=r'E:\Projects\server\app\src\management',
+         note='独立域名静态模块由统一门户托管；房间 WebSocket 与灵体 API 转发至此服务'),
+    dict(key='lingjing', name='灵境 · 会馆', cwd=str(ROOT / 'server/app/src/management'),
          domains=['lingjing.iridescently.xyz'], port=5179, runner='node',
          args=[VITE, '--host', '127.0.0.1', '--port', '5179', '--strictPort'], wait=45,
          note='Vite 开发服务器（源码已并入 server/app/src/management）'),
     dict(key='psyche', name='心理评估数据库平台 · psyche',
          cwd=r'E:\心理\心理评估数据库平台_v2',
          domains=['psyche.iridescently.xyz'], port=8000, runner='powershell',
-         args=['-File', r'C:\Users\hp\marvis-services\start-psyche.ps1'], wait=90,
+         args=['-File', str(Path.home() / 'marvis-services/start-psyche.ps1')], wait=90,
          note='Docker 方式启动，首次拉起引擎较慢'),
     dict(key='psy', name='psy · 未部署', cwd=None,
          domains=['psy.iridescently.xyz'], port=5000, deployed=False,
@@ -344,6 +345,10 @@ def recover_site(site, report, quiet=False):
         return False
 
     try:
+        if site['key'] == 'portal':
+            node = NODE if NODE.is_file() else Path('node')
+            subprocess.run([str(node), 'server/app/scripts/build-modules.mjs'],
+                           cwd=ROOT, check=True)
         child = launch(site)
     except Exception as error:
         report('「%s」启动失败：%s' % (site['name'], error), 'bad')

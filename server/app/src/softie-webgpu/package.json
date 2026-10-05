@@ -1,0 +1,27 @@
+{
+  "name": "softie-webgpu",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "test": "node --test tests/*.test.js",
+    "test:browser": "node tests/browser.mjs",
+    "test:spirit": "node tests/spirit-experience.browser.mjs",
+    "test:spirit-experience": "node tests/spirit-experience.browser.mjs",
+    "test:multiplayer": "node tests/multiplayer.browser.mjs",
+    "test:account-profile": "node tests/account-profile.browser.mjs",
+    "test:load-smoke": "node tests/load-smoke.mjs"
+  },
+  "dependencies": {
+    "three": "^0.185.1",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "vite": "^8.2.2"
+  }
+}

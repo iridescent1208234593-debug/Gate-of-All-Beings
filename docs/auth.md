@@ -21,6 +21,8 @@
 | `GET /api/logout` | 退出并清 cookie |
 | `POST /api/auth` | 供 management 的注册/登录复用 |
 | `POST /api/game/save` · `GET /api/game/load` | 账号云存档 |
+
+灵体使用 `scope=softie` 将参数保存在账号记录的独立命名空间中，不会覆盖灵境会馆的默认存档。主站游戏壳允许对会馆 API 携带账号 Cookie。
 | `GET/POST /api/security/<action>` | 账号找回（见下） |
 
 - 账号来源两种：**USSO**（外部 OAuth 2.1/OIDC，`sso.umrc.cn`）与**站内**账号；`users` 存 USSO，`local_users` 存站内。

@@ -1,0 +1,780 @@
+:root {
+  color-scheme: dark;
+  /* stage-06 编辑器主题 token：语义与 src/ui/theme.js 的调色板保持一致 */
+  --panel-bg: rgba(16, 24, 32, 0.92);
+  --panel-border: #2a3a4a;
+  --panel-text: #e6e1d5;
+  --panel-dim: #9fb0bd;
+  --accent: #d4a840;
+  --accent-dim: #a08030;
+  --danger: #e0805a;
+  --bar-track: #1c2733;
+  --bar-fill: #5a9e8f;
+  /* stage-13 环境干预面板 token：夜间边框与悬停底色，集中定义避免散落硬编码 */
+  --night-border: #2b3d5c;
+  /* stage-16 建城资料页遮罩底色（集中定义，避免散落硬编码） */
+  --overlay-bg: rgba(6, 10, 14, 0.72);
+  --panel-hover: rgba(42, 58, 74, 0.45);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body, #app, #scene {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0d1117;
+}
+#hud {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 18px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(20, 28, 36, 0.72);
+  color: #e6e1d5;
+  font: 14px/1.4 "Microsoft YaHei", sans-serif;
+  letter-spacing: 1px;
+  z-index: 10;
+  user-select: none;
+  backdrop-filter: blur(6px);
+}
+#hint {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(20, 28, 36, 0.55);
+  color: #9fb0bd;
+  font: 12px/1.5 "Microsoft YaHei", sans-serif;
+  z-index: 10;
+  user-select: none;
+  pointer-events: none;
+}
+#hud-evo {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(20, 28, 36, 0.72);
+  color: #e6e1d5;
+  font: 13px/1.5 "Microsoft YaHei", sans-serif;
+  letter-spacing: 1px;
+  z-index: 10;
+  user-select: none;
+  backdrop-filter: blur(6px);
+  min-width: 150px;
+}
+/* stage-08：有机体行为统计（左下，世代面板上方）*/
+#hud-beh {
+  position: fixed;
+  left: 16px;
+  bottom: 108px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(20, 28, 36, 0.6);
+  color: var(--panel-dim);
+  font: 12px/1.5 "Microsoft YaHei", sans-serif;
+  letter-spacing: 1px;
+  z-index: 10;
+  user-select: none;
+  backdrop-filter: blur(6px);
+  min-width: 120px;
+}
+#hud-evo-points {
+  color: var(--accent);
+}
+#btn-editor, #btn-spawn {
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  background: rgba(20, 28, 36, 0.72);
+  color: var(--panel-text);
+  font: 13px/1.4 "Microsoft YaHei", sans-serif;
+  letter-spacing: 1px;
+  padding: 2px 12px;
+  cursor: pointer;
+  user-select: none;
+}
+#btn-editor:hover, #btn-spawn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ---- stage-06 细胞编辑器面板（DOM 覆盖层）---- */
+#editor {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 10, 14, 0.35);
+  z-index: 40;
+  user-select: none;
+}
+#editor[hidden] { display: none; }
+.editor-card {
+  width: 400px;
+  max-width: 92vw;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  font: 14px/1.5 "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.editor-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.editor-title { font-size: 17px; font-weight: 600; }
+.editor-points { color: var(--panel-dim); font-size: 13px; }
+.editor-points b { color: var(--accent); }
+.editor-sub {
+  color: var(--panel-dim);
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+.attr-row {
+  display: grid;
+  grid-template-columns: 42px 1fr 52px 48px auto;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+}
+.attr-name { font-size: 13px; color: var(--panel-text); }
+.attr-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bar-track);
+  overflow: hidden;
+}
+.attr-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--bar-fill), var(--accent));
+}
+.attr-value { text-align: right; font-variant-numeric: tabular-nums; font-size: 13px; }
+.attr-gen { color: var(--panel-dim); font-size: 11px; font-variant-numeric: tabular-nums; }
+.attr-btns { display: flex; gap: 6px; }
+.btn {
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--panel-text);
+  font: 13px/1.4 "Microsoft YaHei", sans-serif;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn-primary {
+  background: rgba(212, 168, 64, 0.16);
+  border-color: var(--accent-dim);
+}
+.btn-primary:hover {
+  background: rgba(212, 168, 64, 0.28);
+  color: var(--accent);
+}
+.btn-mini {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+.editor-readonly { margin-top: 8px; padding-top: 6px; border-top: 1px dashed var(--panel-border); }
+.ro-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--panel-dim);
+  font-size: 12px;
+  padding: 2px 0;
+}
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+.ro-tip {
+  margin-top: 6px;
+  color: var(--panel-dim);
+  font-size: 11px;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+
+/* ===================== stage-09：生成编辑器（组装模式） ===================== */
+#orgeditor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none; /* 覆盖层不吃事件：面板外的场景仍可点选有机体 */
+  z-index: 20;
+  font: 13px/1.5 "Microsoft YaHei", sans-serif;
+  color: var(--panel-text);
+}
+#orgeditor[hidden] { display: none; }
+.oe-card {
+  position: absolute;
+  top: 64px;
+  right: 18px;
+  width: 336px;
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  pointer-events: auto;
+  padding: 12px 14px 14px;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: var(--panel-bg);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+.oe-head { display: flex; justify-content: space-between; align-items: baseline; }
+.oe-title { font-size: 14px; font-weight: 600; color: var(--accent); }
+.oe-points { font-size: 12px; color: var(--panel-dim); }
+.oe-points b { color: var(--accent); font-variant-numeric: tabular-nums; }
+.oe-sub { margin-top: 2px; font-size: 11px; color: var(--panel-dim); }
+.oe-section { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--panel-border); }
+.oe-label { font-size: 12px; color: var(--panel-text); margin-bottom: 6px; }
+.oe-count { color: var(--panel-dim); font-size: 11px; }
+.oe-orgs { display: flex; flex-wrap: wrap; gap: 4px; max-height: 62px; overflow-y: auto; }
+.oe-org, .oe-type {
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--panel-dim);
+  font: 11px/1.3 "Microsoft YaHei", sans-serif;
+  padding: 3px 7px;
+  cursor: pointer;
+}
+.oe-org:hover, .oe-type:hover { border-color: var(--accent); color: var(--accent); }
+.oe-org.active, .oe-type.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(212, 168, 64, 0.16);
+}
+.oe-types { display: flex; flex-wrap: wrap; gap: 6px; }
+.oe-type { font-size: 12px; padding: 5px 9px; }
+.oe-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 6px;
+  justify-content: center;
+  margin: 4px 0 6px;
+}
+.oe-cell {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--panel-bg);
+  font: 12px/1 "Microsoft YaHei", sans-serif;
+  opacity: 0.45;
+  transition: opacity 0.12s, transform 0.12s;
+}
+.oe-cell:hover { opacity: 0.85; transform: scale(1.06); }
+.oe-cell.filled { opacity: 1; }
+.oe-cell.is-new { outline: 2px dashed var(--accent); outline-offset: -3px; }
+.oe-legend { font-size: 11px; color: var(--panel-dim); text-align: center; }
+.oe-preview { width: 100%; border-collapse: collapse; font-size: 12px; }
+.oe-preview th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--panel-dim);
+  font-size: 11px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.oe-preview td { padding: 2px 0; font-variant-numeric: tabular-nums; }
+.oe-preview td.dim { color: var(--panel-dim); }
+.oe-preview td.up { color: var(--accent); }
+.oe-preview td.down { color: var(--danger); }
+.oe-preview td.flat { color: var(--panel-dim); }
+.oe-msg {
+  margin-top: 8px;
+  min-height: 16px;
+  font-size: 11px;
+  color: var(--accent);
+  line-height: 1.5;
+}
+.oe-foot { margin-top: 10px; display: flex; gap: 8px; }
+.oe-foot .btn { flex: 1; }
+
+/* ===================== stage-10：世代演化与体型趋势 ===================== */
+/* 分区存活统计（左下，行为面板上方）*/
+/* ---- stage-14 神经网络个体读数（左下，生态读数上方）---- */
+#hud-nn {
+  position: fixed;
+  left: 16px;
+  bottom: 240px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(20, 28, 36, 0.6);
+  color: var(--panel-dim);
+  font: 12px/1.5 "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  user-select: none;
+  backdrop-filter: blur(6px);
+}
+
+/* ---- stage-11 生态金字塔（生产者/草食/肉食）实时读数 ---- */
+#hud-eco {
+  position: fixed;
+  left: 16px;
+  bottom: 206px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(20, 28, 36, 0.6);
+  color: var(--panel-dim);
+  font: 12px/1.5 "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  user-select: none;
+  backdrop-filter: blur(6px);
+}
+
+#hud-zone {
+  position: fixed;
+  left: 16px;
+  bottom: 150px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(20, 28, 36, 0.6);
+  color: var(--panel-dim);
+  font: 12px/1.5 "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  user-select: none;
+  backdrop-filter: blur(6px);
+  min-width: 150px;
+  white-space: pre;
+}
+/* 世代趋势图（右下角）：模块数走向，观察体型分异 */
+#trend-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  padding: 8px 10px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: rgba(20, 28, 36, 0.72);
+  z-index: 10;
+  user-select: none;
+  backdrop-filter: blur(6px);
+}
+#trend-title {
+  margin-bottom: 4px;
+  color: var(--panel-dim);
+  font: 11px/1.4 "Microsoft YaHei", sans-serif;
+  letter-spacing: 1px;
+}
+#chart-modules {
+  display: block;
+  width: 260px;
+  height: 120px;
+  border-radius: 6px;
+}
+/* ---- stage-12 生态经营面板（左上角）：总能量/种群数/多样性/温度/昼夜/时间流速 ---- */
+#eco-panel {
+  position: fixed;
+  top: 64px;
+  left: 16px;
+  width: 216px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  font: 12px/1.6 "Microsoft YaHei", sans-serif;
+  z-index: 10;
+  user-select: none;
+  backdrop-filter: blur(6px);
+}
+#eco-panel .eco-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--panel-border);
+}
+#eco-panel .eco-title { color: var(--accent); letter-spacing: 1px; }
+#eco-panel .eco-clock { color: var(--panel-dim); font-variant-numeric: tabular-nums; }
+#eco-panel .eco-row { display: flex; justify-content: space-between; }
+#eco-panel .eco-row span { color: var(--panel-dim); }
+#eco-panel .eco-row b { font-weight: 600; font-variant-numeric: tabular-nums; }
+#eco-panel .eco-detail { margin: 2px 0 6px; color: var(--panel-dim); font-size: 11px; }
+#eco-panel .eco-sun { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+#eco-panel .eco-sun-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bar-track);
+  overflow: hidden;
+}
+#eco-panel .eco-sun-track i {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.2s linear;
+}
+#eco-panel .eco-phase { color: var(--panel-dim); font-size: 11px; white-space: nowrap; }
+#eco-panel .eco-scale { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+#eco-panel .eco-scale-label { color: var(--panel-dim); }
+#eco-panel .eco-btns { display: flex; gap: 4px; }
+#eco-panel .eco-btn {
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--panel-dim);
+  font: 11px/1.4 "Microsoft YaHei", sans-serif;
+  cursor: pointer;
+}
+#eco-panel .eco-btn:hover { color: var(--panel-text); border-color: var(--accent-dim); }
+#eco-panel .eco-btn.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--panel-text);
+}
+#eco-panel .eco-tip { margin-top: 6px; color: var(--panel-dim); font-size: 10px; opacity: 0.85; }
+/* 夜间（光照 < 35%）：面板边框转冷，呼应场景灯光变暗 */
+body.night #eco-panel { border-color: var(--night-border); }
+
+/* ---- stage-13 气候与环境干预 ---- */
+/* 右上角气候读数面板（与左上角 eco-panel 对称；配色一律走 theme token / CSS 变量） */
+.climate-panel {
+  position: fixed;
+  top: 64px;
+  right: 16px;
+  width: 216px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  font: 12px/1.55 "Microsoft YaHei", sans-serif;
+  z-index: 10;
+}
+.climate-panel .cl-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.climate-panel .cl-title { color: var(--accent); letter-spacing: 1px; }
+.climate-panel .cl-band { color: var(--panel-dim); font-size: 11px; }
+.climate-panel .cl-row { display: flex; justify-content: space-between; }
+.climate-panel .cl-row span { color: var(--panel-dim); }
+.climate-panel .cl-row b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.climate-panel .cl-sep {
+  height: 1px;
+  margin: 6px 0;
+  background: var(--panel-border);
+  opacity: 0.7;
+}
+.climate-panel .cl-bar {
+  height: 6px;
+  margin: 3px 0 5px;
+  border-radius: 999px;
+  background: var(--bar-track);
+  overflow: hidden;
+}
+.climate-panel .cl-bar i {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.2s linear;
+}
+.climate-panel .cl-detail { color: var(--panel-dim); font-size: 11px; }
+.climate-panel .cl-tip {
+  margin-top: 6px;
+  color: var(--panel-dim);
+  font-size: 10px;
+  opacity: 0.85;
+}
+body.night .climate-panel { border-color: var(--night-border); }
+
+/* 点击地面弹出的环境干预菜单：定位由 JS 按落点写入 left/top */
+.env-menu {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 224px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  font: 12px/1.5 "Microsoft YaHei", sans-serif;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  z-index: 40;
+}
+.env-menu[hidden] { display: none; }
+.env-menu .env-head {
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--panel-border);
+  color: var(--panel-dim);
+  font-size: 11px;
+}
+.env-menu .env-head i { color: var(--accent); font-style: normal; }
+.env-menu .env-item {
+  display: block;
+  width: 100%;
+  margin: 3px 0;
+  padding: 5px 8px;
+  border: 1px solid var(--panel-border);
+  border-left-width: 3px;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--panel-text);
+  font: 12px/1.4 "Microsoft YaHei", sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.env-menu .env-item b { display: block; font-weight: 600; }
+.env-menu .env-item span { color: var(--panel-dim); font-size: 10px; }
+.env-menu .env-item:hover { background: var(--panel-hover); }
+
+/* ===================== stage-15：群体与领地面板 ===================== */
+/* 位置：右下角趋势图上方（群体指令是长期操作对象，与生态读数分列不与干预菜单抢位） */
+.tribe-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 192px; /* 让开右下角趋势图（bottom:16 + 高约 160） */
+  width: 320px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  font: 12px/1.5 "Microsoft YaHei", sans-serif;
+  z-index: 20;
+  user-select: none;
+  backdrop-filter: blur(6px);
+}
+.tribe-panel .tb-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--panel-border);
+}
+.tribe-panel .tb-title { font-size: 13px; letter-spacing: 1px; }
+.tribe-panel .tb-count { color: var(--accent); font-size: 11px; }
+.tribe-panel .tb-rows { max-height: 210px; overflow-y: auto; }
+.tribe-panel .tb-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  margin-bottom: 4px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: rgba(42, 58, 74, 0.22);
+  cursor: pointer;
+}
+.tribe-panel .tb-item:hover { background: var(--panel-hover); }
+.tribe-panel .tb-item-sel { border-color: var(--accent-dim); }
+.tribe-panel .tb-dot {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.tribe-panel .tb-info { flex: 1 1 auto; min-width: 0; }
+.tribe-panel .tb-info b { display: block; font-weight: 600; font-size: 11px; }
+.tribe-panel .tb-info span {
+  display: block;
+  color: var(--panel-dim);
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tribe-panel .tb-acts { flex: 0 0 auto; display: flex; gap: 3px; }
+.tribe-panel .tb-btn {
+  padding: 2px 5px;
+  border: 1px solid var(--panel-border);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--panel-dim);
+  font: 10px/1.4 "Microsoft YaHei", sans-serif;
+  cursor: pointer;
+}
+.tribe-panel .tb-btn:hover { background: var(--panel-hover); color: var(--panel-text); }
+.tribe-panel .tb-btn-on {
+  border-color: var(--accent-dim);
+  background: rgba(212, 168, 64, 0.18);
+  color: var(--panel-text);
+}
+.tribe-panel .tb-ban { color: var(--danger); }
+.tribe-panel .tb-sep {
+  margin: 6px 0 5px;
+  border-top: 1px solid var(--panel-border);
+}
+.tribe-panel .tb-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+.tribe-panel .tb-row span { color: var(--panel-dim); }
+.tribe-panel .tb-row b { font-weight: 600; }
+.tribe-panel .tb-tip {
+  margin-top: 6px;
+  color: var(--panel-dim);
+  font-size: 10px;
+  opacity: 0.9;
+}
+body.night .tribe-panel { border-color: var(--night-border); }
+
+/* ---- stage-15 群体与领地读数（左下，神经网络读数上方）---- */
+#hud-tribe {
+  position: fixed;
+  left: 16px;
+  bottom: 274px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(20, 28, 36, 0.6);
+  color: var(--panel-dim);
+  font: 12px/1.5 "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  user-select: none;
+  backdrop-filter: blur(6px);
+}
+
+/* stage-16：顶部/左侧 HUD 新增一行文明读数（进度 + 阶段 + 资源点状态） */
+#hud-civ {
+  position: fixed;
+  left: 16px;
+  bottom: 308px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(20, 28, 36, 0.6);
+  color: var(--panel-dim);
+  font: 12px/1.5 "Microsoft YaHei", sans-serif;
+  letter-spacing: 0.5px;
+  z-index: 10;
+  user-select: none;
+  backdrop-filter: blur(6px);
+}
+
+/* ---- stage-16 文明与科技面板：进度条 / 三类资源完成度 / 研究点 / 两级科技 ----
+   位置放在左上第二列（eco-panel 右侧），避开右侧气候面板与右下群体/趋势面板；
+   色值一律走 CSS token 或 JS 侧 COLORS（禁硬编码色值）。 */
+.civ-panel {
+  position: fixed;
+  top: 64px;
+  left: 248px;
+  width: 236px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  font: 12px/1.55 "Microsoft YaHei", sans-serif;
+  z-index: 20;
+  user-select: none;
+  backdrop-filter: blur(6px);
+}
+.civ-panel .cv-head { display: flex; justify-content: space-between; align-items: baseline; }
+.civ-panel .cv-title { color: var(--accent); letter-spacing: 1px; }
+.civ-panel .cv-stage { font-weight: 600; font-variant-numeric: tabular-nums; }
+.civ-panel .cv-bar {
+  position: relative;
+  height: 12px;
+  margin: 6px 0 8px;
+  border-radius: 6px;
+  background: var(--bar-track);
+  overflow: hidden;
+}
+.civ-panel .cv-bar i { display: block; height: 100%; width: 0; transition: width 0.2s linear; }
+.civ-panel .cv-bar span {
+  position: absolute;
+  inset: 0;
+  text-align: center;
+  font-size: 10px;
+  line-height: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.civ-panel .cv-rows { display: flex; flex-direction: column; }
+.civ-panel .cv-row { display: flex; align-items: center; gap: 6px; }
+.civ-panel .cv-row span { color: var(--panel-dim); }
+.civ-panel .cv-row b { margin-left: auto; font-weight: 600; font-variant-numeric: tabular-nums; }
+.civ-panel .cv-dot { display: inline-block; width: 8px; height: 8px; border-radius: 2px; }
+.civ-panel .cv-sep { margin: 6px 0; border-top: 1px dashed var(--panel-border); }
+.civ-panel .cv-techs { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.civ-panel .cv-tech { padding-top: 4px; border-top: 1px dashed var(--panel-border); }
+.civ-panel .cv-tech .cv-tdot { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; }
+.civ-panel .cv-tech .cv-tstate { float: right; font-weight: 600; }
+.civ-panel .cv-tech .cv-teff { display: block; color: var(--panel-dim); font-size: 11px; font-style: normal; }
+.civ-panel .cv-tech-on .cv-tname { color: var(--accent); }
+.civ-panel .cv-tip { margin-top: 8px; color: var(--panel-dim); font-size: 11px; }
+body.night .civ-panel { border-color: var(--night-border); }
+
+/* 建城资料页（胜利页）：整屏 overlay，只在本阶段通关时出现 */
+.cv-victory {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay-bg);
+}
+.cv-victory[hidden] { display: none; }
+.cv-victory .cv-card {
+  width: 460px;
+  max-width: calc(100vw - 48px);
+  padding: 18px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+  background: var(--panel-bg);
+  color: var(--panel-text);
+  font: 13px/1.7 "Microsoft YaHei", sans-serif;
+}
+.cv-victory .cv-vtitle { color: var(--accent); font-size: 16px; letter-spacing: 2px; }
+.cv-victory .cv-vmeta { margin-top: 4px; color: var(--panel-dim); font-variant-numeric: tabular-nums; }
+.cv-victory .cv-vsub { margin-top: 10px; }
+.cv-victory .cv-vlist { margin: 8px 0 0; padding-left: 18px; color: var(--panel-dim); }
+.cv-victory .cv-vnext { margin-top: 10px; color: var(--accent-dim); }
+.cv-victory .cv-vfoot { margin-top: 14px; display: flex; align-items: center; gap: 10px; }
+.cv-victory .cv-vhint { color: var(--panel-dim); font-size: 11px; }
+.cv-victory button {
+  margin-left: auto;
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--panel-border);
+  background: var(--bar-fill);
+  color: var(--panel-text);
+  font: 12px/1.4 "Microsoft YaHei", sans-serif;
+  cursor: pointer;
+}
+.cv-victory button:hover { border-color: var(--accent); }

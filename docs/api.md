@@ -22,6 +22,8 @@
 
 云存档：`/api/game/save`、`/api/game/load`
 
+`POST /api/game/save?scope=softie` 与 `GET /api/game/load?scope=softie` 保存或读取登录账号的灵体外观参数。省略 `scope` 时继续使用原有灵境会馆存档。
+
 也接受前缀 `/api/huiguan/<同上>` 与 `/api/security/*`。
 
 ## 2. 卡牌 OAuth `server/app/src/cards/server.py`（5174）

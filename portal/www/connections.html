@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#18242b" />
+    <meta
+      name="description"
+      content="Iridescently 与开源项目、友站、创作者之间的连接与鸣谢。"
+    />
+    <link rel="canonical" href="https://iridescently.xyz/connections.html" />
+    <link rel="icon" href="/favicon.png" />
+    <link rel="stylesheet" href="./styles/connections.css" />
+    <title>连接与鸣谢 · Iridescently</title>
+  </head>
+  <body>
+    <header class="site-chrome">
+      <a class="site-brand" href="/" aria-label="Iridescently 首页">
+        <img
+          class="site-brand__logo"
+          src="./assets/iridescently-mark.png"
+          alt=""
+          width="32"
+          height="32"
+          decoding="async"
+        />
+        <span class="site-brand__words">
+          <span class="site-brand__name" data-brand-proximity>
+            <span class="site-brand__name-word">Iridescently</span>
+            <span class="site-brand__kaomoji" aria-hidden="true">(｡•̀ᴗ-)✧</span>
+          </span>
+          <span class="site-brand__motto">节气之间，自有天气</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="站点导航">
+        <a class="site-nav__link" href="https://huiguan.iridescently.xyz/"
+          >西木会馆</a
+        >
+        <a
+          class="site-nav__link site-nav__link--secondary"
+          href="https://oc.iridescently.xyz/"
+          >角色设定</a
+        >
+        <details class="site-menu">
+          <summary class="site-menu__toggle">
+            <span>更多去处</span>
+            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path d="m4 6 4 4 4-4" />
+            </svg>
+          </summary>
+          <div class="site-menu__panel">
+            <p class="site-menu__eyebrow">继续探索</p>
+            <a href="https://zszm.iridescently.xyz/">众生之门</a>
+            <a href="https://psyche.iridescently.xyz/">心理档案云</a>
+            <a href="https://lingjing.iridescently.xyz/">灵境会馆</a>
+            <a href="https://juling.iridescently.xyz/">聚灵</a>
+            <span class="site-menu__rule" aria-hidden="true"></span>
+            <a href="/connections.html">连接与鸣谢</a>
+            <details class="site-menu__legal">
+              <summary>版权与免责声明</summary>
+              <p>罗小黑战记相关 IP 版权归寒木春华动画工作室所有。</p>
+              <p>
+                本站为非商业性粉丝社区项目，仅为用户提供信息交流与身份认证服务。所有涉及“罗小黑战记”及相关角色、形象、作品的内容，其著作权、商标权等知识产权均归原作者及寒木春华动画工作室所有。本站未获官方授权，如有侵权请联系管理员删除。
+              </p>
+            </details>
+            <small class="site-menu__copyright">© 2026 Iridescently</small>
+          </div>
+        </details>
+      </nav>
+    </header>
+
+    <main class="connections">
+      <header class="connections-intro">
+        <p class="connections-eyebrow">
+          IRIDESCENTLY · CONNECTIONS &amp; CREDITS
+        </p>
+        <h1>连接与鸣谢</h1>
+        <p class="connections-intro__lead">
+          一处节气图库，也由许多人的创造、分享与支持共同构成。这里记下它所借助的开源项目、一路相邻的站点，以及来自
+          Iridescently 的小小尝试。
+        </p>
+        <nav class="connections-index" aria-label="本页目录">
+          <a href="#open-source">开源与构建</a>
+          <a href="#neighbors">友站与邻居</a>
+          <a href="#with-thanks">特别感谢</a>
+          <a href="#from-iridescently">来自 Iridescently</a>
+        </nav>
+      </header>
+
+      <section class="connections-section" id="open-source">
+        <header class="connections-section__heading">
+          <p class="connections-eyebrow">01 · OPEN SOURCE / BUILT WITH</p>
+          <h2>开源与构建</h2>
+          <p>
+            这些项目各自承担了清晰的一部分：绘制空间、读取色彩、组织页面与构建代码。
+          </p>
+        </header>
+        <ul class="project-list">
+          <li class="project-credit">
+            <p class="project-credit__role">三维绘制 · WebGL</p>
+            <h3>
+              <a href="https://threejs.org/" target="_blank" rel="noopener"
+                >Three.js</a
+              >
+            </h3>
+            <p>
+              让节气图能在带有纵深的画布中排列、移动，并与氛围背景共同呈现。
+            </p>
+            <p class="project-credit__attribution">
+              Three.js contributors ·
+              <a
+                href="https://github.com/mrdoob/three.js/blob/dev/LICENSE"
+                target="_blank"
+                rel="noopener"
+                >MIT License</a
+              >
+            </p>
+          </li>
+          <li class="project-credit">
+            <p class="project-credit__role">图像色彩 · 调色板</p>
+            <h3>
+              <a
+                href="https://github.com/lokesh/color-thief"
+                target="_blank"
+                rel="noopener"
+                >Color Thief</a
+              >
+            </h3>
+            <p>从每张图像提取代表色，为图库的氛围色彩提供起点。</p>
+            <p class="project-credit__attribution">
+              Lokesh Dhakar ·
+              <a
+                href="https://github.com/lokesh/color-thief/blob/master/LICENSE"
+                target="_blank"
+                rel="noopener"
+                >MIT License</a
+              >
+            </p>
+          </li>
+          <li class="project-credit">
+            <p class="project-credit__role">图库基础 · 深度滚动</p>
+            <h3>
+              <a
+                href="https://github.com/houmahani/codrops-depth-gallery"
+                target="_blank"
+                rel="noopener"
+                >Atmospheric Depth Gallery</a
+              >
+            </h3>
+            <p>
+              由 Houmahani Kane 创作并发表于 Codrops。Iridescently
+              在此基础上接入节气贺图与图库呈现。
+            </p>
+            <p class="project-credit__attribution">
+              <a
+                href="https://tympanus.net/codrops/2026/03/09/building-a-scroll-reactive-3d-gallery-with-three-js-velocity-and-mood-based-backgrounds/"
+                target="_blank"
+                rel="noopener"
+                >Codrops 教程</a
+              >
+              ·
+              <a
+                href="https://github.com/houmahani/codrops-depth-gallery/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener"
+                >MIT License</a
+              >
+            </p>
+          </li>
+          <li class="project-credit">
+            <p class="project-credit__role">开发与发布 · GLSL 导入</p>
+            <h3>
+              <a href="https://vite.dev/" target="_blank" rel="noopener"
+                >Vite</a
+              >
+              <span>＋</span>
+              <a
+                href="https://github.com/UstymUkhman/vite-plugin-glsl"
+                target="_blank"
+                rel="noopener"
+                >vite-plugin-glsl</a
+              >
+            </h3>
+            <p>
+              构建首页脚本与静态资源，并让 Gallery
+              的着色器源码能直接参与开发构建。
+            </p>
+            <p class="project-credit__attribution">
+              Evan You · Ustym Ukhman ·
+              <a
+                href="https://github.com/vitejs/vite/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener"
+                >MIT</a
+              >
+              /
+              <a
+                href="https://github.com/UstymUkhman/vite-plugin-glsl/blob/master/LICENSE"
+                target="_blank"
+                rel="noopener"
+                >MIT</a
+              >
+            </p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="connections-section" id="neighbors">
+        <header class="connections-section__heading">
+          <p class="connections-eyebrow">02 · FRIENDS / NEIGHBORS</p>
+          <h2>友站与邻居</h2>
+          <p>同一片站群里的不同入口，也欢迎认识彼此的世界。</p>
+        </header>
+        <div
+          class="neighbor-grid"
+          data-connections-neighbors
+          aria-live="polite"
+        >
+          <p class="connections-loading">正在整理友站……</p>
+        </div>
+      </section>
+
+      <section
+        class="connections-section connections-section--thanks"
+        id="with-thanks"
+      >
+        <header class="connections-section__heading">
+          <p class="connections-eyebrow">03 · WITH THANKS</p>
+          <h2>特别感谢</h2>
+          <p>
+            感谢创作了这个世界的人，也感谢每一位愿意停留、分享与陪伴的朋友。
+          </p>
+        </header>
+        <div class="thanks-list" data-connections-thanks aria-live="polite">
+          <p class="connections-loading">正在整理鸣谢……</p>
+        </div>
+      </section>
+
+      <section
+        class="connections-section connections-section--from"
+        id="from-iridescently"
+      >
+        <header class="connections-section__heading">
+          <p class="connections-eyebrow">04 · FROM IRIDESCENTLY</p>
+          <h2>来自 Iridescently</h2>
+          <p>从站点里长出来的小工具、实验与组件，也会在适合分享时来到这里。</p>
+        </header>
+        <p class="from-note">
+          目前，这里暂时留白。节气图库仍是 Iridescently 最想与你分享的部分。
+        </p>
+      </section>
+
+      <section
+        class="connections-admin"
+        data-connections-admin
+        hidden
+        aria-label="页面内容管理"
+      >
+        <button
+          class="connections-admin__toggle"
+          type="button"
+          data-connections-edit
+          aria-expanded="false"
+          aria-controls="connections-editor"
+        >
+          编辑本页内容
+        </button>
+        <div
+          class="connections-editor"
+          id="connections-editor"
+          data-connections-editor
+          hidden
+        >
+          <section class="connections-editor__group">
+            <h2>友站</h2>
+            <div data-neighbor-editor></div>
+            <div class="connections-editor__actions">
+              <button type="button" data-neighbor-add>添加友站</button>
+              <button type="button" data-neighbor-save>保存友站</button>
+            </div>
+          </section>
+          <section class="connections-editor__group">
+            <h2>鸣谢</h2>
+            <div data-thanks-editor></div>
+            <div class="connections-editor__actions">
+              <button type="button" data-thanks-add-section>添加分类</button>
+              <button type="button" data-thanks-save>保存鸣谢</button>
+            </div>
+          </section>
+          <p
+            class="connections-admin__status"
+            data-connections-status
+            role="status"
+            aria-live="polite"
+          ></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="connections-footer">
+      <a href="/">回到节气图库</a>
+      <span>© 2026 Iridescently</span>
+    </footer>
+
+    <script type="module" src="./scripts/connections.js"></script>
+  </body>
+</html>

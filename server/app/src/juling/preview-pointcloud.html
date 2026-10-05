@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>灵力点云 · 持续聚灵</title>
+<style>
+  body{margin:0;background:#0a0e14;overflow:hidden;font-family:"PingFang SC",sans-serif;color:#dbe2ec;}
+  canvas{display:block;}
+  .hud{position:fixed;top:16px;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;}
+  .hud h1{font-size:16px;letter-spacing:2px;margin:0;font-weight:normal;}
+  .hud p{font-size:12px;color:#8794a8;margin:4px 0 0;}
+  .btn{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 28px;font-size:15px;border-radius:24px;border:1px solid #5fbf6e;background:#1b2a20;color:#dbe2ec;cursor:pointer;letter-spacing:2px;}
+  .btn:hover{background:#243a2a;}
+  .btn.active{background:#2a4028;border-color:#9fe0a0;}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="hud"><h1>☯ 灵力点云 · 持续聚灵</h1><p>绿色=生灵 · 金色=物质灵 · 点击「聚灵」持续汇聚，灵体不断成长</p></div>
+<button class="btn" id="gather">🌿 聚 灵</button>
+
+<script>
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+let W,H,cx,cy;
+function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight;cx=W/2;cy=H/2;}
+resize();addEventListener('resize',resize);
+
+// 灵力点云
+const N=300;
+const dots=[];
+for(let i=0;i<N;i++){
+  const life=Math.random()<0.55;
+  dots.push({
+    x:Math.random()*W, y:Math.random()*H,
+    r:0.8+Math.random()*1.8,
+    life,
+    color:life?`hsla(${120+Math.random()*30},70%,${60+Math.random()*20}%,`:`hsla(${42+Math.random()*15},75%,${55+Math.random()*20}%,`,
+    phase:Math.random()*Math.PI*2,
+    vx:0,vy:0,
+  });
+}
+
+let gathering=false;   // 是否处于持续聚灵状态
+let growth=0;          // 灵体成长度（持续积累）
+
+document.getElementById('gather').onclick=()=>{
+  gathering=!gathering;
+  const btn=document.getElementById('gather');
+  if(gathering){btn.textContent='汇 聚 中 …（点击停止）';btn.classList.add('active');}
+  else{btn.textContent='🌿 聚 灵';btn.classList.remove('active');}
+};
+
+function tick(){
+  ctx.clearRect(0,0,W,H);
+
+  const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*0.7);
+  bg.addColorStop(0,'#111a16');
+  bg.addColorStop(1,'#0a0e14');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+  // 中心灵体（随 growth 持续成长）
+  const pulse=1+Math.sin(Date.now()/500)*0.04;
+  const glowR=(24+growth*0.8)*pulse;
+  const glow=ctx.createRadialGradient(cx,cy,0,cx,cy,glowR*2.4);
+  glow.addColorStop(0,`rgba(160,220,160,${0.3+Math.min(1,growth*0.02)})`);
+  glow.addColorStop(0.5,`rgba(140,200,140,${0.1+Math.min(1,growth*0.015)})`);
+  glow.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=glow;ctx.beginPath();ctx.arc(cx,cy,glowR*2.4,0,Math.PI*2);ctx.fill();
+
+  ctx.beginPath();ctx.arc(cx,cy,glowR,0,Math.PI*2);
+  ctx.fillStyle=`rgba(190,235,180,${0.15+Math.min(0.4,growth*0.01)})`;
+  ctx.fill();
+  ctx.strokeStyle=`rgba(220,255,210,${0.35+Math.min(0.5,growth*0.015)})`;
+  ctx.lineWidth=1.5;ctx.stroke();
+
+  // 点云：持续流动
+  for(const d of dots){
+    if(gathering){
+      // 持续向中心缓慢汇聚
+      const dx=cx-d.x, dy=cy-d.y, dist=Math.hypot(dx,dy);
+      const a=0.014;
+      d.vx+=dx/dist*a; d.vy+=dy/dist*a;
+      d.vx+=Math.sin(Date.now()/2600+d.phase)*0.004;
+      d.vy+=Math.cos(Date.now()/3100+d.phase)*0.004;
+      d.vx*=0.986; d.vy*=0.986;
+      d.x+=d.vx; d.y+=d.vy;
+
+      if(dist<glowR+2){
+        // 融入灵体 → 灵体成长 → 重置到远处继续（点云源源不断）
+        growth++;
+        d.x=Math.random()*W; d.y=Math.random()*H; d.vx=0; d.vy=0;
+      }
+    }else{
+      // 自然漂浮
+      d.x+=Math.sin(Date.now()/1800+d.phase)*0.25;
+      d.y+=Math.cos(Date.now()/2100+d.phase)*0.25;
+    }
+
+    const alpha=gathering?0.95:0.5+Math.sin(Date.now()/800+d.phase)*0.3;
+    ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);
+    ctx.fillStyle=d.color+alpha+')';
+    ctx.fill();
+  }
+
+  requestAnimationFrame(tick);
+}
+
+tick();
+</script>
+</body>
+</html>

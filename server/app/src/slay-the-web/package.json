@@ -1,0 +1,50 @@
+{
+  "name": "slaytheweb",
+  "version": "0.16.1",
+  "license": "AGPL-3.0-or-later",
+  "homepage": "https://slaytheweb.cards",
+  "repository": "https://github.com/oskarrough/slaytheweb",
+  "bugs": "https://github.com/oskarrough/slaytheweb/issues",
+  "type": "module",
+  "scripts": {
+    "start": "servor public --reload",
+    "lint": "eslint public tests --fix",
+    "test": "ava",
+    "test:watch": "ava --watch",
+    "test:coverage": "c8 ava",
+    "build": "snowpack --include 'public/**/*.js' --clean --dest 'public/web_modules' --stat --optimize",
+    "docs": "rm -rf ./docs; cd public/game; docco *.js; mv docs ../../docs",
+    "release": "release-it"
+  },
+  "devDependencies": {
+    "ava": "^4.3.3",
+    "c8": "^7.12.0",
+    "docco": "^0.9.1",
+    "eslint": "^8.23.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "2.7.1",
+    "release-it": "^15.4.0",
+    "servor": "^4.0.2",
+    "snowpack": "^1.7.1"
+  },
+  "dependencies": {
+    "esm": "^3.2.25",
+    "gsap": "^3.11.0",
+    "htm": "^3.1.1",
+    "immer": "^9.0.15",
+    "tone": "^14.8.9"
+  },
+  "release-it": {
+    "git": {
+      "requireCleanWorkingDir": false,
+      "changelog": "npx auto-changelog --stdout --commit-limit false --unreleased --template https://raw.githubusercontent.com/release-it/release-it/master/templates/changelog-compact.hbs"
+    },
+    "npm": {
+      "publish": false
+    },
+    "hooks": {
+      "after:bump": "npx auto-changelog -p"
+    }
+  }
+}

@@ -1,0 +1,516 @@
+﻿@import './styles/tokens.css';
+@import './styles/app.css';
+@import './styles/fonts.css';
+@import './styles/overlay.css';
+@import './styles/card.css';
+@import './styles/targets.css';
+@import './styles/map.css';
+@import './styles/tooltipped.css';
+
+:root {
+	--card-width: 11em;
+	--card-height: 17em;
+	--yellow: var(--qc-gold);
+	--teal: var(--qc-accent);
+	--lightblue: var(--qc-elem-water);
+	--red: var(--qc-danger);
+	--bg: var(--qc-bg);
+	--text: var(--qc-text);
+	--text-inverse: var(--qc-gold);
+	--text-stroke: var(--text-inverse);
+}
+
+/* 魂灵跨局传承（重生之门） */
+.SoulSettle {
+	color: var(--color-content-2, var(--game-text-dim));
+	font-style: italic;
+	margin: 0.3em 0;
+}
+.Target-soulLegacy {
+	font-size: 0.75em;
+	color: var(--color-content-2, var(--game-text-dim));
+	text-align: center;
+	margin-top: 0.25em;
+}
+/* 羁绊（重生之门）：名称 + 结缘对象，悬浮查看类型/背景/被动 */
+.Target-bonds {
+	font-size: 0.75em;
+	color: var(--color-content-2, var(--game-text-dim));
+	text-align: center;
+	margin-top: 0.25em;
+	line-height: 1.5;
+}
+.Target-bond {
+	cursor: help;
+	border-bottom: 1px dotted currentColor;
+	padding-bottom: 0.05em;
+	white-space: nowrap;
+	transition: color 0.15s ease;
+}
+.Target-bond:hover {
+	color: var(--qc-gold);
+}
+.Splash-details.Article {
+	margin-top: 1.2em;
+	padding: 0.8em 1em;
+	border: 1px solid var(--qc-border);
+	border-radius: var(--qc-r-lg);
+	background: var(--qc-panel);
+	text-align: left;
+	max-width: 28em;
+	margin-left: auto;
+	margin-right: auto;
+}
+.Splash-details.Article p {
+	margin: 0.2em 0;
+	font-size: 0.9em;
+}
+
+/* 本命御灵系 · 五行共鸣（重生之门） */
+.Splash-element {
+	margin: 0.6em auto 0;
+	max-width: 34em;
+	padding: 0.5em 0.8em 0.7em;
+	border: 1px solid var(--qc-border);
+	border-radius: var(--qc-r-lg);
+	background: var(--qc-panel);
+}
+.Splash-elementTitle {
+	margin: 0 0 0.5em;
+	font-size: 0.95em;
+	letter-spacing: 0.08em;
+	color: var(--qc-gold);
+}
+.Splash-elementGrid {
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 0.45em;
+}
+.Splash-elementItem {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.15em;
+	padding: 0.45em 0.2em;
+	border: 1px solid var(--qc-border);
+	border-radius: var(--qc-r-md);
+	background: var(--qc-panel);
+	color: var(--text);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+.Splash-elementItem:hover {
+	border-color: var(--qc-gold);
+	background: var(--qc-gold-glow);
+}
+.Splash-elementItem.is-selected {
+	border-color: var(--game-gold);
+	background: var(--game-warn-glow-soft);
+	box-shadow: 0 0 10px var(--game-warn-glow);
+}
+.Splash-elementSymbol {
+	font-size: 1.4em;
+	font-weight: 700;
+	color: var(--qc-gold);
+}
+.Splash-elementName {
+	font-size: 0.78em;
+}
+.Splash-elementRole {
+	font-size: 0.68em;
+	opacity: 0.75;
+}
+.Splash-elementHint {
+	margin: 0.5em 0 0;
+	font-size: 0.82em;
+	color: var(--qc-dim);
+}
+/* 灵质天赋 · 六大能力系（重生之门） */
+.Splash-branch {
+	margin-top: 0.5em;
+}
+.Splash-branchGrid {
+	grid-template-columns: repeat(6, 1fr);
+}
+.Splash-branchItem .Splash-elementName {
+	font-size: 0.85em;
+	font-weight: 600;
+}
+.Splash-elementDual {
+	display: inline-block;
+	margin-top: 0.25em;
+	padding: 0.05em 0.5em;
+	font-size: 0.62em;
+	color: var(--game-gold-bright);
+	border: 1px solid var(--qc-gold);
+	border-radius: 8px;
+	background: var(--game-warn-glow-soft, transparent);
+	white-space: nowrap;
+}
+@media (max-width: 720px) {
+	.Splash-branchGrid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+/* 出身分馆 · 妖灵会馆七大分馆（重生之门） */
+.Splash-guild {
+	margin-top: 0.5em;
+}
+.Splash-guildGrid {
+	grid-template-columns: repeat(4, 1fr);
+}
+.Splash-guildItem {
+	padding: 0.5em 0.3em;
+}
+.Splash-guildItem .Splash-elementName {
+	font-size: 0.85em;
+	font-weight: 600;
+	white-space: nowrap;
+}
+.Splash-elementGuildRep {
+	font-size: 0.62em;
+	opacity: 0.7;
+}
+@media (max-width: 720px) {
+	.Splash-guildGrid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+.Target-element--branch {
+	border-color: var(--game-gold);
+	background: var(--game-warn-glow-soft);
+}
+/* 今日灵机（每日祝福）徽章：青绿描边，与金色五行/天时徽章区分，一日一佑 */
+.Target-element--daily {
+	border-color: var(--qc-accent);
+	color: var(--qc-accent);
+	background: var(--qc-accent-bg-soft);
+}
+/* 灵机共振徽章：今日灵机当值与楼层天时同向（稀有日），紫金描边提示天地同频 */
+.Target-element--resonance {
+	border-color: var(--qc-resonance);
+	color: var(--qc-resonance-bright);
+	background: var(--qc-resonance-bg-soft);
+	box-shadow: 0 0 8px var(--qc-resonance-halo);
+}
+/* 聚灵修炼徽章：生灵/物质灵双资源与化形阶段，荧蓝描边呼应灵质循环 */
+.Target-element--ling {
+	border-color: var(--qc-ling);
+	color: var(--qc-ling-bright);
+	background: var(--qc-ling-bg);
+}
+.Target-element {
+	display: inline-block;
+	padding: 0.08em 0.5em;
+	margin-right: 0.4em;
+	border: 1px solid var(--qc-gold);
+	border-radius: 6px;
+	color: var(--game-gold-bright);
+	font-weight: 700;
+	cursor: help;
+}
+/* 怪物御灵系技能徽章（重生之门）：展示怪物当前施展的技能名，松绿描边与金色五行徽章区分 */
+.Target-skill {
+	display: inline-block;
+	margin-right: 0.4em;
+	padding: 0.08em 0.55em;
+	border: 1px solid var(--qc-accent);
+	border-radius: 999px;
+	color: var(--qc-accent);
+	background: var(--qc-accent-bg-strong);
+	font-size: 0.78rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	vertical-align: middle;
+	cursor: help;
+}
+/* 敌人世界观档案徽章（重生之门）：展示敌人所属势力/物种/背景档案，紫罗兰描边与技能徽章区分 */
+.Target-lore {
+	display: inline-block;
+	margin-right: 0.4em;
+	padding: 0.08em 0.55em;
+	border: 1px solid var(--qc-lore);
+	border-radius: 999px;
+	color: var(--qc-lore);
+	background: var(--qc-lore-bg);
+	font-size: 0.78rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	vertical-align: middle;
+	cursor: help;
+}
+@media (max-width: 720px) {
+	.Splash-elementGrid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+/* 商店（妖灵会馆补给站 / 集市） */
+.ShopRoom {
+	max-width: 40em;
+	margin: 0 auto;
+	padding: 1em;
+}
+.ShopRoom-items {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6em;
+	margin: 0.8em auto;
+	max-width: 30em;
+}
+.ShopItem {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3em;
+	padding: 0.7em 0.9em;
+	border: 1px solid var(--qc-border);
+	border-radius: var(--qc-r-md);
+	background: var(--qc-panel);
+	text-align: left;
+}
+.ShopItem-head {
+	display: flex;
+	align-items: center;
+	gap: 0.6em;
+}
+.ShopItem-kind {
+	font-size: 0.72em;
+	padding: 0.1em 0.45em;
+	border-radius: 5px;
+	border: 1px solid var(--game-warn-border);
+	color: var(--game-gold-bright);
+	white-space: nowrap;
+}
+.ShopItem-name {
+	flex: 1;
+}
+.ShopItem-price {
+	font-size: 0.85em;
+	color: var(--game-gold-bright);
+	white-space: nowrap;
+}
+.ShopItem-desc {
+	margin: 0;
+	font-size: 0.8em;
+	opacity: 0.8;
+}
+.ShopItem button {
+	align-self: flex-end;
+}
+.ShopItem.sold {
+	opacity: 0.55;
+}
+.ShopItem.unaffordable {
+	border-color: var(--qc-border);
+}
+
+/* Boss 出场台词气泡（重生之门）：显示在怪物名下方，战前渲染 */
+.Target-quote {
+	margin: 0.35rem 0.5rem 0.2rem;
+	padding: 0.35em 0.7em;
+	font-size: 0.8rem;
+	line-height: 1.45;
+	text-align: center;
+	color: var(--qc-accent);
+	background: linear-gradient(180deg, var(--qc-gold-glow), var(--qc-panel));
+	border: 1px solid var(--qc-gold);
+	border-radius: 8px;
+	box-shadow: 0 0 12px var(--qc-gold-glow);
+}
+.Target--isDead .Target-quote {
+	opacity: 0.35;
+}
+
+/* Boss 第二阶段徽标（半血进入狂暴形态，红色脉冲警示） */
+.Target-phase2Badge {
+	display: inline-block;
+	margin-left: 0.6rem;
+	padding: 0.12em 0.6em;
+	font-size: 0.72rem;
+	letter-spacing: 0.08em;
+	vertical-align: middle;
+	color: var(--qc-panel);
+	background: linear-gradient(180deg, var(--qc-danger), var(--qc-danger-75));
+	border: 1px solid var(--qc-danger-border-light);
+	border-radius: 999px;
+	animation: phase2Pulse 1.2s ease-in-out infinite;
+}
+@keyframes phase2Pulse {
+	0%, 100% {
+		box-shadow: 0 0 0 0 var(--qc-danger-55);
+	}
+	50% {
+		box-shadow: 0 0 0 7px rgba(179, 84, 63, 0);
+	}
+}
+/* 第二阶段台词（转场演出：台词随形态切换为狂暴口吻） */
+.Target-quote--phase2 {
+	color: var(--qc-panel);
+	background: linear-gradient(180deg, var(--qc-danger-60), var(--qc-danger-15));
+	border-color: var(--qc-danger-65);
+	box-shadow: 0 0 18px var(--qc-danger-40);
+}
+
+/* 修行面板（游戏内菜单 → 修行面板） */
+.CultivationPanel {
+	max-width: 42rem;
+	justify-content: flex-start;
+	padding: 2.5rem 1rem;
+	overflow-y: auto;
+	gap: 0.9rem;
+}
+.CultivationPanel h1 {
+	margin: 0 0 0.4rem;
+}
+.PanelLoc {
+	color: var(--qc-gold);
+	font-weight: 600;
+}
+.PanelSection {
+	text-align: left;
+	background: var(--qc-panel);
+	border: 1px solid var(--qc-border);
+	border-radius: var(--qc-r-lg);
+	padding: 0.8rem 1.1rem;
+}
+.PanelSection h3 {
+	margin: 0 0 0.4rem;
+	color: var(--qc-accent);
+	font-size: 1.05rem;
+	letter-spacing: 0.05em;
+}
+.PanelLine {
+	margin: 0.2rem 0;
+	font-size: 0.95rem;
+}
+.PanelMuted {
+	opacity: 0.72;
+	font-size: 0.88rem;
+	line-height: 1.55;
+	margin: 0.25rem 0;
+}
+.PanelItem {
+	border-top: 1px dashed var(--qc-border);
+	padding: 0.45rem 0;
+}
+.PanelItem:first-of-type {
+	border-top: 0;
+}
+.PanelItemTitle {
+	margin: 0;
+	font-weight: 600;
+}
+.CultivationPanel .Options {
+	max-width: 22rem;
+	margin-top: 0.8rem;
+}
+
+/* 音乐开关（重生之门）：悬浮按钮，切换场景 BGM 静音并持久化偏好 */
+.MusicToggle {
+	position: fixed;
+	top: 0.6rem;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 30;
+	font-size: 0.85rem;
+	padding: 0.35rem 0.9rem;
+	cursor: pointer;
+	border-radius: 999px;
+	background: var(--game-deep-green);
+	border: 1px solid var(--game-gold-45);
+	color: var(--text);
+	letter-spacing: 0.06em;
+	opacity: 0.72;
+	transition: opacity 200ms, background 200ms;
+}
+.MusicToggle:hover {
+	opacity: 1;
+	background: var(--game-deep-green-solid);
+	border-color: var(--game-gold-90);
+}
+
+/* 战记面板（重生之门）：逐条战况记录，左侧色条按日志种类着色 */
+.BattleLog {
+	padding: 1rem 1.2rem;
+	max-width: 46rem;
+}
+.BattleLog-head {
+	font-size: 0.85rem;
+	letter-spacing: 0.12em;
+	color: var(--game-gold);
+	margin: 0 0 0.6rem;
+	border-bottom: 1px solid var(--game-gold-30);
+	padding-bottom: 0.4rem;
+}
+.BattleLog-empty {
+	color: var(--bl-info);
+	font-style: italic;
+	margin: 0;
+}
+.BattleLog-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+}
+.BattleLog-item {
+	display: flex;
+	align-items: baseline;
+	gap: 0.55rem;
+	font-size: 0.86rem;
+	line-height: 1.5;
+	padding: 0.22rem 0.55rem;
+	border-left: 3px solid var(--bl-info);
+	background: var(--game-white-3);
+	border-radius: 0 4px 4px 0;
+}
+.BattleLog-item.battle-log--dmg {
+	border-left-color: var(--bl-dmg);
+}
+.BattleLog-item.battle-log--def {
+	border-left-color: var(--bl-def);
+}
+.BattleLog-item.battle-log--heal {
+	border-left-color: var(--bl-heal);
+}
+.BattleLog-item.battle-log--debuff {
+	border-left-color: var(--bl-debuff);
+}
+.BattleLog-item.battle-log--warn {
+	border-left-color: var(--bl-warn);
+}
+.BattleLog-item.battle-log--break {
+	border-left-color: var(--bl-break);
+}
+.BattleLog-item.battle-log--reward {
+	border-left-color: var(--bl-reward);
+}
+.BattleLog-item.battle-log--event {
+	border-left-color: var(--bl-event);
+}
+.BattleLog-item.battle-log--info {
+	border-left-color: var(--bl-info);
+}
+.BattleLog-turn {
+	flex: none;
+	min-width: 2.6rem;
+	font-size: 0.72rem;
+	letter-spacing: 0.06em;
+	color: var(--bl-info);
+	font-variant-numeric: tabular-nums;
+}
+.BattleLog-text {
+	flex: 1;
+	color: var(--game-text-warm);
+}
+
+/* ===== 西木会馆账户条（并入 huiguan 账户系统） ===== */
+#QcAccountBar { position: fixed; top: 10px; right: 14px; z-index: 9999; }
+.QcAccountBar { display: flex; align-items: center; gap: 8px; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; font-size: 13px; }
+.QcAccountBar--hidden { display: none; }
+.QcAccountBar-name { color: var(--game-account-text); background: var(--game-deep-green-soft); border: 1px solid var(--game-gold-45); border-radius: 14px; padding: 4px 12px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.QcAccountBar-btn { cursor: pointer; border: 1px solid var(--game-gold-60); border-radius: 14px; padding: 4px 14px; text-decoration: none; color: var(--game-account-text-hover); background: var(--game-deep-green-soft); transition: background 0.2s; }
+.QcAccountBar-btn:hover { background: var(--game-deep-green-hover); }
+.QcAccountBar-logout { font-size: 13px; }

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>个人账户 · 西木会馆</title>
+<link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="/design-system/design-system.css">
+<style>
+:root{--bg:#f5f0e8;--panel:#fbf8f2;--border:#d4cfbe;--text:#3a4a3e;--dim:#7a8a7e;--accent:#5a9e8f;--gold:#d4a840;--danger:#b3543f}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:"Noto Serif SC","Source Han Serif SC",serif;min-height:100vh;padding:48px 16px 60px}
+.wrap{max-width:640px;margin:0 auto}
+h1{font-size:22px;letter-spacing:3px}
+h1 small{font-size:12px;color:var(--dim);margin-left:10px;letter-spacing:1px}
+.back{display:inline-block;margin-bottom:14px;color:var(--dim);font-size:13px;text-decoration:none}
+.back:hover{color:var(--accent)}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:16px}
+.card h2{font-size:15px;letter-spacing:2px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:14px}
+.row .k{color:var(--dim)}
+.tag{display:inline-block;padding:1px 10px;border-radius:4px;font-size:12px;border:1px solid var(--border);color:var(--dim)}
+.tag.gold{background:rgba(212,168,64,.15);border-color:var(--gold);color:var(--gold)}
+.tag.green{background:rgba(90,158,143,.12);border-color:var(--accent);color:var(--accent)}
+.btn{font-family:inherit;font-size:13px;cursor:pointer;padding:7px 18px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;transition:all .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.hint{font-size:12px;color:var(--dim);margin-top:6px;line-height:1.6}
+.err{color:var(--danger);font-size:13px;margin-top:8px;min-height:18px}
+.state-box{text-align:center;padding:60px;color:var(--dim)}
+.schemes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chip{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;color:var(--text);background:transparent;transition:all .15s}
+.chip:hover{border-color:var(--accent)}
+.chip .dot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.12);flex-shrink:0}
+.chip .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.chip.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+input[type=color]{width:42px;height:32px;border:1px solid var(--border);border-radius:6px;background:transparent;padding:2px;cursor:pointer}
+.hex-in{width:92px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;color:var(--text);background:var(--bg)}
+.theme-prev{border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:12px;background:var(--bg);min-height:52px}
+.theme-prev .btn{pointer-events:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← 返回会馆</a>
+  <h1>个人账户<small>西木会馆 · iridescently.xyz</small></h1>
+  <div id="content"><div class="state-box">加载中…</div></div>
+</div>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const roleName={executor:'执行者',elder:'长老',admin:'管理员'};
+async function init(){
+  try{
+    const r=await fetch('/api/user'); const u=await r.json();
+    if(!u.logged_in){document.getElementById('content').innerHTML='<div class="state-box">请先登录后管理账户。<br><a href="/" style="color:var(--gold)">去登录 / 注册</a></div>';return;}
+    render(u);
+  }catch(e){document.getElementById('content').innerHTML='<div class="state-box">加载失败，请刷新。</div>';}
+}
+function render(u){
+  const isElder=u.role==='elder', isAdmin=u.is_admin, isScribe=u.edit_role==='scribe';
+  const curP=((u.theme_primary||'#f5f0e8').match(/^#[0-9a-fA-F]{6}$/)?u.theme_primary:'#f5f0e8').toLowerCase();
+  const curA=((u.theme_accent||'#5a9e8f').match(/^#[0-9a-fA-F]{6}$/)?u.theme_accent:'#5a9e8f').toLowerCase();
+  document.getElementById('content').innerHTML=`
+    <div class="qc-card" style="margin-bottom:var(--qc-sp-4)">
+      <h2 class="qc-h2">账户安全</h2>
+      <p class="qc-hint">设置找回问题、修改密码，或检查你的站内登录账号。</p>
+      <a class="qc-btn" href="/security.html" style="margin-top:var(--qc-sp-3)">管理账户安全</a>
+    </div>
+    <div class="card">
+      <h2>身份信息</h2>
+      <div class="row"><span class="k">昵称</span><span>${esc(u.nickname||u.username)}</span></div>
+      <div class="row"><span class="k">账号类型</span><span>${u.kind==='local'?'站内账号':'USSO 账号'}</span></div>
+      <div class="row"><span class="k">会馆身份</span><span class="tag ${isAdmin?'gold':isElder?'green':''}">${roleName[u.role]||'执行者'}</span></div>
+      <div class="row"><span class="k">编辑权限</span><span class="tag ${isScribe?'green':''}">${isScribe?'编辑（可直接修订设定）':'无'}</span></div>
+    </div>
+    <div class="card">
+      <h2>等级与积分</h2>
+      <div class="row"><span class="k">当前等级</span><span class="tag gold">Lv.${u.level||1} <span style="color:var(--dim)">/ 100</span></span></div>
+      <div class="row"><span class="k">积分</span><span>${u.points||0}</span></div>
+      <div class="hint">升级方式：成功提交人设表 +20 分；使用自定义配色 +10 分。每 10 分升 1 级，最高 100 级。多探索站点功能可更快升级。</div>
+    </div>
+    <div class="card">
+      <h2>改名</h2>
+      <div class="row"><span class="k">当前昵称</span><span>${esc(u.nickname||u.username)}</span></div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input id="renameInput" placeholder="输入新昵称" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:14px;">
+        <button class="btn" onclick="doRename()">改名</button>
+      </div>
+      <div class="hint">昵称全站唯一，每 3 天可改一次。</div>
+      <div class="err" id="renameErr"></div>
+    </div>
+    <div class="card">
+      <h2>身份申请</h2>
+      <div class="row"><span class="k">会馆长老</span>${elderBtn(u)}</div>
+      <div class="hint">长老：御灵系可选 2 系、年龄上限 1500 岁；可管理执行者与编辑。需申请并经馆长批准。</div>
+      <div class="row" style="margin-top:10px;"><span class="k">编辑（审查补充世界观）</span>${scribeBtn(u)}</div>
+      <div class="hint">编辑：可直接编辑/补充官方角色设定（所有改动留版本记录）。需申请并经长老/管理员批准。</div>
+      <div class="row" style="margin-top:10px;"><span class="k">突破年龄限制</span>${exemptBtn(u,'age')}</div>
+      <div class="hint">获批后，可在人设登记表"年龄"旁勾选突破年龄限制，解除 450/1500 岁上限。</div>
+      <div class="row" style="margin-top:10px;"><span class="k">突破技能选择限制</span>${exemptBtn(u,'skill')}</div>
+      <div class="hint">获批后，可在人设登记表"能力"旁勾选突破选择限制，解除御灵系/大系数量限制。</div>
+      <div class="err" id="applyErr"></div>
+    </div>
+    <div class="card">
+      <h2>外观配色</h2>
+      <div class="hint" style="margin-bottom:10px;">设置你的专属主题色。psy 题库站等子站登录后将跟随该配色；未设置时默认宣纸乳白（#f5f0e8 × #5a9e8f）。</div>
+      <div class="schemes" id="schemeGrid">
+        ${COLOR_SCHEMES.map((s,i)=>`<button type="button" class="chip ${curP===s.primary.toLowerCase()&&curA===s.accent.toLowerCase()?'on':''}" data-i="${i}" onclick="pickScheme(${i})" title="${esc(s.name)}"><span class="dot" style="background:${s.primary}"></span><span class="dot" style="background:${s.accent}"></span><span class="nm">${esc(s.name)}</span></button>`).join('')}
+      </div>
+      <div class="row" style="margin-top:12px;"><span class="k">主色</span><input type="color" id="tp" value="${curP}" oninput="syncThemeInputs()"><input class="hex-in" id="tpHex" value="${curP}" oninput="syncThemeInputs()"></div>
+      <div class="row"><span class="k">辅色</span><input type="color" id="ta" value="${curA}" oninput="syncThemeInputs()"><input class="hex-in" id="taHex" value="${curA}" oninput="syncThemeInputs()"></div>
+      <div class="theme-prev" id="themePrev"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn" onclick="saveTheme()">保存配色</button>
+        <button class="btn ghost" onclick="resetTheme()">恢复默认宣纸乳白</button>
+      </div>
+      <div class="hint" id="themeHint"></div>
+      <div class="err" id="themeErr"></div>
+    </div>
+    <div class="card">
+      <h2>USSO 账户绑定</h2>
+      <div class="row"><span class="k">当前绑定</span><span>${u.kind==='usso'?'<span class="tag green">已绑定 USSO</span>':'<span class="tag">站内账号（未绑定 USSO）</span>'}</span></div>
+      ${u.kind==='local'?'<div class="hint">绑定 USSO 后可用统一身份登录站群各站。点击下方按钮走 USSO 授权完成绑定。</div><button class="btn ghost" style="margin-top:10px;" onclick="location.href=\'/api/login\'">绑定 / 使用 USSO 登录</button>':'<div class="hint">你已通过 USSO 登录，站群各站共用此身份。</div>'}
+    </div>
+  `;
+  updatePrev();
+}
+function elderBtn(u){
+  if(u.role==='elder'||u.is_admin) return '<span class="tag green">已是长老/管理员</span>';
+  if(u.elder_pending) return '<span class="tag">审核中</span>';
+  return '<button class="btn" onclick="applyElder()">申请长老</button>';
+}
+function scribeBtn(u){
+  if(u.edit_role==='scribe'||u.is_admin) return '<span class="tag green">已有编辑权限</span>';
+  if(u.scribe_pending) return '<span class="tag">审核中</span>';
+  return '<button class="btn" onclick="applyScribe()">申请编辑</button>';
+}
+function exemptBtn(u,type){
+  const has = type==='age' ? u.exempt_age : u.exempt_skill;
+  const pend = type==='age' ? u.exempt_age_pending : u.exempt_skill_pending;
+  if(has) return '<span class="tag green">已突破</span>';
+  if(pend) return '<span class="tag">审核中</span>';
+  return `<button class="btn" onclick="applyExempt('${type}')">申请</button>`;
+}
+async function applyExempt(type){
+  const label = type==='age' ? '突破年龄限制' : '突破技能选择限制';
+  const msg=(prompt(`申请${label}的理由（选填）：`)||'').trim();
+  const err=document.getElementById('applyErr'); err.textContent='';
+  try{
+    const r=await fetch('/api/exempt/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,message:msg})});
+    const d=await r.json();
+    if(d.ok){alert('✔ '+(d.msg||'申请已提交，等待审批。')); init();}
+    else err.textContent=d.error||'申请失败';
+  }catch(e){err.textContent='网络错误';}
+}
+async function doRename(){
+  const nn=(document.getElementById('renameInput').value||'').trim();
+  const err=document.getElementById('renameErr'); err.textContent='';
+  if(!nn){err.textContent='请输入新昵称';return;}
+  try{
+    const r=await fetch('/api/rename',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nickname:nn})});
+    const d=await r.json();
+    if(d.ok){alert('✔ 昵称已改为「'+(d.nickname||nn)+'」');init();}
+    else err.textContent=d.error||'改名失败';
+  }catch(e){err.textContent='网络错误';}
+}
+async function applyElder(){
+  if(!confirm('申请【长老】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 长老/编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。\n确认继续申请？'))return;
+  const msg=(prompt('申请长老的理由（选填，300 字内）：')||'').trim();
+  const err=document.getElementById('applyErr'); err.textContent='';
+  try{
+    const r=await fetch('/api/elder/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+    const d=await r.json();
+    if(d.ok){alert('✔ 长老申请已提交，等待馆长审批。');init();}
+    else err.textContent=d.error||'申请失败';
+  }catch(e){err.textContent='网络错误';}
+}
+async function applyScribe(){
+  if(!confirm('申请【编辑】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。\n确认继续申请？'))return;
+  const msg=(prompt('申请编辑的理由（选填，说明你如何补充世界观内容）：')||'').trim();
+  const err=document.getElementById('applyErr'); err.textContent='';
+  try{
+    const r=await fetch('/api/official/scribe-apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+    const d=await r.json();
+    if(d.ok){alert('✔ 编辑申请已提交，等待长老/管理员审批。');init();}
+    else err.textContent=d.error||'申请失败';
+  }catch(e){err.textContent='网络错误';}
+}
+// ---------- 外观配色 ----------
+const COLOR_SCHEMES = [
+  { name: '罗小黑·漆黑×翠绿', primary: '#1A1F2E', primaryDark: '#10131C', accent: '#0EB83A', accentLight: '#86DB9C', accentPale: '#B6E9C3', text: '#DFDBD8', dim: '#72707D', line: 'rgba(14,184,58,0.25)' },
+  { name: '无限·靛蓝×银白', primary: '#065279', primaryDark: '#03324B', accent: '#D1D9E0', accentLight: '#E8ECEF', accentPale: '#F1F3F5', text: '#DCE3E4', dim: '#678CA6', line: 'rgba(209,217,224,0.25)' },
+  { name: '鹿野·黛蓝×缟白', primary: '#3B3561', primaryDark: '#242042', accent: '#F0EFEB', accentLight: '#F6F5F2', accentPale: '#FBFAF8', text: '#E6E4F0', dim: '#8B87A6', line: 'rgba(240,239,235,0.25)' },
+  { name: '哪吒·品红×橙黄', primary: '#8B1942', primaryDark: '#560F28', accent: '#FFA400', accentLight: '#FFD17F', accentPale: '#FFE3B2', text: '#F0DADB', dim: '#B06C88', line: 'rgba(255,164,0,0.25)' },
+  { name: '三足乌馆长·暮紫×金橙', primary: '#4a1033', primaryDark: '#170a14', accent: '#e8a33d', accentLight: '#f5c26b', accentPale: '#ffd9a0', text: '#f3e6e0', dim: '#b99aa9', line: 'rgba(232,163,61,0.25)' },
+  { name: '深绿×暖黄', primary: '#1b4d3e', primaryDark: '#103428', accent: '#e8c050', accentLight: '#f0d878', accentPale: '#f8e8a8', text: '#e4efe0', dim: '#8a9e80', line: 'rgba(232,192,80,0.25)' },
+  { name: '黛蓝×缃色', primary: '#425066', primaryDark: '#27303d', accent: '#F0C239', accentLight: '#f7e09c', accentPale: '#faecc3', text: '#e5e3e1', dim: '#888b9c', line: 'rgba(240,194,57,0.25)' },
+  { name: '绛紫×月白', primary: '#8C4356', primaryDark: '#542833', accent: '#D6ECF0', accentLight: '#eaf5f7', accentPale: '#f2f9fa', text: '#f1e1de', dim: '#b18393', line: 'rgba(214,236,240,0.25)' },
+  { name: '鸦青×酡颜', primary: '#424C50', primaryDark: '#272d30', accent: '#F9906F', accentLight: '#fcc7b7', accentPale: '#fdddd3', text: '#e5e2de', dim: '#888890', line: 'rgba(249,144,111,0.25)' },
+  { name: '玄青×赤金', primary: '#3D3B4F', primaryDark: '#24232f', accent: '#F2BE45', accentLight: '#f8dea2', accentPale: '#fbebc7', text: '#e5dfdd', dim: '#857f8f', line: 'rgba(242,190,69,0.25)' },
+  { name: '黛绿×珊瑚赫', primary: '#2F4A4A', primaryDark: '#1D2D2D', accent: '#C12C1F', accentLight: '#e0958f', accentPale: '#ecbfbb', text: '#e3e2dd', dim: '#7d878c', line: 'rgba(193,44,31,0.25)' },
+  { name: '紫檀×松花', primary: '#4C221B', primaryDark: '#2d1410', accent: '#FFEE6F', accentLight: '#fff6b7', accentPale: '#fff9d3', text: '#e7dcd6', dim: '#8d7172', line: 'rgba(255,238,111,0.25)' },
+  { name: '苍色×茶色', primary: '#55666A', primaryDark: '#343F41', accent: '#B35C44', accentLight: '#d9ada1', accentPale: '#e8cec6', text: '#e8e6e1', dim: '#92979e', line: 'rgba(179,92,68,0.25)' },
+  { name: '漆黑×牙色', primary: '#161823', primaryDark: '#0d0e15', accent: '#EEDEB0', accentLight: '#f6eed7', accentPale: '#f9f5e7', text: '#dfdad7', dim: '#706c77', line: 'rgba(238,222,176,0.25)' },
+  { name: '靛蓝×藕荷色', primary: '#065279', primaryDark: '#033148', accent: '#E4C6D0', accentLight: '#f1e2e7', accentPale: '#f6edf0', text: '#dce3e4', dim: '#678ca6', line: 'rgba(228,198,208,0.25)' },
+  { name: '黧×樱草色', primary: '#5D513C', primaryDark: '#373024', accent: '#EAFF56', accentLight: '#f4ffaa', accentPale: '#f8ffcc', text: '#e9e3db', dim: '#978b85', line: 'rgba(234,255,86,0.25)' },
+  { name: '水绿×葱青', primary: '#D4F2E7', primaryDark: '#7f918a', accent: '#3E6E4E', accentLight: '#9eb6a6', accentPale: '#c3d3ca', text: '#2a3a2e', dim: '#6e8a78', line: 'rgba(62,110,78,0.25)' },
+  { name: '苍黄×丁香色', primary: '#2E5C48', primaryDark: '#1C392C', accent: '#CCA4E3', accentLight: '#e5d1f1', accentPale: '#efe3f6', text: '#e2e4dc', dim: '#7d918b', line: 'rgba(204,164,227,0.25)' }
+];
+function currentThemeVals(){
+  let p=(document.getElementById('tpHex').value||'').trim();
+  let a=(document.getElementById('taHex').value||'').trim();
+  if(!/^#[0-9a-fA-F]{6}$/.test(p)) p='#f5f0e8';
+  if(!/^#[0-9a-fA-F]{6}$/.test(a)) a='#5a9e8f';
+  p=p.toLowerCase(); a=a.toLowerCase();
+  document.getElementById('tp').value=p;
+  document.getElementById('ta').value=a;
+  document.getElementById('tpHex').value=p;
+  document.getElementById('taHex').value=a;
+  return {p:p,a:a};
+}
+function updatePrev(){
+  const {p,a}=currentThemeVals();
+  const prev=document.getElementById('themePrev');
+  if(!prev) return;
+  prev.style.background=p;
+  prev.innerHTML=`<span class="btn" style="background:${a};border-color:${a};color:#fff;">预览按钮</span> <span class="btn ghost" style="border-color:${a};color:${a};background:transparent;">描边</span> <span style="margin-left:8px;font-size:12px;color:${a};">${a}</span>`;
+  document.querySelectorAll('#schemeGrid .chip').forEach(ch=>{
+    const s=COLOR_SCHEMES[+ch.dataset.i];
+    if(s) ch.classList.toggle('on', s.primary.toLowerCase()===p && s.accent.toLowerCase()===a);
+  });
+}
+function syncThemeInputs(){
+  const src=document.activeElement;
+  const tp=document.getElementById('tp'), tpHex=document.getElementById('tpHex');
+  const ta=document.getElementById('ta'), taHex=document.getElementById('taHex');
+  if(src===tp) tpHex.value=tp.value;
+  if(src===ta) taHex.value=ta.value;
+  if(src===tpHex && /^#[0-9a-fA-F]{6}$/.test(tpHex.value.trim())) tp.value=tpHex.value.trim();
+  if(src===taHex && /^#[0-9a-fA-F]{6}$/.test(taHex.value.trim())) ta.value=taHex.value.trim();
+  updatePrev();
+}
+function pickScheme(i){
+  const s=COLOR_SCHEMES[i];
+  if(!s) return;
+  document.getElementById('tp').value=s.primary;
+  document.getElementById('ta').value=s.accent;
+  document.getElementById('tpHex').value=s.primary;
+  document.getElementById('taHex').value=s.accent;
+  updatePrev();
+}
+async function saveTheme(){
+  const err=document.getElementById('themeErr'); err.textContent='';
+  const hint=document.getElementById('themeHint'); hint.textContent='';
+  const vals=currentThemeVals();
+  try{
+    const r=await fetch('/api/user/theme',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({primary:vals.p,accent:vals.a})});
+    const d=await r.json();
+    if(d.ok){hint.textContent='✔ 配色已保存：psy 题库站等子站登录后将跟随该配色。'; updatePrev();}
+    else err.textContent=d.error||'保存失败';
+  }catch(e){err.textContent='网络错误';}
+}
+function resetTheme(){
+  document.getElementById('tp').value='#f5f0e8';
+  document.getElementById('ta').value='#5a9e8f';
+  document.getElementById('tpHex').value='#f5f0e8';
+  document.getElementById('taHex').value='#5a9e8f';
+  updatePrev();
+  saveTheme();
+}
+init();
+</script>
+<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c12"></script>
+</body>
+</html>

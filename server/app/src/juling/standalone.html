@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>众生之门 · 轮回肉鸽</title>
+<style>
+  :root{--bg:#0d1117;--panel:#151b25;--border:#263041;--text:#dbe2ec;--muted:#8794a8;--gold:#c9a24a;--green:#5fbf6e;--red:#e0605a;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;}
+  .wrap{max-width:760px;margin:0 auto;padding:18px;}
+  header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+  h1{font-size:20px;margin:0;letter-spacing:3px;}
+  .sub{color:var(--muted);font-size:12px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:13px;}
+  .card h2{font-size:13px;margin:0 0 10px;color:var(--gold);letter-spacing:1px;}
+  .el{display:inline-block;padding:1px 9px;border-radius:20px;border:1px solid;font-size:12px;font-weight:bold;}
+  .el-木{color:#5fbf6e;border-color:#5fbf6e;}.el-火{color:#e0605a;border-color:#e0605a;}.el-土{color:#d0a24a;border-color:#d0a24a;}.el-金{color:#dcdcdc;border-color:#dcdcdc;}.el-水{color:#6a9bd8;border-color:#6a9bd8;}
+  .sky{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .phase-big{font-size:34px;font-weight:bold;line-height:1;}
+  .flavor{color:#c5d0de;font-size:13px;flex:1;min-width:150px;}
+  .pbar{height:10px;background:#0a0e14;border-radius:6px;overflow:hidden;flex:1;min-width:100px;}
+  .pfill{height:100%;background:linear-gradient(90deg,#c9a24a,#e0c06a);transition:width .4s;}
+  .spirit-bar{height:14px;background:#0a0e14;border-radius:7px;overflow:hidden;margin:6px 0;}
+  .spirit-fill{height:100%;border-radius:7px;transition:width .4s;}
+  .muted{color:var(--muted);font-size:12px;}
+  .relics{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .relic{border:1px solid var(--gold);color:#d8c08a;border-radius:8px;padding:3px 9px;font-size:12px;}
+  .npc{border:1px solid var(--red);border-radius:10px;padding:10px;margin-top:6px;}
+  .npc.friend{border-color:var(--green);}
+  .npc .nname{font-weight:bold;}
+  .npc .nbar{height:8px;background:#0a0e14;border-radius:5px;overflow:hidden;margin:4px 0;}
+  .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+  button{background:#1b232e;color:var(--text);border:1px solid var(--border);border-radius:9px;padding:10px 14px;font-size:14px;cursor:pointer;text-align:left;}
+  button:hover{border-color:var(--gold);}
+  button.primary{background:#233a26;border-color:#5fbf6e;}
+  button.danger{border-color:#c0605a;}
+  button small{display:block;color:var(--muted);font-size:11px;}
+  .log{max-height:300px;overflow-y:auto;font-size:12px;color:#aeb8c8;}
+  .log div{padding:3px 0;border-bottom:1px solid #1c222c;}
+  .start-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;}
+  .start-el{background:#10161f;border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;}
+  .start-el:hover{border-color:var(--gold);}
+  .start-el .big{font-size:24px;font-weight:bold;margin-bottom:4px;}
+  .start-el .role{font-size:11px;color:var(--muted);}
+  .overlay{position:fixed;inset:0;background:rgba(5,8,12,.88);display:flex;align-items:center;justify-content:center;z-index:10;padding:20px;}
+  .overlay .box{background:var(--panel);border:1px solid var(--gold);border-radius:16px;padding:26px;max-width:440px;width:100%;text-align:center;max-height:90vh;overflow-y:auto;}
+  .overlay .verdict{font-size:30px;margin-bottom:8px;}
+  .overlay .stat{color:var(--muted);font-size:14px;margin:4px 0;}
+  .hidden{display:none;}
+  input[type=range]{width:100%;accent-color:#c9a24a;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><h1>☯ 众生之门 · 轮回肉鸽</h1><div class="sub">一轮宇宙 = 一局 · 聚灵修炼 · 突破变强 · 成仙封神</div></div>
+    <div class="muted" id="soulTag"></div>
+  </header>
+
+  <div class="card" id="skyCard"><div class="sky">
+    <div class="phase-big" id="phaseBig">—</div>
+    <div class="flavor" id="phaseFlavor"></div>
+    <div class="pbar"><div class="pfill" id="phaseFill" style="width:0%"></div></div>
+    <div class="muted" id="phaseMeta"></div>
+  </div></div>
+
+  <div class="card" id="meCard"><h2 id="meTitle">我的妖灵</h2><div id="meBody"></div></div>
+  <div class="card" id="actionCard"><h2>本回合 · 抉择</h2><div id="actions"></div></div>
+  <div class="card"><h2>宇宙纪事</h2><div class="log" id="log"></div></div>
+</div>
+
+<div class="overlay hidden" id="overlay"><div class="box" id="overlayBox"></div></div>
+
+<script>
+/* ================= 引擎（纯浏览器版）================= */
+const ELEMENTS=['木','火','土','金','水'];
+const SHENG={木:'火',火:'土',土:'金',金:'水',水:'木'};
+const KE={木:'土',火:'金',土:'水',金:'木',水:'火'};
+const SHENG_BY={},KE_BY={};
+for(const a of ELEMENTS){SHENG_BY[SHENG[a]]=a;KE_BY[KE[a]]=a;}
+const ELEMENT_ROLE={金:'攻击·锋锐克木',木:'生长·生机克土',水:'控制·柔韧克火',火:'爆发·炽烈克金',土:'防御·厚重克水'};
+const PHASE_FLAVOR={木:'万物生发，生灵活跃，宜聚灵',火:'能量鼎盛，竞争加剧',土:'中和稳定，最宜积累',金:'肃杀收敛，生存艰难',水:'收藏归藏，轮回将至'};
+
+const DIFFICULTIES={1:{label:'简单',pressureMul:0.5,npcMul:0.6},2:{label:'较易',pressureMul:0.75,npcMul:0.8},3:{label:'普通',pressureMul:1.0,npcMul:1.0},4:{label:'较难',pressureMul:1.3,npcMul:1.25},5:{label:'困难',pressureMul:1.6,npcMul:1.5}};
+const REALMS=[{name:'凡人',soul:0,desc:'灵质空间初成，尚未入道'},{name:'修行者',soul:100,desc:'聚灵修行，踏上问道之路'},{name:'得道者',soul:500,desc:'灵质空间渐成，道行渐深'},{name:'仙人',soul:1000,desc:'成仙！灵质空间自成一界，可内视'},{name:'神',soul:3000,desc:'封神！凌驾天地，超脱轮回'}];
+const SIX_SYSTEMS={御灵系:{desc:'最基本的能力，分支金木水火土',abilities:['金·攻击','木·生长','水·控制','火·爆发','土·防御']},生灵系:{desc:'与生命相关',abilities:['洞察','观灵','豪夺','隐匿','治愈','追毫']},造物系:{desc:'重构物体，无中生有',abilities:['重构','画灵','仿生']},空间系:{desc:'空间不连续变化，无法后天习得',abilities:['吞噬','传送','转移','蕴藏','领域']},心灵系:{desc:'与精神力相关',abilities:['读心','傀儡','摄心','戏梦','传音']},锁御系:{desc:'与法宝法器相关',abilities:['灵御','制灵','阵法']}};
+
+const CFG={PHASE_LENGTH:8,BASE_SPIRITMAX:40,SPIRITMAX_PER_REALM:15,INIT_REALM:1,INIT_SPIRIT:30,BREAKTHROUGH_KEEP:0.4,GATHER_GAIN:10,PHASE_BOOST:4,PHASE_PENALTY:5,STRIKE_DMG:30,STRIKE_GAIN:15,BOND_GAIN:14,SEIZE_DMG:40,SEIZE_GAIN:30,SEIZE_RATE:0.6,SEIZE_FAIL_COST:18,NPC_SPAWN_RATE:0.5,NPC_SPIRIT:[30,50],NPC_HIT:13,RELIC_DROP_RATE:0.3,SOUL_PER_REALM:15,SOUL_WIN_BONUS:40};
+
+const RELICS={天明珠:{desc:'灵质空间上限+20',onEquip:p=>{p.spiritMax+=20;}},大御镜盘:{desc:'灵质空间上限+10',onEquip:p=>{p.spiritMax+=10;}},定心镜:{desc:'每回合+3灵质',perTurn:3},预蝉:{desc:'每回合+2灵质',perTurn:2},唤灵石:{desc:'聚灵+5',gatherBonus:5},木系灵核:{desc:'木系聚灵+8',gatherIf:{木:8}},斥冰焰:{desc:'克伐水系+10',strikeIf:{水:10}},蓝玉盘:{desc:'豪夺成功率+15%',seizeRate:0.15},琼圆盾:{desc:'受击伤害-8',defend:8},青灵果:{desc:'立即+30灵质',instant:30},方寸盒:{desc:'每回合+1灵质',perTurn:1}};
+const RELIC_NAMES=Object.keys(RELICS);
+
+const EVENTS=[{w:4,name:'灵珠现世',desc:'天地灵气凝结成珠',run:r=>gain(r,18,'灵珠灵气入体，+18')},{w:4,name:'灵潮涌动',desc:'天地间灵潮涨起',run:r=>gain(r,10,'灵潮涌动，+10')},{w:3,name:'妖风骤起',desc:'一股妖风掠过',run:r=>gain(r,-15,'妖风刮散生灵，-15')},{w:2,name:'天时突变',desc:'天时紊乱，相位加速',run:r=>{r.phaseProgress+=3;r.log.unshift('⏳ 天时突变，宇宙加速走向终结！')}},{w:2,name:'天时凝滞',desc:'天地气息凝滞',run:r=>{r.phaseProgress=Math.max(0,r.phaseProgress-1);r.log.unshift('🧊 天时凝滞，轮回暂缓')}},{w:3,name:'法器出土',desc:'泥土中露出一角灵光',run:r=>grantRelic(r,'泥土中掘出一件法器')},{w:2,name:'风息化树',desc:'远处一片灵木静立',run:r=>{r.soulSeed=(r.soulSeed||0)+6;r.log.unshift('🌲 你感悟风息化树的意境，魂灵种子+6')}},{w:2,name:'散灵危机',desc:'生灵忽然躁动不安',run:r=>{if(isFading(r)){gain(r,-20,'⚠️ 散灵危机！你失势，-20')}else{gain(r,8,'你压住躁动的生灵，+8')}}}];
+const NPC_NAMES=['清凝','风息','虚淮','小黑','鹿野','鸠老','玄离','谛听','老君','阎明','若水','翠竹','木落仙人','大熊','府先生'];
+
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+function rand(min,max){return Math.floor(min+Math.random()*(max-min+1));}
+function clamp(v,max){return Math.max(0,Math.min(max,v));}
+function getRealmStage(soul){let cur=REALMS[0];for(const r of REALMS){if(soul>=r.soul)cur=r;}return cur;}
+function diffCfg(r){return DIFFICULTIES[r.difficulty]||DIFFICULTIES[3];}
+
+function createRun(soul=0,difficulty=3){
+  const p={element:'木',realm:CFG.INIT_REALM,spiritMax:CFG.BASE_SPIRITMAX+CFG.INIT_REALM*CFG.SPIRITMAX_PER_REALM,spirit:CFG.INIT_SPIRIT,relics:[],wuxing:{金:0,木:0,水:0,火:0,土:0},shengling:0};
+  return {run:1,phaseIndex:0,phaseProgress:0,phaseLength:CFG.PHASE_LENGTH,tick:0,soul,soulSeed:0,difficulty,player:p,npc:null,status:'running',summary:null,log:[]};
+}
+function chooseElement(r,el){if(r.status!=='running')return false;r.player.element=el;r.log.unshift(`你聚灵降临，主修${el}系（${ELEMENT_ROLE[el]}）。灵质空间初成，修为第${r.player.realm}重。`);return true;}
+function isBooming(r){const ph=ELEMENTS[r.phaseIndex];return r.player.element===ph||SHENG[r.player.element]===ph;}
+function isFading(r){const ph=ELEMENTS[r.phaseIndex];return KE[ph]===r.player.element;}
+function gain(r,v,msg){const p=r.player;p.spirit=clamp(p.spirit+v,p.spiritMax);if(msg)r.log.unshift(msg);}
+function grantRelic(r,prefix){const name=pick(RELIC_NAMES),relic=RELICS[name];r.player.relics.push(name);if(relic.onEquip)relic.onEquip(r.player);if(relic.instant)gain(r,relic.instant);r.log.unshift(`✨ ${prefix}：【${name}】${relic.desc}`);}
+function spawnNpc(r){return{name:pick(NPC_NAMES),element:pick(ELEMENTS),spirit:rand(CFG.NPC_SPIRIT[0],CFG.NPC_SPIRIT[1]),hostile:Math.random()<0.6};}
+
+function applyAction(r,action){
+  const p=r.player;
+  switch(action){
+    case 'gather':{let g=CFG.GATHER_GAIN;for(const n of p.relics){const rl=RELICS[n];if(rl.gatherBonus)g+=rl.gatherBonus;if(rl.gatherIf&&rl.gatherIf[p.element])g+=rl.gatherIf[p.element];}if(isBooming(r))g+=CFG.PHASE_BOOST;if(isFading(r))g-=CFG.PHASE_PENALTY;gain(r,g,`🌿 你聚灵修炼，灵质 ${g>0?'+'+g:g}（${p.spirit}/${p.spiritMax}）`);p.wuxing[p.element]+=1;p.shengling+=1;break;}
+    case 'breakthrough':{if(p.spirit<p.spiritMax*0.6){r.log.unshift('灵质尚未充盈，无法突破');break;}p.realm++;p.spiritMax=CFG.BASE_SPIRITMAX+p.realm*CFG.SPIRITMAX_PER_REALM;p.spirit=Math.round(p.spiritMax*CFG.BREAKTHROUGH_KEEP);p.wuxing[p.element]+=3;r.log.unshift(`🧘 你改造灵质空间，突破至【第${p.realm}重修为】！灵质空间扩大至 ${p.spiritMax}，此乃变强之证`);break;}
+    case 'strike':{const npc=r.npc;if(!npc){r.log.unshift('没有可克伐的对象');break;}if(KE[p.element]!==npc.element){r.log.unshift(`克伐失败：${p.element}不克${npc.element}`);break;}let dmg=CFG.STRIKE_DMG+p.realm*2;for(const n of p.relics){const rl=RELICS[n];if(rl.strikeIf&&rl.strikeIf[npc.element])dmg+=rl.strikeIf[npc.element];}npc.spirit-=dmg;r.log.unshift(`⚔️ 你克伐${npc.name}(${npc.element})，-${dmg}`);if(npc.spirit<=0)defeatNpc(r,npc);break;}
+    case 'bond':{const npc=r.npc;if(!npc){r.log.unshift('没有可相生的对象');break;}if(!(SHENG[p.element]===npc.element||SHENG[npc.element]===p.element)){r.log.unshift(`相生失败：${p.element}与${npc.element}非相生`);break;}gain(r,CFG.BOND_GAIN,`🤝 你与${npc.name}相生，+${CFG.BOND_GAIN}`);if(!npc.hostile){r.log.unshift(`${npc.name}回赠灵光，+5`);gain(r,5);}break;}
+    case 'seize':{const npc=r.npc;if(!npc){r.log.unshift('没有可豪夺的对象');break;}let rate=CFG.SEIZE_RATE;if(isBooming(r))rate+=0.15;if(isFading(r))rate-=0.2;for(const n of p.relics){const rl=RELICS[n];if(rl.seizeRate)rate+=rl.seizeRate;}if(Math.random()<rate){const taken=Math.min(npc.spirit,CFG.SEIZE_DMG);npc.spirit-=taken;gain(r,CFG.SEIZE_GAIN,`🔥 你豪夺${npc.name}成功！+${CFG.SEIZE_GAIN}`);if(npc.spirit<=0)defeatNpc(r,npc);}else{gain(r,-CFG.SEIZE_FAIL_COST,`💥 豪夺失败，被反噬，-${CFG.SEIZE_FAIL_COST}`);checkDeath(r);}break;}
+  }
+}
+function defeatNpc(r,npc){r.log.unshift(`💫 你击败了${npc.name}！`);gain(r,25,'  掠夺其灵质+25');if(Math.random()<CFG.RELIC_DROP_RATE)grantRelic(r,`${npc.name}掉落法器：`);r.npc=null;}
+function checkDeath(r){if(r.status==='running'&&r.player.spirit<=0){r.player.spirit=0;r.status='dead';endRun(r);}}
+
+function tick(r,action){
+  if(r.status!=='running')return;
+  r.phaseProgress++;
+  while(r.phaseProgress>=r.phaseLength){r.phaseProgress-=r.phaseLength;r.phaseIndex++;if(r.phaseIndex>=ELEMENTS.length){r.phaseIndex=0;r.status='won';endRun(r);return;}}
+  if(!r.npc&&Math.random()<CFG.NPC_SPAWN_RATE){r.npc=spawnNpc(r);r.log.unshift(`${r.npc.hostile?'⚠️':'🕊️'} 一只${r.npc.element}系妖精「${r.npc.name}」出现，带着${r.npc.hostile?'敌意':'友善'}`);}
+  if(action)applyAction(r,action);
+  if(r.status!=='running')return;
+  if(r.npc&&r.npc.hostile){let hit=Math.round(CFG.NPC_HIT*diffCfg(r).npcMul);for(const n of r.player.relics){const rl=RELICS[n];if(rl.defend)hit-=rl.defend;}hit=Math.max(1,hit);gain(r,-hit,`🗡️ ${r.npc.name}反击，你受击 -${hit}`);checkDeath(r);if(r.status!=='running')return;}
+  const ev=weightedEvent();r.log.unshift(`📜【${ev.name}】${ev.desc}`);ev.run(r);
+  if(r.status!=='running')return;
+  for(const n of r.player.relics){const rl=RELICS[n];if(rl.perTurn)gain(r,rl.perTurn);}
+  if(r.tick>10){const pressure=Math.round(Math.floor((r.tick-10)/3)*5*diffCfg(r).pressureMul);if(pressure>0){gain(r,-pressure,`🌑 轮回压迫：宇宙逼近终结，生灵枯竭 -${pressure}`);checkDeath(r);if(r.status!=='running')return;}}
+  r.tick++;r.npc=null;
+}
+function weightedEvent(){const total=EVENTS.reduce((s,e)=>s+e.w,0);let x=Math.random()*total;for(const e of EVENTS){x-=e.w;if(x<=0)return e;}return EVENTS[0];}
+function endRun(r){if(r.summary)return;const p=r.player;const gainedSoul=p.realm*CFG.SOUL_PER_REALM+p.relics.length*5+(r.soulSeed||0)+(r.status==='won'?CFG.SOUL_WIN_BONUS:0);r.soul+=gainedSoul;r.summary={status:r.status,turns:r.tick,realm:p.realm,relics:p.relics.length,soulGained:gainedSoul,totalSoul:r.soul,cause:r.status==='won'?'你活过了整轮宇宙的终结，灵识不灭':'灵质空间衰竭，散灵归天'};saveSoul(r.soul);r.log.unshift(`🏁 ${r.status==='won'?'🎉 通关':'🕯️ 散灵'}！修为${p.realm}重 · 法器${p.relics.length}件 · 魂灵 +${gainedSoul}（累计 ${r.soul}）`);}
+function getState(r){const p=r.player;const available=['gather'];if(p.spirit>=p.spiritMax*0.6)available.push('breakthrough');if(r.npc){if(KE[p.element]===r.npc.element)available.push('strike');if(SHENG[p.element]===r.npc.element||SHENG[r.npc.element]===p.element)available.push('bond');available.push('seize');}const stage=getRealmStage(r.soul);return{run:r.run,tick:r.tick,phase:ELEMENTS[r.phaseIndex],phaseIndex:r.phaseIndex,phaseProgress:r.phaseProgress,phaseLength:r.phaseLength,phaseFlavor:PHASE_FLAVOR[ELEMENTS[r.phaseIndex]],status:r.status,difficulty:r.difficulty,realmStage:stage,canInnerView:stage.name==='仙人'||stage.name==='神',player:{element:p.element,role:ELEMENT_ROLE[p.element],realm:p.realm,spirit:p.spirit,spiritMax:p.spiritMax,relics:p.relics.map(n=>({name:n,desc:RELICS[n].desc})),phaseState:isBooming(r)?'得势':isFading(r)?'失势':'平',canBreak:p.spirit>=p.spiritMax*0.6,wuxing:p.wuxing,shengling:p.shengling},npc:r.npc,soul:r.soul,summary:r.summary,available,log:r.log.slice(0,50),elements:ELEMENTS,sixSystems:SIX_SYSTEMS};}
+
+/* ================= 持久化 ================= */
+function loadSoul(){try{return Number(localStorage.getItem('zsm_soul'))||0;}catch(e){return 0;}}
+function saveSoul(v){try{localStorage.setItem('zsm_soul',String(v));}catch(e){}}
+
+/* ================= UI ================= */
+let phase='start',latestState=null,run=null;
+const EL_ROLE={金:'攻击·克木',木:'生长·克土',水:'控制·克火',火:'爆发·克金',土:'防御·克水'};
+const ACT={gather:{name:'聚灵',desc:'修炼积累灵质',cls:''},breakthrough:{name:'突破',desc:'灵质空间成长，修为+1',cls:'primary'},strike:{name:'克伐',desc:'攻击你克的敌人',cls:'danger'},bond:{name:'相生',desc:'与相生对象结盟',cls:''},seize:{name:'豪夺',desc:'强夺（赌博）',cls:'danger'}};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function barColor(v,max){return v>max*0.6?'#5fbf6e':v>max*0.3?'#c9a24a':'#e0605a';}
+
+function showStart(){
+  phase='start';
+  const soul=loadSoul();
+  document.getElementById('soulTag').textContent=`境界：${getRealmStage(soul).name} · 魂灵 ${soul}`;
+  ['skyCard','meCard','actionCard'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('overlayBox').innerHTML=`
+    <div style="margin-bottom:6px;color:var(--muted)">选择你的主修属性，降临本轮宇宙</div>
+    <div class="start-grid">${['金','木','水','火','土'].map(e=>`<div class="start-el" onclick="start('${e}')"><div class="big el-${e}">${e}</div><div class="role">${EL_ROLE[e]}</div></div>`).join('')}</div>
+    <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:12px">
+      <div class="muted">难度：<b id="diffLabel" style="color:var(--gold)">普通</b></div>
+      <input type="range" id="diffSlider" min="1" max="5" value="3" oninput="onDiff(this.value)">
+      <div class="muted" style="font-size:11px">越难，轮回压迫越强、敌人越凶</div>
+    </div>`;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function onDiff(v){document.getElementById('diffLabel').textContent={1:'简单',2:'较易',3:'普通',4:'较难',5:'困难'}[v];}
+function start(el){
+  const diff=Number(document.getElementById('diffSlider').value)||3;
+  run=createRun(loadSoul(),diff);
+  chooseElement(run,el);
+  document.getElementById('overlay').classList.add('hidden');
+  phase='playing';render();
+}
+function act(action){
+  tick(run,action);
+  if(run.status!=='running'){render();showEnd();}
+  else render();
+}
+function render(){
+  latestState=getState(run);
+  const s=latestState;
+  document.getElementById('soulTag').textContent=`境界：${s.realmStage.name} · 魂灵 ${s.soul}`;
+  ['skyCard','meCard','actionCard'].forEach(id=>document.getElementById(id).style.display='');
+  document.getElementById('phaseBig').textContent=s.phase;
+  document.getElementById('phaseBig').className='phase-big el-'+s.phase;
+  document.getElementById('phaseFlavor').textContent='「'+s.phaseFlavor+'」';
+  document.getElementById('phaseFill').style.width=Math.round(s.phaseProgress/s.phaseLength*100)+'%';
+  document.getElementById('phaseMeta').textContent=`第${s.run}局 · T${s.tick} · ${s.phaseProgress}/${s.phaseLength}`;
+  const p=s.player;
+  const pct=Math.max(0,Math.round(p.spirit/p.spiritMax*100));
+  document.getElementById('meTitle').innerHTML=`我的妖灵 <span class="el el-${p.element}">${p.element}</span> · 修为第${p.realm}重 ${p.phaseState==='得势'?'☀得势':p.phaseState==='失势'?'☁失势':'·平'}`;
+  document.getElementById('meBody').innerHTML=`
+    <div class="spirit-bar"><div class="spirit-fill" style="width:${pct}%;background:${barColor(p.spirit,p.spiritMax)}"></div></div>
+    <div class="muted">灵质 ${p.spirit}/${p.spiritMax} · ${p.role}${p.canBreak?' · <span style="color:var(--gold)">灵质充盈，可突破</span>':''}</div>
+    <div class="relics">${p.relics.map(r=>`<span class="relic" title="${esc(r.desc)}">${esc(r.name)}</span>`).join('')||'<span class="muted">尚未获得法器</span>'}</div>
+    ${s.canInnerView?'<button class="primary" style="margin-top:8px" onclick="showInnerView()">🔮 内视灵质空间</button>':''}`;
+  let actionsHtml='';
+  if(s.npc){const n=s.npc;const np=Math.max(0,Math.round(n.spirit/70*100));document.getElementById('meBody').innerHTML+=`<div class="npc ${n.hostile?'':'friend'}"><span class="nname"><span class="el el-${n.element}">${n.element}</span> ${n.name} ${n.hostile?'· 敌意':'· 友善'}</span><div class="nbar"><div class="spirit-fill" style="width:${np}%;background:${n.hostile?'#e0605a':'#5fbf6e'}"></div></div><div class="muted">灵质 ${n.spirit}</div></div>`;}
+  for(const a of s.available){const info=ACT[a];actionsHtml+=`<button class="${info.cls}" onclick="act('${a}')">${info.name}<small>${info.desc}</small></button>`;}
+  document.getElementById('actions').innerHTML=actionsHtml||'<span class="muted">…</span>';
+  document.getElementById('log').innerHTML=s.log.map(l=>'<div>'+esc(l)+'</div>').join('');
+}
+function showEnd(){
+  const sm=run.summary,win=run.status==='won';
+  document.getElementById('overlayBox').innerHTML=`
+    <div class="verdict">${win?'🎉 通关':'🕯️ 散灵'}</div>
+    <div class="stat">${sm.cause}</div>
+    <div class="stat">存活 ${sm.turns} 回合 · 修为${sm.realm}重 · 法器 ${sm.relics} 件</div>
+    <div class="stat" style="color:var(--gold);font-weight:bold">魂灵 +${sm.soulGained}（累计 ${sm.totalSoul}）</div>
+    <div class="stat muted">${getRealmStage(sm.totalSoul).desc}</div>
+    <br><button class="primary" onclick="showStart()">🌌 再入轮回</button>`;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function showInnerView(){
+  const s=latestState,p=s.player,w=p.wuxing,total=Object.values(w).reduce((a,b)=>a+b,0)+p.shengling;
+  document.getElementById('overlayBox').innerHTML=`
+    <div style="font-size:24px;font-weight:bold;color:var(--gold);margin-bottom:8px">🔮 灵质空间</div>
+    <div class="stat muted">灵质空间大小 ${p.spiritMax} · 修为第${p.realm}重</div>
+    <div class="stat" style="margin:10px 0">五行物质灵：${['金','木','水','火','土'].map(e=>`<span class="el el-${e}" style="margin:0 2px">${e} ${w[e]}</span>`).join('')}</div>
+    <div class="stat">生灵：${p.shengling} · 总灵 ${total}</div>
+    <div class="stat muted" style="margin:12px 0 6px">—— 六大系 ——</div>
+    ${Object.entries(s.sixSystems).map(([name,info])=>`<div class="stat" style="text-align:left;font-size:13px;margin:4px 0"><b>${name}</b>：${info.desc}</div><div class="stat muted" style="text-align:left;font-size:12px">${info.abilities.join(' · ')}</div>`).join('')}
+    <br><button class="primary" onclick="closeInnerView()">返回</button>`;
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function closeInnerView(){document.getElementById('overlay').classList.add('hidden');phase='playing';render();}
+
+showStart();
+</script>
+</body>
+</html>

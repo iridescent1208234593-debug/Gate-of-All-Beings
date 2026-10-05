@@ -1,0 +1,142 @@
+.playing-spirit { --lxh-sky: #bfe3dc; background: var(--lxh-sky); }
+.playing-spirit #loading, .spirit-playground[hidden] { display: none !important; }
+.spirit-playground {
+  --lxh-paper: #f7f1e1;
+  --lxh-paper-dim: #ece5d0;
+  --lxh-paper-line: #d8d2c0;
+  --lxh-ink: #4a4636;
+  --lxh-text: #5c6152;
+  --lxh-text-dim: #8b9181;
+  --lxh-yes: #c08b3c;
+  --lxh-no: #7d8b7d;
+  --lxh-sky: #bfe3dc;
+  --lxh-forest: #4a7a32;
+  --lxh-cream: #f0e2a0;
+  --lxh-outline: #2f3a26;
+  --lxh-font: "LXGW WenKai", "Noto Serif SC", "Source Han Serif SC", serif;
+  max-width: 1600px; min-height: 100svh; margin: 0 auto; padding: 24px 38px 26px;
+  color: var(--lxh-text); font-family: var(--lxh-font), serif;
+}
+.spirit-debug-gate { position: fixed; z-index: 20; inset: 0; display: grid; align-content: center; justify-items: center; gap: 10px; padding: 24px; background: #bfe3dc; color: var(--lxh-ink); text-align: center; }
+.spirit-debug-gate[hidden] { display: none; }
+.spirit-debug-gate h1, .spirit-debug-gate p { margin: 0; }
+.spirit-debug-gate a { color: var(--lxh-forest); }
+.spirit-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 18px; }
+.spirit-eyebrow { margin: 0 0 8px; color: var(--lxh-no); font-size: 10px; font-weight: 700; letter-spacing: .16em; }
+.spirit-header h1 { margin: 0; color: var(--lxh-ink); font-size: clamp(25px, 3vw, 36px); letter-spacing: -.04em; }
+.spirit-header h1 span { display: inline-block; margin-left: 20px; color: var(--lxh-text-dim); font-size: 13px; font-weight: 400; letter-spacing: 0; }
+.spirit-header a { display: inline-flex; min-height: 42px; align-items: center; padding: 0 16px; border: 2px solid var(--lxh-outline); border-radius: 12px; background: var(--lxh-paper); color: var(--lxh-ink); font-size: 12px; text-decoration: none; }
+.spirit-layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 22px; align-items: start; }
+.spirit-arena { position: relative; min-width: 0; height: min(78vh, 800px); min-height: 540px; overflow: hidden; border: 3px solid var(--lxh-paper); border-radius: 22px; background: var(--lxh-forest); }
+.spirit-canvas { display: block; width: 100%; height: 100%; outline: none; touch-action: none; cursor: grab; }
+.spirit-nameplates { position: absolute; z-index: 2; inset: 0; overflow: hidden; pointer-events: none; }
+.spirit-nameplate { position: absolute; top: 0; left: 0; padding: 3px 8px; border: 1.5px solid var(--lxh-outline); border-radius: 9px 9px 9px 3px; background: rgb(247 241 225 / 94%); box-shadow: 0 2px 5px rgb(47 58 38 / 20%); color: var(--lxh-ink); font-size: 11px; font-weight: 700; line-height: 1.25; white-space: nowrap; }
+.spirit-nameplate[hidden] { display: none; }
+.spirit-arena:focus-within { border-color: var(--lxh-cream); }
+.spirit-status { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; padding: 25px; background: #bfe3dc; color: var(--lxh-ink); text-align: center; }
+.spirit-status[hidden] { display: none; }
+.spirit-arena-label { position: absolute; z-index: 3; top: 16px; left: 16px; display: flex; flex-direction: column; gap: 6px; max-width: min(470px, calc(100% - 32px)); padding: 11px 14px; border: 2px solid var(--lxh-paper); border-radius: 12px; background: #43412f; color: var(--lxh-paper); pointer-events: none; }
+.spirit-name { color: var(--lxh-cream); font-size: 14px; font-weight: 700; }
+.spirit-room-count { color: var(--lxh-paper); font-size: 11px; }
+.spirit-network-metrics { color: #e1dcc8; font: 9px ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.spirit-arena-tools { position: absolute; z-index: 3; top: 16px; right: 16px; display: flex; gap: 7px; }
+.spirit-arena-tools[hidden] { display: none; }
+.spirit-arena-tools button { border-radius: 20px; padding: 8px 14px; font-size: 12px; }
+.spirit-help { position: absolute; z-index: 3; bottom: 13px; left: 15px; right: 15px; display: flex; justify-content: center; flex-wrap: wrap; align-items: center; gap: 15px; margin: 0; color: var(--lxh-paper); pointer-events: none; font-size: 11px; text-shadow: 0 1px 2px #25314380; }
+.spirit-help kbd { display: inline-flex; width: 22px; height: 22px; align-items: center; justify-content: center; margin-right: 3px; border: 1px solid var(--lxh-paper); border-radius: 6px; background: var(--lxh-paper); color: var(--lxh-ink); font: 10px system-ui; }
+.spirit-panel { padding: 23px 22px; border: 3px solid var(--lxh-outline); border-radius: 18px; background: var(--lxh-paper); color: var(--lxh-text); }
+.spirit-panel h2 { margin: 0 0 8px; color: var(--lxh-ink); font-size: 24px; overflow-wrap: anywhere; }
+.spirit-panel-intro { margin: 0 0 21px; color: var(--lxh-text-dim); font-size: 12px; line-height: 1.7; }
+.spirit-room-control { margin: 0 0 20px; padding: 12px; border: 1px solid var(--lxh-paper-line); border-radius: 12px; background: #f1ead7; }
+.spirit-room-control > label { display: block; margin-bottom: 7px; color: var(--lxh-ink); font-size: 11px; font-weight: 700; }
+.spirit-room-row { display: grid; grid-template-columns: minmax(0, 1fr) 62px; gap: 6px; }
+.spirit-room-row input { min-width: 0; height: 38px; padding: 0 9px; border: 1px solid var(--lxh-paper-line); border-radius: 8px; background: var(--lxh-paper); color: var(--lxh-ink); font: 12px ui-monospace, monospace; }
+.spirit-room-row button, .spirit-room-share { min-height: 38px; border-radius: 8px; font-size: 11px; }
+.spirit-room-control .spirit-room-share { width: 100%; min-height: 34px; margin-top: 7px; border-color: var(--lxh-paper-line); font-size: 10px; }
+.spirit-room-message { min-height: 14px; margin: 7px 0 0; color: var(--lxh-text-dim); font-size: 9px; line-height: 1.5; overflow-wrap: anywhere; }
+.spirit-settings { min-width: 0; margin: 0; padding: 0; border: 0; }
+.spirit-account-row { margin: 0 0 17px; color: var(--lxh-no); font-size: 10px; line-height: 1.6; }
+.spirit-account-login { color: var(--lxh-forest); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.spirit-account-login[hidden] { display: none; }
+.spirit-perk-hint { display: block; margin-top: 4px; color: var(--lxh-text-dim); }
+.spirit-perk-hint[hidden], .spirit-perk[hidden] { display: none; }
+.spirit-settings .spirit-perk { min-height: 30px; margin-top: 6px; padding: 3px 9px; border-width: 1px; border-color: var(--lxh-paper-line); border-radius: 999px; color: var(--lxh-forest); font-size: 10px; }
+.spirit-settings label { display: block; color: var(--lxh-text); font-size: 12px; }
+.spirit-settings input[type=text] { width: 100%; min-height: 44px; margin: 8px 0 20px; padding: 9px 11px; border: 2px solid var(--lxh-paper-line); border-radius: 10px; background: var(--lxh-paper-dim); color: var(--lxh-ink); font: inherit; font-size: 13px; }
+.spirit-settings select { width: 100%; min-height: 42px; margin: 8px 0 20px; padding: 8px 11px; border: 2px solid var(--lxh-paper-line); border-radius: 10px; background: var(--lxh-paper-dim); color: var(--lxh-ink); font: inherit; font-size: 12px; }
+.spirit-color-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 23px; }
+.spirit-color-row input { width: 52px; height: 36px; padding: 2px; border: 2px solid var(--lxh-paper-line); border-radius: 9px; background: var(--lxh-paper); cursor: pointer; }
+.spirit-range { margin-bottom: 18px; }
+.spirit-range label { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.spirit-range output { color: var(--lxh-yes); font-variant-numeric: tabular-nums; }
+.spirit-range input { width: 100%; height: 18px; accent-color: var(--lxh-yes); cursor: pointer; }
+.spirit-range input:disabled { cursor: not-allowed; opacity: .4; }
+.spirit-draw { margin: 0 0 20px; padding: 12px; border: 1px solid var(--lxh-paper-line); border-radius: 12px; background: #f1ead7; }
+.spirit-draw-title { margin: 0 0 8px; color: var(--lxh-ink); font-size: 12px; font-weight: 700; }
+.spirit-draw-canvas { display: block; width: 100%; aspect-ratio: 3 / 2; border: 1px solid var(--lxh-paper-line); border-radius: 8px; background: #fffdf7; touch-action: none; cursor: crosshair; }
+.spirit-draw-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 7px; }
+.spirit-draw-tools button { min-height: 34px; border-width: 1px; border-color: var(--lxh-paper-line); border-radius: 8px; font-size: 10px; }
+.spirit-draw-tools button[aria-pressed="true"], .spirit-draw-generate { background: var(--lxh-yes) !important; color: var(--lxh-paper) !important; }
+.spirit-draw-size { display: flex !important; align-items: center; justify-content: space-between; margin-top: 7px; font-size: 10px !important; }
+.spirit-draw-brush { width: 58%; accent-color: var(--lxh-yes); }
+.spirit-draw-color-label { display: flex !important; align-items: center; justify-content: space-between; margin-top: 7px; font-size: 10px !important; }
+.spirit-draw-color { width: 48px; height: 30px; padding: 2px; border: 1px solid var(--lxh-paper-line); border-radius: 7px; background: var(--lxh-paper); }
+.spirit-draw-status { min-height: 24px; margin: 7px 0 0; color: var(--lxh-text-dim); font-size: 9px; line-height: 1.5; }
+.spirit-playground button, .spirit-import-label { min-height: 44px; border: 2px solid var(--lxh-outline); border-radius: 10px; background: var(--lxh-paper); color: var(--lxh-ink); font: inherit; font-size: 12px; cursor: pointer; }
+.spirit-playground button:disabled { cursor: wait; opacity: .6; }
+.spirit-settings .spirit-save { width: 100%; border-color: var(--lxh-yes); background: var(--lxh-yes); color: var(--lxh-paper); font-weight: 700; }
+.spirit-field-note { margin: 0 0 14px; color: var(--lxh-text-dim); font-size: 10px; line-height: 1.7; }
+.spirit-save-status { min-height: 31px; margin: 10px 0 14px; color: var(--lxh-no); font-size: 10px; line-height: 1.7; }
+.spirit-config-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.spirit-settings .spirit-import-label { position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; border-color: var(--lxh-paper-line); font-size: 11px; }
+.spirit-import-label input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
+.spirit-config-actions .spirit-defaults { grid-column: 1 / -1; border-color: transparent; background: transparent; color: var(--lxh-text-dim); }
+.spirit-playground[data-mode="create"] .spirit-room-control,
+.spirit-playground[data-mode="create"] .spirit-arena-tools,
+.spirit-playground[data-mode="create"] .spirit-help { display: none; }
+.spirit-playground :is(button, input, select, a):focus-visible { outline: 3px solid var(--lxh-yes); outline-offset: 3px; }
+.spirit-credit { margin: 24px 0 0; color: var(--lxh-text-dim); font-size: 10px; line-height: 1.7; }
+.spirit-credit a { color: var(--lxh-forest); }
+.spirit-nav-play { display: inline-flex; }
+.spirit-playground[data-mode="play"] { position: fixed; z-index: 900; inset: 0; width: 100%; max-width: none; min-height: 0; padding: 0; overflow: hidden; background: var(--lxh-sky); }
+.spirit-playground[data-mode="play"] .spirit-header { position: absolute; z-index: 5; inset: 0 0 auto; height: 58px; margin: 0; padding: 8px 14px; pointer-events: none; }
+.spirit-playground[data-mode="play"] .spirit-header > div { display: none; }
+.spirit-playground[data-mode="play"] .spirit-nav-play { display: none; }
+.spirit-playground[data-mode="play"] .spirit-header nav { margin-left: auto; pointer-events: auto; }
+.spirit-playground[data-mode="play"] .spirit-header a { min-height: 38px; border-radius: 20px; background: rgb(247 241 225 / 90%); }
+.spirit-playground[data-mode="play"] .spirit-layout { display: block; height: 100%; }
+.spirit-playground[data-mode="play"] .spirit-arena { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; border: 0; border-radius: 0; }
+.spirit-playground[data-mode="play"] .spirit-panel { display: none; }
+.spirit-playground[data-mode="play"] .spirit-arena-label { top: 70px; left: 14px; max-width: min(220px, calc(100% - 28px)); padding: 8px 11px; border-width: 1px; border-radius: 12px; background: rgb(67 65 47 / 80%); }
+.spirit-playground[data-mode="play"] .spirit-name { display: none; }
+.spirit-playground[data-mode="play"] .spirit-network-metrics { display: none; }
+.spirit-playground[data-mode="play"] .spirit-arena-tools { top: auto; right: 14px; bottom: 18px; }
+.spirit-playground[data-mode="play"] .spirit-arena-tools button { min-height: 44px; background: rgb(247 241 225 / 92%); }
+.spirit-playground[data-mode="play"] .spirit-help { bottom: 23px; left: 14px; right: auto; max-width: min(60%, 430px); justify-content: flex-start; padding: 8px 11px; border-radius: 11px; background: rgb(67 65 47 / 72%); text-align: left; }
+.spirit-playground[data-mode="play"] .spirit-keyboard-help { display: none; }
+.spirit-playground[data-mode="create"] { max-width: 1280px; }
+.spirit-playground[data-mode="create"] .spirit-header h1 { font-size: clamp(24px, 3vw, 34px); }
+.spirit-playground[data-mode="create"] .spirit-header h1 span { display: none; }
+.spirit-playground[data-mode="create"] .spirit-nav-create { display: none; }
+.spirit-playground[data-mode="create"] .spirit-layout { grid-template-columns: minmax(0, 1.35fr) minmax(290px, .8fr); align-items: stretch; }
+.spirit-playground[data-mode="create"] .spirit-arena { position: sticky; top: 18px; height: min(74vh, 760px); min-height: 480px; }
+.spirit-playground[data-mode="create"] .spirit-room-control { display: none; }
+.spirit-playground[data-mode="create"] .spirit-panel { padding: 21px; }
+.spirit-playground[data-mode="debug"] { max-width: 1600px; }
+.spirit-playground[data-mode="debug"] .spirit-nav-create { display: none; }
+.spirit-playground[data-mode="debug"] .spirit-nav-play { display: inline-flex !important; }
+.spirit-playground[data-mode="debug"] .spirit-network-metrics { display: block; }
+.spirit-playground[data-mode="debug"] .spirit-credit { display: block; }
+@media (max-width: 860px) {
+  .spirit-playground { padding: 17px 16px 22px; }
+  .spirit-header h1 span { display: block; margin: 8px 0 0; font-size: 12px; }
+  .spirit-layout { grid-template-columns: 1fr; gap: 15px; }
+  .spirit-arena { height: 58vh; min-height: 380px; }
+  .spirit-panel { padding: 20px; }
+  .spirit-arena-label { top: 12px; left: 12px; }
+  .spirit-help { bottom: 8px; gap: 9px; flex-direction: column; }
+  .spirit-playground[data-mode="create"] { padding: 12px; }
+  .spirit-playground[data-mode="create"] .spirit-layout { grid-template-columns: 1fr; }
+  .spirit-playground[data-mode="create"] .spirit-arena { position: relative; top: auto; height: 42vh; min-height: 300px; }
+  .spirit-playground[data-mode="play"] .spirit-help { bottom: 20px; max-width: calc(100% - 28px); flex-direction: row; }
+}

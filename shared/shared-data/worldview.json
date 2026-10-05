@@ -1,0 +1,5627 @@
+{
+  "schemaVersion": 1,
+  "source": "worldview_luoxiaohei_v4.db",
+  "characters": [
+    {
+      "id": 1,
+      "name": "罗小黑",
+      "aliases": "锁门弟子、九漏猫",
+      "species": "妖精(黑猫)",
+      "affiliation": "妖灵会馆",
+      "abilities": [
+        "分身黑咻",
+        "双灵质空间（空间系）",
+        "双灵质空间（金属系）",
+        "双灵质空间：一个人拥有两个灵质空间，极其罕见",
+        "尾巴分裂：尾巴可分裂成有独立意识的黑咻",
+        "御灵系-金（操纵金属）；空间系-领域（电影中已失去）、空间系-传送；罕见双灵质空间体质；可分裂黑咻（现可分裂四个，特殊情况无限分裂，总体积不变），可和黑咻相互传送",
+        "御灵系·金（跟无限学的）：操纵金属",
+        "空间、金属",
+        "空间系·传送：通过黑咻进行空间传送",
+        "空间系·领域：外放灵质空间，原为风息所夺，后亲手销毁",
+        "空间系–领域（前） 空间系–传送 御灵系–金",
+        "空间系–领域（已失去） 空间系–传送 御灵系–金"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑/10712965"
+    },
+    {
+      "id": 2,
+      "name": "无限",
+      "aliases": "",
+      "species": "人类(后成仙)",
+      "affiliation": "兴国→妖灵会馆",
+      "abilities": [
+        "御灵系-金",
+        "御灵系-金、空间系-吞噬",
+        "御灵系-金、空间系-吞噬[6]",
+        "御灵系·金：操纵金属，可借助金属移动和飞行",
+        "最强执行者·武力",
+        "空间、随身金属",
+        "空间系-吞噬",
+        "空间系·吞噬：将物质灵吞入空间，但不能吞生灵"
+      ],
+      "sourceUrl": "https://mzh.moegirl.org.cn/zh-tw/無限(羅小黑戰記)"
+    },
+    {
+      "id": 3,
+      "name": "风息",
+      "aliases": "",
+      "species": "妖精(黑豹)",
+      "affiliation": "风息阵营(独立)",
+      "abilities": [
+        "妖尊级别妖力",
+        "御灵系-木",
+        "御灵系-木、生灵系-豪夺（可夺取他人能力/灵质空间）",
+        "御灵系·木：操控藤蔓等植物",
+        "控制风的能力",
+        "生灵系-豪夺",
+        "生灵系·豪夺：强行夺取其他妖精的能力"
+      ],
+      "sourceUrl": "https://m.bilibili.com/opus/510407093051620696"
+    },
+    {
+      "id": 4,
+      "name": "老君",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆三大创始神之一;灵质空间主体为蓝溪镇",
+      "abilities": [
+        "双系技能·灵誓（心灵系+生灵系）",
+        "御灵系全系（金木水火土）",
+        "御灵系（金木水火土）、心灵系、生灵系-洞察、心灵系+生灵系双系技能-灵誓、锁御系（法宝众多）、空间系-眷灵（吸收灵质空间内生物逸散的灵）",
+        "心灵系",
+        "心灵系+生灵系-灵誓",
+        "炼器/炼丹：顶级炼器师，制造了天明珠等神器",
+        "炼器大师",
+        "生灵心灵双系-灵誓",
+        "生灵系-洞察",
+        "生灵系-观灵",
+        "生灵系·洞察",
+        "空间系·眷灵",
+        "空间系–眷灵[2] 生灵系–洞察[3] 生灵系心灵系–灵誓（双系技能）[4] 锁御系[2] 御灵系–金木水火土[2] 造物系[2]",
+        "空间系眷灵",
+        "锁御系-法宝大师",
+        "锁御系（大量法宝）"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/老君/18368174"
+    },
+    {
+      "id": 5,
+      "name": "罗小白",
+      "aliases": "",
+      "species": "人类",
+      "affiliation": "人类;罗家\n[萌娘百科] 灵溪(人类)",
+      "abilities": [
+        "御灵系-火（众生之门游戏中选择）",
+        "持有老君赠送的法宝“蓝玉盘”（定点空间传送顶级法宝，老君设了一个月冷却时间）",
+        "无系（普通人类，无灵质力）"
+      ],
+      "sourceUrl": "http://www.wikiwand.com/zh/articles/蓝溪镇_(漫画)"
+    },
+    {
+      "id": 6,
+      "name": "阿根",
+      "aliases": "玄离",
+      "species": "人类/妖精（与玄离共存）",
+      "affiliation": "小白堂哥/乡下",
+      "abilities": [
+        "御灵系-冰",
+        "御灵系·冰",
+        "御灵系·水（冰）",
+        "御灵系·火",
+        "控制冰、火；吸收火焰、控制水的形态并凝结成冰；灵质空间为足球场大的极寒地狱，可放置有独立意识的分身；拥有嘲讽体质（动物靠近会咬他）"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0/8383472;https://www.newton.com.tw/wiki/羅小黑戰記;https://mzh.moegirl.org.cn/罗小黑战记;https://baike.sogou.com/v168021536.htm;http://www.wikiwand.com/zh-hans/articles/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0;https://baike.baidu.com/item/罗小黑战记/8383472"
+    },
+    {
+      "id": 7,
+      "name": "谛听",
+      "aliases": "爷爷",
+      "species": "妖精-神兽",
+      "affiliation": "老君山(追随老君);前隶属酆都(阎明属下)",
+      "abilities": [
+        "分身",
+        "听令于老君；持有法宝“定心镜”（可辨别谎言）",
+        "御灵系-火",
+        "御灵系·火/炎系（上古神兽，使用炎系法术与斥冰焰）",
+        "神通·谛听：通过聆听心跳，可以知晓世间万物的信息、位置，甚至听到过去的对话（被屏蔽或刻意隐藏的信息除外）",
+        "腾云"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/谛听"
+    },
+    {
+      "id": 8,
+      "name": "鹿野",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(执行者,总会馆感知组组长);定居苍南会馆",
+      "abilities": [
+        "御灵系-金",
+        "御灵系-金（操控金属如臂使指，将金属片变形为细绳/刀等武器，缠在手腕辅助飞行）、生灵系-追毫（敏锐洞察力，追踪感知）；体术与耐力极强；疑似已成仙",
+        "感知系能力",
+        "生灵系-追毫",
+        "生灵系·寻踪/追踪（可将自身与自然融为一体追踪目标）",
+        "生灵系、御灵系·金"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/鹿野"
+    },
+    {
+      "id": 9,
+      "name": "李清凝（清凝仙子）",
+      "aliases": "清凝、清凝仙子",
+      "species": "人类",
+      "affiliation": "老君弟子;蓝溪镇;北域(曾)",
+      "abilities": [
+        "生灵系·治愈系（极罕见）",
+        "生灵系–治愈系"
+      ],
+      "sourceUrl": "https://mzh.moegirl.org.cn/清凝;http://www.wikiwand.com/zh-hans/articles/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0;https://mzh.moegirl.org.cn/李清凝;https://baike.baidu.com/item/罗小黑战记/8383472"
+    },
+    {
+      "id": 10,
+      "name": "山新",
+      "aliases": "",
+      "species": "人类",
+      "affiliation": "人类;罗小白朋友\n[萌娘百科] 灵溪(人类)",
+      "abilities": [
+        "无系（普通人类，无灵质力）",
+        "游戏高手：魔兽世界高玩，自称血精灵T3战士"
+      ],
+      "sourceUrl": "http://www.wikiwand.com/zh/articles/蓝溪镇_(漫画)"
+    },
+    {
+      "id": 11,
+      "name": "那伽",
+      "aliases": "娜迦、北域神明",
+      "species": "妖精(北域神明,大蛇原型)",
+      "affiliation": "北域",
+      "abilities": [
+        "吸食魂灵",
+        "吸食魂灵；将自身灵与众多妖精绑定制造疼痛共感",
+        "空间系-领域"
+      ],
+      "sourceUrl": "https://baike.baidu.com/view/1734018.html"
+    },
+    {
+      "id": 12,
+      "name": "玄离",
+      "aliases": "",
+      "species": "上古神兽(原型螭龙,龙之九子之首)",
+      "affiliation": "蓝溪镇(追随老君);后隐居乡下",
+      "abilities": [
+        "双灵质空间",
+        "双灵质空间：冰火双空间，极寒地狱（据说有足球场大）",
+        "嘲讽体质：寻常动物靠近会不自觉攻击他",
+        "御灵系-冰",
+        "御灵系-火",
+        "御灵系-火、冰双系（可操纵火、喷火、吸收外部火焰如斥冰焰/焚焰火；可操纵水凝结成冰、控制冰形态）；罕见双灵质空间体质；嘲讽体质（动物靠近会咬）；身边有三只可变成鸟的棕色狗",
+        "御灵系·冰（水）：控制水的形态并凝结成冰",
+        "御灵系·水（冰）",
+        "御灵系·火",
+        "御灵系·火：可吸收焚焰火、斥冰焰等高等火系技能",
+        "远古大妖·战斗能力",
+        "远古大妖·炎系能力"
+      ],
+      "sourceUrl": "https://www.baike.com/wikiid/7688917566795141135"
+    },
+    {
+      "id": 13,
+      "name": "洛竹",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "风息阵营",
+      "abilities": [
+        "御灵系-木"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E6%B4%9B%E7%AB%B9"
+    },
+    {
+      "id": 14,
+      "name": "哪吒",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(核心战力/创始人之一)",
+      "abilities": [
+        "御灵系-火",
+        "御灵系-火、生灵系-幻化（三头六臂）、锁御系-灵御（法宝）",
+        "数千道行",
+        "混天绫",
+        "生灵系-幻化",
+        "金刚圈",
+        "锁御系-灵御"
+      ],
+      "sourceUrl": "https://moegirl.icu/罗小黑战记 | https://www.sina.cn/news/detail/5223579472102175.html"
+    },
+    {
+      "id": 15,
+      "name": "虚淮",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "风息团队\n[萌娘百科] 离岛",
+      "abilities": [
+        "御灵系-冰",
+        "御灵系·冰",
+        "御灵系·岩：操控岩石和大地，拥有极强的防御力和破坏力"
+      ],
+      "sourceUrl": "https://m.bilibili.com/opus/510407093051620696"
+    },
+    {
+      "id": 17,
+      "name": "天虎",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "风息阵营",
+      "abilities": [
+        "御灵系-火",
+        "御灵系·火"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记/8383472"
+    },
+    {
+      "id": 18,
+      "name": "比丢",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "罗小黑伙伴",
+      "abilities": [
+        "变色保护",
+        "变色：吃下食物可变对应颜色（保护机制，约5分钟恢复）",
+        "吃（除了金属和生物外的所有东西，最喜欢吃木头）、跑的速度极快；吃了金属和生物会暴走（身体巨大化变蓝色，眉心出现纹路，碰一下恢复但消耗生命）",
+        "吞噬",
+        "暴走：吃金属或生物后巨大化变蓝，眉心暴走纹，消耗生命",
+        "移动速度极快，最爱吃木头"
+      ],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 19,
+      "name": "皇受",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "山新家",
+      "abilities": [
+        "无特殊妖力（普通猫）"
+      ],
+      "sourceUrl": "http://www.wikiwand.com/zh/articles/蓝溪镇_(漫画) | https://www.newton.com.tw/wiki/《羅小黑戰記》/8383472"
+    },
+    {
+      "id": 20,
+      "name": "鸠老",
+      "aliases": "死老头",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(执行者)",
+      "abilities": [
+        "强化系-凌荆",
+        "生灵系-洞察",
+        "生灵系·洞察、造物系·仿生、强化系·凌荆",
+        "生灵系、造物系",
+        "造物系-仿生"
+      ],
+      "sourceUrl": "https://zh.moegirl.org.cn/鸠老"
+    },
+    {
+      "id": 21,
+      "name": "龙老",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（执行者）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/index.php?curid=1589; https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 22,
+      "name": "蓝玉",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（一级执行者）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/蓝玉; https://luoxiaohei.huijiwiki.com/wiki/蓝玉"
+    },
+    {
+      "id": 23,
+      "name": "潘靖",
+      "aliases": "",
+      "species": "妖精(五尾白鸟原型)",
+      "affiliation": "龙游会馆(馆长)",
+      "abilities": [
+        "心灵系-传音",
+        "生灵系-化生",
+        "生灵系-培元",
+        "生灵系·培元、生灵系·化生、心灵系·传音",
+        "生灵系、心灵系"
+      ],
+      "sourceUrl": "https://zh.moegirl.tw/潘靖"
+    },
+    {
+      "id": 24,
+      "name": "逸风",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（执行者/治疗）",
+      "abilities": [
+        "生灵系-回复",
+        "生灵系·回复"
+      ],
+      "sourceUrl": "https://moegirl.icu/罗小黑战记 | https://www.newton.com.tw/wiki/%E9%80%B8%E9%A2%A8/61905993"
+    },
+    {
+      "id": 25,
+      "name": "破老",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "府先生团队",
+      "abilities": [
+        "感应灵体、隐身"
+      ],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 26,
+      "name": "若水",
+      "aliases": "",
+      "species": "妖精(狐狸精)",
+      "affiliation": "妖灵会馆(执行者)",
+      "abilities": [
+        "强化系-巨力",
+        "生灵系、锁御系",
+        "锁御系-制灵",
+        "锁御系·制灵、强化系·巨力"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记/8383472"
+    },
+    {
+      "id": 27,
+      "name": "青丘",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [
+        "法宝-方寸盒",
+        "锁御系",
+        "锁御系（锁御师，能够感应天明珠）；持有法宝“方寸盒”"
+      ],
+      "sourceUrl": "https://moegirl.icu/罗小黑战记"
+    },
+    {
+      "id": 28,
+      "name": "紫罗兰",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/紫罗兰; https://newton.com.tw/wiki/《羅小黑戰記》/22902442"
+    },
+    {
+      "id": 29,
+      "name": "卡里",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵溪妖灵会馆(馆长)",
+      "abilities": [
+        "御灵系-木",
+        "御灵系-木（催生树木生长卖树赚钱）",
+        "御灵系-木（催生植物，可持续存活）",
+        "御灵系·木"
+      ],
+      "sourceUrl": "https://www.bilibili.com/read/cv12329573/"
+    },
+    {
+      "id": 30,
+      "name": "闵翔",
+      "aliases": "闵先生",
+      "species": "妖精",
+      "affiliation": "独立",
+      "abilities": [
+        "生灵系-薄音",
+        "生灵系-薄音[1]"
+      ],
+      "sourceUrl": "白发、粗眉、胡须、佩戴墨镜、151cm;https://baike.baidu.com/starmap/view?lemmaId=8383472&nodeId=b05f0ad89e93b52e07440379"
+    },
+    {
+      "id": 31,
+      "name": "花轮",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(执行者,负责后勤)",
+      "abilities": [
+        "空间系",
+        "空间系-蕴藏",
+        "空间系-蕴藏（灵质空间非常小只有三米直径，放入空间的物体自动缩小整理，所藏相当于二十家宜家）",
+        "空间系·蕴藏（负责后勤）"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E8%8A%B1%E8%BD%AE"
+    },
+    {
+      "id": 32,
+      "name": "粉末",
+      "aliases": "",
+      "species": "妖精；花精灵",
+      "affiliation": "灵风山（师从木落仙人）",
+      "abilities": [
+        "无明确灵系",
+        "稀有能力花精灵感应（范围方圆五百米）；坐骑树虎常伴身边"
+      ],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记 | https://www.newton.com.tw/wiki/《羅小黑戰記》/8383472"
+    },
+    {
+      "id": 33,
+      "name": "秃贝",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（灵溪）；灵溪妖灵会馆馆长助理",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记 | https://www.newton.com.tw/wiki/《羅小黑戰記》/8383472"
+    },
+    {
+      "id": 34,
+      "name": "清泉",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆下属分馆-流石会馆",
+      "abilities": [
+        "能力未公开"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/清泉;https://baike.sogou.com/v10004370126.htm;https://luoxiaohei.huijiwiki.com/wiki/流石事件 | https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 35,
+      "name": "画虎",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [
+        "生灵系-画灵",
+        "生灵系×造物系-画灵（双系合技，赋予画中生物活动能力）",
+        "生灵系、造物系",
+        "画灵（造物系与生灵系结合使用）",
+        "造物系-画灵",
+        "造物系-画灵（造物系+生灵系结合）"
+      ],
+      "sourceUrl": "https://moegirl.icu/罗小黑战记 | https://baike.baidu.com/item/%e7%bd%97%e5%b0%8f%e9%bb%91%e6%88%98%e8%ae%b0/8383472"
+    },
+    {
+      "id": 36,
+      "name": "泽宇",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [
+        "御灵系-金",
+        "御灵系-金、生灵系-追毫",
+        "生灵系-追毫",
+        "生灵系、御灵系·金"
+      ],
+      "sourceUrl": "https://zh.moegirl.org.cn/鹿野"
+    },
+    {
+      "id": 37,
+      "name": "冠萱",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（执行者/善后）",
+      "abilities": [
+        "心灵系",
+        "心灵系-清洗",
+        "生灵系-念磁",
+        "生灵系·念磁、心灵系·清洗"
+      ],
+      "sourceUrl": "https://moegirl.icu/罗小黑战记 | https://baike.baidu.com/item/%e7%bd%97%e5%b0%8f%e9%bb%91%e6%88%98%e8%ae%b0/8383472"
+    },
+    {
+      "id": 38,
+      "name": "冠旭",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "闵翔门下",
+      "abilities": [
+        "无技能（生灵系小家伙）",
+        "生灵系（无技能）",
+        "生灵系（无技能）[2]"
+      ],
+      "sourceUrl": "https://c.m.163.com/news/a/EP950KR80526HP94.html"
+    },
+    {
+      "id": 39,
+      "name": "阿赫",
+      "aliases": "",
+      "species": "人类",
+      "affiliation": "风息阵营",
+      "abilities": [
+        "心灵系",
+        "心灵系-傀儡",
+        "心灵系·傀儡"
+      ],
+      "sourceUrl": "https://moegirl.icu/罗小黑战记 | https://baike.baidu.com/item/%e7%bd%97%e5%b0%8f%e9%bb%91%e6%88%98%e8%ae%b0/8383472"
+    },
+    {
+      "id": 40,
+      "name": "阿龙",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（执行者）",
+      "abilities": [
+        "强化系"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/阿龙"
+    },
+    {
+      "id": 42,
+      "name": "狗剩",
+      "aliases": "",
+      "species": "狗（动物）",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记/8383472, https://m.maigoo.com/citiao/220389.html; https://luoxiaohei.huijiwiki.com/wiki/狗剩"
+    },
+    {
+      "id": 43,
+      "name": "黄溜溜",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E9%BB%84%E6%BA%9C%E6%BA%9C"
+    },
+    {
+      "id": 44,
+      "name": "东东",
+      "aliases": "冬冬",
+      "species": "妖精",
+      "affiliation": "龙游会馆（执行者）",
+      "abilities": [
+        "加快自身时间流速",
+        "御兽系",
+        "时间系/加速",
+        "空间系-时滞",
+        "空间系·时滞（使目标时间停滞）",
+        "空间系（空间系能力）"
+      ],
+      "sourceUrl": "https://www.sohu.com/a/509716014_120099883 ; https://luoxiaohei-news.com/luo-xiao-heizatan/luo-xiaohei-plot-analysis-wuxian-mystery"
+    },
+    {
+      "id": 45,
+      "name": "南歌",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%8D%97%E6%AD%8C"
+    },
+    {
+      "id": 46,
+      "name": "云飞",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵溪",
+      "abilities": [],
+      "sourceUrl": "http://www.wikiwand.com/zh/articles/蓝溪镇_(漫画)"
+    },
+    {
+      "id": 47,
+      "name": "蛋蛋（TV版）",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵簿角色",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E8%9B%8B%E8%9B%8B%EF%BC%88TV%E7%89%88%EF%BC%89"
+    },
+    {
+      "id": 48,
+      "name": "星月",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/星月; https://luoxiaohei.huijiwiki.com/wiki/星月; 微博@电影罗小黑战记2 2025-07-29"
+    },
+    {
+      "id": 49,
+      "name": "明月",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆下属分馆-流石会馆",
+      "abilities": [],
+      "sourceUrl": "https://www.sina.cn/news/detail/5233424781542889.html; https://luoxiaohei.huijiwiki.com/wiki/流石事件 | https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 50,
+      "name": "小叶",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "龙游地区（普通居民）",
+      "abilities": [],
+      "sourceUrl": "https://b23.tv/BV1Ux411A7pB"
+    },
+    {
+      "id": 51,
+      "name": "小白老师",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "人类·灵溪",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%B0%8F%E7%99%BD%E8%80%81%E5%B8%88"
+    },
+    {
+      "id": 52,
+      "name": "乙",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（一级执行者）；妖灵会馆执行者",
+      "abilities": [
+        "御灵系·土",
+        "生灵系-回复"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/乙; https://luoxiaohei.huijiwiki.com/wiki/芷清 | https://zh.moegirl.org.cn/index.php?search=罗小黑战记2 | https://www.sina.cn/news/detail/5223579472102175.html | https://baike.baidu.com/item/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B02/63112182 | https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 53,
+      "name": "大爽",
+      "aliases": "爽叔、爽爷",
+      "species": "人类",
+      "affiliation": "蓝溪镇",
+      "abilities": [
+        "空间系",
+        "空间系-转移",
+        "空间系·转移（大规模空间传送，以自身灵质空间为中转站，大电影中一分钟疏散龙游市）"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%A4%A7%E7%88%BD"
+    },
+    {
+      "id": 54,
+      "name": "大松",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆下属分馆-流石会馆（馆长）",
+      "abilities": [
+        "锁御系"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/大松 | https://view.inews.qq.com/a/20250916A039WL00"
+    },
+    {
+      "id": 55,
+      "name": "大须",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵遥",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%A4%A7%E9%A1%BB; https://weibo.com/7181026147/PDtEbb17n | https://baike.baidu.com/item/罗小黑战记Ⅱ/65831026 | https://live.baidu.com/p/9929181506"
+    },
+    {
+      "id": 56,
+      "name": "大黄",
+      "aliases": "",
+      "species": "狗（动物）",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记/8383472; https://luoxiaohei.huijiwiki.com/wiki/大黄; 微博@罗小黑CAT 2017-01-05"
+    },
+    {
+      "id": 57,
+      "name": "勃勃",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "人类·灵溪（罗小白邻居）\n[萌娘百科] 灵溪(人类)",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%8B%83%E5%8B%83"
+    },
+    {
+      "id": 58,
+      "name": "白宜",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（一级执行者）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/白宜, https://sina.cn/news/detail/5194105379884452.html; https://luoxiaohei.huijiwiki.com/wiki/白宜; 微博@电影罗小黑战记2 2025-07-27/08-30"
+    },
+    {
+      "id": 59,
+      "name": "白鬃",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E7%99%BD%E9%AC%83"
+    },
+    {
+      "id": 60,
+      "name": "斑臂",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E6%96%91%E8%87%82"
+    },
+    {
+      "id": 61,
+      "name": "池年",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(长老)",
+      "abilities": [
+        "御灵系·土"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E6%B1%A0%E5%B9%B4"
+    },
+    {
+      "id": 62,
+      "name": "丁",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "池年弟子",
+      "abilities": [
+        "御灵系·土"
+      ],
+      "sourceUrl": "https://zh.moegirl.org/%E8%8A%B7%E6%B8%85"
+    },
+    {
+      "id": 63,
+      "name": "鳄鱼",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵遥",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E9%B3%84%E9%B1%BC; https://weibo.com/7181026147/PDtEbb17n | https://baike.baidu.com/item/罗小黑战记Ⅱ/65831026 | https://live.baidu.com/p/9929181506"
+    },
+    {
+      "id": 64,
+      "name": "飞毯豹",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E9%A3%9E%E6%AF%AF%E8%B1%B9; https://luoxiaohei.huijiwiki.com/wiki/飞毯豹; 罗小黑战记大电影官方设定集P22"
+    },
+    {
+      "id": 65,
+      "name": "鬼辰",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/鬼辰; https://luoxiaohei.huijiwiki.com/wiki/鬼辰"
+    },
+    {
+      "id": 66,
+      "name": "鬼镰",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵遥",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E9%AC%BC%E9%95%B0 | https://www.sina.cn/news/detail/5194105379884452.html"
+    },
+    {
+      "id": 67,
+      "name": "浩客",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者（常驻藏区）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/浩客"
+    },
+    {
+      "id": 68,
+      "name": "鹤天",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵遥",
+      "abilities": [
+        "锁御系-阵法"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E9%B9%A4%E5%A4%A9"
+    },
+    {
+      "id": 69,
+      "name": "黑阳",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/p/2303"
+    },
+    {
+      "id": 70,
+      "name": "虎妞",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "精灵类",
+      "abilities": [],
+      "sourceUrl": "https://www.maigoo.com/citiao/220389.html"
+    },
+    {
+      "id": 71,
+      "name": "机长",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "《罗小黑战记2：众生之门》角色（机长）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/机长"
+    },
+    {
+      "id": 72,
+      "name": "佳柒",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆·一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/佳柒"
+    },
+    {
+      "id": 73,
+      "name": "江泠",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆; 一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/江泠"
+    },
+    {
+      "id": 74,
+      "name": "杰克斯",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "虚拟人物（双斩联盟游戏人物）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E6%9D%B0%E5%85%8B%E6%96%AF"
+    },
+    {
+      "id": 75,
+      "name": "皆逆荒",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵遥阵营",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E7%9A%86%E9%80%86%E8%8D%92"
+    },
+    {
+      "id": 76,
+      "name": "镜云",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（一级执行者）",
+      "abilities": [],
+      "sourceUrl": "https://weibo.com/7181026147/PDtEbb17n, https://zh.moegirl.org/蓝溪镇; https://luoxiaohei.huijiwiki.com/wiki/镜云; 微博@电影罗小黑战记2 2025-08-04 | https://baike.baidu.com/item/罗小黑战记Ⅱ/65831026"
+    },
+    {
+      "id": 77,
+      "name": "酒鬼",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [
+        "强化系-迅身",
+        "强化系·迅身",
+        "生灵系-空识",
+        "生灵系·空识"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E9%85%92%E9%AC%BC; https://zh.moegirl.org.cn/罗小黑战记 | https://zh.moegirl.org.cn/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 78,
+      "name": "酒仙",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "府先生团队",
+      "abilities": [
+        "造物系·仿生"
+      ],
+      "sourceUrl": "https://moegirl.icu/罗小黑战记"
+    },
+    {
+      "id": 79,
+      "name": "空空",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆-粤东会馆",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E7%A9%BA%E7%A9%BA; https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 80,
+      "name": "老府",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆-灵溪会馆",
+      "abilities": [
+        "以体术为主；从未展现过战斗能力"
+      ],
+      "sourceUrl": "http://www.wikiwand.com/zh/articles/蓝溪镇_(漫画)"
+    },
+    {
+      "id": 81,
+      "name": "莉澄",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/莉澄"
+    },
+    {
+      "id": 82,
+      "name": "凌铜",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/凌铜"
+    },
+    {
+      "id": 83,
+      "name": "灵遥",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(长老)",
+      "abilities": [
+        "流石甲"
+      ],
+      "sourceUrl": "https://c.m.163.com/news/a/KQLOLJVE0553EA5D.html"
+    },
+    {
+      "id": 84,
+      "name": "绿萝",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "精灵（花精灵）",
+      "abilities": [],
+      "sourceUrl": "https://www.maigoo.com/citiao/220389.html"
+    },
+    {
+      "id": 85,
+      "name": "莽眼",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（一级执行者）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/莽眼 | https://insecure.ao3.org/works/73715396"
+    },
+    {
+      "id": 86,
+      "name": "猫渣",
+      "aliases": "",
+      "species": "猫（动物）",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E7%8C%AB%E6%B8%A3; https://luoxiaohei.huijiwiki.com/wiki/猫渣; 微博@罗小黑CAT 2017-01-05"
+    },
+    {
+      "id": 87,
+      "name": "木炎",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/木炎"
+    },
+    {
+      "id": 88,
+      "name": "沐夜",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（一级执行者）",
+      "abilities": [
+        "未公开"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/沐夜; https://luoxiaohei.huijiwiki.com/wiki/沐夜; 微博@电影罗小黑战记2 2025-08-03"
+    },
+    {
+      "id": 89,
+      "name": "涅帕",
+      "aliases": "",
+      "species": "食人族（豹）",
+      "affiliation": "妖灵会馆（特许执行者）",
+      "abilities": [
+        "御灵系-火",
+        "御灵系·火"
+      ],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 90,
+      "name": "七臂",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [
+        "锁御系-七星",
+        "锁御系·七星",
+        "锁御系（锁御师）"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/七臂 | https://zh.moegirl.org.cn/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 91,
+      "name": "乞峰",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆; 一级执行者",
+      "abilities": [
+        "心灵系-读心",
+        "生灵系-念控",
+        "生灵系–念控[1] 心灵系–读心[1]"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E4%B9%9E%E5%B3%B0"
+    },
+    {
+      "id": 92,
+      "name": "七果",
+      "aliases": "",
+      "species": "妖精；树精灵",
+      "affiliation": "灵风山",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记 | https://www.newton.com.tw/wiki/《羅小黑戰記》/8383472"
+    },
+    {
+      "id": 93,
+      "name": "千针",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [
+        "斩断空间、传送"
+      ],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 94,
+      "name": "青峰",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/青峰; https://www.sina.cn/news/detail/5293510863361783.html"
+    },
+    {
+      "id": 95,
+      "name": "归月",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%BD%92%E6%9C%88"
+    },
+    {
+      "id": 96,
+      "name": "肉山",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [
+        "强化系",
+        "御灵系-水",
+        "御灵系·水",
+        "生灵系-强化系-强化",
+        "生灵系-强化（强化系）"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E8%82%89%E5%B1%B1; https://zh.moegirl.org.cn/罗小黑战记 | https://zh.moegirl.org.cn/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 97,
+      "name": "撒旦",
+      "aliases": "",
+      "species": "狗（动物）",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E6%92%92%E6%97%A6; https://luoxiaohei.huijiwiki.com/wiki/撒旦"
+    },
+    {
+      "id": 98,
+      "name": "天介",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(执行者)",
+      "abilities": [
+        "御灵系-火",
+        "御灵系·火、生灵系·焚瘴",
+        "生灵系-焚瘴"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记/8383472"
+    },
+    {
+      "id": 99,
+      "name": "天心",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（执行者）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇; https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 100,
+      "name": "旺财",
+      "aliases": "楼道小灰狗",
+      "species": "狗（动物）",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E6%97%BA%E8%B4%A2; https://luoxiaohei.huijiwiki.com/wiki/旺财; 微博@罗小黑CAT 2017-01-05"
+    },
+    {
+      "id": 101,
+      "name": "西地",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 感知组",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0; https://luoxiaohei.huijiwiki.com/wiki/西地; 微博@电影罗小黑战记2 2025-07-29 | https://baike.baidu.com/item/罗小黑战记Ⅱ/65831026"
+    },
+    {
+      "id": 102,
+      "name": "西木子",
+      "aliases": "",
+      "species": "妖精(狐妖)",
+      "affiliation": "苍南会馆(妖灵会馆总会馆,五大长老之一)",
+      "abilities": [
+        "心灵系·戏梦：操控梦境",
+        "心灵系、锁御系"
+      ],
+      "sourceUrl": "https://zh.moegirl.org.cn/西木子"
+    },
+    {
+      "id": 103,
+      "name": "希声",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%B8%8C%E5%A3%B0"
+    },
+    {
+      "id": 104,
+      "name": "稀碎",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E7%A8%80%E7%A2%8E"
+    },
+    {
+      "id": 105,
+      "name": "肖符",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E8%82%96%E7%AC%A6"
+    },
+    {
+      "id": 106,
+      "name": "小金龙",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [
+        "强化系-爆力",
+        "强化系·爆力"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%B0%8F%E9%87%91%E9%BE%99; https://zh.moegirl.org.cn/罗小黑战记 | https://zh.moegirl.org.cn/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 107,
+      "name": "小绿",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/小绿; https://luoxiaohei.huijiwiki.com/wiki/小绿; 微博@电影罗小黑战记2 2025-07-19"
+    },
+    {
+      "id": 108,
+      "name": "小鱼",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "《妖灵簿》角色",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%B0%8F%E9%B1%BC"
+    },
+    {
+      "id": 109,
+      "name": "晓月",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（一级执行者）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/晓月; https://www.sina.cn/news/detail/5293510863361783.html"
+    },
+    {
+      "id": 110,
+      "name": "辛绝",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/辛绝"
+    },
+    {
+      "id": 111,
+      "name": "心缘",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%BF%83%E7%BC%98；https://luoxiaohei.huijiwiki.com/wiki/心缘; https://luoxiaohei.huijiwiki.com/wiki/心缘"
+    },
+    {
+      "id": 112,
+      "name": "鸭鸭",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵质球守卫队",
+      "abilities": [],
+      "sourceUrl": "https://shouyou.3dmgame.com/gl/32276.html | https://a.9game.cn/lxhzjylb1/"
+    },
+    {
+      "id": 113,
+      "name": "岩烬",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆执行部",
+      "abilities": [],
+      "sourceUrl": "https://movie.douban.com/subject/26754233/"
+    },
+    {
+      "id": 114,
+      "name": "宴瑞",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 115,
+      "name": "杨雪",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 116,
+      "name": "叶澜",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 117,
+      "name": "一笙",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.fandom.com/wiki/"
+    },
+    {
+      "id": 118,
+      "name": "银钩",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://movie.douban.com/subject/34956139/"
+    },
+    {
+      "id": 119,
+      "name": "雨檀",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 120,
+      "name": "雨夜",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 121,
+      "name": "元尾",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 122,
+      "name": "月山",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 123,
+      "name": "舟渡",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 124,
+      "name": "竹叶",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 125,
+      "name": "子墨",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 126,
+      "name": "小明",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://www.moegirl.org/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 127,
+      "name": "小瑶",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://www.moegirl.org/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 128,
+      "name": "秋辞",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记2/63112182 | https://baike.baidu.com/item/罗小黑战记Ⅱ/65831026 | https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 129,
+      "name": "夏雨",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记2/63112182 | https://baike.baidu.com/item/罗小黑战记Ⅱ/65831026 | https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 130,
+      "name": "雨笛",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（苍南总馆馆长）",
+      "abilities": [
+        "未知"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/雨笛 | https://baike.baidu.com/item/罗小黑战记Ⅱ/65831026 | https://www.sina.cn/news/detail/5223579472102175.html | https://baike.baidu.com/item/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B02/63112182 | https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 131,
+      "name": "极光",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "极北圣地守护者",
+      "abilities": [
+        "光系/精神系"
+      ],
+      "sourceUrl": "https://luoxiaobei.fandom.com/zh/wiki/妖灵簿"
+    },
+    {
+      "id": 132,
+      "name": "极阴",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇/老君座下",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.fandom.com/wiki/"
+    },
+    {
+      "id": 133,
+      "name": "极阳",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇/老君座下",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.fandom.com/wiki/"
+    },
+    {
+      "id": 134,
+      "name": "木落仙人",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵风山",
+      "abilities": [
+        "御灵系·木"
+      ],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 135,
+      "name": "炎帝",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [
+        "御灵系-火（最强御灵系、最强火系）",
+        "御灵系·火"
+      ],
+      "sourceUrl": "https://www.baike.com/wikiid/7098319037575337253"
+    },
+    {
+      "id": 136,
+      "name": "甲",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "池年弟子",
+      "abilities": [
+        "御灵系·土"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/甲 | https://www.sina.cn/news/detail/5223579472102175.html | https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 137,
+      "name": "科拉",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [
+        "御灵系·水"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记"
+    },
+    {
+      "id": 139,
+      "name": "羽夕",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "龙游会馆",
+      "abilities": [
+        "强化系",
+        "强化系-强化",
+        "生灵系",
+        "生灵系-强化系-强化",
+        "生灵系-隐匿",
+        "生灵系·隐匿、强化系·强化"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记/8383472"
+    },
+    {
+      "id": 140,
+      "name": "芷清",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（池年门下三弟子）",
+      "abilities": [
+        "御灵系·土"
+      ],
+      "sourceUrl": "https://zh.moegirl.org/%E8%8A%B7%E6%B8%85; https://luoxiaohei.huijiwiki.com/wiki/芷清"
+    },
+    {
+      "id": 141,
+      "name": "阎明",
+      "aliases": "明王",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(三大创始人之一);掌管地界",
+      "abilities": [
+        "治愈系（并不纯粹）；御灵系-火；生灵系（生灵系最强者）；灵质空间是酆都",
+        "生灵系"
+      ],
+      "sourceUrl": "https://www.baike.com/wikiid/7098319037575337253"
+    },
+    {
+      "id": 142,
+      "name": "兆岳",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(执行者)",
+      "abilities": [
+        "御灵系-土",
+        "御灵系-火",
+        "御灵系-火、御灵系-土",
+        "御灵系·土、御灵系·火"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记/8383472"
+    },
+    {
+      "id": 143,
+      "name": "叶子",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "风息团队",
+      "abilities": [
+        "御灵系-土",
+        "御灵系·土"
+      ],
+      "sourceUrl": "https://moegirl.icu/罗小黑战记 | https://baike.baidu.com/item/%e7%bd%97%e5%b0%8f%e9%bb%91%e6%88%98%e8%ae%b0/8383472"
+    },
+    {
+      "id": 144,
+      "name": "坛九",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "融入人类社会\n[萌娘百科] 漫画家",
+      "abilities": [
+        "造物系",
+        "造物系·灵体分身",
+        "造物系（用灵力制作灵体分身）"
+      ],
+      "sourceUrl": "https://moegirl.icu/罗小黑战记"
+    },
+    {
+      "id": 146,
+      "name": "小白爷爷",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "罗家岙",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.uk/%E7%BD%97%E4%BA%91%E9%A3%9E"
+    },
+    {
+      "id": 148,
+      "name": "雅婷（七刀）",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "明王（阎明）手下",
+      "abilities": [
+        "无灵系能力（平凡人类）"
+      ],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://baike.baidu.com/item/蓝溪镇/23752996;https://mzh.moegirl.org.cn/蓝溪镇"
+    },
+    {
+      "id": 150,
+      "name": "风华",
+      "aliases": "风华黄泉",
+      "species": "妖精",
+      "affiliation": "明王（阎明）手下（酆都阵营）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/蓝溪镇 | https://baike.baidu.com/item/蓝溪镇/23752996 | https://weibo.com/7795359381/Mil3QDQ2v"
+    },
+    {
+      "id": 151,
+      "name": "夏掌柜",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇（早期会馆/客栈管理人）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/潘靖 | https://baijiahao.baidu.com/s?id=1664956762592892629"
+    },
+    {
+      "id": 152,
+      "name": "猫妖",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇（镇内妖精）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025 | https://www.bilibili.com/read/cv12900161"
+    },
+    {
+      "id": 153,
+      "name": "山魈妖",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇（镇内妖精）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025 | https://www.bilibili.com/read/cv12900161"
+    },
+    {
+      "id": 155,
+      "name": "幕斯",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "融入人类社会\n[萌娘百科] 漫画家",
+      "abilities": [
+        "御灵系-木、锁御系-？（封蓝溪镇大门、破解锁御宫、拿出焚焰火）"
+      ],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 156,
+      "name": "阿先",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "融入人类社会\n[萌娘百科] 漫画家",
+      "abilities": [
+        "空间系-瞬移（定点位移，借助特殊道具短距离瞬移和类似“回城”的长距离瞬移，但回城发动太慢）"
+      ],
+      "sourceUrl": "https://moegirl.icu/罗小黑战记"
+    },
+    {
+      "id": 157,
+      "name": "小白爸爸",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "罗小白家",
+      "abilities": [],
+      "sourceUrl": "http://www.wikiwand.com/zh/articles/蓝溪镇_(漫画)"
+    },
+    {
+      "id": 158,
+      "name": "小白妈妈",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "罗小白家",
+      "abilities": [],
+      "sourceUrl": "http://www.wikiwand.com/zh/articles/蓝溪镇_(漫画)"
+    },
+    {
+      "id": 159,
+      "name": "帕陀",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "北域（那伽手下）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑战记 | https://m.weibo.cn/status/5185921194658806"
+    },
+    {
+      "id": 160,
+      "name": "乌咕",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "北域（那伽手下）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑战记"
+    },
+    {
+      "id": 161,
+      "name": "复奚言",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "明王麾下\n[萌娘百科] 明王手下",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.uk/罗小黑战记"
+    },
+    {
+      "id": 162,
+      "name": "静一",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(长老)",
+      "abilities": [],
+      "sourceUrl": "https://weibo.com/2017504782/Qd2mwmD46"
+    },
+    {
+      "id": 163,
+      "name": "阿良",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E9%98%BF%E8%89%AF"
+    },
+    {
+      "id": 164,
+      "name": "肄目",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [
+        "心灵系-摄心"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E8%82%84%E7%9B%AE；https://luoxiaohei.huijiwiki.com/wiki/肄目"
+    },
+    {
+      "id": 165,
+      "name": "玄止",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [
+        "顺风耳（特殊感知）"
+      ],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E7%8E%84%E6%AD%A2"
+    },
+    {
+      "id": 166,
+      "name": "夏诗越",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆分馆馆长（曾为燕京诗越楼掌柜）",
+      "abilities": [],
+      "sourceUrl": "https://novel.qq.com/read/56048857/17 | https://m.weibo.cn/status/5185921194658806 | https://insecure.ao3.org/works/73715396"
+    },
+    {
+      "id": 167,
+      "name": "小玉",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆流石分馆\n[萌娘百科] 流石会馆",
+      "abilities": [],
+      "sourceUrl": "https://www.sina.cn/news/detail/5194105379884452.html | https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 168,
+      "name": "阿吉",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 感知组",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记 | https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 169,
+      "name": "火花",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 感知组",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 170,
+      "name": "紫实",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 感知组",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 171,
+      "name": "雪荆",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 感知组",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 172,
+      "name": "蛋壳",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [
+        "生灵系-音罗",
+        "生灵系·音罗"
+      ],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记; https://zh.moegirl.org.cn/罗小黑战记 | https://zh.moegirl.org.cn/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 173,
+      "name": "溪鹿",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [
+        "御灵系-金",
+        "御灵系-金（金属系能力）",
+        "生灵系-念磁"
+      ],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记; https://zh.moegirl.org.cn/罗小黑战记 | https://zh.moegirl.org.cn/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 174,
+      "name": "流藏",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（执行者）",
+      "abilities": [
+        "御灵系-金",
+        "御灵系-金（金属系能力）"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记/8383472; https://baike.baidu.com/item/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0/8383472 | https://baike.baidu.com/item/%e7%bd%97%e5%b0%8f%e9%bb%91%e6%88%98%e8%ae%b0/8383472"
+    },
+    {
+      "id": 175,
+      "name": "晴岚",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://www.sina.cn/news/detail/5193460577731408.html"
+    },
+    {
+      "id": 176,
+      "name": "樊陪",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 177,
+      "name": "咪咪",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 178,
+      "name": "暮影",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 179,
+      "name": "厌骨",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 180,
+      "name": "绝文",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 181,
+      "name": "昊天",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.uk/; https://luoxiaohei.huijiwiki.com/"
+    },
+    {
+      "id": 182,
+      "name": "叁拾",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 183,
+      "name": "鲁伊",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 184,
+      "name": "黄逗菌",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "平行萌物",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/黄渤"
+    },
+    {
+      "id": 185,
+      "name": "兴帝",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "兴朝皇帝",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/兴帝"
+    },
+    {
+      "id": 186,
+      "name": "程北河",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "兴朝\n[萌娘百科] 无限旧识(古代)",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 187,
+      "name": "孙锐",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "兴朝\n[萌娘百科] 无限旧识(古代)",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 188,
+      "name": "李雪",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "兴朝\n[萌娘百科] 无限旧识(古代)",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 189,
+      "name": "李均",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "玉国（或燕国）",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/李清凝"
+    },
+    {
+      "id": 190,
+      "name": "黑咻",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "罗小黑的尾巴分身",
+      "abilities": [],
+      "sourceUrl": "http://www.wikiwand.com/zh/articles/蓝溪镇_(漫画)"
+    },
+    {
+      "id": 191,
+      "name": "三三",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "三三阵营",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑战记 | https://m.weibo.cn/status/5185921194658806"
+    },
+    {
+      "id": 192,
+      "name": "革少",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "三三阵营",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 193,
+      "name": "阿显",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "三三阵营",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑战记 | https://m.weibo.cn/status/5185921194658806"
+    },
+    {
+      "id": 194,
+      "name": "小睿",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "三三阵营",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 195,
+      "name": "托比",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "三三阵营",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 196,
+      "name": "硫酸",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "三三阵营",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 197,
+      "name": "乱步",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "三三阵营",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/罗小黑战记"
+    },
+    {
+      "id": 198,
+      "name": "阿稳",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "三三阵营",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 199,
+      "name": "硅老",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "龙游",
+      "abilities": [
+        "御灵系-火（滞爆）",
+        "滞爆"
+      ],
+      "sourceUrl": "https://m.bilibili.com/opus/510407093051620696 | https://baike.baidu.com/item/%e7%bd%97%e5%b0%8f%e9%bb%91%e6%88%98%e8%ae%b0/8383472"
+    },
+    {
+      "id": 200,
+      "name": "叽叽",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "画虎",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 201,
+      "name": "契灯",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 202,
+      "name": "葵纸",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "《众生之门》玩家",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 203,
+      "name": "龙岩",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "其他妖精",
+      "abilities": [
+        "变化/形态操控",
+        "土/岩系能力"
+      ],
+      "sourceUrl": "https://luoxiaohei-news.com/luo-xiao-heizatan/luo-xiaohei-plot-analysis-wuxian-mystery"
+    },
+    {
+      "id": 204,
+      "name": "莫生",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "其他妖精",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 205,
+      "name": "星君",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "其他妖精",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 206,
+      "name": "元月",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "虚拟人物（双斩联盟游戏人物）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%85%83%E6%9C%88；https://luoxiaohei.huijiwiki.com/wiki/元月；https://www.9game.cn/lxhzjylb1/keyword-112542-1"
+    },
+    {
+      "id": 207,
+      "name": "MT",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "众生之门游戏向导",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/MT"
+    },
+    {
+      "id": 208,
+      "name": "Nonopanda",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "客串角色",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/Nonopanda"
+    },
+    {
+      "id": 209,
+      "name": "彼尔德",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E5%BD%BC%E5%B0%94%E5%BE%B7"
+    },
+    {
+      "id": 210,
+      "name": "蛋蛋（妖灵簿）",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵簿角色",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E8%9B%8B%E8%9B%8B%EF%BC%88%E5%A6%96%E7%81%B5%E7%B0%BF%EF%BC%89"
+    },
+    {
+      "id": 211,
+      "name": "阿柱",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "人类·乡下罗家岙（农民阿伯）\n[萌娘百科] 乡下(罗家岙)",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E9%98%BF%E6%9F%B1"
+    },
+    {
+      "id": 212,
+      "name": "阿狸",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "客串角色",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E9%98%BF%E7%8B%B8"
+    },
+    {
+      "id": 214,
+      "name": "余",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E4%BD%99; https://baike.baidu.com/item/罗小黑战记2/63112182"
+    },
+    {
+      "id": 215,
+      "name": "柚子",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "《妖灵簿》角色",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E6%9F%9A%E5%AD%90；https://luoxiaohei.huijiwiki.com/wiki/柚子"
+    },
+    {
+      "id": 216,
+      "name": "羽毛球",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "其他",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E7%BE%BD%E6%AF%9B%E7%90%83；https://luoxiaohei.huijiwiki.com/wiki/羽毛球"
+    },
+    {
+      "id": 217,
+      "name": "郑信毅",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆-洞桥会馆",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E9%83%91%E4%BF%A1%E6%AF%85；https://luoxiaohei.huijiwiki.com/wiki/郑信毅; https://weibo.com/7181026147/PDtEbb17n; https://baike.baidu.com/item/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0%E2%85%A1/65831026"
+    },
+    {
+      "id": 218,
+      "name": "孙悟空",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（神兽/神仙类）",
+      "abilities": [],
+      "sourceUrl": "https://news.china.com/socialgd/10000169/20260723/49628268_1.html"
+    },
+    {
+      "id": 219,
+      "name": "恒娥仙子",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "天庭（仙界）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025 | https://www.bilibili.com/read/cv12900161"
+    },
+    {
+      "id": 220,
+      "name": "杨戬",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（神兽/神仙类）",
+      "abilities": [],
+      "sourceUrl": "https://www.xs8.cn/baike/1gmqm4tw4sinv"
+    },
+    {
+      "id": 221,
+      "name": "小风",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆·苍南会馆（与鹿野同为感知组成员）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 222,
+      "name": "黑无常",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "阎明（明王）手下\n[萌娘百科] 明王手下",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://baike.baidu.com/item/蓝溪镇/23752996, https://newton.com.tw/wiki/那伽/62006028, https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 223,
+      "name": "白无常",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "阎明（明王）手下\n[萌娘百科] 明王手下",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://baike.baidu.com/item/蓝溪镇/23752996, https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 224,
+      "name": "大壮",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 225,
+      "name": "雀儿",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://weibo.com/7373407462/Ng3TZmfJw; https://mzh.moegirl.org.cn/%E8%93%9D%E6%BA%AA%E9%95%87"
+    },
+    {
+      "id": 226,
+      "name": "大山",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 227,
+      "name": "赵大夫",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇；蓝溪镇三和堂医馆（蓝溪镇最大医馆）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025 | https://luoxiaohei.huijiwiki.com/wiki/%E8%93%9D%E6%BA%AA%E9%95%87"
+    },
+    {
+      "id": 228,
+      "name": "钱大夫",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇；蓝溪镇三和堂医馆（蓝溪镇最大医馆）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025 | https://luoxiaohei.huijiwiki.com/wiki/%E8%93%9D%E6%BA%AA%E9%95%87"
+    },
+    {
+      "id": 229,
+      "name": "孙大夫",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇；蓝溪镇三和堂医馆（蓝溪镇最大医馆）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025 | https://luoxiaohei.huijiwiki.com/wiki/%E8%93%9D%E6%BA%AA%E9%95%87"
+    },
+    {
+      "id": 230,
+      "name": "老卢",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇；三和堂医馆，负责抓药、维持秩序",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025 | https://luoxiaohei.huijiwiki.com/wiki/%E8%93%9D%E6%BA%AA%E9%95%87"
+    },
+    {
+      "id": 231,
+      "name": "学堂先生",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 232,
+      "name": "郑括",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei-news.com/luo-xiao-heizatan/luoxiaohei-shuangye-profile; https://mzh.moegirl.org.cn/%E8%93%9D%E6%BA%AA%E9%95%87 | https://insecure.ao3.org/works/73715396 | https://luoxiaohei.huijiwiki.com/wiki/%E8%93%9D%E6%BA%AA%E9%95%87"
+    },
+    {
+      "id": 233,
+      "name": "顾婕",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025 | https://insecure.ao3.org/works/73715396"
+    },
+    {
+      "id": 234,
+      "name": "片片",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://weibo.com/7373407462/Ng3TZmfJw"
+    },
+    {
+      "id": 235,
+      "name": "阿乐",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 236,
+      "name": "小花",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 237,
+      "name": "柱子",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 238,
+      "name": "春生",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 239,
+      "name": "老姜",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://baijiahao.baidu.com/s?id=1668665948940909362; https://zh.moegirl.org/蓝溪镇"
+    },
+    {
+      "id": 240,
+      "name": "谢谷雨",
+      "aliases": "",
+      "species": "人类",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/zh-hans/%E6%B8%85%E5%87%9D"
+    },
+    {
+      "id": 241,
+      "name": "老贾",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "古代",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 242,
+      "name": "铁根",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "古代",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/老君"
+    },
+    {
+      "id": 243,
+      "name": "小花的父亲",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "古代（蓝溪镇相关）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 244,
+      "name": "章大夫",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "古代",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 245,
+      "name": "马府公子",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "古代",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 246,
+      "name": "万爷",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "古代",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 247,
+      "name": "邹先生",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "古代",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 248,
+      "name": "杰哥",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "其他",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 249,
+      "name": "冯瑞雪",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "龙游（大爽的后代）",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei-news.com/luo-xiao-heizatan/luoxiaohei-shuangye-profile"
+    },
+    {
+      "id": 250,
+      "name": "精灵龙",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "精灵类",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 251,
+      "name": "森林小精灵",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "精灵类",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 252,
+      "name": "鹰犬",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "其他",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑"
+    },
+    {
+      "id": 253,
+      "name": "洛",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆\n[萌娘百科] 执行者",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E6%B4%9B; https://baike.baidu.com/item/罗小黑战记2/63112182 | https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 254,
+      "name": "姝玥",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "明王麾下\n[萌娘百科] 明王手下",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.uk/罗小黑战记, https://zh.moegirl.org.cn/Template:罗小黑战记"
+    },
+    {
+      "id": 256,
+      "name": "一凡仙人",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "仙界",
+      "abilities": [
+        "拥有最快的瞬身技；唯一一位到过其他星辰的妖精"
+      ],
+      "sourceUrl": "https://moegirl.icu/zh-cn/老君(罗小黑战记)"
+    },
+    {
+      "id": 257,
+      "name": "GM",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "种族不明",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 258,
+      "name": "基尔兔",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "种族不明",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 259,
+      "name": "孙力",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 260,
+      "name": "肥啾",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 261,
+      "name": "呱呱",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 262,
+      "name": "臭臭",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 263,
+      "name": "青蛙",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 264,
+      "name": "瓢虫",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 265,
+      "name": "老姜的儿子",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 266,
+      "name": "龙游市市长",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "龙游",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 267,
+      "name": "小吴",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "龙游",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 268,
+      "name": "王先生",
+      "aliases": "",
+      "species": "人类",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.icu/zh-cn/老君(罗小黑战记)"
+    },
+    {
+      "id": 269,
+      "name": "村长爷爷",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org/蓝溪镇, https://luoxiaohei-news.com/luo-xiao-heizatan/lanxi-town-character-guide-2025"
+    },
+    {
+      "id": 270,
+      "name": "电玩男",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "漫展游客",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 271,
+      "name": "寒舞",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "漫展游客",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 272,
+      "name": "淑酱",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "漫展游客",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 273,
+      "name": "叫兽",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "乡下（罗家岙）\n[萌娘百科] 乡下(罗家岙)",
+      "abilities": [],
+      "sourceUrl": "https://www.maigoo.com/citiao/220389.html"
+    },
+    {
+      "id": 274,
+      "name": "三叔",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "乡下（罗家岙）\n[萌娘百科] 乡下(罗家岙)",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0\nhttps://lxhzj.biligame.com/"
+    },
+    {
+      "id": 275,
+      "name": "二云",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵溪\n[萌娘百科] 灵溪(人类)",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记/8383472 | https://www.newton.com.tw/wiki/《羅小黑戰記》/8383472"
+    },
+    {
+      "id": 276,
+      "name": "羽毛球侠",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "乡下（罗家岙）\n[萌娘百科] 乡下(罗家岙)",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 277,
+      "name": "小吉",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "乡下（罗家岙）\n[萌娘百科] 乡下(罗家岙)",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 278,
+      "name": "大吉",
+      "aliases": "",
+      "species": "人类",
+      "affiliation": "乡下（罗家岙）\n[萌娘百科] 乡下(罗家岙)",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记/8383472 | https://www.newton.com.tw/wiki/《羅小黑戰記》/8383472"
+    },
+    {
+      "id": 281,
+      "name": "小白的老师",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵溪",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 282,
+      "name": "保险推销员",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵溪\n[萌娘百科] 灵溪(人类)",
+      "abilities": [],
+      "sourceUrl": "https://mobile.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 285,
+      "name": "保险男",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵溪（《妖灵簿》角色）",
+      "abilities": [],
+      "sourceUrl": "https://www.9game.cn/lxhzjylb1/gonglue-27-1/"
+    },
+    {
+      "id": 289,
+      "name": "东北虎",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "灵溪会馆",
+      "abilities": [],
+      "sourceUrl": "https://www.baike.com/wikiid/7538654998013837351"
+    },
+    {
+      "id": 290,
+      "name": "青榕",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇附近",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/video/BV1X34y1V7gZ/"
+    },
+    {
+      "id": 291,
+      "name": "云中君",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（创建者之一）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/云中君"
+    },
+    {
+      "id": 292,
+      "name": "大志",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "寒木会馆",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/index.php?title=大志（罗小黑战记,人类）; https://zh.moegirl.org.cn/罗小黑; https://weibo.com/7181026147/PDtEbb17n"
+    },
+    {
+      "id": 293,
+      "name": "副队",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://m.weibo.cn/status/5189834735358997; https://baike.baidu.com/item/罗小黑战记2/63112182"
+    },
+    {
+      "id": 295,
+      "name": "李冶",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（修行者）",
+      "abilities": [],
+      "sourceUrl": "https://www.readnovel.com/baike/1y2jhj80yxl19"
+    },
+    {
+      "id": 296,
+      "name": "小黄",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "樱桃沟（守护李冶）",
+      "abilities": [],
+      "sourceUrl": "https://www.xs8.cn/baike/1gmqm4tw4sinv"
+    },
+    {
+      "id": 297,
+      "name": "白泽",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://www.xs8.cn/baike/1gmqm4tw4sinv"
+    },
+    {
+      "id": 298,
+      "name": "李晓东",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "龙游工作室",
+      "abilities": [],
+      "sourceUrl": "https://www.xs8.cn/baike/1gmqm4tw4sinv"
+    },
+    {
+      "id": 299,
+      "name": "娜娜",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://www.readnovel.com/baike/1y2jhj80yxl19"
+    },
+    {
+      "id": 300,
+      "name": "妮妮",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://www.readnovel.com/baike/1y2jhj80yxl19"
+    },
+    {
+      "id": 301,
+      "name": "马飞",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://www.readnovel.com/baike/1y2jhj80yxl19"
+    },
+    {
+      "id": 302,
+      "name": "青龙",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（入驻蓝溪镇）",
+      "abilities": [],
+      "sourceUrl": "https://www.xs8.cn/baike/1gmqm4tw4sinv"
+    },
+    {
+      "id": 303,
+      "name": "饕餮",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "深渊（被镇压）",
+      "abilities": [],
+      "sourceUrl": "https://www.xs8.cn/baike/1gmqm4tw4sinv"
+    },
+    {
+      "id": 304,
+      "name": "擎天",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "古东会馆（执行者）",
+      "abilities": [],
+      "sourceUrl": "https://www.xxsy.net/baike/axdj3teusujv"
+    },
+    {
+      "id": 305,
+      "name": "青牛",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "魔都森林公园（青云塔）",
+      "abilities": [],
+      "sourceUrl": "https://www.xxsy.net/baike/axdj3teusujv"
+    },
+    {
+      "id": 306,
+      "name": "源月",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "魔都/樱桃沟（与娜娜为友）",
+      "abilities": [],
+      "sourceUrl": "https://www.xxsy.net/baike/axdj3teusujv"
+    },
+    {
+      "id": 307,
+      "name": "薯条",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（执行者）",
+      "abilities": [],
+      "sourceUrl": "https://www.xxsy.net/baike/axdj3teusujv"
+    },
+    {
+      "id": 308,
+      "name": "徐如风",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "军方（海军）",
+      "abilities": [],
+      "sourceUrl": "https://www.xxsy.net/baike/axdj3teusujv"
+    },
+    {
+      "id": 309,
+      "name": "小王",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/read/cv12900161"
+    },
+    {
+      "id": 314,
+      "name": "栗劳斯",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/read/cv12900161"
+    },
+    {
+      "id": 315,
+      "name": "秦先生",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇居民",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/read/cv12900161"
+    },
+    {
+      "id": 317,
+      "name": "佛岚",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei-news.com/luo-xiao-heizatan/luoxiaohei-zhongshengmen-executor-task | https://www.sohu.com/a/477114351_120194115 | https://mzh.moegirl.org.cn/罗小黑战记 | https://luoxiaohei.huijiwiki.com/wiki/妖王佛岚的赞赏"
+    },
+    {
+      "id": 9904,
+      "name": "洛伊",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/%E7%94%A8%E6%88%B7:Xigma/%E8%A7%92%E8%89%B2%E5%88%97%E8%A1%A8"
+    },
+    {
+      "id": 9905,
+      "name": "食肉松",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9906,
+      "name": "螃蟹",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9907,
+      "name": "沁芽虫",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9908,
+      "name": "知了",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9909,
+      "name": "村头小鸟",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9910,
+      "name": "村头大灰",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9911,
+      "name": "村头二黄",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9912,
+      "name": "村头老黄牛",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9913,
+      "name": "村头老母鸡",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9914,
+      "name": "村头山羊",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9915,
+      "name": "村头小猫",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "普通动物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9916,
+      "name": "大爆花",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "植物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9917,
+      "name": "吠皮果",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "植物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9918,
+      "name": "鸾草",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "植物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9919,
+      "name": "凤羽草",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "植物",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9920,
+      "name": "开口菇",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "菌类",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9921,
+      "name": "云层菇",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "菌类",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/Template:%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9923,
+      "name": "苍南",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.uk/index.php?title=李清凝&variant=zh-sg"
+    },
+    {
+      "id": 9924,
+      "name": "奎恩东特",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "众生之门·规则失序者",
+      "abilities": [],
+      "sourceUrl": "https://www.xs8.cn/baike/1y2jhj80yxm5q"
+    },
+    {
+      "id": 9925,
+      "name": "白虎",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "上古神兽",
+      "abilities": [
+        "上古神兽体质",
+        "空间/破坏（推测）"
+      ],
+      "sourceUrl": "https://www.douban.com/note/732169318/ ; https://luoxiaobei.fandom.com/zh/wiki/神兽"
+    },
+    {
+      "id": 9926,
+      "name": "骨龙",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://it.sohu.com/a/1010508786_121432046"
+    },
+    {
+      "id": 9927,
+      "name": "重明",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "无限弟子（衍生小说）",
+      "abilities": [],
+      "sourceUrl": "https://book.qq.com/baike/3dyr9wrwxdp4c | https://m.readnovel.com/baike/1y2jhj80z6ypl"
+    },
+    {
+      "id": 9932,
+      "name": "捷豹",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（受监管）",
+      "abilities": [],
+      "sourceUrl": "https://m.hongxiu.com/baike/1pcbn19zpc523, https://www.xs8.cn/baike/1gmqm4tw4sinv"
+    },
+    {
+      "id": 9933,
+      "name": "哮天犬",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆（随杨戬）",
+      "abilities": [],
+      "sourceUrl": "https://www.readnovel.com/baike/1y2jhj80yxl19"
+    },
+    {
+      "id": 9934,
+      "name": "部长",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "会馆",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记Ⅱ; https://baike.baidu.com/item/罗小黑战记2/63112182"
+    },
+    {
+      "id": 9935,
+      "name": "记录员",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "会馆",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记Ⅱ; https://baike.baidu.com/item/罗小黑战记2/63112182"
+    },
+    {
+      "id": 9936,
+      "name": "空乘",
+      "aliases": "",
+      "species": "人类",
+      "affiliation": "民航",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记Ⅱ"
+    },
+    {
+      "id": 9937,
+      "name": "副机长",
+      "aliases": "",
+      "species": "人类",
+      "affiliation": "民航",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/罗小黑战记Ⅱ"
+    },
+    {
+      "id": 9938,
+      "name": "路西法",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "不明（幕后势力）",
+      "abilities": [],
+      "sourceUrl": "https://www.readnovel.com/baike/1y2jhj80yxl19"
+    },
+    {
+      "id": 9939,
+      "name": "老医师",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/蓝溪镇 | https://mzh.moegirl.org.cn/李清凝 | https://m.sohu.com/a/509741688_120099896/"
+    },
+    {
+      "id": 9940,
+      "name": "蝙蝠妖",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://www.toutiao.com/article/7629333036454248994/"
+    },
+    {
+      "id": 9941,
+      "name": "神棍德",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "（客串）",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑战记"
+    },
+    {
+      "id": 9942,
+      "name": "白胡子老道士",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://www.xxsy.net/baike/axdj3teusujv"
+    },
+    {
+      "id": 9945,
+      "name": "老王",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/%E8%93%9D%E6%BA%AA%E9%95%87; https://luoxiaohei.huijiwiki.com/wiki/%E5%A4%A7%E7%88%BD"
+    },
+    {
+      "id": 9946,
+      "name": "老李",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/蓝溪镇"
+    },
+    {
+      "id": 9947,
+      "name": "白婶",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/蓝溪镇"
+    },
+    {
+      "id": 9948,
+      "name": "白文村",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/蓝溪镇"
+    },
+    {
+      "id": 9949,
+      "name": "村长",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei.huijiwiki.com/wiki/蓝溪镇"
+    },
+    {
+      "id": 9956,
+      "name": "司令",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "会馆",
+      "abilities": [],
+      "sourceUrl": "https://weibo.com/2964495347/PBDsXDGF4"
+    },
+    {
+      "id": 9957,
+      "name": "老员工",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "寒木会馆",
+      "abilities": [],
+      "sourceUrl": "https://weibo.com/2964495347/PBDsXDGF4"
+    },
+    {
+      "id": 9958,
+      "name": "新员工",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "寒木会馆",
+      "abilities": [],
+      "sourceUrl": "https://weibo.com/2964495347/PBDsXDGF4"
+    },
+    {
+      "id": 9965,
+      "name": "沛沛",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/"
+    },
+    {
+      "id": 9966,
+      "name": "曼斯",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://mzh.moegirl.org.cn/%E8%93%9D%E6%BA%AA%E9%95%87; https://luoxiaohei.huijiwiki.com/wiki/%E6%9B%BC%E6%96%AF"
+    },
+    {
+      "id": 9967,
+      "name": "若离",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://littleblack.cn/wiki/%E8%8B%A5%E7%A6%BB"
+    },
+    {
+      "id": 9968,
+      "name": "蛸",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://www.zhihu.com/"
+    },
+    {
+      "id": 9969,
+      "name": "瞎子",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆执行者相关（萌娘百科能力列表收录）\n[萌娘百科] 一级执行者",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/罗小黑战记 | https://zh.moegirl.org.cn/%E7%BD%97%E5%B0%8F%E9%BB%91%E6%88%98%E8%AE%B0"
+    },
+    {
+      "id": 9971,
+      "name": "灵溪",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "无限宫",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/bangumi/play/ep116278"
+    },
+    {
+      "id": 9972,
+      "name": "罗天大醮主办人",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "罗天大醮",
+      "abilities": [],
+      "sourceUrl": "https://weibo.com/2882455240/JxYz9q8h7"
+    },
+    {
+      "id": 9974,
+      "name": "木落",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "无限宫",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/bangumi/play/ep316785"
+    },
+    {
+      "id": 9975,
+      "name": "铁枝",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "罗天大醮",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/bangumi/play/ep116278"
+    },
+    {
+      "id": 9978,
+      "name": "域宿",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "老君",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/%E5%9F%9F%E5%AE%BF"
+    },
+    {
+      "id": 9979,
+      "name": "二狗",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇·老君麾下",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/manga/detail/mc27750"
+    },
+    {
+      "id": 9991,
+      "name": "芒岁",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://moegirl.uk/index.php?title=Template:罗小黑战记"
+    },
+    {
+      "id": 9993,
+      "name": "郑先生",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://zh.moegirl.org.cn/李清凝"
+    },
+    {
+      "id": 9994,
+      "name": "虎压",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "风息团队(后勤);天虎宠物店",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/video/BV1xx411c7mD"
+    },
+    {
+      "id": 9995,
+      "name": "鹿笛",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇(猎户)",
+      "abilities": [],
+      "sourceUrl": "https://www.bilibili.com/bangumi/play/ss26687"
+    },
+    {
+      "id": 9996,
+      "name": "执音",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆(高级执行者)",
+      "abilities": [],
+      "sourceUrl": "https://weibo.com/1893430580/NB2345678"
+    },
+    {
+      "id": 9999,
+      "name": "春妹妹",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei-news.com/luo-xiao-heilight-novel/lanxi-town-xuanli-debut-analysis"
+    },
+    {
+      "id": 10000,
+      "name": "谭哥哥",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "https://luoxiaohei-news.com/luo-xiao-heilight-novel/lanxi-town-xuanli-debut-analysis"
+    },
+    {
+      "id": 10001,
+      "name": "太上老君",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/%E5%A4%AA%E4%B8%8A%E8%80%81%E5%90%9B/24295233"
+    },
+    {
+      "id": 10002,
+      "name": "小白",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "城中村流浪猫",
+      "abilities": [
+        "冰系灵质空间"
+      ],
+      "sourceUrl": "https://baike.baidu.com/item/%E5%B0%8F%E7%99%BD/24295234"
+    },
+    {
+      "id": 10003,
+      "name": "慕容",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/%E6%85%95%E5%AE%B9/24295235"
+    },
+    {
+      "id": 10004,
+      "name": "郭先生",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "蓝溪镇",
+      "abilities": [],
+      "sourceUrl": "知乎《蓝溪镇》人族角色解析"
+    },
+    {
+      "id": 10006,
+      "name": "花妖",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/《罗小黑战记》/22902442"
+    },
+    {
+      "id": 10007,
+      "name": "小二",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "《罗小黑战记》电影1角色（客栈小二）",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/《罗小黑战记》/22902442"
+    },
+    {
+      "id": 10009,
+      "name": "小女孩",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://www.baike.com/wikiid/7158714404362715144; https://baike.baidu.com/item/《罗小黑战记》/22902442"
+    },
+    {
+      "id": 10011,
+      "name": "蓝玉盘",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "老君",
+      "abilities": [],
+      "sourceUrl": "https://baike.baidu.com/item/蓝溪镇/23752996"
+    },
+    {
+      "id": 10012,
+      "name": "鸡叫兽",
+      "aliases": "",
+      "species": "妖精",
+      "affiliation": "罗家岙（播报员）",
+      "abilities": [],
+      "sourceUrl": "https://so.html5.qq.com/page/real/search_news?docid=70000021_1965cf27dfb32152&faker=1"
+    },
+    {
+      "id": 10015,
+      "name": "河亦",
+      "aliases": "因",
+      "species": "人类",
+      "affiliation": "湘竹会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10016,
+      "name": "幻玥",
+      "aliases": "妖灵会馆最强执行者之一",
+      "species": "人类",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10017,
+      "name": "汻凪",
+      "aliases": "白芷",
+      "species": "妖精",
+      "affiliation": "灵溪会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10018,
+      "name": "莫看",
+      "aliases": "无限，妖灵强执行者，御灵系·金/空噬，人类",
+      "species": "人类",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10019,
+      "name": "参宿",
+      "aliases": "参宿",
+      "species": "妖精",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10020,
+      "name": "清欢",
+      "aliases": "清欢",
+      "species": "妖精",
+      "affiliation": "洞桥会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10021,
+      "name": "欣雅",
+      "aliases": "欣雅",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10022,
+      "name": "遇南枝",
+      "aliases": "遇南枝，西木会馆—三级执行者",
+      "species": "妖精",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10023,
+      "name": "省省",
+      "aliases": "省省",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10024,
+      "name": "沐子阳",
+      "aliases": "沐子阳，粤东会馆最有潜力的厨师",
+      "species": "妖精",
+      "affiliation": "粤东会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10025,
+      "name": "叽里咕噜灬",
+      "aliases": "罗小黑，妖灵会馆·无限门下，空间系/御灵系·金，妖精",
+      "species": "妖精",
+      "affiliation": "灵溪会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10026,
+      "name": "允生",
+      "aliases": "哪吒，妖灵会馆.生",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10027,
+      "name": "清鸾",
+      "aliases": "清鸾，苍南会馆",
+      "species": "人类",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10028,
+      "name": "望舒",
+      "aliases": "望舒·神仙姐姐（人类的小孩如此称呼)·tv前600年+角色·已散灵",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10029,
+      "name": "云川间",
+      "aliases": "云川间",
+      "species": "妖精",
+      "affiliation": "粤东会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10030,
+      "name": "尼克",
+      "aliases": "野火",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10031,
+      "name": "安无劫",
+      "aliases": "安，元禄会馆",
+      "species": "妖精",
+      "affiliation": "元禄会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10032,
+      "name": "茉阿",
+      "aliases": "茉阿，MOA",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10033,
+      "name": "天笑",
+      "aliases": "星期三",
+      "species": "妖精",
+      "affiliation": "江河会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10034,
+      "name": "风寂",
+      "aliases": "感知组队员",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10035,
+      "name": "时雨",
+      "aliases": "时雨",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10036,
+      "name": "碎云",
+      "aliases": "自由人",
+      "species": "妖精",
+      "affiliation": "龙游会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10037,
+      "name": "淮聿",
+      "aliases": "未来的流石会馆馆长",
+      "species": "妖精",
+      "affiliation": "流石会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10038,
+      "name": "棽衾",
+      "aliases": "木下衣，虎丘会馆",
+      "species": "妖精",
+      "affiliation": "虎丘会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10039,
+      "name": "炽荣",
+      "aliases": "荣老板",
+      "species": "妖精",
+      "affiliation": "粤东会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10040,
+      "name": "越怜",
+      "aliases": "曲泠君",
+      "species": "妖精",
+      "affiliation": "寒木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10041,
+      "name": "晶凌",
+      "aliases": "Bird",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10042,
+      "name": "赤沙",
+      "aliases": "讨厌人类的人类执行者",
+      "species": "人类",
+      "affiliation": "盘龙会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10043,
+      "name": "巳苍",
+      "aliases": "靛青",
+      "species": "妖精",
+      "affiliation": "暂无",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10044,
+      "name": "溪洛",
+      "aliases": "白鸽",
+      "species": "妖精",
+      "affiliation": "粤东会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10045,
+      "name": "见青",
+      "aliases": "阿青，妖灵会馆，空间系/御灵系·木，人类",
+      "species": "人类",
+      "affiliation": "龙游会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10046,
+      "name": "小猫",
+      "aliases": "嘎嘎帅",
+      "species": "妖精",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10047,
+      "name": "妄卿",
+      "aliases": "卿",
+      "species": "妖精",
+      "affiliation": "花间会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10048,
+      "name": "应沐雪",
+      "aliases": "妖灵会馆财务部",
+      "species": "人类",
+      "affiliation": "金陵会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10049,
+      "name": "长兮",
+      "aliases": "晴野葵",
+      "species": "妖精",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10050,
+      "name": "乐乐",
+      "aliases": "罗小黑，妖灵会馆·无限门下，空间系/御灵系·金，妖精",
+      "species": "妖精",
+      "affiliation": "妖灵会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10051,
+      "name": "浮玉",
+      "aliases": "浮玉，妖灵会馆·执行者",
+      "species": "妖精",
+      "affiliation": "花间会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10052,
+      "name": "眠昼",
+      "aliases": "眠昼，妖灵会馆·执行者",
+      "species": "妖精",
+      "affiliation": "花间会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10053,
+      "name": "无溪",
+      "aliases": "无溪，散仙",
+      "species": "人类",
+      "affiliation": "不属会馆，藏于人类中",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10054,
+      "name": "苍梧（林苍）",
+      "aliases": "扶桑",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10055,
+      "name": "晚榆",
+      "aliases": "妖灵会馆善后组组长，一级执行者",
+      "species": "妖精",
+      "affiliation": "榕城会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10056,
+      "name": "春归",
+      "aliases": "苍南大学学生（？）",
+      "species": "人类",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10057,
+      "name": "小黑",
+      "aliases": "UDET",
+      "species": "人类",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10058,
+      "name": "秋凉",
+      "aliases": "凉",
+      "species": "妖精",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10059,
+      "name": "岁栖",
+      "aliases": "岁栖，镐池会馆馆长",
+      "species": "妖精",
+      "affiliation": "镐池会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10060,
+      "name": "沈辞安",
+      "aliases": "辞   苍南会馆一级执行者",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10061,
+      "name": "浮虎",
+      "aliases": "幽山艺家",
+      "species": "妖精",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10062,
+      "name": "九天",
+      "aliases": "碎云",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10063,
+      "name": "阿基",
+      "aliases": "神拳太保",
+      "species": "人类",
+      "affiliation": "JIT组织",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10064,
+      "name": "江知渺",
+      "aliases": "知渺",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10065,
+      "name": "阿齐",
+      "aliases": "阿齐，妖灵会馆·感知组组长，生灵系·寻踪，妖精（鸦科）",
+      "species": "妖精",
+      "affiliation": "榕城会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10066,
+      "name": "天元",
+      "aliases": "小天才",
+      "species": "人类",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10067,
+      "name": "埃舒亚",
+      "aliases": "埃舒亚",
+      "species": "妖精",
+      "affiliation": "无",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10068,
+      "name": "姩七",
+      "aliases": "姩七",
+      "species": "妖精",
+      "affiliation": "灵音会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10069,
+      "name": "娫七",
+      "aliases": "娫七",
+      "species": "妖精",
+      "affiliation": "灵音会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10070,
+      "name": "张子天",
+      "aliases": "张子天，妖灵会馆·普通执行者，御灵系·金/空间系·领域，人类",
+      "species": "人类",
+      "affiliation": "黄河会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10071,
+      "name": "九日旭",
+      "aliases": "阿旭",
+      "species": "人类",
+      "affiliation": "未加入会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10072,
+      "name": "水青",
+      "aliases": "水青，离落门下",
+      "species": "妖精",
+      "affiliation": "青舟茶馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10073,
+      "name": "虹",
+      "aliases": "虹（佳霖），西木会馆，上古三足乌后裔，无主空间的收集者与安魂人",
+      "species": "妖精",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10074,
+      "name": "岁穗",
+      "aliases": "穗酱",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10075,
+      "name": "朝杏",
+      "aliases": "行动组组长",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10076,
+      "name": "青枳",
+      "aliases": "青枳，妖精，青鸟一族最后的族人",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10077,
+      "name": "小黑（猫田）",
+      "aliases": "猫田",
+      "species": "妖精",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10078,
+      "name": "斐德兰",
+      "aliases": "星星",
+      "species": "人类",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10079,
+      "name": "藏芜",
+      "aliases": "藏芜 榕城会馆",
+      "species": "妖精",
+      "affiliation": "榕城会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10080,
+      "name": "雨漠",
+      "aliases": "大唐",
+      "species": "妖精",
+      "affiliation": "湘竹会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10081,
+      "name": "白藏",
+      "aliases": "妖灵会馆一级执行者",
+      "species": "妖精",
+      "affiliation": "望江会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10082,
+      "name": "lv测试",
+      "aliases": "lv测试",
+      "species": "",
+      "affiliation": "",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10083,
+      "name": "苓念",
+      "aliases": "苓念",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10084,
+      "name": "寒夜梦",
+      "aliases": "寒夜梦",
+      "species": "妖精",
+      "affiliation": "深林会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10085,
+      "name": "枳萝",
+      "aliases": "枳萝，洞桥会馆，学生会成员",
+      "species": "妖精",
+      "affiliation": "洞桥会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10086,
+      "name": "月涟",
+      "aliases": "恒月",
+      "species": "人类",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10087,
+      "name": "温言",
+      "aliases": "温言",
+      "species": "妖精",
+      "affiliation": "西木会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10088,
+      "name": "苍梧",
+      "aliases": "妖灵会馆苍南会馆总馆心灵系执行组小组长",
+      "species": "妖精",
+      "affiliation": "苍南会馆（总馆）",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "id": 10089,
+      "name": "瑞光",
+      "aliases": "云崎",
+      "species": "妖精",
+      "affiliation": "鹏城会馆",
+      "abilities": [],
+      "sourceUrl": "https://huiguan.iridescently.xyz/"
+    }
+  ],
+  "locations": [
+    {
+      "id": 1,
+      "name": "灵溪",
+      "type": "城镇",
+      "description": "罗小白家所在的小镇，有妖灵会馆分馆，馆长卡里"
+    },
+    {
+      "id": 2,
+      "name": "龙游",
+      "type": "城市",
+      "description": "风息诞生地，妖灵会馆龙游分馆所在地，馆长潘靖。风息最终在此展开领域"
+    },
+    {
+      "id": 3,
+      "name": "离岛",
+      "type": "岛屿",
+      "description": "风息一伙的据点，通过桥梁下的传送门可达"
+    },
+    {
+      "id": 4,
+      "name": "老君阁",
+      "type": "灵质空间",
+      "description": "老君闭关的灵质空间，内有锁御宫、斗帅宫等，天明珠存放于此"
+    },
+    {
+      "id": 5,
+      "name": "蓝溪镇",
+      "type": "灵质空间",
+      "description": "# 蓝溪镇 > https://luoxiaohei.huijiwiki.com/wiki/蓝溪镇 消歧义 此条目介绍的是曾受老君庇护、现已废弃的人类城镇。有一些其他的条目可能与此条目重名、近似或意义相近，请参阅消歧义页面。 蓝溪镇位于老君的灵质空间内。约无限前三百年左右，老君开始在乱世中游历、接纳难民至他的灵质空间避难，逐渐形成此镇。兴国建立后，虽有不少居民离开，仍有许多人选择留下。无限4年，老君要求蓝溪镇全体居民迁出，蓝溪镇由此废弃。 目录 1 历史 1.1 建镇三百年 1.2 迁镇兰溪 1.3 后世 2 已知地点 2.1 呱记 2.2 盲桥 2.3 七星居 2.4 三和堂 2.5 晒谷场 2.6 学堂 3 已知居民 4 其他 5 参考 历史 建镇三百年 从约无限前三百年开始，[2][3]每当人类遭逢乱世，老君就会四处游历，随缘带走无家可归之人，让他们生活在自己的灵质空间内，受其庇护。战乱结束之后，人类可以自由离开，也可选择留下。[4]不过，选择离开的人不能再返回蓝溪镇，[5]也不得在外界提起蓝溪镇之事。[6]除了每两月可以有一人出镇打探外界消息外，[7]蓝溪镇和外界没有任何互通渠道。 尽管战乱时有停歇，还是有一部分人选择留了下来，在蓝溪镇世代生活。十几代人过去，到无限前5年时，已经建成了一座颇具规模、自给自足的小城镇，[8]人口有数千之多。[1] 战乱结束后，老君在晒谷场聚集起镇民，宣布去留事宜。 无限元年，吴国、燕国和玉国之间的多年战争宣告结束，起义军取得了胜利，[1]建国为兴。[9]由于战乱告终，老君再次给予了蓝溪镇居民去留的选择。但就在居民动身之前，以老姜为首、由阎明安插在蓝溪镇的一些居民开始散布流言，称蓝溪镇的围墙外什么都没有，且离开镇子的人全都下落不明。[10]老君亲自来到三和堂当面对质，惶惶不安的镇民也都围在医馆内外。[11]老君很快识破阴谋，让当时的镇长老王安排几人次日离镇，此事遂平息。[6] 迁镇兰溪 无限4年，清凝被北域之主那伽掳走，老君的灵质空间内渐渐失控。考虑到蓝溪镇居民的安全，老君决定把蓝溪镇迁出自己的灵质空间。[12]他专程到燕京，向兴帝讨要了一块位于苍山之南、横阳之北的土地，用于安置镇子。[13][14]不久，老君在晒谷场将剩余的百姓召集起来，告知迁镇事宜，并于次日在晒谷场的牌坊开启了传送门。[15] 为了新城交通便利，老君移走了两座山，将新镇址与兴国官道连接起来。兴帝也认可了其存在。[16]无限6年，新的镇子渐渐成型，原镇长老王继续担任镇长，与朝廷委派的知县相辅而行。各地工匠前来找活，商贾货运应运而生，开始有外面的人搬来定居。无限12年，蓝溪镇完成了到新镇址的搬迁。[17]新城取名为兰溪，为了表示对旧蓝溪镇的怀念，新镇里还建有蓝溪祠。几年后，郑括接替老王，成为兰溪镇第二任镇长。由于老君的关系，兰溪与妖灵会馆的联系非常密切，许多人类加入了会馆，妖精也在兰溪里自由穿行、生活。[18] 后世 当罗小黑、罗小白和阿根一行在迁镇四百多年后来到镇子时，蓝溪镇已经布满苍苔。 又过了四百余年，无限418年，老君让谛听将罗小黑、罗小白和阿根带去见他时，再次经过了蓝溪镇。这时的蓝溪镇已经饱经岁月的侵蚀，虽然建筑大体上保存完好，但青苔已爬满了镇内的所有房屋，运河里的水也不复清澈。[19] 已知地点 呱记 盲桥 七星居 三和堂 三和堂是蓝溪镇最大的医馆，[20]馆内有赵大夫、钱大夫、孙大夫等多名大夫，老卢负责抓药、维持秩序。约无限前5年左右，李清凝进入医馆为学徒，在三名大夫的指导下学习医术。[21]至无限前3年，清凝已成为馆内最好的大夫，[22]并与老君在医馆完成了拜师仪式。[23] 三和堂大堂牌匾上书“三和堂”三字，堂内一面墙设有药柜，柜前摆桌用于问诊。[20]另有一间房间，内设太师椅，椅后置梅花纹屏风，清凝的拜师仪式即在此完成，[23]其后老君与老姜等对质时也在此地。[11]后院陈设竹匾与陶盆若干，竹匾用于晒药、选药，陶盆用以种植。[1] 晒谷场 学堂 已知居民 阿乐[2][16]（迁出） 白婶[16]（迁出） 白文村[24]（迁出） 春生（迁出） 顾捷（迁出） 老姜（迁出） 老李[24]（迁出） 老王（镇长；迁出） 李清凝一村（迁出） 村长 大爽 大壮 李清凝 雀儿 三和堂（迁出） 老卢 钱大夫 孙大夫 赵大夫 小花（迁出） 新月村[24]（迁出） 郑括（迁出） 柱子（迁出） 其他 在迁镇前，老君曾以蓝溪镇的居民作为凝练灵力的来源。[25] 福建省龙岩市上杭县也有一地名为蓝溪镇，古称“蓝家渡”。[26] 参考 ↑ 1.0 1.1 1.2 1.3 蓝溪镇—改朝（28） ↑ 2.0 2.1 蓝溪镇—谈心（15） ↑ 蓝溪镇—筹谋（137） ↑ 蓝溪镇—清凝（1） ↑ 蓝溪镇—去留（29） ↑ 6.0 6.1 蓝溪"
+    },
+    {
+      "id": 6,
+      "name": "妖灵会馆总馆/苍南会馆",
+      "type": "组织总部",
+      "description": "上古无主灵质空间改造而成，妖灵会馆的主会馆"
+    },
+    {
+      "id": 7,
+      "name": "风息公园",
+      "type": "地点",
+      "description": "# 风息公园 > https://luoxiaohei.huijiwiki.com/wiki/风息公园 风息公园是龙游市内的一个地点，由龙游事件中风息散灵后建立。[1] 历史 无限414年，风息散灵。 无限418年之前，风息公园建立。 参考 ↑ 罗小黑战记，离别篇—非法者合法者（26）"
+    },
+    {
+      "id": 8,
+      "name": "流石会馆",
+      "type": "妖灵会馆分馆",
+      "description": "馆长大松，在第二部电影中被人类袭击，全员遇难"
+    },
+    {
+      "id": 9,
+      "name": "罗家岙",
+      "type": "乡村",
+      "description": "罗小白的老家，爷爷和阿根生活的地方"
+    },
+    {
+      "id": 10,
+      "name": "北域",
+      "type": "区域",
+      "description": "那伽的领地，清凝曾被囚禁于此三百年"
+    },
+    {
+      "id": 11,
+      "name": "龙游会馆",
+      "type": "",
+      "description": "# 龙游会馆 > https://luoxiaohei.huijiwiki.com/wiki/龙游会馆 需要扩充 这个条目资料紧缺。你可以帮助罗小黑百科 补充资料。 龙游会馆是妖灵会馆的一个分会馆，出入口位于龙游市。 参考 ↑ 1.0 1.1 罗小黑战记大电影官方设定集，第204页"
+    },
+    {
+      "id": 16,
+      "name": "兰溪",
+      "type": "城镇",
+      "description": "蓝溪镇迁出后的新城镇。无限4年老君向兴帝讨要苍山之南、横阳之北的土地安置镇民，无限6年成型、无限12年完成搬迁，建有蓝溪祠纪念旧镇。与妖灵会馆联系密切。来源：灰机wiki蓝溪镇条目/萌娘百科导航模板"
+    },
+    {
+      "id": 17,
+      "name": "小香礁",
+      "type": "岛屿",
+      "description": "福兰省地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 18,
+      "name": "灵风山",
+      "type": "山",
+      "description": "其他地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 19,
+      "name": "冰云城",
+      "type": "城市",
+      "description": "其他地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 20,
+      "name": "隐寒山基地",
+      "type": "基地",
+      "description": "西奥兰莫区域内的基地。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 21,
+      "name": "阔伦托",
+      "type": "区域",
+      "description": "未知区域。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 22,
+      "name": "西奥兰莫",
+      "type": "区域",
+      "description": "隐寒山基地所在区域。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 23,
+      "name": "妖兽森林",
+      "type": "森林",
+      "description": "其他地点，森林类区域。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 24,
+      "name": "罗城",
+      "type": "城市",
+      "description": "其他地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 25,
+      "name": "诗越楼",
+      "type": "建筑",
+      "description": "其他地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 26,
+      "name": "苍西",
+      "type": "地点",
+      "description": "其他地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 27,
+      "name": "燕都",
+      "type": "城市",
+      "description": "其他地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 28,
+      "name": "龙游镇",
+      "type": "城镇",
+      "description": "古代地点，与龙游市相关。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 29,
+      "name": "老君山",
+      "type": "山",
+      "description": "老君灵质空间内的山，君阁所在地。来源：萌娘百科导航模板/灰机wiki抄本"
+    },
+    {
+      "id": 30,
+      "name": "星夜湖",
+      "type": "湖泊",
+      "description": "老君灵质空间内的湖泊，蓝溪镇原与其位于同一平面，后灵质空间折叠处于蓝溪镇背面。来源：萌娘百科蓝溪镇(地点)"
+    },
+    {
+      "id": 31,
+      "name": "斗帅宫",
+      "type": "建筑",
+      "description": "老君灵质空间内开放给妖精对战之处，天明珠任务相关场地。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 32,
+      "name": "锁御宫",
+      "type": "建筑",
+      "description": "老君灵质空间内封印/藏宝之地，设有复杂封印。来源：萌娘百科导航模板/灰机wiki抄本"
+    },
+    {
+      "id": 33,
+      "name": "聚灵宫",
+      "type": "建筑",
+      "description": "老君灵质空间内宫殿。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 34,
+      "name": "清凝宫",
+      "type": "建筑",
+      "description": "老君灵质空间内宫殿，与李清凝相关。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 35,
+      "name": "老君门",
+      "type": "建筑",
+      "description": "老君灵质空间入口之门。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 36,
+      "name": "君阁",
+      "type": "建筑",
+      "description": "老君闭关居所，位于老君山，老君立誓百年不出君阁。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 37,
+      "name": "三和堂",
+      "type": "建筑",
+      "description": "蓝溪镇最大的医馆，馆内有赵大夫、钱大夫、孙大夫，老卢负责抓药。李清凝曾在此学徒。来源：灰机wiki蓝溪镇条目"
+    },
+    {
+      "id": 38,
+      "name": "七星居",
+      "type": "建筑",
+      "description": "蓝溪镇（古代）地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 39,
+      "name": "呱记",
+      "type": "建筑",
+      "description": "蓝溪镇（古代）地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 40,
+      "name": "于记",
+      "type": "建筑",
+      "description": "蓝溪镇（古代）地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 41,
+      "name": "文心斋",
+      "type": "建筑",
+      "description": "蓝溪镇（古代）地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 42,
+      "name": "春华堂",
+      "type": "建筑",
+      "description": "蓝溪镇（古代）地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 43,
+      "name": "钟楼",
+      "type": "建筑",
+      "description": "蓝溪镇（古代）地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 44,
+      "name": "盲桥",
+      "type": "建筑",
+      "description": "蓝溪镇（古代）地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 45,
+      "name": "渡龙山",
+      "type": "山",
+      "description": "蓝溪镇（古代）附近山脉。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 46,
+      "name": "双子山",
+      "type": "山",
+      "description": "蓝溪镇（古代）附近山脉。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 47,
+      "name": "苍城居",
+      "type": "建筑",
+      "description": "蓝溪镇（古代）地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 48,
+      "name": "幽都城",
+      "type": "城市",
+      "description": "阎明（明王）领地，地界相关。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 49,
+      "name": "酆都",
+      "type": "城市",
+      "description": "阎明（明王）领地。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 50,
+      "name": "燕京",
+      "type": "城市",
+      "description": "兴国都城。老君曾赴燕京向兴帝讨要土地安置蓝溪镇镇民。来源：萌娘百科导航模板/灰机wiki蓝溪镇条目"
+    },
+    {
+      "id": 51,
+      "name": "东陵",
+      "type": "地点",
+      "description": "兴国地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 52,
+      "name": "北集",
+      "type": "地点",
+      "description": "兴国地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 53,
+      "name": "元典县",
+      "type": "县",
+      "description": "兴国县名。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 54,
+      "name": "北山村",
+      "type": "村",
+      "description": "兴国村名。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 55,
+      "name": "马府",
+      "type": "建筑",
+      "description": "兴国地点（府邸）。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 56,
+      "name": "刘氏宗祠",
+      "type": "建筑",
+      "description": "兴国地点（宗祠）。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 57,
+      "name": "庞城",
+      "type": "城市",
+      "description": "兴国城市。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 58,
+      "name": "浦城",
+      "type": "城市",
+      "description": "兴国城市。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 59,
+      "name": "进县",
+      "type": "县",
+      "description": "兴国县名。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 60,
+      "name": "昌北",
+      "type": "地点",
+      "description": "兴国地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 61,
+      "name": "渝州",
+      "type": "地点",
+      "description": "兴国地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 62,
+      "name": "月山",
+      "type": "山",
+      "description": "兴国山名。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 63,
+      "name": "仙客来",
+      "type": "饭店",
+      "description": "兴国饭店名。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 64,
+      "name": "百丰山",
+      "type": "山",
+      "description": "兴国山名。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 65,
+      "name": "九龙山",
+      "type": "山",
+      "description": "兴国山名。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 66,
+      "name": "云台山",
+      "type": "山",
+      "description": "兴国山名。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 67,
+      "name": "李家村",
+      "type": "村",
+      "description": "玉国村名。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 68,
+      "name": "琼州山脉",
+      "type": "山脉",
+      "description": "玉国山脉。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 69,
+      "name": "潍城",
+      "type": "城市",
+      "description": "吴国城市。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 70,
+      "name": "江淮",
+      "type": "地点",
+      "description": "燕国地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 71,
+      "name": "青云洞",
+      "type": "地点",
+      "description": "松山地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 72,
+      "name": "三岙",
+      "type": "地点",
+      "description": "松山地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 73,
+      "name": "龙凤山",
+      "type": "山",
+      "description": "松山山脉。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 74,
+      "name": "空岛",
+      "type": "岛屿",
+      "description": "北域地点。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 75,
+      "name": "天朝",
+      "type": "国/朝代",
+      "description": "古代国号/朝代名，出自萌娘百科罗小黑战记导航模板。暂无可考详设，未编造"
+    },
+    {
+      "id": 76,
+      "name": "玉国",
+      "type": "国/朝代",
+      "description": "君主制国家，后在战乱中灭亡。无限元年，吴国、燕国和玉国之间的多年战争宣告结束，起义军取得胜利并建立兴国，玉国为战败被灭的诸国之一。来源：灰机wiki罗小黑百科/蓝溪镇"
+    },
+    {
+      "id": 77,
+      "name": "吴国",
+      "type": "国/朝代",
+      "description": "古代国家，蓝溪镇相关：无限元年，吴国、燕国和玉国之间的多年战争宣告结束。"
+    },
+    {
+      "id": 78,
+      "name": "燕国",
+      "type": "国/朝代",
+      "description": "古代国家，蓝溪镇相关：无限元年，吴国、燕国和玉国之间的多年战争宣告结束。"
+    },
+    {
+      "id": 79,
+      "name": "兴国",
+      "type": "国/朝代",
+      "description": "君主制大一统国家。无限元年六月十七日，起义军战胜境内原有多个政权后，兴帝称帝，立国号'兴'，定都燕京，以建国当年为无限元年。建国后开放户籍、接受他国百姓，入籍初期送粮送田且免税三年；实行军屯制，对富户在免税期过后加税；先前王室成员全数编入庞城户籍不得离开。老君曾向兴帝讨要苍山之南、横阳之北的土地安置蓝溪镇镇民（即后来的兰溪）。来源：灰机wiki罗小黑百科"
+    },
+    {
+      "id": 80,
+      "name": "福兰省",
+      "type": "省级行政区",
+      "description": "省份，小香礁所在省。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 81,
+      "name": "灵溪会馆",
+      "type": "妖灵会馆分馆",
+      "description": "妖灵会馆分馆，位于灵溪镇内，馆长卡里。为妖精提供住宿与生活帮助的场所。来源：动画TV第20话/萌娘百科导航模板"
+    },
+    {
+      "id": 82,
+      "name": "洞桥会馆",
+      "type": "妖灵会馆分馆",
+      "description": "妖灵会馆分馆，原型为苍南藻溪镇的洞桥（清乾隆年间建造的单孔圆拱石桥），与苍南总馆同属一区域网络。来源：萌娘百科苍南会馆条目"
+    },
+    {
+      "id": 83,
+      "name": "寒木会馆",
+      "type": "妖灵会馆分馆",
+      "description": "《罗小黑战记2》核心场景，妖灵会馆全球网络的关联枢纽，也是制作团队北京寒木春华动画技术有限公司（HMCH）在世界观中的具象化表达。打破传统会馆'山林隐居'设定，采用'现代办公建筑+空间传送技术'融合设计，外立面标有HMCH标识，内部既有人类工作人员办公（部分肩头栖息玄凤妖精），也设有连接苍南总馆的传送装置。功能定位偏向'信息中转+跨区域传送'，区别于流石会馆的战斗属性与粤东会馆的生活属性。核心成员大志（官方未明确能力属性）。罗小黑与无限曾在此短暂停留后前往苍南会馆执行任务。来源：萌娘百科寒木会馆条目"
+    },
+    {
+      "id": 84,
+      "name": "粤东会馆",
+      "type": "妖灵会馆分馆",
+      "description": "妖灵会馆分馆，生活属性会馆，与流石会馆的战斗属性、寒木会馆的信息中转属性相区别。鹿野和小黑调查途中到访的会馆之一，小黑在此因美食开启星星眼。来源：萌娘百科寒木会馆/苍南会馆条目"
+    },
+    {
+      "id": 85,
+      "name": "黄河会馆",
+      "type": "妖灵会馆分馆",
+      "description": "妖灵会馆分馆。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 86,
+      "name": "榕城会馆",
+      "type": "妖灵会馆分馆",
+      "description": "妖灵会馆分馆，位于福州（联动《大鱼海棠》的城市彩蛋），出现在电影场景中。来源：萌娘百科苍南会馆条目"
+    },
+    {
+      "id": 87,
+      "name": "河海会馆",
+      "type": "妖灵会馆分馆",
+      "description": "妖灵会馆分馆。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 88,
+      "name": "花间会馆",
+      "type": "妖灵会馆分馆",
+      "description": "妖灵会馆分馆。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 89,
+      "name": "茂竹会馆",
+      "type": "妖灵会馆分馆",
+      "description": "妖灵会馆分馆。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 90,
+      "name": "风灵会馆",
+      "type": "妖灵会馆分馆",
+      "description": "妖灵会馆分馆。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 91,
+      "name": "罗氏宗祠",
+      "type": "建筑",
+      "description": "宗祠类建筑。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 92,
+      "name": "松山",
+      "type": "山",
+      "description": "山脉/山地，青云洞、三岙、龙凤山所在。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 93,
+      "name": "新月村",
+      "type": "村",
+      "description": "蓝溪镇相关村落。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 94,
+      "name": "Matthiola incana Flower",
+      "type": "地点",
+      "description": "风息公园旁的花店。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 95,
+      "name": "白文村",
+      "type": "村",
+      "description": "蓝溪镇相关村落，原角色表中归为非角色，补入地点表。"
+    }
+  ],
+  "timeline": [
+    {
+      "id": 1,
+      "era": "无限前85年",
+      "event": "玄离出生。",
+      "description": "玄离出生于无限纪年法前85年。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—出关73）",
+      "relatedCharacters": "玄离"
+    },
+    {
+      "id": 2,
+      "era": "无限前23年",
+      "event": "无限出生。",
+      "description": "无限出生于无限纪年法前23年。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—年号32）",
+      "relatedCharacters": "无限"
+    },
+    {
+      "id": 3,
+      "era": "无限前15年",
+      "event": "李清凝出生。",
+      "description": "李清凝出生于无限纪年法前15年。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—改朝28）",
+      "relatedCharacters": "李清凝"
+    },
+    {
+      "id": 4,
+      "era": "约无限前5年",
+      "event": "清凝被老君救下并带往蓝溪镇。",
+      "description": "清凝试图拜老君为师但被拒绝。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—清凝1）",
+      "relatedCharacters": "老君,李清凝"
+    },
+    {
+      "id": 5,
+      "era": "无限前3年",
+      "event": "清凝学有所成，老君正式收徒。",
+      "description": "清凝成为蓝溪镇医馆最好的大夫，老君正式收李清凝为徒。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—画家7）",
+      "relatedCharacters": "老君,李清凝"
+    },
+    {
+      "id": 6,
+      "era": "无限元年",
+      "event": "兴国建立，定年号为「无限」。",
+      "description": "兴国建立时无限23岁、李清凝15岁。以兴国建立为坐标原点，这一年定为无限元年。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—年号32）",
+      "relatedCharacters": "无限,兴帝"
+    },
+    {
+      "id": 7,
+      "era": "无限3年",
+      "event": "兴帝派遣无限除妖祸；清凝随那伽回北域。",
+      "description": "兴帝派遣无限到各地除妖祸；清凝成年参加成年礼，达成灵誓并随那伽一同回到北域。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—祸乱70/灵誓104/绑架107）",
+      "relatedCharacters": "无限,李清凝,那伽"
+    },
+    {
+      "id": 8,
+      "era": "无限4年",
+      "event": "老君请地建兰溪、建立妖灵会馆。",
+      "description": "老君请求兴国开国皇帝赐地用于建立兰溪；建立妖灵会馆，明王和哪吒加入；要求蓝溪镇居民迁出到兰溪。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—取地108/起点109/消息110/聚散111）",
+      "relatedCharacters": "老君,明王,哪吒"
+    },
+    {
+      "id": 9,
+      "era": "无限6年",
+      "event": "无限带北河去属地。",
+      "description": "来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—至宝114）",
+      "relatedCharacters": "无限,程北河"
+    },
+    {
+      "id": 10,
+      "era": "无限12年",
+      "event": "蓝溪镇搬迁完成，开放斗帅宫。",
+      "description": "蓝溪镇搬迁完成；老君开放斗帅宫。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—至宝114）",
+      "relatedCharacters": "老君"
+    },
+    {
+      "id": 11,
+      "era": "无限13年",
+      "event": "第一届斗帅宫大会举办。",
+      "description": "来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—盛会119）",
+      "relatedCharacters": "老君"
+    },
+    {
+      "id": 12,
+      "era": "无限31年",
+      "event": "玄离成仙。",
+      "description": "来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—流年116）",
+      "relatedCharacters": "玄离"
+    },
+    {
+      "id": 13,
+      "era": "无限45年",
+      "event": "清凝成仙；老君公布闭关真相。",
+      "description": "清凝成仙；老君公布李清凝「闭关」的真相。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—流年116）",
+      "relatedCharacters": "李清凝,老君"
+    },
+    {
+      "id": 14,
+      "era": "无限57年",
+      "event": "兴国开国皇帝驾崩，庙号太祖。",
+      "description": "来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—流年116）",
+      "relatedCharacters": "兴帝"
+    },
+    {
+      "id": 15,
+      "era": "无限63年",
+      "event": "无限成仙。",
+      "description": "来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—流年116）",
+      "relatedCharacters": "无限"
+    },
+    {
+      "id": 16,
+      "era": "无限359年",
+      "event": "玄离北域大战重伤。",
+      "description": "玄离前往北域南界参加大战，被打成重伤，后被老君救回。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—祖孙118）",
+      "relatedCharacters": "玄离,老君"
+    },
+    {
+      "id": 17,
+      "era": "无限389年",
+      "event": "北域大战，老君闭关。",
+      "description": "老君和大爽见面吃饭；第一千届斗帅宫大会举办；潘靖带无限前往龙游调停；老君和西木子前往灵溪乡下接回玄离；老君、玄离、无限、明王和哪吒前往北域参战，最终打败那伽接回清凝；老君向外宣称清凝仙逝并开始闭关，立誓百年内不得离开君阁、不得干涉阁外事务。来源：灰机wiki《罗小黑世界的历史》（蓝溪镇—访友123/北域124/回家133；罗小黑战记老君篇—老君10/蓝溪镇11）",
+      "relatedCharacters": "老君,玄离,无限,明王,哪吒,那伽,李清凝"
+    },
+    {
+      "id": 18,
+      "era": "无限408年",
+      "event": "小黑出生。",
+      "description": "来源：灰机wiki《罗小黑世界的历史》（罗小黑战记大电影官方设定集第4页）",
+      "relatedCharacters": "罗小黑"
+    },
+    {
+      "id": 19,
+      "era": "无限414年",
+      "event": "风息事件，无限收小黑为徒。",
+      "description": "风息、虚淮、洛竹、天虎带小黑到离岛；无限到达离岛抓捕四人，四人逃脱只留下小黑；途中小黑被风息劫走并被夺走「领域」生命垂危；小黑利用第二个灵质空间「复活」进入领域帮助无限打败风息；风息散灵化为巨树；无限正式收小黑为徒。来源：灰机wiki《罗小黑世界的历史》（罗小黑战记2019）",
+      "relatedCharacters": "罗小黑,无限,风息,虚淮,洛竹,天虎"
+    },
+    {
+      "id": 20,
+      "era": "无限416年",
+      "event": "流石事件爆发。",
+      "description": "流石会馆遭人类袭击妖精全部阵亡，若木被盗；无限遭怀疑被哪吒看守；鹿野带小黑调查抓住皆逆荒；池年率弟子前往人类基地夺回若木；灵遥小队攻击飞机；鹿野与灵遥对战，小黑合力打败灵遥；无限独自前往人类基地夺回若木。来源：灰机wiki《罗小黑世界的历史》（罗小黑战记2 2025）",
+      "relatedCharacters": "无限,鹿野,罗小黑,池年,皆逆荒,灵遥,哪吒"
+    },
+    {
+      "id": 21,
+      "era": "无限418年",
+      "event": "小黑盗天明珠被打回原形，被罗小白收养。",
+      "description": "小黑闯入君阁盗走天明珠，逃跑途中被谛听打回原形；流浪到城市被人类女孩罗小白捡到并被冠姓为「罗」；随小白到乡下居住于爷爷罗云飞和哥哥阿根家中。来源：灰机wiki《罗小黑世界的历史》（罗小黑战记相遇篇—喵1/下乡篇—唷5）",
+      "relatedCharacters": "罗小黑,罗小白,谛听,老君,罗云飞,阿根"
+    }
+  ],
+  "terms": [
+    {
+      "id": 1,
+      "category": "核心概念",
+      "term": "灵",
+      "definition": "罗小黑世界中的一种物质，分为物质灵和生灵两种类型，存在于空间中，无处不在，肉眼不可见但能被感知。"
+    },
+    {
+      "id": 2,
+      "category": "核心概念",
+      "term": "物质灵",
+      "definition": "灵的一种类型，是组成一切事物的基石。"
+    },
+    {
+      "id": 3,
+      "category": "核心概念",
+      "term": "生灵",
+      "definition": "灵的一种类型，是生命的象征。生灵会自己汇聚形成精灵，精灵与物质灵结合可演变成妖精。"
+    },
+    {
+      "id": 4,
+      "category": "核心概念",
+      "term": "魂灵",
+      "definition": "生命在孕育过程中吸收自然界生灵后孕育出的灵识，是意识和自我认知的载体。"
+    },
+    {
+      "id": 5,
+      "category": "核心概念",
+      "term": "精灵",
+      "definition": "生灵汇聚后形成的没有实体的存在形态，是妖精诞生过程中的中间阶段。"
+    },
+    {
+      "id": 6,
+      "category": "生命周期",
+      "term": "聚灵",
+      "definition": "生灵汇聚形成精灵、精灵与物质灵结合演变成妖精的过程，是妖精诞生的方式。"
+    },
+    {
+      "id": 7,
+      "category": "生命周期",
+      "term": "散灵",
+      "definition": "生物死亡后生灵消散、回归自然的过程，是妖精和生物死亡的表现方式。"
+    },
+    {
+      "id": 8,
+      "category": "能力体系",
+      "term": "灵质空间",
+      "definition": "每个生命体固有的物质空间，用于储存灵，与生命直接相关。灵质空间衰竭时生命体便会死亡。"
+    },
+    {
+      "id": 9,
+      "category": "能力体系",
+      "term": "灵质力",
+      "definition": "本作中能力的统称，每个人/妖都拥有灵质空间储存灵质力。"
+    },
+    {
+      "id": 10,
+      "category": "核心概念",
+      "term": "妖精",
+      "definition": "聚灵而生的生物，因其特殊的生成形式，天生便具有御灵能力。"
+    },
+    {
+      "id": 11,
+      "category": "文化信仰",
+      "term": "固种论",
+      "definition": "妖精的一种信仰理论，认为妖精都是种子，现在的所有生物包括人族都是由远古妖族繁衍变化而来。"
+    },
+    {
+      "id": 12,
+      "category": "衍生概念",
+      "term": "灵偶/傀儡",
+      "definition": "直接用生灵和物质灵造出的类似生命的物体，看起来是活的但没有太多自我意识。"
+    },
+    {
+      "id": 13,
+      "category": "特殊案例",
+      "term": "风息化树",
+      "definition": "风息在龙游展开领域失败后，生灵散尽但并未完全消散，而是化为一片林木留在龙游，是散灵的特殊形态。"
+    },
+    {
+      "id": 14,
+      "category": "环境条件",
+      "term": "森林聚灵环境",
+      "definition": "妖精聚灵诞生所需的特定自然环境条件，包括人迹罕至、生灵种类数量充足、物质灵活跃等要素。"
+    },
+    {
+      "id": 15,
+      "category": "妖精实例",
+      "term": "天虎聚灵特征",
+      "definition": "天虎是在龙游森林中聚灵诞生的虎形妖精，是原作中展示聚灵过程的核心案例。"
+    },
+    {
+      "id": 16,
+      "category": "技能",
+      "term": "领域",
+      "definition": "空间系技能，外放灵质空间形成领域。代表：风息、罗小黑。"
+    },
+    {
+      "id": 17,
+      "category": "技能",
+      "term": "传送",
+      "definition": "空间系技能，通过空间转移位置。代表：罗小黑（黑咻）、大爽（转移）。"
+    },
+    {
+      "id": 18,
+      "category": "技能",
+      "term": "吞噬",
+      "definition": "空间系技能，吞噬他人灵质力。代表：风息。"
+    },
+    {
+      "id": 19,
+      "category": "技能",
+      "term": "蕴藏",
+      "definition": "空间系技能，在灵质空间内储存灵质力。"
+    },
+    {
+      "id": 20,
+      "category": "技能",
+      "term": "时滞",
+      "definition": "空间系技能，使目标时间停滞。"
+    },
+    {
+      "id": 21,
+      "category": "技能",
+      "term": "转移",
+      "definition": "空间系技能，定点或大规模转移生命体，与灵质空间共存亡。代表：大爽。"
+    },
+    {
+      "id": 22,
+      "category": "技能",
+      "term": "裂空",
+      "definition": "空间系技能，撕裂空间。"
+    },
+    {
+      "id": 23,
+      "category": "技能",
+      "term": "眷灵",
+      "definition": "空间系技能，能且仅能吸收灵质空间内生物逸散的灵。代表：老君。"
+    },
+    {
+      "id": 24,
+      "category": "技能",
+      "term": "滞爆",
+      "definition": "御灵系·火系技能，使爆炸停滞。代表：硅老。"
+    },
+    {
+      "id": 25,
+      "category": "技能",
+      "term": "豪夺",
+      "definition": "生灵系技能，夺取他人灵质力。"
+    },
+    {
+      "id": 26,
+      "category": "技能",
+      "term": "洞察",
+      "definition": "生灵系技能，通过眼睛注入法力对他人进行完全分析。代表：老君。"
+    },
+    {
+      "id": 27,
+      "category": "技能",
+      "term": "幻化",
+      "definition": "生灵系技能，幻化形态。"
+    },
+    {
+      "id": 28,
+      "category": "技能",
+      "term": "培元",
+      "definition": "生灵系技能，培养/强化灵质力。代表：潘靖。"
+    },
+    {
+      "id": 29,
+      "category": "技能",
+      "term": "化生",
+      "definition": "生灵系技能，转化形态。代表：潘靖。"
+    },
+    {
+      "id": 30,
+      "category": "技能",
+      "term": "焚瘴",
+      "definition": "生灵系技能，焚烧瘴气。"
+    },
+    {
+      "id": 31,
+      "category": "技能",
+      "term": "薄音",
+      "definition": "生灵系技能，声音相关能力。"
+    },
+    {
+      "id": 32,
+      "category": "技能",
+      "term": "回复",
+      "definition": "生灵系技能，治愈回复。"
+    },
+    {
+      "id": 33,
+      "category": "技能",
+      "term": "念磁",
+      "definition": "生灵系技能，念力磁控。"
+    },
+    {
+      "id": 34,
+      "category": "技能",
+      "term": "隐匿",
+      "definition": "生灵系技能，隐藏气息。"
+    },
+    {
+      "id": 35,
+      "category": "技能",
+      "term": "画灵",
+      "definition": "生灵系+造物系双系合技，以画创造灵偶。代表：无限。"
+    },
+    {
+      "id": 36,
+      "category": "技能",
+      "term": "音罗",
+      "definition": "生灵系技能，声音感知。"
+    },
+    {
+      "id": 37,
+      "category": "技能",
+      "term": "念控",
+      "definition": "生灵系技能，念力控制。"
+    },
+    {
+      "id": 38,
+      "category": "技能",
+      "term": "空识",
+      "definition": "生灵系技能，空间感知。"
+    },
+    {
+      "id": 39,
+      "category": "技能",
+      "term": "灵誓",
+      "definition": "生灵系+心灵系双系合技，宣读灵誓让人达成共识并绑定魂灵，破誓魂灭。代表：老君。"
+    },
+    {
+      "id": 40,
+      "category": "技能",
+      "term": "追毫",
+      "definition": "生灵系技能，追踪毫发。"
+    },
+    {
+      "id": 41,
+      "category": "技能",
+      "term": "观灵",
+      "definition": "生灵系技能，观察灵质力。"
+    },
+    {
+      "id": 42,
+      "category": "技能",
+      "term": "巨力",
+      "definition": "强化系技能，获得巨大力量。"
+    },
+    {
+      "id": 43,
+      "category": "技能",
+      "term": "凌荆",
+      "definition": "强化系技能，荆棘形态强化。"
+    },
+    {
+      "id": 44,
+      "category": "技能",
+      "term": "强化",
+      "definition": "强化系技能，强化体质。"
+    },
+    {
+      "id": 45,
+      "category": "技能",
+      "term": "爆力",
+      "definition": "强化系技能，爆发力量。"
+    },
+    {
+      "id": 46,
+      "category": "技能",
+      "term": "迅身",
+      "definition": "强化系技能，极速移动。"
+    },
+    {
+      "id": 47,
+      "category": "技能",
+      "term": "传音",
+      "definition": "心灵系技能，远距离传声。代表：潘靖。"
+    },
+    {
+      "id": 48,
+      "category": "技能",
+      "term": "傀儡",
+      "definition": "心灵系技能，操控他人。"
+    },
+    {
+      "id": 49,
+      "category": "技能",
+      "term": "清洗",
+      "definition": "心灵系技能，清洗记忆。代表：潘靖助手（抹去乘客记忆）。"
+    },
+    {
+      "id": 50,
+      "category": "技能",
+      "term": "读心",
+      "definition": "心灵系技能，读取心思。"
+    },
+    {
+      "id": 51,
+      "category": "技能",
+      "term": "戏梦",
+      "definition": "心灵系技能，操控梦境。"
+    },
+    {
+      "id": 52,
+      "category": "技能",
+      "term": "摄心",
+      "definition": "心灵系技能，摄住心神。"
+    },
+    {
+      "id": 53,
+      "category": "技能",
+      "term": "仿生",
+      "definition": "造物系技能，仿造生物形态。"
+    },
+    {
+      "id": 54,
+      "category": "技能",
+      "term": "制灵",
+      "definition": "锁御系技能，制作/封印灵。"
+    },
+    {
+      "id": 55,
+      "category": "技能",
+      "term": "灵御",
+      "definition": "锁御系技能，驾驭法宝灵物。"
+    },
+    {
+      "id": 56,
+      "category": "技能",
+      "term": "七星",
+      "definition": "锁御系技能，七星阵法。"
+    },
+    {
+      "id": 57,
+      "category": "法器灵物",
+      "term": "天明珠",
+      "definition": "老君誓言录中的宝物，取得天明珠需挑战玄离。罗小黑曾奉无限之命盗取。"
+    },
+    {
+      "id": 58,
+      "category": "法器灵物",
+      "term": "蓝玉盘",
+      "definition": "老君耳饰，空间系顶级法宝，可转移人去曾经标记过的地方。老君将其中一只送给罗小白。"
+    },
+    {
+      "id": 59,
+      "category": "法器灵物",
+      "term": "定心镜",
+      "definition": "法宝，可以判断对方是否在说谎。"
+    },
+    {
+      "id": 60,
+      "category": "法器灵物",
+      "term": "斥冰焰",
+      "definition": "法器，冰焰类。"
+    },
+    {
+      "id": 61,
+      "category": "法器灵物",
+      "term": "焚焰火",
+      "definition": "法器，火焰类。黑面罩与独角兽曾使用（冰系克星）。"
+    },
+    {
+      "id": 62,
+      "category": "法器灵物",
+      "term": "玄清丹",
+      "definition": "丹药，收入誓言录中，条件为有人能逼老君出手。"
+    },
+    {
+      "id": 63,
+      "category": "法器灵物",
+      "term": "青灵果",
+      "definition": "灵物，收入誓言录中，获得条件为进入锁御宫。"
+    },
+    {
+      "id": 64,
+      "category": "法器灵物",
+      "term": "唤灵石",
+      "definition": "灵物，可召唤灵石相关力量。"
+    },
+    {
+      "id": 65,
+      "category": "法器灵物",
+      "term": "虚灵草",
+      "definition": "灵物。"
+    },
+    {
+      "id": 66,
+      "category": "法器灵物",
+      "term": "巨灵阵",
+      "definition": "阵法/法器。"
+    },
+    {
+      "id": 67,
+      "category": "法器灵物",
+      "term": "预蝉",
+      "definition": "法宝，感知到周围危险时预警。老君持有。"
+    },
+    {
+      "id": 68,
+      "category": "法器灵物",
+      "term": "方寸盒",
+      "definition": "空间法器，内部存有一些空间。老君持有。"
+    },
+    {
+      "id": 69,
+      "category": "法器灵物",
+      "term": "琼圆盾",
+      "definition": "法宝，能抵挡大部分攻击。老君持有，第二部大电影中鹿野借去抵挡伤害。"
+    },
+    {
+      "id": 70,
+      "category": "法器灵物",
+      "term": "碧玉甲",
+      "definition": "法宝，与琼圆盾作用类似但可贴身移动，失去意识会触发。老君持有。"
+    },
+    {
+      "id": 71,
+      "category": "法器灵物",
+      "term": "空间简片",
+      "definition": "法宝，可直接转移攻击。老君持有。"
+    },
+    {
+      "id": 72,
+      "category": "法器灵物",
+      "term": "百药柜",
+      "definition": "老君法宝，药柜类。"
+    },
+    {
+      "id": 73,
+      "category": "法器灵物",
+      "term": "大御镜盘",
+      "definition": "老君法宝，镜盘类。"
+    },
+    {
+      "id": 74,
+      "category": "法器灵物",
+      "term": "灵珠",
+      "definition": "神器，出自萌娘百科罗小黑战记模板。"
+    },
+    {
+      "id": 75,
+      "category": "法器灵物",
+      "term": "游地简",
+      "definition": "神器，出自萌娘百科罗小黑战记模板。"
+    },
+    {
+      "id": 76,
+      "category": "法器灵物",
+      "term": "飞去来",
+      "definition": "神器，出自萌娘百科罗小黑战记模板。"
+    },
+    {
+      "id": 77,
+      "category": "法器灵物",
+      "term": "盏铃对戒",
+      "definition": "神器，出自萌娘百科罗小黑战记模板。"
+    },
+    {
+      "id": 78,
+      "category": "法器灵物",
+      "term": "木系灵核",
+      "definition": "神器，木系灵核。木落仙人相关。"
+    },
+    {
+      "id": 79,
+      "category": "法器灵物",
+      "term": "涪灵丹",
+      "definition": "丹药，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 80,
+      "category": "法器灵物",
+      "term": "清丹",
+      "definition": "丹药，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 81,
+      "category": "法器灵物",
+      "term": "天灵丹",
+      "definition": "丹药，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 82,
+      "category": "法器灵物",
+      "term": "护灵丹",
+      "definition": "丹药，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 83,
+      "category": "法器灵物",
+      "term": "凝天丹",
+      "definition": "丹药，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 84,
+      "category": "法器灵物",
+      "term": "闭气丸",
+      "definition": "丹药，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 85,
+      "category": "法器灵物",
+      "term": "噬灵药",
+      "definition": "药物，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 86,
+      "category": "法器灵物",
+      "term": "风灵草",
+      "definition": "灵草，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 87,
+      "category": "法器灵物",
+      "term": "灵心草",
+      "definition": "灵草，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 88,
+      "category": "法器灵物",
+      "term": "本命灵石",
+      "definition": "灵石，与妖精本命关联的灵石类灵物。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 89,
+      "category": "法器灵物",
+      "term": "指灵戒",
+      "definition": "法器，戒指类法宝。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 90,
+      "category": "法器灵物",
+      "term": "曲晶方",
+      "definition": "法器，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 91,
+      "category": "法器灵物",
+      "term": "乾坤袋",
+      "definition": "空间法器，可收纳物品的袋状法宝。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 92,
+      "category": "法器灵物",
+      "term": "千音石",
+      "definition": "灵石，音类灵石。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 93,
+      "category": "法器灵物",
+      "term": "乌木",
+      "definition": "灵木材料，出自萌娘百科罗小黑战记导航模板（法器灵物类）。"
+    },
+    {
+      "id": 94,
+      "category": "法器灵物",
+      "term": "风火乾坤圈",
+      "definition": "哪吒的法宝。乾坤圈与风火轮实为相同的三个环，尺寸可变，可分化为数十个，也可合体为一个，变成手环藏在衣服下，世人误以为是两样法宝。"
+    },
+    {
+      "id": 95,
+      "category": "法器灵物",
+      "term": "锁灵枷",
+      "definition": "法器，束缚/封锁类，可锁灵。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 96,
+      "category": "法器灵物",
+      "term": "流石甲",
+      "definition": "护甲类法宝，与流石会馆相关。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 97,
+      "category": "法器灵物",
+      "term": "断金阵",
+      "definition": "阵法，金属性相关。出自萌娘百科罗小黑战记导航模板。"
+    },
+    {
+      "id": 98,
+      "category": "法器灵物",
+      "term": "若木",
+      "definition": "特殊材料，坚硬如铁、蕴含灵力。电影2关键设定：人类用它制作子弹弹头以对付妖精，使原本对常规武器免疫的妖精无法抵抗。流石会馆妖精即死于若木子弹。"
+    },
+    {
+      "id": 99,
+      "category": "法器灵物",
+      "term": "辟火珠",
+      "definition": "灵物，辟火类宝珠。出自萌娘百科罗小黑战记导航模板。"
+    }
+  ],
+  "organizations": [
+    {
+      "id": 1,
+      "name": "妖灵会馆",
+      "description": "管理妖精事务的组织，维护人妖平衡。创始人包括老君等。下设各分馆和执行者"
+    },
+    {
+      "id": 2,
+      "name": "离岛组织",
+      "description": "风息领导的厌恨人类妖精组织，主张夺回人类占据的土地"
+    },
+    {
+      "id": 3,
+      "name": "执行者",
+      "description": "妖灵会馆的执法力量，处理违规妖精。最强执行者为无限"
+    },
+    {
+      "id": 4,
+      "name": "感知组",
+      "description": "妖灵会馆的情报部门，组长为鹿野"
+    },
+    {
+      "id": 5,
+      "name": "流石会馆",
+      "description": "# 流石会馆 > https://luoxiaohei.huijiwiki.com/wiki/流石会馆 需要扩充 这个条目资料紧缺。你可以帮助罗小黑百科 补充资料。 流石会馆是妖灵会馆的一个分会馆。 参考"
+    },
+    {
+      "id": 6,
+      "name": "龙游会馆",
+      "description": "妖灵会馆在龙游市设立的分部，馆长潘靖。主要成员：羽夕(馆长保镖)、逸风(治疗担当)、冠萱(善后担当)、花轮(后勤担当)、冬冬、大爽、若水、鸠老。来源：萌娘百科龙游会馆"
+    },
+    {
+      "id": 7,
+      "name": "灵溪会馆",
+      "description": "妖灵会馆在灵溪设立的分馆，馆长卡里，管事秃贝。来源：萌娘百科罗小黑战记导航模板"
+    },
+    {
+      "id": 8,
+      "name": "苍南会馆（总馆）",
+      "description": "妖灵会馆总馆，由上古无主灵质空间改造而成。老君拿出的上古无主灵质空间建设。来源：灰机wiki/萌娘百科"
+    },
+    {
+      "id": 9,
+      "name": "明王势力",
+      "description": "阎明（明王）领导的势力，掌管地界与索灵妖精，领地有幽都城、酆都。来源：萌娘百科导航模板"
+    },
+    {
+      "id": 10,
+      "name": "北域势力",
+      "description": "北域神明那伽的势力，吸食魂灵，曾掳走清凝三百年。来源：萌娘百科罗小黑战记模板"
+    }
+  ]
+}

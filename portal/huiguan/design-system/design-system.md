@@ -1,0 +1,66 @@
+# 西木会馆 · Design System
+
+> 维护方法参考《用 AI 维护一套设计系统》：design token + 组件库 + 规范文档，并映射到代码。
+> 代码入口：`design-system/design-system.css`。所有新页面/新组件必须复用本系统，禁止硬编码色值。
+
+## 一、Design Tokens（见 design-system.css `:root`）
+
+| 类别 | Token | 值 | 用途 |
+|---|---|---|---|
+| 色彩 | --qc-bg | #f5f0e8 | 页面底（乳白宣纸） |
+| 色彩 | --qc-panel | #fbf8f2 | 卡片/面板底 |
+| 色彩 | --qc-border | #d4cfbe | 描边 |
+| 色彩 | --qc-text | #3a4a3e | 正文（墨绿） |
+| 色彩 | --qc-dim | #7a8a7e | 次级文字 |
+| 色彩 | --qc-accent | #5a9e8f | 主色（松绿） |
+| 色彩 | --qc-gold | #d4a840 | 点缀（描金） |
+| 色彩 | --qc-danger | #b3543f | 警示（赭红） |
+| 字体 | --qc-font-body | Noto Serif SC | 正文衬线 |
+| 字体 | --qc-font-hand | LXGW WenKai | 导航/手写感 |
+| 圆角 | --qc-r-sm/md/lg/xl | 4/6/10/12px | 由小到大 |
+| 阴影 | --qc-shadow-sm/md/lg | — | 卡片/悬浮/弹窗 |
+
+派生透明色（--qc-accent-glow 等）由主色派生，**不要硬编码 rgba**。
+
+## 二、组件清单（qc- 前缀）
+
+| 组件 | 类名 | 用途 | 何时用 | 何时不用 |
+|---|---|---|---|---|
+| 按钮 | .qc-btn | 主操作 | 提交/确认 | 纯链接用 <a> |
+| 按钮·幽灵 | .qc-btn--ghost | 次操作 | 取消/返回 | 主操作用实心 |
+| 按钮·金 | .qc-btn--gold | 强调 | 申请/会员 | 普通操作用主色 |
+| 按钮·危险 | .qc-btn--danger | 破坏 | 删除/封禁 | 非破坏操作 |
+| 卡片 | .qc-card | 内容容器 | 信息块/列表项 | 纯文本段落 |
+| 卡片·悬浮 | .qc-card--hover | 可点卡片 | 画廊/跳转 | 静态展示 |
+| 标签 | .qc-tag | 状态/分类 | 角色/完整度 | 长文本 |
+| 输入 | .qc-input/.qc-select/.qc-textarea | 表单 | 编辑/搜索 | 只读展示 |
+| 表格 | .qc-table | 结构化数据 | 成员/审核列表 | 少量键值用卡片 |
+| 弹窗 | .qc-modal | 覆盖交互 | 确认/编辑/删除 | 轻提示用 toast |
+| 横幅 | .qc-banner | 引导/公告 | 申请/入口 | 常规内容 |
+| 标题 | .qc-h2 | 区块标题 | 分节 | 页面主标题 |
+| 色板 | .qc-swatch / .qc-swatch-grid | 古色色板 | 配色选色 | 纯展示色卡 |
+| 页签 | .qc-tabs / .qc-tab | 五行/分类切换 | 色库分类 | 导航级页签 |
+| 选色槽 | .qc-slot / .qc-slots | 主色/辅色槽位 | 双槽选色 | 单色展示 |
+| 上传区 | .qc-upload | 点击/拖拽上传 | 图片上传 | 表单附件 |
+| 滑块 | .qc-range | 范围调节 | 透明度/缩放 | 精确数值输入 |
+
+## 三、Rules（给 AI / 开发的硬约束）
+
+1. 只能用 `src` 级组件（本文件 qc- 类），**不允许新建组件**；确需新组件先更新本文档与 css。
+2. **不允许硬编码色值**；一律用 token（--qc-*）。
+3. 间距/圆角/字号用 token（--qc-sp-* / --qc-r-* / --qc-fs-*）。
+4. 新增组件类型或发现好看风格 → **反哺**回本系统（持续反哺原则）。
+5. 定稿前让 AI 用组件库重画一遍，确保复用已有组件。
+6. 定期用 AI 做 UI 体检：交互是否符合原则、视觉是否一致。
+
+## 四、扩展色库 · 中国古色 · 五行
+
+- 数据源：`design-system/ancient-colors.js`（window.ANCIENT_COLORS，金/木/水/火/土 五类，479+ 色，每色 {h:HEX, n:色名}）。
+- 可视化：`design-system/colors.html`（按五行浏览、搜索、点击复制 HEX）。
+- 用途：角色主题「自由选色」从该色库取色；设计新界面需传统色时优先从此库选，保持文化一致性。
+- 主站 index.html 的「自由选色 · 479 种中国古色 · 五行归类」与此同源。
+
+## 五、映射到代码
+
+- 组件 ↔ 代码：所有页面引用 `design-system/design-system.css`，类名即契约。
+- 样式指南/演示：`design-system/index.html`（可视化全部 token 与组件）。

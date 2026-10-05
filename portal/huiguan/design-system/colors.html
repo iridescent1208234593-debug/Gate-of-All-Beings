@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>中国古色 · 五行色库 · 西木会馆设计系统</title>
+<link rel="stylesheet" href="design-system.css?v=3">
+<style>
+  body{padding:48px 16px 80px;}
+  .wrap{max-width:1080px;margin:0 auto;}
+  h1{font-size:24px;letter-spacing:3px;margin-bottom:6px;}
+  .sub{color:var(--qc-dim);font-size:13px;margin-bottom:20px;}
+  .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px;}
+  .bar input{flex:1;min-width:180px;}
+  .el-tab{cursor:pointer;padding:6px 16px;border-radius:999px;border:1px solid var(--qc-border);background:var(--qc-panel);font-size:13px;font-family:inherit;}
+  .el-tab.on{background:var(--qc-accent);border-color:var(--qc-accent);color:#fff;}
+  .el-sec{margin-bottom:30px;}
+  .el-title{font-size:16px;letter-spacing:2px;margin-bottom:10px;border-left:4px solid var(--qc-accent);padding-left:10px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;}
+  .sw{border:1px solid var(--qc-border);border-radius:8px;overflow:hidden;cursor:pointer;background:var(--qc-panel);}
+  .sw .c{height:56px;}
+  .sw .t{padding:4px 6px;font-size:11px;color:var(--qc-text);}
+  .sw .t small{display:block;color:var(--qc-dim);font-size:10px;}
+  #toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--qc-text);color:#fff;padding:8px 18px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;}
+</style>
+</head>
+<body class="qc-body">
+<div class="wrap">
+  <h1>中国古色 · 五行色库</h1>
+  <p class="sub">西木会馆设计系统 · 479+ 种传统色，按金木水火土归类 · 点击色块复制 HEX</p>
+  <div class="bar">
+    <input class="qc-input" id="q" placeholder="搜色名 / HEX…" oninput="render()">
+    <button class="el-tab on" data-el="" onclick="setEl('',this)">全部</button>
+    <button class="el-tab" data-el="金" onclick="setEl('金',this)">金</button>
+    <button class="el-tab" data-el="木" onclick="setEl('木',this)">木</button>
+    <button class="el-tab" data-el="水" onclick="setEl('水',this)">水</button>
+    <button class="el-tab" data-el="火" onclick="setEl('火',this)">火</button>
+    <button class="el-tab" data-el="土" onclick="setEl('土',this)">土</button>
+  </div>
+  <div id="box"></div>
+</div>
+<div id="toast"></div>
+<script src="ancient-colors.js"></script>
+<script>
+let curEl='';
+function setEl(el,btn){ curEl=el; document.querySelectorAll('.el-tab').forEach(b=>b.classList.toggle('on',b===btn)); render(); }
+function render(){
+  const q=(document.getElementById('q').value||'').trim().toLowerCase();
+  const A=window.ANCIENT_COLORS||{};
+  const els=curEl?[curEl]:Object.keys(A);
+  let html='';
+  els.forEach(el=>{
+    const list=(A[el]||[]).filter(c=>!q||c.n.toLowerCase().includes(q)||c.h.toLowerCase().includes(q));
+    if(!list.length) return;
+    html+=`<div class="el-sec"><div class="el-title">${el} · ${list.length} 色</div><div class="grid">`+
+      list.map(c=>`<div class="sw" onclick="copy('${c.h}','${c.n}')"><div class="c" style="background:${c.h}"></div><div class="t">${c.n}<small>${c.h}</small></div></div>`).join('')+
+      `</div></div>`;
+  });
+  document.getElementById('box').innerHTML=html||'<p style="color:var(--qc-dim)">没有匹配的颜色。</p>';
+}
+function copy(hex,name){
+  try{ navigator.clipboard&&navigator.clipboard.writeText(hex); }catch(e){}
+  const t=document.getElementById('toast'); t.textContent=`已复制 ${name} ${hex}`; t.style.opacity=1;
+  setTimeout(()=>t.style.opacity=0,1200);
+}
+render();
+</script>
+</body>
+</html>

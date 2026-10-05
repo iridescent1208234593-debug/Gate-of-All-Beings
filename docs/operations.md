@@ -17,7 +17,8 @@
 
 ## 生产架构
 
-- **Cloudflare 隧道**：`~/.cloudflared/config.yml` 把 `iridescently.xyz`、`www`、`huiguan`、`oc` 指向 `127.0.0.1:8080`（统一入口）；`zszm/game/juling/lingjing/psyche/psy/feather` 各自保留。
+- **Cloudflare 隧道**：`~/.cloudflared/config.yml` 把 `iridescently.xyz`、`www`、`huiguan`、`oc`、`spirit` 指向 `127.0.0.1:8080`（统一入口）；`zszm/game/juling/lingjing/psyche/psy/feather` 各自保留。
+- 灵体正式链接为 `https://spirit.iridescently.xyz/games/spirit-playground?room=forest`。页面由 `server/app/modules/softie/` 提供，房间服务使用 softie 上游 4173；账号云存档 API 由会馆提供。
 - **网站管家** `ops/网站恢复/website-manager.py`：按 `SITES` 一键恢复全部站点 + 隧道；`--smoke-test` 自检（不启动任何进程）。
 - **看门狗** `portal/huiguan/watchdog.py`：8080 不在则拉起统一入口（由计划任务每 5 分钟调用）。
 
@@ -31,7 +32,7 @@ python website-manager.py --smoke-test              # 自检
 ### 重启隧道
 
 ```bash
-cloudflared tunnel --config "C:\Users\hp\.cloudflared\config.yml" run
+cloudflared tunnel --config "%USERPROFILE%\.cloudflared\config.yml" run
 ```
 
 ## 统一入口切换 / 回滚

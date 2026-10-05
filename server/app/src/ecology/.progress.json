@@ -1,0 +1,87 @@
+{
+  "done": [
+    "stage-01",
+    "stage-02",
+    "stage-03",
+    "stage-04",
+    "stage-05",
+    "stage-06",
+    "stage-07",
+    "stage-08",
+    "stage-09",
+    "stage-10",
+    "stage-11",
+    "stage-12",
+    "stage-13",
+    "stage-14",
+    "stage-15",
+    "stage-16"
+  ],
+  "last": "stage-16",
+  "summary": {
+    "stage-01": {
+      "time": "2026-09-09",
+      "note": "Vite+three.js骨架:80细胞随机漂移,单向流state/reducer,构建与dev均通过"
+    },
+    "stage-02": {
+      "time": "2026-09-09T03:45:00+08:00",
+      "note": "细胞代谢与进食:食物能量团池+感知趋向减速吸收+持续耗能饿死变灰消失,能量HUD,调参后饿死稳定可见,dev/build/浏览器冒烟均通过"
+    },
+    "stage-03": {
+      "time": "2026-09-09T04:30:00+08:00",
+      "note": "基因数据模型与随机变异:细胞携带{speed,size,perception,metabolism,color}归一化基因,子代继承父基因±0.25随机变异,表型映射速度/体型/感知/能耗/色系,灭绝以存活平均基因为父本重播种,HUD显示基因统计,无头14项+dev+build+浏览器冒烟均通过"
+    },
+    "stage-04": {
+      "time": "2026-09-09T07:52:53+08:00",
+      "note": "分裂繁殖与自然选择:能量达90%一分为二(子代变异,父子半能),每tick限10次分裂,种群上限130压力淘汰最弱,autoEvo每6秒结算一代;无头模拟稳定于maxCells,平均速度5.89→8.0平滑收敛上升;vite build/dev HTTP200通过"
+    },
+    "stage-05": {
+      "time": "2026-09-10T03:26:42+08:00",
+      "note": "3D外观基因化:细胞改InstancedMesh单draw call渲染(容量220),体型scale与逐实例颜色按基因+能量状态(健康脉动/濒死灰化),悬停显示感知圈(perception基因),色值全部走theme token;build通过,dev HTTP200,headless截图确认多色与体型差异可见"
+    },
+    "stage-06": {
+      "time": "2026-09-10T03:53:00+08:00",
+      "note": "细胞编辑器MVP:[E]/按钮暂停冻结世界,单击拾取细胞(区分拖拽)打开DOM面板,速度/感知/体型每步±0.05耗1进化点(分裂与吸收能量累积进化点),边界与点数不足保护,应用即更新该细胞并投放3个展示子代+恢复播放;无头reducer流程断言全过,build通过,dev HTTP200"
+    },
+    "stage-07": {
+      "time": "2026-09-10T04:24:41+08:00",
+      "note": "多细胞模块模型:新增core/organism.js定义body/flagellum/mouth/chloroplast四类模块与3x3网格布局,module布局synthesize()合成speed/能耗上限/吸收倍率/叶绿产能/进食半径等表型,初始播6只(游者/食者/光者演示体+随机体);整体游动靠flagellum、进食靠mouth、chloroplast被动产能;reducer TICK接入organisms移动/进食/死亡与全灭重播,SPAWN_ORGANISM手动投放按O/+按钮(上限24),renderer用独立InstancedMesh逐模块拼团渲染(模块色走theme token);theme.js补齐stage-07世界常量与模块色;无头smoke断言表型加成与30s游动/进食/上限均通过,build通过,dev HTTP200,浏览器截图确认HUD有机体数与团状模块可见、O键投放6→9生效"
+    },
+    "stage-08": {
+      "time": "2026-09-10T08:18:21+08:00",
+      "note": "有机体自主行为:新增behaviors.js每tick决策(感知->目标->移动),模块构成决定权值--mouth倾向觅食seek、chloroplast>=2且无mouth倾向停留光合photo(几乎原地+产能倍率)、体型分差距大时小者逃离flee(1.18倍速)/大者能量足时压制chase;行为行动成本drainMul差异(逃1.6>压1.25>寻1.0>巡0.9>光0.4);organism.js新增brute压迫者演示布局与computeOrganismStats,state.js TICK接入stepOrganisms(同帧快照统一决策),renderer按行为着色提示(逃灰/压暖/光绿,色值走theme token),HUD新增行为分布(觅/逃/压/光/巡);无头断言15项+flee/chase/seek/photo行为与能量成本全过,build通过,dev HTTP200,60s长跑行为多样有机体不灭"
+    },
+    "stage-09": {
+      "time": "2026-09-10T08:55:50+08:00",
+      "note": "生成编辑器(组装模式):[G]/按钮暂停世界并进入组装,目标有机体可在面板切换或在场景点选;3x3网格点空位添加体细胞/鞭毛/口器/叶绿体(每格消耗2进化点+12能量预算,新加格虚线标记),点已有格可移除(移除本次新加的退还进化点),右侧实时预览速度/储能上限/耗能/吸收/光合/进食半径的当前vs组装后变化;应用后按新布局重算表型(能量扣减、速度向量按新巡航速度归一)并立即恢复游动,关闭则丢弃缓冲不改世界;organism.js导出synthesizePhenotype/validateLayout/gridCapacity/applyLayoutToOrganism,state.js新增orgEditor缓冲与orgStats.edited,新增ui/organismEditor.js(DOM覆盖层,色值全走theme token);无头reducer断言45项全过,build通过,dev HTTP200,CDP驱动headless Edge冒烟21项全过(面板/网格回显/增删/预览/应用/HUD组装计数),截图确认面板与多色模块网格可见"
+    },
+    "stage-10": {
+      "time": "2026-09-10T10:05:00+08:00",
+      "note": "世代演化与体型趋势:有机体分裂繁殖+模块布局变异(增/删/换,body>=1保护);三条纵向营养带(富/过渡/贫)引入真实食物稀缺压力--分区配额+分区再生速率(富1.25x/贫0.45x)+进食能量按带折算(orgFoodZoneBase)+光合按带折算,配合归巢拉力与跨带觅食惩罚,饥饿线(维持度<0.3)先淘汰大体型;autoEvo每10秒结算各区存活比例刷新spawnWeights并记录世代模块布局统计,zones趋势图新增富营养/贫瘠区模块均数两条线;theme.js新增foodRegenZoneBase/orgFoodZoneBase/orgStarveRatio等token(无硬编码色值);无头验证11项全过(180s长跑:富营养带11只模块均6.64 vs 贫瘠带4只模块均3.75,三带均有存活),vite dev HTTP200且页面标题与趋势面板加载正常"
+    },
+    "stage-11": {
+      "time": "2026-09-10T20:51:59+08:00",
+      "note": "网格环境与食物链:新增src/world/map.js(24x24种子噪声地形,草地368/水域127/沙地81,同种子可复现,水域不可通行)与src/world/plants.js(生产者,仅草地萌发130株、生物量12~26随时间恢复);state.js接入三级能量流--草食者(口器/无爪)按生物量收割植物并计本带初级生产力,肉食者(捕食爪)猎杀草食者(同化率0.6+每模块肉量+捕猎冷却8s+饱腹0.95不屠场+每tick最多1杀+繁殖配额0.5倍草食数+全灭补播需猎物>=2),形成植物->草食->肉食生态金字塔;HUD生态行实时显示三层数量与累计取食/啃空/捕杀;无头180s长跑三层均存活不灭绝不爆炸(末段草食均4.3/肉食均1.9/植物130株),CDP浏览器冒烟+截图确认地形/植物/有机体可见;另新增vite.config.js忽略遗留.edge_*浏览器profile目录,修复其EBUSY锁导致npm run dev监听器崩溃"
+    },
+    "stage-12": {
+      "time": "2026-09-10T23:39:18+08:00",
+      "note": "生态经营面板与昼夜循环:新增core/eco.js纯函数层(lightFactor/temperatureOf/photoLightMul/visionLightMul/formatClock/简化Simpson/computeEcoMetrics),hud新增#eco-panel实时面板(总能量/种群数/多样性/温度/昼夜时钟)与1x/2x/3x倍速按钮,昼夜由dayPhase驱动——光照改环境光/天色/雾色/主光端点色(全走theme token,新增dayNight 8端点色与eco三色),叶绿体产能与视野随光照缩放(夜间0.296x/0.516x)且细胞与有机体同帧生效,state.js TICK按timeScale推进昼夜并受maxStepSeconds上限保护;无头验证24项断言全过(src内COLORS/WORLD/GENOME引用全解析、1x与3x相位推进精确匹配、非法倍速拒绝、tick不改原state),vite build通过(22模块1.92s),npm run dev HTTP200(5201端口),Edge headless截图确认3D场景+面板数值+倍速按钮+昼夜时钟可见"
+    },
+    "stage-13": {
+      "time": "2026-09-11T01:15:00+08:00",
+      "note": "环境干预:新增core/climate.js(clampTempOffset/baseTemperatureOf/mapTemperatureOf/plantTempMul/tempDrainMul/tempStressOf/adaptationShares/climateBandOf)与ui/envPanel.js(EnvMenu点击地面弹6项干预菜单:播种/排水/注水/升温/降温/复位;ClimatePanel实时显示基线气候温度/地图温度/偏移/气候带/冷暖适应占比与温度不适耗能),state.js新增Actions.seedPlants/drainTile/fillTile/adjustTemp/resetTemp(地形改写带rev与计数,调温步进5℃夹在±25℃并同步climateTemp与temperature),温度经tempDrainMul进入有机体维持耗能形成选择压力,autoEvo世代记录附带当代气候快照(climateTemp/tempOffset/mapTemp/plantMul/冷暖占比);无头18项断言全过(3随机种子180s:+15℃冷适应占比均值0.387->0.079且每种子都下降、种群均未团灭),UI层DOM桩28项全过(菜单6项意图/自动收起/视口回夹/面板读数),vite build24模块通过,dev server动态端口HTTP200且#climate-panel/#env-menu/标题Stage 13均在页面"
+    },
+    "stage-14": {
+      "time": "2026-09-11T02:35:00+08:00",
+      "note": "极简神经网络个体:新增core/nn.js([6,4,4]全连接+tanh,createBrain/encodeSenses/forward/decideBrain/mutateBrain/brainSummary),部分个体带脑并优先走感知编码->前向->argmax动作(动作不可执行时回退规则分支),繁殖时权重变异遗传+无脑父代按概率突变出脑+带脑子代小概率丢脑(认知谱系双向流),决策层觅食先验偏置+感知半径1.35x+取食效率1.35x构成认知优势;orgStats新增带脑占比与NN/普通人均觅食(含三营养带分区累计),HUD新增神经行#hud-nn实时显示占比与人均觅食倍数;无头smoke11项全过、300s分区对比带内比值富3.47/过渡3.22/贫3.62(全局3.48)且末态带脑占比50%两类共存、vite build 25模块通过、dev HTTP200且#hud-nn与标题Stage 14在页面"
+    },
+    "stage-15": {
+      "time": "2026-09-11T23:48:00+08:00",
+      "note": "群体与领地:新增core/tribe.js(纯函数层:dominantModuleOf/tribeKeyOf按「食性+优势模块」定基因簇,buildTribes簇内按tribeJoinDist贪心聚合出群体并产出center/radius/成员表,跨tick按成员延续性复用群体id以保住指令与能量池,applyOrders把群体指令投射到成员order字段供behaviors读取,shareEnergy按tribeEmitFrac/tribeDrawFrac做超额上缴与亏缺领取的公共能量池结算并累计given/taken,tribeSummary只读汇总)与ui/tribePanel.js(群体行:名/成员数/池/指令/禁繁/龄+统计区群体成员·最大·池·累计上缴领取·禁繁拦截),renderer绘制领地圈+悬浮自转群体标记+指令落点并按群体标识色给成员偏色,actions新增SET_TRIBE_ORDER/TOGGLE_TRIBE_BREED,main.js支持点选个体或列表行选群、地面点选落点行军、采集/自由/禁繁按钮与Esc取消选择,HUD新增群体行;vite build 27模块1.9s通过,dev HTTP200,Edge实机交互验收5项全过(HUD群体4群成员10池138;移动指令使领地随落点迁移且标记整体偏移;采集令成员转向植被取食且池持续流入274→428;禁繁后成员数6只停止增长而拦截计数6→38593攀升;累计上缴/领取1105→1242与148→213持续滚动);收尾复核:把隔离夹具改为「扫描候选走廊+逐条试跑到真实可达」后,无头断言111项连续5轮全过0失败(6/6聚群、落点距离27→3、群id存续500/500 tick),新增jsdom UI层验证20项全过(面板读数=统计、四按钮派发移动/采集/自由/禁繁、等待落点态文案与行高亮、指令回流后高亮跟随、色值取自theme token),vite build 27模块通过、dev HTTP200(5231)、Edge无头截图确认3D地形+成团个体+领地面板池量读数可见"
+    },
+    "stage-16": {
+      "time": "2026-09-12T01:25:00+08:00",
+      "note": "文明最小闭环:新增core/civilization.js纯函数层(createCivState 六资源点围游群成环/stepCivilization采集入库·储量枯竭·研究点·两级科技火种与工具·资源封顶·建城判定/buildCity落城/ackCity读档/milestones大事记/stageOf与civProgressOf/techView/civSummary只读视图)与ui/civPanel.js文明面板(进度条·三类资源完成度·研究点·两级科技视图·建城胜利资料页,色值全走COLORS token经cssHex转CSS),state.js接入civ并每tick推进,actions新增ACK_CITY,renderer新增文明层(资源晶体按储量缩放·采空转灰·采集脉动圈·城郭圈+核心塔+火灯火晕+工具环,只读state.civ),main.js装配CivPanel与#hud-civ读数;并修复资源点选址——锚点改取游群质心、方位角落水时左右交替偏转重扫,杜绝退化到全图随机把资源甩到半张地图外导致缺某类资源死等;无头验收45项全过(六点收拢最远16.8、火种97.2s→工具161.9s→城邦「初火城」200.8s落成、资源封顶、ACK_CITY幂等且不改世界数据、暂停冻结、stepCivilization不改入参),npm run dev启动正常(5199端口,index与main/civPanel/civilization/renderer/theme/actions均HTTP200),Chrome无头截图确认3D地形+资源点+HUD与文明面板读数(文明21%/研究点4/水0-60)可见且无黑屏报错;本轮收尾补强(自动采集闭环):新增civilization.dispatchGatherers文明层自动派遣——自由群体自动前往仍缺口的资源点,玩家亲自下过指令的群体(manual)永不干预,建城后停止,且只在单点无人在途时才派(避免把全部群体抽走);tribe.js跨tick保留auto/work/manual字段,tribePanel标注「文明自动派遣」;对照实验(开/关各3轮300s)开=建城3/3(170/278/204s)、关=0/3(最高52%),证明资源点→单位自动采集→入库在无人干预下真正闭环;无头验收28项全过(新增派遣规则7项与纯函数断言),npm run build(29模块2.2s)EXIT=0,dev HTTP200且页面正常渲染,浏览器实测建城胜利页于130s弹出(文明100%、科技2/2、累计入库204、初火城落点(-27,-21));已知无害项:面板流速按钮为click绑定(快捷键1/2/3同源),自动化坐标点击点击不稳需原生事件派发"
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"extends":"./tsconfig.json","compilerOptions":{"strict":true,"allowJs":false,"resolveJsonModule":true},"include":["src/vite-env.d.ts","src/game/**/*.ts","src/game/**/*.tsx","src/components/reference/ReferenceScene2D.tsx","src/components/reference/sceneModel.ts","src/types.ts"],"exclude":["node_modules"]}

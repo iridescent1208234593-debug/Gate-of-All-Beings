@@ -1,0 +1,1954 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>西木会馆 · 配色海报</title>
+<meta name="description" content="西木会馆 · 配色海报 — 用中国古色与色环为你的角色定制双色水墨海报。">
+<link rel="stylesheet" href="/design-system/design-system.css?v=3">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--qc-bg); color: var(--qc-text);
+    font-family: var(--qc-font-body);
+    display: flex; min-height: 100vh;
+    padding-top: 41px; /* 避开外部共享导航 shared-chrome-v2.js 固定顶部（41px） */
+  }
+  /* ---------- 未登录锁定 ---------- */
+  .hb-locked { position: relative; }
+  .hb-locked > *:not(.hb-lock-overlay) { opacity: .45; pointer-events: none; filter: saturate(.5); user-select: none; }
+  .hb-lock-overlay {
+    position: absolute; inset: 0; z-index: 5; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; letter-spacing: 1px; color: var(--qc-dim);
+    background: transparent; border-radius: var(--qc-r-lg);
+  }
+  .hb-lock-overlay:hover { color: var(--qc-gold); background: rgba(212,168,64,.06); }
+  /* 登录提示弹窗 */
+  #hbAuthMask {
+    position: fixed; inset: 0; z-index: 99999; background: rgba(20,26,22,.62);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  #hbAuthMask[hidden] { display: none; }
+  .hb-auth-box {
+    background: var(--qc-panel); border: 1px solid var(--qc-border); border-radius: var(--qc-r-lg);
+    max-width: 400px; width: 100%; padding: 24px; box-shadow: var(--qc-shadow-lg); text-align: center;
+  }
+  .hb-auth-box strong { font-size: 17px; letter-spacing: 2px; font-family: var(--qc-font-hand); }
+  .hb-auth-box p { font-size: 13px; color: var(--qc-dim); line-height: 1.9; margin: 12px 0 18px; }
+  .hb-auth-box .hb-auth-btns { display: flex; gap: 10px; }
+  .hb-auth-box button { flex: 1; padding: 10px; border-radius: var(--qc-r-md); font-size: 14px; font-family: inherit; cursor: pointer; letter-spacing: 2px; }
+  #hbAuthGo { background: var(--qc-gold); color: #fff; border: none; }
+  #hbAuthCancel { background: transparent; color: var(--qc-dim); border: 1px solid var(--qc-border); }
+  /* 我的海报列表 */
+  .poster-list { display: flex; flex-direction: column; gap: 8px; }
+  .poster-item {
+    display: flex; gap: 10px; align-items: center; border: 1px solid var(--qc-border);
+    border-radius: var(--qc-r-md); padding: 8px; background: var(--qc-panel);
+  }
+  .poster-item img { width: 42px; height: 74px; object-fit: cover; border-radius: var(--qc-r-sm); border: 1px solid var(--qc-border); flex-shrink: 0; background:#eee; }
+  .poster-item .pi-info { flex: 1; min-width: 0; }
+  .poster-item .pi-title { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .poster-item .pi-sub { font-size: 11px; color: var(--qc-dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .poster-item .pi-btns { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+  .poster-item .pi-btns button {
+    padding: 3px 8px; font-size: 11px; border: 1px solid var(--qc-border); border-radius: var(--qc-r-sm);
+    background: var(--qc-bg); color: var(--qc-text); cursor: pointer; font-family: inherit; white-space: nowrap;
+  }
+  .poster-item .pi-btns button:hover { border-color: var(--qc-accent); color: var(--qc-accent); }
+  .poster-item .pi-btns button.pub { border-color: var(--qc-gold); color: var(--qc-gold); }
+  .hb-empty { font-size: 12px; color: var(--qc-dim); padding: 6px 0; }
+  /* ---------- 舞台 ---------- */
+  .stage {
+    /* 桌面端：海报区固定在左侧，仅配置面板随页面滚动 */
+    flex: 1; position: sticky; top: 41px; align-self: flex-start; z-index: 5;
+    height: calc(100vh - 41px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    background:
+      radial-gradient(ellipse at 30% 20%, var(--qc-accent-glow), transparent 55%),
+      radial-gradient(ellipse at 75% 85%, var(--qc-gold-glow), transparent 50%),
+      var(--qc-bg);
+  }
+  .canvas-wrap {
+    position: relative;
+    height: min(84vh, 148vw);
+    aspect-ratio: 9 / 16;
+    background: #fff;
+    box-shadow: var(--qc-shadow-lg);
+    border-radius: var(--qc-r-lg);
+    overflow: hidden;
+    border: 1px solid var(--qc-border);
+    /* 触摸拖拽组件时不滚动页面 */
+    touch-action: none;
+  }
+  .canvas-wrap canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* 双击组件唤出的选中外框（拖拽移动 + 手柄缩放） */
+  .sel-box {
+    position: absolute; z-index: 20; display: none;
+    border: 2px dashed rgba(212, 168, 64, .95);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .08);
+    box-sizing: border-box;
+    touch-action: none;
+  }
+  .sel-box .sel-handle {
+    position: absolute; width: 16px; height: 16px;
+    background: #d4a840; border: 2px solid #fff; border-radius: 50%;
+    box-sizing: border-box; cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .3);
+  }
+  /* ---------- 控制面板 ---------- */
+  .panel {
+    width: 400px; flex-shrink: 0;
+    padding: 18px;
+    /* 整页自然滚动：不再把面板锁死在视口高度内滚动 */
+    max-height: none; overflow: visible;
+    border-left: 1px solid var(--qc-border);
+    background: var(--qc-bg);
+  }
+  .panel h1 { font-size: 20px; letter-spacing: 3px; margin: 0 0 4px; font-family: var(--qc-font-hand); }
+  .panel .sub { font-size: 12px; color: var(--qc-dim); margin-bottom: 14px; letter-spacing: 1px; }
+  .panel .qc-card { margin-bottom: 12px; padding: var(--qc-sp-3) var(--qc-sp-4); }
+  .layer-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 8px; }
+  .layer-name { font-size: 14px; font-weight: 600; letter-spacing: 1px; flex: 1; }
+  .layer-no { font-size: 11px; color: var(--qc-gold); margin-right: 4px; }
+  .val { font-size: 11px; color: var(--qc-dim); font-variant-numeric: tabular-nums; min-width: 38px; text-align: right; }
+  .lbl { font-size: 12px; color: var(--qc-dim); flex-shrink: 0; letter-spacing: .5px; }
+  .row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .switch {
+    position: relative; width: 34px; height: 19px; flex-shrink: 0;
+    background: var(--qc-border); border-radius: 10px; cursor: pointer; transition: background .2s;
+  }
+  .switch.on { background: var(--qc-accent); }
+  .switch::after {
+    content: ""; position: absolute; top: 2px; left: 2px;
+    width: 15px; height: 15px; background: #fff; border-radius: 50%; transition: left .2s;
+  }
+  .switch.on::after { left: 17px; }
+  .order-btns { display: flex; gap: 4px; flex-shrink: 0; }
+  .order-btns button {
+    width: 24px; height: 24px; border: 1px solid var(--qc-border); border-radius: var(--qc-r-sm);
+    background: var(--qc-panel); color: var(--qc-text); font-size: 11px; line-height: 1;
+    cursor: pointer; padding: 0; transition: all .15s;
+  }
+  .order-btns button:hover:not(:disabled) { border-color: var(--qc-accent); color: var(--qc-accent); }
+  .order-btns button:disabled { opacity: .3; cursor: default; }
+  .sub-row { margin: 8px 0 2px; font-size: 12px; color: var(--qc-accent); letter-spacing: 1px; }
+  .mini-tip { margin-top: 6px; font-size: 11px; color: var(--qc-dim); line-height: 1.6; }
+  input[type=color] {
+    width: 42px; height: 28px; border: 1px solid var(--qc-border); border-radius: var(--qc-r-sm);
+    background: var(--qc-panel); padding: 2px; cursor: pointer; flex-shrink: 0;
+  }
+  .name-input {
+    width: 70px; padding: 5px 6px; background: var(--qc-panel); color: var(--qc-text);
+    border: 1px solid var(--qc-border); border-radius: var(--qc-r-md); font-size: 14px; text-align: center;
+    font-family: var(--qc-font-body); outline: none;
+  }
+  .name-input:focus { border-color: var(--qc-accent); }
+  .qc-select.sm, .qc-input.sm { padding: 5px 8px; font-size: 13px; }
+  /* 快速配色卡 */
+  .scheme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 6px; }
+  .scheme-card {
+    border: 1px solid var(--qc-border); border-radius: var(--qc-r-md); padding: 6px;
+    cursor: pointer; background: var(--qc-panel); transition: all .15s; text-align: center;
+    position: relative;
+  }
+  .scheme-card:hover { border-color: var(--qc-accent); transform: translateY(-2px); box-shadow: var(--qc-shadow-sm); }
+  .scheme-card.is-active { border-color: var(--qc-gold); box-shadow: 0 0 0 1px var(--qc-gold); }
+  .scheme-card .sw { display: flex; height: 26px; border-radius: var(--qc-r-sm); overflow: hidden; margin-bottom: 4px; }
+  .scheme-card .sw span { flex: 1; }
+  .scheme-card .nm { font-size: 11px; color: var(--qc-text); }
+  .scheme-del {
+    position: absolute; top: 2px; right: 2px; z-index: 3;
+    width: 17px; height: 17px; line-height: 15px; text-align: center;
+    border-radius: 50%; border: 1px solid var(--qc-error, #c0392b);
+    background: var(--qc-panel); color: var(--qc-error, #c0392b);
+    font-size: 10px; cursor: pointer; padding: 0; font-family: inherit;
+    opacity: 0; transition: opacity .15s; box-shadow: 0 1px 3px rgba(0,0,0,.16);
+    pointer-events: none;
+  }
+  .scheme-card:hover .scheme-del { opacity: .9; pointer-events: auto; }
+  .scheme-del:hover { background: var(--qc-error, #c0392b); color: #fff; opacity: 1 !important; }
+  /* 海报页局部覆盖：古色色板完整展示（全局 design-system.css 默认 max-height:240px 只显示约6行）
+     仅在 .panel 内生效，不影响主站及其他页面；整页可滚动后保留适度限高防页面过长 */
+  .panel .qc-swatch-grid {
+    max-height: min(600px, 62vh);
+    overflow-y: auto;
+  }
+  /* 色环 */
+  .wheel-wrap { display: flex; gap: 12px; flex-wrap: wrap; }
+  .wheel-slot { flex: 1; min-width: 150px; }
+  .wheel-slot canvas {
+    border-radius: 50%; cursor: crosshair; display: block; margin: 0 auto;
+    box-shadow: var(--qc-shadow-sm); border: 3px solid var(--qc-panel); outline: 1px solid var(--qc-border);
+  }
+  .wheel-label { font-size: 11px; color: var(--qc-dim); text-align: center; margin-bottom: 4px; letter-spacing: 1px; }
+  .wheel-hex { font-size: 11px; color: var(--qc-accent); font-variant-numeric: tabular-nums; }
+  /* 上传 */
+  .char-preview { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+  .char-preview img { width: 56px; height: 80px; object-fit: cover; border-radius: var(--qc-r-sm); border: 1px solid var(--qc-border); }
+  #charCtl { display: none; }
+  #mildSplitCtl, #darkSplitCtl { display: none; }
+  #btnMergeDark, #btnMergeMild { display: none; }
+  .actions { display: flex; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+  .actions .qc-btn { flex: 1; min-width: 96px; }
+  .qc-card.top { outline: 1px solid var(--qc-accent); }
+  @media (max-width: 860px) {
+    body { flex-direction: column; }
+    /* 移动端：海报区固定在顶部，仅下方配置面板随页面滚动 */
+    .stage { position: sticky; top: 41px; flex: none; width: 100%; height: auto; min-height: 0; padding: 10px 12px 14px; }
+    .canvas-wrap { height: min(56vh, 148vw); }
+    .panel { width: 100%; max-height: none; border-left: none; border-top: 1px solid var(--qc-border); }
+  }
+  /* 方正书宋（色名大字 / 匾文同款字体） */
+  @font-face { font-family: 'FZShuSong'; src: url('FZSSJW.TTF') format('truetype'); }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="canvas-wrap">
+    <canvas id="cv"></canvas>
+    <div id="selBox" class="sel-box" style="display:none;">
+      <span class="sel-handle" data-h="nw"></span>
+      <span class="sel-handle" data-h="n"></span>
+      <span class="sel-handle" data-h="ne"></span>
+      <span class="sel-handle" data-h="e"></span>
+      <span class="sel-handle" data-h="se"></span>
+      <span class="sel-handle" data-h="s"></span>
+      <span class="sel-handle" data-h="sw"></span>
+      <span class="sel-handle" data-h="w"></span>
+    </div>
+  </div>
+</div>
+
+<div class="panel">
+  <h1>配色海报</h1>
+  <div class="sub">为你的角色定制双色水墨海报 · 古色 / 色环 / 上传角色图</div>
+
+  <!-- ═══ ① 配色 ═══ -->
+  <div class="qc-card">
+    <div class="layer-head"><span class="layer-name">① 配色</span><span class="qc-tag qc-tag--gold">古色 · 色环</span></div>
+    <div class="lbl" style="margin-bottom:5px;">快速搭配</div>
+    <div class="scheme-grid" id="schemeGrid"></div>
+
+    <div class="sub-row">自由选色 · 479 种中国古色 · 五行归类</div>
+    <div class="row">
+      <input type="text" class="qc-input sm" id="ancientSearch" placeholder="搜色名 / 五行（金木水火土）" style="flex:1;">
+    </div>
+    <div class="qc-slots" style="margin-bottom:8px;">
+      <div class="qc-slot is-active" id="slotPrimary" onclick="setActiveSlot('primary')">
+        <span class="qc-slot__chip" id="slotPrimaryChip"></span>
+        <span class="qc-slot__col"><span class="qc-slot__label">主色（左半幅）</span><span class="qc-slot__name" id="slotPrimaryName">点击选</span></span>
+      </div>
+      <div class="qc-slot" id="slotAccent" onclick="setActiveSlot('accent')">
+        <span class="qc-slot__chip" id="slotAccentChip"></span>
+        <span class="qc-slot__col"><span class="qc-slot__label">辅色（右半幅）</span><span class="qc-slot__name" id="slotAccentName">点击选</span></span>
+      </div>
+      <button type="button" class="qc-btn qc-btn--sm" id="applyCustomBtn" onclick="applyCustomColors()" disabled style="margin-left:auto;align-self:center;">应用</button>
+    </div>
+    <div class="qc-tabs" id="colorTabs"></div>
+    <div class="qc-swatch-grid" id="swatchGrid"></div>
+
+    <div class="sub-row">色环选色</div>
+    <div class="mini-tip" style="margin:0 0 8px;">在色环上点选任意颜色，立即应用于海报左右主辅色。</div>
+    <div class="wheel-wrap">
+      <div class="wheel-slot">
+        <div class="wheel-label">主色（左）</div>
+        <canvas id="wheelPrimary" width="140" height="140"></canvas>
+        <div class="row" style="justify-content:center;margin-top:5px;">
+          <span class="lbl">亮度</span>
+          <input type="range" class="qc-range" id="wheelPrimaryV" min="5" max="100" value="82" style="width:70px;" oninput="onWheelV('primary',this.value)">
+          <span class="wheel-hex" id="wheelPrimaryHex"></span>
+        </div>
+      </div>
+      <div class="wheel-slot">
+        <div class="wheel-label">辅色（右）</div>
+        <canvas id="wheelAccent" width="140" height="140"></canvas>
+        <div class="row" style="justify-content:center;margin-top:5px;">
+          <span class="lbl">亮度</span>
+          <input type="range" class="qc-range" id="wheelAccentV" min="5" max="100" value="72" style="width:70px;" oninput="onWheelV('accent',this.value)">
+          <span class="wheel-hex" id="wheelAccentHex"></span>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <input type="text" class="qc-input sm" id="wheelNameP" placeholder="主色名" maxlength="12" style="width:86px;">
+      <span class="lbl">×</span>
+      <input type="text" class="qc-input sm" id="wheelNameA" placeholder="辅色名" maxlength="12" style="width:86px;">
+      <button type="button" class="qc-btn qc-btn--sm" id="wheelSaveBtn" onclick="hbSaveScheme()" style="margin-left:auto;">保存配色</button>
+    </div>
+    <div class="mini-tip" id="wheelSaveMsg" style="min-height:14px;margin-top:4px;">保存后同步到西木会馆配色库，全馆可用。</div>
+    <div class="sub-row">馆友保存的配色</div>
+    <div class="scheme-grid" id="schemeGridUser"><div class="hb-empty">加载中…</div></div>
+  </div>
+
+  <!-- ═══ ② 角色图像 ═══ -->
+  <div class="qc-card" id="layerBox-charImg">
+    <div class="layer-head">
+      <span class="layer-name"><span class="layer-no"></span>角色图像</span>
+      <div class="order-btns">
+        <button data-order-up="charImg" title="上移一层">▲</button>
+        <button data-order-down="charImg" title="下移一层">▼</button>
+      </div>
+      <div class="switch on" data-layer="charImg"></div>
+    </div>
+    <div class="qc-upload" id="charUpload" onclick="document.getElementById('charFile').click()">
+      点击或拖拽上传角色图像，叠加到海报上<br>
+      <span style="font-size:11px;">支持 JPG / PNG / WEBP（≤ 8MB），可拖动调整位置</span>
+      <input type="file" id="charFile" accept="image/jpeg,image/png,image/webp" hidden>
+    </div>
+    <div id="charCtl">
+      <div class="char-preview">
+        <img id="charThumb" alt="角色图预览">
+        <div style="flex:1;">
+          <div style="font-size:12px;" id="charInfo">已加载</div>
+          <button type="button" class="qc-btn qc-btn--sm qc-btn--danger" style="margin-top:6px;" onclick="removeCharImg()">移除</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px;">
+        <span class="lbl">透明</span>
+        <input type="range" class="qc-range" min="0" max="100" value="100" data-layer="charImg">
+        <span class="val" data-opacity-label="charImg">100%</span>
+      </div>
+      <div class="row">
+        <span class="lbl">缩放</span>
+        <input type="range" class="qc-range" min="20" max="300" value="100" data-scale="charImg">
+        <span class="val" data-scale-label="charImg">100%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ ③ 背景 ═══ -->
+  <div class="qc-card">
+    <div class="layer-head"><span class="layer-name">背景</span></div>
+    <div class="row">
+      <select class="qc-select sm" id="bgSelect" style="flex:1;">
+        <option value="duotone" selected>双色 · 主色+辅色+底部渐变（素材风）</option>
+        <option value="#ffffff">白色</option>
+        <option value="#f2efe8">米白</option>
+        <option value="#0f1013">深灰</option>
+        <option value="transparent">透明（导出 PNG）</option>
+      </select>
+    </div>
+    <div class="row" id="duotoneCtl">
+      <span class="lbl">主色(左)</span>
+      <input type="color" id="colorA" value="#90a65d">
+      <span class="lbl">辅色(右)</span>
+      <input type="color" id="colorB" value="#2b313a">
+    </div>
+    <div class="mini-tip">配色区的快速搭配 / 古色 / 色环均直接作用于这里，也可手动微调。</div>
+  </div>
+
+  <!-- ═══ ④ 淡墨竹影 ═══ -->
+  <div class="qc-card" id="layerBox-mild">
+    <div class="layer-head">
+      <span class="layer-name"><span class="layer-no">#2</span> 淡墨竹影</span>
+      <div class="order-btns">
+        <button data-order-up="mild" title="上移一层">▲</button>
+        <button data-order-down="mild" title="下移一层">▼</button>
+      </div>
+      <div class="switch on" data-layer="mild"></div>
+    </div>
+    <div class="row"><span class="lbl">墨色</span><input type="color" data-tint="mild" value="#404a3a"></div>
+    <div id="mildWholeCtl">
+      <div class="row">
+        <input type="range" class="qc-range" min="0" max="100" value="65" data-layer="mild">
+        <span class="val" data-opacity-label="mild">65%</span>
+      </div>
+      <div class="row">
+        <span class="lbl">缩放</span>
+        <input type="range" class="qc-range" min="30" max="200" value="100" data-scale="mild">
+        <span class="val" data-scale-label="mild">100%</span>
+      </div>
+    </div>
+    <div id="mildSplitCtl">
+      <div class="sub-row">淡墨 · 左上</div>
+      <div class="row"><input type="range" class="qc-range" min="0" max="100" value="65" data-layer="mildTL"><span class="val" data-opacity-label="mildTL">65%</span></div>
+      <div class="row"><span class="lbl">缩放</span><input type="range" class="qc-range" min="30" max="200" value="100" data-scale="mildTL"><span class="val" data-scale-label="mildTL">100%</span></div>
+      <div class="sub-row">淡墨 · 右下</div>
+      <div class="row"><input type="range" class="qc-range" min="0" max="100" value="65" data-layer="mildBR"><span class="val" data-opacity-label="mildBR">65%</span></div>
+      <div class="row"><span class="lbl">缩放</span><input type="range" class="qc-range" min="30" max="200" value="100" data-scale="mildBR"><span class="val" data-scale-label="mildBR">100%</span></div>
+    </div>
+    <div class="mini-tip">双击画布中的竹影可拆分为左上/右下独立调整，再双击合并。</div>
+  </div>
+
+  <!-- ═══ ⑤ 浓墨竹影 ═══ -->
+  <div class="qc-card" id="layerBox-dark">
+    <div class="layer-head">
+      <span class="layer-name"><span class="layer-no">#3</span> 浓墨竹影</span>
+      <div class="order-btns">
+        <button data-order-up="dark" title="上移一层">▲</button>
+        <button data-order-down="dark" title="下移一层">▼</button>
+      </div>
+      <div class="switch on" data-layer="dark"></div>
+    </div>
+    <div class="row"><span class="lbl">墨色</span><input type="color" data-tint="dark" value="#101721"></div>
+    <div id="darkWholeCtl">
+      <div class="row">
+        <input type="range" class="qc-range" min="0" max="100" value="100" data-layer="dark">
+        <span class="val" data-opacity-label="dark">100%</span>
+      </div>
+      <div class="row">
+        <span class="lbl">缩放</span>
+        <input type="range" class="qc-range" min="30" max="200" value="100" data-scale="dark">
+        <span class="val" data-scale-label="dark">100%</span>
+      </div>
+    </div>
+    <div id="darkSplitCtl">
+      <div class="sub-row">浓墨 · 左上</div>
+      <div class="row"><input type="range" class="qc-range" min="0" max="100" value="100" data-layer="darkTL"><span class="val" data-opacity-label="darkTL">100%</span></div>
+      <div class="row"><span class="lbl">缩放</span><input type="range" class="qc-range" min="30" max="200" value="100" data-scale="darkTL"><span class="val" data-scale-label="darkTL">100%</span></div>
+      <div class="sub-row">浓墨 · 右下</div>
+      <div class="row"><input type="range" class="qc-range" min="0" max="100" value="100" data-layer="darkBR"><span class="val" data-opacity-label="darkBR">100%</span></div>
+      <div class="row"><span class="lbl">缩放</span><input type="range" class="qc-range" min="30" max="200" value="100" data-scale="darkBR"><span class="val" data-scale-label="darkBR">100%</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ ⑥ 双色文字 ═══ -->
+  <div class="qc-card" id="layerBox-colorText">
+    <div class="layer-head">
+      <span class="layer-name">双色文字（色名）</span>
+      <div class="switch on" data-layer="colorText"></div>
+    </div>
+    <div class="row">
+      <input type="range" class="qc-range" min="0" max="100" value="100" data-layer="colorText">
+      <span class="val" data-opacity-label="colorText">100%</span>
+    </div>
+    <div class="row">
+      <span class="lbl">左色名</span>
+      <input type="text" class="name-input" id="nameA" value="葱青" maxlength="4">
+      <span class="lbl">右色名</span>
+      <input type="text" class="name-input" id="nameB" value="玄青" maxlength="4">
+    </div>
+    <div class="mini-tip">粗宋体竖排色名 + RGB 标注；颜色自动与所在半边背景互换。</div>
+  </div>
+
+  <!-- ═══ ⑦ 门匾 ═══ -->
+  <div class="qc-card" id="layerBox-frame">
+    <div class="layer-head">
+      <span class="layer-name"><span class="layer-no">#4</span> 门匾</span>
+      <div class="order-btns">
+        <button data-order-up="frame" title="上移一层">▲</button>
+        <button data-order-down="frame" title="下移一层">▼</button>
+      </div>
+      <div class="switch on" data-layer="frame"></div>
+    </div>
+    <div class="row">
+      <input type="range" class="qc-range" min="0" max="100" value="100" data-layer="frame">
+      <span class="val" data-opacity-label="frame">100%</span>
+    </div>
+    <div class="row">
+      <span class="lbl">缩放</span>
+      <input type="range" class="qc-range" min="30" max="200" value="100" data-scale="frame">
+      <span class="val" data-scale-label="frame">100%</span>
+    </div>
+    <div class="row" style="margin-top:6px;">
+      <span class="lbl">匾文</span>
+      <input type="text" class="qc-input sm" id="frameText" value="" maxlength="6" placeholder="输入匾文（竖排，自动拉长）" style="flex:1;font-family:FZShuSong,serif;">
+    </div>
+  </div>
+
+  <!-- ═══ ⑧ 标题 ═══ -->
+  <div class="qc-card" id="layerBox-logo">
+    <div class="layer-head">
+      <span class="layer-name"><span class="layer-no">#5</span> 标题</span>
+      <div class="order-btns">
+        <button data-order-up="logo" title="上移一层">▲</button>
+        <button data-order-down="logo" title="下移一层">▼</button>
+      </div>
+      <div class="switch on" data-layer="logo"></div>
+    </div>
+    <div class="row">
+      <input type="range" class="qc-range" min="0" max="100" value="100" data-layer="logo">
+      <span class="val" data-opacity-label="logo">100%</span>
+    </div>
+    <div class="row">
+      <span class="lbl">缩放</span>
+      <input type="range" class="qc-range" min="30" max="200" value="100" data-scale="logo">
+      <span class="val" data-scale-label="logo">100%</span>
+    </div>
+    <div class="row">
+      <span class="lbl">颜色</span>
+      <input type="color" id="logoColor" value="#216753" title="标题文字颜色">
+      <span class="mini-tip" style="margin:0;">标题文字颜色，实时生效</span>
+    </div>
+  </div>
+
+  <!-- ═══ ⑨ 保存与共享 ═══ -->
+  <div class="qc-card" id="saveCard">
+    <div class="layer-head"><span class="layer-name">⑨ 保存与共享</span><span class="qc-tag qc-tag--gold">云端 · 与人设互通</span></div>
+    <div class="row">
+      <span class="lbl">标题</span>
+      <input type="text" class="qc-input sm" id="posterTitle" placeholder="海报标题（必填，≤60字）" maxlength="60" style="flex:1;">
+    </div>
+    <div class="row">
+      <span class="lbl">关联人设</span>
+      <select class="qc-select sm" id="bindChar" style="flex:1;">
+        <option value="">不关联人设</option>
+      </select>
+    </div>
+    <div class="mini-tip">关联人设后：保存时海报配色会同步到该人设的登记配色，人设页配色改动也可在此应用；共享画廊时按人设一一对应，多人设不混淆。草稿会自动保存在本机，刷新不丢。</div>
+    <div class="actions">
+      <button type="button" class="qc-btn qc-btn--gold" id="btnSavePoster" onclick="savePoster()">保存到云端</button>
+    </div>
+    <div class="mini-tip" id="saveMsg" style="min-height:16px;margin-top:6px;"></div>
+    <div class="sub-row">我的海报</div>
+    <div id="myPosterList" class="poster-list"><div class="hb-empty">登录后可查看与保存海报</div></div>
+  </div>
+
+  <div class="actions">
+    <button class="qc-btn" id="btnExport">导出 PNG</button>
+    <button class="qc-btn qc-btn--gold" id="btnMergeDark" style="display:none;">合并浓墨</button>
+    <button class="qc-btn qc-btn--gold" id="btnMergeMild" style="display:none;">合并淡墨</button>
+  </div>
+  <div class="mini-tip" style="margin-top:10px;">
+    拖动滑块调节透明度与缩放，点击开关显隐图层，可直接拖动画布中的组件调整位置；▲▼ 调整图层上下顺序。导出为 1080×1920 成品图。
+  </div>
+</div>
+
+<script src="/design-system/ancient-colors.js"></script>
+<script>
+const W = 1080, H = 1920;
+const cv = document.getElementById('cv');
+cv.width = W; cv.height = H;
+const ctx = cv.getContext('2d');
+
+// 组件位置（依据素材海报比例定位）
+const POS = {
+  mild:   { x: 0,   y: 0,   w: 1080, h: 1920 },
+  mildTL: { x: 0,   y: 0,   w: 1080, h: 1920 },
+  mildBR: { x: 0,   y: 0,   w: 1080, h: 1920 },
+  dark:   { x: 0,   y: 0,   w: 1080, h: 1920 },
+  darkTL: { x: 0,   y: 0,   w: 1080, h: 1920 },
+  darkBR: { x: 0,   y: 0,   w: 1080, h: 1920 },
+  frame:  { x: 50,  y: 830, w: 230,  h: 254 },
+  logo:   { x: 100, y: 1498, w: 880, h: 420 }
+};
+// 角色图（上传后按原图比例置入，中心点定位）
+const charPos = { cx: W / 2, cy: H * 0.55, bw: 700, bh: 1200 };
+
+const layers = {
+  mild:   { img: null, opacity: .65, visible: true, src: 'layer_bamboo_淡雾_fixed.png', scale: 1, tint: '#404a3a' },
+  mildTL: { img: null, opacity: .65, visible: true, src: 'layer_bamboo_淡雾_左上_fixed.png', scale: 1, tint: '#404a3a' },
+  mildBR: { img: null, opacity: .65, visible: true, src: 'layer_bamboo_淡雾_右下_fixed.png', scale: 1, tint: '#404a3a' },
+  dark:   { img: null, opacity: 1, visible: true, src: 'layer_bamboo_浓墨_fixed.png', scale: 1, tint: '#101721' },
+  darkTL: { img: null, opacity: 1, visible: true, src: 'layer_bamboo_浓墨_左上_fixed.png', scale: 1, tint: '#101721' },
+  darkBR: { img: null, opacity: 1, visible: true, src: 'layer_bamboo_浓墨_右下_fixed.png', scale: 1, tint: '#101721' },
+  frame:  { img: null, opacity: 1, visible: true, src: 'frame_deco.png', scale: 1 },
+  logo:   { img: null, opacity: 1, visible: true, src: 'logo_text.png', scale: 1, tint: '#216753' },
+  charImg: { img: null, opacity: 1, visible: true, scale: 1 },   // 用户上传的角色图
+  colorText: { opacity: 1, visible: true },                      // 虚拟图层：双色文字
+  frameText: { text: '', visible: true }                         // 虚拟图层：门匾文字
+};
+
+let mildSplit = false, darkSplit = false;
+// 图层显示顺序：越靠后越在上层
+let layerOrder = ['mild', 'charImg', 'dark', 'frame', 'logo'];
+
+let loaded = 0;
+const imgKeys = Object.keys(layers).filter(k => layers[k].src);
+const total = imgKeys.length;
+for (const key of imgKeys) {
+  const img = new Image();
+  img.onload = () => { layers[key].img = img; loaded++; if (loaded === total) { draw(); updateOrderUI(); } };
+  img.src = layers[key].src;
+}
+
+function bgColor() { return document.getElementById('bgSelect').value; }
+function colorA() { return document.getElementById('colorA').value; }
+function colorB() { return document.getElementById('colorB').value; }
+function hexToRgb(hex) {
+  const v = hex.replace('#', '');
+  return { r: parseInt(v.slice(0, 2), 16), g: parseInt(v.slice(2, 4), 16), b: parseInt(v.slice(4, 6), 16) };
+}
+
+// —— 双色背景 ——
+let grain = null;
+function getGrain() {
+  if (grain) return grain;
+  grain = document.createElement('canvas');
+  grain.width = W; grain.height = H;
+  const g = grain.getContext('2d');
+  const id = g.createImageData(W, H);
+  const d = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const v = 116 + Math.random() * 24;
+    d[i] = d[i + 1] = d[i + 2] = v;
+    d[i + 3] = 255;
+  }
+  g.putImageData(id, 0, 0);
+  return grain;
+}
+function duotoneHalf(c2, color, x, w) {
+  const g = c2.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, color);
+  g.addColorStop(0.52, color);
+  g.addColorStop(0.885, '#ffffff');
+  g.addColorStop(1, '#ffffff');
+  c2.fillStyle = g;
+  c2.fillRect(x, 0, w, H);
+}
+function drawDuotoneBg(c2) {
+  duotoneHalf(c2, colorA(), 0, 540);
+  duotoneHalf(c2, colorB(), 540, W - 540);
+  c2.save();
+  c2.globalAlpha = 0.35;
+  c2.globalCompositeOperation = 'overlay';
+  c2.drawImage(getGrain(), 0, 0);
+  c2.restore();
+}
+
+// —— 双色文字（竖排色名 + RGB 标注，颜色与所在半边背景互换）——
+const SERIF = '"FZShuSong","方正书宋二_GBK","STZhongsong","SimSun","宋体",serif';
+if (document.fonts && document.fonts.load) {
+  document.fonts.load('185px FZShuSong').then(() => draw()).catch(() => {});
+}
+function drawColorText(c2) {
+  const t = layers.colorText;
+  if (!t.visible || t.opacity <= 0) return;
+  const A = document.getElementById('nameA').value.trim();
+  const B = document.getElementById('nameB').value.trim();
+  c2.save();
+  c2.globalAlpha = t.opacity;
+  c2.textAlign = 'center';
+  c2.textBaseline = 'middle';
+  drawName(c2, A, 160, colorB());   // 左半边的文字用辅色
+  drawName(c2, B, 937, colorA());   // 右半边的文字用主色
+  c2.restore();
+}
+function drawName(c2, text, x, col) {
+  if (!text) return;
+  const chars = [...text];
+  const size = 185, advance = 213;
+  const firstCenterY = 132;
+  c2.fillStyle = col;
+  c2.font = `${size}px ${SERIF}`;
+  chars.forEach((ch, i) => c2.fillText(ch, x, firstCenterY + i * advance));
+  const rgb = hexToRgb(col);
+  const bottom = firstCenterY + (chars.length - 1) * advance + size / 2;
+  c2.font = '24px Arial, "Microsoft YaHei", sans-serif';
+  c2.fillText(`RGB ${rgb.r} ${rgb.g} ${rgb.b}`, x, bottom + 55);
+  c2.fillText(col.replace('#', '').toLowerCase(), x, bottom + 86);
+}
+
+// —— 竹影着色（任意颜色替换）——
+function tintedSource(l) {
+  if (!l.tint || !l.img) return l.img;
+  if (l._tintC && l._tintKey === l.tint) return l._tintC;
+  const c = document.createElement('canvas');
+  c.width = l.img.width; c.height = l.img.height;
+  const cc = c.getContext('2d');
+  cc.drawImage(l.img, 0, 0);
+  cc.globalCompositeOperation = 'source-in';
+  cc.fillStyle = l.tint;
+  cc.fillRect(0, 0, c.width, c.height);
+  l._tintC = c; l._tintKey = l.tint;
+  return c;
+}
+
+// —— 角色图像 ——
+function charRect() {
+  const l = layers.charImg;
+  if (!l.img) return null;
+  const w = charPos.bw * l.scale, h = charPos.bh * l.scale;
+  return { x: charPos.cx - w / 2, y: charPos.cy - h / 2, w, h };
+}
+function drawCharImg(c2) {
+  const l = layers.charImg;
+  if (!l.img || !l.visible || l.opacity <= 0) return;
+  const r = charRect();
+  c2.save();
+  c2.globalAlpha = l.opacity;
+  c2.drawImage(l.img, r.x, r.y, r.w, r.h);
+  c2.restore();
+}
+
+// —— 门匾（九宫格拉伸：线框随文字长度自动拉长）——
+const FRAME_CAP_TOP = 72, FRAME_CAP_BOT = 83;
+function drawFrameAndText(c2) {
+  const ft = layers.frameText;
+  const text = document.getElementById('frameText').value.trim();
+  ft.text = text;
+  const f = layers.frame;
+  if (!f.visible) return;
+  const p = POS.frame;
+  const scale = f.scale;
+  const img = f.img;
+  const chars = text ? [...text] : [];
+  const charCount = Math.max(chars.length, 1);
+  const srcW = (img && img.naturalWidth) || 190;
+  const srcH = (img && img.naturalHeight) || 210;
+  const frameW = srcW * scale;
+  const ws = frameW / srcW;
+  const capTopH = FRAME_CAP_TOP * ws;
+  const capBotH = FRAME_CAP_BOT * ws;
+  const charLineH = 70 * scale;
+  const midMinH = 40 * scale;
+  const textH = charCount * charLineH;
+  const midH = Math.max(midMinH, textH);
+  const frameH = capTopH + midH + capBotH;
+  const fx = p.x + (p.w - frameW) / 2;
+  const fy = p.y + (p.h - frameH) / 2;
+  if (img) {
+    c2.save();
+    c2.globalAlpha = f.opacity;
+    const midSrcY = FRAME_CAP_TOP;
+    const midSrcH = srcH - FRAME_CAP_TOP - FRAME_CAP_BOT;
+    c2.drawImage(img, 0, 0, srcW, FRAME_CAP_TOP, fx, fy, frameW, capTopH);
+    c2.drawImage(img, 0, midSrcY, srcW, midSrcH, fx, fy + capTopH, frameW, midH);
+    c2.drawImage(img, 0, srcH - FRAME_CAP_BOT, srcW, FRAME_CAP_BOT, fx, fy + capTopH + midH, frameW, capBotH);
+    c2.restore();
+  }
+  if (!text || !ft.visible) return;
+  const fontSize = Math.round(54 * scale);
+  const totalTextH = charCount * charLineH;
+  const textStartY = fy + capTopH + (midH - totalTextH) / 2;
+  const cx = fx + frameW / 2;
+  c2.save();
+  c2.globalAlpha = f.opacity;
+  c2.fillStyle = '#1a1a1a';
+  c2.font = `bold ${fontSize}px ${SERIF}`;
+  c2.textAlign = 'center';
+  c2.textBaseline = 'top';
+  chars.forEach((ch, i) => c2.fillText(ch, cx, textStartY + i * charLineH + (charLineH - fontSize) / 2));
+  c2.restore();
+}
+
+function parentOf(k) {
+  if (k === 'mildTL' || k === 'mildBR') return 'mild';
+  if (k === 'darkTL' || k === 'darkBR') return 'dark';
+  return k;
+}
+function expandKey(k) {
+  if (k === 'mild') return mildSplit ? ['mildTL', 'mildBR'] : ['mild'];
+  if (k === 'dark') return darkSplit ? ['darkTL', 'darkBR'] : ['dark'];
+  return [k];
+}
+function drawKeys() {
+  const out = [];
+  for (const k of layerOrder) out.push(...expandKey(k));
+  return out;
+}
+
+// 场景渲染（预览与导出共用）
+function renderScene(c2) {
+  c2.clearRect(0, 0, W, H);
+  const bg = bgColor();
+  if (bg === 'duotone') {
+    drawDuotoneBg(c2);
+  } else if (bg !== 'transparent') {
+    c2.fillStyle = bg;
+    c2.fillRect(0, 0, W, H);
+  }
+  drawColorText(c2);
+  for (const key of drawKeys()) {
+    if (key === 'charImg') { drawCharImg(c2); continue; }
+    const l = layers[key];
+    if (!l.img || !l.visible) continue;
+    if (key === 'frame') { drawFrameAndText(c2); continue; }
+    c2.globalAlpha = l.opacity;
+    const p = POS[key];
+    c2.drawImage(tintedSource(l), p.x, p.y, p.w * l.scale, p.h * l.scale);
+  }
+  c2.globalAlpha = 1;
+}
+
+function draw() {
+  renderScene(ctx);
+  if (mildSplit || darkSplit) {
+    ctx.fillStyle = 'rgba(20,26,22,.6)';
+    ctx.fillRect(0, 0, W, 52);
+    ctx.fillStyle = '#f5f0e8';
+    ctx.font = 'bold 30px "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    const parts = [];
+    if (mildSplit) parts.push('淡墨已拆分');
+    if (darkSplit) parts.push('浓墨已拆分');
+    parts.push('拖动组件移动 · 双击空白处合并');
+    ctx.fillText(parts.join('  ·  '), W / 2, 36);
+    ctx.textAlign = 'start';
+  }
+}
+
+// ========== 通用控件事件 ==========
+document.getElementById('bgSelect').addEventListener('change', () => {
+  document.getElementById('duotoneCtl').style.display = bgColor() === 'duotone' ? 'flex' : 'none';
+  draw();
+});
+document.getElementById('colorA').addEventListener('input', draw);
+document.getElementById('colorB').addEventListener('input', draw);
+document.getElementById('nameA').addEventListener('input', draw);
+document.getElementById('nameB').addEventListener('input', draw);
+document.getElementById('frameText').addEventListener('input', draw);
+document.getElementById('logoColor').addEventListener('input', (e) => {
+  layers.logo.tint = e.target.value;
+  draw();
+});
+
+document.querySelectorAll('input[type=color][data-tint]').forEach(inp => {
+  inp.addEventListener('input', () => {
+    const group = inp.dataset.tint;
+    const keys = group === 'mild' ? ['mild', 'mildTL', 'mildBR'] : ['dark', 'darkTL', 'darkBR'];
+    keys.forEach(k => { layers[k].tint = inp.value; });
+    draw();
+  });
+});
+
+document.querySelectorAll('input[type=range][data-layer]').forEach(r => {
+  r.addEventListener('input', () => {
+    const key = r.dataset.layer;
+    layers[key].opacity = r.value / 100;
+    const label = document.querySelector(`[data-opacity-label="${key}"]`);
+    if (label) label.textContent = r.value + '%';
+    draw();
+  });
+});
+
+document.querySelectorAll('input[type=range][data-scale]').forEach(r => {
+  r.addEventListener('input', () => {
+    const key = r.dataset.scale;
+    layers[key].scale = r.value / 100;
+    const label = document.querySelector(`[data-scale-label="${key}"]`);
+    if (label) label.textContent = r.value + '%';
+    draw();
+  });
+});
+
+document.querySelectorAll('.switch').forEach(s => {
+  s.addEventListener('click', () => {
+    const key = s.dataset.layer;
+    if (key === 'dark') {
+      layers.dark.visible = !layers.dark.visible;
+      layers.darkTL.visible = layers.dark.visible;
+      layers.darkBR.visible = layers.dark.visible;
+      s.classList.toggle('on', layers.dark.visible);
+    } else if (key === 'mild') {
+      layers.mild.visible = !layers.mild.visible;
+      layers.mildTL.visible = layers.mild.visible;
+      layers.mildBR.visible = layers.mild.visible;
+      s.classList.toggle('on', layers.mild.visible);
+    } else {
+      layers[key].visible = !layers[key].visible;
+      s.classList.toggle('on', layers[key].visible);
+    }
+    draw();
+  });
+});
+
+// ========== 图层顺序 ==========
+function updateOrderUI() {
+  layerOrder.forEach((k, i) => {
+    const box = document.getElementById('layerBox-' + k);
+    if (box) box.classList.toggle('top', i === layerOrder.length - 1);
+    const no = box ? box.querySelector('.layer-no') : null;
+    if (no) no.textContent = '#' + (i + 1);
+    const up = document.querySelector(`[data-order-up="${k}"]`);
+    const down = document.querySelector(`[data-order-down="${k}"]`);
+    if (up) up.disabled = (i === 0);
+    if (down) down.disabled = (i === layerOrder.length - 1);
+  });
+}
+document.querySelectorAll('[data-order-up]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const k = btn.dataset.orderUp;
+    const i = layerOrder.indexOf(k);
+    if (i <= 0) return;
+    [layerOrder[i - 1], layerOrder[i]] = [layerOrder[i], layerOrder[i - 1]];
+    updateOrderUI(); draw();
+  });
+});
+document.querySelectorAll('[data-order-down]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const k = btn.dataset.orderDown;
+    const i = layerOrder.indexOf(k);
+    if (i < 0 || i >= layerOrder.length - 1) return;
+    [layerOrder[i + 1], layerOrder[i]] = [layerOrder[i], layerOrder[i + 1]];
+    updateOrderUI(); draw();
+  });
+});
+
+// ========== 竹影拆分 / 合并 ==========
+function syncSplitCtl(prefix, parentKey) {
+  const d = POS[parentKey];
+  const tl = parentKey + 'TL', br = parentKey + 'BR';
+  POS[tl].x = d.x; POS[tl].y = d.y;
+  POS[br].x = d.x; POS[br].y = d.y;
+  for (const sel of [tl, br]) {
+    layers[sel].opacity = layers[parentKey].opacity;
+    layers[sel].scale = layers[parentKey].scale;
+    const r1 = document.querySelector(`[data-scale="${sel}"]`);
+    const r2 = document.querySelector(`[data-layer="${sel}"]`);
+    if (r1) r1.value = Math.round(layers[parentKey].scale * 100);
+    if (r2) r2.value = Math.round(layers[parentKey].opacity * 100);
+    const l1 = document.querySelector(`[data-scale-label="${sel}"]`);
+    const l2 = document.querySelector(`[data-opacity-label="${sel}"]`);
+    if (l1) l1.textContent = Math.round(layers[parentKey].scale * 100) + '%';
+    if (l2) l2.textContent = Math.round(layers[parentKey].opacity * 100) + '%';
+  }
+}
+function setMildSplit(split) {
+  mildSplit = split;
+  document.getElementById('mildWholeCtl').style.display = split ? 'none' : '';
+  document.getElementById('mildSplitCtl').style.display = split ? 'block' : 'none';
+  document.getElementById('btnMergeMild').style.display = split ? 'block' : 'none';
+  if (split) syncSplitCtl('mild', 'mild');
+  draw();
+}
+function setDarkSplit(split) {
+  darkSplit = split;
+  document.getElementById('darkWholeCtl').style.display = split ? 'none' : '';
+  document.getElementById('darkSplitCtl').style.display = split ? 'block' : 'none';
+  document.getElementById('btnMergeDark').style.display = split ? 'block' : 'none';
+  if (split) syncSplitCtl('dark', 'dark');
+  draw();
+}
+document.getElementById('btnMergeMild').addEventListener('click', () => setMildSplit(false));
+document.getElementById('btnMergeDark').addEventListener('click', () => setDarkSplit(false));
+
+// ========== 画布拖拽（鼠标 + 触摸） ==========
+let dragTarget = null;   // 图层 key 或 'char'
+let dragOffsetX = 0, dragOffsetY = 0;
+let dragging = false;
+let selTarget = null;    // 双击选中的组件 key（显示外框）
+let selResize = null;    // 外框手柄缩放状态 { key, startScale, startPointer, center }
+
+function alphaAt(key, px, py) {
+  const l = layers[key];
+  const p = POS[key];
+  const sx = Math.floor((px - p.x) / l.scale);
+  const sy = Math.floor((py - p.y) / l.scale);
+  if (!l.img || sx < 0 || sy < 0 || sx >= l.img.width || sy >= l.img.height) return 0;
+  if (!l._px) {
+    const c = document.createElement('canvas');
+    c.width = l.img.width; c.height = l.img.height;
+    const cc = c.getContext('2d', { willReadFrequently: true });
+    cc.drawImage(l.img, 0, 0);
+    l._px = cc.getImageData(0, 0, c.width, c.height).data;
+  }
+  return l._px[(sy * l.img.width + sx) * 4 + 3];
+}
+
+function hitTest(px, py) {
+  const keys = drawKeys().slice().reverse();
+  for (const key of keys) {
+    if (key === 'charImg') {
+      const l = layers.charImg;
+      if (!l.img || !l.visible || l.opacity <= 0) continue;
+      const r = charRect();
+      if (px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h) return 'charImg';
+      continue;
+    }
+    const l = layers[key];
+    if (!l.img || !l.visible || l.opacity <= 0) continue;
+    const p = POS[key];
+    if (px >= p.x && px <= p.x + p.w * l.scale && py >= p.y && py <= p.y + p.h * l.scale) {
+      if (p.w >= W && p.h >= H && alphaAt(key, px, py) < 25) continue;
+      return key;
+    }
+  }
+  return null;
+}
+
+function canvasXY(e) {
+  const rect = cv.getBoundingClientRect();
+  const cx = (e.touches ? e.touches[0].clientX : e.clientX);
+  const cy = (e.touches ? e.touches[0].clientY : e.clientY);
+  return { x: (cx - rect.left) * (W / rect.width), y: (cy - rect.top) * (H / rect.height) };
+}
+
+// —— 门匾实际绘制矩形（与外框缩放共用） ——
+function frameRect() {
+  const f = layers.frame;
+  const text = document.getElementById('frameText').value.trim();
+  const chars = text ? [...text] : [];
+  const charCount = Math.max(chars.length, 1);
+  const img = f.img;
+  const srcW = (img && img.naturalWidth) || 190;
+  const srcH = (img && img.naturalHeight) || 210;
+  const scale = f.scale;
+  const frameW = srcW * scale;
+  const ws = frameW / srcW;
+  const capTopH = FRAME_CAP_TOP * ws;
+  const capBotH = FRAME_CAP_BOT * ws;
+  const charLineH = 70 * scale;
+  const midMinH = 40 * scale;
+  const textH = charCount * charLineH;
+  const midH = Math.max(midMinH, textH);
+  const frameH = capTopH + midH + capBotH;
+  const p = POS.frame;
+  return { x: p.x + (p.w - frameW) / 2, y: p.y + (p.h - frameH) / 2, w: frameW, h: frameH };
+}
+function compRect(key) {
+  if (key === 'charImg') return charRect();
+  if (key === 'frame') return frameRect();
+  const p = POS[key];
+  return { x: p.x, y: p.y, w: p.w * (layers[key].scale || 1), h: p.h * (layers[key].scale || 1) };
+}
+
+// —— 选中外框（双击组件唤出，拖拽移动 + 手柄缩放） ——
+function selectComponent(key) {
+  selTarget = key;
+  const box = document.getElementById('selBox');
+  if (box) box.style.display = 'block';
+  refreshSelBox();
+}
+function hideSelBox() {
+  selTarget = null;
+  selResize = null;
+  const box = document.getElementById('selBox');
+  if (box) box.style.display = 'none';
+}
+function refreshSelBox() {
+  const box = document.getElementById('selBox');
+  if (!selTarget || !box || box.style.display === 'none') return;
+  const r = compRect(selTarget);
+  const rect = cv.getBoundingClientRect();
+  box.style.left = (r.x * rect.width / W) + 'px';
+  box.style.top = (r.y * rect.height / H) + 'px';
+  box.style.width = (r.w * rect.width / W) + 'px';
+  box.style.height = (r.h * rect.height / H) + 'px';
+  const pos = { nw: ['0', '0'], n: ['50%', '0'], ne: ['100%', '0'], e: ['100%', '50%'], se: ['100%', '100%'], s: ['50%', '100%'], sw: ['0', '100%'], w: ['0', '50%'] };
+  box.querySelectorAll('.sel-handle').forEach(h => {
+    const p = pos[h.dataset.h];
+    h.style.left = p[0]; h.style.top = p[1];
+    h.style.transform = 'translate(-50%,-50%)';
+  });
+}
+function updateScaleUI(key) {
+  const r2 = document.querySelector(`input[type=range][data-scale="${key}"]`);
+  if (r2) r2.value = Math.round((layers[key].scale || 1) * 100);
+  const lb2 = document.querySelector(`[data-scale-label="${key}"]`);
+  if (lb2) lb2.textContent = Math.round((layers[key].scale || 1) * 100) + '%';
+}
+
+function beginDrag(e) {
+  if (!window.HB_USER) { if (window.hbShowAuthModal) hbShowAuthModal('拖动编辑组件需要登录'); e.preventDefault(); return; }
+  const { x, y } = canvasXY(e);
+  const key = hitTest(x, y);
+  if (key) {
+    if (key === selTarget) {
+      // 拖动当前选中组件：保留选中态，仅临时隐藏外框，拖动结束后恢复
+      const box = document.getElementById('selBox');
+      if (box) box.style.display = 'none';
+    } else if (selTarget) {
+      hideSelBox();   // 单击其他组件：取消原选中，进入普通拖动
+    }
+    dragTarget = key;
+    if (key === 'charImg') {
+      dragOffsetX = x - charPos.cx; dragOffsetY = y - charPos.cy;
+    } else {
+      dragOffsetX = x - POS[key].x; dragOffsetY = y - POS[key].y;
+    }
+    dragging = true;
+    cv.style.cursor = 'grabbing';
+    e.preventDefault();
+  } else if (selTarget) {
+    hideSelBox();   // 单击画布空白处：取消选中、隐藏外框
+  }
+}
+function moveDrag(e) {
+  if (selResize) { resizeMove(e); return; }
+  if (!dragging || !dragTarget) return;
+  const { x, y } = canvasXY(e);
+  if (dragTarget === 'charImg') {
+    charPos.cx = Math.round(x - dragOffsetX);
+    charPos.cy = Math.round(y - dragOffsetY);
+  } else {
+    POS[dragTarget].x = Math.round(x - dragOffsetX);
+    POS[dragTarget].y = Math.round(y - dragOffsetY);
+  }
+  draw();
+  if (selTarget) refreshSelBox();
+}
+function endDrag() {
+  if (selResize) { selResize = null; if (window.queueDraftSave) queueDraftSave(); return; }
+  if (!dragging) return;
+  dragging = false;
+  cv.style.cursor = '';
+  dragTarget = null;
+  // 拖动期间外框被隐藏；若组件拖动前处于选中态，结束后恢复选中并重新显示外框
+  if (selTarget) {
+    const box = document.getElementById('selBox');
+    if (box) box.style.display = 'block';
+    refreshSelBox();
+  }
+  if (window.queueDraftSave) queueDraftSave();
+}
+
+// —— 外框手柄缩放（以组件中心为不动点等比缩放） ——
+function startResize(e) {
+  if (!selTarget) return;
+  if (!window.HB_USER) { if (window.hbShowAuthModal) hbShowAuthModal('缩放组件需要登录'); e.preventDefault(); return; }
+  e.preventDefault(); e.stopPropagation();
+  const p = canvasXY(e);
+  const r = compRect(selTarget);
+  selResize = { key: selTarget, startScale: layers[selTarget].scale || 1, startPointer: p, center: { x: r.x + r.w / 2, y: r.y + r.h / 2 } };
+  dragging = false; dragTarget = null;
+}
+function resizeMove(e) {
+  const sr = selResize;
+  const p = canvasXY(e);
+  const d0 = Math.hypot(sr.startPointer.x - sr.center.x, sr.startPointer.y - sr.center.y) || 1;
+  const d1 = Math.hypot(p.x - sr.center.x, p.y - sr.center.y) || 1;
+  let ns = sr.startScale * (d1 / d0);
+  ns = Math.max(0.2, Math.min(3, ns));
+  const key = sr.key;
+  if (key === 'charImg') {
+    layers.charImg.scale = ns;   // charRect 以 charPos.cx/cy 为中心，天然保持中心
+  } else {
+    const l = layers[key];
+    l.scale = ns;
+    if (key !== 'frame') {
+      // 普通图片层：重算左上角保持中心不动（frame 中心恒为 p.x + p.w/2，无需重算）
+      const p0 = POS[key];
+      p0.x = Math.round(sr.center.x - p0.w * ns / 2);
+      p0.y = Math.round(sr.center.y - p0.h * ns / 2);
+    }
+  }
+  draw(); updateScaleUI(key); refreshSelBox();
+}
+
+cv.addEventListener('mousedown', beginDrag);
+window.addEventListener('mousemove', moveDrag);
+window.addEventListener('mouseup', endDrag);
+// 触摸拖拽（preventDefault 防止拖动时页面滚动）
+cv.addEventListener('touchstart', beginDrag, { passive: false });
+window.addEventListener('touchmove', moveDrag, { passive: false });
+window.addEventListener('touchend', endDrag);
+window.addEventListener('touchcancel', endDrag);
+
+// 选中外框：本体拖动移动组件；手柄拖动缩放
+(function () {
+  const box = document.getElementById('selBox');
+  if (!box) return;
+  function boxDown(e, isTouch) {
+    if (e.target.classList.contains('sel-handle')) { startResize(e); return; }
+    if (!selTarget) return;
+    if (!window.HB_USER) { if (window.hbShowAuthModal) hbShowAuthModal('拖动编辑组件需要登录'); e.preventDefault(); return; }
+    const { x, y } = canvasXY(e);
+    dragTarget = selTarget;
+    if (selTarget === 'charImg') { dragOffsetX = x - charPos.cx; dragOffsetY = y - charPos.cy; }
+    else { dragOffsetX = x - POS[selTarget].x; dragOffsetY = y - POS[selTarget].y; }
+    dragging = true;
+    cv.style.cursor = 'grabbing';
+    e.preventDefault(); e.stopPropagation();
+  }
+  box.addEventListener('mousedown', (e) => boxDown(e, false));
+  box.addEventListener('touchstart', (e) => boxDown(e, true), { passive: false });
+})();
+
+// 双击组件：竹影保留拆分/合并；标题、门匾、角色图等唤出选中外框（可拖拽移动 + 手柄缩放）
+cv.addEventListener('dblclick', (e) => {
+  if (!window.HB_USER) { if (window.hbShowAuthModal) hbShowAuthModal('编辑组件需要登录'); return; }
+  const { x, y } = canvasXY(e);
+  const hit = hitTest(x, y);
+  const hitParent = hit ? parentOf(hit) : null;
+  if (hitParent === 'dark') { setDarkSplit(!darkSplit); hideSelBox(); return; }
+  if (hitParent === 'mild') { setMildSplit(!mildSplit); hideSelBox(); return; }
+  if (hit) { selectComponent(hit); e.preventDefault(); return; }
+  // 双击空白：合并拆分 + 取消选中
+  setDarkSplit(false); setMildSplit(false);
+  hideSelBox();
+});
+
+// ========== 导出 ==========
+function renderPosterCanvas() {
+  const out = document.createElement('canvas');
+  out.width = W; out.height = H;
+  renderScene(out.getContext('2d'));
+  return out;
+}
+document.getElementById('btnExport').addEventListener('click', () => {
+  if (!window.HB_USER) { if (window.hbShowAuthModal) hbShowAuthModal('保存图片需要登录'); return; }
+  const a = document.createElement('a');
+  const nameA2 = document.getElementById('nameA').value.trim();
+  const nameB2 = document.getElementById('nameB').value.trim();
+  const nm = (nameA2 || nameB2) ? `${nameA2}x${nameB2}_` : '';
+  a.download = `配色海报_${nm}1080x1920.png`;
+  a.href = renderPosterCanvas().toDataURL('image/png');
+  a.click();
+});
+
+
+// ========== 配色：统一状态 ==========
+// 主色/辅色选色槽（古色或色环来源均可）
+let activeSlot = 'primary';
+let picked = { primary: null, accent: null };   // { hex, name }
+
+function setActiveSlot(slot) {
+  activeSlot = slot;
+  document.getElementById('slotPrimary').classList.toggle('is-active', slot === 'primary');
+  document.getElementById('slotAccent').classList.toggle('is-active', slot === 'accent');
+}
+
+function setPicked(slot, hex, name) {
+  picked[slot] = { hex, name };
+  const chip = document.getElementById(slot === 'primary' ? 'slotPrimaryChip' : 'slotAccentChip');
+  const nm = document.getElementById(slot === 'primary' ? 'slotPrimaryName' : 'slotAccentName');
+  chip.style.background = hex;
+  nm.textContent = name || hex;
+  document.getElementById('applyCustomBtn').disabled = !(picked.primary && picked.accent);
+}
+
+// 将当前主辅色应用到海报背景 + 色名文字
+function applyPair(hexA, hexB, nameAcn, nameBcn) {
+  const inpA = document.getElementById('colorA');
+  const inpB = document.getElementById('colorB');
+  inpA.value = hexA; inpB.value = hexB;
+  document.getElementById('bgSelect').value = 'duotone';
+  document.getElementById('duotoneCtl').style.display = 'flex';
+  if (nameAcn) document.getElementById('nameA').value = nameAcn.slice(0, 4);
+  if (nameBcn) document.getElementById('nameB').value = nameBcn.slice(0, 4);
+  draw();
+}
+
+function applyCustomColors() {
+  if (!picked.primary || !picked.accent) return;
+  applyPair(picked.primary.hex, picked.accent.hex, picked.primary.name, picked.accent.name);
+}
+
+// ---------- 快速搭配（预设配色卡） ----------
+const PRESET_SCHEMES = [
+  { name: '葱青×玄青', primary: '#3E6E4E', accent: '#2E3A42' },
+  { name: '黛蓝×缃色', primary: '#425066', accent: '#F0C239' },
+  { name: '绛紫×月白', primary: '#8C4356', accent: '#D6ECF0' },
+  { name: '鸦青×酡颜', primary: '#424C50', accent: '#F9906F' },
+  { name: '玄青×赤金', primary: '#3D3B4F', accent: '#F2BE45' },
+  { name: '黛绿×珊瑚赫', primary: '#426666', accent: '#E06E5E' },
+  { name: '紫檀×松花', primary: '#4C221B', accent: '#BCE672' },
+  { name: '藏蓝×琥珀', primary: '#3B2E7E', accent: '#CA6924' },
+  { name: '苍色×茶色', primary: '#75878A', accent: '#8E6E4E' },
+  { name: '翡翠×胭脂', primary: '#3DE1AD', accent: '#9D2933' },
+  { name: '漆黑×牙色', primary: '#1E2028', accent: '#EEDEB0' },
+  { name: '靛蓝×藕荷', primary: '#065279', accent: '#E4C6D0' },
+  { name: '铜绿×朱红', primary: '#549688', accent: '#FF4C00' },
+  { name: '苍黄×丁香', primary: '#519A73', accent: '#CCA4E3' },
+  { name: '宝蓝×赤璋', primary: '#4B5CC4', accent: '#E1C199' }
+];
+function renderSchemeGrid() {
+  const grid = document.getElementById('schemeGrid');
+  grid.innerHTML = '';
+  PRESET_SCHEMES.forEach(s => {
+    const [pn, an] = s.name.split('×');
+    const div = document.createElement('div');
+    div.className = 'scheme-card';
+    div.innerHTML = `<div class="sw"><span style="background:${s.primary}"></span><span style="background:${s.accent}"></span></div><div class="nm">${s.name}</div>`;
+    div.addEventListener('click', () => {
+      grid.querySelectorAll('.scheme-card').forEach(c => c.classList.remove('is-active'));
+      div.classList.add('is-active');
+      setPicked('primary', s.primary, pn);
+      setPicked('accent', s.accent, an);
+      applyPair(s.primary, s.accent, pn, an);
+    });
+    grid.appendChild(div);
+  });
+}
+
+// ---------- 自由选色 · 479 种中国古色 ----------
+let ancientTab = '全部';
+let ancientQuery = '';
+const FIVE = ['金', '木', '水', '火', '土'];
+
+function ancientAll() {
+  const src = window.ANCIENT_COLORS || {};
+  const out = [];
+  FIVE.forEach(el => (src[el] || []).forEach(c => out.push({ ...c, el })));
+  return out;
+}
+
+function renderColorTabs() {
+  const tabs = document.getElementById('colorTabs');
+  tabs.innerHTML = '';
+  ['全部', ...FIVE].forEach(t => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'qc-tab' + (t === ancientTab ? ' is-active' : '');
+    b.textContent = t;
+    b.addEventListener('click', () => { ancientTab = t; renderColorTabs(); renderSwatchGrid(); });
+    tabs.appendChild(b);
+  });
+}
+
+function renderSwatchGrid() {
+  const grid = document.getElementById('swatchGrid');
+  grid.innerHTML = '';
+  const q = ancientQuery.trim().toLowerCase();
+  const frag = document.createDocumentFragment();
+  let count = 0;
+  for (const c of ancientAll()) {
+    if (ancientTab !== '全部' && c.el !== ancientTab) continue;
+    if (q && !c.n.toLowerCase().includes(q) && !c.el.includes(q) && !c.h.toLowerCase().includes(q)) continue;
+    if (++count > 600) break;   // 防止极端情况下渲染过多
+    const d = document.createElement('div');
+    d.className = 'qc-swatch';
+    const isP = (picked.primary && picked.primary.hex.toUpperCase() === c.h.toUpperCase()) ||
+                (picked.accent && picked.accent.hex.toUpperCase() === c.h.toUpperCase());
+    if (isP) d.classList.add('is-picked');
+    d.title = `${c.n} ${c.h}（${c.el}）`;
+    d.innerHTML = `<span class="qc-swatch__chip" style="background:${c.h}"></span><span class="qc-swatch__name">${c.n}</span>`;
+    d.addEventListener('click', () => {
+      setPicked(activeSlot, c.h, c.n);
+      renderSwatchGrid();
+    });
+    frag.appendChild(d);
+  }
+  if (count === 0) {
+    const d = document.createElement('div');
+    d.style.cssText = 'grid-column:1/-1;font-size:12px;color:var(--qc-dim);padding:8px 0;';
+    d.textContent = '没有匹配的色名';
+    frag.appendChild(d);
+  }
+  grid.appendChild(frag);
+}
+
+document.getElementById('ancientSearch').addEventListener('input', (e) => {
+  ancientQuery = e.target.value;
+  renderSwatchGrid();
+});
+
+// ---------- 色环选色 ----------
+const wheelState = {
+  primary: { h: 130, s: 0.55, v: 0.62 },
+  accent: { h: 210, s: 0.25, v: 0.25 }
+};
+function hsvToRgb(h, s, v) {
+  h = ((h % 360) + 360) % 360;
+  const c = v * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = v - c;
+  let r = 0, g = 0, b = 0;
+  if (h < 60) { r = c; g = x; } else if (h < 120) { r = x; g = c; }
+  else if (h < 180) { g = c; b = x; } else if (h < 240) { g = x; b = c; }
+  else if (h < 300) { r = x; b = c; } else { r = c; b = x; }
+  return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+}
+function rgbToHex(r, g, b) {
+  return '#' + ('0' + r.toString(16)).slice(-2) + ('0' + g.toString(16)).slice(-2) + ('0' + b.toString(16)).slice(-2);
+}
+function wheelCanvas(slot) { return document.getElementById(slot === 'primary' ? 'wheelPrimary' : 'wheelAccent'); }
+function wheelHex(slot) {
+  const st = wheelState[slot];
+  const rgb = hsvToRgb(st.h, st.s, st.v);
+  return rgbToHex(rgb[0], rgb[1], rgb[2]);
+}
+// 性能优化：色环位图按亮度值缓存，拖动不再逐像素重算（与主站同款方案）
+const _wheelBmp = { primary: new Map(), accent: new Map() };
+function getWheelBitmap(slot) {
+  const canvas = wheelCanvas(slot);
+  const cw = canvas.width, ch = canvas.height, cx = cw / 2, cy = ch / 2, R = cw / 2 - 2;
+  const vi = Math.round(wheelState[slot].v * 100);
+  const cache = _wheelBmp[slot];
+  if (cache.has(vi)) return cache.get(vi);
+  const off = document.createElement('canvas');
+  off.width = cw; off.height = ch;
+  const o2 = off.getContext('2d');
+  const img = o2.createImageData(cw, ch);
+  const v = wheelState[slot].v;
+  for (let y = 0; y < ch; y++) {
+    for (let x = 0; x < cw; x++) {
+      const dx = x - cx, dy = y - cy;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const i = (y * cw + x) * 4;
+      if (dist > R) { img.data[i + 3] = 0; continue; }
+      let h = Math.atan2(dy, dx) * 180 / Math.PI;
+      if (h < 0) h += 360;
+      const rgb = hsvToRgb(h, dist / R, v);
+      img.data[i] = rgb[0]; img.data[i + 1] = rgb[1]; img.data[i + 2] = rgb[2]; img.data[i + 3] = 255;
+    }
+  }
+  o2.putImageData(img, 0, 0);
+  if (cache.size >= 16) cache.delete(cache.keys().next().value);
+  cache.set(vi, off);
+  return off;
+}
+function drawColorWheel(slot) {
+  const canvas = wheelCanvas(slot);
+  if (!canvas) return;
+  const c2 = canvas.getContext('2d');
+  const cw = canvas.width, cx = cw / 2, cy = canvas.height / 2, R = cw / 2 - 2;
+  c2.clearRect(0, 0, cw, canvas.height);
+  c2.drawImage(getWheelBitmap(slot), 0, 0);
+  // 选中标记
+  const st = wheelState[slot];
+  const ang = st.h * Math.PI / 180;
+  const mx = cx + Math.cos(ang) * st.s * R, my = cy + Math.sin(ang) * st.s * R;
+  c2.beginPath(); c2.arc(mx, my, 6, 0, Math.PI * 2); c2.lineWidth = 2; c2.strokeStyle = '#fff'; c2.stroke();
+  c2.beginPath(); c2.arc(mx, my, 6, 0, Math.PI * 2); c2.lineWidth = 1; c2.strokeStyle = '#333'; c2.stroke();
+}
+function updateWheelPick(slot) {
+  const hex = wheelHex(slot);
+  const hexEl = document.getElementById(slot === 'primary' ? 'wheelPrimaryHex' : 'wheelAccentHex');
+  if (hexEl) hexEl.textContent = hex.toUpperCase();
+  // 在古色库中查找最接近的色名，作为色名候选
+  let best = null, bestD = Infinity;
+  const t = hexToRgb(hex);
+  for (const c of ancientAll()) {
+    const cc = hexToRgb(c.h);
+    const d = (cc.r - t.r) ** 2 + (cc.g - t.g) ** 2 + (cc.b - t.b) ** 2;
+    if (d < bestD) { bestD = d; best = c; }
+  }
+  const name = (best && bestD < 300) ? best.n : '';
+  setPicked(slot, hex, name);
+  // 色环点选即时应用到海报
+  if (picked.primary && picked.accent) {
+    applyPair(picked.primary.hex, picked.accent.hex, picked.primary.name, picked.accent.name);
+  } else if (slot === 'primary' && picked.primary) {
+    document.getElementById('colorA').value = picked.primary.hex; draw();
+  } else if (slot === 'accent' && picked.accent) {
+    document.getElementById('colorB').value = picked.accent.hex; draw();
+  }
+  clearTimeout(window._hbGridTimer);
+  window._hbGridTimer = setTimeout(renderSwatchGrid, 160);
+}
+const _wheelRaf = { primary: 0, accent: 0 };
+function scheduleWheelRedraw(slot) {
+  if (_wheelRaf[slot]) return;
+  _wheelRaf[slot] = requestAnimationFrame(() => {
+    _wheelRaf[slot] = 0;
+    drawColorWheel(slot);
+    updateWheelPick(slot);
+  });
+}
+function wheelPickFromEvent(slot, ev) {
+  const canvas = wheelCanvas(slot);
+  const rect = canvas.getBoundingClientRect();
+  const cx = canvas.width / 2, cy = canvas.height / 2, R = canvas.width / 2 - 2;
+  const x = (ev.clientX - rect.left) * canvas.width / rect.width;
+  const y = (ev.clientY - rect.top) * canvas.height / rect.height;
+  const dx = x - cx, dy = y - cy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  if (dist > R + 4) return;
+  let h = Math.atan2(dy, dx) * 180 / Math.PI;
+  if (h < 0) h += 360;
+  wheelState[slot].h = h;
+  wheelState[slot].s = Math.min(dist / R, 1);
+  scheduleWheelRedraw(slot);
+}
+function onWheelV(slot, val) {
+  wheelState[slot].v = Math.max(0.05, parseInt(val, 10) / 100);
+  scheduleWheelRedraw(slot);
+}
+function initWheelPickers() {
+  ['primary', 'accent'].forEach(slot => {
+    const canvas = wheelCanvas(slot);
+    if (!canvas) return;
+    canvas.addEventListener('mousedown', (ev) => { ev.preventDefault(); wheelPickFromEvent(slot, ev); });
+    canvas.addEventListener('mousemove', (ev) => { if (ev.buttons === 1) wheelPickFromEvent(slot, ev); });
+    canvas.addEventListener('touchstart', (ev) => { ev.preventDefault(); wheelPickFromEvent(slot, ev.touches[0]); }, { passive: false });
+    canvas.addEventListener('touchmove', (ev) => { ev.preventDefault(); wheelPickFromEvent(slot, ev.touches[0]); }, { passive: false });
+    drawColorWheel(slot);
+    updateWheelPick(slot);
+  });
+}
+
+// ========== 角色图像上传 ==========
+let charObjUrl = null;
+function handleCharFile(file) {
+  if (!file) return;
+  if (!/^image\/(jpeg|png|webp)$/.test(file.type)) { alert('仅支持 JPG / PNG / WEBP 图片'); return; }
+  if (file.size > 8 * 1024 * 1024) { alert('图片不能超过 8MB'); return; }
+  const rd = new FileReader();
+  rd.onload = () => loadCharFromDataUrl(rd.result, file.name);
+  rd.readAsDataURL(file);
+}
+function loadCharFromDataUrl(url, fname) {
+  if (charObjUrl && charObjUrl.startsWith('blob:')) URL.revokeObjectURL(charObjUrl);
+  charObjUrl = url;
+  const img = new Image();
+  img.onload = () => {
+    layers.charImg.img = img;
+    // 按原图比例置入，最长边不超过画面 78%
+    const ratio = img.naturalWidth / img.naturalHeight;
+    let bw = W * 0.78, bh = bw / ratio;
+    if (bh > H * 0.78) { bh = H * 0.78; bw = bh * ratio; }
+    charPos.bw = bw; charPos.bh = bh;
+    charPos.cx = W / 2; charPos.cy = H * 0.55;
+    layers.charImg.scale = 1;
+    const sc = document.querySelector('[data-scale="charImg"]');
+    if (sc) sc.value = 100;
+    const sl = document.querySelector('[data-scale-label="charImg"]');
+    if (sl) sl.textContent = '100%';
+    document.getElementById('charUpload').style.display = 'none';
+    document.getElementById('charCtl').style.display = 'block';
+    document.getElementById('charThumb').src = charObjUrl;
+    document.getElementById('charInfo').textContent = `${img.naturalWidth}×${img.naturalHeight} · ${fname || '角色图'}`;
+    layers.charImg.dataUrl = url;
+    draw(); updateOrderUI();
+    if (window.queueDraftSave) queueDraftSave();
+  };
+  img.onerror = () => alert('图片读取失败，请换一张试试');
+  img.src = charObjUrl;
+}
+function removeCharImg() {
+  layers.charImg.img = null;
+  if (charObjUrl) { URL.revokeObjectURL(charObjUrl); charObjUrl = null; }
+  document.getElementById('charUpload').style.display = '';
+  document.getElementById('charCtl').style.display = 'none';
+  document.getElementById('charFile').value = '';
+  draw();
+}
+document.getElementById('charFile').addEventListener('change', (e) => {
+  handleCharFile(e.target.files && e.target.files[0]);
+  e.target.value = '';
+});
+// 拖拽上传
+(function () {
+  const zone = document.getElementById('charUpload');
+  ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('is-drag'); }));
+  ['dragleave', 'drop'].forEach(ev => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('is-drag'); }));
+  zone.addEventListener('drop', (e) => {
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    handleCharFile(f);
+  });
+})();
+
+// ========== 登录状态与限制 ==========
+const HB_LOCK_CARDS = ['layerBox-charImg', 'layerBox-mild', 'layerBox-dark', 'layerBox-colorText', 'layerBox-frame', 'layerBox-logo'];
+
+function hbShowAuthModal(msg) {
+  const m = document.getElementById('hbAuthMask');
+  if (!m) return;
+  hbBindAuthOnce();
+  if (msg) document.getElementById('hbAuthMsg').textContent = msg + '。即将前往西木会馆登录，登录成功后自动返回本页。';
+  m.hidden = false;
+}
+// 弹窗 DOM 在本脚本之后才出现，首次弹窗时再绑定事件
+let _hbAuthBound = false;
+function hbBindAuthOnce() {
+  if (_hbAuthBound) return;
+  const c = document.getElementById('hbAuthCancel'), g = document.getElementById('hbAuthGo'), m = document.getElementById('hbAuthMask');
+  if (!c || !g || !m) return;
+  _hbAuthBound = true;
+  c.addEventListener('click', () => { m.hidden = true; });
+  g.addEventListener('click', () => { location.href = '/?openauth=1&next=' + encodeURIComponent(location.href); });
+  m.addEventListener('click', (e) => { if (e.target.id === 'hbAuthMask') m.hidden = true; });
+}
+
+function hbApplyAuth() {
+  const logged = !!window.HB_USER;
+  HB_LOCK_CARDS.forEach(id => {
+    const card = document.getElementById(id);
+    if (!card) return;
+    let ov = card.querySelector('.hb-lock-overlay');
+    if (!logged) {
+      card.classList.add('hb-locked');
+      if (!ov) {
+        ov = document.createElement('div');
+        ov.className = 'hb-lock-overlay';
+        ov.textContent = '🔒 登录西木会馆后可编辑此组件';
+        ov.addEventListener('click', () => hbShowAuthModal('编辑该组件需要登录'));
+        card.appendChild(ov);
+      }
+    } else {
+      card.classList.remove('hb-locked');
+      if (ov) ov.remove();
+    }
+  });
+  if (logged) { loadMyChars(); loadMyPosters(); }
+  else {
+    document.getElementById('myPosterList').innerHTML = '<div class="hb-empty">登录后可查看与保存海报</div>';
+  }
+}
+hbApplyAuth(); // 初始按未登录锁定，登录态确认后解锁
+
+// ========== 本地草稿缓存（刷新不丢） ==========
+function gv(id) { const el = document.getElementById(id); return el ? el.value : ''; }
+
+function collectState() {
+  const ls = {};
+  for (const k of Object.keys(layers)) {
+    const l = layers[k];
+    ls[k] = { opacity: l.opacity, visible: l.visible };
+    if (l.scale !== undefined) ls[k].scale = l.scale;
+    if (l.tint !== undefined) ls[k].tint = l.tint;
+  }
+  return {
+    v: 1,
+    bg: bgColor(), colorA: colorA(), colorB: colorB(),
+    nameA: gv('nameA'), nameB: gv('nameB'), frameText: gv('frameText'),
+    layers: ls, layerOrder: layerOrder.slice(),
+    mildSplit, darkSplit,
+    pos: JSON.parse(JSON.stringify(POS)),
+    charPos: { cx: charPos.cx, cy: charPos.cy, bw: charPos.bw, bh: charPos.bh },
+    wheel: JSON.parse(JSON.stringify(wheelState)),
+    picked: {
+      primary: picked.primary ? { hex: picked.primary.hex, name: picked.primary.name } : null,
+      accent: picked.accent ? { hex: picked.accent.hex, name: picked.accent.name } : null
+    },
+    charImg: layers.charImg.dataUrl || null
+  };
+}
+
+function applyState(st) {
+  if (!st || st.v !== 1) return;
+  const bgSel = document.getElementById('bgSelect');
+  if ([...bgSel.options].some(o => o.value === st.bg)) bgSel.value = st.bg;
+  document.getElementById('duotoneCtl').style.display = bgColor() === 'duotone' ? 'flex' : 'none';
+  document.getElementById('colorA').value = st.colorA || '#90a65d';
+  document.getElementById('colorB').value = st.colorB || '#2b313a';
+  document.getElementById('nameA').value = st.nameA || '';
+  document.getElementById('nameB').value = st.nameB || '';
+  document.getElementById('frameText').value = st.frameText || '';
+  // 图层参数 + 控件同步
+  for (const k of Object.keys(layers)) {
+    const sv = st.layers && st.layers[k];
+    if (!sv) continue;
+    const l = layers[k];
+    l.opacity = sv.opacity !== undefined ? sv.opacity : l.opacity;
+    l.visible = sv.visible !== undefined ? sv.visible : l.visible;
+    if (sv.scale !== undefined && l.scale !== undefined) l.scale = sv.scale;
+    if (sv.tint !== undefined && l.tint !== undefined) l.tint = sv.tint;
+    const r1 = document.querySelector(`input[type=range][data-layer="${k}"]`);
+    if (r1) r1.value = Math.round(l.opacity * 100);
+    const lb1 = document.querySelector(`[data-opacity-label="${k}"]`);
+    if (lb1) lb1.textContent = Math.round(l.opacity * 100) + '%';
+    const r2 = document.querySelector(`input[type=range][data-scale="${k}"]`);
+    if (r2) r2.value = Math.round((l.scale || 1) * 100);
+    const lb2 = document.querySelector(`[data-scale-label="${k}"]`);
+    if (lb2) lb2.textContent = Math.round((l.scale || 1) * 100) + '%';
+    const ti = document.querySelector(`input[type=color][data-tint="${k === 'mild' ? 'mild' : k === 'dark' ? 'dark' : k}"]`);
+    if (k === 'mild' && l.tint) document.querySelector('input[data-tint="mild"]').value = l.tint;
+    if (k === 'dark' && l.tint) document.querySelector('input[data-tint="dark"]').value = l.tint;
+    if (k === 'logo' && l.tint) { const lc = document.getElementById('logoColor'); if (lc) lc.value = l.tint; }
+    const sw = document.querySelector(`.switch[data-layer="${k}"]`);
+    if (sw && (k !== 'mild' && k !== 'dark')) sw.classList.toggle('on', l.visible);
+    if (sw && (k === 'mild' || k === 'dark')) sw.classList.toggle('on', layers[k].visible);
+  }
+  if (Array.isArray(st.layerOrder)) {
+    layerOrder = st.layerOrder.filter(k => layerOrder.includes(k) || ['mild', 'charImg', 'dark', 'frame', 'logo'].includes(k));
+  }
+  if (st.pos) {
+    for (const k of Object.keys(st.pos)) {
+      if (POS[k]) { POS[k].x = st.pos[k].x; POS[k].y = st.pos[k].y; }
+    }
+  }
+  if (st.charPos) Object.assign(charPos, st.charPos);
+  if (st.wheel) {
+    ['primary', 'accent'].forEach(slot => { if (st.wheel[slot]) Object.assign(wheelState[slot], st.wheel[slot]); });
+    const vp = document.getElementById('wheelPrimaryV'), va = document.getElementById('wheelAccentV');
+    if (vp) vp.value = Math.round(wheelState.primary.v * 100);
+    if (va) va.value = Math.round(wheelState.accent.v * 100);
+  }
+  if (st.picked) {
+    if (st.picked.primary) setPicked('primary', st.picked.primary.hex, st.picked.primary.name);
+    if (st.picked.accent) setPicked('accent', st.picked.accent.hex, st.picked.accent.name);
+  }
+  setMildSplit(!!st.mildSplit);
+  setDarkSplit(!!st.darkSplit);
+  // 角色图
+  if (st.charImg && !layers.charImg.img) {
+    loadCharFromDataUrl(st.charImg, '上次保存的角色图');
+  }
+  drawColorWheel('primary'); drawColorWheel('accent');
+  ['primary', 'accent'].forEach(slot => {
+    const hexEl = document.getElementById(slot === 'primary' ? 'wheelPrimaryHex' : 'wheelAccentHex');
+    if (hexEl) hexEl.textContent = wheelHex(slot).toUpperCase();
+  });
+  draw(); updateOrderUI();
+}
+
+let _draftTimer = 0;
+function queueDraftSave() {
+  clearTimeout(_draftTimer);
+  _draftTimer = setTimeout(() => {
+    try { localStorage.setItem('hb_draft_v1', JSON.stringify(collectState())); }
+    catch (e) {
+      try { const st = collectState(); st.charImg = null; localStorage.setItem('hb_draft_v1', JSON.stringify(st)); } catch (e2) {}
+    }
+  }, 800);
+}
+document.addEventListener('input', queueDraftSave);
+document.addEventListener('click', queueDraftSave);
+
+// ========== 我的人设（绑定/互通） ==========
+let MY_CHARS = [];
+async function loadMyChars() {
+  try {
+    const r = await fetch('/api/get-characters');
+    if (!r.ok) return;
+    const d = await r.json();
+    MY_CHARS = d.characters || [];
+    const sel = document.getElementById('bindChar');
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">不关联人设</option>' + MY_CHARS.map(c => {
+      const cd = c.data || c;
+      const code = cd.code || c.code || '';
+      const nm = (cd.name || code).replace(/[<>&"]/g, '');
+      return '<option value="' + code + '">' + nm + '</option>';
+    }).join('');
+    if (cur && [...sel.options].some(o => o.value === cur)) sel.value = cur;
+  } catch (e) {}
+}
+document.getElementById('bindChar').addEventListener('change', () => {
+  const code = document.getElementById('bindChar').value;
+  if (!code) return;
+  const rec = MY_CHARS.find(c => (c.data && c.data.code === code) || c.code === code);
+  const cd = rec && (rec.data || rec);
+  if (cd && cd.colorPrimary && cd.colorAccent) {
+    // 人设登记页的配色 → 海报（互通）
+    applyPair(cd.colorPrimary, cd.colorAccent);
+    setPicked('primary', cd.colorPrimary, '');
+    setPicked('accent', cd.colorAccent, '');
+    document.getElementById('saveMsg').textContent = '已应用「' + (cd.name || code) + '」在会馆登记的配色';
+  } else {
+    document.getElementById('saveMsg').textContent = '该人设尚未登记配色，保存海报时将把当前配色写入人设';
+  }
+  queueDraftSave();
+});
+
+// ========== 云端保存 / 我的海报 / 共享画廊 ==========
+function hbEsc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+let MY_POSTERS = [];
+
+async function savePoster() {
+  const msgEl = document.getElementById('saveMsg');
+  if (!window.HB_USER) { hbShowAuthModal('保存海报需要登录'); return; }
+  const title = gv('posterTitle').trim();
+  if (!title) { msgEl.textContent = '⚠ 请先输入海报标题'; return; }
+  const code = document.getElementById('bindChar').value;
+  const rec = code ? MY_CHARS.find(c => (c.data && c.data.code === code) || c.code === code) : null;
+  const cd = rec ? (rec.data || rec) : null;
+  msgEl.textContent = '正在生成并上传…';
+  const state = collectState();
+  const image = renderPosterCanvas().toDataURL('image/png');
+  const body = {
+    title,
+    char_code: code, char_name: cd ? (cd.name || '') : '',
+    primary_name: (picked.primary && picked.primary.hex.toUpperCase() === colorA().toUpperCase()) ? (picked.primary.name || '') : '',
+    accent_name: (picked.accent && picked.accent.hex.toUpperCase() === colorB().toUpperCase()) ? (picked.accent.name || '') : '',
+    primary_color: colorA(), accent_color: colorB(),
+    state, image
+  };
+  try {
+    const r = await fetch('/api/posters/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const d = await r.json();
+    if (!d.ok) { msgEl.textContent = '⚠ ' + (d.error || '保存失败'); return; }
+    msgEl.textContent = '✔ 已保存到云端（本地草稿也已保留）';
+    // 互通：把海报配色写回关联人设的登记配色
+    if (cd && code) {
+      const nd = JSON.parse(JSON.stringify(cd));
+      nd.colorPrimary = colorA();
+      nd.colorAccent = colorB();
+      nd.colorIndex = -1;
+      fetch('/api/save-character', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, data: nd }) }).catch(() => {});
+    }
+    loadMyPosters();
+  } catch (e) { msgEl.textContent = '⚠ 网络错误，保存失败'; }
+}
+
+async function loadMyPosters() {
+  if (!window.HB_USER) return;
+  try {
+    const r = await fetch('/api/posters/my');
+    const d = await r.json();
+    MY_POSTERS = d.posters || [];
+    renderPosterList();
+  } catch (e) {}
+}
+
+function renderPosterList() {
+  const box = document.getElementById('myPosterList');
+  if (!MY_POSTERS.length) { box.innerHTML = '<div class="hb-empty">还没有保存的海报</div>'; return; }
+  box.innerHTML = '';
+  MY_POSTERS.forEach(p => {
+    const div = document.createElement('div');
+    div.className = 'poster-item';
+    const sub = [
+      p.char_name ? '人设：' + p.char_name : '',
+      (p.primary_name || p.accent_name) ? ((p.primary_name || '?') + '×' + (p.accent_name || '?')) : '',
+      p.is_public ? '已共享到画廊' : ''
+    ].filter(Boolean).join(' · ');
+    div.innerHTML =
+      '<img src="' + hbEsc(p.img_ref) + '" alt="">' +
+      '<div class="pi-info"><div class="pi-title">' + hbEsc(p.title) + '</div><div class="pi-sub">' + hbEsc(sub || '—') + '</div></div>' +
+      '<div class="pi-btns">' +
+      '<button data-act="load">载入</button>' +
+      '<button data-act="pub" class="' + (p.is_public ? 'pub' : '') + '">' + (p.is_public ? '取消共享' : '共享画廊') + '</button>' +
+      '<button data-act="del">删除</button>' +
+      '</div>';
+    div.querySelector('[data-act="load"]').onclick = () => {
+      try { applyState(JSON.parse(p.state_json)); queueDraftSave(); document.getElementById('posterTitle').value = p.title; }
+      catch (e) { alert('该海报无编辑状态快照，仅保存了图片'); }
+    };
+    div.querySelector('[data-act="del"]').onclick = async () => {
+      if (!confirm('删除海报「' + p.title + '」？（同时从画廊移除）')) return;
+      await fetch('/api/posters/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id }) });
+      loadMyPosters();
+    };
+    div.querySelector('[data-act="pub"]').onclick = async () => {
+      const r = await fetch('/api/posters/publish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id, is_public: !p.is_public }) });
+      const d = await r.json();
+      if (!d.ok) { alert(d.error || '操作失败'); return; }
+      loadMyPosters();
+    };
+    box.appendChild(div);
+  });
+}
+
+// ========== 色环配色命名保存（与主站配色库互通） ==========
+async function hbSaveScheme() {
+  const msg = document.getElementById('wheelSaveMsg');
+  if (!window.HB_USER) { hbShowAuthModal('保存配色需要登录'); return; }
+  const pn = gv('wheelNameP').trim(), an = gv('wheelNameA').trim();
+  if (!pn || !an) { msg.textContent = '⚠ 请输入主色名与辅色名'; return; }
+  if (!picked.primary || !picked.accent) { msg.textContent = '⚠ 请先在色环/色板选好主辅色'; return; }
+  try {
+    const r = await fetch('/api/color-schemes', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ primary_name: pn, accent_name: an, primary: picked.primary.hex, accent: picked.accent.hex })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      msg.textContent = '✔ 已保存「' + pn + '×' + an + '」，西木会馆配色库同步可用';
+      document.getElementById('wheelNameP').value = '';
+      document.getElementById('wheelNameA').value = '';
+      loadUserSchemesHb();
+    } else msg.textContent = '⚠ ' + (d.error || '保存失败');
+  } catch (e) { msg.textContent = '⚠ 网络错误'; }
+}
+
+function loadUserSchemesHb() {
+  fetch('/api/color-schemes').then(r => r.json()).then(d => {
+    const grid = document.getElementById('schemeGridUser');
+    const list = (d && d.schemes) || [];
+    if (!list.length) { grid.innerHTML = '<div class="hb-empty">还没有馆友保存的配色</div>'; return; }
+    grid.innerHTML = '';
+    list.slice(-30).reverse().forEach(cs => {
+      const div = document.createElement('div');
+      div.className = 'scheme-card';
+      div.innerHTML = '<div class="sw"><span style="background:' + cs.primary + '"></span><span style="background:' + cs.accent + '"></span></div><div class="nm">' + hbEsc(cs.name) + '</div>' + (cs.can_delete ? '<button type="button" class="scheme-del" title="删除配色" onclick="deleteUserSchemeHb(' + cs.id + ', event)">✕</button>' : '');
+      div.addEventListener('click', () => {
+        setPicked('primary', cs.primary, cs.primary_name || '');
+        setPicked('accent', cs.accent, cs.accent_name || '');
+        applyPair(cs.primary, cs.accent, cs.primary_name || '', cs.accent_name || '');
+      });
+      grid.appendChild(div);
+    });
+  }).catch(() => {});
+}
+
+function deleteUserSchemeHb(id, ev) {
+  if (ev && ev.stopPropagation) ev.stopPropagation();
+  if (!window.HB_USER) { alert('请先登录后再删除自己保存的配色'); return; }
+  if (!confirm('确定删除该配色吗？删除后不可恢复。')) return;
+  fetch('/api/color-schemes/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: id })
+  })
+    .then(r => r.json())
+    .then(d => {
+      if (d && d.ok) {
+        loadUserSchemesHb();
+      } else {
+        alert((d && d.error) || '删除失败');
+      }
+    })
+    .catch(() => alert('网络错误，删除失败'));
+}
+loadUserSchemesHb();
+
+// ========== 初始化 ==========
+renderSchemeGrid();
+renderColorTabs();
+renderSwatchGrid();
+initWheelPickers();
+updateOrderUI();
+// 恢复本地草稿（刷新不丢）
+try {
+  const draft = JSON.parse(localStorage.getItem('hb_draft_v1') || 'null');
+  if (draft) applyState(draft);
+} catch (e) {}
+
+</script>
+
+<!-- 登录提示弹窗 -->
+<div id="hbAuthMask" hidden>
+  <div class="hb-auth-box">
+    <strong>需要登录西木会馆</strong>
+    <p id="hbAuthMsg">该功能需要登录后使用。即将前往西木会馆登录，登录成功后自动返回本页。</p>
+    <div class="hb-auth-btns">
+      <button type="button" id="hbAuthGo">去登录</button>
+      <button type="button" id="hbAuthCancel">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 全站统一导航（与西木会馆主站一致）；登录栏由本页自挂 -->
+<script>window.__HUIGUAN_OWN_AUTH = true; window.__HUIGUAN_OWN_CONTACT = true;</script>
+<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c12"></script>
+<script>
+(function () {
+  function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function render(user) {
+    var bar = document.getElementById('authBar');
+    if (!bar) return;
+    var st = 'color:#d4a840;font-size:12px;text-decoration:none;margin-left:8px;';
+    if (user) {
+      var member = (user.is_admin || user.role === 'elder') ? '<a href="/member.html" style="' + st + '">成员管理</a>' : '';
+      bar.innerHTML = '<span style="color:#f5f0e8;font-size:12px;">' + esc(user.nickname || user.username || '用户') + '</span>' +
+        '<a href="/account.html" style="' + st + '">账户</a>' + member +
+        '<a href="/api/logout" style="' + st + '">退出</a>';
+    } else {
+      bar.innerHTML = '<a href="javascript:void(0)" id="hbLoginLink" style="' + st.replace('margin-left:8px;', '') + '">登录 / 注册</a>';
+      var lk = document.getElementById('hbLoginLink');
+      if (lk) lk.onclick = function () { if (window.hbShowAuthModal) hbShowAuthModal('登录后即可保存海报、编辑全部组件'); };
+    }
+  }
+  fetch('/api/user', { credentials: 'same-origin' })
+    .then(function (r) { return r.json(); })
+    .then(function (u) {
+      window.HB_USER = (u && u.logged_in) ? u : null;
+      render(window.HB_USER);
+      if (window.hbApplyAuth) hbApplyAuth();
+    })
+    .catch(function () { window.HB_USER = null; render(null); if (window.hbApplyAuth) hbApplyAuth(); });
+})();
+</script>
+<script>
+/* 修复：外部 shared-chrome-v2.js 检测到 body 为 flex，会把统一页脚 #qc-foot 塞进最高的子元素（.stage），
+   导致海报舞台被挤到左下角、被底部栏顶走。这里将页脚移回 body 末尾，并用 flex-wrap 让页脚独占一行。 */
+(function () {
+  function fixFoot() {
+    var foot = document.getElementById('qc-foot');
+    if (!foot) return;
+    var body = document.body;
+    if (foot.parentElement && foot.parentElement !== body) {
+      body.appendChild(foot);
+    }
+    body.style.flexWrap = 'wrap';
+    foot.style.flexBasis = '100%';
+    foot.style.width = '100%';
+    foot.style.marginTop = '24px';
+    foot.style.position = 'relative';
+  }
+  var t = setInterval(function () {
+    if (document.getElementById('qc-foot')) { clearInterval(t); fixFoot(); }
+  }, 120);
+  setTimeout(function () { clearInterval(t); fixFoot(); }, 3000);
+})();
+</script>
+<script>
+/* 修复：移动端 .stage sticky 固定顶部时，被外部导航栏 #qc-nav（fixed top:0，高度 41~47px 不等）遮住一部分。
+   按 #qc-nav 实际高度动态校准移动端 body 顶部留白与 .stage 的 sticky 偏移，保证海报图 sticky 后完整可见；
+   桌面端（宽屏）不受影响（CSS 默认 top:41px 兜底）。 */
+(function () {
+  var mq = window.matchMedia('(max-width: 860px)');
+  function fixStageTop() {
+    if (!mq.matches) return;
+    var nav = document.getElementById('qc-nav');
+    if (!nav) return;
+    var h = nav.offsetHeight || 41;
+    var st = document.querySelector('.stage');
+    if (st) st.style.top = h + 'px';
+    if (document.body) document.body.style.paddingTop = h + 'px';
+  }
+  var t2 = setInterval(function () {
+    if (document.getElementById('qc-nav')) { clearInterval(t2); fixStageTop(); }
+  }, 120);
+  setTimeout(function () { clearInterval(t2); fixStageTop(); }, 3000);
+  window.addEventListener('resize', fixStageTop);
+})();
+</script>
+</body>
+</html>

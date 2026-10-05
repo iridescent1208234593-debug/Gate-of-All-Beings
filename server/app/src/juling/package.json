@@ -1,0 +1,13 @@
+{
+  "name": "wuxing-cycle-universe",
+  "version": "0.2.0",
+  "description": "众生之门·轮回肉鸽 —— 五行循环宇宙文字游戏（Node + SQLite 持久化）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,617 @@
+{
+  "$schema": "https://design-tokens.github.io/community-group/format/",
+  "$description": "Chinese Color Atlas free sample tokens — 47 representative colors. Complete tokens are in the paid resource packs.",
+  "color": {
+    "an": {
+      "$value": "#41555d",
+      "$type": "color",
+      "$description": "黯 (黯) · àn",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "黯",
+          "en": "黯",
+          "pinyin": "àn",
+          "reliability": "verified"
+        }
+      }
+    },
+    "bao-lan": {
+      "$value": "#4b5cc4",
+      "$type": "color",
+      "$description": "宝蓝 (Sapphire) · bǎo lán",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "宝蓝",
+          "en": "Sapphire",
+          "pinyin": "bǎo lán",
+          "reliability": "verified"
+        }
+      }
+    },
+    "bi-lv": {
+      "$value": "#2add9c",
+      "$type": "color",
+      "$description": "碧绿 (Emerald Green) · bì lǜ",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "碧绿",
+          "en": "Emerald Green",
+          "pinyin": "bì lǜ",
+          "reliability": "verified"
+        }
+      }
+    },
+    "bi-shan": {
+      "$value": "#779649",
+      "$type": "color",
+      "$description": "碧山 (碧山) · bì shān",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "碧山",
+          "en": "碧山",
+          "pinyin": "bì shān",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cang-huang-0462": {
+      "$value": "#b6a014",
+      "$type": "color",
+      "$description": "蒼黃 (蒼黃) · cāng huáng",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "蒼黃",
+          "en": "蒼黃",
+          "pinyin": "cāng huáng",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cang-lang": {
+      "$value": "#99bcac",
+      "$type": "color",
+      "$description": "蒼筤 (蒼筤) · cāng láng",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "蒼筤",
+          "en": "蒼筤",
+          "pinyin": "cāng láng",
+          "reliability": "attributed"
+        }
+      }
+    },
+    "cang-lang-0458": {
+      "$value": "#b1d5c8",
+      "$type": "color",
+      "$description": "滄浪 (滄浪) · cāng làng",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "滄浪",
+          "en": "滄浪",
+          "pinyin": "cāng làng",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cang-se": {
+      "$value": "#75878a",
+      "$type": "color",
+      "$description": "苍色 (苍色) · cāng sè",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "苍色",
+          "en": "苍色",
+          "pinyin": "cāng sè",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cang-yan-luo-zhao": {
+      "$value": "#C8B5B3",
+      "$type": "color",
+      "$description": "蒼煙落照 (蒼煙落照) · cāng yān luò zhào",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "蒼煙落照",
+          "en": "蒼煙落照",
+          "pinyin": "cāng yān luò zhào",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cao-bai": {
+      "$value": "#BFC1A9",
+      "$type": "color",
+      "$description": "草白 (草White) · cǎo bái",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "草白",
+          "en": "草White",
+          "pinyin": "cǎo bái",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cao-lv": {
+      "$value": "#40de5a",
+      "$type": "color",
+      "$description": "草绿 (Grass Green) · cǎo lǜ",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "草绿",
+          "en": "Grass Green",
+          "pinyin": "cǎo lǜ",
+          "reliability": "verified"
+        }
+      }
+    },
+    "ceng-qing": {
+      "$value": "#535164",
+      "$type": "color",
+      "$description": "曾青 (曾Cyan) · céng qīng",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "曾青",
+          "en": "曾Cyan",
+          "pinyin": "céng qīng",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cha-se": {
+      "$value": "#b35c44",
+      "$type": "color",
+      "$description": "茶色 (茶色) · chá sè",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "茶色",
+          "en": "茶色",
+          "pinyin": "chá sè",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cheng-huang": {
+      "$value": "#ffa400",
+      "$type": "color",
+      "$description": "橙黄 (橙Yellow) · chéng huáng",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "橙黄",
+          "en": "橙Yellow",
+          "pinyin": "chéng huáng",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cheng-wei": {
+      "$value": "#EF845D",
+      "$type": "color",
+      "$description": "赬尾 (赬尾) · chēng wěi",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "赬尾",
+          "en": "赬尾",
+          "pinyin": "chēng wěi",
+          "reliability": "verified"
+        }
+      }
+    },
+    "chi": {
+      "$value": "#c3272b",
+      "$type": "color",
+      "$description": "赤 (赤) · chì",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "赤",
+          "en": "赤",
+          "pinyin": "chì",
+          "reliability": "verified"
+        }
+      }
+    },
+    "chi-jin": {
+      "$value": "#f2be45",
+      "$type": "color",
+      "$description": "赤金 (赤金) · chì jīn",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "赤金",
+          "en": "赤金",
+          "pinyin": "chì jīn",
+          "reliability": "verified"
+        }
+      }
+    },
+    "chi-ti": {
+      "$value": "#BA5B49",
+      "$type": "color",
+      "$description": "赤緹 (赤緹) · chì tí",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "赤緹",
+          "en": "赤緹",
+          "pinyin": "chì tí",
+          "reliability": "verified"
+        }
+      }
+    },
+    "chi-you-qi": {
+      "$value": "#A85858",
+      "$type": "color",
+      "$description": "蚩尤旗 (蚩尤旗) · chī yóu qí",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "蚩尤旗",
+          "en": "蚩尤旗",
+          "pinyin": "chī yóu qí",
+          "reliability": "verified"
+        }
+      }
+    },
+    "chi-zhang": {
+      "$value": "#E1C199",
+      "$type": "color",
+      "$description": "赤璋 (赤璋) · chì zhāng",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "赤璋",
+          "en": "赤璋",
+          "pinyin": "chì zhāng",
+          "reliability": "verified"
+        }
+      }
+    },
+    "chu-xiu": {
+      "$value": "#A9A773",
+      "$type": "color",
+      "$description": "出岫 (出岫) · chū xiù",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "出岫",
+          "en": "出岫",
+          "pinyin": "chū xiù",
+          "reliability": "verified"
+        }
+      }
+    },
+    "chun-bi": {
+      "$value": "#9D9D82",
+      "$type": "color",
+      "$description": "春碧 (春碧) · chūn bì",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "春碧",
+          "en": "春碧",
+          "pinyin": "chūn bì",
+          "reliability": "verified"
+        }
+      }
+    },
+    "chun-zhi": {
+      "$value": "#C25160",
+      "$type": "color",
+      "$description": "唇脂 (唇脂) · chún zhī",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "唇脂",
+          "en": "唇脂",
+          "pinyin": "chún zhī",
+          "reliability": "verified"
+        }
+      }
+    },
+    "ci-miao": {
+      "$value": "#A67EB7",
+      "$type": "color",
+      "$description": "茈藐 (茈藐) · cí miǎo",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "茈藐",
+          "en": "茈藐",
+          "pinyin": "cí miǎo",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cong-jie": {
+      "$value": "#88BFB8",
+      "$type": "color",
+      "$description": "繱犗 (繱犗) · cōng jiè",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "繱犗",
+          "en": "繱犗",
+          "pinyin": "cōng jiè",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cong-qian-0132": {
+      "$value": "#6C8650",
+      "$type": "color",
+      "$description": "蔥倩 (蔥倩) · cōng qiàn",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "蔥倩",
+          "en": "蔥倩",
+          "pinyin": "cōng qiàn",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cui-piao": {
+      "$value": "#B7D332",
+      "$type": "color",
+      "$description": "翠縹 (翠縹) · cuì piǎo",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "翠縹",
+          "en": "翠縹",
+          "pinyin": "cuì piǎo",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cui-wei": {
+      "$value": "#4C8045",
+      "$type": "color",
+      "$description": "翠微 (翠微) · cuì wēi",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "翠微",
+          "en": "翠微",
+          "pinyin": "cuì wēi",
+          "reliability": "verified"
+        }
+      }
+    },
+    "cui-zun": {
+      "$value": "#CDD171",
+      "$type": "color",
+      "$description": "翠樽 (翠樽) · cuì zūn",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "翠樽",
+          "en": "翠樽",
+          "pinyin": "cuì zūn",
+          "reliability": "verified"
+        }
+      }
+    },
+    "da-hong": {
+      "$value": "#ff2121",
+      "$type": "color",
+      "$description": "大红 (Bright Red) · dà hóng",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "大红",
+          "en": "Bright Red",
+          "pinyin": "dà hóng",
+          "reliability": "verified"
+        }
+      }
+    },
+    "da-kuai": {
+      "$value": "#BFA782",
+      "$type": "color",
+      "$description": "大塊 (大塊) · dà kuài",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "大塊",
+          "en": "大塊",
+          "pinyin": "dà kuài",
+          "reliability": "verified"
+        }
+      }
+    },
+    "hai-tian-xia": {
+      "$value": "#f3a694",
+      "$type": "color",
+      "$description": "海天霞 (海天霞) · hǎi tiān xiá",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "海天霞",
+          "en": "海天霞",
+          "pinyin": "hǎi tiān xiá",
+          "reliability": "attributed"
+        }
+      }
+    },
+    "huang-bai-you": {
+      "$value": "#fff799",
+      "$type": "color",
+      "$description": "黃白游 (黃White游) · huáng bái yóu",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "黃白游",
+          "en": "黃White游",
+          "pinyin": "huáng bái yóu",
+          "reliability": "verified"
+        }
+      }
+    },
+    "jin-yun": {
+      "$value": "#ee7959",
+      "$type": "color",
+      "$description": "縉雲 (縉雲) · jìn yún",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "縉雲",
+          "en": "縉雲",
+          "pinyin": "jìn yún",
+          "reliability": "attributed"
+        }
+      }
+    },
+    "li-ke": {
+      "$value": "#775039",
+      "$type": "color",
+      "$description": "栗殼 (栗殼) · lì ké",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "栗殼",
+          "en": "栗殼",
+          "pinyin": "lì ké",
+          "reliability": "attributed"
+        }
+      }
+    },
+    "liu-huang": {
+      "$value": "#8B7042",
+      "$type": "color",
+      "$description": "流黃 (流黃) · liú huáng",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "流黃",
+          "en": "流黃",
+          "pinyin": "liú huáng",
+          "reliability": "attributed"
+        }
+      }
+    },
+    "long-zhan": {
+      "$value": "#5f4321",
+      "$type": "color",
+      "$description": "龍戰 (龍戰) · lóng zhàn",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "龍戰",
+          "en": "龍戰",
+          "pinyin": "lóng zhàn",
+          "reliability": "verified"
+        }
+      }
+    },
+    "piao-bi": {
+      "$value": "#80a492",
+      "$type": "color",
+      "$description": "縹碧 (縹碧) · piǎo bì",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "縹碧",
+          "en": "縹碧",
+          "pinyin": "piǎo bì",
+          "reliability": "attributed"
+        }
+      }
+    },
+    "qing-li": {
+      "$value": "#422517",
+      "$type": "color",
+      "$description": "青驪 (Cyan驪) · qīng lí",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "青驪",
+          "en": "Cyan驪",
+          "pinyin": "qīng lí",
+          "reliability": "attributed"
+        }
+      }
+    },
+    "shan-hu-he": {
+      "$value": "#c12c1f",
+      "$type": "color",
+      "$description": "珊瑚赫 (珊瑚赫) · shān hú hè",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "珊瑚赫",
+          "en": "珊瑚赫",
+          "pinyin": "shān hú hè",
+          "reliability": "attributed"
+        }
+      }
+    },
+    "song-hua": {
+      "$value": "#ffee6f",
+      "$type": "color",
+      "$description": "松花 (Pine Flower) · sōng huā",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "松花",
+          "en": "Pine Flower",
+          "pinyin": "sōng huā",
+          "reliability": "verified"
+        }
+      }
+    },
+    "tian-piao": {
+      "$value": "#d5ebe1",
+      "$type": "color",
+      "$description": "天縹 (天縹) · tiān piǎo",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "天縹",
+          "en": "天縹",
+          "pinyin": "tiān piǎo",
+          "reliability": "verified"
+        }
+      }
+    },
+    "xiang-se": {
+      "$value": "#f0c239",
+      "$type": "color",
+      "$description": "缃色 (Pale Yellow) · xiāng sè",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "缃色",
+          "en": "Pale Yellow",
+          "pinyin": "xiāng sè",
+          "reliability": "verified"
+        }
+      }
+    },
+    "xiang-ye": {
+      "$value": "#ecd452",
+      "$type": "color",
+      "$description": "緗葉 (緗葉) · xiāng yè",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "緗葉",
+          "en": "緗葉",
+          "pinyin": "xiāng yè",
+          "reliability": "verified"
+        }
+      }
+    },
+    "xun-huang": {
+      "$value": "#ba5140",
+      "$type": "color",
+      "$description": "纁黃 (纁黃) · xūn huáng",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "纁黃",
+          "en": "纁黃",
+          "pinyin": "xūn huáng",
+          "reliability": "attributed"
+        }
+      }
+    },
+    "yan-zhi": {
+      "$value": "#9d2933",
+      "$type": "color",
+      "$description": "胭脂 (Rouge) · yān zhī",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "胭脂",
+          "en": "Rouge",
+          "pinyin": "yān zhī",
+          "reliability": "verified"
+        }
+      }
+    },
+    "yue-bai": {
+      "$value": "#d6ecf0",
+      "$type": "color",
+      "$description": "月白 (Moon White) · yuè bái",
+      "$extensions": {
+        "com.cathycolor": {
+          "zh": "月白",
+          "en": "Moon White",
+          "pinyin": "yuè bái",
+          "reliability": "verified"
+        }
+      }
+    }
+  }
+}

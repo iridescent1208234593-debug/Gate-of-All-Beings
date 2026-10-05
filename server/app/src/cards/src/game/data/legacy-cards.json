@@ -1,0 +1,1207 @@
+[
+  {
+    "id": "legacy-01",
+    "name": "金刃",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "金",
+    "effect": {
+      "damage": 6
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "jin",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "金刃"
+  },
+  {
+    "id": "legacy-02",
+    "name": "土盾",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "土",
+    "effect": {
+      "block": 5
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "tu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "土盾"
+  },
+  {
+    "id": "legacy-03",
+    "name": "御金击",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "金",
+    "effect": {
+      "damage": 8,
+      "vulnerable": 2
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "jin",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "御金击"
+  },
+  {
+    "id": "legacy-04",
+    "name": "雷灵闪",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "金",
+    "effect": {
+      "damage": 4,
+      "vulnerable": 1
+    },
+    "target": "all",
+    "school": "yuling",
+    "element": "jin",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "雷灵闪"
+  },
+  {
+    "id": "legacy-05",
+    "name": "追毫",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "生",
+    "effect": {
+      "vulnerable": 2,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "追毫"
+  },
+  {
+    "id": "legacy-06",
+    "name": "木缠暗击",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "木",
+    "effect": {
+      "damage": 7,
+      "weak": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "mu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "木缠暗击"
+  },
+  {
+    "id": "legacy-07",
+    "name": "木愈回春",
+    "owner": "all",
+    "cost": 2,
+    "type": "技能",
+    "glyph": "木",
+    "effect": {
+      "regen": 5
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "mu",
+    "condition": "belowHalf",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "木愈回春"
+  },
+  {
+    "id": "legacy-08",
+    "name": "木缚藤蔓",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "木",
+    "effect": {
+      "damage": 5,
+      "weak": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "mu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "木缚藤蔓"
+  },
+  {
+    "id": "legacy-09",
+    "name": "铁浪",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "水",
+    "effect": {
+      "damage": 5,
+      "block": 5
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "shui",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "铁浪"
+  },
+  {
+    "id": "legacy-10",
+    "name": "冰封千里",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "水",
+    "effect": {
+      "damage": 8,
+      "weak": 2
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "shui",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "冰封千里"
+  },
+  {
+    "id": "legacy-11",
+    "name": "水御·寒潮",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "水",
+    "effect": {
+      "block": 5,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "shui",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "水御·寒潮"
+  },
+  {
+    "id": "legacy-12",
+    "name": "紫云焰",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "火",
+    "effect": {
+      "damage": 11,
+      "weak": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "huo",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "紫云焰"
+  },
+  {
+    "id": "legacy-13",
+    "name": "玄离·炽焰",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "火",
+    "effect": {
+      "damage": 5,
+      "vulnerable": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "huo",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "玄离·炽焰"
+  },
+  {
+    "id": "legacy-14",
+    "name": "炎爆术",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "火",
+    "effect": {
+      "damage": 14
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "huo",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "炎爆术"
+  },
+  {
+    "id": "legacy-15",
+    "name": "金刚撞",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "土",
+    "effect": {
+      "damageFromBlock": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "tu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "金刚撞"
+  },
+  {
+    "id": "legacy-16",
+    "name": "土灵护体",
+    "owner": "all",
+    "cost": 2,
+    "type": "技能",
+    "glyph": "土",
+    "effect": {
+      "block": 12
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "tu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "土灵护体"
+  },
+  {
+    "id": "legacy-17",
+    "name": "御金·锋锐",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "金",
+    "effect": {
+      "damage": 6,
+      "vulnerable": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "jin",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "御金·锋锐"
+  },
+  {
+    "id": "legacy-18",
+    "name": "御木·生长",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "木",
+    "effect": {
+      "block": 4,
+      "regen": 2
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "mu",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "御木·生长"
+  },
+  {
+    "id": "legacy-19",
+    "name": "御水·流转",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "水",
+    "effect": {
+      "damage": 4,
+      "block": 4
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "shui",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "御水·流转"
+  },
+  {
+    "id": "legacy-20",
+    "name": "御火·爆发",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "火",
+    "effect": {
+      "damage": 13,
+      "vulnerable": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "huo",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "御火·爆发"
+  },
+  {
+    "id": "legacy-21",
+    "name": "御土·厚德",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "土",
+    "effect": {
+      "block": 7,
+      "regen": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "tu",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "御土·厚德"
+  },
+  {
+    "id": "legacy-22",
+    "name": "全攻突进",
+    "owner": "all",
+    "cost": 0,
+    "type": "攻击",
+    "glyph": "灵",
+    "effect": {
+      "damage": 14
+    },
+    "target": "single",
+    "condition": "attacksOnly",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "全攻突进"
+  },
+  {
+    "id": "legacy-23",
+    "name": "横扫",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "灵",
+    "effect": {
+      "damage": 8
+    },
+    "target": "all",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "横扫"
+  },
+  {
+    "id": "legacy-24",
+    "name": "回春术",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "生",
+    "effect": {
+      "heal": 1,
+      "drawBelowHalf": 2
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "回春术"
+  },
+  {
+    "id": "legacy-25",
+    "name": "治愈灵光",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "生",
+    "effect": {
+      "block": 3,
+      "heal": 4
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "治愈灵光"
+  },
+  {
+    "id": "legacy-26",
+    "name": "眷灵",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "生",
+    "effect": {
+      "regen": 2,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "眷灵"
+  },
+  {
+    "id": "legacy-27",
+    "name": "噬灵术",
+    "owner": "all",
+    "cost": 3,
+    "type": "攻击",
+    "glyph": "生",
+    "effect": {
+      "damage": 8,
+      "heal": 4
+    },
+    "target": "all",
+    "school": "shengling",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "噬灵术"
+  },
+  {
+    "id": "legacy-28",
+    "name": "净灵之雨",
+    "owner": "all",
+    "cost": 2,
+    "type": "技能",
+    "glyph": "生",
+    "effect": {
+      "block": 10,
+      "heal": 3
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "净灵之雨"
+  },
+  {
+    "id": "legacy-29",
+    "name": "豪夺",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "生",
+    "effect": {
+      "damage": 8,
+      "regen": 2
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "豪夺"
+  },
+  {
+    "id": "legacy-30",
+    "name": "散灵诀",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "生",
+    "effect": {
+      "damage": 5,
+      "weak": 1,
+      "reduceAttack": 2
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "散灵诀"
+  },
+  {
+    "id": "legacy-31",
+    "name": "巨力",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "生",
+    "effect": {
+      "damage": 5,
+      "strength": 2
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "巨力"
+  },
+  {
+    "id": "legacy-32",
+    "name": "摄魂术",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "心",
+    "effect": {
+      "weak": 3,
+      "vulnerable": 3,
+      "healthCost": 3
+    },
+    "target": "all",
+    "school": "xinling",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "摄魂术"
+  },
+  {
+    "id": "legacy-33",
+    "name": "咒术化解",
+    "owner": "all",
+    "cost": 0,
+    "type": "攻击",
+    "glyph": "心",
+    "effect": {
+      "damageFromDebuffs": 2,
+      "clearTargetDebuffs": 1
+    },
+    "target": "single",
+    "school": "xinling",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "咒术化解"
+  },
+  {
+    "id": "legacy-34",
+    "name": "灵誓",
+    "owner": "all",
+    "cost": 2,
+    "type": "技能",
+    "glyph": "心",
+    "effect": {
+      "weak": 3,
+      "vulnerable": 3
+    },
+    "target": "single",
+    "school": "xinling",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "灵誓"
+  },
+  {
+    "id": "legacy-35",
+    "name": "无相面具",
+    "owner": "all",
+    "cost": 0,
+    "type": "技能",
+    "glyph": "造",
+    "effect": {
+      "energy": 1
+    },
+    "target": "single",
+    "school": "zaowu",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "无相面具"
+  },
+  {
+    "id": "legacy-36",
+    "name": "画灵",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "造",
+    "effect": {
+      "damage": 6,
+      "block": 3
+    },
+    "target": "single",
+    "school": "zaowu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "画灵"
+  },
+  {
+    "id": "legacy-37",
+    "name": "瞬移",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "空",
+    "effect": {
+      "draw": 2
+    },
+    "target": "single",
+    "school": "kongjian",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "瞬移"
+  },
+  {
+    "id": "legacy-38",
+    "name": "吞噬之域",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "空",
+    "effect": {
+      "damage": 5,
+      "block": 5
+    },
+    "target": "single",
+    "school": "kongjian",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "吞噬之域"
+  },
+  {
+    "id": "legacy-39",
+    "name": "领域·展开",
+    "owner": "all",
+    "cost": 3,
+    "type": "技能",
+    "glyph": "空",
+    "effect": {
+      "block": 8,
+      "regen": 3
+    },
+    "target": "single",
+    "school": "kongjian",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "领域·展开"
+  },
+  {
+    "id": "legacy-40",
+    "name": "定心镜",
+    "owner": "all",
+    "cost": 0,
+    "type": "技能",
+    "glyph": "锁",
+    "effect": {
+      "block": 4,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "suoyu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "定心镜"
+  },
+  {
+    "id": "legacy-41",
+    "name": "蓝玉盘",
+    "owner": "all",
+    "cost": 2,
+    "type": "技能",
+    "glyph": "空",
+    "effect": {
+      "block": 8,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "kongjian",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "蓝玉盘"
+  },
+  {
+    "id": "legacy-42",
+    "name": "黑咻·分身",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "生",
+    "effect": {
+      "block": 4,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "黑咻·分身"
+  },
+  {
+    "id": "legacy-43",
+    "name": "剑域·斩",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "金",
+    "effect": {
+      "damage": 7
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "jin",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "剑域·斩"
+  },
+  {
+    "id": "legacy-44",
+    "name": "风息·木缚",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "金",
+    "effect": {
+      "damage": 9,
+      "vulnerable": 2
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "mu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "风息·金缚"
+  },
+  {
+    "id": "legacy-45",
+    "name": "火尖枪·破",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "火",
+    "effect": {
+      "damage": 8
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "huo",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "火尖枪·破"
+  },
+  {
+    "id": "legacy-46",
+    "name": "冰火双域",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "火",
+    "effect": {
+      "damage": 8,
+      "weak": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "huo",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "冰火双域"
+  },
+  {
+    "id": "legacy-47",
+    "name": "清凝仙术",
+    "owner": "all",
+    "cost": 2,
+    "type": "技能",
+    "glyph": "生",
+    "effect": {
+      "heal": 12
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "清凝仙术"
+  },
+  {
+    "id": "legacy-48",
+    "name": "团鼠·吞灵",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "生",
+    "effect": {
+      "damage": 6,
+      "block": 3
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "团鼠·吞灵"
+  },
+  {
+    "id": "legacy-49",
+    "name": "七星锁",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "锁",
+    "effect": {
+      "weak": 2
+    },
+    "target": "single",
+    "school": "suoyu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "七星锁"
+  },
+  {
+    "id": "legacy-50",
+    "name": "时滞·加速",
+    "owner": "all",
+    "cost": 2,
+    "type": "技能",
+    "glyph": "空",
+    "effect": {
+      "energy": 1,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "kongjian",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "时滞·加速"
+  },
+  {
+    "id": "legacy-51",
+    "name": "白虎·啸",
+    "owner": "all",
+    "cost": 3,
+    "type": "攻击",
+    "glyph": "金",
+    "effect": {
+      "damage": 20
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "jin",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "白虎·啸"
+  },
+  {
+    "id": "legacy-52",
+    "name": "木灵愈生",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "木",
+    "effect": {
+      "regen": 3,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "mu",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "木灵愈生"
+  },
+  {
+    "id": "legacy-53",
+    "name": "古树盘根",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "木",
+    "effect": {
+      "block": 5,
+      "weak": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "mu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "古树盘根"
+  },
+  {
+    "id": "legacy-54",
+    "name": "冰晶·玄离",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "水",
+    "effect": {
+      "damage": 6,
+      "weak": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "shui",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "冰晶·玄离"
+  },
+  {
+    "id": "legacy-55",
+    "name": "清泉·双刃",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "水",
+    "effect": {
+      "damage": 5,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "shui",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "清泉·双刃"
+  },
+  {
+    "id": "legacy-56",
+    "name": "芷清·土壁",
+    "owner": "all",
+    "cost": 2,
+    "type": "技能",
+    "glyph": "土",
+    "effect": {
+      "block": 14
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "tu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "芷清·土壁"
+  },
+  {
+    "id": "legacy-57",
+    "name": "叶子·地刺",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "土",
+    "effect": {
+      "damage": 7,
+      "vulnerable": 1
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "tu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "叶子·地刺"
+  },
+  {
+    "id": "legacy-58",
+    "name": "池年·重塑",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "土",
+    "effect": {
+      "block": 4,
+      "regen": 2
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "tu",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "池年·重塑"
+  },
+  {
+    "id": "legacy-59",
+    "name": "龙岩·岩崩",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "土",
+    "effect": {
+      "damage": 13
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "tu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "龙岩·岩崩"
+  },
+  {
+    "id": "legacy-60",
+    "name": "读心",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "心",
+    "effect": {
+      "weak": 2,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "xinling",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "读心"
+  },
+  {
+    "id": "legacy-61",
+    "name": "傀儡术",
+    "owner": "all",
+    "cost": 1,
+    "type": "攻击",
+    "glyph": "心",
+    "effect": {
+      "damage": 5,
+      "weak": 2
+    },
+    "target": "single",
+    "school": "xinling",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "傀儡术"
+  },
+  {
+    "id": "legacy-62",
+    "name": "戏梦",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "心",
+    "effect": {
+      "vulnerable": 2,
+      "weak": 2
+    },
+    "target": "single",
+    "school": "xinling",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "戏梦"
+  },
+  {
+    "id": "legacy-63",
+    "name": "重构",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "造",
+    "effect": {
+      "block": 6,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "zaowu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "重构"
+  },
+  {
+    "id": "legacy-64",
+    "name": "无中生有",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "造",
+    "effect": {
+      "energy": 1,
+      "draw": 1
+    },
+    "target": "single",
+    "school": "zaowu",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "无中生有"
+  },
+  {
+    "id": "legacy-65",
+    "name": "封灵阵",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "锁",
+    "effect": {
+      "weak": 2,
+      "vulnerable": 2
+    },
+    "target": "all",
+    "school": "suoyu",
+    "exhaust": false,
+    "source": "旧版灵术改编",
+    "originalName": "封灵阵"
+  },
+  {
+    "id": "legacy-66",
+    "name": "御灵环",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "锁",
+    "effect": {
+      "block": 7,
+      "regen": 1
+    },
+    "target": "single",
+    "school": "suoyu",
+    "exhaust": true,
+    "source": "旧版灵术改编",
+    "originalName": "御灵环"
+  },
+  {
+    "id": "legacy-67",
+    "name": "拾遗",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "生",
+    "effect": {
+      "block": 6
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": false,
+    "source": "同人角色灵术",
+    "originalName": "拾遗"
+  },
+  {
+    "id": "legacy-68",
+    "name": "衔光",
+    "owner": "all",
+    "cost": 1,
+    "type": "技能",
+    "glyph": "生",
+    "effect": {
+      "weak": 2
+    },
+    "target": "single",
+    "school": "shengling",
+    "exhaust": false,
+    "source": "同人角色灵术",
+    "originalName": "衔光"
+  },
+  {
+    "id": "legacy-69",
+    "name": "金乌展翅",
+    "owner": "all",
+    "cost": 2,
+    "type": "攻击",
+    "glyph": "火",
+    "effect": {
+      "damage": 12
+    },
+    "target": "single",
+    "school": "yuling",
+    "element": "huo",
+    "exhaust": false,
+    "source": "同人角色灵术",
+    "originalName": "金乌展翅"
+  },
+  {
+    "id": "legacy-70",
+    "name": "虹间安魂",
+    "owner": "all",
+    "cost": 2,
+    "type": "技能",
+    "glyph": "空",
+    "effect": {
+      "block": 12
+    },
+    "target": "single",
+    "school": "kongjian",
+    "exhaust": false,
+    "source": "同人角色灵术",
+    "originalName": "虹间安魂"
+  }
+]

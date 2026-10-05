@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8" />
+		<title>罗小黑战记·重生之门 · 修行总览</title>
+		<meta name="description" content="罗小黑战记·重生之门 战绩统计与跨局修行总览" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
+		/>
+		<link rel="manifest" href="manifest.webmanifest" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="theme-color" content="#116f54" />
+		<meta name="msapplication-TileColor" content="#116f54" />
+		<link rel="icon" type="image/png" href="/ui/images/spoder.png" sizes="512x512" />
+		<link rel="shortcut icon" href="/ui/images/spoder.png" />
+		<link rel="apple-touch-icon" href="/ui/images/spoder.png" />
+		<link rel="stylesheet" href="ui/index.css" />
+		<style>
+			/* 修行总览页专属样式 */
+			.Stats-wrap {max-width: 860px; margin: 0 auto; padding: 16px 12px 60px;}
+			.Stats-card {background: rgba(255,255,255,0.92); border-radius: 14px; padding: 14px 16px; margin-top: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);}
+			.Stats-card h3 {margin: 0 0 10px; font-size: 17px; color: #0d5c46; border-left: 4px solid #2a9d74; padding-left: 8px;}
+			.Stats-grid {display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;}
+			.Stats-cell {background: #f4faf7; border-radius: 10px; padding: 10px 12px; text-align: center;}
+			.Stats-cell b {display: block; font-size: 22px; color: #0d5c46;}
+			.Stats-cell span {font-size: 12px; color: #5b6b64;}
+			.RealmBox {display: flex; align-items: center; gap: 14px; flex-wrap: wrap;}
+			.RealmBadge {background: linear-gradient(135deg, #2a9d74, #116f54); color: #fff; border-radius: 999px; padding: 8px 18px; font-size: 18px; font-weight: 700;}
+			.RealmDesc {color: #4a5a53; font-size: 13px; flex: 1; min-width: 180px;}
+			.ProgressBar {height: 8px; background: #e2eee8; border-radius: 99px; overflow: hidden; margin-top: 6px;}
+			.ProgressBar i {display: block; height: 100%; background: linear-gradient(90deg, #2a9d74, #7fd0ae); border-radius: 99px;}
+			.ProgressItem {margin-bottom: 10px;}
+			.ProgressItem-head {display: flex; justify-content: space-between; font-size: 13px; color: #33473e;}
+			.AchList {display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px;}
+			.AchItem {display: flex; align-items: center; gap: 8px; background: #f4faf7; border-radius: 8px; padding: 7px 10px; font-size: 13px; color: #33473e;}
+			.AchItem.off {opacity: 0.55; filter: grayscale(0.8);}
+			.AchItem .AchCat {margin-left: auto; background: #dcefe6; color: #0d5c46; border-radius: 99px; padding: 1px 8px; font-size: 11px; white-space: nowrap;}
+			.ElementRow {display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px dashed #e2eee8; flex-wrap: wrap;}
+			.ElementRow:last-child {border-bottom: none;}
+			.ElementBadge {width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; flex: none;}
+			.ElementRow .ElTitle {font-weight: 700; color: #0d5c46; font-size: 15px;}
+			.ElementRow .ElRole {font-size: 12px; color: #8a5a2a; background: #fbf3e4; border-radius: 99px; padding: 1px 8px;}
+			.ElementRow .ElFlavor {font-size: 12px; color: #5b6b64; flex: 1; min-width: 160px;}
+			.ElementRow .ElWin {font-size: 12px; color: #0d5c46; white-space: nowrap;}
+			.WuXing {display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: #4a5a53;}
+			.WuXing span {background: #eef6f2; border-radius: 8px; padding: 4px 10px;}
+			.SoulSettle {color: #0d5c46; font-weight: 700;}
+			table.StatsTable {width: 100%; border-collapse: collapse; font-size: 13px;}
+			.StatsTable th {text-align: left; background: #eef6f2; color: #0d5c46; padding: 6px 8px;}
+			.StatsTable td {padding: 6px 8px; border-bottom: 1px solid #eef3ef; color: #33473e;}
+		</style>
+	</head>
+
+	<body style="overflow: auto">
+		<div id="root"></div>
+		<script type="module">
+			import {html, render} from './web_modules/htm/preact/standalone.module.js'
+			import {getRuns} from './game/backend.js'
+			import {getLegacy, legacyLevel, SOUL_REALMS} from './content/soul-legacy.js'
+			import {loadProgress} from './game/lingzhi-progress.js'
+			import {lingzhiCharacters, lingzhiCards, lingzhiRelics, lingzhiAchievements} from './content/lingzhi-xiuxing.js'
+			import {getAchievementState, isUnlocked, ACHIEVEMENTS, ACHIEVEMENT_CATEGORIES} from './content/achievements.js'
+			import {getCollection, getProgress} from './content/collection-progress.js'
+			import cards from './content/cards.js'
+			import {extraCharacters} from './content/characters-full.js'
+			import {easyMonsters, monsters, elites, bosses} from './content/dungeon-encounters.js'
+			import {spiritSpacePool} from './content/spirit-spaces.js'
+			import {worldviewEventPool} from './content/worldview-events.js'
+			import {episodeList} from './content/episodes-data.js'
+			import {bonds} from './content/bonds.js'
+			import {locations, characters, artifacts} from './content/worldview-data.js'
+			import {ELEMENTS, elementMasteries, SHENG, KE} from './content/element-mastery.js'
+
+			const ELEMENT_COLOR = {金: '#c9a227', 木: '#2f9d5f', 水: '#2b7fd0', 火: '#d04a2b', 土: '#8a6a3a'}
+
+			const ProgressBar = ({ratio}) => html`<div class="ProgressBar"><i style="width:${Math.round(Math.min(1, ratio) * 100)}%"></i></div>`
+
+			// ==================== 魂灵传承 ====================
+			const SoulSection = () => {
+				const legacy = getLegacy()
+				if (!legacy) return html`<div class="Stats-card"><h3>魂灵传承</h3><p style="color:#5b6b64;font-size:13px">暂无轮回记录——每一局散灵或通关，魂灵都将在此沉淀。</p></div>`
+				const level = legacyLevel(legacy.soul || 0)
+				const next = SOUL_REALMS.find((r) => r.soul > (legacy.soul || 0))
+				const prevSoul = SOUL_REALMS[Math.max(0, level.index - 1)]?.soul || 0
+				const ratio = next ? ((legacy.soul - prevSoul) / (next.soul - prevSoul)) : 1
+				return html`<div class="Stats-card">
+					<h3>魂灵传承 <small style="color:#8aa198;font-weight:400">每一次散灵，都是下一世重生的养料</small></h3>
+					<div class="RealmBox">
+						<div class="RealmBadge">${level.name}</div>
+						<div class="RealmDesc">${level.desc}${next ? html`<br /><small>下一境界「${next.name}」需 ${next.soul} 魂灵</small>` : ''}</div>
+						<${ProgressBar} ratio=${ratio} />
+					</div>
+					<div class="Stats-grid" style="margin-top:10px">
+						<div class="Stats-cell"><b>${legacy.soul || 0}</b><span>累计魂灵</span></div>
+						<div class="Stats-cell"><b>${legacy.runs || 0}</b><span>轮回次数</span></div>
+						<div class="Stats-cell"><b>${legacy.wins || 0}</b><span>通关重生之门</span></div>
+						<div class="Stats-cell"><b>${legacy.bestFloor || 0}</b><span>最高楼层</span></div>
+						<div class="Stats-cell"><b>${legacy.lastResult || '—'}</b><span>上次结局</span></div>
+					</div>
+				</div>`
+			}
+
+			// ==================== 灵质修行 ====================
+			const LingzhiSection = () => {
+				const p = loadProgress()
+				const best = p.bestTimeMs ? new Date(p.bestTimeMs).toISOString().substr(14, 5) : '—'
+				const cells = [
+					[p.shards || 0, '修行残片'],
+					[`${p.unlockedCharacters.length}/${lingzhiCharacters.length}`, '角色'],
+					[`${p.unlockedCards.length}/${lingzhiCards.length}`, '灵术'],
+					[`${p.unlockedRelics.length}/${lingzhiRelics.length}`, '遗物'],
+					[p.runs || 0, '修行次数'],
+					[p.wins || 0, '通关回路'],
+					[best, '最快通关'],
+					[`${Object.keys(p.claimedAchievements || {}).length}/${lingzhiAchievements.length}`, '修行成就'],
+				]
+				return html`<div class="Stats-card">
+					<h3>灵质修行 <small style="color:#8aa198;font-weight:400">灵质回路试炼 · 独立于主冒险的修行之路</small></h3>
+					<div class="Stats-grid">${cells.map(([v, k]) => html`<div class="Stats-cell"><b>${v}</b><span>${k}</span></div>`)}</div>
+				</div>`
+			}
+
+			// ==================== 成就总览 ====================
+			const AchievementSection = () => {
+				const state = getAchievementState()
+				const list = ACHIEVEMENTS.map((a) => ({...a, unlocked: isUnlocked(a.id, state)}))
+				const cats = Object.entries(ACHIEVEMENT_CATEGORIES).map(([key, label]) => {
+					const inCat = list.filter((a) => a.category === key)
+					return {key, label, items: inCat, done: inCat.filter((a) => a.unlocked).length}
+				})
+				const total = list.length
+				const done = list.filter((a) => a.unlocked).length
+				return html`<div class="Stats-card">
+					<h3>成就总览 <small style="color:#8aa198;font-weight:400">已解锁 ${done}/${total}</small></h3>
+					${cats.map((c) => html`
+						<div style="margin:10px 0 4px;font-size:13px;color:#0d5c46;font-weight:700">${c.label} · ${c.done}/${c.items.length}</div>
+						<div class="AchList">${c.items.map((a) => html`<div class="AchItem ${a.unlocked ? '' : 'off'}" title=${a.desc}>${a.icon}${a.name}<span class="AchCat">${a.rewardTitle}</span></div>`)}</div>
+					`)}
+				</div>`
+			}
+
+			// ==================== 五行掌握 ====================
+			const ElementSection = () => {
+				const state = getAchievementState()
+				const wins = (state || {}).elementWins || {}
+				return html`<div class="Stats-card">
+					<h3>五行掌握 <small style="color:#8aa198;font-weight:400">本命御灵系共鸣 · 天时相生相克</small></h3>
+					${elementMasteries.map((m) => html`<div class="ElementRow">
+						<div class="ElementBadge" style="background:${ELEMENT_COLOR[m.element]}">${m.element}</div>
+						<div><div class="ElTitle">${m.title}</div></div>
+						<span class="ElRole">${m.role}</span>
+						<span class="ElFlavor">${m.flavor}</span>
+						<span class="ElWin">${wins[m.element] ? `通关 ×${wins[m.element]}` : '尚未通关'}</span>
+					</div>`)}
+					<div class="WuXing">
+						<span>相生：${ELEMENTS.map((e) => `${e}→${SHENG[e]}`).join('、')}</span>
+						<span>相克：${ELEMENTS.map((e) => `${e}克${KE[e]}`).join('、')}</span>
+					</div>
+				</div>`
+			}
+
+			// ==================== 图鉴收集 ====================
+			const CollectionSection = () => {
+				const enemyTotal = [...new Set([...Object.values(easyMonsters), ...Object.values(monsters), ...Object.values(elites), ...Object.values(bosses)].flatMap((r) => r.monsters?.map((m) => m.name) || []).filter(Boolean))].length
+				const stats = [
+					['卡牌', 'cards', cards.length],
+					['角色', 'characters', characters.length + extraCharacters.length],
+					['地点', 'locations', locations.length],
+					['法宝', 'artifacts', artifacts.length],
+					['敌人', 'enemies', enemyTotal],
+					['灵质空间', 'spaces', spiritSpacePool.length],
+					['事件', 'events', worldviewEventPool.length],
+					['剧集', 'stories', episodeList.length],
+					['羁绊', 'bonds', bonds.length],
+				]
+				const items = stats.map(([label, type, total]) => {
+					const p = getProgress(type, total)
+					return html`<div class="ProgressItem">
+						<div class="ProgressItem-head"><b>${label}</b><span>${p.collected} / ${total}</span></div>
+						<${ProgressBar} ratio=${p.ratio} />
+					</div>`
+				})
+				const collectedSum = stats.reduce((s, [, type]) => s + getCollection()[type].length, 0)
+				const totalSum = stats.reduce((s, [, , total]) => s + total, 0)
+				return html`<div class="Stats-card">
+					<h3>图鉴收集 <small style="color:#8aa198;font-weight:400">在爬塔中遇见角色、敌人、灵质空间与法宝即可收录</small></h3>
+					<div class="SoulSettle" style="margin-bottom:8px">已收录 ${collectedSum} / ${totalSum}（${Math.round((totalSum ? collectedSum / totalSum : 0) * 100)}%）</div>
+					${items}
+				</div>`
+			}
+
+			// ==================== 历次对局 ====================
+			const List = (props) => html`
+				<div class="Stats-wrap">
+					<p><a href="/" class="Button">返回</a></p>
+					<h1 style="margin:6px 0 2px">罗小黑战记·重生之门</h1>
+					<h2 style="color:#0d5c46;margin:0 0 4px">修行总览</h2>
+					<${SoulSection} />
+					<${LingzhiSection} />
+					<${AchievementSection} />
+					<${ElementSection} />
+					<${CollectionSection} />
+					<div class="Stats-card">
+						<h3>历次对局 <small style="color:#8aa198;font-weight:400">最近 100 局</small></h3>
+						${props.runs.length ? html`<table class="StatsTable">
+							<thead><tr><th>日期</th><th>名称</th><th>状态</th><th>御灵师生命</th><th>历史步数</th></tr></thead>
+							<tbody>${props.runs.map((run) => {
+								try {
+									const game = JSON.parse(run.fields.state)
+									const date = new Intl.DateTimeFormat('zh-CN').format(new Date(run.createdTime))
+									return html`<tr>
+										<td>${date}</td>
+										<td>${run.fields.name}</td>
+										<td>${run.fields.status}</td>
+										<td>${game.state.player.currentHealth}</td>
+										<td>${game.past.list.length}</td>
+									</tr>`
+								} catch (e) {
+									return null
+								}
+							})}</tbody>
+						</table>` : html`<p style="color:#5b6b64;font-size:13px">暂无对局记录，去爬塔吧。</p>`}
+					</div>
+				</div>
+			`
+
+			getRuns()
+				.then((runs) => render(html`<${List} runs=${runs || []} />`, document.querySelector('#root')))
+				.catch(() => render(html`<${List} runs=${[]} />`, document.querySelector('#root')))
+		</script>
+	</body>
+</html>

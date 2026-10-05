@@ -1,0 +1,45 @@
+{
+  "name": "@lxh/shared-types",
+  "version": "0.1.0",
+  "description": "众生之门、灵境会馆与生态模拟共享词汇、TypeScript 数据契约及 JSON 交换校验",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./wuxing": "./wuxing.js",
+    "./element": "./element.js",
+    "./resource": "./resource.js",
+    "./id": "./id.js",
+    "./realm": "./realm.js",
+    "./tick": "./tick.js",
+    "./world": {
+      "types": "./world.d.ts",
+      "default": "./world.js"
+    },
+    "./models": "./models.d.ts",
+    "./exchange": {
+      "types": "./exchange.d.ts",
+      "default": "./exchange.js"
+    }
+  },
+  "files": [
+    "wuxing.js",
+    "element.js",
+    "resource.js",
+    "id.js",
+    "realm.js",
+    "tick.js",
+    "verify/contract.mjs",
+    "world.js",
+    "world.d.ts",
+    "models.d.ts",
+    "exchange.js",
+    "exchange.d.ts"
+  ],
+  "scripts": {
+    "verify": "node verify/contract.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}

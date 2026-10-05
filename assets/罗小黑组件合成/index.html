@@ -1,0 +1,856 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>罗小黑 · 组件多层合成</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1b1e24;
+    color: #e8e6e3;
+    font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    display: flex;
+    min-height: 100vh;
+  }
+  .stage {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .canvas-wrap {
+    position: relative;
+    height: min(86vh, 150vw);
+    aspect-ratio: 9 / 16;
+    background: #fff;
+    box-shadow: 0 8px 40px rgba(0,0,0,.55);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .canvas-wrap canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .panel {
+    width: 360px;
+    padding: 24px 20px;
+    background: #23272f;
+    border-left: 1px solid #31363f;
+    overflow-y: auto;
+    max-height: 100vh;
+  }
+  .panel h1 { font-size: 18px; margin-bottom: 6px; letter-spacing: 1px; }
+  .panel .sub { font-size: 12px; color: #8b93a1; margin-bottom: 18px; }
+  .layer {
+    background: #2b303a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+  }
+  .layer.top { border-color: #5bbd84; }
+  .layer .head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 6px; }
+  .layer .name { font-size: 14px; font-weight: 600; flex: 1; }
+  .layer .opacity { font-size: 12px; color: #9aa3b2; font-variant-numeric: tabular-nums; }
+  .layer input[type=range] { width: 100%; accent-color: #7fd6a2; }
+  .row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .row .opacity { width: 44px; text-align: right; font-size: 12px; color: #9aa3b2; font-variant-numeric: tabular-nums; }
+  .row .lbl { width: auto; color: #8b93a1; flex-shrink: 0; }
+  .switch {
+    position: relative; width: 34px; height: 19px;
+    background: #3d434f; border-radius: 10px; cursor: pointer;
+    transition: background .2s; flex-shrink: 0;
+  }
+  .switch.on { background: #5bbd84; }
+  .switch::after {
+    content: ""; position: absolute; top: 2px; left: 2px;
+    width: 15px; height: 15px; background: #fff; border-radius: 50%;
+    transition: left .2s;
+  }
+  .switch.on::after { left: 17px; }
+  .order-btns { display: flex; gap: 4px; flex-shrink: 0; }
+  .order-btns button {
+    width: 24px; height: 24px; border: none; border-radius: 5px;
+    background: #3d4450; color: #cfd6e2; font-size: 11px; line-height: 1;
+    cursor: pointer; padding: 0;
+  }
+  .order-btns button:hover:not(:disabled) { background: #4a525f; }
+  .order-btns button:disabled { opacity: .3; cursor: default; }
+  .sub-row { margin: 8px 0 2px; font-size: 12px; color: #7fd6a2; }
+  .actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+  .actions button {
+    flex: 1; padding: 10px 0; border: none; border-radius: 8px;
+    font-size: 13px; cursor: pointer; background: #3d4450; color: #e8e6e3;
+    transition: background .15s; min-width: 90px;
+  }
+  .actions button:hover { background: #4a525f; }
+  .actions button.primary { background: #5bbd84; color: #13221a; font-weight: 700; }
+  .actions button.primary:hover { background: #6fcf97; }
+  .actions button.warn { background: #c98a3d; color: #22170a; font-weight: 700; }
+  .actions button.warn:hover { background: #d99b4e; }
+  .tip { margin-top: 14px; font-size: 12px; color: #8b93a1; line-height: 1.7; }
+  .mini-tip { margin-top: 6px; font-size: 11px; color: #77808f; line-height: 1.6; }
+  select {
+    width: 100%; padding: 6px 8px; background: #3d4450; color: #e8e6e3;
+    border: none; border-radius: 6px; font-size: 13px;
+  }
+  input[type=color] {
+    width: 44px; height: 28px; border: 1px solid #4a525f; border-radius: 6px;
+    background: #3d4450; padding: 2px; cursor: pointer; flex-shrink: 0;
+  }
+  input[type=text].name-input {
+    width: 66px; padding: 5px 6px; background: #3d4450; color: #e8e6e3;
+    border: none; border-radius: 6px; font-size: 14px; text-align: center;
+  }
+  #darkSplitCtl, #mildSplitCtl { display: none; }
+  #btnMergeDark, #btnMergeMild { display: none; }
+  /* 方正书宋（素材色名大字同款字体） */
+  @font-face {
+    font-family: 'FZShuSong';
+    src: url('FZSSJW.TTF') format('truetype');
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="canvas-wrap">
+    <canvas id="cv"></canvas>
+  </div>
+</div>
+
+<div class="panel">
+  <h1>组件多层合成</h1>
+  <div class="sub">素材风双色海报 · 竹影 + 色名文字 + 门匾 + 标题</div>
+
+  <div class="layer">
+    <div class="head">
+      <span class="name">背景</span>
+      <select id="bgSelect">
+        <option value="duotone" selected>双色 · 主色+辅色+底部渐变（素材风）</option>
+        <option value="#ffffff">白色</option>
+        <option value="#f2efe8">米白</option>
+        <option value="#0f1013">深灰</option>
+        <option value="transparent">透明（导出PNG）</option>
+      </select>
+    </div>
+    <div id="duotoneCtl">
+      <div class="row">
+        <span class="opacity lbl">主色(左)</span>
+        <input type="color" id="colorA" value="#90a65d">
+        <span class="opacity lbl">辅色(右)</span>
+        <input type="color" id="colorB" value="#2b313a">
+      </div>
+      <div class="mini-tip">左右分色于画面中线，底部渐变过渡到白色（与素材一致），改任意两色即时生效。</div>
+    </div>
+  </div>
+
+  <div class="layer" id="layerBox-colorText">
+    <div class="head">
+      <span class="name">双色文字（色名）</span>
+      <div class="switch on" data-layer="colorText"></div>
+    </div>
+    <div class="row">
+      <input type="range" min="0" max="100" value="100" data-layer="colorText">
+      <span class="opacity" data-opacity-label="colorText">100%</span>
+    </div>
+    <div class="row">
+      <span class="opacity lbl">左色名</span>
+      <input type="text" class="name-input" id="nameA" value="葱青" maxlength="4">
+      <span class="opacity lbl">右色名</span>
+      <input type="text" class="name-input" id="nameB" value="玄青" maxlength="4">
+    </div>
+    <div class="mini-tip">粗宋体竖排色名 + RGB/色值标注。颜色自动互换：左半边文字用辅色，右半边文字用主色（素材同款效果）。</div>
+  </div>
+
+  <div class="layer" id="layerBox-mild">
+    <div class="head">
+      <span class="name"><span class="layer-no">#2</span> 淡墨竹影</span>
+      <div class="order-btns">
+        <button data-order-up="mild" title="上移一层">▲</button>
+        <button data-order-down="mild" title="下移一层">▼</button>
+      </div>
+      <div class="switch on" data-layer="mild"></div>
+    </div>
+    <div class="row">
+      <span class="opacity lbl">墨色</span>
+      <input type="color" data-tint="mild" value="#404a3a">
+    </div>
+    <div id="mildWholeCtl">
+      <div class="row">
+        <input type="range" min="0" max="100" value="65" data-layer="mild">
+        <span class="opacity" data-opacity-label="mild">65%</span>
+      </div>
+      <div class="row">
+        <span class="opacity lbl">缩放</span>
+        <input type="range" min="30" max="200" value="100" data-scale="mild">
+        <span class="opacity" data-scale-label="mild">100%</span>
+      </div>
+    </div>
+    <div id="mildSplitCtl">
+      <div class="sub-row">淡墨 · 左上</div>
+      <div class="row">
+        <input type="range" min="0" max="100" value="65" data-layer="mildTL">
+        <span class="opacity" data-opacity-label="mildTL">65%</span>
+      </div>
+      <div class="row">
+        <span class="opacity lbl">缩放</span>
+        <input type="range" min="30" max="200" value="100" data-scale="mildTL">
+        <span class="opacity" data-scale-label="mildTL">100%</span>
+      </div>
+      <div class="sub-row">淡墨 · 右下</div>
+      <div class="row">
+        <input type="range" min="0" max="100" value="65" data-layer="mildBR">
+        <span class="opacity" data-opacity-label="mildBR">65%</span>
+      </div>
+      <div class="row">
+        <span class="opacity lbl">缩放</span>
+        <input type="range" min="30" max="200" value="100" data-scale="mildBR">
+        <span class="opacity" data-scale-label="mildBR">100%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="layer" id="layerBox-dark">
+    <div class="head">
+      <span class="name"><span class="layer-no">#3</span> 浓墨竹影</span>
+      <div class="order-btns">
+        <button data-order-up="dark" title="上移一层">▲</button>
+        <button data-order-down="dark" title="下移一层">▼</button>
+      </div>
+      <div class="switch on" data-layer="dark"></div>
+    </div>
+    <div class="row">
+      <span class="opacity lbl">墨色</span>
+      <input type="color" data-tint="dark" value="#101721">
+    </div>
+    <div id="darkWholeCtl">
+      <div class="row">
+        <input type="range" min="0" max="100" value="100" data-layer="dark">
+        <span class="opacity" data-opacity-label="dark">100%</span>
+      </div>
+      <div class="row">
+        <span class="opacity lbl">缩放</span>
+        <input type="range" min="30" max="200" value="100" data-scale="dark">
+        <span class="opacity" data-scale-label="dark">100%</span>
+      </div>
+    </div>
+    <div id="darkSplitCtl">
+      <div class="sub-row">浓墨 · 左上</div>
+      <div class="row">
+        <input type="range" min="0" max="100" value="100" data-layer="darkTL">
+        <span class="opacity" data-opacity-label="darkTL">100%</span>
+      </div>
+      <div class="row">
+        <span class="opacity lbl">缩放</span>
+        <input type="range" min="30" max="200" value="100" data-scale="darkTL">
+        <span class="opacity" data-scale-label="darkTL">100%</span>
+      </div>
+      <div class="sub-row">浓墨 · 右下</div>
+      <div class="row">
+        <input type="range" min="0" max="100" value="100" data-layer="darkBR">
+        <span class="opacity" data-opacity-label="darkBR">100%</span>
+      </div>
+      <div class="row">
+        <span class="opacity lbl">缩放</span>
+        <input type="range" min="30" max="200" value="100" data-scale="darkBR">
+        <span class="opacity" data-scale-label="darkBR">100%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="layer" id="layerBox-frame">
+    <div class="head">
+      <span class="name"><span class="layer-no">#4</span> 门匾</span>
+      <div class="order-btns">
+        <button data-order-up="frame" title="上移一层">▲</button>
+        <button data-order-down="frame" title="下移一层">▼</button>
+      </div>
+      <div class="switch on" data-layer="frame"></div>
+    </div>
+    <div class="row">
+      <input type="range" min="0" max="100" value="100" data-layer="frame">
+      <span class="opacity" data-opacity-label="frame">100%</span>
+    </div>
+    <div class="row">
+      <span class="opacity lbl">缩放</span>
+      <input type="range" min="30" max="200" value="100" data-scale="frame">
+      <span class="opacity" data-scale-label="frame">100%</span>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <span class="opacity lbl">匾文</span>
+      <input type="text" id="frameText" value="" maxlength="6" placeholder="输入匾文" style="flex:1;padding:5px 8px;background:#3d4450;color:#e8e6e3;border:none;border-radius:6px;font-size:14px;font-family:FZShuSong,serif;">
+    </div>
+    <div class="mini-tip">在门匾框内竖排显示文字，使用方正书宋字体。</div>
+  </div>
+
+  <div class="layer" id="layerBox-logo">
+    <div class="head">
+      <span class="name"><span class="layer-no">#5</span> 标题（logo_text）</span>
+      <div class="order-btns">
+        <button data-order-up="logo" title="上移一层">▲</button>
+        <button data-order-down="logo" title="下移一层">▼</button>
+      </div>
+      <div class="switch on" data-layer="logo"></div>
+    </div>
+    <div class="row">
+      <input type="range" min="0" max="100" value="100" data-layer="logo">
+      <span class="opacity" data-opacity-label="logo">100%</span>
+    </div>
+    <div class="row">
+      <span class="opacity lbl">缩放</span>
+      <input type="range" min="30" max="200" value="100" data-scale="logo">
+      <span class="opacity" data-scale-label="logo">100%</span>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="btnExport">导出 PNG</button>
+    <button class="warn" id="btnMergeDark">合并浓墨</button>
+    <button class="warn" id="btnMergeMild">合并淡墨</button>
+  </div>
+  <div class="tip">
+    双色背景与竹影墨色均可任选任意颜色实时替换；色名文字颜色自动取对侧背景色。<br>
+    拖动滑块调节透明度与缩放，点击开关显隐图层，可直接拖动画布中的组件调整位置。<br>
+    ▲▼ 可调整图层上下顺序。双击「浓墨竹影」或「淡墨竹影」可拆分为左上、右下两部分独立调整；再次双击同一竹影或点「合并」按钮恢复整体。导出为 1080×1920 成品图。
+  </div>
+</div>
+
+<script>
+const W = 1080, H = 1920;
+const cv = document.getElementById('cv');
+cv.width = W; cv.height = H;
+const ctx = cv.getContext('2d');
+
+// 组件位置（依据原图比例定位）
+const POS = {
+  mild:   { x: 0,   y: 0,   w: 1080, h: 1920 },
+  mildTL: { x: 0,   y: 0,   w: 1080, h: 1920 },
+  mildBR: { x: 0,   y: 0,   w: 1080, h: 1920 },
+  dark:   { x: 0,   y: 0,   w: 1080, h: 1920 },
+  darkTL: { x: 0,   y: 0,   w: 1080, h: 1920 },
+  darkBR: { x: 0,   y: 0,   w: 1080, h: 1920 },
+  frame:  { x: 50,  y: 830, w: 230,  h: 254 },
+  logo:   { x: 100, y: 1498, w: 880, h: 420 }
+};
+
+const layers = {
+  mild:   { img: null, opacity: .65, visible: true, src: 'layer_bamboo_淡雾_fixed.png?v=2', scale: 1, tint: '#404a3a' },
+  mildTL: { img: null, opacity: .65, visible: true, src: 'layer_bamboo_淡雾_左上_fixed.png?v=2', scale: 1, tint: '#404a3a' },
+  mildBR: { img: null, opacity: .65, visible: true, src: 'layer_bamboo_淡雾_右下_fixed.png?v=2', scale: 1, tint: '#404a3a' },
+  dark:   { img: null, opacity: 1, visible: true, src: 'layer_bamboo_浓墨_fixed.png', scale: 1, tint: '#101721' },
+  darkTL: { img: null, opacity: 1, visible: true, src: 'layer_bamboo_浓墨_左上_fixed.png', scale: 1, tint: '#101721' },
+  darkBR: { img: null, opacity: 1, visible: true, src: 'layer_bamboo_浓墨_右下_fixed.png', scale: 1, tint: '#101721' },
+  frame:  { img: null, opacity: 1, visible: true, src: 'frame_deco.png', scale: 1 },
+  logo:   { img: null, opacity: 1, visible: true, src: 'logo_text.png', scale: 1 },
+  colorText: { opacity: 1, visible: true },   // 虚拟图层：双色文字（Canvas 绘制）
+  frameText: { text: '', visible: true }   // 虚拟图层：门匾文字
+};
+
+let mildSplit = false;   // 淡墨拆分编辑模式
+let darkSplit = false;   // 浓墨拆分编辑模式
+// 图层显示顺序：越靠后越在上层
+let layerOrder = ['mild', 'dark', 'frame', 'logo'];
+
+let loaded = 0;
+const imgKeys = Object.keys(layers).filter(k => layers[k].src);
+const total = imgKeys.length;
+for (const key of imgKeys) {
+  const img = new Image();
+  img.onload = () => { layers[key].img = img; loaded++; if (loaded === total) { draw(); updateOrderUI(); } };
+  img.src = layers[key].src;
+}
+
+function bgColor() {
+  return document.getElementById('bgSelect').value;
+}
+function colorA() { return document.getElementById('colorA').value; }
+function colorB() { return document.getElementById('colorB').value; }
+
+function hexToRgb(hex) {
+  const v = hex.replace('#', '');
+  return { r: parseInt(v.slice(0, 2), 16), g: parseInt(v.slice(2, 4), 16), b: parseInt(v.slice(4, 6), 16) };
+}
+
+// —— 双色背景 ——
+let grain = null;
+function getGrain() {
+  // 细颗粒纸纹（素材背景的颗粒质感），只生成一次
+  if (grain) return grain;
+  grain = document.createElement('canvas');
+  grain.width = W; grain.height = H;
+  const g = grain.getContext('2d');
+  const id = g.createImageData(W, H);
+  const d = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const v = 116 + Math.random() * 24;
+    d[i] = d[i + 1] = d[i + 2] = v;
+    d[i + 3] = 255;
+  }
+  g.putImageData(id, 0, 0);
+  return grain;
+}
+
+function duotoneHalf(c2, color, x, w) {
+  // 顶部纯色 → y≈1000 起渐变 → y≈1700 变白（实测素材曲线）
+  const g = c2.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, color);
+  g.addColorStop(0.52, color);
+  g.addColorStop(0.885, '#ffffff');
+  g.addColorStop(1, '#ffffff');
+  c2.fillStyle = g;
+  c2.fillRect(x, 0, w, H);
+}
+
+function drawDuotoneBg(c2) {
+  duotoneHalf(c2, colorA(), 0, 540);
+  duotoneHalf(c2, colorB(), 540, W - 540);
+  c2.save();
+  c2.globalAlpha = 0.35;
+  c2.globalCompositeOperation = 'overlay';
+  c2.drawImage(getGrain(), 0, 0);
+  c2.restore();
+}
+
+// —— 双色文字（竖排色名 + RGB/色值标注，颜色与所在半边背景互换）——
+// 位置按素材海报实测：字1 y40-225、字2 y253-440（字号≈185），左列中心 x≈160、右列 x≈937
+const SERIF = '"FZShuSong","方正书宋二_GBK","STZhongsong","SimSun","宋体",serif';
+// 预加载方正书宋字体文件，加载完成后重绘
+document.fonts.load('185px FZShuSong').then(() => draw()).catch(() => {});
+function drawColorText(c2) {
+  const t = layers.colorText;
+  if (!t.visible || t.opacity <= 0) return;
+  const A = document.getElementById('nameA').value.trim();
+  const B = document.getElementById('nameB').value.trim();
+  c2.save();
+  c2.globalAlpha = t.opacity;
+  c2.textAlign = 'center';
+  c2.textBaseline = 'middle';
+  drawName(c2, A, 160, colorB());   // 左半边的文字用辅色
+  drawName(c2, B, 937, colorA());   // 右半边的文字用主色
+  c2.restore();
+}
+function drawName(c2, text, x, col) {
+  if (!text) return;
+  const chars = [...text];
+  const size = 185, advance = 213;      // 实测：字高≈185，字间推进≈213（间隙28）
+  const firstCenterY = 132;              // 首字中心 y（字顶 y≈40）
+  c2.fillStyle = col;
+  c2.font = `${size}px ${SERIF}`;
+  chars.forEach((ch, i) => c2.fillText(ch, x, firstCenterY + i * advance));
+  const rgb = hexToRgb(col);
+  const bottom = firstCenterY + (chars.length - 1) * advance + size / 2;
+  c2.font = '24px Arial, "Microsoft YaHei", sans-serif';
+  c2.fillText(`RGB ${rgb.r} ${rgb.g} ${rgb.b}`, x, bottom + 55);
+  c2.fillText(col.replace('#', '').toLowerCase(), x, bottom + 86);
+}
+
+// —— 竹影着色（任意颜色替换）——
+function tintedSource(l) {
+  if (!l.tint || !l.img) return l.img;
+  if (l._tintC && l._tintKey === l.tint) return l._tintC;
+  const c = document.createElement('canvas');
+  c.width = l.img.width; c.height = l.img.height;
+  const cc = c.getContext('2d');
+  cc.drawImage(l.img, 0, 0);
+  cc.globalCompositeOperation = 'source-in';
+  cc.fillStyle = l.tint;
+  cc.fillRect(0, 0, c.width, c.height);
+  l._tintC = c; l._tintKey = l.tint;
+  return c;
+}
+
+
+// —— 门匾（九宫格拉伸：线框随文字长度自动拉长）——
+// 源图 190x210：上装饰 y0-72，中间直线 y72-127，下装饰 y127-210
+const FRAME_CAP_TOP = 72, FRAME_CAP_BOT = 83;
+function drawFrameAndText(c2) {
+  const ft = layers.frameText;
+  const text = document.getElementById('frameText').value.trim();
+  ft.text = text;
+  const f = layers.frame;
+  if (!f.visible) return;
+  const p = POS.frame;
+  const scale = f.scale;
+  const img = f.img;
+  
+  const chars = text ? [...text] : [];
+  const charCount = Math.max(chars.length, 1);
+  
+  // 宽度随缩放滑块
+  const srcW = img.naturalWidth || 190;
+  const srcH = img.naturalHeight || 210;
+  const frameW = srcW * scale;
+  const ws = frameW / srcW;            // 宽度缩放系数
+  
+  // 上下装饰高度（随宽度等比，保持装饰不变形）
+  const capTopH = FRAME_CAP_TOP * ws;
+  const capBotH = FRAME_CAP_BOT * ws;
+  
+  // 中间区域高度 = 由文字数量决定（每字占一个行高）
+  const charLineH = 70 * scale;         // 每字行高
+  const midMinH = 40 * scale;           // 无文字时的最小中间高度
+  const textH = charCount * charLineH;
+  const midH = Math.max(midMinH, textH);
+  
+  const frameH = capTopH + midH + capBotH;
+  const fx = p.x + (p.w - frameW) / 2;
+  const fy = p.y + (p.h - frameH) / 2;
+  
+  // 三段绘制：上装饰 / 中间拉伸 / 下装饰
+  if (img) {
+    c2.save();
+    c2.globalAlpha = f.opacity;
+    const midSrcY = FRAME_CAP_TOP;
+    const midSrcH = srcH - FRAME_CAP_TOP - FRAME_CAP_BOT;
+    // 上装饰
+    c2.drawImage(img, 0, 0, srcW, FRAME_CAP_TOP, fx, fy, frameW, capTopH);
+    // 中间（纵向拉伸）
+    c2.drawImage(img, 0, midSrcY, srcW, midSrcH, fx, fy + capTopH, frameW, midH);
+    // 下装饰
+    c2.drawImage(img, 0, srcH - FRAME_CAP_BOT, srcW, FRAME_CAP_BOT, fx, fy + capTopH + midH, frameW, capBotH);
+    c2.restore();
+  }
+  
+  // 竖排文字（在中间区域垂直居中）
+  if (!text || !ft.visible) return;
+  const fontSize = Math.round(54 * scale);
+  const totalTextH = charCount * charLineH;
+  const textStartY = fy + capTopH + (midH - totalTextH) / 2;
+  const cx = fx + frameW / 2;
+  c2.save();
+  c2.globalAlpha = f.opacity;
+  c2.fillStyle = '#1a1a1a';
+  c2.font = `bold ${fontSize}px ${SERIF}`;
+  c2.textAlign = 'center';
+  c2.textBaseline = 'top';
+  chars.forEach((ch, i) => c2.fillText(ch, cx, textStartY + i * charLineH + (charLineH - fontSize) / 2));
+  c2.restore();
+}
+function parentOf(k) {
+  if (k === 'mildTL' || k === 'mildBR') return 'mild';
+  if (k === 'darkTL' || k === 'darkBR') return 'dark';
+  return k;
+}
+
+function expandKey(k) {
+  if (k === 'mild') return mildSplit ? ['mildTL', 'mildBR'] : ['mild'];
+  if (k === 'dark') return darkSplit ? ['darkTL', 'darkBR'] : ['dark'];
+  return [k];
+}
+
+function drawKeys() {
+  const out = [];
+  for (const k of layerOrder) out.push(...expandKey(k));
+  return out;
+}
+
+// 场景渲染（预览与导出共用）
+function renderScene(c2) {
+  c2.clearRect(0, 0, W, H);
+  const bg = bgColor();
+  if (bg === 'duotone') {
+    drawDuotoneBg(c2);
+  } else if (bg !== 'transparent') {
+    c2.fillStyle = bg;
+    c2.fillRect(0, 0, W, H);
+  }
+  drawColorText(c2);
+  for (const key of drawKeys()) {
+    const l = layers[key];
+    if (!l.img || !l.visible) continue;
+    if (key === 'frame') { drawFrameAndText(c2); continue; }
+    c2.globalAlpha = l.opacity;
+    const p = POS[key];
+    c2.drawImage(tintedSource(l), p.x, p.y, p.w * l.scale, p.h * l.scale);
+  }
+  c2.globalAlpha = 1;
+}
+
+function draw() {
+  renderScene(ctx);
+  // 拆分模式虚线框
+  if (mildSplit) {
+    ctx.strokeStyle = 'rgba(127,214,162,.9)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 6]);
+    const a = POS.mildTL, b = POS.mildBR;
+    const la = layers.mildTL, lb = layers.mildBR;
+    if (la.visible) ctx.strokeRect(a.x, a.y, a.w * la.scale, a.h * la.scale);
+    if (lb.visible) ctx.strokeRect(b.x, b.y, b.w * lb.scale, b.h * lb.scale);
+    ctx.setLineDash([]);
+  }
+  if (darkSplit) {
+    ctx.strokeStyle = 'rgba(255,180,90,.9)';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 6]);
+    const a = POS.darkTL, b = POS.darkBR;
+    const la = layers.darkTL, lb = layers.darkBR;
+    if (la.visible) ctx.strokeRect(a.x, a.y, a.w * la.scale, a.h * la.scale);
+    if (lb.visible) ctx.strokeRect(b.x, b.y, b.w * lb.scale, b.h * lb.scale);
+    ctx.setLineDash([]);
+  }
+  // 拆分模式顶部提示条
+  if (mildSplit || darkSplit) {
+    ctx.fillStyle = 'rgba(20,24,30,.75)';
+    ctx.fillRect(0, 0, W, 52);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 30px "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    const parts = [];
+    if (mildSplit) parts.push('淡墨已拆分');
+    if (darkSplit) parts.push('浓墨已拆分');
+    parts.push('拖动组件移动 · 双击空白处合并');
+    ctx.fillText(parts.join('  ·  '), W / 2, 36);
+    ctx.textAlign = 'start';
+  }
+}
+
+document.getElementById('bgSelect').addEventListener('change', () => {
+  document.getElementById('duotoneCtl').style.display = bgColor() === 'duotone' ? 'block' : 'none';
+  draw();
+});
+document.getElementById('colorA').addEventListener('input', draw);
+document.getElementById('colorB').addEventListener('input', draw);
+document.getElementById('nameA').addEventListener('input', draw);
+document.getElementById('nameB').addEventListener('input', draw);
+document.getElementById('frameText').addEventListener('input', draw);
+
+// 竹影墨色（任意颜色替换，子图层跟随父图层）
+document.querySelectorAll('input[type=color][data-tint]').forEach(inp => {
+  inp.addEventListener('input', () => {
+    const group = inp.dataset.tint;
+    const keys = group === 'mild' ? ['mild', 'mildTL', 'mildBR'] : ['dark', 'darkTL', 'darkBR'];
+    keys.forEach(k => { layers[k].tint = inp.value; });
+    draw();
+  });
+});
+
+document.querySelectorAll('input[type=range][data-layer]').forEach(r => {
+  r.addEventListener('input', () => {
+    const key = r.dataset.layer;
+    layers[key].opacity = r.value / 100;
+    const label = document.querySelector(`[data-opacity-label="${key}"]`);
+    if (label) label.textContent = r.value + '%';
+    draw();
+  });
+});
+
+document.querySelectorAll('input[type=range][data-scale]').forEach(r => {
+  r.addEventListener('input', () => {
+    const key = r.dataset.scale;
+    layers[key].scale = r.value / 100;
+    const label = document.querySelector(`[data-scale-label="${key}"]`);
+    if (label) label.textContent = r.value + '%';
+    draw();
+  });
+});
+
+document.querySelectorAll('.switch').forEach(s => {
+  s.addEventListener('click', () => {
+    const key = s.dataset.layer;
+    if (key === 'dark') {
+      layers.dark.visible = !layers.dark.visible;
+      layers.darkTL.visible = layers.dark.visible;
+      layers.darkBR.visible = layers.dark.visible;
+      s.classList.toggle('on', layers.dark.visible);
+    } else if (key === 'mild') {
+      layers.mild.visible = !layers.mild.visible;
+      layers.mildTL.visible = layers.mild.visible;
+      layers.mildBR.visible = layers.mild.visible;
+      s.classList.toggle('on', layers.mild.visible);
+    } else {
+      layers[key].visible = !layers[key].visible;
+      s.classList.toggle('on', layers[key].visible);
+    }
+    draw();
+  });
+});
+
+// —— 图层顺序调整 ——
+function updateOrderUI() {
+  layerOrder.forEach((k, i) => {
+    const box = document.getElementById('layerBox-' + k);
+    if (box) box.classList.toggle('top', i === layerOrder.length - 1);
+    const no = box ? box.querySelector('.layer-no') : null;
+    if (no) no.textContent = '#' + (i + 1);
+    const up = document.querySelector(`[data-order-up="${k}"]`);
+    const down = document.querySelector(`[data-order-down="${k}"]`);
+    if (up) up.disabled = (i === 0);
+    if (down) down.disabled = (i === layerOrder.length - 1);
+  });
+}
+
+document.querySelectorAll('[data-order-up]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const k = btn.dataset.orderUp;
+    const i = layerOrder.indexOf(k);
+    if (i <= 0) return;
+    [layerOrder[i - 1], layerOrder[i]] = [layerOrder[i], layerOrder[i - 1]];
+    updateOrderUI();
+    draw();
+  });
+});
+
+document.querySelectorAll('[data-order-down]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const k = btn.dataset.orderDown;
+    const i = layerOrder.indexOf(k);
+    if (i < 0 || i >= layerOrder.length - 1) return;
+    [layerOrder[i + 1], layerOrder[i]] = [layerOrder[i], layerOrder[i + 1]];
+    updateOrderUI();
+    draw();
+  });
+});
+
+// —— 竹影拆分 / 合并 ——
+function setMildSplit(split) {
+  mildSplit = split;
+  document.getElementById('mildWholeCtl').style.display = split ? 'none' : '';
+  document.getElementById('mildSplitCtl').style.display = split ? 'block' : 'none';
+  document.getElementById('btnMergeMild').style.display = split ? 'block' : 'none';
+  if (split) {
+    const d = POS.mild;
+    POS.mildTL.x = d.x; POS.mildTL.y = d.y;
+    POS.mildBR.x = d.x; POS.mildBR.y = d.y;
+    layers.mildTL.opacity = layers.mild.opacity;
+    layers.mildBR.opacity = layers.mild.opacity;
+    layers.mildTL.scale = layers.mild.scale;
+    layers.mildBR.scale = layers.mild.scale;
+    for (const sel of ['mildTL', 'mildBR']) {
+      document.querySelector(`[data-scale="${sel}"]`).value = Math.round(layers.mild.scale * 100);
+      document.querySelector(`[data-layer="${sel}"]`).value = Math.round(layers.mild.opacity * 100);
+      document.querySelector(`[data-scale-label="${sel}"]`).textContent = Math.round(layers.mild.scale * 100) + '%';
+      document.querySelector(`[data-opacity-label="${sel}"]`).textContent = Math.round(layers.mild.opacity * 100) + '%';
+    }
+  }
+  draw();
+}
+
+function setDarkSplit(split) {
+  darkSplit = split;
+  document.getElementById('darkWholeCtl').style.display = split ? 'none' : '';
+  document.getElementById('darkSplitCtl').style.display = split ? 'block' : 'none';
+  document.getElementById('btnMergeDark').style.display = split ? 'block' : 'none';
+  if (split) {
+    const d = POS.dark;
+    POS.darkTL.x = d.x; POS.darkTL.y = d.y;
+    POS.darkBR.x = d.x; POS.darkBR.y = d.y;
+    layers.darkTL.opacity = layers.dark.opacity;
+    layers.darkBR.opacity = layers.dark.opacity;
+    layers.darkTL.scale = layers.dark.scale;
+    layers.darkBR.scale = layers.dark.scale;
+    for (const sel of ['darkTL', 'darkBR']) {
+      document.querySelector(`[data-scale="${sel}"]`).value = Math.round(layers.dark.scale * 100);
+      document.querySelector(`[data-layer="${sel}"]`).value = Math.round(layers.dark.opacity * 100);
+      document.querySelector(`[data-scale-label="${sel}"]`).textContent = Math.round(layers.dark.scale * 100) + '%';
+      document.querySelector(`[data-opacity-label="${sel}"]`).textContent = Math.round(layers.dark.opacity * 100) + '%';
+    }
+  }
+  draw();
+}
+
+document.getElementById('btnMergeMild').addEventListener('click', () => setMildSplit(false));
+document.getElementById('btnMergeDark').addEventListener('click', () => setDarkSplit(false));
+
+// —— 组件拖拽移动 ——
+let dragKey = null;
+let dragOffsetX = 0, dragOffsetY = 0;
+let dragging = false;
+
+function alphaAt(key, px, py) {
+  // 读取图层源图在 (px,py) 对应位置的 alpha（缓存像素数据）
+  const l = layers[key];
+  const p = POS[key];
+  const sx = Math.floor((px - p.x) / l.scale);
+  const sy = Math.floor((py - p.y) / l.scale);
+  if (sx < 0 || sy < 0 || sx >= l.img.width || sy >= l.img.height) return 0;
+  if (!l._px) {
+    const c = document.createElement('canvas');
+    c.width = l.img.width; c.height = l.img.height;
+    const cc = c.getContext('2d', { willReadFrequently: true });
+    cc.drawImage(l.img, 0, 0);
+    l._px = cc.getImageData(0, 0, c.width, c.height).data;
+  }
+  return l._px[(sy * l.img.width + sx) * 4 + 3];
+}
+
+function hitTest(px, py) {
+  const keys = drawKeys().reverse();
+  for (const key of keys) {
+    const l = layers[key];
+    if (!l.img || !l.visible || l.opacity <= 0) continue;
+    const p = POS[key];
+    if (px >= p.x && px <= p.x + p.w * l.scale && py >= p.y && py <= p.y + p.h * l.scale) {
+      // 满幅竹影图层按实际像素 alpha 判定，避免遮挡下层
+      if (p.w >= W && p.h >= H && alphaAt(key, px, py) < 25) continue;
+      return key;
+    }
+  }
+  return null;
+}
+
+cv.addEventListener('mousedown', (e) => {
+  const rect = cv.getBoundingClientRect();
+  const sx = (e.clientX - rect.left) * (W / rect.width);
+  const sy = (e.clientY - rect.top) * (H / rect.height);
+  const key = hitTest(sx, sy);
+  if (key) {
+    dragKey = key;
+    dragOffsetX = sx - POS[key].x;
+    dragOffsetY = sy - POS[key].y;
+    dragging = true;
+    cv.style.cursor = 'grabbing';
+    e.preventDefault();
+  }
+});
+
+window.addEventListener('mousemove', (e) => {
+  if (!dragging || !dragKey) return;
+  const rect = cv.getBoundingClientRect();
+  const sx = (e.clientX - rect.left) * (W / rect.width);
+  const sy = (e.clientY - rect.top) * (H / rect.height);
+  POS[dragKey].x = Math.round(sx - dragOffsetX);
+  POS[dragKey].y = Math.round(sy - dragOffsetY);
+  draw();
+});
+
+window.addEventListener('mouseup', () => {
+  if (!dragging) return;
+  dragging = false;
+  cv.style.cursor = '';
+  dragKey = null;
+});
+
+// 双击拆分/合并（原生事件，兼容系统双击速度）
+cv.addEventListener('dblclick', (e) => {
+  const rect = cv.getBoundingClientRect();
+  const sx = (e.clientX - rect.left) * (W / rect.width);
+  const sy = (e.clientY - rect.top) * (H / rect.height);
+  const hit = hitTest(sx, sy);
+  const hitParent = hit ? parentOf(hit) : null;
+  if (hitParent === 'dark') setDarkSplit(!darkSplit);
+  else if (hitParent === 'mild') setMildSplit(!mildSplit);
+  else {
+    setDarkSplit(false);
+    setMildSplit(false);
+  }
+});
+
+document.getElementById('btnExport').addEventListener('click', () => {
+  const out = document.createElement('canvas');
+  out.width = W; out.height = H;
+  const octx = out.getContext('2d');
+  renderScene(octx);
+  const a = document.createElement('a');
+  a.download = '小黑_组件合成_1080x1920.png';
+  a.href = out.toDataURL('image/png');
+  a.click();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-28",
+  "url": "http://127.0.0.1:5182/#collection",
+  "checks": [
+    "98 existing cards load with local backend editable status",
+    "Search by name finds the intended card",
+    "Negative energy cost disables saving",
+    "Claw cost 1 -> 2 and damage 7 -> 9 saved successfully",
+    "Reloading the page retains cost 2 and damage 9",
+    "Restore default saves original cost 1 and damage 7",
+    "Backend restart retains revision 2 with zero overrides",
+    "Two pre-write backup JSON files exist",
+    "Full guide lists all eight views plus effect and save guides",
+    "Narrow viewport: page 568px <= viewport 583px, dialog 542px"
+  ],
+  "finalConfiguration": {"revision": 2, "overrides": {}},
+  "automatedTests": {"game": 22, "backend": 4},
+  "typeChecks": ["npm run lint", "npm run check:game"],
+  "build": "node node_modules/vite/bin/vite.js build",
+  "remainingWarnings": ["Existing main bundle exceeds 500 kB"],
+  "scope": "Browser validation used the existing local interface; test card values were restored. Automated backend tests use isolated temporary data."
+}

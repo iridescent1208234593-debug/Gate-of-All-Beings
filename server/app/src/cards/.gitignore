@@ -1,0 +1,26 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# === 整合前快照 20260927 追加 ===
+dist/
+*.log
+*.db
+*.db.bak_*
+*.mp4
+*.mov
+*.psd
+_archive/
+.edge_cdp11/
+
+# Built from ../ecoplanet3d-js by scripts/build.mjs
+/public/ecology/
+/public/management/
+
+# Editable server configuration and automatic backups (preserve locally).
+/data/card-balance/

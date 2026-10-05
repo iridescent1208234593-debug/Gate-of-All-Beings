@@ -1,0 +1,8 @@
+{
+  "name": "众生之门",
+  "description": "Effortlessly recreate and apply animation effects from any video source.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,167 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <radialGradient id="bg-glow" cx="50%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#fef3e0"/>
+      <stop offset="60%" stop-color="#f5e6d0"/>
+      <stop offset="100%" stop-color="#e8d5b8"/>
+    </radialGradient>
+    <radialGradient id="rainbow-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff9a9e" stop-opacity="0.6"/>
+      <stop offset="25%" stop-color="#fecfef" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#a8edea" stop-opacity="0.3"/>
+      <stop offset="75%" stop-color="#fed6e3" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+    <linearGradient id="hair-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#2d2d44"/>
+    </linearGradient>
+    <linearGradient id="robe-outer" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4a1033"/>
+      <stop offset="100%" stop-color="#2a0a1e"/>
+    </linearGradient>
+    <linearGradient id="robe-inner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8a030"/>
+      <stop offset="100%" stop-color="#d48820"/>
+    </linearGradient>
+    <linearGradient id="eye-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d4a040"/>
+      <stop offset="100%" stop-color="#b88020"/>
+    </linearGradient>
+    <filter id="soft-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+      <feOffset dx="0" dy="3"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.2"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="400" rx="40" fill="url(#bg-glow)"/>
+  <circle cx="200" cy="190" r="160" fill="url(#rainbow-glow)" opacity="0.4"/>
+
+  <!-- Floating rainbow particles -->
+  <g opacity="0.7" filter="url(#glow)">
+    <circle cx="80" cy="100" r="4" fill="#ff9a9e"><animate attributeName="cy" values="100;90;100" dur="3s" repeatCount="indefinite"/></circle>
+    <circle cx="320" cy="120" r="3" fill="#a8edea"><animate attributeName="cy" values="120;108;120" dur="3.5s" repeatCount="indefinite"/></circle>
+    <circle cx="60" cy="220" r="3.5" fill="#fecfef"><animate attributeName="cy" values="220;210;220" dur="2.8s" repeatCount="indefinite"/></circle>
+    <circle cx="340" cy="250" r="2.5" fill="#fed6e3"><animate attributeName="cy" values="250;240;250" dur="4s" repeatCount="indefinite"/></circle>
+    <circle cx="100" cy="320" r="3" fill="#c2e9fb"><animate attributeName="cy" values="320;310;320" dur="3.2s" repeatCount="indefinite"/></circle>
+    <circle cx="300" cy="80" r="2" fill="#fbc2eb"><animate attributeName="cy" values="80;72;80" dur="2.5s" repeatCount="indefinite"/></circle>
+    <circle cx="150" cy="60" r="2.5" fill="#f6d365"><animate attributeName="cy" values="60;52;60" dur="3.8s" repeatCount="indefinite"/></circle>
+    <circle cx="250" cy="340" r="3" fill="#a1c4fd"><animate attributeName="cy" values="340;330;340" dur="3.6s" repeatCount="indefinite"/></circle>
+  </g>
+
+  <!-- Small sun/crow symbol top-right -->
+  <g transform="translate(330, 55)" opacity="0.15">
+    <circle r="18" fill="#d4a040"/>
+    <path d="M-22,0 L-14,0 M14,0 L22,0 M0,-22 L0,-14 M0,14 L0,22 M-16,-16 L-10,-10 M10,10 L16,16 M16,-16 L10,-10 M-10,10 L-16,16" stroke="#d4a040" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Body / Robe -->
+  <g filter="url(#soft-shadow)">
+    <path d="M130,260 Q120,270 115,310 Q110,360 120,400 L280,400 Q290,360 285,310 Q280,270 270,260 Q250,250 200,248 Q150,250 130,260Z" fill="url(#robe-outer)"/>
+    <path d="M155,258 Q150,265 148,290 Q147,310 150,340 L250,340 Q253,310 252,290 Q250,265 245,258 Q230,252 200,250 Q170,252 155,258Z" fill="url(#robe-inner)"/>
+    <path d="M165,258 L200,310 L235,258" fill="none" stroke="#4a1033" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M160,300 Q165,320 162,350" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1.5"/>
+    <path d="M240,300 Q235,320 238,350" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Neck -->
+  <rect x="185" y="238" width="30" height="24" rx="8" fill="#f5dcc0"/>
+
+  <!-- Head -->
+  <g filter="url(#soft-shadow)">
+    <ellipse cx="200" cy="175" rx="75" ry="82" fill="#fae0c8"/>
+    <ellipse cx="148" cy="200" rx="18" ry="10" fill="#f5a0a0" opacity="0.35"/>
+    <ellipse cx="252" cy="200" rx="18" ry="10" fill="#f5a0a0" opacity="0.35"/>
+  </g>
+
+  <!-- Hair -->
+  <g>
+    <path d="M125,170 Q120,120 140,90 Q160,60 200,52 Q240,60 260,90 Q280,120 275,170 Q270,155 260,148 Q240,138 200,135 Q160,138 140,148 Q130,155 125,170Z" fill="url(#hair-grad)"/>
+    <path d="M135,165 Q140,130 155,115 Q170,105 185,110 Q180,130 175,155 Q170,165 165,170Z" fill="url(#hair-grad)"/>
+    <path d="M265,165 Q260,130 245,115 Q230,105 215,110 Q220,130 225,155 Q230,165 235,170Z" fill="url(#hair-grad)"/>
+    <path d="M170,155 Q175,120 190,108 Q200,105 210,108 Q225,120 230,155 Q215,148 200,145 Q185,148 170,155Z" fill="url(#hair-grad)"/>
+    <path d="M165,100 Q175,85 195,80" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M200,52 Q195,30 210,20 Q215,25 208,45" fill="url(#hair-grad)" stroke="#1a1a2e" stroke-width="1"/>
+    <path d="M125,175 Q118,190 120,210 Q122,215 128,210 Q130,195 132,180Z" fill="url(#hair-grad)"/>
+    <path d="M275,175 Q282,190 280,210 Q278,215 272,210 Q270,195 268,180Z" fill="url(#hair-grad)"/>
+  </g>
+
+  <!-- Eyes -->
+  <g>
+    <ellipse cx="170" cy="190" rx="20" ry="22" fill="#fff"/>
+    <ellipse cx="170" cy="192" rx="16" ry="18" fill="url(#eye-grad)"/>
+    <ellipse cx="170" cy="192" rx="10" ry="12" fill="#8a6010"/>
+    <circle cx="170" cy="192" r="6" fill="#2a1a00"/>
+    <circle cx="163" cy="185" r="5" fill="#fff" opacity="0.9"/>
+    <circle cx="176" cy="196" r="2.5" fill="#fff" opacity="0.6"/>
+    <circle cx="166" cy="188" r="1.5" fill="#ffd700" opacity="0.8"/>
+    <path d="M150,175 Q170,168 190,175" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+
+    <ellipse cx="230" cy="190" rx="20" ry="22" fill="#fff"/>
+    <ellipse cx="230" cy="192" rx="16" ry="18" fill="url(#eye-grad)"/>
+    <ellipse cx="230" cy="192" rx="10" ry="12" fill="#8a6010"/>
+    <circle cx="230" cy="192" r="6" fill="#2a1a00"/>
+    <circle cx="223" cy="185" r="5" fill="#fff" opacity="0.9"/>
+    <circle cx="236" cy="196" r="2.5" fill="#fff" opacity="0.6"/>
+    <circle cx="226" cy="188" r="1.5" fill="#ffd700" opacity="0.8"/>
+    <path d="M210,175 Q230,168 250,175" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Nose -->
+  <path d="M198,208 Q200,212 202,208" fill="none" stroke="#c8a090" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Mouth -->
+  <path d="M185,222 Q192,230 200,230 Q208,230 215,222" fill="none" stroke="#c08070" stroke-width="2" stroke-linecap="round"/>
+  <path d="M192,225 L194,229" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Eyebrows -->
+  <path d="M152,168 Q165,162 182,166" fill="none" stroke="#2d2d44" stroke-width="2" stroke-linecap="round"/>
+  <path d="M218,166 Q235,162 248,168" fill="none" stroke="#2d2d44" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Small crow wing peeking from behind -->
+  <g opacity="0.6">
+    <path d="M108,280 Q95,265 100,250 Q105,240 115,245 Q118,255 115,270Z" fill="#1a1a2e"/>
+    <path d="M105,275 Q98,262 102,252" fill="none" stroke="#d4a040" stroke-width="1" opacity="0.5"/>
+  </g>
+
+  <!-- Fusang branch behind ear -->
+  <g filter="url(#glow)">
+    <path d="M260,140 Q275,125 290,105 Q295,95 292,88" fill="none" stroke="#5a8a40" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="292" cy="86" r="5" fill="#a8e060" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="288" cy="95" r="3" fill="#c8f080" opacity="0.6"/>
+    <ellipse cx="280" cy="112" rx="6" ry="3" fill="#5a8a40" transform="rotate(-30 280 112)"/>
+    <ellipse cx="272" cy="125" rx="5" ry="2.5" fill="#5a8a40" transform="rotate(-20 272 125)"/>
+  </g>
+
+  <!-- Jelly cube in hand -->
+  <g filter="url(#glow)" transform="translate(270, 290)">
+    <ellipse cx="-5" cy="8" rx="12" ry="10" fill="#fae0c8"/>
+    <rect x="-12" y="-12" width="22" height="20" rx="4" fill="rgba(255,180,100,0.7)" stroke="rgba(255,200,130,0.9)" stroke-width="1.5">
+      <animate attributeName="y" values="-12;-15;-12" dur="2s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="-8" y="-9" width="6" height="4" rx="2" fill="rgba(255,255,255,0.6)">
+      <animate attributeName="y" values="-9;-12;-9" dur="2s" repeatCount="indefinite"/>
+    </rect>
+    <circle cx="4" cy="-2" r="2" fill="rgba(255,255,255,0.4)">
+      <animate attributeName="cy" values="-2;-5;-2" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- Three-legged crow silhouette watermark -->
+  <g transform="translate(355, 370) scale(0.5)" opacity="0.12">
+    <path d="M0,-30 Q-15,-25 -20,-10 Q-22,0 -15,5 Q-10,8 -5,5 Q-8,15 -12,25 M-5,5 Q0,15 5,25 M5,5 Q8,15 12,25 M-20,-10 Q-30,-15 -35,-5 Q-30,0 -20,-5 M20,-10 Q30,-15 35,-5 Q30,0 20,-5" fill="none" stroke="#2a3a2e" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="0" cy="-15" r="8" fill="none" stroke="#2a3a2e" stroke-width="2"/>
+  </g>
+
+  <!-- Text label -->
+  <text x="200" y="388" text-anchor="middle" font-family="'LXGW WenKai', 'Noto Serif SC', serif" font-size="14" fill="#8a7a6a" letter-spacing="4" opacity="0.6">虹 · 佳霖</text>
+</svg>

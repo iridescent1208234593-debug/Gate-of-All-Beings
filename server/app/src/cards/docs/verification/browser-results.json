@@ -1,0 +1,171 @@
+{
+  "base": "http://127.0.0.1:5182",
+  "results": [
+    "Restored opening and all three module entries load",
+    "Three.js map, grid construction, camera zoom/reset and save work",
+    "Experimental spirit assembly opens, changes presets and saves",
+    "Ecology harvest survives refresh, credits base once and creates 8 cards",
+    "390px layout has no horizontal overflow and mobile panel controls work"
+  ],
+  "errors": [],
+  "packet": {
+    "schemaVersion": 2,
+    "kind": "eco-harvest",
+    "worldId": "eco-f88c6f2f-c974-458e-844a-aba70f07ce2a",
+    "sequence": 1,
+    "resources": {
+      "food": 1,
+      "herb": 0,
+      "spirit": 1
+    },
+    "species": [
+      {
+        "id": "eco-producer",
+        "name": "灵芽",
+        "role": "producer",
+        "population": 132
+      },
+      {
+        "id": "eco-herbivore",
+        "name": "林间食草灵",
+        "role": "herbivore",
+        "population": 8
+      }
+    ],
+    "individuals": [
+      {
+        "id": "eco-card-eco-f88c6f2f-c974-458e-844a-aba70f07ce2a-plant-500000",
+        "sourceId": "plant-500000",
+        "worldId": "eco-f88c6f2f-c974-458e-844a-aba70f07ce2a",
+        "name": "灵芽 · 500000",
+        "role": "producer",
+        "element": "mu",
+        "traits": {
+          "size": 10,
+          "speed": 1,
+          "vitality": 10
+        }
+      },
+      {
+        "id": "eco-card-eco-f88c6f2f-c974-458e-844a-aba70f07ce2a-plant-500001",
+        "sourceId": "plant-500001",
+        "worldId": "eco-f88c6f2f-c974-458e-844a-aba70f07ce2a",
+        "name": "灵芽 · 500001",
+        "role": "producer",
+        "element": "mu",
+        "traits": {
+          "size": 10,
+          "speed": 1,
+          "vitality": 10
+        }
+      },
+      {
+        "id": "eco-card-eco-f88c6f2f-c974-458e-844a-aba70f07ce2a-plant-500002",
+        "sourceId": "plant-500002",
+        "worldId": "eco-f88c6f2f-c974-458e-844a-aba70f07ce2a",
+        "name": "灵芽 · 500002",
+        "role": "producer",
+        "element": "mu",
+        "traits": {
+          "size": 5,
+          "speed": 1,
+          "vitality": 5
+        }
+      },
+      {
+        "id": "eco-card-eco-f88c6f2f-c974-458e-844a-aba70f07ce2a-plant-500003",
+        "sourceId": "plant-500003",
+        "worldId": "eco-f88c6f2f-c974-458e-844a-aba70f07ce2a",
+        "name": "灵芽 · 500003",
+        "role": "producer",
+        "element": "mu",
+        "traits": {
+          "size": 10,
+          "speed": 1,
+          "vitality": 10
+        }
+      },
+      {
+        "id": "eco-card-eco-f88c6f2f-c974-458e-844a-aba70f07ce2a-organism-100000",
+        "sourceId": "organism-100000",
+        "worldId": "eco-f88c6f2f-c974-458e-844a-aba70f07ce2a",
+        "name": "林间食草灵 · 100000",
+        "role": "herbivore",
+        "element": "mu",
+        "traits": {
+          "size": 2,
+          "speed": 3,
+          "vitality": 4
+        }
+      },
+      {
+        "id": "eco-card-eco-f88c6f2f-c974-458e-844a-aba70f07ce2a-organism-100001",
+        "sourceId": "organism-100001",
+        "worldId": "eco-f88c6f2f-c974-458e-844a-aba70f07ce2a",
+        "name": "林间食草灵 · 100001",
+        "role": "herbivore",
+        "element": "mu",
+        "traits": {
+          "size": 7,
+          "speed": 7,
+          "vitality": 4
+        }
+      },
+      {
+        "id": "eco-card-eco-f88c6f2f-c974-458e-844a-aba70f07ce2a-organism-100002",
+        "sourceId": "organism-100002",
+        "worldId": "eco-f88c6f2f-c974-458e-844a-aba70f07ce2a",
+        "name": "林间食草灵 · 100002",
+        "role": "herbivore",
+        "element": "mu",
+        "traits": {
+          "size": 5,
+          "speed": 6,
+          "vitality": 3
+        }
+      },
+      {
+        "id": "eco-card-eco-f88c6f2f-c974-458e-844a-aba70f07ce2a-organism-100004",
+        "sourceId": "organism-100004",
+        "worldId": "eco-f88c6f2f-c974-458e-844a-aba70f07ce2a",
+        "name": "林间食草灵 · 100004",
+        "role": "herbivore",
+        "element": "mu",
+        "traits": {
+          "size": 10,
+          "speed": 5,
+          "vitality": 4
+        }
+      }
+    ],
+    "space": {
+      "id": "eco-f88c6f2f-c974-458e-844a-aba70f07ce2a",
+      "ownerCharacterId": null,
+      "element": "mu",
+      "concentration": 1,
+      "capacity": 576,
+      "materialLing": 113.67947395605987,
+      "lifeLing": 58.32589359999994,
+      "detritus": 9.913688000000041,
+      "decomposers": 8.187999999999896
+    }
+  },
+  "inventoryBefore": {
+    "spirit": 169.2,
+    "food": 40,
+    "faqi": 0,
+    "wood": 2,
+    "herb": 2,
+    "stone": 0,
+    "ore": 0
+  },
+  "inventoryAfter": {
+    "spirit": 170.2,
+    "food": 41,
+    "faqi": 0,
+    "wood": 2,
+    "herb": 2,
+    "stone": 0,
+    "ore": 0
+  }
+}

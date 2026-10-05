@@ -1,0 +1,24 @@
+*.swp
+.DS_Store
+coverage/
+docs/
+node_modules/
+package-lock.json
+yarn-error.log
+yarn.lock
+bun.lockb
+.log
+.vercel
+
+# === 整合前快照 20260927 追加 ===
+dist/
+*.log
+*.db
+*.db.bak_*
+*.mp4
+*.mov
+*.psd
+# Snowpack-generated source maps; runtime web_modules JavaScript stays tracked.
+public/web_modules/**/*.map
+_archive/
+.edge_cdp11/

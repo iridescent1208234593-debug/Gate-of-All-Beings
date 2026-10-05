@@ -1,0 +1,192 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { getActivationCodes, createActivationCodes } from '@/server/activation';
+import { generateUniqueActivationCodes, formatDateTimeForAPI } from '@/lib/utils';
+
+// 使用工具函数生成激活码
+
+/**
+ * 获取激活码列表 API
+ * GET /api/admin/codes
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+
+    // 解析查询参数
+    const status = searchParams.get('status') || 'all';
+    const search = searchParams.get('search') || '';
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const offset = (page - 1) * limit;
+
+    // 验证参数
+    if (page < 1 || limit < 1 || limit > 100) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: '分页参数无效'
+        },
+        { status: 400 }
+      );
+    }
+
+    // 获取激活码列表
+    const result = await getActivationCodes({
+      status: status === 'all' ? undefined : status,
+      search: search || undefined,
+      limit,
+      offset
+    });
+
+    // 格式化日期字段
+    const formattedCodes = result.codes.map(code => ({
+      ...code,
+      created_at: formatDateTimeForAPI(code.created_at),
+      expires_at: formatDateTimeForAPI(code.expires_at),
+      used_at: formatDateTimeForAPI(code.used_at)
+    }));
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: '获取激活码列表成功',
+        data: {
+          codes: formattedCodes,
+          pagination: {
+            page,
+            limit,
+            total: result.total,
+            totalPages: Math.ceil(result.total / limit)
+          }
+        }
+      },
+      { status: 200 }
+    );
+
+  } catch (error) {
+    console.error('获取激活码列表API错误:', error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: '获取激活码列表失败'
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * 批量生成激活码 API
+ * POST /api/admin/codes
+ * 
+ * 请求体参数：
+ * - quantity: 生成数量 (1-1000)
+ * - expires_at: 过期时间 (可选，支持时分秒)
+ *   格式示例：
+ *   - "2024-12-31 23:59:59"
+ *   - "2024-12-31T23:59:59"
+ *   - "2024-12-31T23:59:59.000Z"
+ */
+export async function POST(request: NextRequest) {
+  try {
+    // 解析请求体
+    const body = await request.json();
+    const { quantity, expires_at, validity_days } = body;
+
+    // 验证请求参数
+    if (!quantity || quantity < 1 || quantity > 1000) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: '生成数量必须在1-1000之间'
+        },
+        { status: 400 }
+      );
+    }
+
+    // 验证过期时间格式（如果提供）
+    let expiresAt: Date | null = null;
+    if (expires_at) {
+      expiresAt = new Date(expires_at);
+      if (isNaN(expiresAt.getTime())) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: '过期时间格式无效，请使用标准日期时间格式（如：2024-12-31 23:59:59 或 2024-12-31T23:59:59）'
+          },
+          { status: 400 }
+        );
+      }
+
+      // 检查过期时间不能是过去的时间（精确到秒）
+      const now = new Date();
+      if (expiresAt <= now) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `过期时间不能是过去的时间，当前时间：${now.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}`
+          },
+          { status: 400 }
+        );
+      }
+    }
+
+    // 生成激活码（优化版本）
+    let generatedCodeStrings: string[];
+    try {
+      generatedCodeStrings = generateUniqueActivationCodes(quantity);
+    } catch (error) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: '生成唯一激活码失败，请减少生成数量或稍后重试'
+        },
+        { status: 500 }
+      );
+    }
+
+    const codes = generatedCodeStrings.map(code => ({
+      code,
+      expires_at: expiresAt,
+      validity_days: validity_days ?? null
+    }));
+
+    // 保存到数据库
+    const createdCodes = await createActivationCodes(codes);
+
+    // 格式化日期字段
+    const formattedCodes = createdCodes.map(code => ({
+      ...code,
+      created_at: formatDateTimeForAPI(code.created_at),
+      expires_at: formatDateTimeForAPI(code.expires_at),
+      used_at: formatDateTimeForAPI(code.used_at)
+    }));
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: `成功生成 ${createdCodes.length} 个激活码`,
+        data: {
+          codes: formattedCodes,
+          summary: {
+            generated: createdCodes.length,
+            expires_at: formatDateTimeForAPI(expiresAt)
+          }
+        }
+      },
+      { status: 201 }
+    );
+
+  } catch (error) {
+    console.error('生成激活码API错误:', error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: '生成激活码失败'
+      },
+      { status: 500 }
+    );
+  }
+}

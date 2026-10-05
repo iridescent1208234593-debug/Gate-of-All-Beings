@@ -1,22 +1,54 @@
-# 依赖与构建产物
+# Dependencies, build output and caches
 node_modules/
 **/dist/
 server/app/modules/
+/portal/www/.homepage-build/
+/portal/www/.homepage-publish/
+/portal/www/assets/homepage/
+**/.next/
+**/.cache/
+**/.turbo/
+**/coverage/
 **/__pycache__/
-*.pyc
+*.py[cod]
+.vite/
 
-# 独立仓库（各自有 .git，见 README「版本控制」）
-/server/
-/shared/
-/portal/
-
-# 大体积素材与归档（保留在本地，不纳入 git）
-/assets/
-/conversations.json
-罗小黑素材引用关系排查报告.md
-
-# 日志与临时
+# Runtime data and secrets (keep local; back up separately)
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.pem
 *.log
+*.swp
+*.swo
 *.bak
 *.pid
 *.tmp
+
+# External database/media collection (required local deployment input, not Git source)
+/assets/罗小黑战记数据库/
+# Local website snapshots and extracted build material
+/assets/网站素材/
+/conversations.json
+/New project/gallery/curve-gallery/
+/New project/gallery/infinite-gsap-gallery/
+/New project/gallery/scroll-revealed-webgl/
+/New project/motion/
+/New project/skills/
+/ops/网站恢复/logs/
+portal/huiguan/assets/uploads/
+portal/huiguan/assets/thumbs/
+portal/huiguan/assets/store/
+portal/huiguan/assets/gate/__probe.html
+
+# OS/editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/

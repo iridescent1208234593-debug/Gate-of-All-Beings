@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="description" content="A video card game for the web" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+		<title>罗小黑战记·重生之门</title>
+		<link rel="manifest" href="manifest.webmanifest" />
+    <meta name="mobile-web-app-capable" content="yes">
+		<meta name="theme-color" content="#116f54" />
+		<meta name="msapplication-TileColor" content="#116f54">
+		<link rel="icon" type="image/png" href="/ui/images/spoder.png" sizes="512x512" />
+		<link rel="shortcut icon" href="/ui/images/spoder.png">
+		<link rel="apple-touch-icon" href="/ui/images/spoder.png" />
+		<link rel="stylesheet" href="ui/index.css" />
+	  <script src="https://huiguan.iridescently.xyz/design-system/game-nav.js" defer></script>
+</head>
+	<body>
+
+		<div id="QcAccountBar"></div>
+		<div id="SlayTheWeb"></div>
+		<script async src="ui/index.js" type="module"></script>
+		<script async src="ui/account-bar.js" type="module"></script>
+		<script>
+			// Offline support
+			if (!location.origin.includes('localhost') && 'serviceWorker' in navigator) {
+				window.addEventListener('load', () => {
+					navigator.serviceWorker.register('/service-worker.js')
+				})
+			}
+			window.TONE_SILENCE_LOGGING = true
+		</script>
+		<noscript>
+			<p>
+				需要启用 JavaScript 才能游玩罗小黑战记·重生之门。
+			</p>
+		</noscript>
+
+	</body>
+</html>

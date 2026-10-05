@@ -1,0 +1,20 @@
+{
+  "name": "lingjing-huiguan",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "灵境会馆 - 罗小黑世界观灵质空间经营模拟（M0 骨架 + M1 最小可玩 Demo + M2 种植 + M3 时代跃迁）",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "vite": "^5.4.10"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  }
+}

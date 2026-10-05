@@ -1,0 +1,261 @@
+/* ============================================================
+   罗小黑战记·重生之门 —— Design Tokens（对齐西木会馆 design-system）
+   来源：portal\huiguan\design-system\design-system.css（唯一权威）
+   规则：只允许使用本文件 token 与 qc- 组件，禁止硬编码色值。
+   ============================================================ */
+
+/* ---------- Design Tokens（design-system.css :root 原样） ---------- */
+:root {
+  /* 色彩 · 主色（乳白宣纸底 + 松绿主色 + 描金点缀） */
+  --qc-bg: #f5f0e8;          /* 页面底 · 乳白 */
+  --qc-paper-light: #efe6d0;  /* 宣纸 · 浅过渡（卡牌渐变） */
+  --qc-panel: #fbf8f2;       /* 卡片/面板底 */
+  --qc-border: #d4cfbe;      /* 描边 · 浅褐 */
+  --qc-text: #3a4a3e;        /* 正文 · 墨绿 */
+  --qc-dim: #7a8a7e;         /* 次级文字 · 灰绿 */
+  --qc-accent: #5a9e8f;      /* 主色 · 松绿 */
+  --qc-gold: #d4a840;        /* 点缀 · 描金 */
+  --qc-danger: #b3543f;      /* 警示 · 赭红 */
+
+  /* 色彩 · 深色导航 */
+  --qc-nav-bg: rgba(34, 45, 38, 0.96);
+  --qc-nav-text: #f5f0e8;
+
+  /* 透明派生色（由主色派生，勿硬编码） */
+  --qc-accent-glow: rgba(90, 158, 143, 0.10);
+  --qc-accent-bg-soft: rgba(90, 158, 143, 0.12);   /* 灵机徽章底 */
+  --qc-accent-bg-strong: rgba(90, 158, 143, 0.14); /* 技能徽章底 */
+  --qc-gold-glow: rgba(212, 168, 64, 0.10);
+  --qc-danger-glow: rgba(179, 84, 63, 0.10);
+  --qc-danger-15: rgba(179, 84, 63, 0.15);
+  --qc-danger-40: rgba(179, 84, 63, 0.4);
+  --qc-danger-55: rgba(179, 84, 63, 0.55);
+  --qc-danger-60: rgba(179, 84, 63, 0.6);
+  --qc-danger-65: rgba(179, 84, 63, 0.65);
+  --qc-danger-75: rgba(179, 84, 63, 0.75);
+  --qc-danger-border-light: rgba(255, 160, 150, 0.5); /* 二阶段描边 · 浅红 */
+
+  /* 字体 */
+  --qc-font-body: "Noto Serif SC", "Source Han Serif SC", serif;
+  --qc-font-hand: "LXGW WenKai", "Noto Serif SC", serif;
+
+  /* 字号 */
+  --qc-fs-xs: 11px;
+  --qc-fs-sm: 12px;
+  --qc-fs-md: 13px;
+  --qc-fs-base: 14px;
+  --qc-fs-lg: 16px;
+  --qc-fs-xl: 22px;
+
+  /* 圆角 */
+  --qc-r-sm: 4px;
+  --qc-r-md: 6px;
+  --qc-r-lg: 10px;
+  --qc-r-xl: 12px;
+
+  /* 间距 */
+  --qc-sp-1: 4px;
+  --qc-sp-2: 8px;
+  --qc-sp-3: 12px;
+  --qc-sp-4: 16px;
+  --qc-sp-5: 20px;
+  --qc-sp-6: 24px;
+
+  /* 阴影 */
+  --qc-shadow-sm: 0 2px 8px rgba(30, 40, 34, 0.10);
+  --qc-shadow-md: 0 6px 20px rgba(30, 40, 34, 0.14);
+  --qc-shadow-lg: 0 10px 40px rgba(20, 26, 22, 0.30);
+
+  /* ---------- 游戏扩展 · 五行元素色 ----------
+     来源：design-system/ancient-colors.js（中国古色·五行库），
+     仅用于卡牌/节点类型标签等语义标识，集中定义于此避免散落硬编码 */
+  --qc-elem-fire: #C3272B;      /* 赤 · 火系 */
+  --qc-elem-water: #424C50;     /* 鸦青 · 水系 */
+  --qc-elem-wood: #4E7E5E;      /* 翠樽 · 木系 */
+  --qc-elem-metal: #B89E4E;     /* 吉金 · 金系 */
+  --qc-elem-earth: #C89B40;     /* 昏黄 · 土系 */
+  --qc-elem-spirit: #057748;    /* 松花绿 · 生灵 */
+  --qc-elem-space: #3B2E7E;     /* 藏蓝 · 空间 */
+  --qc-elem-mind: #8E7E9E;      /* 夕岚 · 心灵 */
+  --qc-elem-artifact: #6E8E8E;  /* 渌波 · 造物 */
+  --qc-elem-lock: #4A4448;      /* 墨灰 · 锁御 */
+  --qc-elem-common: #3E4A52;    /* 墨色 · 通用/攻击 */
+
+  /* ---------- 游戏深色主题 · 水墨玄黑系 ----------
+     对齐 Slay-the-Web 现有游戏 UI 视觉（玄黑底 + 青黛山影 + 朱砂/鎏金描边），
+     与上方 qc 浅色宣纸系并存：qc 系用于未来西木会馆风格界面，game 系用于游戏本体。
+     统一在此维护，新增样式禁止散落硬编码色值。 */
+  --game-bg-top: #101418;       /* 页面底 · 玄黑（上） */
+  --game-bg-mid: #0b0d10;       /* 页面底 · 玄黑（中） */
+  --game-bg-bottom: #13100d;    /* 页面底 · 玄黑（下，暖调） */
+  --game-teal: #2f6f6a;         /* 青黛 · 辅色（山影/能量） */
+  --game-teal-soft: #6f9e9a;    /* 青黛 · 柔和（标题渐变） */
+  --game-gold: #c8a24a;         /* 鎏金 · 主强调 */
+  --game-gold-bright: #e2c17a;  /* 鎏金 · 亮金（文字/图标） */
+  --game-gold-soft: #ffe0b3;    /* 鎏金 · 淡金（小标题） */
+  --game-cinnabar: #b8452f;     /* 朱砂 · 警示/描边 */
+  --game-ink: #14161a;          /* 墨底 · 按钮/面板 */
+  --game-ink-light: #1d2026;    /* 墨底 · 按钮（亮） */
+  --game-text-warm: #f2e3c8;    /* 正文 · 暖米白 */
+  --game-text-dim: #cfc3b2;     /* 次级文字 · 灰米 */
+  --game-warn: #ffc107;         /* 警示金 · 提示/选中 */
+  --game-warn-glow: rgba(255, 193, 7, 0.35);
+  --game-warn-glow-dim: rgba(255, 193, 7, 0.18);
+  --game-warn-glow-soft: rgba(255, 193, 7, 0.12);
+  --game-warn-border: rgba(255, 193, 7, 0.45);
+  --game-overlay: rgba(8, 10, 13, 0.88);   /* 顶部/底部压暗层 */
+  --game-overlay-warm: hsla(32, 10%, 5%, 0.97); /* 弹窗遮罩 · 暖褐黑 */
+
+  /* ---------- 派生色 · 浅色宣纸（由 --qc-* 派生，禁止散落硬编码） ---------- */
+  --qc-text-muted: #5f6f63;                /* 次级正文 · 深墨绿（强调弱化） */
+  --qc-bg-fade: rgba(245, 240, 232, 0.72); /* 背景顶部/底部渐隐（宣纸透出） */
+  --qc-toast-bg: rgba(17, 111, 84, 0.92);  /* 收集提示 · 深松绿 */
+  --qc-toast-text: #f7fbf9;
+  --qc-toast-border: rgba(127, 208, 174, 0.55);
+
+  /* ---------- 五行 · 天时线/底透明派生（MapWeather / 行轴标记） ---------- */
+  --qc-elem-wood-line: rgba(78, 126, 94, 0.55);
+  --qc-elem-wood-bg: rgba(78, 126, 94, 0.16);
+  --qc-elem-fire-line: rgba(195, 39, 43, 0.55);
+  --qc-elem-fire-bg: rgba(195, 39, 43, 0.14);
+  --qc-elem-earth-line: rgba(200, 155, 64, 0.55);
+  --qc-elem-earth-bg: rgba(200, 155, 64, 0.14);
+  --qc-elem-metal-line: rgba(184, 158, 78, 0.55);
+  --qc-elem-metal-bg: rgba(184, 158, 78, 0.14);
+  --qc-elem-water-line: rgba(66, 76, 80, 0.55);
+  --qc-elem-water-bg: rgba(66, 76, 80, 0.16);
+
+  /* ---------- 灵机共振 · 紫金（天时/行轴共振态） ---------- */
+  --qc-resonance: #b07ce8;
+  --qc-resonance-bright: #cfa5f7;
+  --qc-resonance-line: rgba(176, 124, 232, 0.8);
+  --qc-resonance-glow: rgba(176, 124, 232, 0.25);
+  --qc-resonance-bg: rgba(176, 124, 232, 0.16);
+  --qc-resonance-bg-soft: rgba(176, 124, 232, 0.14);  /* 共振徽章底 · 淡 */
+  --qc-resonance-halo: rgba(176, 124, 232, 0.35);      /* 共振徽章光晕 */
+
+  /* ---------- 聚灵修炼 · 荧蓝（生灵/物质灵双资源徽章） ---------- */
+  --qc-ling: #6ec6d8;
+  --qc-ling-bright: #8fd8e8;
+  --qc-ling-bg: rgba(110, 198, 216, 0.12);
+
+  /* ---------- 世界观档案 · 紫罗兰（敌人档案徽章） ---------- */
+  --qc-lore: #8f7ac4;
+  --qc-lore-bg: rgba(143, 122, 196, 0.14);
+
+  /* ---------- 游戏深色主题 · 战记/日志色板（BattleLog 左侧色条） ---------- */
+  --bl-dmg: #d05b5b;      /* 伤害 */
+  --bl-def: #5b8fd0;      /* 防御 */
+  --bl-heal: #5bbf8a;     /* 治疗 */
+  --bl-debuff: #9a6ac2;   /* 减益 */
+  --bl-warn: #d0a24a;     /* 警示 */
+  --bl-break: #e0d24a;    /* 破势 */
+  --bl-reward: #d0b45b;   /* 奖励 */
+  --bl-event: #6aa8c2;    /* 事件 */
+  --bl-info: #8a8f98;     /* 信息/空态 */
+  --game-white-3: rgba(255, 255, 255, 0.03);  /* 日志条目底 · 极淡白 */
+
+  /* ---------- 游戏深色主题 · 音乐开关/账户条（深松绿鎏金） ---------- */
+  --game-deep-green: rgba(17, 111, 84, 0.82);     /* 悬浮底 */
+  --game-deep-green-solid: rgba(17, 111, 84, 1);  /* 悬浮底 · hover */
+  --game-deep-green-soft: rgba(17, 111, 84, 0.75); /* 账户条底 */
+  --game-deep-green-hover: rgba(11, 84, 63, 0.9);  /* 账户条 hover */
+  --game-gold-30: rgba(200, 162, 74, 0.3);
+  --game-gold-60: rgba(212, 168, 64, 0.6);          /* 账户条描边 */
+  --game-account-text: #e8e6e0;                     /* 账户条姓名 */
+  --game-account-text-hover: #f5f0e8;               /* 账户条按钮文字 */
+
+  /* ---------- 深色弹窗 · 鎏金派生（元素/修仙事件 Overlay） ---------- */
+  --game-gold-18: rgba(200, 162, 74, 0.18);
+  --game-gold-28: rgba(200, 162, 74, 0.28);
+  --game-gold-40: rgba(200, 162, 74, 0.4);
+  --game-gold-45: rgba(200, 162, 74, 0.45);
+  --game-gold-50: rgba(200, 162, 74, 0.5);
+  --game-gold-90: rgba(200, 162, 74, 0.9);
+  --game-title-warm: #f0d9a8;   /* 弹窗标题 · 暖金 */
+  --game-title-cream: #f7e6c0;  /* 弹窗标题 · 米金 */
+  --game-title-sand: #e8cfa0;   /* 弹窗标题 · 沙金 */
+  --game-title-tan: #d8c090;    /* 弹窗标题 · 褐金 */
+}
+
+/* ---------- 基础 ---------- */
+.qc-body { background: var(--qc-bg); color: var(--qc-text); font-family: var(--qc-font-body); }
+
+/* ---------- 按钮 ---------- */
+.qc-btn {
+  display: inline-block; font-family: inherit; cursor: pointer;
+  font-size: var(--qc-fs-md); letter-spacing: 1px; line-height: 1.4;
+  padding: 7px 18px; border-radius: var(--qc-r-md);
+  border: 1px solid var(--qc-accent); background: var(--qc-accent); color: #fff;
+  transition: all 0.2s; text-decoration: none;
+}
+.qc-btn:hover { filter: brightness(1.08); }
+.qc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.qc-btn--ghost { background: transparent; color: var(--qc-accent); }
+.qc-btn--ghost:hover { background: var(--qc-accent-glow); }
+.qc-btn--gold { border-color: var(--qc-gold); background: var(--qc-gold); }
+.qc-btn--gold-ghost { background: transparent; color: var(--qc-gold); border-color: var(--qc-gold); }
+.qc-btn--danger { border-color: var(--qc-danger); background: var(--qc-danger); }
+.qc-btn--sm { font-size: var(--qc-fs-sm); padding: 3px 10px; border-radius: var(--qc-r-sm); }
+
+/* ---------- 卡片 ---------- */
+.qc-card {
+  background: var(--qc-panel); border: 1px solid var(--qc-border);
+  border-radius: var(--qc-r-lg); padding: var(--qc-sp-4);
+  box-shadow: var(--qc-shadow-sm);
+}
+.qc-card--hover { transition: transform .15s, box-shadow .15s; cursor: pointer; }
+.qc-card--hover:hover { transform: translateY(-3px); box-shadow: var(--qc-shadow-md); }
+
+/* ---------- 徽章 / 标签 ---------- */
+.qc-tag {
+  display: inline-block; padding: 1px 8px; border-radius: var(--qc-r-sm);
+  font-size: var(--qc-fs-xs); border: 1px solid var(--qc-border); color: var(--qc-dim);
+  white-space: nowrap;
+}
+.qc-tag--accent { background: var(--qc-accent-glow); border-color: var(--qc-accent); color: var(--qc-accent); }
+.qc-tag--gold { background: var(--qc-gold-glow); border-color: var(--qc-gold); color: var(--qc-gold); }
+.qc-tag--danger { background: var(--qc-danger-glow); border-color: var(--qc-danger); color: var(--qc-danger); }
+
+/* ---------- 表单 ---------- */
+.qc-input, .qc-select, .qc-textarea {
+  width: 100%; font-family: inherit; font-size: var(--qc-fs-base);
+  padding: 8px 10px; border: 1px solid var(--qc-border); border-radius: var(--qc-r-md);
+  background: var(--qc-panel); color: var(--qc-text); outline: none;
+}
+.qc-input:focus, .qc-select:focus, .qc-textarea:focus { border-color: var(--qc-accent); }
+.qc-textarea { resize: vertical; }
+.qc-label { display: block; font-size: var(--qc-fs-md); color: var(--qc-gold); margin-bottom: 5px; letter-spacing: .5px; }
+.qc-hint { font-size: var(--qc-fs-xs); color: var(--qc-dim); margin-top: 3px; }
+.qc-err { font-size: var(--qc-fs-xs); color: var(--qc-danger); margin-top: 3px; }
+
+/* ---------- 表格 ---------- */
+.qc-table { width: 100%; border-collapse: collapse; background: var(--qc-panel); border: 1px solid var(--qc-border); border-radius: var(--qc-r-md); overflow: hidden; font-size: var(--qc-fs-md); }
+.qc-table th, .qc-table td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--qc-border); }
+.qc-table th { background: var(--qc-gold-glow); font-size: var(--qc-fs-sm); letter-spacing: 1px; }
+.qc-table tr:last-child td { border-bottom: none; }
+
+/* ---------- 弹窗 ---------- */
+.qc-modal { position: fixed; inset: 0; z-index: 9995; background: rgba(20,26,22,.55); display: none; align-items: center; justify-content: center; padding: 20px; }
+.qc-modal.is-open { display: flex; }
+.qc-modal__panel { background: var(--qc-panel); border: 1px solid var(--qc-border); border-radius: var(--qc-r-xl); max-width: 560px; width: 100%; max-height: 86vh; overflow: auto; padding: var(--qc-sp-5); box-shadow: var(--qc-shadow-lg); }
+.qc-modal__title { font-size: var(--qc-fs-lg); letter-spacing: 1px; }
+
+/* ---------- 横幅 ---------- */
+.qc-banner { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 18px; border-radius: var(--qc-r-lg); margin-bottom: 18px; }
+.qc-banner--gold { border: 1px solid rgba(212,168,64,.4); background: var(--qc-gold-glow); }
+.qc-banner--accent { border: 1px solid rgba(90,158,143,.4); background: var(--qc-accent-glow); }
+
+/* ---------- 标题 ---------- */
+.qc-h2 { font-size: var(--qc-fs-lg); letter-spacing: 2px; border-bottom: 2px solid var(--qc-accent); padding-bottom: 8px; margin-bottom: 14px; }
+.qc-h2--gold { border-bottom-color: var(--qc-gold); }
+
+/* ---------- 页签 Tabs ---------- */
+.qc-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--qc-sp-3); }
+.qc-tab {
+  padding: 3px 12px; font-size: var(--qc-fs-sm); letter-spacing: 1px; cursor: pointer;
+  border: 1px solid var(--qc-border); border-radius: 999px; background: transparent;
+  color: var(--qc-dim); font-family: inherit; transition: all .15s;
+}
+.qc-tab:hover { border-color: var(--qc-accent); color: var(--qc-accent); }
+.qc-tab.is-active { background: var(--qc-accent); border-color: var(--qc-accent); color: #fff; }

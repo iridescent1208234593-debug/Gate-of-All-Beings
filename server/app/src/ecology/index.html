@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>众生之门 · 一方灵境</title>
+  <link rel="stylesheet" href="/src/ui/style.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="hud">
+      <span id="hud-cells">细胞: 0</span>
+      <span id="hud-food">食物: 0</span>
+      <span id="hud-energy">平均能量: 0</span>
+      <span id="hud-gene">基因: --</span>
+      <span id="hud-split">分裂: 0</span>
+      <span id="hud-culled">淘汰: 0</span>
+      <span id="hud-org">有机体: --</span>
+      <span id="hud-evo-points">进化点: 0</span>
+      <button id="btn-editor" type="button">⏸ 编辑器 [E]</button>
+      <button id="btn-spawn" type="button">+ 有机体 [O]</button>
+      <button id="btn-org-editor" type="button">🧩 组装模式 [G]</button>
+      <span id="hud-fps">FPS: --</span>
+    </div>
+    <div id="hud-evo">世代: --</div>
+    <div id="hud-nn">神经: --</div>
+    <div id="hud-beh">行为: --</div>
+    <div id="hud-zone">分区: --</div>
+    <div id="hud-eco">生态: --</div>
+    <div id="hud-tribe">群体: --</div>
+    <div id="hud-civ">文明: --</div>
+    <div id="tribe-panel"></div>
+    <div id="civ-panel"></div>
+    <div id="victory-root" hidden></div>
+    <div id="eco-panel"></div>
+    <div id="climate-panel"></div>
+    <div id="env-menu" hidden></div>
+    <div id="trend-panel">
+      <div id="trend-title">模块数趋势（体型分异）</div>
+      <canvas id="chart-modules" width="260" height="120"></canvas>
+    </div>
+    <div id="editor-root"></div>
+    <div id="hint">拖动旋转视角 · 滚轮缩放 · 点击地面干预环境 · E 编辑细胞 · G 拼装生灵</div>
+    <canvas id="scene"></canvas>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

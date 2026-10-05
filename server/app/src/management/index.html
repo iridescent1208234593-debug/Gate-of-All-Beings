@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>灵境会馆 · 灵质空间经营模拟</title>
+</head>
+<body class="lxh">
+  <div id="app">
+    <header id="hud">
+      <div class="hud-brand"><span class="brand-mark" data-icon="map"></span><div><strong>灵境会馆</strong><span id="hud-time">天 0 · 0:00</span></div></div>
+      <div class="hud-resources" aria-label="资源库存">
+        <span class="resource-pill spirit">灵质 <b id="hud-spirit">0</b></span>
+        <span class="resource-pill food">食物 <b id="hud-food">0</b></span>
+        <span class="resource-pill faqi">法器 <b id="hud-faqi">0</b></span>
+      </div>
+      <div class="hud-group" id="speed-controls" aria-label="时间控制">
+        <button class="speed-btn pause" id="btn-pause" aria-label="暂停" title="暂停/继续">Ⅱ</button>
+        <button class="speed-btn" data-rate="1">1×</button><button class="speed-btn active" data-rate="2">2×</button><button class="speed-btn" data-rate="3">3×</button>
+      </div>
+      <button id="btn-settings" class="icon-button" aria-label="会馆设置" title="会馆设置" data-icon="wrench"></button>
+    </header>
+    <section id="era-panel" aria-label="时代进程">
+      <span class="era-current">当前 <b id="era-current-name">聚落时代</b></span>
+      <div class="era-tabs" id="era-tabs"><button class="era-tab active" data-era="tribal">聚落</button><button class="era-tab" data-era="alliance">结盟</button><button class="era-tab" data-era="hall">会馆</button></div>
+      <div id="era-detail" class="era-detail"></div><button id="era-advance" class="era-advance hidden">跃迁</button>
+    </section>
+    <main id="stage">
+      <aside id="build-panel" class="paper-panel" aria-label="营造与研究">
+        <div class="panel-heading"><span>营造手札</span><button class="panel-close" data-close-panel aria-label="关闭营造面板">×</button></div>
+        <nav class="panel-tabs" aria-label="营造分类"><button class="active" data-pane="build-pane">建造</button><button data-pane="research-pane">研究</button><button data-pane="craft-pane">合成</button></nav>
+        <div class="panel-scroll">
+          <section id="build-pane" class="panel-pane"><p class="panel-intro">从一片空地，筑起大家的家。</p><div id="build-list"></div><p class="panel-hint">选择建筑，再点击空地。<br>拖动地图寻找空地，取消键退出建造。</p></section>
+          <section id="research-pane" class="panel-pane hidden"><p class="panel-intro">建好研究台，让小妖研习御灵之道。</p><div id="research-list"></div></section>
+          <section id="craft-pane" class="panel-pane hidden"><button id="btn-spirit-workshop">灵体拼装 · 实验室</button><p class="panel-intro">工坊建成后点选配方，小妖自动采集、炼制。</p><div id="material-stock" class="material-stock"></div><div id="craft-list"></div><h3>炼制队列 <span id="craft-queue-count"></span></h3><div id="craft-queue" class="craft-queue"></div></section>
+        </div>
+      </aside>
+      <section id="canvas-wrap" aria-label="会馆地图">
+        <canvas id="game-canvas" tabindex="0" aria-label="三维会馆地图。点击选择，拖动平移，滚轮缩放；方向键平移，加减键缩放，Home复位。"></canvas>
+        <div class="map-heading"><span id="map-phase">灵质空间</span><small id="map-size">24 × 16</small></div>
+        <div id="map-mode" class="map-mode hidden"><span id="map-mode-text"></span><button id="btn-cancel">取消</button></div>
+        <div id="selection-detail" class="selection-detail hidden" aria-live="polite"></div>
+        <div class="map-controls" aria-label="视角控制"><button id="btn-zoom-out" aria-label="缩小">−</button><span id="zoom-level">100%</span><button id="btn-zoom-in" aria-label="放大">＋</button><button id="btn-reset-view" aria-label="复位视角" title="复位视角" data-icon="map"></button></div>
+        <div class="map-help">拖动平移 · 滚轮 / 双指缩放</div><div id="tooltip" class="hidden"></div><div id="render-status" class="hidden" role="status"></div>
+      </section>
+      <aside id="colonist-panel" class="paper-panel" aria-label="居民与往来">
+        <div class="panel-heading"><span>会馆日常</span><button class="panel-close" data-close-panel aria-label="关闭居民面板">×</button></div>
+        <nav class="panel-tabs" aria-label="会馆分类"><button class="active" data-pane="colonist-pane">小妖 <span id="colonist-count">0</span></button><button data-pane="relations-pane">往来</button></nav>
+        <div class="panel-scroll"><section id="colonist-pane" class="panel-pane"><p class="panel-intro">五行相伴，各有所长。</p><div id="colonist-list"></div></section><section id="relations-pane" class="panel-pane hidden"><h3>人类聚落</h3><div id="settlement-list"></div><h3>远征</h3><div id="expedition-status"></div><div id="expedition-dispatch"></div><div id="expedition-log"></div></section></div>
+      </aside>
+    </main>
+    <footer id="log-bar">
+      <div id="event-log" aria-label="会馆动态"></div>
+      <div id="save-controls">
+        <button class="mobile-toggle" data-open-panel="build-panel">营造</button><button class="mobile-toggle" data-open-panel="colonist-panel">小妖</button>
+        <button id="btn-move" title="移动模式：点建筑再点目标位置">搬迁</button><button id="btn-demolish" class="hidden" title="拆除选中的建筑，返还一半资源">拆除</button>
+        <button id="btn-expand" title="花费灵质向东扩展一列">东扩</button><button id="btn-expand-south" title="花费灵质向南扩展一行">南扩</button><button id="btn-save">存档</button><button id="btn-load">读档</button>
+      </div>
+    </footer>
+    <div id="save-hint" class="save-hint" role="status"></div>
+    <dialog id="settings-dialog" class="paper-dialog">
+      <div class="dialog-heading"><h2>会馆设置</h2><button id="settings-close" aria-label="关闭设置">×</button></div>
+      <div id="settings-controls"><label class="setting-item">难度<select id="setting-difficulty"><option value="easy">简单</option><option value="normal" selected>普通</option><option value="hard">困难</option></select></label><label class="setting-item">事件频率<select id="setting-frequency"><option value="low">稀少</option><option value="normal" selected>正常</option><option value="high">频繁</option></select></label></div>
+      <div id="theme-area"><label class="theme-label">手札配色<select id="theme-select" class="theme-select"></select></label></div>
+      <div id="account-area"><span id="account-status">未登录</span><button id="btn-login">登录</button><button id="btn-logout" class="hidden">登出</button></div>
+      <p class="panel-hint">未登录时可使用本地存档。登录西木会馆账号后可同步云端进度。</p>
+    </dialog>
+    <div id="login-modal" class="login-modal hidden" role="dialog" aria-modal="true" aria-labelledby="login-title"><div class="login-box">
+      <h3 id="login-title">登录西木会馆</h3><p class="login-tip">输入用户名和密码。未注册将自动创建，存档会同步到云端。</p>
+      <input id="login-username" aria-label="用户名" placeholder="用户名（2–16 位）" maxlength="16" autocomplete="username" />
+      <input id="login-password" aria-label="密码" type="password" placeholder="密码（至少 6 位）" maxlength="64" autocomplete="current-password" />
+      <div id="login-error" class="login-error" role="status"></div><div class="login-actions"><button id="login-ok">登录 / 注册</button><button id="login-cancel">取消</button></div>
+    </div></div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

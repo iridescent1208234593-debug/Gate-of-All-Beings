@@ -1,0 +1,167 @@
+[
+  {
+    "name": "黛蓝×缃色",
+    "primary": "#425066",
+    "primaryDark": "#27303d",
+    "accent": "#F0C239",
+    "accentLight": "#f7e09c",
+    "accentPale": "#faecc3",
+    "text": "#e5e3e1",
+    "dim": "#888b9c",
+    "line": "rgba(240,194,57,0.25)"
+  },
+  {
+    "name": "绛紫×月白",
+    "primary": "#8C4356",
+    "primaryDark": "#542833",
+    "accent": "#D6ECF0",
+    "accentLight": "#eaf5f7",
+    "accentPale": "#f2f9fa",
+    "text": "#f1e1de",
+    "dim": "#b18393",
+    "line": "rgba(214,236,240,0.25)"
+  },
+  {
+    "name": "鸦青×酡颜",
+    "primary": "#424C50",
+    "primaryDark": "#272d30",
+    "accent": "#F9906F",
+    "accentLight": "#fcc7b7",
+    "accentPale": "#fdddd3",
+    "text": "#e5e2de",
+    "dim": "#888890",
+    "line": "rgba(249,144,111,0.25)"
+  },
+  {
+    "name": "玄青×赤金",
+    "primary": "#3D3B4F",
+    "primaryDark": "#24232f",
+    "accent": "#F2BE45",
+    "accentLight": "#f8dea2",
+    "accentPale": "#fbebc7",
+    "text": "#e5dfdd",
+    "dim": "#857f8f",
+    "line": "rgba(242,190,69,0.25)"
+  },
+  {
+    "name": "黛绿×珊瑚赫",
+    "primary": "#426666",
+    "primaryDark": "#273d3d",
+    "accent": "#C12C1F",
+    "accentLight": "#e0958f",
+    "accentPale": "#ecbfbb",
+    "text": "#e5e6e1",
+    "dim": "#88979c",
+    "line": "rgba(193,44,31,0.25)"
+  },
+  {
+    "name": "紫檀×松花",
+    "primary": "#4C221B",
+    "primaryDark": "#2d1410",
+    "accent": "#FFEE6F",
+    "accentLight": "#fff6b7",
+    "accentPale": "#fff9d3",
+    "text": "#e7dcd6",
+    "dim": "#8d7172",
+    "line": "rgba(255,238,111,0.25)"
+  },
+  {
+    "name": "藏蓝×琥珀",
+    "primary": "#3B2E7E",
+    "primaryDark": "#231b4b",
+    "accent": "#CA6924",
+    "accentLight": "#e4b491",
+    "accentPale": "#efd2bd",
+    "text": "#e4dde4",
+    "dim": "#8478a9",
+    "line": "rgba(202,105,36,0.25)"
+  },
+  {
+    "name": "苍色×茶色",
+    "primary": "#75878A",
+    "primaryDark": "#465152",
+    "accent": "#B35C44",
+    "accentLight": "#d9ada1",
+    "accentPale": "#e8cec6",
+    "text": "#edebe6",
+    "dim": "#a4a9af",
+    "line": "rgba(179,92,68,0.25)"
+  },
+  {
+    "name": "翡翠色×胭脂",
+    "primary": "#3DE1AD",
+    "primaryDark": "#248767",
+    "accent": "#9D2933",
+    "accentLight": "#ce9499",
+    "accentPale": "#e1bec1",
+    "text": "#e5f8eb",
+    "dim": "#85dac3",
+    "line": "rgba(157,41,51,0.25)"
+  },
+  {
+    "name": "漆黑×牙色",
+    "primary": "#161823",
+    "primaryDark": "#0d0e15",
+    "accent": "#EEDEB0",
+    "accentLight": "#f6eed7",
+    "accentPale": "#f9f5e7",
+    "text": "#dfdad7",
+    "dim": "#706c77",
+    "line": "rgba(238,222,176,0.25)"
+  },
+  {
+    "name": "靛蓝×藕荷色",
+    "primary": "#065279",
+    "primaryDark": "#033148",
+    "accent": "#E4C6D0",
+    "accentLight": "#f1e2e7",
+    "accentPale": "#f6edf0",
+    "text": "#dce3e4",
+    "dim": "#678ca6",
+    "line": "rgba(228,198,208,0.25)"
+  },
+  {
+    "name": "黧×樱草色",
+    "primary": "#5D513C",
+    "primaryDark": "#373024",
+    "accent": "#EAFF56",
+    "accentLight": "#f4ffaa",
+    "accentPale": "#f8ffcc",
+    "text": "#e9e3db",
+    "dim": "#978b85",
+    "line": "rgba(234,255,86,0.25)"
+  },
+  {
+    "name": "宝蓝×赤璋",
+    "primary": "#4B5CC4",
+    "primaryDark": "#2d3775",
+    "accent": "#E1C199",
+    "accentLight": "#f0e0cc",
+    "accentPale": "#f6ece0",
+    "text": "#e7e4ef",
+    "dim": "#8d91cf",
+    "line": "rgba(225,193,153,0.25)"
+  },
+  {
+    "name": "铜绿×朱红",
+    "primary": "#549688",
+    "primaryDark": "#325a51",
+    "accent": "#FF4C00",
+    "accentLight": "#ffa57f",
+    "accentPale": "#ffc9b2",
+    "text": "#e8ede6",
+    "dim": "#92b1ae",
+    "line": "rgba(255,76,0,0.25)"
+  },
+  {
+    "name": "苍黄×丁香色",
+    "primary": "#519A73",
+    "primaryDark": "#305c45",
+    "accent": "#CCA4E3",
+    "accentLight": "#e5d1f1",
+    "accentPale": "#efe3f6",
+    "text": "#e8eee3",
+    "dim": "#90b3a3",
+    "line": "rgba(204,164,227,0.25)"
+  }
+]

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>众生之门 · 官方 UI 复刻组件库</title>
+<script src="https://huiguan.iridescently.xyz/design-system/game-nav.js" defer></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css">
+<link rel="stylesheet" href="https://huiguan.iridescently.xyz/design-system/ui/lxh-ui.css">
+<style>
+  body { margin: 0; padding: 70px 24px 60px; background: #efe9db; font-family: "LXGW WenKai", "Noto Serif SC", serif; color: #4a4636; }
+  h1 { font-size: 26px; letter-spacing: 4px; margin: 0 0 6px; }
+  .sub { color: #8b9181; font-size: 13px; letter-spacing: 2px; margin-bottom: 30px; }
+  section { max-width: 980px; margin: 0 auto 44px; }
+  h2 { font-size: 18px; letter-spacing: 3px; border-left: 5px solid #c08b3c; padding-left: 10px; margin: 0 0 6px; }
+  .note { font-size: 12px; color: #8b9181; letter-spacing: 1px; margin: 0 0 14px; }
+  .frame { background: #dcd6c6; border-radius: 16px; padding: 20px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+  .rowline { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+  button.demo { margin-top: 12px; font-family: inherit; font-size: 14px; letter-spacing: 2px; padding: 8px 22px; border-radius: 8px; border: 2px solid #4a4636; background: #f7f1e1; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<section>
+  <h1>众生之门 · 官方 UI 复刻组件库</h1>
+  <p class="sub">考据自 public/ui/images/lxh/ 22 张官方界面截图 · lxh-ui.css + lxh-ui.js</p>
+</section>
+
+<section>
+  <h2>1 · 主 HUD 框架（日 / 夜 + 状态闪烁）</h2>
+  <p class="note">左上头像+三状态栏+特殊状态图标；右列六功能钮；底栏三钮+聊天框；中央地图槽。</p>
+  <div class="frame" id="hud-day"></div>
+  <div class="frame" id="hud-night" style="margin-top:14px"></div>
+</section>
+
+<section>
+  <h2>2 · 半透明胶片卡（透底 / 深色实底）</h2>
+  <p class="note">左胶片格列 · 右上三横线圆 · 中央星徽水印 · 右下三格。</p>
+  <div class="grid2">
+    <div class="frame" id="film1" style="background:url('ui/images/scenes/rebirth-gate.png') center/cover"></div>
+    <div class="frame" id="film2"></div>
+  </div>
+</section>
+
+<section>
+  <h2>3 · 角色属性面板（御灵面板 + 五行生克星图）</h2>
+  <p class="note">姓名/种族/等级 · 介绍框 · 三能力槽 · 右侧五行五角星生克图 + 中央立绘。</p>
+  <div class="frame" id="charpanel"></div>
+</section>
+
+<section>
+  <h2>4/5 · 能力雷达（六维六角 / 五行星形）</h2>
+  <p class="note">六维=六大能力系；星形=五行属性（第一人称视角卡面）。</p>
+  <div class="grid2">
+    <div class="frame" id="radar6" style="background:#43412f"></div>
+    <div class="frame" id="radar5" style="background:#8a6a52"></div>
+  </div>
+</section>
+
+<section>
+  <h2>6/7 · 确认对话框 / 金额确认框</h2>
+  <p class="note">赭金「是」· 灰绿「否」· 乳白圆角卡 · 4 位数字槽 + ¥。</p>
+  <div class="frame">
+    <button class="demo" id="btn-exit">打开·退出确认</button>
+    <button class="demo" id="btn-amount">打开·金额确认（2000¥）</button>
+  </div>
+</section>
+
+<section>
+  <h2>8/9/10 · 邮件图标 / 五行徽章 / 状态图标行</h2>
+  <div class="frame rowline" id="misc"></div>
+</section>
+
+<script src="https://huiguan.iridescently.xyz/design-system/ui/lxh-ui.js"></script>
+<script>
+  var U = window.LXHUI
+
+  // 1. HUD（日：山新头像占位 / 夜：小黑白圆脸 + 闪烁状态）
+  document.getElementById('hud-day').appendChild(U.hud({
+    lv: 45,
+    status: [{ icon: 'radar' }, { icon: 'scroll' }]
+  }))
+  document.getElementById('hud-night').appendChild(U.hud({
+    night: true, lv: 51,
+    status: [{ icon: 'radar' }, { icon: 'wrench' }, { icon: 'shop', big: true, flash: true }]
+  }))
+
+  // 2. 胶片卡
+  document.getElementById('film1').appendChild(U.filmcard())
+  document.getElementById('film2').appendChild(U.filmcard({ solid: true }))
+
+  // 3. 角色面板（罗小黑示例，立绘走素材库 API）
+  document.getElementById('charpanel').appendChild(U.charpanel({
+    name: '罗小黑', race: '猫妖', lv: 10,
+    avatar: 'https://huiguan.iridescently.xyz/api/assets/avatar?cid=1',
+    portrait: 'https://huiguan.iridescently.xyz/api/assets/avatar?cid=1',
+    intro: '猫妖，10 岁。御灵系金，双空间系：吞噬（已失）+ 传送。被小白猫罐中带回家后一同生活，后拜无限为师。',
+    abilities: ['空间系<br>传送', '御灵系<br>金', '生灵系？<br>变化？']
+  }))
+
+  // 4/5. 雷达
+  document.getElementById('radar6').appendChild(U.radar6({
+    values: [0.9, 0.4, 0.85, 0.3, 0.5, 0.6]
+  }))
+  document.getElementById('radar5').appendChild(U.radar5())
+
+  // 6/7. 对话框
+  document.getElementById('btn-exit').onclick = function () {
+    U.confirm({
+      icon: 'door',
+      title: '是否确定退出？',
+      hint: '＊角色下次登陆将出现在退出地点<br>请注意安全'
+    }).open()
+  }
+  document.getElementById('btn-amount').onclick = function () {
+    U.confirm({
+      icon: 'shop',
+      title: '游戏转账',
+      amount: 2000,
+      hint: '我出 2000 元，你教我学技能怎么样？'
+    }).open()
+  }
+
+  // 8/9/10. 杂项
+  var misc = document.getElementById('misc')
+  misc.appendChild(U.mail())
+  ;['金', '木', '水', '火', '土'].forEach(function (c) { misc.appendChild(U.wxnode(c)) })
+  var sr = document.createElement('div')
+  sr.className = 'lxh-statusrow'
+  sr.innerHTML = '<span class="lxh-status">' + U.ICONS.radar + '</span>' +
+    '<span class="lxh-status">' + U.ICONS.scroll + '</span>' +
+    '<span class="lxh-status lxh-status--big lxh-status--flash">' + U.ICONS.shop + '</span>'
+  misc.appendChild(sr)
+</script>
+</body>
+</html>
