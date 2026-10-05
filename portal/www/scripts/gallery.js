@@ -10,6 +10,9 @@ const count = document.querySelector("[data-gallery-count]");
 const canvas = document.querySelector(".webgl");
 const root = document.body;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const prefersReducedMotionNow = () =>
+  reducedMotion.matches ||
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const autoplayButton = document.querySelector("[data-gallery-autoplay]");
 const AUTOPLAY_DELAY_MS = 8000;
 const AUTOPLAY_RETRY_MS = 300;
@@ -46,7 +49,7 @@ try {
     trailController,
     reducedMotion,
   });
-  let autoplayEnabled = appearance.autoplayEnabled && !reducedMotion.matches;
+  let autoplayEnabled = appearance.autoplayEnabled && !prefersReducedMotionNow();
   let autoplayDirection = 1;
   const resources = gallery.resources;
   const compactViewport = window.matchMedia("(max-width: 620px)");
@@ -110,11 +113,19 @@ try {
 
   const scheduleAutoplay = (delay = AUTOPLAY_DELAY_MS) => {
     clearAutoplay();
+    if (prefersReducedMotionNow()) {
+      if (autoplayEnabled) onReducedMotionChange();
+      return;
+    }
     if (!autoplayEnabled || !engine.isInitialized || gallery.planes.length < 2)
       return;
 
     const deadline = performance.now() + delay;
     const waitForTurn = () => {
+      if (prefersReducedMotionNow()) {
+        onReducedMotionChange();
+        return;
+      }
       if (!autoplayEnabled) return;
       const remaining = deadline - performance.now();
       if (remaining > 0 || galleryIsMoving()) {
@@ -149,6 +160,10 @@ try {
       return;
 
     const waitForArrival = () => {
+      if (prefersReducedMotionNow()) {
+        onReducedMotionChange();
+        return;
+      }
       if (!autoplayEnabled) return;
       if (galleryIsMoving()) {
         autoplayTimer = window.setTimeout(waitForArrival, AUTOPLAY_RETRY_MS);
@@ -178,14 +193,14 @@ try {
 
   const onAppearancePreferenceChange = (event) => {
     const enabled = event.detail?.autoplayEnabled === true;
-    autoplayEnabled = enabled && !reducedMotion.matches;
+    autoplayEnabled = enabled && !prefersReducedMotionNow();
     syncAutoplayButton();
     if (autoplayEnabled) scheduleAutoplay();
     else clearAutoplay();
   };
 
   const onReducedMotionChange = () => {
-    if (reducedMotion.matches) {
+    if (prefersReducedMotionNow()) {
       if (autoplayEnabled) appearance.setAutoplayEnabled(false);
       autoplayEnabled = false;
       clearAutoplay();

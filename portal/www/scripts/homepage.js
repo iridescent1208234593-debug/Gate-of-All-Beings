@@ -1,9 +1,6 @@
-import { asset } from "./asset.js";
+import logoUrl from "../assets/iridescently-mark.png";
 import "./brand-interaction.js";
 import "./site-navigation.js";
 import "./gallery.js";
 
-document.querySelector(".site-brand__logo")?.setAttribute(
-  "src",
-  asset("iridescently-mark.png"),
-);
+document.querySelector(".site-brand__logo")?.setAttribute("src", logoUrl);

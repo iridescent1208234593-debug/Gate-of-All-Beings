@@ -22,7 +22,7 @@ npm ci --prefix "New project/gallery/codrops-depth-gallery"
 ## 修改入口
 
 - 首页标题、说明文字、图库状态、导航内容与菜单链接：`homepage.html`
-- 站点标志图片：`assets/iridescently-mark.png`；靠近站名字样时显示颜文字：`scripts/brand-interaction.js` 与 `styles/chrome.css`
+- 站点标志图片：`assets/iridescently-mark.png`，由 `scripts/homepage.js` 按 Vite 资源路径载入。站名字样在桌面悬停或键盘聚焦时随机切换七种颜文字，手机点按可切换、再次点按还原：`scripts/brand-interaction.js` 与 `styles/chrome.css`（Connections 页使用 `styles/connections.css`）。
 - Gallery 启动、桌面画面居中、节气图标题、单张步进、键盘控制、autoplay、启动反馈和资源生命周期：`scripts/gallery.js`。自动播放默认关闭；开启后每张停留 8 秒、到达两端会折返。滚动、方向键、前后按钮和控制带操作都会把下一次播放延后 8 秒；Gallery 的滚动与按键仍由用户优先控制。系统减少动态效果时不会自动启动，运行中切换到减少动态效果会暂停。
 - 可调观感控制带及偏好：`scripts/appearance-controls.js`。右侧设置按钮横向展开六项滑块，默认收起且不占布局空间。六项观感与 autoplay 开关通过 `shared/shared-session/save.js` 保存在 `localStorage['iridescently.save.v1']`，使用 `homepage.appearance.v1:account:<kind>:<uid>` 区分账户，匿名设置单独使用 `homepage.appearance.v1:anonymous`。旧首页 v1/v2 本地值只在首次账户没有 Appearance 值时迁移一次；已有账户值优先。当前 shared-session save 没有云端通用偏好接口，因此按账户分区只在本浏览器持久化，不提供跨设备同步。连续拖动即时预览，滑块松开后本地保存；系统减少动态效果仍优先于账户中的微动值。
 - 当前页导航保护：`scripts/site-navigation.js` 根据 canonical path 标记 `aria-current="page"`，并阻止重复导航到当前首页。
@@ -34,4 +34,4 @@ npm ci --prefix "New project/gallery/codrops-depth-gallery"
 - 资源校验、发布目录和根首页构建：`scripts/build-homepage.mjs`
 - Connections / Credits 页面结构与站内链接：`connections.html`；其独立视觉样式和友站/鸣谢数据渲染及原有管理员编辑：`styles/connections.css`、`scripts/connections.js`。可维护的友站数据在 `links.json`，鸣谢数据在 `thanks.json`；开源项目的作者、用途和许可证说明直接维护在页面 HTML 中。
 
-本轮正式首页截图保存在根目录 `docs/homepage-acceptance-assets/`：桌面 1440 CSS 像素宽见 [`desktop-1440.png`](../../docs/homepage-acceptance-assets/desktop-1440.png)，手机 390 CSS 像素宽见 [`mobile-390.png`](../../docs/homepage-acceptance-assets/mobile-390.png)。
+此前的首页验收基线截图（2026-10-04）保存在根目录 `docs/homepage-acceptance-assets/`：桌面见 [`desktop-1440.png`](../../docs/homepage-acceptance-assets/desktop-1440.png)，手机见 [`mobile-390.png`](../../docs/homepage-acceptance-assets/mobile-390.png)。
