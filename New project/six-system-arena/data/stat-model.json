@@ -1,0 +1,115 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-10-05",
+  "description": "六系数值模型：hp / attack / defense / element / realm 的取值规则与分档。所有数值由本模型确定性推导，不写回数据库。",
+  "source": {
+    "db": "E:\\Projects\\assets\\罗小黑战记数据库\\db\\worldview_luoxiaohei_v4.db",
+    "tables": ["characters", "character_abilities", "ability_branches", "cultivation_realm"],
+    "note": "character_stats 表在 v4 中为空（0 行），故数值全部由本模型推导。"
+  },
+
+  "realm": {
+    "sourceTable": "cultivation_realm",
+    "field": "realm_id",
+    "levels": [
+      { "id": 1, "key": "qi", "name": "练气", "order": 1, "hpBase": 800, "atkBase": 60, "defBase": 45 },
+      { "id": 2, "key": "foundation", "name": "筑基", "order": 2, "hpBase": 1300, "atkBase": 90, "defBase": 70 },
+      { "id": 3, "key": "golden", "name": "金丹", "order": 3, "hpBase": 2100, "atkBase": 135, "defBase": 105 },
+      { "id": 4, "key": "nascent", "name": "元婴", "order": 4, "hpBase": 3200, "atkBase": 190, "defBase": 150 },
+      { "id": 5, "key": "deity", "name": "化神", "order": 5, "hpBase": 4600, "atkBase": 260, "defBase": 215 },
+      { "id": 6, "key": "tribulation", "name": "渡劫", "order": 6, "hpBase": 6400, "atkBase": 350, "defBase": 300 }
+    ],
+    "rules": [
+      { "realm_id": 6, "reason": "登神/渡劫级", "match": { "deity_eq": "神", "notes_contains": ["封神", "成仙", "神格"] } },
+      { "realm_id": 6, "reason": "远古妖王级", "match": { "type_in": ["远古妖王", "上古神兽", "神"] } },
+      { "realm_id": 5, "reason": "主线核心", "match": { "type_prefix": ["主角", "核心角色", "核心反派", "反派", "BOSS", "boss"] } },
+      { "realm_id": 4, "reason": "重要角色 / 一级执行者", "match": { "type_prefix": ["重要角色", "一级执行者", "主要角色", "女主角"] } },
+      { "realm_id": 3, "reason": "执行者 / 配角 / 妖族", "match": { "type_contains": ["执行者", "配角", "电影角色", "妖族", "客串"] } },
+      { "realm_id": 2, "reason": "妖精 / 妖族", "match": { "category_in": ["妖精"] } },
+      { "realm_id": 1, "reason": "默认（人类 / 动物 / 同人 / 未知）", "match": { "default": true } }
+    ],
+    "note": "按 rules 顺序首个命中即采用；同 id 多次运行结果一致。"
+  },
+
+  "element": {
+    "fallback": "none",
+    "maxSystems": 3,
+    "special": [
+      { "system": "all", "pattern": "六大系", "note": "如老君『六大系皆有涉猎』→ 直接判定六系全覆盖" }
+    ],
+    "confidence": {
+      "high": "命中『御灵系·X』精确写法或明确能力名（如 吞噬 / 蕴藏 / 传送）",
+      "medium": "命中系别名（如 冰 / 火焰 / 金属）",
+      "low": "仅命中泛化词或未命中"
+    },
+    "keywords": [
+      { "system": "jin", "weight": "high", "patterns": ["御灵系·金", "御灵系-金", "御金", "操纵金属"] },
+      { "system": "mu", "weight": "high", "patterns": ["御灵系·木", "御灵系-木", "御木", "生长", "培元", "化生"] },
+      { "system": "shui", "weight": "high", "patterns": ["御灵系（水", "御灵系(水", "御灵系·水", "御灵系-水", "御水", "御冰", "冰", "水的形态"] },
+      { "system": "huo", "weight": "high", "patterns": ["御灵系·火", "御灵系-火", "御火", "紫云焰", "斥冰焰", "火焰", "火；"] },
+      { "system": "tu", "weight": "high", "patterns": ["御灵系·土", "御灵系-土", "御土", "土系"] },
+      { "system": "kongjian", "weight": "high", "patterns": ["空间系", "领域", "吞噬", "传送", "蕴藏", "转移", "灵质空间"] }
+    ],
+    "abilityTableBonus": {
+      "note": "character_abilities 表中的能力明细（191 行 / 77 角色）优先级高于 abilities_summary 文本匹配。",
+      "applyTo": ["金", "木", "水", "火", "土", "空间"]
+    }
+  },
+
+  "statRules": {
+    "formula": {
+      "hp": "round(realm.hpBase * elementBias.hp * typeBonus.hp * abilityBonus.hp * jitter)",
+      "attack": "round(realm.atkBase * elementBias.atk * typeBonus.atk * abilityBonus.atk * jitter)",
+      "defense": "round(realm.defBase * elementBias.def * typeBonus.def * abilityBonus.def * jitter)"
+    },
+    "elementBias": {
+      "jin": { "hp": 0.98, "atk": 1.10, "def": 0.98 },
+      "mu": { "hp": 1.06, "atk": 0.96, "def": 1.02 },
+      "shui": { "hp": 1.00, "atk": 1.02, "def": 1.02 },
+      "huo": { "hp": 0.95, "atk": 1.14, "def": 0.94 },
+      "tu": { "hp": 1.10, "atk": 0.88, "def": 1.16 },
+      "kongjian": { "hp": 0.96, "atk": 1.08, "def": 0.96 },
+      "none": { "hp": 1.00, "atk": 1.00, "def": 1.00 }
+    },
+    "typeBonus": [
+      { "hp": 1.20, "atk": 1.15, "def": 1.10, "match": { "deity_eq": "神" } },
+      { "hp": 1.18, "atk": 1.12, "def": 1.10, "match": { "type_prefix": ["主角", "核心角色", "核心反派", "反派", "BOSS", "boss"] } },
+      { "hp": 1.10, "atk": 1.06, "def": 1.05, "match": { "type_prefix": ["重要角色", "主要角色", "女主角", "一级执行者"] } },
+      { "hp": 1.05, "atk": 1.03, "def": 1.03, "match": { "type_contains": ["执行者", "妖族", "电影角色"] } },
+      { "hp": 1.00, "atk": 1.00, "def": 1.00, "match": { "default": true } }
+    ],
+    "abilityBonus": {
+      "perAbility": 0.02,
+      "cap": 0.12,
+      "note": "按 character_abilities 明细条数累加，上限 +12%。"
+    },
+    "jitter": { "range": 0.03, "note": "±3% 确定性扰动，由 md5(character_id) 派生，保证可复现。" },
+    "systemCountBonus": { "perExtraSystem": 0.04, "cap": 0.08, "note": "多系角色（≥2 系）额外加成。" }
+  },
+
+  "power": {
+    "formula": "round(hp * 0.35 + attack * 4 + defense * 3)",
+    "note": "综合战力，用于分档与卡组稀有度映射。"
+  },
+
+  "tiers": [
+    { "key": "F", "name": "凡品", "min": 0, "max": 1200 },
+    { "key": "E", "name": "良品", "min": 1200, "max": 2400 },
+    { "key": "D", "name": "优品", "min": 2400, "max": 3600 },
+    { "key": "C", "name": "精锐", "min": 3600, "max": 4600 },
+    { "key": "B", "name": "绝品", "min": 4600, "max": 5800 },
+    { "key": "A", "name": "神话", "min": 5800, "max": null }
+  ],
+
+  "rarity": {
+    "note": "卡组稀有度映射（P4 全量铺开时使用，本轮仅定义）。",
+    "map": { "F": "R", "E": "R", "D": "SR", "C": "SR", "B": "SSR", "A": "UR" },
+    "targetDistribution": { "R": 0.60, "SR": 0.30, "SSR": 0.09, "UR": 0.01 }
+  },
+
+  "mainline": {
+    "note": "主线角色判定：type 前缀命中下列集合。",
+    "typePrefixes": ["主角", "核心角色", "重要角色", "主要角色", "女主角", "核心反派", "反派", "BOSS", "boss"],
+    "priorityIds": [1, 2, 3, 4, 6, 7, 12, 13, 14, 15, 18, 23, 31, 139]
+  }
+}

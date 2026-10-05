@@ -1,0 +1,118 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-10-05",
+  "description": "六系（金/木/水/火/土/空间）统一定义。图标色值取自官方卡片 SVG（shared-ui/AI image/cards/*.svg）的描边色。",
+  "order": ["jin", "mu", "shui", "huo", "tu", "kongjian"],
+  "systems": {
+    "jin": {
+      "key": "jin",
+      "name": "金系",
+      "officialName": "御灵系·金",
+      "glyph": "金",
+      "color": "#c9a227",
+      "colorSoft": "#e0c25c",
+      "sourceSvg": "metal.svg",
+      "domain": "攻击 / 锋锐 / 金属操纵",
+      "desc": "御灵系分支之一。操纵金属、改变形状、借金属移动升天。代表：罗小黑、无限。",
+      "battleRole": "物理输出、破防",
+      "counter": "mu",
+      "counteredBy": "huo",
+      "iconSvgPathTemplate": "ICONS['jin']"
+    },
+    "mu": {
+      "key": "mu",
+      "name": "木系",
+      "officialName": "御灵系·木",
+      "glyph": "木",
+      "color": "#4a8a5a",
+      "colorSoft": "#6fae7f",
+      "sourceSvg": "wood.svg",
+      "domain": "生长 / 恢复 / 缠绕",
+      "desc": "御灵系分支之一。催生植物、生长加速、缠绕束缚。代表：风息、洛竹。",
+      "battleRole": "持续恢复、控制",
+      "counter": "tu",
+      "counteredBy": "jin",
+      "iconSvgPathTemplate": "ICONS['mu']"
+    },
+    "shui": {
+      "key": "shui",
+      "name": "水系",
+      "officialName": "御灵系·水（冰）",
+      "glyph": "水",
+      "color": "#3f7f9e",
+      "colorSoft": "#63a6c4",
+      "sourceSvg": "water.svg",
+      "domain": "控制 / 凝结（冰）/ 形态变化",
+      "desc": "御灵系分支之一。控制水的形态并凝结成冰，亦可御冰。代表：虚淮、阿根、玄离。",
+      "battleRole": "控制、减速、冻结",
+      "counter": "huo",
+      "counteredBy": "tu",
+      "iconSvgPathTemplate": "ICONS['shui']"
+    },
+    "huo": {
+      "key": "huo",
+      "name": "火系",
+      "officialName": "御灵系·火",
+      "glyph": "火",
+      "color": "#c8452f",
+      "colorSoft": "#e2725b",
+      "sourceSvg": "fire.svg",
+      "domain": "爆发 / 灼烧 / 高热",
+      "desc": "御灵系分支之一。爆裂性输出，可吸收火焰。代表：谛听（紫云焰、斥冰焰）、玄离、哪吒。",
+      "battleRole": "爆发输出、灼烧",
+      "counter": "jin",
+      "counteredBy": "shui",
+      "iconSvgPathTemplate": "ICONS['huo']"
+    },
+    "tu": {
+      "key": "tu",
+      "name": "土系",
+      "officialName": "御灵系·土",
+      "glyph": "土",
+      "color": "#9a7642",
+      "colorSoft": "#bf9a63",
+      "sourceSvg": "earth.svg",
+      "domain": "防御 / 坚固 / 地形",
+      "desc": "御灵系分支之一。以坚固与承载为核心，偏防御与稳定。",
+      "battleRole": "坦克、减伤",
+      "counter": "shui",
+      "counteredBy": "mu",
+      "iconSvgPathTemplate": "ICONS['tu']"
+    },
+    "kongjian": {
+      "key": "kongjian",
+      "name": "空间系",
+      "officialName": "空间系",
+      "glyph": "域",
+      "color": "#7a6aa8",
+      "colorSoft": "#9d8fc4",
+      "sourceSvg": "space.svg",
+      "domain": "传送 / 吞噬 / 蕴藏 / 领域",
+      "desc": "一切空间上的不连续变化，或时间上的加速减缓。附着于灵质空间，无法后天习得，一个灵质空间只附带一个。代表：罗小黑（传送）、无限（吞噬）、花轮（蕴藏）、比丢（吞噬）。",
+      "battleRole": "位移、爆发、机制型",
+      "counter": "kongjian",
+      "counteredBy": "kongjian",
+      "iconSvgPathTemplate": "ICONS['kongjian']"
+    }
+  },
+  "neutral": {
+    "key": "none",
+    "name": "无系",
+    "glyph": "无",
+    "color": "#5c6152",
+    "desc": "未检出御灵系或空间系归属的角色（多为生灵系/心灵系辅助型）。数值使用中性基线。",
+    "iconSvgPathTemplate": null
+  },
+  "fiveElementCycle": {
+    "note": "五行相克（御灵系内部）：金克木、木克土、土克水、水克火、火克金。空间系与其他五系互不克制。",
+    "ring": ["jin", "mu", "tu", "shui", "huo", "jin"]
+  },
+  "officialSystems": {
+    "note": "v4 库 ability_branches 表收录的官方能力体系，六系为其子集扩展维度。",
+    "list": ["御灵系", "生灵系", "造物系", "空间系", "心灵系", "锁御系", "强化系", "治愈系"],
+    "mapping": {
+      "御灵系": ["jin", "mu", "shui", "huo", "tu"],
+      "空间系": ["kongjian"]
+    }
+  }
+}
