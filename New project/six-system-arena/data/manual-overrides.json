@@ -1,0 +1,12 @@
+{
+  "_readme": "人工校准表：按角色 id 覆盖自动推导结果。可用字段 systems / element_name / realm_id / hp / attack / defense / name。修改后重跑 data/scripts/generate_stats.py 即生效（自动推导为主，本表只做定点纠偏）。",
+  "4": {
+    "systems": ["jin", "mu", "shui", "huo", "tu", "kongjian"],
+    "element_name": "六系全通（本源主修心灵系）"
+  },
+  "23": {
+    "systems": [],
+    "element_name": "无系（生灵系 + 心灵系，均不在六系之列）",
+    "realm_id": 5
+  }
+}
