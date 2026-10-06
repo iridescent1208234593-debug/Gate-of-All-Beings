@@ -155,3 +155,43 @@ powershell -ExecutionPolicy Bypass -File "scripts\run_all.ps1"
 - **短分支**：eat/sixsys-r2、eat/sixsys-icon-mount、eat/sixsys-radar-panel、eat/sixsys-deck-bind、eat/sixsys-achievement、eat/sixsys-battle-settle。
 - **待拍板**：土系成就 ch_system_001 门槛、稀有度分布（R 85.7%）、立绘覆盖（26.2%）、胜率实测回归。
 - **红线遵守**：仅官方图、禁 AI 生图；参考仓库只读；git add 精确到 New project/six-system-arena，禁用 -A。
+
+---
+
+## R3 · 2026-10-06 · 工作副本切换至 E 盘 + 现有游戏系统数值登记
+
+**范围**：① 工作副本正式切到 `E:\Projects\New project\six-system-arena\`，D 盘第 1 轮成果迁入 `legacy/d-drive-r1/`；② 更新 README 工作副本声明与数据库指向；③ 登记 zszm 站点现有 demo 数值为参考基线；④ 核对 R1 派生结果与站点 demo 数值的字段关系；⑤ 更新分轮计划与未决项。
+**约束遵守**：D 盘目录**保留不删**（仅标记为旧副本）；站点工程 `E:\Projects\server\app\src\cards\` 全程只读，未做任何写入；未触碰既有未提交变更；未做任何联网采集。
+
+### 1. 交付物清单
+
+| 文件 | 大小 | 说明 |
+|---|---|---|
+| `legacy/d-drive-r1/`（48 文件 / 3.57 MB） | — | D 盘第 1 轮成果只读快照（排除 `.git` / `node_modules`） |
+| `legacy/d-drive-r1/MIGRATION.md` | 4,424 B | 迁入说明：来源、时间、文件数、两库分叉裁定、内容地图、使用约束 |
+| `docs/08-现有游戏数值基线登记.md` | 9,223 B | 站点 8 文件 / 3 池卡牌 / 18 效果字段 / 战斗经营常量的登记与字段对照 |
+| `data/demo-baseline.json` | 5,443 B | 站点 demo 数值结构化登记（供脚本读取，含复用结论与校准路径） |
+| `README.md`（更新） | — | 新增「§0 工作副本声明（R3 裁定）」；目录树补 `legacy/`、`docs/07~08`、`data/demo-baseline.json`；参考表补站点工程与旧副本 |
+
+### 2. 关键结论
+
+- **两库分叉裁定**：D 盘 `34EFCB0A…` / E 盘 `EE5B2C1E…`，判定 **E 盘库为工作副本唯一数据源**（只读），D 盘库仅作历史比对；两者**不可混用**。
+- **迁入方式**：整目录快照至 `legacy/`，**未覆盖** E 盘 R2 已验收产物（`data/generated/character_stats.json`、`decks.json`、`achievements.json`、`ui/battle-engine.js` 等）；D 盘的外置覆盖层与三层溯源登记为 R4+ 可选吸收项。
+- **站点数值性质**：站点 25 基础卡 + 70 legacy 卡 + 3 生态卡、3 名英雄（hp 72/80/76）、18 项效果字段**均为未精校 demo**，且 **无 0–100 六系分值**；`school` / `element` 仅为归属标签。
+- **零映射可复用**：`Element`（`jin/mu/shui/huo/tu`）与六系图标 key 同名；`Card.school` 与 `AbilitySystem` 六系 id 同名（`yuling/suoyu/zaowu/xinling/shengling/kongjian`）→ `<LxhIcon name={card.element}/>` 可直出，卡组沿用 `pool()` 过滤语义。
+- **需新增**：角色 0–100 六系分值、境界/分档/稀有度/战力（站点均无）；**不改动**站点效果字段上限、英雄 hp、敌人公式与经济常量。
+- **legacy 卡标签实测**：`school` 御灵 34 / 生灵 14 / 心灵 6 / 空间 6 / 造物 4 / 锁御 4 / 无 2；`element` 土 8 / 木 7 / 火 7 / 金 6 / 水 6 / 无 36。
+
+### 3. 分轮计划更新
+
+| 轮次 | 主题 | 状态 |
+|---|---|---|
+| R0 / R1 / R2 | 基础盘点 / 图标与数值 / 卡组·对战·成就·结算 | 已完成 |
+| **R3** | **工作副本切换 + 现有数值登记** | **本轮完成** |
+| R4 | 站点 P7 接入执行（方案 A 先行）+ 土系成就门槛拍板 + 表情包专项目录 | 待启动 |
+
+### 4. 本轮已知问题 / 待办
+
+1. **土系成就 `ach_system_001` 静态不可达成**：站点侧土系同样偏弱（legacy 卡土系仅 8 张、六系分值维度缺失），R2 已报备的门槛问题维持待用户拍板。
+2. **D 盘快照为静态参考**：`legacy/d-drive-r1/` 不随 E 盘演进；如需吸收其外置覆盖层与三层溯源能力，须在 E 盘另建实现。
+3. **demo 基线需随站点发版重登记**：站点发布新平衡版本后，应重跑 `docs/08 §7` 复核命令并更新 `data/demo-baseline.json`。

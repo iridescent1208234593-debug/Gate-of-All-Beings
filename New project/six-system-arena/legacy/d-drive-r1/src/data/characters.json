@@ -1,0 +1,2942 @@
+[
+  {
+    "schemaVersion": 1,
+    "id": 1,
+    "name": "罗小黑",
+    "category": "妖精",
+    "species": "妖精(黑猫)",
+    "affiliation": "妖灵会馆",
+    "element": "jin",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 100,
+      "suoyu": 30,
+      "zaowu": 24,
+      "xinling": 23,
+      "shengling": 29,
+      "kongjian": 100
+    },
+    "rating": {
+      "total": 306,
+      "average": 51,
+      "peak": 100,
+      "peakSystem": "kongjian",
+      "secondary": 100,
+      "secondarySystem": "yuling",
+      "stdev": 34.7,
+      "balance": 0.13,
+      "composite": 85.3,
+      "power": 85,
+      "realmBonus": 0,
+      "grade": "S",
+      "gradeName": "绝品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "御灵系·金;空间系·传送(已知范围5米);失去领域前拥有极为罕见的双空间系,是已知唯一拥有双空间系能力的妖精;黑咻(尾巴分裂分身)"
+        },
+        {
+          "from": "notes",
+          "text": "生日定在11月1日;创作灵感来源于导演MTJJ饲养的宠物猫;天敌&基友为皇受;师傅无限,师姐鹿野"
+        },
+        {
+          "from": "story_summary",
+          "text": "原名小黑,因家园被人类破坏开始流浪;被风息收留后一度对人类城市发起破坏;遇无限后经历海上漂流之旅,逐渐理解人与妖共存的命题;后成为无限徒弟,进入妖灵会馆,与罗小白、阿根成为好友;首个完成老君《誓言录》中天明珠任务的妖精;罗小黑战记2中从被保护者成长为能独当一面的战士"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·金（跟无限学的）：操纵金属"
+        },
+        {
+          "from": "character_abilities",
+          "text": "空间系·领域：外放灵质空间，原为风息所夺，后亲手销毁"
+        },
+        {
+          "from": "character_abilities",
+          "text": "空间系·传送：通过黑咻进行空间传送"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 5
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "操纵金属",
+              "金属"
+            ]
+          }
+        ],
+        "suoyu": [
+          {
+            "kind": "explicit",
+            "label": "锁御系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "天明珠"
+            ]
+          }
+        ],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 12
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 8
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "空间系",
+              "灵质空间",
+              "传送",
+              "领域",
+              "黑咻"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 13,
+        "mu": 0,
+        "shui": 0,
+        "huo": 0,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "主线核心",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 2,
+    "name": "无限",
+    "category": "人类",
+    "species": "人类(后成仙)",
+    "affiliation": "兴国→妖灵会馆",
+    "element": "jin",
+    "realm": "deity",
+    "systems": {
+      "yuling": 100,
+      "suoyu": 27,
+      "zaowu": 35,
+      "xinling": 27,
+      "shengling": 29,
+      "kongjian": 100
+    },
+    "rating": {
+      "total": 318,
+      "average": 53,
+      "peak": 100,
+      "peakSystem": "kongjian",
+      "secondary": 100,
+      "secondarySystem": "yuling",
+      "stdev": 33.3,
+      "balance": 0.17,
+      "composite": 85.9,
+      "power": 96,
+      "realmBonus": 10,
+      "grade": "S",
+      "gradeName": "绝品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "御灵系·金(操纵金属,改变形状,借金属移动升天);空间系·吞噬(将物质灵吞入空间,不能吞生灵);必要时用\"吞噬\"能力;在别人领域里与控制者可五五开"
+        },
+        {
+          "from": "notes",
+          "text": "据说曾被封神但因故失去神格;与老君、清凝是好友;对手为风息\n【分类标记】神（用户确认 2026-08-22）"
+        },
+        {
+          "from": "story_summary",
+          "text": "妖灵会馆最强执行者,人类中的最强者,被老君称为\"这个时代最强的神就是个人类\";曾以一人之力使城池不战而降;蓝溪镇中为起义军一员,身受重伤被老君助手北河救治;兴国开国典礼上放走试图刺杀皇帝的妖精;收小黑为徒;罗小黑战记2中与小黑共同面对妖灵会馆被袭击的危机,徒弟还有鹿野"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·金：操纵金属，可借助金属移动和飞行"
+        },
+        {
+          "from": "character_abilities",
+          "text": "空间系·吞噬：将物质灵吞入空间，但不能吞生灵"
+        },
+        {
+          "from": "character_abilities",
+          "text": "空间、随身金属"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 5
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "操纵金属",
+              "金属"
+            ]
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [
+          {
+            "kind": "explicit",
+            "label": "造物系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "变形",
+              "物质灵"
+            ]
+          }
+        ],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 0
+          },
+          {
+            "kind": "loose",
+            "label": "生灵",
+            "n": 2
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 5
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 3
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "空间系",
+              "吞噬",
+              "领域"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 15,
+        "mu": 0,
+        "shui": 0,
+        "huo": 0,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "主线核心",
+      "deity": "神"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 3,
+    "name": "风息",
+    "category": "妖精",
+    "species": "妖精(黑豹)",
+    "affiliation": "风息阵营(独立)",
+    "element": "mu",
+    "realm": "tribulation",
+    "systems": {
+      "yuling": 96,
+      "suoyu": 23,
+      "zaowu": 30,
+      "xinling": 18,
+      "shengling": 93,
+      "kongjian": 51
+    },
+    "rating": {
+      "total": 311,
+      "average": 51.8,
+      "peak": 96,
+      "peakSystem": "yuling",
+      "secondary": 93,
+      "secondarySystem": "shengling",
+      "stdev": 31.9,
+      "balance": 0.2,
+      "composite": 82.2,
+      "power": 94,
+      "realmBonus": 12,
+      "grade": "A",
+      "gradeName": "上品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "御灵系-木;生灵系-豪夺(夺走的能力包括:领域(小黑)、薄音(闵先生)、画灵(画虎)、滞爆(硅老))"
+        },
+        {
+          "from": "notes",
+          "text": "小黑旧友"
+        },
+        {
+          "from": "story_summary",
+          "text": "曾经生活在龙游市,因人类后期工业快速发展妖精生活地方被不断侵占不得已流浪,由此想把人类赶出故土;为创造没有人类的世界选择牺牲小黑;最后被无限和小黑制止并打败,化身一棵大树留在龙游"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·木：操控藤蔓等植物"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系·豪夺：强行夺取其他妖精的能力"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系-木、生灵系-豪夺（可夺取他人能力/灵质空间）"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 4
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "藤",
+              "植物"
+            ]
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 4
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "豪夺"
+            ]
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 0
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 1
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "灵质空间",
+              "领域"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 7,
+        "shui": 0,
+        "huo": 0,
+        "tu": 2
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "主线核心",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 4,
+    "name": "老君",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "妖灵会馆三大创始神之一;灵质空间主体为蓝溪镇",
+    "element": "huo",
+    "realm": "deity",
+    "systems": {
+      "yuling": 99,
+      "suoyu": 100,
+      "zaowu": 52,
+      "xinling": 100,
+      "shengling": 100,
+      "kongjian": 100
+    },
+    "rating": {
+      "total": 551,
+      "average": 91.8,
+      "peak": 100,
+      "peakSystem": "kongjian",
+      "secondary": 100,
+      "secondarySystem": "shengling",
+      "stdev": 17.8,
+      "balance": 0.55,
+      "composite": 97.6,
+      "power": 108,
+      "realmBonus": 10,
+      "grade": "S",
+      "gradeName": "绝品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "六大系皆有涉猎,锁御系为佼佼者(见蓝溪镇136话眷灵),主修心灵系;【眷灵】空间系能力:吸收灵质空间内生灵逸散之灵不断变强,但只能靠灵质空间吸灵,空间无生灵则逐渐衰竭;【灵誓】心灵系+生灵系双系合一,誓言具象化为灵力光球绑定魂灵,违约者魂灭;可施展生灵系-洞察、心灵系-读心等;持有蓝玉盘(空间系顶级法宝)、天明珠等无数法宝;四百年前靠眷灵+斗帅宫大会强大了十倍,战胜领域内那伽"
+        },
+        {
+          "from": "notes",
+          "text": "与炎帝是棋友、与无限玄离卡里是旧识、与阎明(明王)曾是师徒关系保密;与谛听朝夕相处;赠罗小白蓝玉盘并调节一个月冷却时间;著有誓言录《拾贰集》\n【分类标记】神（用户确认 2026-08-22）"
+        },
+        {
+          "from": "story_summary",
+          "text": "早年隐居悬谷种药炼丹、追更《西游记》;每逢乱世四处游历收留无家可归之人建立蓝溪镇;收李清凝为徒,与玄离一同带其游历传授技艺;曾收治愈系弟子(阎明及另一不知名者);四百年前将天明珠置于老君阁并立誓,后遗忘;小黑盗走天明珠后派谛听寻回,想起誓言后将天明珠赠予小黑;近三十年因\"百年内不得离开老君阁\"誓言闭关沉迷ACG;为救李清凝集中修为攻击那伽致灵质空间衰竭,将星夜湖折叠到蓝溪镇背面;曾因阎明怨恨之事被误解,与玄离因清凝之事决裂"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系全系（金木水火土）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "心灵系"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系·洞察"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 3
+          }
+        ],
+        "suoyu": [
+          {
+            "kind": "explicit",
+            "label": "锁御系",
+            "n": 5
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "法宝",
+              "蓝玉盘",
+              "天明珠",
+              "炼器"
+            ]
+          }
+        ],
+        "zaowu": [
+          {
+            "kind": "explicit",
+            "label": "造物系",
+            "n": 1
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "造物"
+            ]
+          }
+        ],
+        "xinling": [
+          {
+            "kind": "explicit",
+            "label": "心灵系",
+            "n": 9
+          },
+          {
+            "kind": "loose",
+            "label": "心灵",
+            "n": 1
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "读心"
+            ]
+          }
+        ],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 11
+          },
+          {
+            "kind": "loose",
+            "label": "生灵",
+            "n": 3
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "洞察",
+              "观灵",
+              "治愈"
+            ]
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 6
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 5
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "空间系",
+              "灵质空间",
+              "领域"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 3,
+        "mu": 3,
+        "shui": 3,
+        "huo": 4,
+        "tu": 3
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "主线核心",
+      "deity": "神"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 5,
+    "name": "罗小白",
+    "category": "人类",
+    "species": "人类",
+    "affiliation": "人类;罗家\n[萌娘百科] 灵溪(人类)",
+    "element": "huo",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 51,
+      "suoyu": 48,
+      "zaowu": 16,
+      "xinling": 25,
+      "shengling": 24,
+      "kongjian": 37
+    },
+    "rating": {
+      "total": 201,
+      "average": 33.5,
+      "peak": 51,
+      "peakSystem": "yuling",
+      "secondary": 48,
+      "secondarySystem": "suoyu",
+      "stdev": 12.9,
+      "balance": 0.68,
+      "composite": 45.2,
+      "power": 45,
+      "realmBonus": 0,
+      "grade": "C",
+      "gradeName": "中品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "普通人类，拥有怪力；持有老君赠送的法宝蓝玉盘"
+        },
+        {
+          "from": "notes",
+          "text": "职业：学生。日常帮好朋友山新打掩护，深受哥哥阿根与小黑喜爱保护。"
+        },
+        {
+          "from": "story_summary",
+          "text": "捡回因盗取天明珠被谛听打伤的猫妖罗小黑,取名罗小黑,开启人与妖同居的温馨日常。\n无限419年雨夜，放学路上捡到流落街头的小黑猫并起名罗小黑，发现其极通人性、尾巴可分裂出名为嘿咻的个体，认为它不是普通猫。后随父母到爷爷罗云飞家暂住，结识堂哥阿根与团鼠比丢。在蓝溪镇中，小黑为保护她身负重伤使用妖化，小白由此得知小黑是妖精。在《众生之门》游戏中耐心教小黑识字，一次交战中阵亡令小黑爆发。"
+        },
+        {
+          "from": "character_abilities",
+          "text": "无系（普通人类，无灵质力）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系-火（众生之门游戏中选择）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "持有老君赠送的法宝“蓝玉盘”（定点空间传送顶级法宝，老君设了一个月冷却时间）"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 1
+          }
+        ],
+        "suoyu": [
+          {
+            "kind": "explicit",
+            "label": "锁御系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "法宝",
+              "蓝玉盘",
+              "天明珠"
+            ]
+          }
+        ],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 0
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 1
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "传送"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 0,
+        "huo": 1,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "主线核心",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 6,
+    "name": "阿根",
+    "category": "人类",
+    "species": "人类/妖精（与玄离共存）",
+    "affiliation": "小白堂哥/乡下",
+    "element": "shui",
+    "realm": "tribulation",
+    "systems": {
+      "yuling": 100,
+      "suoyu": 19,
+      "zaowu": 22,
+      "xinling": 16,
+      "shengling": 27,
+      "kongjian": 46
+    },
+    "rating": {
+      "total": 230,
+      "average": 38.3,
+      "peak": 100,
+      "peakSystem": "yuling",
+      "secondary": 46,
+      "secondarySystem": "kongjian",
+      "stdev": 29.2,
+      "balance": 0.27,
+      "composite": 70.7,
+      "power": 83,
+      "realmBonus": 12,
+      "grade": "A",
+      "gradeName": "上品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "控制冰、火；吸收火焰、控制水的形态并凝结成冰；灵质空间为极寒地狱，可放置有独立意识的分身"
+        },
+        {
+          "from": "notes",
+          "text": "小白堂哥。被众妖认作上古神兽玄离（共存状态）。与玄离一样会被动物不自觉攻击（嘲讽技能）。"
+        },
+        {
+          "from": "story_summary",
+          "text": "小白的乡下堂哥，却又被众妖认作上古神兽玄离。与玄离一样会被动物不自觉攻击（嘲讽技能）。可吸收火焰、控制水的形态并凝结成冰。灵质空间据说是足球场大的极寒地狱，可放置有独立意识的分身，妖力强大。"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·水（冰）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·火"
+        },
+        {
+          "from": "character_abilities",
+          "text": "控制冰、火；吸收火焰、控制水的形态并凝结成冰；灵质空间为足球场大的极寒地狱，可放置有独立意识的分身；拥有嘲讽体质（动物靠近会咬他）"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 4
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "冰",
+              "火焰"
+            ]
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 0
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 3
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "灵质空间"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 15,
+        "huo": 9,
+        "tu": 3
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "主线核心",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 7,
+    "name": "谛听",
+    "category": "妖精",
+    "species": "妖精-神兽",
+    "affiliation": "老君山(追随老君);前隶属酆都(阎明属下)",
+    "element": "huo",
+    "realm": "tribulation",
+    "systems": {
+      "yuling": 100,
+      "suoyu": 46,
+      "zaowu": 11,
+      "xinling": 27,
+      "shengling": 36,
+      "kongjian": 31
+    },
+    "rating": {
+      "total": 251,
+      "average": 41.8,
+      "peak": 100,
+      "peakSystem": "yuling",
+      "secondary": 46,
+      "secondarySystem": "suoyu",
+      "stdev": 28.1,
+      "balance": 0.3,
+      "composite": 71.8,
+      "power": 84,
+      "realmBonus": 12,
+      "grade": "A",
+      "gradeName": "上品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "御灵系-火,能使用紫云焰、斥冰焰;听/嗅觉灵敏,会穿墙、腾云、远程释放分身;持有老君给予的法宝定心镜;有三匹会变出黄色翅膀的侦查鹰犬(从玄离处抢来)"
+        },
+        {
+          "from": "notes",
+          "text": "与虚淮是好友;同门:七刀、白无常、黑无常、风华黄泉、姝玥、复奚言;老君戏称\"爷爷\";下属三只鹰犬\n【分类标记】妖精（用户确认 2026-08-22）"
+        },
+        {
+          "from": "story_summary",
+          "text": "幼年由阎明带回酆都交给七刀带大;老君来访时与玄离交战败北;斗帅宫大会多次挑战玄离均落败;追随老君期间看护天明珠不力被小黑盗走,将小黑打至重伤现回原形,主动请缨捉拿小黑寻回天明珠将功抵罪;追踪妖气找到阿根(玄离),试探认出其为玄离;在漫展帮老君带周边,帮山新打赢比赛,见证小黑交还天明珠"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·火/炎系（上古神兽，使用炎系法术与斥冰焰）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "神通·谛听：通过聆听心跳，可以知晓世间万物的信息、位置，甚至听到过去的对话（被屏蔽或刻意隐藏的信息除外）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "听令于老君；持有法宝“定心镜”（可辨别谎言）"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 3
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "冰"
+            ]
+          }
+        ],
+        "suoyu": [
+          {
+            "kind": "explicit",
+            "label": "锁御系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "法宝",
+              "定心镜",
+              "天明珠"
+            ]
+          }
+        ],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "追踪",
+              "聆听"
+            ]
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "穿墙"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 2,
+        "huo": 8,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "主线核心",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 8,
+    "name": "鹿野",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "妖灵会馆(执行者,总会馆感知组组长);定居苍南会馆",
+    "element": "jin",
+    "realm": "deity",
+    "systems": {
+      "yuling": 96,
+      "suoyu": 28,
+      "zaowu": 37,
+      "xinling": 19,
+      "shengling": 100,
+      "kongjian": 52
+    },
+    "rating": {
+      "total": 332,
+      "average": 55.3,
+      "peak": 100,
+      "peakSystem": "shengling",
+      "secondary": 96,
+      "secondarySystem": "yuling",
+      "stdev": 31.8,
+      "balance": 0.21,
+      "composite": 85.8,
+      "power": 96,
+      "realmBonus": 10,
+      "grade": "S",
+      "gradeName": "绝品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "御灵系-金(主);生灵系-追毫(追踪灵的痕迹,极擅长);武器:金属、球状空间系牢笼、琼圆盾;实力推测已成仙(敢直面叫板池年长老)"
+        },
+        {
+          "from": "notes",
+          "text": "弟子:泽宇(同为御灵系金+生灵系追毫);好友:晴岚;对师父无限厨艺评价很差;经济状况好,带小黑住豪华酒店;制作团队尝试200多个设计稿才确定形象;制作组设200+稿"
+        },
+        {
+          "from": "story_summary",
+          "text": "战争遗孤:幼年家园被毁亲友惨死导致PTSD,10岁拜当地妖精为师,13岁师父与所有认识的妖精死于战火,被介入战争的无限救下;为复仇主动拜师成为无限关门弟子(小黑之前的最后一个);18岁告别无限,20岁开始在会馆组织下执行任务并加入总会馆感知组;无限416年师父被诬陷袭击流石会馆,与小黑辗转各地追查,最终在废弃钢铁厂击败灵遥小队揪出真凶;飞机事故中为追查boss下落选择用机上所有人性命做诱饵,牺牲人类救援师父,展现立场矛盾;与小黑合力破断金阵,战灵遥时妖化加速战力大增,用空间牢笼困住灵遥;结尾对无限说\"师父你有空看看我\""
+        },
+        {
+          "from": "character_abilities",
+          "text": "感知系能力"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系、御灵系·金"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系·寻踪/追踪（可将自身与自然融为一体追踪目标）"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 6
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "金属"
+            ]
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [
+          {
+            "kind": "explicit",
+            "label": "造物系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "变形"
+            ]
+          }
+        ],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 7
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "洞察",
+              "追毫",
+              "追踪",
+              "寻踪",
+              "感知"
+            ]
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 1
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 1
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "空间系"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 15,
+        "mu": 0,
+        "shui": 0,
+        "huo": 1,
+        "tu": 3
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "主线核心",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 18,
+    "name": "比丢",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "罗小黑伙伴",
+    "element": "jin",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 28,
+      "suoyu": 20,
+      "zaowu": 14,
+      "xinling": 11,
+      "shengling": 22,
+      "kongjian": 33
+    },
+    "rating": {
+      "total": 128,
+      "average": 21.3,
+      "peak": 33,
+      "peakSystem": "kongjian",
+      "secondary": 28,
+      "secondarySystem": "yuling",
+      "stdev": 7.6,
+      "balance": 0.81,
+      "composite": 28.5,
+      "power": 29,
+      "realmBonus": 0,
+      "grade": "D",
+      "gradeName": "下品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "吞噬（可吞下比自己大的物体）"
+        },
+        {
+          "from": "notes",
+          "text": "基色为橘黄，吃下一种东西后会变成该东西的颜色（自我保护机制，约五分钟恢复原样），因特殊皮毛被捕杀所剩无几。因\"bi diu~\"叫声被小白取名并收养。吃了金属和生物会暴走（身体巨大化失去控制），暴走纹在眉心，触碰可恢复，但消耗生命。后被放归森林，小白从老君处回来后得知它一直在等待，被接回。"
+        },
+        {
+          "from": "story_summary",
+          "text": "团鼠，基色为橘黄。吃下一种东西后会变成那种东西的主色，五分钟左右恢复。因特殊皮毛被捕杀所剩无几。跑到村里觅食时被阿根控制住，因'bi diu~'叫声被小白取名比丢。吃了金属和生物会暴走（巨大化变蓝色），碰一下眉心暴走纹就恢复但会消耗生命。\n无限419年，一只团鼠在罗云飞与阿根家木墙上啃洞被抓入铁笼。罗小白来爷爷家小住时发现并起名比丢，小黑借黑咻将其抓回。误食山新和罗小白喂的羽毛球后暴走变大，事件后小白同意将其送回森林。"
+        },
+        {
+          "from": "character_abilities",
+          "text": "变色：吃下食物可变对应颜色（保护机制，约5分钟恢复）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "暴走：吃金属或生物后巨大化变蓝，眉心暴走纹，消耗生命"
+        },
+        {
+          "from": "character_abilities",
+          "text": "移动速度极快，最爱吃木头"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "金属"
+            ]
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "吞噬",
+              "黑咻"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 12,
+        "mu": 5,
+        "shui": 0,
+        "huo": 0,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "主线核心",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 19,
+    "name": "皇受",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "山新家",
+    "element": "none",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 29,
+      "suoyu": 20,
+      "zaowu": 25,
+      "xinling": 21,
+      "shengling": 24,
+      "kongjian": 31
+    },
+    "rating": {
+      "total": 150,
+      "average": 25,
+      "peak": 31,
+      "peakSystem": "kongjian",
+      "secondary": 29,
+      "secondarySystem": "yuling",
+      "stdev": 4,
+      "balance": 0.9,
+      "composite": 28.8,
+      "power": 29,
+      "realmBonus": 0,
+      "grade": "D",
+      "gradeName": "下品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "无特殊能力（普通家猫/流浪猫，非战斗系）"
+        },
+        {
+          "from": "notes",
+          "text": "山新饲养的灰色虎斑小公猫。开始时对罗小黑感到恐惧，后被小黑从大狗SATAN身边救下，对小黑产生感情穷追不舍，被山新称为小黑的克星。\\n【suppl_20260813g】灰机wiki+搜狗百科+萌娘百科确认：雄性灰猫，生日2月22日，本为流浪猫，被山新放学路上捡回领养；首次出场动画第3集（嘿），最后出场《宝贝别哭》；见到黑咻会害怕，被小黑从大狗SATAN身边救下后暗恋小黑，被山新称为\"小黑的克星\"；名字为对皇贞季的恶搞。"
+        },
+        {
+          "from": "story_summary",
+          "text": "被山新捡回家的灰色虎斑小公猫。开始对罗小黑感到恐惧，后因被小黑从大狗SATAN身边救下，对小黑产生感情穷追猛打，被山新称之为小黑的克星。"
+        },
+        {
+          "from": "character_abilities",
+          "text": "无特殊妖力（普通猫）"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "黑咻"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 0,
+        "huo": 0,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "主线核心",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 11,
+    "name": "那伽",
+    "category": "妖精",
+    "species": "妖精(北域神明,大蛇原型)",
+    "affiliation": "北域",
+    "element": "tu",
+    "realm": "tribulation",
+    "systems": {
+      "yuling": 19,
+      "suoyu": 19,
+      "zaowu": 11,
+      "xinling": 20,
+      "shengling": 42,
+      "kongjian": 97
+    },
+    "rating": {
+      "total": 208,
+      "average": 34.7,
+      "peak": 97,
+      "peakSystem": "kongjian",
+      "secondary": 42,
+      "secondarySystem": "shengling",
+      "stdev": 29.5,
+      "balance": 0.26,
+      "composite": 67.3,
+      "power": 79,
+      "realmBonus": 12,
+      "grade": "B",
+      "gradeName": "良品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "主修生灵系与空间系;能力:领域(进阶形态,具\"侵占\"特质,让灵融入对方灵质空间,结合魂灵使其成为同感者)、分身(分出灵力构建\"灵主\",通过杀戮传播灵,掌控数千妖精性命,分身破灭则所有吸收过其灵的妖精死亡)、植灵转移;瞬间破防琼圆盾与碧玉甲"
+        },
+        {
+          "from": "notes",
+          "text": "蓝溪镇第91话:价值;与老君、明王相识\n【分类标记】妖精（用户确认 2026-08-22）\n【分类标记】神（用户确认 2026-08-22）"
+        },
+        {
+          "from": "story_summary",
+          "text": "《蓝溪镇》主要反派,初登场于漫画第59话末尾;因大限将至欲夺李清凝治愈系能力续命,以中原数千妖精性命要挟老君交出清凝;虽计划得逞但反被清凝设下灵誓束缚,失去主动权长期忍受清凝欺压;清凝划走其大片领地;三百年后与老君战斗落败,最终靠接受灵誓保命"
+        },
+        {
+          "from": "character_abilities",
+          "text": "吸食魂灵"
+        },
+        {
+          "from": "character_abilities",
+          "text": "空间系-领域"
+        },
+        {
+          "from": "character_abilities",
+          "text": "吸食魂灵；将自身灵与众多妖精绑定制造疼痛共感"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 1
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "治愈"
+            ]
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 2
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 1
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "空间系",
+              "灵质空间",
+              "转移",
+              "领域"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 0,
+        "huo": 0,
+        "tu": 1
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "会馆与神",
+      "deity": "神"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 12,
+    "name": "玄离",
+    "category": "妖精",
+    "species": "上古神兽(原型螭龙,龙之九子之首)",
+    "affiliation": "蓝溪镇(追随老君);后隐居乡下",
+    "element": "huo",
+    "realm": "tribulation",
+    "systems": {
+      "yuling": 100,
+      "suoyu": 11,
+      "zaowu": 30,
+      "xinling": 22,
+      "shengling": 33,
+      "kongjian": 63
+    },
+    "rating": {
+      "total": 259,
+      "average": 43.2,
+      "peak": 100,
+      "peakSystem": "yuling",
+      "secondary": 63,
+      "secondarySystem": "kongjian",
+      "stdev": 30,
+      "balance": 0.25,
+      "composite": 75.6,
+      "power": 88,
+      "realmBonus": 12,
+      "grade": "A",
+      "gradeName": "上品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "御灵系-火+冰双属性(御冰御火,可吸收火焰);拥有双灵质空间;会被动物不自觉攻击(嘲讽技能);实力强大,妖界声望高,被尊称\"玄离大人\";一狗败三仙"
+        },
+        {
+          "from": "notes",
+          "text": "与老君是忘年交;被谛听唤为玄离;曾挑战无限在斗帅宫比武落败\n【分类标记】妖精（用户确认 2026-08-22）"
+        },
+        {
+          "from": "story_summary",
+          "text": "上古神兽螭龙,上古时期常活跃于斗帅宫以战斗为乐;数百年前护送村民前往蓝溪镇追随老君参与平息战乱;与李清凝关系密切被称\"狗哥\";邪修那迦想夺清凝治愈能力,玄离欲攻击被老君阻止,清凝被迫随那迦前往北域,玄离与老君决裂离开蓝溪镇刻苦修炼;正片中原肉体在长眠洞休眠,灵体寄居罗小白哥哥阿根体内双魂一体;与阿根互补,通过阿根重新接触人类世界,理解情感与责任平衡"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·水（冰）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·火"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·火：可吸收焚焰火、斥冰焰等高等火系技能"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 8
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "御火",
+              "冰",
+              "火焰"
+            ]
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "治愈"
+            ]
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 0
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 5
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "灵质空间"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 17,
+        "huo": 21,
+        "tu": 1
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "会馆与神",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 14,
+    "name": "哪吒",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "妖灵会馆(核心战力/创始人之一)",
+    "element": "huo",
+    "realm": "tribulation",
+    "systems": {
+      "yuling": 97,
+      "suoyu": 100,
+      "zaowu": 10,
+      "xinling": 11,
+      "shengling": 84,
+      "kongjian": 0
+    },
+    "rating": {
+      "total": 302,
+      "average": 50.3,
+      "peak": 100,
+      "peakSystem": "suoyu",
+      "secondary": 97,
+      "secondarySystem": "yuling",
+      "stdev": 43.8,
+      "balance": 0,
+      "composite": 84.5,
+      "power": 97,
+      "realmBonus": 12,
+      "grade": "A",
+      "gradeName": "上品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "御灵系（火）+生灵系（幻化）+锁御系（灵御）"
+        },
+        {
+          "from": "notes",
+          "text": "活了3000多年的上古妖精;会馆创始人之一\n【round_2026-08-12】 本轮补充-外貌性格声优: appearance: 小男孩形象，黑发齐刘海，头顶可拆卸双丸子头，身穿印有「NAZA」的休闲服饰，混天绫与乾坤圈化作配饰; personality: 傲娇毒舌、实力强悍，看似随性散漫实则靠谱有分寸; gender: 男; original_form: 上古妖精（三千年以上）; voice_actor: 山新（中文）；水濑祈（日文）; source_url: https://baike.baidu.com/item/罗小黑战记/8383472 [轮次suppl_20260812: 百度百科补充外貌/性格/续作剧情/配音]；蓝溪镇终章：与池年互动暗示关系亲密;[round_2026-08-12] 补充字段:height,source_url；2026-08-12 更新：身高/年龄/瞳色/发色/声优日配\n【round_20260812_2】身份：妖精会馆总部派出的妖精钦差；能力：御灵系·火、生灵系·幻化、锁御系·灵御，三系大佬；外貌：丸子头、脚踩风火轮\n【分类标记】神（用户确认 2026-08-22）"
+        },
+        {
+          "from": "story_summary",
+          "text": "妖灵会馆总部成员，实力强大。曾和孙悟空被列为妖王，现已成神。罗小黑中的哪吒是妖精，聚灵而生，无父母兄弟。电影第二部主角团成员。与无限互为知己。"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系-火"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系-幻化"
+        },
+        {
+          "from": "character_abilities",
+          "text": "锁御系-灵御"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 5
+          }
+        ],
+        "suoyu": [
+          {
+            "kind": "explicit",
+            "label": "锁御系",
+            "n": 5
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "法宝",
+              "灵御"
+            ]
+          }
+        ],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 5
+          }
+        ],
+        "kongjian": []
+      },
+      "innateZeroed": [
+        "kongjian"
+      ],
+      "inferred": false,
+      "elementHits": {
+        "jin": 1,
+        "mu": 0,
+        "shui": 1,
+        "huo": 6,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "会馆与神",
+      "deity": "神"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 141,
+    "name": "阎明",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "妖灵会馆(三大创始人之一);掌管地界",
+    "element": "huo",
+    "realm": "deity",
+    "systems": {
+      "yuling": 47,
+      "suoyu": 13,
+      "zaowu": 14,
+      "xinling": 14,
+      "shengling": 98,
+      "kongjian": 46
+    },
+    "rating": {
+      "total": 232,
+      "average": 38.7,
+      "peak": 98,
+      "peakSystem": "shengling",
+      "secondary": 47,
+      "secondarySystem": "yuling",
+      "stdev": 30.3,
+      "balance": 0.24,
+      "composite": 70,
+      "power": 80,
+      "realmBonus": 10,
+      "grade": "A",
+      "gradeName": "上品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "治愈系(并不纯粹);体质决定只能走吞噬魂灵的道路;灵质空间是酆都"
+        },
+        {
+          "from": "notes",
+          "text": "\n【分类标记】神（用户确认 2026-08-22）"
+        },
+        {
+          "from": "story_summary",
+          "text": "即明王,本名阎明;唯一封神的治愈系妖精;曾师从老君,关系保密只有炎帝知道;当阎明被妖精围剿时老君也没认她;曾在蓝溪镇煽动村民捣乱,派人抓捕李清凝,意图让清凝离开老君不再重蹈上一个徒弟覆辙;手下有黑白无常、雅婷(已牺牲)"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系"
+        },
+        {
+          "from": "character_abilities",
+          "text": "治愈系（并不纯粹）；御灵系-火；生灵系（生灵系最强者）；灵质空间是酆都"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 1
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 3
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "治愈"
+            ]
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 0
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 2
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "灵质空间",
+              "吞噬"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 0,
+        "huo": 2,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "会馆与神",
+      "deity": "神"
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 10,
+    "name": "山新",
+    "category": "人类",
+    "species": "人类",
+    "affiliation": "人类;罗小白朋友\n[萌娘百科] 灵溪(人类)",
+    "element": "none",
+    "realm": "mortal",
+    "systems": {
+      "yuling": 23,
+      "suoyu": 22,
+      "zaowu": 19,
+      "xinling": 22,
+      "shengling": 22,
+      "kongjian": 0
+    },
+    "rating": {
+      "total": 108,
+      "average": 18,
+      "peak": 23,
+      "peakSystem": "yuling",
+      "secondary": 22,
+      "secondarySystem": "shengling",
+      "stdev": 8.1,
+      "balance": 0.8,
+      "composite": 21.3,
+      "power": 21,
+      "realmBonus": 0,
+      "grade": "D",
+      "gradeName": "下品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "普通人类；游戏中为血精灵/T3战士"
+        },
+        {
+          "from": "notes",
+          "text": "职业：学生/T3战士（游戏）。魔兽高玩，包裹内多橙装。在街头捡回小猫小皇陪伴。"
+        },
+        {
+          "from": "story_summary",
+          "text": "罗小白的同学兼朋友。经常去小白家做客。在漫展获得限量游戏机《众生之门》,与小白、小黑、阿根一起进入游戏。自称血精灵T3战士。"
+        },
+        {
+          "from": "character_abilities",
+          "text": "无系（普通人类，无灵质力）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "游戏高手：魔兽世界高玩，自称血精灵T3战士"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [],
+        "kongjian": []
+      },
+      "innateZeroed": [
+        "kongjian"
+      ],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 0,
+        "huo": 0,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "社区群像",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 15,
+    "name": "虚淮",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "风息团队\n[萌娘百科] 离岛",
+    "element": "shui",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 100,
+      "suoyu": 23,
+      "zaowu": 28,
+      "xinling": 11,
+      "shengling": 18,
+      "kongjian": 0
+    },
+    "rating": {
+      "total": 180,
+      "average": 30,
+      "peak": 100,
+      "peakSystem": "yuling",
+      "secondary": 28,
+      "secondarySystem": "zaowu",
+      "stdev": 32.6,
+      "balance": 0.19,
+      "composite": 64.6,
+      "power": 65,
+      "realmBonus": 0,
+      "grade": "B",
+      "gradeName": "良品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "御灵系（水/冰）"
+        },
+        {
+          "from": "notes",
+          "text": "龙游事件后被会馆抓捕关押"
+        },
+        {
+          "from": "story_summary",
+          "text": "电影角色。风息、天虎、洛竹的伙伴，曾和风息一同与妖灵会馆作对，且很理解风息的做法。冷静果敢，实力很强，闷骚。在龙游事件后被会馆抓捕关押，现状不明。与谛听是好友。"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·冰"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系·岩：操控岩石和大地，拥有极强的防御力和破坏力"
+        },
+        {
+          "from": "character_abilities_ext",
+          "text": "御灵系-冰"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 4
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "冰",
+              "岩"
+            ]
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [],
+        "kongjian": []
+      },
+      "innateZeroed": [
+        "kongjian"
+      ],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 4,
+        "huo": 0,
+        "tu": 4
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "社区群像",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 20,
+    "name": "鸠老",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "妖灵会馆(执行者)",
+    "element": "shui",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 25,
+      "suoyu": 27,
+      "zaowu": 100,
+      "xinling": 21,
+      "shengling": 100,
+      "kongjian": 50
+    },
+    "rating": {
+      "total": 323,
+      "average": 53.8,
+      "peak": 100,
+      "peakSystem": "shengling",
+      "secondary": 100,
+      "secondarySystem": "zaowu",
+      "stdev": 33.9,
+      "balance": 0.15,
+      "composite": 86.2,
+      "power": 86,
+      "realmBonus": 0,
+      "grade": "S",
+      "gradeName": "绝品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "生灵系-洞察(一眼看穿能力属性/弱点/潜力);造物系-仿生(以灵力制造逼真复制品);生灵系-强化系-凌荆(提升速度力量反应等综合战斗素质);拥有定点空间系法宝游地简"
+        },
+        {
+          "from": "notes",
+          "text": "昵称\"死老头\"(若水称);徒弟:若水、大志;TV35.游戏与现实之间/37/40出场;蓝溪镇76/115-116/124-130/133-134出场"
+        },
+        {
+          "from": "story_summary",
+          "text": "原是松山青云洞洞主,当年无限为制止妖祸曾去借游地简;妖灵会馆执行者之一;加入众生之门游戏带徒弟修炼,十级就能带徒弟爬上圆柱高山(小黑他们40级才上去);与无限相识曾一起执行任务;因无限收了妖精徒弟罗小黑,决定收人类徒弟大志"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系、造物系"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系·洞察、造物系·仿生、强化系·凌荆"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系-洞察"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [],
+        "suoyu": [
+          {
+            "kind": "explicit",
+            "label": "锁御系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "法宝"
+            ]
+          }
+        ],
+        "zaowu": [
+          {
+            "kind": "explicit",
+            "label": "造物系",
+            "n": 5
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "造物"
+            ]
+          }
+        ],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 6
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "洞察",
+              "强化"
+            ]
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 1
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "空间系"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 2,
+        "huo": 0,
+        "tu": 2
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "社区群像",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 23,
+    "name": "潘靖",
+    "category": "妖精",
+    "species": "妖精(五尾白鸟原型)",
+    "affiliation": "龙游会馆(馆长)",
+    "element": "huo",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 26,
+      "suoyu": 20,
+      "zaowu": 24,
+      "xinling": 100,
+      "shengling": 85,
+      "kongjian": 47
+    },
+    "rating": {
+      "total": 302,
+      "average": 50.3,
+      "peak": 100,
+      "peakSystem": "xinling",
+      "secondary": 85,
+      "secondarySystem": "shengling",
+      "stdev": 31.3,
+      "balance": 0.22,
+      "composite": 82.1,
+      "power": 82,
+      "realmBonus": 0,
+      "grade": "A",
+      "gradeName": "上品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "生灵系-培元;生灵系-化生;心灵系-传音(利用传音能力指引疏散市民)"
+        },
+        {
+          "from": "notes",
+          "text": "与灵溪会馆馆长卡里是好友,常利用会馆传送门约酒(都不胜酒力);助手:羽夕、逸风、冠萱等;TV36与无限谈话"
+        },
+        {
+          "from": "story_summary",
+          "text": "龙游会馆现任馆长,妻子为夏掌柜,曾在蓝溪镇住过;原本是燕国军师,兴国开国典礼上试图刺杀皇帝被抓住后被老君解救;蓝溪镇第116章正式成为会馆馆长;电影中指挥助手拯救列车乘客并抹去记忆,告知无限风息夺走他人灵质力之事,察觉小黑灵质空间衰竭说出\"如果老君能救,也不用寄情于借火岩了\""
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系、心灵系"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系·培元、生灵系·化生、心灵系·传音"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系-培元"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "岩"
+            ]
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [
+          {
+            "kind": "explicit",
+            "label": "心灵系",
+            "n": 5
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "传音"
+            ]
+          }
+        ],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 9
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 0
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 1
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "灵质空间",
+              "传送"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 0,
+        "huo": 1,
+        "tu": 1
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "社区群像",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 31,
+    "name": "花轮",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "妖灵会馆(执行者,负责后勤)",
+    "element": "shui",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 21,
+      "suoyu": 26,
+      "zaowu": 30,
+      "xinling": 28,
+      "shengling": 19,
+      "kongjian": 100
+    },
+    "rating": {
+      "total": 224,
+      "average": 37.3,
+      "peak": 100,
+      "peakSystem": "kongjian",
+      "secondary": 30,
+      "secondarySystem": "zaowu",
+      "stdev": 28.3,
+      "balance": 0.29,
+      "composite": 67.2,
+      "power": 67,
+      "realmBonus": 0,
+      "grade": "B",
+      "gradeName": "良品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "空间系-蕴藏(灵质空间很小只有三米直径,放入空间的物体会自动缩小整理,能随意拿出想拿的东西;所藏约相当于二十家宜家)"
+        },
+        {
+          "from": "story_summary",
+          "text": "妖灵会馆执行者，负责后勤，绰号\"移动仓库\"。风息事件中与鸠老、若水、天介、兆岳一行在山洞下与无限汇合，过程中使用空间能力为无限和罗小黑提供了饮食"
+        },
+        {
+          "from": "character_abilities",
+          "text": "空间系"
+        },
+        {
+          "from": "character_abilities",
+          "text": "空间系·蕴藏（负责后勤）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "空间系-蕴藏"
+        },
+        {
+          "from": "character_abilities",
+          "text": "空间系-蕴藏（灵质空间非常小只有三米直径，放入空间的物体自动缩小整理，所藏相当于二十家宜家）"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 6
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 5
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "空间系",
+              "灵质空间",
+              "蕴藏"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 1,
+        "huo": 0,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "社区群像",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 35,
+    "name": "画虎",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "妖灵会馆",
+    "element": "none",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 19,
+      "suoyu": 21,
+      "zaowu": 100,
+      "xinling": 29,
+      "shengling": 96,
+      "kongjian": 0
+    },
+    "rating": {
+      "total": 265,
+      "average": 44.2,
+      "peak": 100,
+      "peakSystem": "zaowu",
+      "secondary": 96,
+      "secondarySystem": "shengling",
+      "stdev": 39.1,
+      "balance": 0.02,
+      "composite": 82.5,
+      "power": 82,
+      "realmBonus": 0,
+      "grade": "A",
+      "gradeName": "上品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "生灵系（画灵）+造物系（画灵，双系合技）；生灵系×造物系-画灵(双系合技)"
+        },
+        {
+          "from": "notes",
+          "text": "原型为松鼠，有人、虎、原型三个形态；片中被风息以豪夺夺走画灵能力。"
+        },
+        {
+          "from": "story_summary",
+          "text": "经营着一家书店。曾被风息偷袭夺取能力，现应恢复。；经营着一家书店，曾被风息偷袭夺取能力，现应恢复"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系、造物系"
+        },
+        {
+          "from": "character_abilities",
+          "text": "画灵（造物系与生灵系结合使用）"
+        },
+        {
+          "from": "character_abilities",
+          "text": "造物系-画灵（造物系+生灵系结合）"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [],
+        "suoyu": [],
+        "zaowu": [
+          {
+            "kind": "explicit",
+            "label": "造物系",
+            "n": 8
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "造物"
+            ]
+          }
+        ],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 7
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "豪夺"
+            ]
+          }
+        ],
+        "kongjian": []
+      },
+      "innateZeroed": [
+        "kongjian"
+      ],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 0,
+        "huo": 0,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "社区群像",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 36,
+    "name": "泽宇",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "妖灵会馆",
+    "element": "jin",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 88,
+      "suoyu": 24,
+      "zaowu": 17,
+      "xinling": 16,
+      "shengling": 94,
+      "kongjian": 0
+    },
+    "rating": {
+      "total": 239,
+      "average": 39.8,
+      "peak": 94,
+      "peakSystem": "shengling",
+      "secondary": 88,
+      "secondarySystem": "yuling",
+      "stdev": 36.9,
+      "balance": 0.08,
+      "composite": 76.6,
+      "power": 77,
+      "realmBonus": 0,
+      "grade": "A",
+      "gradeName": "上品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "御灵系-金;生灵系-追毫(与师父鹿野相同)"
+        },
+        {
+          "from": "notes",
+          "text": "泽宇：微博电影2官方配音表确认(任景行，与郑信毅同配音)"
+        },
+        {
+          "from": "story_summary",
+          "text": "鹿野唯一的弟子"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系、御灵系·金"
+        },
+        {
+          "from": "character_abilities",
+          "text": "御灵系-金"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系-追毫"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 4
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 4
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "追毫"
+            ]
+          }
+        ],
+        "kongjian": []
+      },
+      "innateZeroed": [
+        "kongjian"
+      ],
+      "inferred": false,
+      "elementHits": {
+        "jin": 4,
+        "mu": 0,
+        "shui": 0,
+        "huo": 0,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "社区群像",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 37,
+    "name": "冠萱",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "妖灵会馆（执行者/善后）",
+    "element": "none",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 26,
+      "suoyu": 22,
+      "zaowu": 18,
+      "xinling": 82,
+      "shengling": 100,
+      "kongjian": 0
+    },
+    "rating": {
+      "total": 248,
+      "average": 41.3,
+      "peak": 100,
+      "peakSystem": "shengling",
+      "secondary": 82,
+      "secondarySystem": "xinling",
+      "stdev": 36.4,
+      "balance": 0.09,
+      "composite": 78.8,
+      "power": 79,
+      "realmBonus": 0,
+      "grade": "A",
+      "gradeName": "上品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "生灵系（念磁）+心灵系（清洗）；生灵系-念磁、心灵系-清洗"
+        },
+        {
+          "from": "notes",
+          "text": "电影中负责应急处理，拯救了无数人类。"
+        },
+        {
+          "from": "story_summary",
+          "text": "妖灵会馆执行者，善后人员。；会馆执行者，善后/应急处理人员，负责痕迹消除"
+        },
+        {
+          "from": "character_abilities",
+          "text": "心灵系"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系·念磁、心灵系·清洗"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系-念磁"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [
+          {
+            "kind": "explicit",
+            "label": "心灵系",
+            "n": 6
+          }
+        ],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 5
+          }
+        ],
+        "kongjian": []
+      },
+      "innateZeroed": [
+        "kongjian"
+      ],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 0,
+        "huo": 0,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "社区群像",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 139,
+    "name": "羽夕",
+    "category": "妖精",
+    "species": "妖精",
+    "affiliation": "龙游会馆",
+    "element": "none",
+    "realm": "unknown",
+    "systems": {
+      "yuling": 13,
+      "suoyu": 17,
+      "zaowu": 12,
+      "xinling": 19,
+      "shengling": 100,
+      "kongjian": 0
+    },
+    "rating": {
+      "total": 161,
+      "average": 26.8,
+      "peak": 100,
+      "peakSystem": "shengling",
+      "secondary": 19,
+      "secondarySystem": "xinling",
+      "stdev": 33.3,
+      "balance": 0.17,
+      "composite": 61.9,
+      "power": 62,
+      "realmBonus": 0,
+      "grade": "B",
+      "gradeName": "良品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "生灵系-隐匿;强化系-强化"
+        },
+        {
+          "from": "story_summary",
+          "text": "龙游会馆馆长潘靖的保镖(同时也是一名刺客);电影角色"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系·隐匿、强化系·强化"
+        },
+        {
+          "from": "character_abilities",
+          "text": "生灵系-隐匿"
+        },
+        {
+          "from": "character_abilities",
+          "text": "强化系-强化"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 6
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "隐匿",
+              "强化"
+            ]
+          }
+        ],
+        "kongjian": []
+      },
+      "innateZeroed": [
+        "kongjian"
+      ],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 0,
+        "huo": 0,
+        "tu": 0
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "社区群像",
+      "deity": null
+    }
+  },
+  {
+    "schemaVersion": 1,
+    "id": 9959,
+    "name": "李清凝",
+    "category": null,
+    "species": "人类(后成仙)",
+    "affiliation": "蓝溪镇",
+    "element": "huo",
+    "realm": "deity",
+    "systems": {
+      "yuling": 33,
+      "suoyu": 26,
+      "zaowu": 20,
+      "xinling": 15,
+      "shengling": 82,
+      "kongjian": 41
+    },
+    "rating": {
+      "total": 217,
+      "average": 36.2,
+      "peak": 82,
+      "peakSystem": "shengling",
+      "secondary": 41,
+      "secondarySystem": "kongjian",
+      "stdev": 22.2,
+      "balance": 0.45,
+      "composite": 60.1,
+      "power": 70,
+      "realmBonus": 10,
+      "grade": "B",
+      "gradeName": "良品"
+    },
+    "evidence": {
+      "source": "worldview_luoxiaohei_v4.db",
+      "sourceTables": [
+        "characters",
+        "character_abilities",
+        "character_abilities_ext"
+      ],
+      "abilitySnippets": [
+        {
+          "from": "abilities_summary",
+          "text": "生灵系-治愈系(六大灵系中生灵系里非常罕见的治愈系,只以治愈为目的,治愈效果非常强甚至起死回生)"
+        },
+        {
+          "from": "notes",
+          "text": "【2026-08-14数据库清洗】已合并至 id=9「李清凝（清凝仙子）」（同名重复角色），关联数据已迁移，本条目保留备查。\n别号:清凝仙子、小李大夫、小清凝、女神仙;父亲李钧、母亲谢谷雨;与玄离互称狗哥;喜欢老君;称无限\"年号大人\";阎明师姐"
+        },
+        {
+          "from": "story_summary",
+          "text": "老君的徒弟,出身燕国;十岁逃难中被老君救下,依据老君给的罗盘来到蓝溪镇,努力一年九个月后在十二岁成功拜老君为师;随老君四处游历甚至登月;在人间游历治病被传为\"仙子\",TV版中被尊称\"清凝仙子\";无限三年18岁被那伽带到北域至今未归,无限四十五年年时成仙(60岁);大电影潘靖台词\"如果老君能救,也不用寄情于借火岩了\"推测清凝可能因灵质空间衰竭而死,老君将其铭刻在借火岩上寄情"
+        }
+      ],
+      "matchedKeywords": {
+        "yuling": [
+          {
+            "kind": "explicit",
+            "label": "御灵系",
+            "n": 0
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "岩"
+            ]
+          }
+        ],
+        "suoyu": [],
+        "zaowu": [],
+        "xinling": [],
+        "shengling": [
+          {
+            "kind": "explicit",
+            "label": "生灵系",
+            "n": 2
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "治愈"
+            ]
+          }
+        ],
+        "kongjian": [
+          {
+            "kind": "explicit",
+            "label": "空间系",
+            "n": 0
+          },
+          {
+            "kind": "loose",
+            "label": "空间",
+            "n": 1
+          },
+          {
+            "kind": "branch",
+            "keywords": [
+              "灵质空间"
+            ]
+          }
+        ]
+      },
+      "innateZeroed": [],
+      "inferred": false,
+      "elementHits": {
+        "jin": 0,
+        "mu": 0,
+        "shui": 0,
+        "huo": 2,
+        "tu": 2
+      }
+    },
+    "provisional": true,
+    "extra": {
+      "group": "社区群像",
+      "deity": null
+    }
+  }
+]

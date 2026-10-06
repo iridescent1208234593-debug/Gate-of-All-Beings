@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "algorithmVersion": "derive-v1.0.0",
+  "generatedAt": "2026-10-05T17:57:36.044Z",
+  "source": {
+    "path": "D:\\Projects\\罗小黑战记数据库\\db\\worldview_luoxiaohei_v4.db",
+    "sizeBytes": 2383872,
+    "mtime": "2026-09-27T18:15:02.347Z",
+    "sha256": "34efcb0aa9cec7fea6801311dfa297de73925cb8b1e33c90383509aadf26bfca",
+    "accessMode": "readOnly"
+  },
+  "selection": [
+    {
+      "id": 1,
+      "name": "罗小黑",
+      "group": "主线核心"
+    },
+    {
+      "id": 2,
+      "name": "无限",
+      "group": "主线核心"
+    },
+    {
+      "id": 3,
+      "name": "风息",
+      "group": "主线核心"
+    },
+    {
+      "id": 4,
+      "name": "老君",
+      "group": "主线核心"
+    },
+    {
+      "id": 5,
+      "name": "罗小白",
+      "group": "主线核心"
+    },
+    {
+      "id": 6,
+      "name": "阿根",
+      "group": "主线核心"
+    },
+    {
+      "id": 7,
+      "name": "谛听",
+      "group": "主线核心"
+    },
+    {
+      "id": 8,
+      "name": "鹿野",
+      "group": "主线核心"
+    },
+    {
+      "id": 18,
+      "name": "比丢",
+      "group": "主线核心"
+    },
+    {
+      "id": 19,
+      "name": "皇受",
+      "group": "主线核心"
+    },
+    {
+      "id": 11,
+      "name": "那伽",
+      "group": "会馆与神"
+    },
+    {
+      "id": 12,
+      "name": "玄离",
+      "group": "会馆与神"
+    },
+    {
+      "id": 14,
+      "name": "哪吒",
+      "group": "会馆与神"
+    },
+    {
+      "id": 141,
+      "name": "阎明",
+      "group": "会馆与神"
+    },
+    {
+      "id": 10,
+      "name": "山新",
+      "group": "社区群像"
+    },
+    {
+      "id": 15,
+      "name": "虚淮",
+      "group": "社区群像"
+    },
+    {
+      "id": 20,
+      "name": "鸠老",
+      "group": "社区群像"
+    },
+    {
+      "id": 23,
+      "name": "潘靖",
+      "group": "社区群像"
+    },
+    {
+      "id": 31,
+      "name": "花轮",
+      "group": "社区群像"
+    },
+    {
+      "id": 35,
+      "name": "画虎",
+      "group": "社区群像"
+    },
+    {
+      "id": 36,
+      "name": "泽宇",
+      "group": "社区群像"
+    },
+    {
+      "id": 37,
+      "name": "冠萱",
+      "group": "社区群像"
+    },
+    {
+      "id": 139,
+      "name": "羽夕",
+      "group": "社区群像"
+    },
+    {
+      "id": 9959,
+      "name": "李清凝",
+      "group": "社区群像"
+    }
+  ],
+  "scoreModel": {
+    "rawScoreMin": 0,
+    "rawScoreMax": 100,
+    "weights": {
+      "explicit": 24,
+      "explicitCap": 72,
+      "loose": 9,
+      "looseCap": 36,
+      "branch": 7,
+      "branchCap": 42,
+      "baseMin": 10,
+      "baseSpan": 20
+    },
+    "innateZeroedSystems": [
+      "kongjian"
+    ],
+    "gradeModel": "composite = peak*0.5 + average*0.3 + secondary*0.2",
+    "gradeThresholds": {
+      "S": 85,
+      "A": 70,
+      "B": 55,
+      "C": 38,
+      "D": 20,
+      "E": 0
+    }
+  },
+  "notes": [
+    "本文件为只读派生结果，世界观事实源仍是 worldview_luoxiaohei_v4.db。",
+    "所有分值为首批样例，provisional=true，可随剧情考据迭代覆盖。",
+    "空间系无文本证据时强制归零（无法后天习得）。",
+    "境界为推断值：DB 无「角色→境界」字段，多数角色为 unknown。"
+  ],
+  "warnings": []
+}

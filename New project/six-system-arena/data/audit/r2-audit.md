@@ -1,3 +1,14 @@
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_9a28ddb1c10a11f1887c525400de85a5
+    ReservedCode1: dmBM+aZMg9M5GUNkbwf3qVw/PT26qnNFX95iGqE7oU+6jkNjfYA8LHB3AZdDfL68BmPaBFmLQlZLV/p3Sw+YtEKE4h1bLUuqeLLro6+ENxmtemoIco87hriFU0IqT72V9WyOoLA7KnaU/RMeAPkbXnuQBJ8vExmxAYWE0Upw+tlTDbohSz2gm9sK5NA=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_9a28ddb1c10a11f1887c525400de85a5
+    ReservedCode2: dmBM+aZMg9M5GUNkbwf3qVw/PT26qnNFX95iGqE7oU+6jkNjfYA8LHB3AZdDfL68BmPaBFmLQlZLV/p3Sw+YtEKE4h1bLUuqeLLro6+ENxmtemoIco87hriFU0IqT72V9WyOoLA7KnaU/RMeAPkbXnuQBJ8vExmxAYWE0Upw+tlTDbohSz2gm9sK5NA=
+---
+
 # R2 迭代 · 数值与卡组审计报告
 
 > 由 `data/scripts/audit_r2.py` 确定性生成；对象为 `data/generated/character_stats.json` 与 `data/decks.json`。
@@ -213,3 +224,4 @@
 ---
 
 *（本报告由脚本生成，数据可追溯至 `character_stats.json` 与 `decks.json`。）*
+*（内容由AI生成，仅供参考）*

@@ -28,6 +28,11 @@ AIGC:
 | P5 | 对战系统落地 | 与官方角色 / 自身对战，卡组平衡调优 | P4 | 🔷 R2 完成（内核已交付，胜率调优待实测） |
 | P6 | 收集类成就玩法 | 胜利放小黑与比丢 + 正向反馈；失败小黑安慰 | P4 | 🔷 R2 完成（官方表情包待采集） |
 | P7 | 站点集成（zszm 端口） | UI 组件 + 图标在卡牌 / 经营 / 模拟三系统上线 | P5、P6 | 🔷 R2 方案产出（docs/07），待接入执行 |
+| P8 | 工作副本切换与现有数值登记 | `legacy/d-drive-r1/`、`docs/08`、`data/demo-baseline.json` | P0 | ✅ R3 完成 |
+
+> **R3 迭代（2026-10-06）**：工作副本正式切至 E 盘；D 盘 `D:\Projects\new project` 保留为旧副本，
+> 其 R1 成果快照至 `legacy/d-drive-r1/`；登记站点现有 demo 数值为参考基线（`docs/08` + `data/demo-baseline.json`），
+> 确认六系分值为新增维度、**不改动站点既有数值框架**。
 
 > **R2 迭代（2026-10-05）**：完成 `data/decks.json`、`data/achievements.json`、`ui/battle-engine.js`、
 > `ui/achievement-system.js`、`ui/settlement.js`、`scripts/run_all.ps1`、`data/audit/r2-audit.md`，
@@ -153,6 +158,18 @@ AIGC:
 
 ---
 
+## P8 · 工作副本切换与现有数值登记 ✅ R3 完成
+
+- [x] 工作副本裁定：E 盘 `E:\Projects\New project\six-system-arena\` 为唯一工作副本
+- [x] D 盘第 1 轮成果迁入 `legacy/d-drive-r1/`（48 文件 / 3.57 MB，排除 `.git` / `node_modules`），含 `MIGRATION.md`
+- [x] D 盘目录保留不删，标记为旧副本；两库 sha256 分叉裁定写入 README §0
+- [x] README 更新：工作副本声明、数据库指向（E 盘 v4）、目录树、参考表
+- [x] 站点现有 demo 数值登记：`docs/08-现有游戏数值基线登记.md` + `data/demo-baseline.json`
+- [x] 字段对照结论：`Element` / `Card.school` 零映射可复用；六系分值为新增维度；不改动站点数值框架
+- [ ] **待站点发版重登记**：站点若发布新平衡版本，需重跑 `docs/08 §7` 复核命令并更新 `demo-baseline.json`
+
+---
+
 ## 里程碑与依赖图
 
 ```
@@ -169,4 +186,7 @@ P0 ──► P1 ──► P2 ──► P3 ──► P4 ──┬──► P5 ─
 | 共享 UI 文件被改动 | 污染参考仓库 | 默认零侵入注入；物理补丁需显式执行 `--apply` 且自动备份 |
 | 素材合规风险 | 侵权 / 违规 | 严格执行 `docs/05` 白名单，AI 目录一律排除 |
 | 主仓库工作区较脏 | 分支操作风险 | 见 `BRANCHING.md`：本轮不切分支，产物落盘待提交 |
+| 主库分叉误用（D / E 两库） | 派生数据不可比对 | R3 已裁定 **E 盘库为工作副本唯一数据源**；D 盘库仅历史比对，禁止混用 |
+| 站点 demo 基线漂移 | 登记结论过期 | 站点发版后重跑 `docs/08 §7` 复核命令并更新 `data/demo-baseline.json` |
+| D 盘快照被误当数据源 | 数据双源冲突 | `legacy/d-drive-r1/` 标记为只读快照，`MIGRATION.md §5` 明令不参与构建 |
 *（内容由AI生成，仅供参考）*

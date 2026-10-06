@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "kind": "six-systems-stats-overrides",
+  "title": "六系数值外置覆盖表（人工校准通道）",
+  "appliesTo": "data/character-stats.json",
+  "outputs": "data/character-stats.effective.json",
+  "appliedBy": "tools/apply-overrides.mjs",
+  "usage": {
+    "apply": "node tools/apply-overrides.mjs",
+    "check": "node tools/apply-overrides.mjs --check",
+    "note": "本文件是「外置可覆盖层」：派生结果永远保留在 data/character-stats.json，任何人工校准只写进本文件，由脚本合并产出 character-stats.effective.json，保证可回滚、可整体替换。"
+  },
+  "provenancePolicy": {
+    "noAuthoritativeReference": true,
+    "statement": "D 盘与 E 盘的 v4 库（worldview_luoxiaohei_v4.db）都不是权威数据源，且两库之间已出现分叉（sha256 不一致）。本项目不存在权威对照表，因此任何角色的六系数值都不得被表述为「官方权威值」，只能标注其来源等级。",
+    "levels": {
+      "official": "官方设定（漫画 / 动画 / 官方设定集 / 官方访谈）中可直接引用的数值或明确强度表述，须在 evidence 写明出处（卷/话/页或官方链接），且经人工确认。",
+      "db-record": "由 v4 库结构化记录直接支撑（character_abilities / character_abilities_ext 中存在该角色该系条目），属「记录支撑」，不等于官方认定。",
+      "inferred": "由文本证据或派生规则推断得到，包含全部未校准的默认基线分，未经人工确认。"
+    },
+    "defaultLevel": "inferred",
+    "uiRule": "UI 展示任何数值时必须同时展示 source 等级；inferred 一律显示「推定基线」标识，禁止出现「官方 / 权威 / 正确」字样。",
+    "disclaimer": "本覆盖表默认为空（overrides = {}），即现阶段全部数值均为推定值；填入覆盖项代表人工校准动作，需自行承担口径判断。"
+  },
+  "confidenceToSource": {
+    "tagged": "db-record",
+    "textual": "inferred",
+    "baseline": "inferred"
+  },
+  "systemOrder": ["yuling", "suoyu", "zaowu", "xinling", "shengling", "kongjian"],
+  "overrideRules": {
+    "scope": "按角色 id 覆盖，可只覆盖部分系（未列出的系保留派生值）",
+    "fields": {
+      "source": "official | db-record | inferred —— 覆盖后的溯源等级（必填）",
+      "confidence": "可选，写库侧或人工标注的置信度原文（如 manual-reviewed）",
+      "evidence": "可选，字符串；official 等级必须写明官方出处",
+      "note": "可选，校准理由 / 争议说明",
+      "systems": "可选，形如 {\"kongjian\": 88}；取值范围 0..100 整数",
+      "skillTags": "可选，若提供则整体替换该角色的技能标签数组"
+    },
+    "guardrails": [
+      "官方 uncalibrated：overrides 为空时脚本不产生任何分值变化",
+      "分值越界（<0 / >100 / 非数字）在校验阶段直接报错并拒绝应用",
+      "覆盖项写入后会在 effective 文件中留下 overrideApplied=true 与 overrideSource，便于回溯"
+    ]
+  },
+  "overrides": {},
+  "exampleOverride": {
+    "_disabled": true,
+    "_note": "示例条目，未启用；如需启用，把同样结构复制进上面的 overrides 对象即可。示例中的分值仅作占位，请替换为你的校准值。",
+    "1": {
+      "source": "db-record",
+      "confidence": "manual-reviewed",
+      "evidence": "示例：v4 库 character_abilities 中该角色御灵系·金 与 空间系·领域 两条记录",
+      "note": "示例：主线角色优先校准，用于 UI 与对战展示",
+      "systems": { "yuling": 92, "kongjian": 94 },
+      "skillTags": []
+    }
+  },
+  "calibrationChecklist": {
+    "rule": "按优先级从上到下校准；每一档完成后运行 node tools/apply-overrides.mjs --check 查看生效差异。",
+    "tiers": [
+      {
+        "tier": 1,
+        "priority": "P0",
+        "label": "主线角色",
+        "items": [
+          { "id": 1, "name": "罗小黑", "reason": "对战 A 侧默认出战角色，UI 示例页第一屏" },
+          { "id": 2, "name": "无限", "reason": "对战 B 侧默认对手，双专精样板" },
+          { "id": 3, "name": "风息", "reason": "生灵系代表，用于验证系别差异化展示" }
+        ]
+      },
+      {
+        "tier": 2,
+        "priority": "P1",
+        "label": "具备具名技能标签的角色（60 名）",
+        "count": 60,
+        "reason": "已有库记录支撑（confidence=tagged 映射为 db-record），校准成本最低、收益最直接",
+        "selection": "data/character-stats.json 中 confidence = tagged 的角色"
+      },
+      {
+        "tier": 3,
+        "priority": "P2",
+        "label": "文本证据角色（160 名）",
+        "count": 160,
+        "reason": "confidence=textual，有原文线索但分支不明，需要人工判断是否提级为 db-record"
+      },
+      {
+        "tier": 4,
+        "priority": "P3",
+        "label": "默认基线角色（268 名）",
+        "count": 268,
+        "reason": "confidence=baseline，仅有存在性证据；若无补充资料，建议长期维持 inferred"
+      }
+    ]
+  }
+}

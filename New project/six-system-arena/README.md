@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_9b163901c10a11f1884b525400cd780f
+    ReservedCode1: f8VOaSRFpJ7jQ2irnwiUpVS+eqbqShnb0yh9MiK7I7yD/F0FBnpi6XffCP1ASLUYxmWztA5TwjwMCzTsZHzDrJ289aNQp8PPgeacQNXBdHmEI3XpiCeUCQlUl0N0Y5Ss6Dce4UZJfOEU4oY7Q7kuE7v7Q3UZopd7mrN4S3zw3pcu0b68tRKgpAX3NSA=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_9b163901c10a11f1884b525400cd780f
+    ReservedCode2: f8VOaSRFpJ7jQ2irnwiUpVS+eqbqShnb0yh9MiK7I7yD/F0FBnpi6XffCP1ASLUYxmWztA5TwjwMCzTsZHzDrJ289aNQp8PPgeacQNXBdHmEI3XpiCeUCQlUl0N0Y5Ss6Dce4UZJfOEU4oY7Q7kuE7v7Q3UZopd7mrN4S3zw3pcu0b68tRKgpAX3NSA=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_2be4f65dc0ee11f1887c525400de85a5
     ReservedCode1: 4giTzS1IIiqu0BvX4Ocym/i8brFqiuNAqUik6bSgSYr/F6nTLU4OAOpR2c1H+kXObskttjDdJ0lZbi34aGhP5xOfB33EjYVpvKTKdfUI4uV+49jgjqIQ4M9upvUNU3jWG3buEuSQEj8hd6oz65AGCav55z20iw7jcgC5vs/rffInVBTAdVYzkZfwJSA=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -14,6 +25,22 @@ AIGC:
 > 罗小黑战记世界观 · 六系（金 / 木 / 水 / 火 / 土 / 空间）数值与卡牌系统孵化项目
 > 位置：`E:\Projects\New project\six-system-arena\`
 > 建立日期：2026-10-05（第一轮基础建设）
+
+---
+
+## 0. 工作副本声明（R3 裁定 · 2026-10-06）
+
+| 项 | 路径 / 值 | 定位 |
+| --- | --- | --- |
+| **工作副本（唯一）** | `E:\Projects\New project\six-system-arena\` | 所有新建、派生、提交只在此处 |
+| **工作副本数据库** | `E:\Projects\assets\罗小黑战记数据库\db\worldview_luoxiaohei_v4.db`（sha256 `EE5B2C1E…`） | 派生数据源，**只读** |
+| 旧副本（仅参考） | `D:\Projects\new project\`（R1 成果 + 其独立 git） | **保留不删**；成果已快照至 `legacy\d-drive-r1\` |
+| 旧副本数据库 | `D:\Projects\罗小黑战记数据库\db\worldview_luoxiaohei_v4.db`（sha256 `34EFCB0A…`） | 仅历史比对与回滚依据 |
+| 站点参考工程 | `E:\Projects\server\app\src\cards\` | 现有 demo 数值登记对象，**只读** |
+
+> ⚠️ 两库已分叉（`34efcb0…` vs `ee5b2c…`），**不可混用**；本项目一切派生以 E 盘库为准。
+> 迁入详情见 [`legacy/d-drive-r1/MIGRATION.md`](legacy/d-drive-r1/MIGRATION.md)；
+> 站点现有 demo 数值的登记与字段对照结论见 [`docs/08-现有游戏数值基线登记.md`](docs/08-现有游戏数值基线登记.md)。
 
 ---
 
@@ -36,6 +63,7 @@ AIGC:
 | 数值与卡组审计 | `data/audit/r2-audit.md` | 待办 | **完成** |
 
 > R2 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R2** 一节。
+> R3 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R3** 一节（工作副本切至 E 盘 + 站点现有 demo 数值登记）。
 
 ### 1.1 世界观与素材红线（最高优先级）
 
@@ -95,7 +123,12 @@ six-system-arena/
 │  ├─ 03-对战系统.md
 │  ├─ 04-成就系统.md
 │  ├─ 05-素材白名单.md
-│  └─ 06-数据源与回滚.md
+│  ├─ 06-数据源与回滚.md
+│  ├─ 07-站点集成方案.md          ← R2：zszm 端口接入点与三套方案
+│  └─ 08-现有游戏数值基线登记.md   ← R3：站点 demo 数值登记与字段对照
+├─ legacy/
+│  └─ d-drive-r1/            ← R3：D 盘第 1 轮成果只读快照（附 MIGRATION.md）
+├─ data/demo-baseline.json   ← R3：站点 demo 数值结构化登记
 └─ vendor/backup/            ← 参考文件备份区（补丁前快照，只增不改）
 ```
 
@@ -197,4 +230,7 @@ python "data\scripts\patch_lxh_icons.py" --rollback
 | 官方卡片图标 | `E:\Projects\shared\shared-ui\AI image\cards\*.svg` | 六系图标来源 |
 | 共享 UI 库 | `E:\Projects\shared\shared-ui\lxh-ui.js` | `wuxingSVG()` / `radar6()` 复用对象 |
 | 官方图片素材 | `E:\Projects\assets\罗小黑战记数据库\images\` | 白名单见 `docs/05` |
+| 站点卡牌工程（现有 demo 数值） | `E:\Projects\server\app\src\cards\` | 数值登记对象，**只读**；登记结论见 `docs/08` |
+| 旧副本工程（第 1 轮成果） | `D:\Projects\new project\` | **保留不删**，仅参考；快照在 `legacy/d-drive-r1/` |
+*（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
