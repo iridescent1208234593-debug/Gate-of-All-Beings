@@ -1,0 +1,34 @@
+{
+  "name": "@lxh/six-systems",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "罗小黑·六大系数值可视化与对战扩展 —— 与 shared-types / shared-ui 平级的可引用模块",
+  "license": "UNLICENSED",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.js",
+    "./world": "./src/world/index.js",
+    "./ui": "./src/ui/index.js",
+    "./ui/react": "./src/ui/react/index.tsx",
+    "./data": "./src/data/characters.json",
+    "./data/provenance": "./src/data/_provenance.json"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "derive": "node tools/derive-from-db.mjs",
+    "derive:check": "node tools/derive-from-db.mjs --check",
+    "stats:derive": "node tools/derive-all-stats.mjs",
+    "stats:check": "node tools/derive-all-stats.mjs --check",
+    "stats:overrides": "node tools/apply-overrides.mjs",
+    "stats:overrides:check": "node tools/apply-overrides.mjs --check",
+    "demo": "node tools/serve-demo.mjs"
+  }
+}

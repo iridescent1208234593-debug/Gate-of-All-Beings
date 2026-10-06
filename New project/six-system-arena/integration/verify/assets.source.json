@@ -1,0 +1,13 @@
+{
+  "note": "官方素材只读来源。为避免 PowerShell 脚本内出现非 ASCII 字面量（PS5.1 无 BOM 时按 ANSI 解析会乱码），中文路径统一由本 UTF-8 配置提供。",
+  "assets_root": "E:\\Projects\\assets",
+  "db_folder": "罗小黑战记数据库",
+  "images_rel": "images",
+  "whitelist": [
+    { "id": "luoxiaohei_full", "rel": "罗小黑\\罗小黑_全身_085.jpg", "dest": "luoxiaohei_full.jpg" },
+    { "id": "luoxiaohei_face_01", "rel": "罗小黑\\罗小黑_表情_087.jpg", "dest": "luoxiaohei_face_01.jpg" },
+    { "id": "luoxiaohei_face_02", "rel": "罗小黑\\罗小黑_表情_088.jpg", "dest": "luoxiaohei_face_02.jpg" },
+    { "id": "bidiu", "rel": "比丢\\比丢.png", "dest": "bidiu.png" },
+    { "id": "bidiu_anim", "rel": "比丢\\比丢.gif", "dest": "bidiu.gif" }
+  ]
+}

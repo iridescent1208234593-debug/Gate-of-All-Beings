@@ -1,0 +1,105 @@
+{
+  "package": "sixsys-zszm-integration",
+  "version": "1.0.0",
+  "round": "R3",
+  "generated_at": "2026-10-05",
+  "description": "六系演武 → zszm 端口（众生之门）集成包。把六大系（金/木/水/火/土/空间）能力数值与 UI 图标接入卡牌 / 经营 / 模拟三系统的可视化，并落地胜负结算（小黑 & 比丢正向反馈、失败安慰）与收集类成就。",
+  "source_of_truth": "E:\\Projects\\New project\\six-system-arena",
+  "target_site": "D:\\Projects\\zszm",
+  "red_lines": [
+    "本包全部文件均在 six-system-arena 目录内生成；不修改 zszm / shared-ui / shared-types / 数据库等参考仓库。",
+    "结算素材仅用《罗小黑战记》官方图（docs/05 白名单）；严禁 AI 生图、严禁同人图、严禁外链。",
+    "本轮未联网采集任何素材；install_assets.ps1 默认 DRY-RUN。",
+    "安装动作（复制文件 / 接线）由站点侧显式执行；本包自身零副作用（无自动写盘、无自动 fetch）。"
+  ],
+  "install_root": {
+    "public": "D:\\Projects\\zszm\\public\\sixsys",
+    "src": "D:\\Projects\\zszm\\src\\game\\sixsys"
+  },
+  "runtime_scripts": [
+    {
+      "source": "ui/six-system-icons.js",
+      "install_to": "public/sixsys/js/six-system-icons.js",
+      "global": "window.SixSystemIcons",
+      "role": "六系图标自包含模块；加载后零侵入注册到 window.LXHUI.ICONS 的 jin/mu/shui/huo/tu/kongjian 六键"
+    },
+    {
+      "source": "ui/SixSystemPanel.js",
+      "install_to": "public/sixsys/js/SixSystemPanel.js",
+      "global": "window.SixSystemPanel",
+      "role": "数值面板（六系雷达 + 五行星图 + 图标 + 属性条），供模拟 / 卡牌详情页复用"
+    },
+    {
+      "source": "ui/settlement.js",
+      "install_to": "public/sixsys/js/settlement.js",
+      "global": "window.SixSystemSettlement",
+      "role": "胜负结算时序与文案池；胜利放小黑与比丢、失败放小黑安慰表情"
+    },
+    {
+      "source": "ui/battle-engine.js",
+      "install_to": "public/sixsys/js/battle-engine.js",
+      "global": "window.SixSystemBattle",
+      "role": "确定性对战内核（六系克制环 / 镜像战 / 30 回合上限 / 战斗日志契约）"
+    },
+    {
+      "source": "ui/achievement-system.js",
+      "install_to": "public/sixsys/js/achievement-system.js",
+      "global": "window.SixSystemAchievement",
+      "role": "收集类成就判定与四条图鉴视图；失败不惩罚"
+    }
+  ],
+  "data_files": [
+    { "source": "data/generated/character_stats.json", "install_to": "public/sixsys/data/character_stats.json", "size_note": "488 名角色六系数值" },
+    { "source": "data/decks.json", "install_to": "public/sixsys/data/decks.json", "size_note": "488 套卡组（主将 + 技能 + 羁绊 + 终极技）" },
+    { "source": "data/achievements.json", "install_to": "public/sixsys/data/achievements.json", "size_note": "15 条收集类成就 + 战斗日志契约" },
+    { "source": "data/six-systems.json", "install_to": "public/sixsys/data/six-systems.json", "size_note": "六系定义、图标 key、颜色、克制环" }
+  ],
+  "ts_package": [
+    { "source": "integration/src/index.ts", "install_to": "src/game/sixsys/index.ts" },
+    { "source": "integration/src/sixsys-types.ts", "install_to": "src/game/sixsys/sixsys-types.ts" },
+    { "source": "integration/src/sixsys-assets.ts", "install_to": "src/game/sixsys/sixsys-assets.ts" },
+    { "source": "integration/src/sixsys-data.ts", "install_to": "src/game/sixsys/sixsys-data.ts" },
+    { "source": "integration/src/SixSystemPanel.tsx", "install_to": "src/game/sixsys/SixSystemPanel.tsx" },
+    { "source": "integration/src/SettlementStage.tsx", "install_to": "src/game/sixsys/SettlementStage.tsx" },
+    { "source": "integration/src/AchievementBanner.tsx", "install_to": "src/game/sixsys/AchievementBanner.tsx" }
+  ],
+  "styles": [
+    { "source": "integration/styles/sixsys-integration.css", "install_to": "src/game/sixsys/sixsys-integration.css", "note": "全部选择器以 sixsys- 前缀，避免与 zszm 既有样式冲突" }
+  ],
+  "verify": [
+    { "file": "integration/verify/install_assets.ps1", "role": "从官方图库复制白名单素材到 public/sixsys/official（默认 DRY-RUN）" },
+    { "file": "integration/verify/assets.source.json", "role": "素材来源配置（UTF-8，避免 PowerShell 中文乱码）" },
+    { "file": "integration/verify/sync_from_arena.ps1", "role": "把 arena 的 ui/data 真源同步到 integration/js、integration/data（只写本目录）" },
+    { "file": "integration/verify/verify_integration.py", "role": "集成包静态自检（交付文件 / arena 漂移 / 素材白名单 / 红线 / 契约 / 数据一致性 / 土系缺口）" },
+    { "file": "integration/verify/smoke_integration.mjs", "role": "运行时冒烟自检（图标注册 / 结算 / 对战 / 成就 / 红线，node 直接跑）" }
+  ],
+  "tools": [
+    { "file": "integration/tools/decide_ach_system_001.py", "role": "ach_system_001 土系缺口拍板工具（只读，输出三方案对比与建议）" }
+  ],
+  "assets": {
+    "base": "/sixsys/official/",
+    "installer": "integration/verify/install_assets.ps1",
+    "origin_root": "E:\\Projects\\assets\\罗小黑战记数据库\\images",
+    "whitelist": [
+      { "id": "luoxiaohei_full", "file": "luoxiaohei_full.jpg", "origin": "罗小黑战记数据库\\images\\罗小黑\\罗小黑_全身_085.jpg", "role": "胜利结算：罗小黑登场（官方全身立绘）" },
+      { "id": "luoxiaohei_face_01", "file": "luoxiaohei_face_01.jpg", "origin": "罗小黑战记数据库\\images\\罗小黑\\罗小黑_表情_087.jpg", "role": "失败结算：小黑安慰表情（官方表情图）" },
+      { "id": "luoxiaohei_face_02", "file": "luoxiaohei_face_02.jpg", "origin": "罗小黑战记数据库\\images\\罗小黑\\罗小黑_表情_088.jpg", "role": "失败结算：小黑安慰表情（官方表情图）" },
+      { "id": "bidiu", "file": "bidiu.png", "origin": "罗小黑战记数据库\\images\\比丢\\比丢.png", "role": "胜利结算：比丢登场（官方立绘）" },
+      { "id": "bidiu_anim", "file": "bidiu.gif", "origin": "罗小黑战记数据库\\images\\比丢\\比丢.gif", "role": "胜利结算：比丢登场动图（可选，静态图缺失时兜底）" }
+    ],
+    "excluded_dirs": ["ai-art", "ai-avatars", "AI image", "同人图"],
+    "note": "本轮未联网采集；如后续需补官方表情包，须按 docs/05 流程逐张审查并更新本清单与 assets.source.json。"
+  },
+  "entry_wiring": [
+    { "file": "src/game/sixsys/bootstrap.ts", "type": "新增", "desc": "按序引入 lxh-ui.js → six-system-icons.js → settlement.js，并显式调用 registerIcons() 兜底；导入 sixsys-integration.css" },
+    { "file": "src/game/GameApp.tsx（或 src/gate/GameShell.tsx）", "type": "1 行 import", "desc": "import './sixsys/bootstrap';" },
+    { "file": "src/game/GameApp.tsx · victory/defeat 区块", "type": "外接组件", "desc": "挂载 <SettlementStage> 与 <AchievementBanner>，原结局区块保留不动" },
+    { "file": "src/game/GameApp.tsx · CardTile / src/game/CardCollection.tsx", "type": "可选增强", "desc": "用 <LxhIcon name={c.element}/> 在卡面显示六系图标；按 element 增加图鉴筛选" }
+  ],
+  "rollback": [
+    "删除 D:\\Projects\\zszm\\public\\sixsys 与 D:\\Projects\\zszm\\src\\game\\sixsys 两个新增目录。",
+    "撤销 bootstrap import 与结算挂载（共 2 处，均为新增行，不触及既有逻辑）。",
+    "git -C D:\\Projects\\zszm status 应回到 feat/card-balance-admin 分支原有的 7 处未提交变更，无新增文件残留。",
+    "参考仓库 E:\\Projects\\shared\\shared-ui 与 E:\\Projects\\assets 全程只读，无需回滚。"
+  ]
+}
