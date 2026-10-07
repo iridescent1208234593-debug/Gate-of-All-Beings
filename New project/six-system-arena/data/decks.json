@@ -3,9 +3,9 @@
     "project": "six-system-arena",
     "generator": "data/scripts/generate_decks.py",
     "version": "1.0.0",
-    "generated_at": "2026-10-05 22:44:37",
+    "generated_at": "2026-10-06 23:38:15",
     "source_stats": "E:\\Projects\\New project\\six-system-arena\\data\\generated\\character_stats.json",
-    "source_stats_generated_at": "2026-10-05 22:44:36",
+    "source_stats_generated_at": "2026-10-06 23:38:15",
     "source_stats_fingerprint": {
       "size": 2392064,
       "mtime": 1791230190,

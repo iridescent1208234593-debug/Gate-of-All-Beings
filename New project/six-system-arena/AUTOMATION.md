@@ -37,6 +37,10 @@ AIGC:
 | 5 | `data/scripts/audit_r2.py` | 生成数值与卡组审计报告（含成就可达性） | 上述两份产物 | `data/audit/r2-audit.md` | 否 |
 | 6 | `data/scripts/smoke_test.js` | 三模块联动冒烟测试（Node，零依赖） | `ui/*.js` + 两份产物 | 控制台断言结论 | 否 |
 | 7 | `data/scripts/patch_lxh_icons.py` | 为 `lxh-ui.js` 的 ICONS 增量补 6 个键 | `shared-ui/lxh-ui.js` | 备份 + 补丁后文件 | **是（仅 `--apply`）** |
+| 8 | `integration/verify/sync_from_arena.ps1` | 以 arena 为唯一真源，刷新 `integration/` 下 js 与 data 副本 | `ui/*.js`、`data/**` | `integration/js`、`integration/data` | 否（仅本工程内） |
+| 9 | `integration/verify/verify_integration.py` | 集成包交付自检：清单 / 漂移 / 红线 / 契约 / 数据五项（`--refresh-hashes` 刷新清单哈希） | `integration/**`、`manifest.json` | `verify_report.json` + 控制台结论 | 否 |
+| 10 | `integration/verify/smoke_integration.mjs` | 运行时冒烟：图标注册零污染、结算契约、克制环确定性、成就判定 | 运行时 JS + 数据 | 控制台断言结论 | 否 |
+| 11 | `integration/verify/install_assets.ps1` | 安装官方结算素材到站点 `public/sixsys/official`（**默认 DRY-RUN**） | `assets.source.json` 白名单 | 站点 `public/sixsys/official/` | **是（仅 `-Apply`）** |
 
 ---
 
@@ -150,6 +154,31 @@ python "data\scripts\patch_lxh_icons.py" --rollback
 > ⚠️ 本项目默认采用**零侵入**接入（加载 `ui/six-system-icons.js` 即自动注册六键），
 > **无需**执行 `--apply`。仅当站点希望把六键固化进共享 UI 文件时，才显式执行并同步 D 盘副本。
 
+### 2.5 集成包同步与交付自检（R4 新增）
+
+```powershell
+$A = "E:\Projects\New project\six-system-arena"
+
+# 1) 同步：把 arena 真源刷新到 integration/ 副本（默认 APPLY，-DryRun 可预览）
+powershell -ExecutionPolicy Bypass -File "$A\integration\verify\sync_from_arena.ps1"
+
+# 2) 静态自检（--refresh-hashes 会先刷新 23 文件哈希再校验）
+python "$A\integration\verify\verify_integration.py" --refresh-hashes
+
+# 3) 运行时冒烟（零依赖 Node）
+node "$A\integration\verify\smoke_integration.mjs"
+
+# 4) 官方素材安装（先预览，再 -Apply）
+powershell -ExecutionPolicy Bypass -File "$A\integration\verify\install_assets.ps1" -Dest "<站点>\public\sixsys\official"
+```
+
+**行为保证**
+
+- `sync_from_arena.ps1` 只在本工程内写入，绝不触碰站点与 `shared-ui`；`character_stats.json` 源自 `data\generated\`。
+- `verify_integration.py` 五项检查：`files.required` / `drift.arena-source` / `assets.official-whitelist` / `redline.*` / `contract.*` / `data.*`；退出码非 0 即失败。
+- `install_assets.ps1` 默认 **DRY-RUN**，只有显式 `-Apply` 才落盘；素材必须命中 `assets.source.json` 白名单。
+- 每次改产物 → 先 `sync` 再 `verify --refresh-hashes`，保证副本与真源零漂移。
+
 ---
 
 ## 3. 建议调度
@@ -164,6 +193,9 @@ python "data\scripts\patch_lxh_icons.py" --rollback
 | 成就 / 卡组校验 | 每次改动 `achievements.json` / `decks.json` 后 | 手动 | `validate_achievements.py` |
 | 审计报告刷新 | 每个迭代收尾 | 手动 | `audit_r2.py`，结论写入 `CHANGELOG.md` |
 | 素材合规扫描 | 每次新增素材 | 手动 | 校验新图片不在 `docs/05` 黑名单目录内 |
+| **集成包同步 + 自检** | 每次改动 arena 产物后 | 手动 | `sync_from_arena.ps1` → `verify_integration.py --refresh-hashes` → `smoke_integration.mjs` |
+| 站点素材安装 | 站点侧首次接入 / 素材更新 | 手动（需授权） | `install_assets.ps1` 先 DRY-RUN，确认后加 `-Apply` |
+| 集成包漂移巡检 | 每轮迭代收尾 | 手动 | `verify_integration.py`（不刷新哈希，纯比对） |
 
 Windows 任务计划程序示例（每周一 09:00 重算）：
 

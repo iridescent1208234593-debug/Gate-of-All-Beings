@@ -1,7 +1,7 @@
 /* ============================================================
    六系演武 · 六系图标自包含模块  six-system-icons.js
    ------------------------------------------------------------
-   来源：官方卡片图标 E:\Projects\shared\shared-ui\AI image\cards\
+   来源：官方卡片图标 shared-ui/AI image/cards\
          metal.svg / wood.svg / water.svg / fire.svg / earth.svg / space.svg
          （仅重命名渐变色 id 以避免多实例冲突，图形与配色原样保留）
 

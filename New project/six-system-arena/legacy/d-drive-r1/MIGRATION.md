@@ -1,3 +1,14 @@
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_9de62c46c15111f1887c525400de85a5
+    ReservedCode1: m01kiLN627mKZOXKnalWPI5MaREYDkagUtGu3YtFddluNZy5vn3FHoJiR8YUZyKk+S+wKUae2jIZRCrTh93vl7C7pWqYbCd0gqkB5EFNCwnEi/ms9Jeo+nSFRAX4VUPyJTruUWJLkmBH/RO1t5DJm3b5gg0Q7Hr5GJ38gbCq6FWDh640UKZICyNcDeM=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_9de62c46c15111f1887c525400de85a5
+    ReservedCode2: m01kiLN627mKZOXKnalWPI5MaREYDkagUtGu3YtFddluNZy5vn3FHoJiR8YUZyKk+S+wKUae2jIZRCrTh93vl7C7pWqYbCd0gqkB5EFNCwnEi/ms9Jeo+nSFRAX4VUPyJTruUWJLkmBH/RO1t5DJm3b5gg0Q7Hr5GJ38gbCq6FWDh640UKZICyNcDeM=
+---
+
 # MIGRATION · D 盘第 1 轮成果迁入说明（R3）
 
 > 本目录是 **D:\Projects\new project 第 1 轮（R1）成果的只读快照**，由 R3 轮从 D 盘迁入。
@@ -68,3 +79,4 @@
 - ❌ 不从本目录直接取数参与 E 盘构建（数据源为 E 盘库 + E 盘派生脚本）。
 - ✅ 需要对比 R1 口径、复用覆盖层设计或 demo 版式时，可作参考阅读。
 - ✅ 需要吸收某项能力时，在 E 盘工程内**另建实现**，并在 `CHANGELOG.md` 记录来源。
+*（内容由AI生成，仅供参考）*

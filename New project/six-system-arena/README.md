@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_9a8b6a27c15111f1884b525400cd780f
+    ReservedCode1: zJwXcYcugEgkvcQzQrnMz7y23NiBV0EW2Yd8ajvxmxMWQFF5PfKaotVDa90TNR1inGkRENj+fDm6dy7SStIQfw0jF1pRcCxBxxcu/rEUy6nW9Up9+sFaRPLYRtsCnRSwApeEzfTf7di077UuLHzfYn7UcinBv+HzjTw30j93J3ahvbS34IyCbvrwKRw=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_9a8b6a27c15111f1884b525400cd780f
+    ReservedCode2: zJwXcYcugEgkvcQzQrnMz7y23NiBV0EW2Yd8ajvxmxMWQFF5PfKaotVDa90TNR1inGkRENj+fDm6dy7SStIQfw0jF1pRcCxBxxcu/rEUy6nW9Up9+sFaRPLYRtsCnRSwApeEzfTf7di077UuLHzfYn7UcinBv+HzjTw30j93J3ahvbS34IyCbvrwKRw=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_9b163901c10a11f1884b525400cd780f
     ReservedCode1: f8VOaSRFpJ7jQ2irnwiUpVS+eqbqShnb0yh9MiK7I7yD/F0FBnpi6XffCP1ASLUYxmWztA5TwjwMCzTsZHzDrJ289aNQp8PPgeacQNXBdHmEI3XpiCeUCQlUl0N0Y5Ss6Dce4UZJfOEU4oY7Q7kuE7v7Q3UZopd7mrN4S3zw3pcu0b68tRKgpAX3NSA=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -53,7 +64,7 @@ AIGC:
 | 六系图标可视化接入 | `ui/six-system-icons.js`、`ui/SixSystemPanel.js` | 完成 | 保持 |
 | 数值模型可执行推导 | `data/stat-model.json`、`data/scripts/generate_stats.py` | 完成 | 全量固化 |
 | 角色数值产物 | `data/generated/character_stats.json`（488 名） | 试跑 | 固化 |
-| 设计文档沉淀 | `docs/01 ~ 06` | 完成 | 冻结为实现依据 |
+| 设计文档沉淀 | `docs/01 ~ 09` | 完成 | 冻结为实现依据 |
 | 可重复自动化 | `AUTOMATION.md` + `scripts/run_all.ps1` | 脚本清单 | 一键串联 |
 | 卡组分配 | `data/decks.json`（488 名 · 主将 + 技能 + 羁绊） | 待办 | **完成** |
 | 收集类成就数据 | `data/achievements.json`（15 条 / 4 类） | 待办 | **完成** |
@@ -125,7 +136,18 @@ six-system-arena/
 │  ├─ 05-素材白名单.md
 │  ├─ 06-数据源与回滚.md
 │  ├─ 07-站点集成方案.md          ← R2：zszm 端口接入点与三套方案
-│  └─ 08-现有游戏数值基线登记.md   ← R3：站点 demo 数值登记与字段对照
+│  ├─ 08-现有游戏数值基线登记.md   ← R3：站点 demo 数值登记与字段对照
+│  └─ 09-站点集成安装手册.md       ← R4：逐步安装 / 素材安装 / 回滚 / 常见问题
+├─ integration/               ← R4：zszm 交付集成包（可直接复制到站点）
+│  ├─ INTEGRATION-ZSZM.md     ← R4：交付级安装指南（零映射 / 四步安装 / 回滚 / FAQ）
+│  ├─ README.md               ← 包结构 / API / 契约 / 红线
+│  ├─ manifest.json           ← 23 文件哈希清单（防漂移基准）
+│  ├─ js/                     ← six-system-icons.js / settlement.js
+│  ├─ src/                    ← TS 接入层（SettlementStage / SixSystemPanel / AchievementBanner / 适配层）
+│  ├─ styles/                 ← sixsys-integration.css（sixsys- 前缀，零冲突）
+│  ├─ data/                   ← 交付数据副本（488 角色 / 488 卡组 / 15 成就 / 六系 / 模型）
+│  ├─ tools/                  ← decide_ach_system_001.py（土系成就缺口决策工具）
+│  └─ verify/                 ← sync / verify / smoke / install_assets 四件套
 ├─ legacy/
 │  └─ d-drive-r1/            ← R3：D 盘第 1 轮成果只读快照（附 MIGRATION.md）
 ├─ data/demo-baseline.json   ← R3：站点 demo 数值结构化登记
@@ -215,12 +237,30 @@ python "data\scripts\patch_lxh_icons.py" --rollback
 </script>
 ```
 
+### 3.4 集成包同步与交付自检（R4）
+
+```powershell
+$A = "E:\Projects\New project\six-system-arena"
+
+# 同步：arena 真源 → integration\ 副本（默认 APPLY；-DryRun 仅预览）
+powershell -ExecutionPolicy Bypass -File "$A\integration\verify\sync_from_arena.ps1"
+
+# 静态自检（23 文件清单 / 零漂移 / 红线 / 契约 / 数据）
+python "$A\integration\verify\verify_integration.py" --refresh-hashes
+
+# 运行时冒烟（图标注册 / 结算契约 / 克制环确定性 / 成就判定）
+node "$A\integration\verify\smoke_integration.mjs"
+```
+
+**接入 zszm 站点（站点侧，需授权后执行）**：见 [`integration/INTEGRATION-ZSZM.md`](integration/INTEGRATION-ZSZM.md) §2–§5 —— 复制 4 组文件 + 入口引两行，零侵入、可一键回滚。
+
 ---
 
 ## 4. 每轮记录入口
 
 - 迭代记录：见 [`CHANGELOG.md`](CHANGELOG.md)（每轮结束必须在其中追加一节）。
 - 阶段进度：见 [`PLAN.md`](PLAN.md) 的阶段勾选表。
+- 交付集成包：见 [`integration/README.md`](integration/README.md)；安装与回滚见 [`integration/INTEGRATION-ZSZM.md`](integration/INTEGRATION-ZSZM.md)。
 
 ## 5. 相关参考（只读）
 
@@ -232,5 +272,7 @@ python "data\scripts\patch_lxh_icons.py" --rollback
 | 官方图片素材 | `E:\Projects\assets\罗小黑战记数据库\images\` | 白名单见 `docs/05` |
 | 站点卡牌工程（现有 demo 数值） | `E:\Projects\server\app\src\cards\` | 数值登记对象，**只读**；登记结论见 `docs/08` |
 | 旧副本工程（第 1 轮成果） | `D:\Projects\new project\` | **保留不删**，仅参考；快照在 `legacy/d-drive-r1/` |
+| zszm 交付集成包 | `E:\Projects\New project\six-system-arena\integration\` | R4 产出；安装指南见 `INTEGRATION-ZSZM.md` |
+*（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*

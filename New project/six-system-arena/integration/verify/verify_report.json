@@ -1,0 +1,303 @@
+{
+  "tool": "verify_integration.py",
+  "package": "sixsys-zszm-integration",
+  "arena_root": "E:\\Projects\\new project\\six-system-arena",
+  "integration_root": "E:\\Projects\\new project\\six-system-arena\\integration",
+  "generated_at": "2026-10-07 04:20:16",
+  "ok": true,
+  "failures": [],
+  "checks": [
+    {
+      "check": "files.required",
+      "ok": true,
+      "detail": "23/23 存在",
+      "missing": []
+    },
+    {
+      "check": "drift.arena-source",
+      "ok": true,
+      "detail": "全部与 arena 真源一致",
+      "rows": [
+        {
+          "file": "js/six-system-icons.js",
+          "status": "in-sync",
+          "sha256": "5c2a0708c08f4174"
+        },
+        {
+          "file": "js/settlement.js",
+          "status": "in-sync",
+          "sha256": "c93bd4cfca25441f"
+        },
+        {
+          "file": "data/character_stats.json",
+          "status": "in-sync",
+          "sha256": "90e3c13e624e78b7"
+        },
+        {
+          "file": "data/decks.json",
+          "status": "in-sync",
+          "sha256": "64fd2f8f846bcd1d"
+        },
+        {
+          "file": "data/achievements.json",
+          "status": "in-sync",
+          "sha256": "64eaefc912c77ee4"
+        },
+        {
+          "file": "data/six-systems.json",
+          "status": "in-sync",
+          "sha256": "beb33d0a1a02f098"
+        },
+        {
+          "file": "data/stat-model.json",
+          "status": "in-sync",
+          "sha256": "058d15a0b38d1d96"
+        }
+      ],
+      "drifted": []
+    },
+    {
+      "check": "assets.official-whitelist",
+      "ok": true,
+      "detail": "5/5 官方素材在位（本轮未联网采集）",
+      "rows": [
+        {
+          "id": "luoxiaohei_full",
+          "exists": true,
+          "bytes": 71322
+        },
+        {
+          "id": "luoxiaohei_face_01",
+          "exists": true,
+          "bytes": 9601
+        },
+        {
+          "id": "luoxiaohei_face_02",
+          "exists": true,
+          "bytes": 18946
+        },
+        {
+          "id": "bidiu",
+          "exists": true,
+          "bytes": 16228
+        },
+        {
+          "id": "bidiu_anim",
+          "exists": true,
+          "bytes": 40984
+        }
+      ],
+      "missing": []
+    },
+    {
+      "check": "redline.forbidden-tokens",
+      "ok": true,
+      "detail": "未命中 AI / 同人 关键词",
+      "hits": []
+    },
+    {
+      "check": "redline.no-external-url",
+      "ok": true,
+      "detail": "未发现外链",
+      "urls": []
+    },
+    {
+      "check": "contract.icon-keys",
+      "ok": true,
+      "detail": "六键 ['jin', 'mu', 'shui', 'huo', 'tu', 'kongjian'] 定义完整",
+      "missing": []
+    },
+    {
+      "check": "contract.zero-injection",
+      "ok": true,
+      "detail": "six-system-icons.js 通过 registerIcons 注册到 window.LXHUI.ICONS"
+    },
+    {
+      "check": "contract.no-penalty-on-lose",
+      "ok": true,
+      "detail": "settlement.js 含 penalty 字段（失败不惩罚）"
+    },
+    {
+      "check": "contract.achievement-stagger",
+      "ok": true,
+      "detail": "结算引擎含 achievement.show_after_ms（与结算错峰）"
+    },
+    {
+      "check": "contract.reuse-lxh",
+      "ok": true,
+      "detail": "接入层复用 window.LXHUI（图标兜底 / 标签）"
+    },
+    {
+      "check": "contract.settlement-driven",
+      "ok": true,
+      "detail": "SettlementStage 由 resolve() 时间轴数据驱动"
+    },
+    {
+      "check": "contract.no-abs-path-in-ui",
+      "ok": true,
+      "detail": "UI 层不含绝对路径（素材经 toSiteUrl 映射）"
+    },
+    {
+      "check": "data.character-stats",
+      "ok": true,
+      "detail": "角色 488 名",
+      "total": 488
+    },
+    {
+      "check": "data.decks",
+      "ok": true,
+      "detail": "卡组 488 套",
+      "decks": 488
+    },
+    {
+      "check": "data.achievements",
+      "ok": true,
+      "detail": "成就 15 条",
+      "achievements": 15
+    },
+    {
+      "check": "data.six-systems",
+      "ok": true,
+      "detail": "六系定义 6 条"
+    },
+    {
+      "check": "data.ach_system_001-gap",
+      "ok": true,
+      "detail": "土系主属性无 C 档以上（缺口确认）",
+      "tu_c_plus": 0,
+      "gate": {
+        "achievement": "ach_system_001",
+        "status": "proposed",
+        "decided_by": "pending-user-review",
+        "min_tier": "C",
+        "or_collect_per_element": 3,
+        "gap": "土系主属性 7 名角色最高仅 D 档，静态不满足 min_tier=C",
+        "reference_tool": "integration/tools/decide_ach_system_001.py",
+        "primary_fix": {
+          "plan": "A · 数据侧补齐土系 C 档",
+          "how": "在 data/manual-overrides.json 为土系角色写入人工校准（经世界观核验），使其 tier >= C",
+          "engine_change": false
+        },
+        "fallback": {
+          "plan": "C · 替代路径 or_collect_per_element",
+          "value": 3,
+          "how": "某系无 C 档角色时，收集该系 3 名亦可点亮；需引擎 1.1.0 将 min_tier 与替代分支参数化",
+          "engine_change": true,
+          "scheduled": "与 P4 全量铺开同批"
+        },
+        "rejected": {
+          "plan": "B · 放宽 min_tier C -> D",
+          "reason": "语义降档会使后续所有系别成就一并贬值"
+        },
+        "note": "不修改 ach_system_001 现有 condition 语义；本段仅登记处置方案，供引擎参数化与人工校准引用。"
+      }
+    },
+    {
+      "check": "data.ach_system_001-decision",
+      "ok": true,
+      "detail": "achievements.json 已落地 element_gate 拍板（替代路径 / 门槛）"
+    }
+  ],
+  "details": {
+    "drift": {
+      "rows": [
+        {
+          "file": "js/six-system-icons.js",
+          "status": "in-sync",
+          "sha256": "5c2a0708c08f4174"
+        },
+        {
+          "file": "js/settlement.js",
+          "status": "in-sync",
+          "sha256": "c93bd4cfca25441f"
+        },
+        {
+          "file": "data/character_stats.json",
+          "status": "in-sync",
+          "sha256": "90e3c13e624e78b7"
+        },
+        {
+          "file": "data/decks.json",
+          "status": "in-sync",
+          "sha256": "64fd2f8f846bcd1d"
+        },
+        {
+          "file": "data/achievements.json",
+          "status": "in-sync",
+          "sha256": "64eaefc912c77ee4"
+        },
+        {
+          "file": "data/six-systems.json",
+          "status": "in-sync",
+          "sha256": "beb33d0a1a02f098"
+        },
+        {
+          "file": "data/stat-model.json",
+          "status": "in-sync",
+          "sha256": "058d15a0b38d1d96"
+        }
+      ]
+    },
+    "assets": {
+      "rows": [
+        {
+          "id": "luoxiaohei_full",
+          "exists": true,
+          "bytes": 71322
+        },
+        {
+          "id": "luoxiaohei_face_01",
+          "exists": true,
+          "bytes": 9601
+        },
+        {
+          "id": "luoxiaohei_face_02",
+          "exists": true,
+          "bytes": 18946
+        },
+        {
+          "id": "bidiu",
+          "exists": true,
+          "bytes": 16228
+        },
+        {
+          "id": "bidiu_anim",
+          "exists": true,
+          "bytes": 40984
+        }
+      ]
+    },
+    "redlines": {
+      "hits": [],
+      "urls": []
+    },
+    "contracts": {
+      "icon_keys": [],
+      "zero_injection": true,
+      "no_penalty": true,
+      "achievement_stagger": true,
+      "reuse_lxh": true,
+      "settlement_driven": true,
+      "no_abs_path": true
+    },
+    "data": {
+      "element_counts": {
+        "jin": 33,
+        "mu": 27,
+        "huo": 16,
+        "shui": 26,
+        "none": 372,
+        "kongjian": 7,
+        "tu": 7
+      },
+      "c_plus": {
+        "jin": 4,
+        "mu": 1,
+        "shui": 3,
+        "huo": 3,
+        "tu": 0,
+        "kongjian": 1
+      }
+    }
+  }
+}

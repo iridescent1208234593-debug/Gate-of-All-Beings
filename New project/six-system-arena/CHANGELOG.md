@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_9c4b56d5c15111f1887c525400de85a5
+    ReservedCode1: w9j3ax+36CinUBigp4bGdUNLrta1p49jXrV6t2kH/U3hjGh36LzXHc6iU7dWDKhr8QHHtDgqThCE87X0n+9nTqrq6Rk9MWooLpp+Fe5lUtqSJ6tFayMHiEmZs62cQXIFijklJk3ueuiGcr/G0WjISvZYm4jCkyTXUj+ZcSsxDJPuC01zfzx9JGpM1jE=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_9c4b56d5c15111f1887c525400de85a5
+    ReservedCode2: w9j3ax+36CinUBigp4bGdUNLrta1p49jXrV6t2kH/U3hjGh36LzXHc6iU7dWDKhr8QHHtDgqThCE87X0n+9nTqrq6Rk9MWooLpp+Fe5lUtqSJ6tFayMHiEmZs62cQXIFijklJk3ueuiGcr/G0WjISvZYm4jCkyTXUj+ZcSsxDJPuC01zfzx9JGpM1jE=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_2f363280c0ee11f1884b525400cd780f
     ReservedCode1: U2FCD7fEUS/97kKH2LbQbFynNvOBpNwVPYVl77SnC8SJ/HTiuTvhPv/+lvCYdklNNBFSRns6LiL2kfr0MsBGVatT8WuI2MyUZC7q+rtB2Yg/dXWFjVgfGcJ+orRKvTPhMK3JgHzXRDDctpumHKEAju406dWnUZazoZdBEP4Jam8IAZPgxdKnKBm1Z1I=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -195,3 +206,50 @@ powershell -ExecutionPolicy Bypass -File "scripts\run_all.ps1"
 1. **土系成就 `ach_system_001` 静态不可达成**：站点侧土系同样偏弱（legacy 卡土系仅 8 张、六系分值维度缺失），R2 已报备的门槛问题维持待用户拍板。
 2. **D 盘快照为静态参考**：`legacy/d-drive-r1/` 不随 E 盘演进；如需吸收其外置覆盖层与三层溯源能力，须在 E 盘另建实现。
 3. **demo 基线需随站点发版重登记**：站点发布新平衡版本后，应重跑 `docs/08 §7` 复核命令并更新 `data/demo-baseline.json`。
+*（内容由AI生成，仅供参考）*
+
+---
+
+## R4 · 2026-10-05 · zszm 集成包交付（交付级安装指南 + 全绿自检）
+
+**范围**：在 `six-system-arena\` 内新增 `integration/` 交付包（运行时 JS + TS 接入层 + 数据 + 样式 + 校验工具 + 安装指南），修复同步脚本路径缺陷，修正校验器误报，收口文档编号。
+**约束遵守**：所有新建均在 `E:\Projects\New project\six-system-arena\` 内；站点工程 `E:\Projects\server\app\src\cards\`、`D:\Projects\zszm`、`shared-ui`、v4 数据库全程只读，未做任何写入；未联网采集素材；未提交 git。
+
+### 1. 交付物清单（`integration/`）
+
+| 文件 | 大小 | 说明 |
+|---|---|---|
+| `INTEGRATION-ZSZM.md` | 8,746 B | **交付级安装指南**：前置检查 / 零映射对照 / 四步安装 / 官方素材安装 / 验证 / 回滚 / FAQ / 短分支建议 |
+| `README.md` | 12,716 B | 包结构、API、契约、红线 |
+| `js/six-system-icons.js` | 5,040 B | 六系图标自包含模块（六键注册 `window.LXHUI.ICONS`） |
+| `js/settlement.js` | 11,959 B | 胜负结算引擎（胜：小黑 + 比丢；负：安慰 + 不惩罚） |
+| `data/character_stats.json` | 353,533 B | 488 角色六系数值 |
+| `data/decks.json` | 1,497,334 B | 488 套卡组 |
+| `data/achievements.json` | 16,706 B | 15 条收集类成就 + `element_gate` 拍板段 |
+| `data/six-systems.json` / `data/stat-model.json` | 4,586 / 6,874 B | 六系定义 / 数值模型 |
+| `src/*.tsx` + `src/*.ts` | 6 文件 | `SettlementStage` / `SixSystemPanel` / `AchievementBanner` / 数据与类型适配层 |
+| `styles/sixsys-integration.css` | 4,718 B | 接入层样式（`sixsys-` 前缀，零冲突） |
+| `verify/` | 6 文件 | `verify_integration.py` / `smoke_integration.mjs` / `sync_from_arena.ps1` / `install_assets.ps1` / `assets.source.json` / `verify_report.json` |
+| `tools/decide_ach_system_001.py` | 9,711 B | 土系成就缺口决策工具（A/B/C 三方案） |
+
+### 2. 本轮修复
+
+1. **同步脚本数据源路径**：`character_stats.json` 真源位于 `data\generated\`，原脚本从 `data\` 直取导致漏拷 → 改为 `name → rel` 映射表，7 文件全量同步成功。
+2. **校验器三处误报**：① 外链守卫把 `www.w3.org`（SVG 命名空间）判为外链；② 禁词守卫把"严禁 AI 生图 / 同人图"的声明句与官方图标目录 `shared-ui/AI image` 判为违规引用；③ 档位比较用字符串比较导致 `D ≥ C` 误判。分别以 URL 白名单、否定语境标记 + 合规来源白名单、`TIER_ORDER` 序数比较修正。
+3. **溯源注释去绝对路径**：`ui/six-system-icons.js` 中 `E:\Projects\shared\...` 改为 `shared-ui/AI image/cards/`。
+4. **文档编号规范化**：`docs/07-站点集成方案_20261005_234411_344.md` → `docs/09-站点集成安装手册.md`（方案地图与安装手册双文档并存，编号连续）。
+
+### 3. 验证结果
+
+| 校验 | 项数 | 结果 |
+|---|---|---|
+| `verify_integration.py` | 18 项静态自检 | **18/18 PASS**（清单 23/23 在位、零漂移、零红线命中） |
+| `smoke_integration.mjs` | 11 项运行时冒烟 | **11/11 PASS**（图标注册零污染、结算契约、克制环确定性、成就判定） |
+| 清单哈希 | 23 文件 | 已刷新至 `manifest.json` |
+
+### 4. 本轮待办
+
+1. **站点侧挂载未执行**：涉及正式工程写入，按中风险处理，待用户拍板后执行（命令见 `integration/INTEGRATION-ZSZM.md` §2–§5，可一键回滚）。
+2. **土系成就 `ach_system_001` 门槛**：`element_gate` 已以 `proposed` 态落盘（主方案 A：数据侧补土系 C 档；备选 C：替代路径；方案 B 已驳回），待拍板。
+3. **官方表情包专项目录仍缺位**：失败结算继续复用官方表情立绘（合规），专项采集须走 `docs/05 §5` 审查流程。
+*（内容由AI生成，仅供参考）*
