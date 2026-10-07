@@ -3,7 +3,7 @@
   "package": "sixsys-zszm-integration",
   "arena_root": "E:\\Projects\\new project\\six-system-arena",
   "integration_root": "E:\\Projects\\new project\\six-system-arena\\integration",
-  "generated_at": "2026-10-07 05:26:22",
+  "generated_at": "2026-10-07 06:28:12",
   "ok": true,
   "failures": [],
   "checks": [
@@ -26,7 +26,7 @@
         {
           "file": "js/settlement.js",
           "status": "in-sync",
-          "sha256": "a803e6252d86ba32"
+          "sha256": "fcec2b7bae1996bb"
         },
         {
           "file": "data/character_stats.json",
@@ -56,7 +56,7 @@
         {
           "file": "data/emoticons.json",
           "status": "in-sync",
-          "sha256": "40e6883a32a6afb8"
+          "sha256": "a16c8dea4ce02b54"
         }
       ],
       "drifted": []
@@ -241,7 +241,7 @@
         {
           "file": "js/settlement.js",
           "status": "in-sync",
-          "sha256": "a803e6252d86ba32"
+          "sha256": "fcec2b7bae1996bb"
         },
         {
           "file": "data/character_stats.json",
@@ -271,7 +271,7 @@
         {
           "file": "data/emoticons.json",
           "status": "in-sync",
-          "sha256": "40e6883a32a6afb8"
+          "sha256": "a16c8dea4ce02b54"
         }
       ]
     },
