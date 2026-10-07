@@ -85,7 +85,17 @@ SCAN_DIRS = ["js", "src", "data", "styles"]
 SCAN_EXT = {".js", ".ts", ".tsx", ".json", ".css", ".mjs", ".ps1"}
 URL_RE = re.compile(r"https?://", re.IGNORECASE)
 # 允许出现在「外链守卫正则」中的字面量（sixsys-assets.ts 的 ^https?:\/\/$ 判定）
-URL_GUARD_HINTS = ("https?:\\/\\/", "https?:\\/\\/i")
+URL_GUARD_HINTS = ("https?:\\/\\/", "https?:\\/\\/i", "www.w3.org")
+
+# 否定 / 声明语境标记：命中禁词但同处声明语境时不算红线（如「严禁同人图」「不依赖 AI image/」）
+NEGATION_MARKERS = ("严禁", "禁止", "不含", "排除", "不得", "不依赖", "不涉及", "no ", "not ", "exclude", "forbid", "disallow")
+
+# 档位序（F < E < D < C < B < A）：字符串比较会把 D 误判为 >= C，必须按序数比较
+TIER_ORDER = ["F", "E", "D", "C", "B", "A"]
+C_AND_ABOVE_MIN_INDEX = TIER_ORDER.index("C")
+
+# 合规来源引用：官方素材目录名恰含 AI image，属溯源注释，不算违规引用
+ALLOW_SOURCE_HINTS = ("shared-ui/AI image", "shared-ui\\AI image", "shared-ui/AI-image")
 
 
 def sha256_of(path: str) -> str:
@@ -187,11 +197,15 @@ def check_redlines(rep: Report) -> dict:
                 path = os.path.join(root, fn)
                 rel = os.path.relpath(path, INTEG).replace("\\", "/")
                 text = read_text(path)
-                low = text.lower()
-                for tok in FORBIDDEN_TOKENS:
-                    if tok in low:
-                        hits.append({"file": rel, "token": tok})
                 for i, line in enumerate(text.splitlines(), 1):
+                    low_line = line.lower()
+                    negated = any(m in line or m in low_line for m in NEGATION_MARKERS) or any(
+                        g in line for g in ALLOW_SOURCE_HINTS
+                    )
+                    if not negated:
+                        for tok in FORBIDDEN_TOKENS:
+                            if tok in low_line:
+                                hits.append({"file": rel, "token": tok, "line": i})
                     if URL_RE.search(line) and not any(g in line for g in URL_GUARD_HINTS):
                         urls.append({"file": rel, "line": i, "text": line.strip()[:120]})
     rep.add("redline.forbidden-tokens", not hits, "未命中 AI / 同人 关键词" if not hits else f"{len(hits)} 处命中", hits=hits)
@@ -263,7 +277,8 @@ def check_data(rep: Report) -> dict:
     for c in stats.get("characters", []):
         el = c.get("element")
         counts[el] += 1
-        if el in tiers and str(c.get("tier", "F")) >= "C":
+        t = str(c.get("tier", "F"))
+        if el in tiers and t in TIER_ORDER and TIER_ORDER.index(t) >= C_AND_ABOVE_MIN_INDEX:
             tiers[el] += 1
     tu_c_plus = tiers.get("tu", 0)
     gate = achs.get("element_gate", {})

@@ -1,0 +1,571 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-10-05",
+  "round": "R2",
+  "project": "six-system-arena",
+  "source_doc": "docs/04-成就系统.md",
+  "description": "收集类成就全量定义。核心定位：让玩家为了『集齐』而反复对战。失败不惩罚；成就判定只读战斗日志 + 数值产物，不做随机掉率判定。",
+  "design_principles": [
+    "失败不惩罚：败局不扣资源、不掉收集进度，且不触发成就判定。",
+    "收集优先于数值：奖励以图鉴位 / 立绘 / 称号 / 徽章为主，数值加成为辅。",
+    "可验证：达成条件全部基于战斗日志契约字段或 character_stats 的确定性字段。",
+    "忠于原作：角色称谓、阵营、羁绊文案取自世界观数据库，不自行发明设定。"
+  ],
+  "battle_log_contract": {
+    "note": "由经营 / 模拟子系统写入的统一战斗日志；本子系统只定义字段契约，不落盘。",
+    "fields": {
+      "battle_id": "string · 对局唯一标识",
+      "mode": "string · story | arena | challenge | mirror",
+      "my_character_id": "int · 我方主将 character_id",
+      "opponent_id": "int|null · 对手 character_id（镜像战为自身 id）",
+      "opponent_type": "string · official | mirror",
+      "result": "string · win | lose",
+      "turn_used": "int · 实际消耗回合数",
+      "hp_left": "int · 我方结算剩余血量",
+      "hp_max": "int · 我方主将血量上限（用于零损血判定）",
+      "seed": "int · 随机种子（可复现）"
+    },
+    "required": [
+      "battle_id",
+      "mode",
+      "my_character_id",
+      "opponent_id",
+      "opponent_type",
+      "result",
+      "turn_used",
+      "hp_left",
+      "seed"
+    ]
+  },
+  "metrics": {
+    "note": "progress.metric 指向本表；achievement-system.js 逐项计算当前值，与 progress.target 比较。",
+    "unlocked_characters": "已解锁角色图鉴数（profile.unlocked_character_ids 去重计数）",
+    "elements_c_covered": "已解锁且主属性为对应系、tier ∈ {C,B,A} 的系别覆盖数（目标 5：金木水火土）",
+    "kongjian_win": "使用空间系主属性角色取胜的次数（≥1 即达成）",
+    "elements_won": "取得过胜利的主属性系别覆盖数（目标 6）",
+    "mainline_defeated": "已击败的主线角色去重数（对手按 mainline 过滤，目标 30）",
+    "challenge_wins": "越档挑战（mode=challenge）取胜次数（目标 5）",
+    "mirror_wins": "镜像战（opponent_type=mirror）取胜次数（目标 3）",
+    "flawless_wins": "零损血取胜场次（hp_left >= hp_max 且 result=win，目标 1）",
+    "rarity_complete_R": "已解锁 R 档角色数（目标 418）",
+    "rarity_complete_SR": "已解锁 SR 档角色数（目标 66）",
+    "rarity_complete_SSR": "已解锁 SSR 档角色数（目标 3）",
+    "rarity_complete_UR": "已解锁 UR 档角色数（目标 1）"
+  },
+  "categories": [
+    {
+      "key": "character",
+      "name": "角色收集",
+      "index": 1,
+      "count": 4
+    },
+    {
+      "key": "system",
+      "name": "六系收集",
+      "index": 2,
+      "count": 3
+    },
+    {
+      "key": "battle",
+      "name": "战斗收集",
+      "index": 3,
+      "count": 4
+    },
+    {
+      "key": "rarity",
+      "name": "稀有度收集",
+      "index": 4,
+      "count": 4
+    }
+  ],
+  "rarity_totals": {
+    "R": 418,
+    "SR": 66,
+    "SSR": 3,
+    "UR": 1
+  },
+  "achievements": [
+    {
+      "id": "ach_character_001",
+      "category": "character",
+      "category_name": "角色收集",
+      "name": "初见小妖",
+      "desc": "解锁 1 名角色图鉴",
+      "condition": {
+        "type": "collection_count",
+        "collection": "characters",
+        "op": ">=",
+        "value": 1
+      },
+      "reward": {
+        "type": "title",
+        "name": "路过",
+        "asset": null,
+        "desc": "称号「路过」"
+      },
+      "progress": {
+        "metric": "unlocked_characters",
+        "target": 1,
+        "unit": "名"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.1"
+    },
+    {
+      "id": "ach_character_030",
+      "category": "character",
+      "category_name": "角色收集",
+      "name": "会馆常客",
+      "desc": "解锁 30 名角色",
+      "condition": {
+        "type": "collection_count",
+        "collection": "characters",
+        "op": ">=",
+        "value": 30
+      },
+      "reward": {
+        "type": "portrait",
+        "name": "比丢的立绘",
+        "asset": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\比丢\\比丢.png",
+        "desc": "解锁比丢立绘（官方原图）"
+      },
+      "progress": {
+        "metric": "unlocked_characters",
+        "target": 30,
+        "unit": "名"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.1"
+    },
+    {
+      "id": "ach_character_100",
+      "category": "character",
+      "category_name": "角色收集",
+      "name": "一馆之人",
+      "desc": "解锁 100 名角色",
+      "condition": {
+        "type": "collection_count",
+        "collection": "characters",
+        "op": ">=",
+        "value": 100
+      },
+      "reward": {
+        "type": "title",
+        "name": "妖灵会馆·常驻",
+        "asset": null,
+        "desc": "称号「妖灵会馆·常驻」"
+      },
+      "progress": {
+        "metric": "unlocked_characters",
+        "target": 100,
+        "unit": "名"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.1"
+    },
+    {
+      "id": "ach_character_488",
+      "category": "character",
+      "category_name": "角色收集",
+      "name": "全线通晓",
+      "desc": "解锁全部 488 名角色",
+      "condition": {
+        "type": "collection_count",
+        "collection": "characters",
+        "op": ">=",
+        "value": 488
+      },
+      "reward": {
+        "type": "card",
+        "name": "众生之门",
+        "rarity": "UR",
+        "asset": null,
+        "desc": "UR 收藏卡「众生之门」"
+      },
+      "progress": {
+        "metric": "unlocked_characters",
+        "target": 488,
+        "unit": "名"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.1"
+    },
+    {
+      "id": "ach_system_001",
+      "category": "system",
+      "category_name": "六系收集",
+      "name": "金木水火土",
+      "desc": "集齐金 / 木 / 水 / 火 / 土 五系各至少 1 名 C 档以上角色",
+      "condition": {
+        "type": "element_coverage",
+        "elements": [
+          "jin",
+          "mu",
+          "shui",
+          "huo",
+          "tu"
+        ],
+        "min_tier": "C",
+        "min_count_per_element": 1
+      },
+      "reward": {
+        "type": "codex_slot",
+        "name": "五行图鉴位",
+        "asset": null,
+        "desc": "解锁五行图鉴位"
+      },
+      "progress": {
+        "metric": "elements_c_covered",
+        "target": 5,
+        "unit": "系"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.2"
+    },
+    {
+      "id": "ach_system_002",
+      "category": "system",
+      "category_name": "六系收集",
+      "name": "空间入门",
+      "desc": "拥有 1 名空间系角色并使用其主属性取胜 1 次",
+      "condition": {
+        "type": "first_win_by_element",
+        "element": "kongjian",
+        "require_owned_element": "kongjian",
+        "source": "battle_log"
+      },
+      "reward": {
+        "type": "title",
+        "name": "御空初学",
+        "asset": null,
+        "desc": "称号「御空初学」"
+      },
+      "progress": {
+        "metric": "kongjian_win",
+        "target": 1,
+        "unit": "胜"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.2"
+    },
+    {
+      "id": "ach_system_003",
+      "category": "system",
+      "category_name": "六系收集",
+      "name": "六系通演",
+      "desc": "用六种主属性各取得 1 胜",
+      "condition": {
+        "type": "element_win_coverage",
+        "elements": [
+          "jin",
+          "mu",
+          "shui",
+          "huo",
+          "tu",
+          "kongjian"
+        ],
+        "min_count_per_element": 1,
+        "source": "battle_log"
+      },
+      "reward": {
+        "type": "codex_slot",
+        "name": "六系通演图谱",
+        "asset": null,
+        "desc": "解锁六系实战图谱"
+      },
+      "progress": {
+        "metric": "elements_won",
+        "target": 6,
+        "unit": "系"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.2"
+    },
+    {
+      "id": "ach_battle_001",
+      "category": "battle",
+      "category_name": "战斗收集",
+      "name": "主线纪录",
+      "desc": "击败全部 30 名主线角色各 1 次",
+      "condition": {
+        "type": "distinct_defeat",
+        "opponent_filter": {
+          "mainline": true
+        },
+        "count": 30,
+        "source": "battle_log"
+      },
+      "reward": {
+        "type": "title",
+        "name": "主线亲历者",
+        "asset": null,
+        "desc": "称号「主线亲历者」"
+      },
+      "progress": {
+        "metric": "mainline_defeated",
+        "target": 30,
+        "unit": "名"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.3"
+    },
+    {
+      "id": "ach_battle_002",
+      "category": "battle",
+      "category_name": "战斗收集",
+      "name": "越阶者",
+      "desc": "越档挑战取胜 5 次",
+      "condition": {
+        "type": "mode_win_count",
+        "mode": "challenge",
+        "count": 5,
+        "source": "battle_log"
+      },
+      "reward": {
+        "type": "title",
+        "name": "越阶者",
+        "asset": null,
+        "desc": "称号「越阶者」"
+      },
+      "progress": {
+        "metric": "challenge_wins",
+        "target": 5,
+        "unit": "胜"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.3"
+    },
+    {
+      "id": "ach_battle_003",
+      "category": "battle",
+      "category_name": "战斗收集",
+      "name": "镜中人",
+      "desc": "镜像战取胜 3 次",
+      "condition": {
+        "type": "mode_win_count",
+        "mode": "mirror",
+        "count": 3,
+        "source": "battle_log"
+      },
+      "reward": {
+        "type": "badge",
+        "name": "镜中徽记",
+        "asset": null,
+        "desc": "徽章「镜中徽记」"
+      },
+      "progress": {
+        "metric": "mirror_wins",
+        "target": 3,
+        "unit": "胜"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.3"
+    },
+    {
+      "id": "ach_battle_004",
+      "category": "battle",
+      "category_name": "战斗收集",
+      "name": "稳如老树",
+      "desc": "单场战斗零损血取胜",
+      "condition": {
+        "type": "battle_condition",
+        "expr": "hp_left >= hp_max",
+        "result": "win",
+        "count": 1,
+        "source": "battle_log"
+      },
+      "reward": {
+        "type": "title",
+        "name": "稳如老树",
+        "asset": null,
+        "desc": "称号「稳如老树」"
+      },
+      "progress": {
+        "metric": "flawless_wins",
+        "target": 1,
+        "unit": "场"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.3"
+    },
+    {
+      "id": "ach_rarity_R",
+      "category": "rarity",
+      "category_name": "稀有度收集",
+      "name": "凡品集齐",
+      "desc": "集齐全部 R 档角色（418 名）",
+      "condition": {
+        "type": "rarity_complete",
+        "rarity": "R",
+        "total": 418
+      },
+      "reward": {
+        "type": "badge",
+        "name": "铜章",
+        "asset": null,
+        "desc": "铜章"
+      },
+      "progress": {
+        "metric": "rarity_complete_R",
+        "target": 418,
+        "unit": "名"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.4"
+    },
+    {
+      "id": "ach_rarity_SR",
+      "category": "rarity",
+      "category_name": "稀有度收集",
+      "name": "精锐集齐",
+      "desc": "集齐全部 SR 档角色（66 名）",
+      "condition": {
+        "type": "rarity_complete",
+        "rarity": "SR",
+        "total": 66
+      },
+      "reward": {
+        "type": "badge",
+        "name": "银章",
+        "asset": null,
+        "desc": "银章"
+      },
+      "progress": {
+        "metric": "rarity_complete_SR",
+        "target": 66,
+        "unit": "名"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.4"
+    },
+    {
+      "id": "ach_rarity_SSR",
+      "category": "rarity",
+      "category_name": "稀有度收集",
+      "name": "绝品集齐",
+      "desc": "集齐全部 SSR 档角色（3 名）",
+      "condition": {
+        "type": "rarity_complete",
+        "rarity": "SSR",
+        "total": 3
+      },
+      "reward": {
+        "type": "badge",
+        "name": "金章",
+        "asset": null,
+        "desc": "金章"
+      },
+      "progress": {
+        "metric": "rarity_complete_SSR",
+        "target": 3,
+        "unit": "名"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.4"
+    },
+    {
+      "id": "ach_rarity_UR",
+      "category": "rarity",
+      "category_name": "稀有度收集",
+      "name": "神话集齐",
+      "desc": "获得唯一 UR 档角色（1 名）",
+      "condition": {
+        "type": "rarity_complete",
+        "rarity": "UR",
+        "total": 1
+      },
+      "reward": {
+        "type": "badge",
+        "name": "神话章",
+        "asset": null,
+        "desc": "神话章"
+      },
+      "progress": {
+        "metric": "rarity_complete_UR",
+        "target": 1,
+        "unit": "名"
+      },
+      "hidden": false,
+      "source_doc": "docs/04-成就系统.md §4.4"
+    }
+  ],
+  "codex": {
+    "note": "收集图鉴结构定义，供 achievement-system.js 渲染使用。",
+    "sections": [
+      {
+        "key": "by_element",
+        "name": "六系图鉴",
+        "group_by": "element",
+        "order": [
+          "jin",
+          "mu",
+          "shui",
+          "huo",
+          "tu",
+          "kongjian",
+          "none"
+        ]
+      },
+      {
+        "key": "by_rarity",
+        "name": "稀有度图鉴",
+        "group_by": "rarity",
+        "order": [
+          "R",
+          "SR",
+          "SSR",
+          "UR"
+        ]
+      },
+      {
+        "key": "by_tier",
+        "name": "分档图鉴",
+        "group_by": "tier",
+        "order": [
+          "F",
+          "E",
+          "D",
+          "C",
+          "B",
+          "A"
+        ]
+      },
+      {
+        "key": "by_mainline",
+        "name": "主线名录",
+        "group_by": "mainline",
+        "order": [
+          true,
+          false
+        ]
+      }
+    ]
+  },
+  "settlement_note": "胜负结算的动画时序与文案池由 ui/settlement.js 承载（对应 docs/04 §2 / §3）；本文件只负责成就定义与判定契约。",
+  "element_gate": {
+    "achievement": "ach_system_001",
+    "status": "proposed",
+    "decided_by": "pending-user-review",
+    "min_tier": "C",
+    "or_collect_per_element": 3,
+    "gap": "土系主属性 7 名角色最高仅 D 档，静态不满足 min_tier=C",
+    "reference_tool": "integration/tools/decide_ach_system_001.py",
+    "primary_fix": {
+      "plan": "A · 数据侧补齐土系 C 档",
+      "how": "在 data/manual-overrides.json 为土系角色写入人工校准（经世界观核验），使其 tier >= C",
+      "engine_change": false
+    },
+    "fallback": {
+      "plan": "C · 替代路径 or_collect_per_element",
+      "value": 3,
+      "how": "某系无 C 档角色时，收集该系 3 名亦可点亮；需引擎 1.1.0 将 min_tier 与替代分支参数化",
+      "engine_change": true,
+      "scheduled": "与 P4 全量铺开同批"
+    },
+    "rejected": {
+      "plan": "B · 放宽 min_tier C -> D",
+      "reason": "语义降档会使后续所有系别成就一并贬值"
+    },
+    "note": "不修改 ach_system_001 现有 condition 语义；本段仅登记处置方案，供引擎参数化与人工校准引用。"
+  }
+}

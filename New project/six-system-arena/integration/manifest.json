@@ -49,57 +49,258 @@
     }
   ],
   "data_files": [
-    { "source": "data/generated/character_stats.json", "install_to": "public/sixsys/data/character_stats.json", "size_note": "488 名角色六系数值" },
-    { "source": "data/decks.json", "install_to": "public/sixsys/data/decks.json", "size_note": "488 套卡组（主将 + 技能 + 羁绊 + 终极技）" },
-    { "source": "data/achievements.json", "install_to": "public/sixsys/data/achievements.json", "size_note": "15 条收集类成就 + 战斗日志契约" },
-    { "source": "data/six-systems.json", "install_to": "public/sixsys/data/six-systems.json", "size_note": "六系定义、图标 key、颜色、克制环" }
+    {
+      "source": "data/generated/character_stats.json",
+      "install_to": "public/sixsys/data/character_stats.json",
+      "size_note": "488 名角色六系数值"
+    },
+    {
+      "source": "data/decks.json",
+      "install_to": "public/sixsys/data/decks.json",
+      "size_note": "488 套卡组（主将 + 技能 + 羁绊 + 终极技）"
+    },
+    {
+      "source": "data/achievements.json",
+      "install_to": "public/sixsys/data/achievements.json",
+      "size_note": "15 条收集类成就 + 战斗日志契约"
+    },
+    {
+      "source": "data/six-systems.json",
+      "install_to": "public/sixsys/data/six-systems.json",
+      "size_note": "六系定义、图标 key、颜色、克制环"
+    }
   ],
   "ts_package": [
-    { "source": "integration/src/index.ts", "install_to": "src/game/sixsys/index.ts" },
-    { "source": "integration/src/sixsys-types.ts", "install_to": "src/game/sixsys/sixsys-types.ts" },
-    { "source": "integration/src/sixsys-assets.ts", "install_to": "src/game/sixsys/sixsys-assets.ts" },
-    { "source": "integration/src/sixsys-data.ts", "install_to": "src/game/sixsys/sixsys-data.ts" },
-    { "source": "integration/src/SixSystemPanel.tsx", "install_to": "src/game/sixsys/SixSystemPanel.tsx" },
-    { "source": "integration/src/SettlementStage.tsx", "install_to": "src/game/sixsys/SettlementStage.tsx" },
-    { "source": "integration/src/AchievementBanner.tsx", "install_to": "src/game/sixsys/AchievementBanner.tsx" }
+    {
+      "source": "integration/src/index.ts",
+      "install_to": "src/game/sixsys/index.ts"
+    },
+    {
+      "source": "integration/src/sixsys-types.ts",
+      "install_to": "src/game/sixsys/sixsys-types.ts"
+    },
+    {
+      "source": "integration/src/sixsys-assets.ts",
+      "install_to": "src/game/sixsys/sixsys-assets.ts"
+    },
+    {
+      "source": "integration/src/sixsys-data.ts",
+      "install_to": "src/game/sixsys/sixsys-data.ts"
+    },
+    {
+      "source": "integration/src/SixSystemPanel.tsx",
+      "install_to": "src/game/sixsys/SixSystemPanel.tsx"
+    },
+    {
+      "source": "integration/src/SettlementStage.tsx",
+      "install_to": "src/game/sixsys/SettlementStage.tsx"
+    },
+    {
+      "source": "integration/src/AchievementBanner.tsx",
+      "install_to": "src/game/sixsys/AchievementBanner.tsx"
+    }
   ],
   "styles": [
-    { "source": "integration/styles/sixsys-integration.css", "install_to": "src/game/sixsys/sixsys-integration.css", "note": "全部选择器以 sixsys- 前缀，避免与 zszm 既有样式冲突" }
+    {
+      "source": "integration/styles/sixsys-integration.css",
+      "install_to": "src/game/sixsys/sixsys-integration.css",
+      "note": "全部选择器以 sixsys- 前缀，避免与 zszm 既有样式冲突"
+    }
   ],
   "verify": [
-    { "file": "integration/verify/install_assets.ps1", "role": "从官方图库复制白名单素材到 public/sixsys/official（默认 DRY-RUN）" },
-    { "file": "integration/verify/assets.source.json", "role": "素材来源配置（UTF-8，避免 PowerShell 中文乱码）" },
-    { "file": "integration/verify/sync_from_arena.ps1", "role": "把 arena 的 ui/data 真源同步到 integration/js、integration/data（只写本目录）" },
-    { "file": "integration/verify/verify_integration.py", "role": "集成包静态自检（交付文件 / arena 漂移 / 素材白名单 / 红线 / 契约 / 数据一致性 / 土系缺口）" },
-    { "file": "integration/verify/smoke_integration.mjs", "role": "运行时冒烟自检（图标注册 / 结算 / 对战 / 成就 / 红线，node 直接跑）" }
+    {
+      "file": "integration/verify/install_assets.ps1",
+      "role": "从官方图库复制白名单素材到 public/sixsys/official（默认 DRY-RUN）"
+    },
+    {
+      "file": "integration/verify/assets.source.json",
+      "role": "素材来源配置（UTF-8，避免 PowerShell 中文乱码）"
+    },
+    {
+      "file": "integration/verify/sync_from_arena.ps1",
+      "role": "把 arena 的 ui/data 真源同步到 integration/js、integration/data（只写本目录）"
+    },
+    {
+      "file": "integration/verify/verify_integration.py",
+      "role": "集成包静态自检（交付文件 / arena 漂移 / 素材白名单 / 红线 / 契约 / 数据一致性 / 土系缺口）"
+    },
+    {
+      "file": "integration/verify/smoke_integration.mjs",
+      "role": "运行时冒烟自检（图标注册 / 结算 / 对战 / 成就 / 红线，node 直接跑）"
+    }
   ],
   "tools": [
-    { "file": "integration/tools/decide_ach_system_001.py", "role": "ach_system_001 土系缺口拍板工具（只读，输出三方案对比与建议）" }
+    {
+      "file": "integration/tools/decide_ach_system_001.py",
+      "role": "ach_system_001 土系缺口拍板工具（只读，输出三方案对比与建议）"
+    }
   ],
   "assets": {
     "base": "/sixsys/official/",
     "installer": "integration/verify/install_assets.ps1",
     "origin_root": "E:\\Projects\\assets\\罗小黑战记数据库\\images",
     "whitelist": [
-      { "id": "luoxiaohei_full", "file": "luoxiaohei_full.jpg", "origin": "罗小黑战记数据库\\images\\罗小黑\\罗小黑_全身_085.jpg", "role": "胜利结算：罗小黑登场（官方全身立绘）" },
-      { "id": "luoxiaohei_face_01", "file": "luoxiaohei_face_01.jpg", "origin": "罗小黑战记数据库\\images\\罗小黑\\罗小黑_表情_087.jpg", "role": "失败结算：小黑安慰表情（官方表情图）" },
-      { "id": "luoxiaohei_face_02", "file": "luoxiaohei_face_02.jpg", "origin": "罗小黑战记数据库\\images\\罗小黑\\罗小黑_表情_088.jpg", "role": "失败结算：小黑安慰表情（官方表情图）" },
-      { "id": "bidiu", "file": "bidiu.png", "origin": "罗小黑战记数据库\\images\\比丢\\比丢.png", "role": "胜利结算：比丢登场（官方立绘）" },
-      { "id": "bidiu_anim", "file": "bidiu.gif", "origin": "罗小黑战记数据库\\images\\比丢\\比丢.gif", "role": "胜利结算：比丢登场动图（可选，静态图缺失时兜底）" }
+      {
+        "id": "luoxiaohei_full",
+        "file": "luoxiaohei_full.jpg",
+        "origin": "罗小黑战记数据库\\images\\罗小黑\\罗小黑_全身_085.jpg",
+        "role": "胜利结算：罗小黑登场（官方全身立绘）"
+      },
+      {
+        "id": "luoxiaohei_face_01",
+        "file": "luoxiaohei_face_01.jpg",
+        "origin": "罗小黑战记数据库\\images\\罗小黑\\罗小黑_表情_087.jpg",
+        "role": "失败结算：小黑安慰表情（官方表情图）"
+      },
+      {
+        "id": "luoxiaohei_face_02",
+        "file": "luoxiaohei_face_02.jpg",
+        "origin": "罗小黑战记数据库\\images\\罗小黑\\罗小黑_表情_088.jpg",
+        "role": "失败结算：小黑安慰表情（官方表情图）"
+      },
+      {
+        "id": "bidiu",
+        "file": "bidiu.png",
+        "origin": "罗小黑战记数据库\\images\\比丢\\比丢.png",
+        "role": "胜利结算：比丢登场（官方立绘）"
+      },
+      {
+        "id": "bidiu_anim",
+        "file": "bidiu.gif",
+        "origin": "罗小黑战记数据库\\images\\比丢\\比丢.gif",
+        "role": "胜利结算：比丢登场动图（可选，静态图缺失时兜底）"
+      }
     ],
-    "excluded_dirs": ["ai-art", "ai-avatars", "AI image", "同人图"],
+    "excluded_dirs": [
+      "ai-art",
+      "ai-avatars",
+      "AI image",
+      "同人图"
+    ],
     "note": "本轮未联网采集；如后续需补官方表情包，须按 docs/05 流程逐张审查并更新本清单与 assets.source.json。"
   },
   "entry_wiring": [
-    { "file": "src/game/sixsys/bootstrap.ts", "type": "新增", "desc": "按序引入 lxh-ui.js → six-system-icons.js → settlement.js，并显式调用 registerIcons() 兜底；导入 sixsys-integration.css" },
-    { "file": "src/game/GameApp.tsx（或 src/gate/GameShell.tsx）", "type": "1 行 import", "desc": "import './sixsys/bootstrap';" },
-    { "file": "src/game/GameApp.tsx · victory/defeat 区块", "type": "外接组件", "desc": "挂载 <SettlementStage> 与 <AchievementBanner>，原结局区块保留不动" },
-    { "file": "src/game/GameApp.tsx · CardTile / src/game/CardCollection.tsx", "type": "可选增强", "desc": "用 <LxhIcon name={c.element}/> 在卡面显示六系图标；按 element 增加图鉴筛选" }
+    {
+      "file": "src/game/sixsys/bootstrap.ts",
+      "type": "新增",
+      "desc": "按序引入 lxh-ui.js → six-system-icons.js → settlement.js，并显式调用 registerIcons() 兜底；导入 sixsys-integration.css"
+    },
+    {
+      "file": "src/game/GameApp.tsx（或 src/gate/GameShell.tsx）",
+      "type": "1 行 import",
+      "desc": "import './sixsys/bootstrap';"
+    },
+    {
+      "file": "src/game/GameApp.tsx · victory/defeat 区块",
+      "type": "外接组件",
+      "desc": "挂载 <SettlementStage> 与 <AchievementBanner>，原结局区块保留不动"
+    },
+    {
+      "file": "src/game/GameApp.tsx · CardTile / src/game/CardCollection.tsx",
+      "type": "可选增强",
+      "desc": "用 <LxhIcon name={c.element}/> 在卡面显示六系图标；按 element 增加图鉴筛选"
+    }
   ],
   "rollback": [
     "删除 D:\\Projects\\zszm\\public\\sixsys 与 D:\\Projects\\zszm\\src\\game\\sixsys 两个新增目录。",
     "撤销 bootstrap import 与结算挂载（共 2 处，均为新增行，不触及既有逻辑）。",
     "git -C D:\\Projects\\zszm status 应回到 feat/card-balance-admin 分支原有的 7 处未提交变更，无新增文件残留。",
     "参考仓库 E:\\Projects\\shared\\shared-ui 与 E:\\Projects\\assets 全程只读，无需回滚。"
-  ]
+  ],
+  "hashes": {
+    "README.md": {
+      "sha256": "d897a12944b859f64f668d70f147d2fc16ea2de37ac137b80904901cef213ac9",
+      "bytes": 12716
+    },
+    "INTEGRATION-ZSZM.md": {
+      "sha256": "2de718d3b3b8a211c128a44158979b14e79d7f7cf8356cd946987e8515d8e134",
+      "bytes": 8746
+    },
+    "manifest.json": {
+      "sha256": "0692a487c965084d1dcda6879f9161a373b4f36261d687fb4fb2b9bb89b09ab7",
+      "bytes": 12120
+    },
+    "js/six-system-icons.js": {
+      "sha256": "5c2a0708c08f4174b2f838a717dcef19cba499f76e43d4591a0ee8aaae5f3c86",
+      "bytes": 5040
+    },
+    "js/settlement.js": {
+      "sha256": "c93bd4cfca25441f91bd7b5783926d2fd57b513a50004d9e3cdd80c4a7f4fea7",
+      "bytes": 11959
+    },
+    "src/index.ts": {
+      "sha256": "91f4df02d3f5ff7ac7b704b3683d3c6e04ad759e6b59dbe2fb229ead19c3f816",
+      "bytes": 1643
+    },
+    "src/sixsys-types.ts": {
+      "sha256": "181eb1f177fe475c438128a384a0cc579a658176dcd91c105d58a8ccac9b9be0",
+      "bytes": 8727
+    },
+    "src/sixsys-assets.ts": {
+      "sha256": "c67e1facbc598bb27013a442c50a6590cc9f9143ad82e402ff914401636f3d43",
+      "bytes": 5518
+    },
+    "src/sixsys-data.ts": {
+      "sha256": "8f0e0b951f37c1c4606d05af030dd476e70c45c02c1ccde20c00d67011825027",
+      "bytes": 7258
+    },
+    "src/SixSystemPanel.tsx": {
+      "sha256": "87565100beb327798105f467796a25ff4b4393580698c63eee13a7becea30a0d",
+      "bytes": 4732
+    },
+    "src/SettlementStage.tsx": {
+      "sha256": "2623f3a9c31434cfc0dde9dd579ed89f324283421ce1f0aa3ff41f3c68ec2d34",
+      "bytes": 8693
+    },
+    "src/AchievementBanner.tsx": {
+      "sha256": "71fcccc3253ea29e3ac56051ae3024e66afa4dc8c4268f393ae29031808f837f",
+      "bytes": 2231
+    },
+    "styles/sixsys-integration.css": {
+      "sha256": "6964d8ca4fa5cefc91c732c346693ef7875b6fddd331387ac203193255ddbecb",
+      "bytes": 4718
+    },
+    "data/character_stats.json": {
+      "sha256": "90e3c13e624e78b7b0c060447b210536d220da2b013bc145222a444474144d02",
+      "bytes": 353533
+    },
+    "data/decks.json": {
+      "sha256": "64fd2f8f846bcd1d37502c0ed43a185040ded7023ad6d96cc45f05f477c0b88a",
+      "bytes": 1497334
+    },
+    "data/achievements.json": {
+      "sha256": "64eaefc912c77ee476adf20dad7237fb2489ee17a5fb7c644fde0c59dc22b810",
+      "bytes": 16706
+    },
+    "data/six-systems.json": {
+      "sha256": "beb33d0a1a02f098fad180239c265043fad6078c11331d6a418214106d19c4f9",
+      "bytes": 4586
+    },
+    "data/stat-model.json": {
+      "sha256": "058d15a0b38d1d9653854ea0e884523eeba5e08adc5ec1727854841f0130989c",
+      "bytes": 6874
+    },
+    "verify/install_assets.ps1": {
+      "sha256": "49c3e0be9db55cb006c5e6d5548e6bb0ec9380229bfd9bcfe7f96898081d1cfe",
+      "bytes": 2953
+    },
+    "verify/sync_from_arena.ps1": {
+      "sha256": "628b54faf35874cff81ae7df40636b63ad1a52a46b2fc39b3bfb7918b68cfc8e",
+      "bytes": 2985
+    },
+    "verify/verify_integration.py": {
+      "sha256": "5f9ebc454fb3c0259f7a63a44ebe49bcaaddb52aa69a8c3b489f0a33220144ee",
+      "bytes": 14709
+    },
+    "verify/smoke_integration.mjs": {
+      "sha256": "efcfc2caff26c02630c013ef73df5b6d69b8caf51a96e0f4fc89946bd7456225",
+      "bytes": 15453
+    },
+    "verify/assets.source.json": {
+      "sha256": "cb5a68c96fb668233beeb86d39b6eb7b3134575656007cbac4e6e4b584e562ba",
+      "bytes": 832
+    }
+  },
+  "hashes_refreshed_at": "2026-10-06 23:38:19",
+  "package_version": "1.0.0"
 }

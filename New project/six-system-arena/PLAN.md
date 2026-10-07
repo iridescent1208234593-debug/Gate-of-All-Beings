@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_9b8df889c15111f1884b525400cd780f
+    ReservedCode1: DWyGGnyVnZuPoj5EsEoELdBR0Icw8VFTaZJg+LhDn7bzw2oxMxBNHkB1oBbZy6t4taB//jDkucCFosDl2lsMAs4b8sZy4h5rxpOfLMsrs9JDO7YdnD9nmr8rduhkXd8I+qO6apimW1PR6BqTJxxmtxL0LIaWB1t/Y9X78UjoXgoEApMJqLA4sG9v5Do=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_9b8df889c15111f1884b525400cd780f
+    ReservedCode2: DWyGGnyVnZuPoj5EsEoELdBR0Icw8VFTaZJg+LhDn7bzw2oxMxBNHkB1oBbZy6t4taB//jDkucCFosDl2lsMAs4b8sZy4h5rxpOfLMsrs9JDO7YdnD9nmr8rduhkXd8I+qO6apimW1PR6BqTJxxmtxL0LIaWB1t/Y9X78UjoXgoEApMJqLA4sG9v5Do=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_2cf8da04c0ee11f1884b525400cd780f
     ReservedCode1: nmgaKA2Tk2tO8axnIjhKDWgt3/Ve9jHQSzw1kCvAGZEufzZ8ihDSLeUp1kp18ykSJbnbDYfmYHzxh9UWqF6KZBDJdGbqX652KYFFxo0xF4BKB7gk5SeH4rGfk+BFobX80UBMBJixDzy3XZn0eyHHP29ri31EpZ7I+MGvTimL/VCPSPbzLk3DBiI6gGo=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -27,12 +38,16 @@ AIGC:
 | P4 | 全量角色铺开 | 488 角色数值 + 卡组分配 | P3 | 🔷 R2 完成（稀有度校准待 P3 平衡） |
 | P5 | 对战系统落地 | 与官方角色 / 自身对战，卡组平衡调优 | P4 | 🔷 R2 完成（内核已交付，胜率调优待实测） |
 | P6 | 收集类成就玩法 | 胜利放小黑与比丢 + 正向反馈；失败小黑安慰 | P4 | 🔷 R2 完成（官方表情包待采集） |
-| P7 | 站点集成（zszm 端口） | UI 组件 + 图标在卡牌 / 经营 / 模拟三系统上线 | P5、P6 | 🔷 R2 方案产出（docs/07），待接入执行 |
+| P7 | 站点集成（zszm 端口） | UI 组件 + 图标在卡牌 / 经营 / 模拟三系统上线 | P5、P6 | 🔷 R4 集成包交付（integration/），待站点挂载 |
 | P8 | 工作副本切换与现有数值登记 | `legacy/d-drive-r1/`、`docs/08`、`data/demo-baseline.json` | P0 | ✅ R3 完成 |
 
 > **R3 迭代（2026-10-06）**：工作副本正式切至 E 盘；D 盘 `D:\Projects\new project` 保留为旧副本，
 > 其 R1 成果快照至 `legacy/d-drive-r1/`；登记站点现有 demo 数值为参考基线（`docs/08` + `data/demo-baseline.json`），
 > 确认六系分值为新增维度、**不改动站点既有数值框架**。
+
+> **R4 迭代（2026-10-05）**：交付 `integration/` 集成包（运行时 JS + TS 接入层 + 数据 + 样式 + 校验工具 + 交付级安装指南 `INTEGRATION-ZSZM.md`），
+> 修复同步脚本路径缺陷与校验器三处误报，静态自检 18/18、运行时冒烟 11/11 全通过。
+> 站点侧挂载**尚未执行**（涉及正式工程写入，待拍板）；详见 [`CHANGELOG.md`](CHANGELOG.md) 的 R4 一节。
 
 > **R2 迭代（2026-10-05）**：完成 `data/decks.json`、`data/achievements.json`、`ui/battle-engine.js`、
 > `ui/achievement-system.js`、`ui/settlement.js`、`scripts/run_all.ps1`、`data/audit/r2-audit.md`，
@@ -147,7 +162,7 @@ AIGC:
 
 ---
 
-## P7 · 站点集成（zszm 端口）🔷 R2 方案产出
+## P7 · 站点集成（zszm 端口）🔷 R4 集成包交付（待站点挂载）
 
 - [x] 定位 zszm 端口游戏 UI，产出 `docs/07-站点集成方案.md`（UI 地图 + 接入点 + 三方案 + 短分支 + 回滚）
 - [x] 确认零映射成本：站点 `Element`（jin/mu/shui/huo/tu）与 `AbilitySystem.kongjian` 与图标 key 同名
@@ -155,6 +170,11 @@ AIGC:
 - [ ] 经营游戏：六系属性作为经营加成维度（分支 `feat/sixsys-radar-panel`）
 - [ ] 模拟游戏：六系雷达面板接入角色详情页（分支 `feat/sixsys-radar-panel`）
 - [ ] 集成前完整回归，确保不触碰参考仓库既有变更
+- [x] R4：集成包落盘 `integration/`（js / src / data / styles / verify / tools / README / INTEGRATION-ZSZM）
+- [x] R4：`sync_from_arena.ps1` 源路径修复并验证；`manifest.json` 哈希刷新 23 文件
+- [x] R4：`verify_integration.py` 18/18 通过；`smoke_integration.mjs` 11/11 通过
+- [x] R4：`docs/09-站点集成安装手册.md` 编号规范化（原时间戳副本）
+- [ ] **待站点侧挂载**：复制 4 组文件 + 入口引两行（方案 A，零侵入，约 0.5 天）
 
 ---
 
@@ -189,4 +209,6 @@ P0 ──► P1 ──► P2 ──► P3 ──► P4 ──┬──► P5 ─
 | 主库分叉误用（D / E 两库） | 派生数据不可比对 | R3 已裁定 **E 盘库为工作副本唯一数据源**；D 盘库仅历史比对，禁止混用 |
 | 站点 demo 基线漂移 | 登记结论过期 | 站点发版后重跑 `docs/08 §7` 复核命令并更新 `data/demo-baseline.json` |
 | D 盘快照被误当数据源 | 数据双源冲突 | `legacy/d-drive-r1/` 标记为只读快照，`MIGRATION.md §5` 明令不参与构建 |
+| 站点侧挂载未执行（R4） | 集成包无法在线上验证 | 按 `integration/INTEGRATION-ZSZM.md` §2–§5 挂载；未挂载期间对现有站点零影响、可一键回滚 |
+*（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*

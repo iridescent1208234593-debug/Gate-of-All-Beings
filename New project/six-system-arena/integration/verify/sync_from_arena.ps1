@@ -25,7 +25,14 @@ $jsDst   = Join-Path $root 'js'
 $dataDst = Join-Path $root 'data'
 
 $jsFiles   = @('six-system-icons.js', 'settlement.js')
-$dataFiles = @('character_stats.json', 'decks.json', 'achievements.json', 'six-systems.json', 'stat-model.json')
+# file -> source path relative to arena\data\ (character_stats.json true source lives in data\generated\)
+$dataFiles = @(
+  [pscustomobject]@{ name = 'character_stats.json'; rel = 'generated\character_stats.json' },
+  [pscustomobject]@{ name = 'decks.json';           rel = 'decks.json' },
+  [pscustomobject]@{ name = 'achievements.json';    rel = 'achievements.json' },
+  [pscustomobject]@{ name = 'six-systems.json';     rel = 'six-systems.json' },
+  [pscustomobject]@{ name = 'stat-model.json';      rel = 'stat-model.json' }
+)
 
 $apply = -not $DryRun
 Write-Host "[sixsys] sync mode: $(if ($apply) { 'APPLY' } else { 'DRY-RUN' })"
@@ -45,11 +52,11 @@ foreach ($f in $jsFiles) {
   $rows += [pscustomobject]@{ kind='js';   file=$f; bytes=(Get-Item -LiteralPath $src).Length; target=$dst }
 }
 foreach ($f in $dataFiles) {
-  $src = Join-Path $dataSrc $f
-  $dst = Join-Path $dataDst $f
+  $src = Join-Path $dataSrc $f.rel
+  $dst = Join-Path $dataDst $f.name
   if (-not (Test-Path -LiteralPath $src)) { Write-Warning "missing source: $src"; continue }
   if ($apply) { Copy-Item -LiteralPath $src -Destination $dst -Force }
-  $rows += [pscustomobject]@{ kind='data'; file=$f; bytes=(Get-Item -LiteralPath $src).Length; target=$dst }
+  $rows += [pscustomobject]@{ kind='data'; file=$f.name; bytes=(Get-Item -LiteralPath $src).Length; target=$dst }
 }
 
 $rows | Format-Table -AutoSize
