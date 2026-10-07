@@ -31,7 +31,8 @@ $dataFiles = @(
   [pscustomobject]@{ name = 'decks.json';           rel = 'decks.json' },
   [pscustomobject]@{ name = 'achievements.json';    rel = 'achievements.json' },
   [pscustomobject]@{ name = 'six-systems.json';     rel = 'six-systems.json' },
-  [pscustomobject]@{ name = 'stat-model.json';      rel = 'stat-model.json' }
+  [pscustomobject]@{ name = 'stat-model.json';      rel = 'stat-model.json' },
+  [pscustomobject]@{ name = 'emoticons.json';       rel = 'emoticons.json' }
 )
 
 $apply = -not $DryRun

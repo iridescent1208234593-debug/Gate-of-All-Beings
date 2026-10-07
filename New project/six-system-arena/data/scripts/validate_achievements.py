@@ -20,7 +20,14 @@
      - 主线角色完整解锁；非主线初始开放 2 张
      - 主系卡占比 >= 60%（有主系角色）
      - card_id 全局唯一
+  B2. 卡组获得节奏分层与稀有度分布校准（R5 · 非数值手段）
+     - meta.non_numeric_rarity_calibration 已 applied / method=acquisition_pacing
+     - 数值框架零漂移：卡组 hp/attack/defense/power/tier/rarity 与数值产物逐条一致
+     - 稀有度 × 投放节奏映射合法（R∈P1–P2 / SR∈P2–P4 / SSR·UR∈P4）且节奏单调
+     - 技能卡完善项自洽（同名去重 / tags / source_kind / 构成统计）
+     - meta.pacing_distribution 与卡组实际分层一致
   C. 交叉引用：decks 覆盖 character_stats 全部 id，无缺漏
+  D. data/emoticons.json 表情包台账（来源 / 红线 / 池内素材 / 审查留痕）
 
 零依赖：仅使用 Python 标准库。
 """
@@ -47,6 +54,19 @@ DEFAULT_ACH = os.path.join(DATA_DIR, 'achievements.json')
 RARITY_SLOTS = {'R': 2, 'SR': 3, 'SSR': 4, 'UR': 4}
 PRIMARY_RATIO_MIN = 0.60
 NON_MAINLINE_UNLOCK = 2
+
+# --- R5 · 稀有度分布校准（非数值手段 · 获得节奏分层）校验参数 ---
+PACE_ORDER = ('P4', 'P3', 'P2', 'P1')          # 由晚到早（P4 最稀缺）
+PACE_STRICTNESS = {'P1': 0, 'P2': 1, 'P3': 2, 'P4': 3}
+RARITY_PACE_ALLOWED = {                        # 稀有度 -> 允许的投放节奏档
+    'R': {'P1', 'P2'},
+    'SR': {'P2', 'P3', 'P4'},
+    'SSR': {'P4'},
+    'UR': {'P4'},
+}
+RARITY_LADDER = ('R', 'SR', 'SSR', 'UR')
+NUMERIC_FIELDS_UNTOUCHED = ('hp', 'attack', 'defense', 'power', 'tier', 'rarity')
+SKILL_SOURCE_KINDS = ('character_ability', 'primary_fallback', 'generic_fallback')
 SUPPORTED_CONDITIONS = {
     'collection_count', 'element_coverage', 'first_win_by_element',
     'element_win_coverage', 'distinct_defeat', 'mode_win_count',
@@ -246,6 +266,179 @@ def check_decks(rep, decks_path, stats, ach):
     return decks
 
 
+def check_deck_pacing(rep, decks, stats):
+    """校验 B2：卡组获得节奏分层与稀有度分布校准（R5 · 非数值手段）。
+
+    校准红线：只调节「获得节奏 / 玩家侧投放与感知」，**不得改动数值框架**。
+    因此本段逐条比对卡组的 hp / attack / defense / power / tier / rarity 与数值产物是否一致，
+    并校验稀有度 × 节奏映射合法性、节奏单调性与技能卡完善项自洽。
+    """
+    print('\n[校验 B2] 获得节奏分层与稀有度校准（非数值手段）')
+    items = decks['decks']
+    meta = decks.get('meta', {})
+    calib = meta.get('non_numeric_rarity_calibration')
+    if not calib:
+        rep.err('decks.json meta 缺少 non_numeric_rarity_calibration（稀有度校准未落地）')
+        return
+
+    if calib.get('status') == 'applied' and calib.get('method') == 'acquisition_pacing':
+        rep.ok('稀有度校准已落地：status=applied / method=acquisition_pacing')
+    else:
+        rep.err('稀有度校准状态异常：status=%s / method=%s'
+                % (calib.get('status'), calib.get('method')))
+
+    touched = set(calib.get('numeric_fields_untouched') or [])
+    lack = [f for f in NUMERIC_FIELDS_UNTOUCHED if f not in touched]
+    if lack:
+        rep.err('校准声明未覆盖数值字段：%s' % lack)
+    else:
+        rep.ok('校准声明未触碰数值字段：%s' % ' / '.join(NUMERIC_FIELDS_UNTOUCHED))
+
+    stats_map = {c['id']: c for c in stats['characters']}
+    drift, bad_pace, skill_bad, unknown = [], [], [], []
+    pace_cnt = Counter()
+    pace_by_rarity = {}
+    for d in items:
+        cid = d['character_id']
+        s = stats_map.get(cid)
+        if s is None:
+            unknown.append(cid)
+            continue
+        # 数值框架零漂移（校准不得改数值）
+        if (d['power'] != s['power'] or d['tier'] != s['tier'] or d['rarity'] != s['rarity']
+                or d['general']['stats'] != {'hp': s['hp'], 'attack': s['attack'],
+                                             'defense': s['defense']}):
+            drift.append(cid)
+        pc = d.get('pacing') or {}
+        pace = pc.get('pace')
+        pace_cnt[pace] += 1
+        pace_by_rarity.setdefault(d['rarity'], Counter())[pace] += 1
+        if pace not in PACE_ORDER or pace not in RARITY_PACE_ALLOWED.get(d['rarity'], set()):
+            bad_pace.append('%s(%s→%s)' % (cid, d['rarity'], pace))
+        # 技能卡完善项自洽
+        names = [sk['name'] for sk in d['skills']]
+        if len(names) != len(set(names)):
+            skill_bad.append('%s:同名技能未去重' % cid)
+        for sk in d['skills']:
+            kind = sk.get('source_kind')
+            if kind not in SKILL_SOURCE_KINDS:
+                skill_bad.append('%s:source_kind 非法(%s)' % (cid, kind))
+            elif sk.get('generic') != (kind != 'character_ability'):
+                skill_bad.append('%s:generic 与 source_kind 不一致' % cid)
+            if not sk.get('tags'):
+                skill_bad.append('%s:技能卡缺 tags' % cid)
+        mix = {k: v for k, v in (d.get('skill_element_mix') or {}).items() if v}
+        if mix != dict(Counter(sk['element'] for sk in d['skills'])):
+            skill_bad.append('%s:skill_element_mix 与技能卡不一致' % cid)
+        split = {k: v for k, v in (d.get('skill_source_split') or {}).items() if v}
+        if split != dict(Counter(sk.get('source_kind') for sk in d['skills'])):
+            skill_bad.append('%s:skill_source_split 与技能卡不一致' % cid)
+
+    if unknown:
+        rep.err('卡组引用数值产物中不存在的角色 id：%s' % unknown[:5])
+    if drift:
+        rep.err('数值漂移 %d 例（校准不得改数值）：%s' % (len(drift), drift[:5]))
+    if not drift and not unknown:
+        rep.ok('数值框架零漂移：%d 套卡组的 hp/attack/defense/power/tier/rarity 与数值产物逐条一致'
+               % len(items))
+
+    if bad_pace:
+        rep.err('稀有度 × 投放节奏映射违规 %d 例：%s' % (len(bad_pace), bad_pace[:5]))
+    else:
+        rep.ok('稀有度 × 投放节奏映射合法（R∈P1–P2 / SR∈P2–P4 / SSR·UR∈P4）')
+
+    if skill_bad:
+        rep.err('技能卡完善项异常 %d 例：%s' % (len(skill_bad), skill_bad[:5]))
+    else:
+        rep.ok('技能卡：同名去重 / tags 齐全 / source_kind 合法 / 构成统计自洽')
+
+    # 节奏单调性：低稀有度的投放窗口不得晚于高稀有度
+    ladder_ok = True
+    for lo, hi in zip(RARITY_LADDER, RARITY_LADDER[1:]):
+        a, b = pace_by_rarity.get(lo), pace_by_rarity.get(hi)
+        if not a or not b:
+            continue
+        if max(PACE_STRICTNESS.get(p, -1) for p in a) > min(PACE_STRICTNESS.get(p, -1) for p in b):
+            ladder_ok = False
+            rep.err('投放节奏倒挂：%s 最晚档晚于 %s 最早档' % (lo, hi))
+    if ladder_ok:
+        rep.ok('投放节奏单调：稀有度越高投放越晚（R ≤ SR ≤ SSR ≤ UR）')
+
+    # meta 声明的分层统计须与卡组实际一致
+    rec = calib.get('pacing_distribution') or {}
+    actual = {k: pace_cnt.get(k, 0) for k in PACE_ORDER}
+    if rec and {k: rec.get(k, 0) for k in PACE_ORDER} != actual:
+        rep.err('meta.pacing_distribution 与卡组实际分层不一致：%s vs %s' % (rec, actual))
+    else:
+        rep.ok('meta.pacing_distribution 与卡组实际分层一致')
+
+
+EMOTICONS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'emoticons.json')
+
+
+def check_emoticons(rep, path):
+    """校验 D：表情包台账（R5）。只读校验，不改数据。"""
+    print('\n[校验 D] 表情包台账 %s' % path)
+    if not os.path.exists(path):
+        rep.err('缺少表情包台账: %s' % path)
+        return None
+    doc = load_json(path)
+
+    for k in ('version', 'round', 'redline', 'channels', 'pool', 'review_log'):
+        if k not in doc:
+            rep.err('emoticons.json 缺少顶层字段: %s' % k)
+    if rep.errors:
+        return doc
+
+    gate = doc['redline']
+    if gate.get('official_only') is True and gate.get('block_character_redraw') is True:
+        rep.ok('红线：仅官方图 + 禁止角色改画')
+    else:
+        rep.err('红线段未开启 official_only / block_character_redraw')
+
+    channels = doc['channels']
+    if len(channels) >= 3:
+        rep.ok('官方发行渠道登记 %d 条' % len(channels))
+    else:
+        rep.warn('官方发行渠道登记偏少（%d 条）' % len(channels))
+
+    root = doc.get('asset_root', '')
+    pool = doc['pool']
+    comfort = pool.get('comfort', [])
+    entrance = pool.get('entrance', [])
+    bad = 0
+    for it in comfort + entrance:
+        p = it.get('path', '')
+        if not root or not p.startswith(root):
+            rep.err('素材越界（不在官方素材库根下）: %s' % p)
+            bad += 1
+        elif '罗小黑战记数据库' not in p:
+            rep.err('素材来源非官方素材库: %s' % p)
+            bad += 1
+        elif not os.path.isfile(p):
+            rep.err('素材不存在: %s' % p)
+            bad += 1
+    if bad == 0:
+        rep.ok('池内素材 %d 张全部在位且在官方素材库内' % (len(comfort) + len(entrance)))
+
+    if len(comfort) >= 2:
+        rep.ok('comfort 池 %d 张（失败 / 平局安慰可用）' % len(comfort))
+    else:
+        rep.err('comfort 池不足 2 张，无法支撑随机安慰')
+
+    for row in doc['review_log']:
+        if not row.get('verdict') or not row.get('basis'):
+            rep.err('审查记录缺 verdict / basis: %s' % row.get('item'))
+
+    pending = doc.get('pending', [])
+    rep.ok('未决挂账 %d 项（显式登记，不静默缺失）' % len(pending))
+
+    print('  渠道 %d / comfort %d / entrance %d / celebration %d / 审查记录 %d' % (
+        len(channels), len(comfort), len(entrance),
+        len(pool.get('celebration', [])), len(doc['review_log'])))
+    return doc
+
+
 def main():
     ap = argparse.ArgumentParser(description='六系演武 · 成就与卡组校验')
     ap.add_argument('--stats', default=DEFAULT_STATS)
@@ -261,11 +454,13 @@ def main():
     stats = load_json(args.stats)
     rep = Report()
     print('=' * 60)
-    print('六系演武 R2 · 成就与卡组校验')
+    print('六系演武 R2/R5 · 成就、卡组与表情包台账校验')
     print('=' * 60)
 
     ach = check_achievements(rep, args.achievements, stats)
-    check_decks(rep, args.decks, stats, ach)
+    decks = check_decks(rep, args.decks, stats, ach)
+    check_deck_pacing(rep, decks, stats)
+    check_emoticons(rep, EMOTICONS_PATH)
 
     print('\n[校验 C] 交叉引用')
     stats_total = len(stats['characters'])

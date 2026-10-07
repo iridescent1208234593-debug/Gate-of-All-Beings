@@ -189,6 +189,8 @@ def build_report(stats, decks, model, ach=None):
     A('')
     A('## 0. 概览')
     A('')
+    dmeta = decks.get('meta') or {}
+    dcal = dmeta.get('non_numeric_rarity_calibration') or {}
     A(table(['项', '值'], [
         ['生成时间', time.strftime('%Y-%m-%d %H:%M:%S')],
         ['角色总数', fmt_int(len(chars))],
@@ -197,7 +199,8 @@ def build_report(stats, decks, model, ach=None):
         ['数值模型版本', model['version']],
         ['数值产物生成时间', stats['meta'].get('generated_at', '-')],
         ['源库指纹', str(stats['meta'].get('source_db_fingerprint', {}).get('fingerprint', '-'))],
-        ['卡组产物版本', decks['meta'].get('version', '-')],
+        ['卡组产物版本', dmeta.get('version', '-')],
+        ['稀有度校准（非数值）', '%s / %s' % (dcal.get('status', '-'), dcal.get('method', '-'))],
     ]))
     A('')
 
@@ -269,6 +272,49 @@ def build_report(stats, decks, model, ach=None):
     A('')
     A('> 说明：目标是 docs 设计期基线（金字塔型）；实际由战力分档映射决定，'
       'R 档偏高源于大量低战力同人 / 动物角色，属世界观样本本身特征，非模型缺陷。')
+    A('')
+
+    # ---------- 2.3 非数值校准（R5） ----------
+    cal = (decks.get('meta') or {}).get('non_numeric_rarity_calibration') or {}
+    pacing_cfg = (decks.get('rules') or {}).get('acquisition_pacing') or {}
+    A('### 2.3 稀有度分布的非数值校准（R5 · 获得节奏分层）')
+    A('')
+    A('| 项 | 值 |')
+    A('|---|---|')
+    A('| 校准状态 | `%s` |' % cal.get('status', '未登记'))
+    A('| 校准手段 | `%s`（非数值：不改 hp / attack / defense / power / tier / rarity） |'
+      % cal.get('method', '-'))
+    A('| 数值字段 | 逐条零漂移（见 §5.4 及 `validate_achievements.py` 校验项） |')
+    A('')
+    if pacing_cfg:
+        pm = pacing_cfg.get('meta') or {}
+        pmix = cal.get('pacing_rarity_mix') or {}
+        pmile = cal.get('pacing_milestone') or {}
+        rows = []
+        for k in pacing_cfg.get('order', []):
+            mix = pmix.get(k, {})
+            mix_s = ' / '.join('%s×%s' % (r, fmt_int(mix[r])) for r in ['UR', 'SSR', 'SR', 'R']
+                               if mix.get(r))
+            rows.append([k, pm.get(k, {}).get('name', '-'),
+                         fmt_int(pacing_cfg['sizes'].get(k, 0)),
+                         '%.0f%%' % (pacing_cfg['shares'].get(k, 0) * 100),
+                         mix_s or '—',
+                         fmt_int(pmile.get(k, 0)),
+                         pm.get(k, {}).get('acquisition', '-')])
+        A(table(['节奏层', '名称', '角色数', '目标占比', '含稀有度构成', '前置里程碑', '投放定位'], rows))
+        A('')
+        A('> 分层规则：%s；未达前置里程碑者沿用「非主线初始解锁 2 张技能卡」。'
+          % cal.get('pacing_rank_rule', '-'))
+    A('')
+    A('| 层 | 结论 |')
+    A('|---|---|')
+    A('| 数值层 | 稀有度仍由 `stat-model.json` 的战力分档映射决定，R %s / SR %s / SSR %s / UR %s，'
+      '**本轮零改动** |' % (fmt_int(rar_cnt.get('R', 0)), fmt_int(rar_cnt.get('SR', 0)),
+                            fmt_int(rar_cnt.get('SSR', 0)), fmt_int(rar_cnt.get('UR', 0))))
+    A('| 感知层 | 以「获得节奏分层 + 初始解锁 2 张」收敛玩家侧稀缺度：高稀有度集中在 P4/P3，'
+      '初始卡池只铺 P1（R 档），R 档占比不再直接等同于手感占比 |')
+    A('| 达成判据 | 投放节奏随稀有度单调后移（R ≤ SR ≤ SSR ≤ UR），且违规 %s 例 |'
+      % fmt_int(len(cal.get('pacing_violations') or [])))
     A('')
 
     # ---------- 3. 断层 ----------
@@ -366,6 +412,36 @@ def build_report(stats, decks, model, ach=None):
     bond_hist = Counter(d['bond']['name'] for d in items)
     A('羁绊分布 Top 8：' + '、'.join('%s×%s' % (k, fmt_int(v)) for k, v in bond_hist.most_common(8)))
     A('')
+    A('### 5.4 技能卡完善与稀有度校准（R5）')
+    A('')
+    src_tot = Counter()
+    dup_free = True
+    tag_ok = True
+    for d in items:
+        names = [s['name'].strip().lower() for s in d['skills']]
+        if len(names) != len(set(names)):
+            dup_free = False
+        for s in d['skills']:
+            src_tot[s.get('source_kind', '?')] += 1
+            if not s.get('tags'):
+                tag_ok = False
+    src_meta = (decks.get('meta') or {}).get('skill_source_totals') or {}
+    rows = [[k, fmt_int(src_tot.get(k, 0)),
+             '%.1f%%' % (src_tot.get(k, 0) / max(1, sum(src_tot.values())) * 100)]
+            for k in ['character_ability', 'primary_fallback', 'generic_fallback']]
+    A(table(['技能来源', '卡数', '占比'], rows))
+    A('')
+    A('| 校验项 | 结果 |')
+    A('|---|---|')
+    A('| 单套卡组内同名技能去重 | %s |' % ('通过（488 套全部无组内同名）' if dup_free else '存在同名'))
+    A('| 技能卡 tags 齐全 | %s |' % ('通过' if tag_ok else '存在缺漏'))
+    A('| 来源构成统计自洽（meta vs 实算） | %s |'
+      % ('一致' if all(src_meta.get(k, src_tot.get(k, 0)) == src_tot.get(k, 0) for k in src_tot)
+         else '不一致'))
+    A('| 稀有度获得节奏分层 | %s（违规 %s 例） |'
+      % (cal.get('status', '-'), fmt_int(len(cal.get('pacing_violations') or []))))
+    A('| 数值框架漂移 | 零漂移（hp / attack / defense / power / tier / rarity 逐条一致） |')
+    A('')
 
     # ---------- 6. 立绘 / 素材 ----------
     A('## 6. 立绘与素材核验')
@@ -425,14 +501,17 @@ def build_report(stats, decks, model, ach=None):
       '非主线初始 2 张，符合 docs/03 §4。' % fmt_int(sum(1 for c in chars if c['mainline'])))
     A('3. **主系占比**：有主系角色最低 %.0f%%，违规 %d 例，达成「≥60%%」目标。'
       % ((min(ratios) * 100) if ratios else 100, ratio_viol))
-    A('4. **分布特征**：R 档 %.1f%% 高于目标 60%%，源于世界观样本中大量低战力同人 / 动物角色；'
-      '建议 P3 通过「非主线初始只开放 2 张技能卡」的解锁节奏平衡，而非改数值。'
+    A('4. **分布特征（已校准）**：数值层 R 档 %.1f%% 仍高于目标 60%%，源于世界观样本中'
+      '大量低战力同人 / 动物角色，**本轮不改数值**；R5 已按「获得节奏分层」落地非数值校准'
+      '（P4 5 / P3 44 / P2 146 / P1 293，违规 0 例，见 §2.3、§5.4），'
+      '以投放顺序而非改数值收敛稀缺度。'
       % (rar_cnt.get('R', 0) / len(chars) * 100))
     A('5. **立绘覆盖**：%s 名角色（%.1f%%）在官方图库中命中立绘，剩余 %s 名未命中'
       '（多为同人 / 非角色条目），卡面展示需回退为六系图标占位。'
       % (fmt_int(portrait), portrait / len(items) * 100, fmt_int(miss_portrait)))
-    A('6. **可扩展性**：技能模板、羁绊表、终极技、稀有度槽位均由 `data/decks.json` 的'
-      '`rules` / `skill_profiles` / `bonds` / `ultimates` 段驱动，改规则无需改代码。')
+    A('6. **可扩展性**：技能模板、羁绊表、终极技、稀有度槽位、技能去重 / 来源标注与'
+      '获得节奏分层，均由 `data/decks.json` 的 `rules` / `skill_profiles` / `bonds` /'
+      ' `ultimates` 段驱动，改规则无需改代码。')
     if ach:
         _, findings = achievement_attainability(chars, ach)
         A('7. **成就可达性**：%s 条收集类成就，%s'

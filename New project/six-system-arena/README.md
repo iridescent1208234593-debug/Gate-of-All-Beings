@@ -70,11 +70,12 @@ AIGC:
 | 收集类成就数据 | `data/achievements.json`（15 条 / 4 类） | 待办 | **完成** |
 | 对战内核 | `ui/battle-engine.js`（确定性 · 六系克制环 · 镜像战） | 待办 | **完成** |
 | 成就判定与图鉴 | `ui/achievement-system.js` | 待办 | **完成** |
-| 胜负结算 | `ui/settlement.js`（胜：小黑 + 比丢 / 负：安慰表情包） | 待办 | **完成** |
+| 胜负结算 | `ui/settlement.js` v1.1.0（胜：小黑 + 比丢 / 负：安慰 / 平：独立轨） | 待办 | **完成**（R5 三轨齐备 + 台账驱动） |
 | 数值与卡组审计 | `data/audit/r2-audit.md` | 待办 | **完成** |
 
 > R2 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R2** 一节。
 > R3 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R3** 一节（工作副本切至 E 盘 + 站点现有 demo 数值登记）。
+> R5 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R5** 一节（三分轮收口：角色技能分配与卡组生成 → 对战结算与收集成就 → 胜负反馈与表情包；`decks.json` v1.1.0 + 结算三轨 + 表情包台账 + 集成包同步）。
 
 ### 1.1 世界观与素材红线（最高优先级）
 
@@ -110,12 +111,13 @@ six-system-arena/
 │  ├─ SixSystemPanel.js      ← 数值面板组件（六系雷达 + 五行星图 + 图标）
 │  ├─ battle-engine.js       ← R2 确定性对战内核（克制环 / 空间穿透 / 镜像战 / 种子复现）
 │  ├─ achievement-system.js  ← R2 成就判定 + 收集图鉴（只读战斗日志契约字段）
-│  └─ settlement.js          ← R2 胜负结算（胜：小黑 + 比丢登场；负：安慰表情包，不惩罚）
+│  └─ settlement.js          ← R2/R5 胜负平三轨结算（胜：小黑 + 比丢；负：安慰；平：独立轨，均不惩罚）
 ├─ data/
 │  ├─ six-systems.json       ← 六系定义、图标 key、颜色映射
 │  ├─ stat-model.json        ← hp/attack/defense/element/realm 取值规则与分档
 │  ├─ decks.json             ← R2 卡组产物（488 名 · 主将 + 技能 + 羁绊 + 规则表）
 │  ├─ achievements.json      ← R2 成就定义（15 条 · 角色 / 六系 / 战斗 / 稀有度）
+│  ├─ emoticons.json         ← R5 表情包素材台账（官方渠道 / 红线 / 池 / 逐张审查留痕）
 │  ├─ manual-overrides.json  ← 人工校准表
 │  ├─ scripts/
 │  │  ├─ generate_stats.py         ← 从 v4 数据库推导角色数值（只读数据库）
@@ -137,15 +139,16 @@ six-system-arena/
 │  ├─ 06-数据源与回滚.md
 │  ├─ 07-站点集成方案.md          ← R2：zszm 端口接入点与三套方案
 │  ├─ 08-现有游戏数值基线登记.md   ← R3：站点 demo 数值登记与字段对照
-│  └─ 09-站点集成安装手册.md       ← R4：逐步安装 / 素材安装 / 回滚 / 常见问题
+│  ├─ 09-站点集成安装手册.md       ← R4：逐步安装 / 素材安装 / 回滚 / 常见问题
+│  └─ 10-表情包素材台账.md         ← R5：表情包台账 / 素材红线 / 采集 SOP / 未决项
 ├─ integration/               ← R4：zszm 交付集成包（可直接复制到站点）
 │  ├─ INTEGRATION-ZSZM.md     ← R4：交付级安装指南（零映射 / 四步安装 / 回滚 / FAQ）
 │  ├─ README.md               ← 包结构 / API / 契约 / 红线
-│  ├─ manifest.json           ← 23 文件哈希清单（防漂移基准）
+│  ├─ manifest.json           ← 24 文件哈希清单（防漂移基准，R5 已刷新）
 │  ├─ js/                     ← six-system-icons.js / settlement.js
 │  ├─ src/                    ← TS 接入层（SettlementStage / SixSystemPanel / AchievementBanner / 适配层）
 │  ├─ styles/                 ← sixsys-integration.css（sixsys- 前缀，零冲突）
-│  ├─ data/                   ← 交付数据副本（488 角色 / 488 卡组 / 15 成就 / 六系 / 模型）
+│  ├─ data/                   ← 交付数据副本（488 角色 / 488 卡组 / 15 成就 / 六系 / 模型 / R5 表情台账）
 │  ├─ tools/                  ← decide_ach_system_001.py（土系成就缺口决策工具）
 │  └─ verify/                 ← sync / verify / smoke / install_assets 四件套
 ├─ legacy/
@@ -245,7 +248,7 @@ $A = "E:\Projects\New project\six-system-arena"
 # 同步：arena 真源 → integration\ 副本（默认 APPLY；-DryRun 仅预览）
 powershell -ExecutionPolicy Bypass -File "$A\integration\verify\sync_from_arena.ps1"
 
-# 静态自检（23 文件清单 / 零漂移 / 红线 / 契约 / 数据）
+# 静态自检（24 文件清单 / 零漂移 / 红线 / 契约 / 数据 / R5 表情台账）
 python "$A\integration\verify\verify_integration.py" --refresh-hashes
 
 # 运行时冒烟（图标注册 / 结算契约 / 克制环确定性 / 成就判定）

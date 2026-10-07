@@ -253,3 +253,84 @@ powershell -ExecutionPolicy Bypass -File "scripts\run_all.ps1"
 2. **土系成就 `ach_system_001` 门槛**：`element_gate` 已以 `proposed` 态落盘（主方案 A：数据侧补土系 C 档；备选 C：替代路径；方案 B 已驳回），待拍板。
 3. **官方表情包专项目录仍缺位**：失败结算继续复用官方表情立绘（合规），专项采集须走 `docs/05 §5` 审查流程。
 *（内容由AI生成，仅供参考）*
+
+## R5 · 2026-10-07 · 三分轮收口（卡组生成 → 对战结算与收集成就 → 胜负反馈与表情包）
+
+**范围**：按 README §1 分轮计划顺序，一次性收口三轮增量：① **角色技能分配与卡组生成**；② **对战结算与收集成就**；③ **胜负反馈与表情包**。
+**红线遵守**：所有新建 / 修改均在 `E:\Projects\New project\six-system-arena\` 内；参考仓库（`shared/shared-ui`、`D:\Projects\zszm`）与 v4 数据库全程只读；**未联网采集任何素材**；**未使用 AI 生成任何角色形象**（UI 拆分组件为唯一例外，本轮亦未新增）。
+
+**数值框架声明（重要）**：`data/stat-model.json`、`data/six-systems.json`、`data/generated/character_stats.json` 的**数值字段与六系口径一律未改**（`character_stats.json` 仅 `generated_at` 时间戳刷新）。`data/decks.json` 由 v1.0.0 升 **v1.1.0**，新增的是**卡组级描述字段与「获得节奏」分层**——卡组数值（hp / attack / defense / power / tier / rarity）与数值产物**逐条零漂移**（由 `validate_achievements.py` 校验 B2 硬校验）。R2 遗留的「稀有度分布待校准」以**非数值手段**（投放节奏 P4 / P3 / P2 / P1 分层）落地，tier → rarity 映射未动。
+
+---
+
+### R5-A · 角色技能分配与卡组生成
+
+| 文件 | 大小 | 动作 |
+|---|---|---|
+| `data/decks.json` | 1,862,889 B | **升 v1.1.0**：488 套卡组；技能卡新增 `tags`（姿态标签）与 `source_kind`（`character_ability` / `primary_fallback` / `generic_fallback`）；卡组级新增 `skill_element_mix`（技能系别构成）与 `skill_source_split`（来源构成）；同一卡组内同名技能保序去重 |
+| `data/scripts/generate_decks.py` | 30,598 B | **生成器升级**：新增 `SKILL_PROFILE` 补位策略 / 同名去重 / 来源统计 / 获得节奏分层（确定性，无随机扰动） |
+| `data/scripts/validate_achievements.py` | 20,548 B | **新增校验段 B2**：非数值校准已 applied 且 method=`acquisition_pacing`；数值框架零漂移逐条比对；稀有度 × 节奏映射合法性（R∈P1–P2 / SR∈P2–P4 / SSR·UR∈P4）与单调性 |
+| `data/audit/r2-audit.md` | 10,067 B | 刷新审计快照（生成时间 / 卡组产物版本 1.1.0） |
+
+- **技能来源溯源**（`data/decks.json:meta.skill_source_totals`）：`character_ability` 131 / `primary_fallback` 177 / `generic_fallback` 742 → 占比 12.48% / 16.86% / 70.67%（卡组合计 2514 张卡，其中技能卡 1050 张）。
+- **获得节奏实测**（目标份额 1% / 9% / 30% / 60%）：P4 5 名 / P3 44 名 / P2 146 名 / P1 293 名（合计 488）。
+- **稀有度分布（未改）**：R 418 / SR 66 / SSR 3 / UR 1。
+
+### R5-B · 对战结算与收集成就
+
+- `ui/settlement.js` 由 R2 的「胜 / 负」两轨扩为**三轨**（见 R5-C），并保留成就解锁**错峰播放**（`achievement.show_after_ms`），避免结算动画与成就弹窗打架。
+- `data/scripts/smoke_test.js` 新增**第 10 段（平局与表情包台账）**，与原 1–9 段（对战内核 / 确定性 / 克制环 / 镜像战 / 成就判定 / 收集图鉴 / 结算 / 败局不判定 / 素材核验）联动回归。
+- **零惩罚口径复核**：失败与平局均不扣资源、不掉进度、不判定成就（静态契约 `contract.no-penalty-on-lose` + 冒烟第 5 / 8 / 10 项）。
+- 对战内核与成就系统（`ui/battle-engine.js`、`ui/achievement-system.js`）**内核未动**，仅做回归验证与文档记录，保持既有数据系统框架不变。
+
+### R5-C · 胜负反馈与表情包
+
+| 文件 | 大小 | 动作 |
+|---|---|---|
+| `data/emoticons.json` | 9,090 B | **新增**：表情包素材台账——官方渠道登记 5 条 / 红线声明 / comfort 池 3 张 + entrance 池 3 张 / 逐张审查留痕 6 条 / 未决挂账 4 项 |
+| `docs/10-表情包素材台账.md` | 6,061 B | **新增**：台账定位 / 素材红线 / 渠道登记 / 运行时池 / 逐张审查记录 / 采集 SOP / 未决项 |
+| `ui/settlement.js` | 17,109 B | **升 v1.1.0**：新增 `loadEmoticons()` / `getEmoticonState()` / `isOfficialPath()`（台账注入 + 官方路径白名单，未登记或不合规图不入池）；新增平局独立轨 `buildDraw()` / `DRAW_LINES` / `DRAW_TIMELINE`（1800 ms / 不判负 / 不惩罚 / 不引用素材） |
+
+### R5 集成包同步（`integration/`，24 文件）
+
+- `data/emoticons.json`、更新后的 `data/decks.json` 与 `data/character_stats.json` 入包；`js/settlement.js` 与 arena 真源**零漂移**。
+- `verify/sync_from_arena.ps1` 数据映射表新增 `emoticons.json`（并按真源子路径 `generated/` 取 `character_stats.json`）。
+- `verify/verify_integration.py` 新增 4 项校验（`contract.draw-track` / `contract.emoticon-ledger` / `data.emoticon-ledger` / `data.emoticon-redline`），合计 **22 项**。
+- `verify/smoke_integration.mjs` 新增 **7b 平局轨**检查，合计 **12 项**。
+- `src/sixsys-assets.ts` 官方白名单扩至 **6 张**（新增 `luoxiaohei_face_03`）；`manifest.json` → **v1.1.0 / R5**。
+
+### 验证结果（本轮实测）
+
+| 校验 | 覆盖 | 结果 |
+|---|---|---|
+| `python data\scripts\validate_achievements.py` | 25 项（含 B2 / D / C） | **25 PASS / 0 警告 / 0 失败** |
+| `node data\scripts\smoke_test.js` | 10 段 | **全部通过** |
+| `python integration\verify\verify_integration.py --refresh-hashes` | 22 项静态自检 | **22/22 PASS**（24/24 文件在位、零漂移、零红线命中） |
+| `node integration\verify\smoke_integration.mjs` | 12 项运行时冒烟 | **12/12 PASS** |
+| `sync_from_arena.ps1` | 8 文件 | 同步成功、零漂移 |
+
+### 素材溯源（本轮实际引用，逐张人工审查）
+
+| 素材 id | 站点文件名 | 官方原文件（相对 `E:\Projects\assets\罗小黑战记数据库\images\`） | 用途 |
+|---|---|---|---|
+| `luoxiaohei_full` | luoxiaohei_full.jpg | `罗小黑\罗小黑_全身_085.jpg` | 胜利：罗小黑登场 |
+| `bidiu` | bidiu.png | `比丢\比丢.png` | 胜利：比丢登场 |
+| `bidiu_anim` | bidiu.gif | `比丢\比丢.gif` | 胜利：比丢动图（兜底） |
+| `luoxiaohei_face_01` | luoxiaohei_face_01.jpg | `罗小黑\罗小黑_表情_087.jpg` | 失败 / 平局：安慰 |
+| `luoxiaohei_face_02` | luoxiaohei_face_02.jpg | `罗小黑\罗小黑_表情_088.jpg` | 失败 / 平局：安慰 |
+| `luoxiaohei_face_03` | luoxiaohei_face_03.jpg | `罗小黑\罗小黑_剧照_000.jpg` | 失败 / 平局：安慰（**R5 新增**） |
+
+- 全部为**库内官方原图**，逐张人工审查后登记；**本轮联网采集 0 张**。
+- 红线：仅官方图 / 禁 AI 生图 / 禁同人图 / 禁外链 / **角色形象不得改画或再生成**；UI 拆分组件（图标 / 边框 / 按钮 / 底板）为唯一例外。
+
+### 未决项（挂账）与下一轮计划
+
+1. **表情包专项采集仍缺位**：comfort 池 3 张全为库内官方图，`emoticons.json:pending` 登记 4 项（官方表情包专项目录 / 审查凭证补全 / celebration 池为空 / 动图兜底策略）；专项采集须走 `docs/10` + `docs/05 §5` 流程。
+2. **站点侧挂载未执行**：R5 集成包的复制 + 入口引两行动作涉及正式工程写入，按中风险处理，待拍板。
+3. **土系成就 `ach_system_001` 门槛**：`element_gate` 仍为 `proposed` 态，待拍板。
+4. **结算未含动效 / 音效**：平局轨当前为文案 + 「再来一次」按钮。
+5. **端到端联调产物待补**：`toLogRecord` 落盘样例、成就判定全 15 条覆盖验证、图鉴四视图渲染自检（本轮以冒烟第 5 / 6 段抽样覆盖，未做到全覆盖逐条验证）。
+
+**下一轮（R6）候选**：A（推荐）端到端联调链路补全（`toLogRecord` 落盘样例 / 全 15 条成就覆盖 / 图鉴四视图渲染自检）＋站点侧 P7 方案 A 挂载（零侵入 / 可一键回滚）；B 表情包专项目录采集（联网 → 逐张人工审查 → 登记台账 → 重跑集成包校验）；C 结算表现增强（动效 / 音效 / 表情池扩容）。
+
+*（内容由AI生成，仅供参考）*

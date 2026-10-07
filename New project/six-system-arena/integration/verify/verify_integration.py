@@ -11,6 +11,7 @@ verify_integration.py - 集成包交付自检（R3）
   5. 组件契约：六键图标、window.LXHUI.ICONS、settlement 不惩罚、成就错峰
   6. 数据一致性：488 角色 / 488 卡组 / 15 成就 / 六系定义
   7. 成就 ach_system_001 的土系缺口与 element_gate 拍板结论是否落地
+  8. 表情包台账（R5）：形态 / 红线 / 官方渠道 / 池内素材在位 / 审查留痕 / 未决挂账
 
 只读参考仓库与数据库，不写除 integration/verify/verify_report.json 之外的文件
 （--refresh-hashes 会额外更新 integration/manifest.json 的 hashes 段）。
@@ -59,6 +60,7 @@ REQUIRED_FILES = [
     "data/achievements.json",
     "data/six-systems.json",
     "data/stat-model.json",
+    "data/emoticons.json",
     "verify/install_assets.ps1",
     "verify/sync_from_arena.ps1",
     "verify/verify_integration.py",
@@ -74,6 +76,7 @@ DRIFT_PAIRS = [
     ("data/achievements.json", "../data/achievements.json"),
     ("data/six-systems.json", "../data/six-systems.json"),
     ("data/stat-model.json", "../data/stat-model.json"),
+    ("data/emoticons.json", "../data/emoticons.json"),
 ]
 
 SIX_KEYS = ["jin", "mu", "shui", "huo", "tu", "kongjian"]
@@ -250,6 +253,14 @@ def check_contracts(rep: Report) -> dict:
     rep.add("contract.no-abs-path-in-ui", no_abs, "UI 层不含绝对路径（素材经 toSiteUrl 映射）")
     details["no_abs_path"] = no_abs
 
+    draw_track = "buildDraw" in settle and "DRAW_LINES" in settle
+    rep.add("contract.draw-track", draw_track, "settlement.js 含平局独立轨（buildDraw / DRAW_LINES，R5）")
+    details["draw_track"] = draw_track
+
+    ledger = "loadEmoticons" in settle and "isOfficialPath" in settle
+    rep.add("contract.emoticon-ledger", ledger, "settlement.js 支持外置表情包台账注入 + 官方路径白名单校验（R5）")
+    details["emoticon_ledger"] = ledger
+
     return details
 
 
@@ -293,6 +304,30 @@ def check_data(rep: Report) -> dict:
         "data.ach_system_001-decision",
         bool(gate),
         "achievements.json 已落地 element_gate 拍板（替代路径 / 门槛）" if gate else "缺少 element_gate 拍板段",
+    )
+
+    emo_path = os.path.join(INTEG, "data", "emoticons.json")
+    emo = load_json(emo_path) if os.path.isfile(emo_path) else {}
+    e_pool = emo.get("pool", {})
+    e_comfort = e_pool.get("comfort", [])
+    e_entrance = e_pool.get("entrance", [])
+    e_root = emo.get("asset_root", "")
+    all_items = e_comfort + e_entrance
+    in_root = [it for it in all_items if str(it.get("path", "")).startswith(e_root)] if e_root else []
+    n_ch = len(emo.get("channels", []))
+    rep.add(
+        "data.emoticon-ledger",
+        len(e_comfort) >= 2 and n_ch >= 3 and len(in_root) == len(all_items),
+        "表情包台账 v%s / 渠道 %d 条 / comfort %d / entrance %d" % (
+            emo.get("version"), n_ch, len(e_comfort), len(e_entrance)),
+        channels=n_ch,
+        comfort=len(e_comfort),
+    )
+    e_gate = emo.get("redline", {})
+    rep.add(
+        "data.emoticon-redline",
+        e_gate.get("official_only") is True and e_gate.get("block_character_redraw") is True,
+        "台账红线：仅官方图 + 禁止角色改画（角色形象不得再生成）",
     )
     return {"element_counts": dict(counts), "c_plus": tiers}
 

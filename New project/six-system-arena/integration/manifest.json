@@ -1,9 +1,9 @@
 {
   "package": "sixsys-zszm-integration",
-  "version": "1.0.0",
-  "round": "R3",
-  "generated_at": "2026-10-05",
-  "description": "六系演武 → zszm 端口（众生之门）集成包。把六大系（金/木/水/火/土/空间）能力数值与 UI 图标接入卡牌 / 经营 / 模拟三系统的可视化，并落地胜负结算（小黑 & 比丢正向反馈、失败安慰）与收集类成就。",
+  "version": "1.1.0",
+  "round": "R5",
+  "generated_at": "2026-10-07",
+  "description": "六系演武 → zszm 端口（众生之门）集成包。把六大系（金/木/水/火/土/空间）能力数值与 UI 图标接入卡牌 / 经营 / 模拟三系统的可视化，并落地胜负结算（小黑 & 比丢正向反馈、失败安慰、平局独立轨）与收集类成就；R5 起安慰 / 平局表情图由 data/emoticons.json 台账登记（逐张留痕）。",
   "source_of_truth": "E:\\Projects\\New project\\six-system-arena",
   "target_site": "D:\\Projects\\zszm",
   "red_lines": [
@@ -33,7 +33,7 @@
       "source": "ui/settlement.js",
       "install_to": "public/sixsys/js/settlement.js",
       "global": "window.SixSystemSettlement",
-      "role": "胜负结算时序与文案池；胜利放小黑与比丢、失败放小黑安慰表情"
+      "role": "胜负结算时序与文案池（胜：小黑 + 比丢 / 负：安慰表情 / 平：独立轨）；R5 支持 data/emoticons.json 台账注入与官方路径白名单校验"
     },
     {
       "source": "ui/battle-engine.js",
@@ -68,6 +68,11 @@
       "source": "data/six-systems.json",
       "install_to": "public/sixsys/data/six-systems.json",
       "size_note": "六系定义、图标 key、颜色、克制环"
+    },
+    {
+      "source": "data/emoticons.json",
+      "install_to": "public/sixsys/data/emoticons.json",
+      "size_note": "表情包素材台账（5 条官方渠道 / comfort 3 + entrance 3 / 逐张审查留痕 / 未决挂账）"
     }
   ],
   "ts_package": [
@@ -169,6 +174,12 @@
         "file": "bidiu.gif",
         "origin": "罗小黑战记数据库\\images\\比丢\\比丢.gif",
         "role": "胜利结算：比丢登场动图（可选，静态图缺失时兜底）"
+      },
+      {
+        "id": "luoxiaohei_face_03",
+        "file": "luoxiaohei_face_03.jpg",
+        "origin": "罗小黑战记数据库\\images\\罗小黑\\罗小黑_剧照_000.jpg",
+        "role": "失败 / 平局结算：小黑安慰表情（官方剧照，R5 新增）"
       }
     ],
     "excluded_dirs": [
@@ -177,7 +188,7 @@
       "AI image",
       "同人图"
     ],
-    "note": "本轮未联网采集；如后续需补官方表情包，须按 docs/05 流程逐张审查并更新本清单与 assets.source.json。"
+    "note": "R5 未联网采集新增表情包；库内官方剧照扩充 1 张（luoxiaohei_face_03）。如后续需补官方表情包，须按 docs/10 + docs/05 流程逐张审查并更新本清单与 assets.source.json。"
   },
   "entry_wiring": [
     {
@@ -213,20 +224,20 @@
       "bytes": 12716
     },
     "INTEGRATION-ZSZM.md": {
-      "sha256": "2de718d3b3b8a211c128a44158979b14e79d7f7cf8356cd946987e8515d8e134",
-      "bytes": 8746
+      "sha256": "8cfc36afd7acacb91379de7ce794a08ae0b3e881e07a2c9aa939e1cac28b8b20",
+      "bytes": 9748
     },
     "manifest.json": {
-      "sha256": "0692a487c965084d1dcda6879f9161a373b4f36261d687fb4fb2b9bb89b09ab7",
-      "bytes": 12120
+      "sha256": "4227d6927b5ddbb4ad2fb0de9661197593f245f9a4ba4e18e80938d005a0c3d5",
+      "bytes": 13057
     },
     "js/six-system-icons.js": {
       "sha256": "5c2a0708c08f4174b2f838a717dcef19cba499f76e43d4591a0ee8aaae5f3c86",
       "bytes": 5040
     },
     "js/settlement.js": {
-      "sha256": "c93bd4cfca25441f91bd7b5783926d2fd57b513a50004d9e3cdd80c4a7f4fea7",
-      "bytes": 11959
+      "sha256": "a803e6252d86ba3248705e3a4cc3fe7ec72cbb504ec80648994ab23a2e1fc5df",
+      "bytes": 17109
     },
     "src/index.ts": {
       "sha256": "91f4df02d3f5ff7ac7b704b3683d3c6e04ad759e6b59dbe2fb229ead19c3f816",
@@ -237,8 +248,8 @@
       "bytes": 8727
     },
     "src/sixsys-assets.ts": {
-      "sha256": "c67e1facbc598bb27013a442c50a6590cc9f9143ad82e402ff914401636f3d43",
-      "bytes": 5518
+      "sha256": "23de9d8ee4e522769742bce1938f7c0d94a37b88b19aff4bc64ebff9edbef1dd",
+      "bytes": 5934
     },
     "src/sixsys-data.ts": {
       "sha256": "8f0e0b951f37c1c4606d05af030dd476e70c45c02c1ccde20c00d67011825027",
@@ -261,12 +272,12 @@
       "bytes": 4718
     },
     "data/character_stats.json": {
-      "sha256": "90e3c13e624e78b7b0c060447b210536d220da2b013bc145222a444474144d02",
+      "sha256": "44f74d4bd176e7ff52a6d0ec8ee45c8d0774423227656603887b5d485fb683cf",
       "bytes": 353533
     },
     "data/decks.json": {
-      "sha256": "64fd2f8f846bcd1d37502c0ed43a185040ded7023ad6d96cc45f05f477c0b88a",
-      "bytes": 1497334
+      "sha256": "a7904898ccd146c8bf945ee77157d2876cc9927222cc9aa4966e1cb27b76cbbc",
+      "bytes": 1863114
     },
     "data/achievements.json": {
       "sha256": "64eaefc912c77ee476adf20dad7237fb2489ee17a5fb7c644fde0c59dc22b810",
@@ -280,27 +291,31 @@
       "sha256": "058d15a0b38d1d9653854ea0e884523eeba5e08adc5ec1727854841f0130989c",
       "bytes": 6874
     },
+    "data/emoticons.json": {
+      "sha256": "40e6883a32a6afb867fdd7c726a201c617d6031b9a54bfac97166146913e6245",
+      "bytes": 9090
+    },
     "verify/install_assets.ps1": {
       "sha256": "49c3e0be9db55cb006c5e6d5548e6bb0ec9380229bfd9bcfe7f96898081d1cfe",
       "bytes": 2953
     },
     "verify/sync_from_arena.ps1": {
-      "sha256": "628b54faf35874cff81ae7df40636b63ad1a52a46b2fc39b3bfb7918b68cfc8e",
-      "bytes": 2985
+      "sha256": "e7513675412a2a1fd97199133a6163aae34c397c2d88c2eb91e8ba25dcc22a93",
+      "bytes": 3064
     },
     "verify/verify_integration.py": {
-      "sha256": "5f9ebc454fb3c0259f7a63a44ebe49bcaaddb52aa69a8c3b489f0a33220144ee",
-      "bytes": 14709
+      "sha256": "e5db35d5f9c7cd3f2068ce1a2719b318b13e2752b5422b364a4fa193322ac707",
+      "bytes": 16485
     },
     "verify/smoke_integration.mjs": {
-      "sha256": "efcfc2caff26c02630c013ef73df5b6d69b8caf51a96e0f4fc89946bd7456225",
-      "bytes": 15453
+      "sha256": "881bbbcb4f25c0476cfca1ceff573c1149d3a3c9a53a695c1a077911d625734f",
+      "bytes": 16818
     },
     "verify/assets.source.json": {
-      "sha256": "cb5a68c96fb668233beeb86d39b6eb7b3134575656007cbac4e6e4b584e562ba",
-      "bytes": 832
+      "sha256": "20fe2515369adaa8600cdf3b2b5b03fd003dcb56cecee882153b593f879d0122",
+      "bytes": 1103
     }
   },
-  "hashes_refreshed_at": "2026-10-06 23:38:19",
-  "package_version": "1.0.0"
+  "hashes_refreshed_at": "2026-10-07 05:26:22",
+  "package_version": "1.1.0"
 }

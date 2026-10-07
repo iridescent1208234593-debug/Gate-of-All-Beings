@@ -18,7 +18,8 @@ export type OfficialAssetId =
   | 'luoxiaohei_face_01'
   | 'luoxiaohei_face_02'
   | 'bidiu'
-  | 'bidiu_anim';
+  | 'bidiu_anim'
+  | 'luoxiaohei_face_03';
 
 export interface OfficialAssetRef {
   id: OfficialAssetId;
@@ -68,6 +69,13 @@ export const OFFICIAL_ASSETS: readonly OfficialAssetRef[] = [
     kind: 'gif',
     role: '胜利结算：比丢登场动图（可选，jpg/png 缺失时兜底）',
   },
+  {
+    id: 'luoxiaohei_face_03',
+    file: 'luoxiaohei_face_03.jpg',
+    origin: '罗小黑战记数据库\\images\\罗小黑\\罗小黑_剧照_000.jpg',
+    kind: 'jpg',
+    role: '失败 / 平局结算：小黑安慰表情（官方剧照，R5 新增）',
+  },
 ] as const;
 
 const BY_FILE: Record<string, OfficialAssetId> = OFFICIAL_ASSETS.reduce((acc, a) => {
@@ -109,7 +117,10 @@ export const SETTLEMENT_ASSETS = {
     companionAlt: 'bidiu_anim' as OfficialAssetId,
   },
   lose: {
-    comfort: ['luoxiaohei_face_01', 'luoxiaohei_face_02'] as OfficialAssetId[],
+    comfort: ['luoxiaohei_face_01', 'luoxiaohei_face_02', 'luoxiaohei_face_03'] as OfficialAssetId[],
+  },
+  draw: {
+    comfort: ['luoxiaohei_face_03', 'luoxiaohei_face_01'] as OfficialAssetId[],
   },
 } as const;
 
