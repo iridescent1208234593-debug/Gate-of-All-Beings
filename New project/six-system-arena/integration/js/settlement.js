@@ -1,16 +1,18 @@
 /**
- * settlement.js — 六系演武 · 胜负结算（R2）
+ * settlement.js — 六系演武 · 胜负结算（R2 内核 / R5 台账注入）
  * ============================================================================
- * 对应文档：docs/04-成就系统.md §2（胜利结算）/ §3（失败结算）、docs/05-素材白名单.md
+ * 对应文档：docs/04-成就系统.md §2（胜利结算）/ §3（失败结算）、
+ *           docs/05-素材白名单.md、docs/10-表情包素材台账.md（R5 新增）
  *
- * 情绪设计双轨
+ * 情绪设计三轨（R5 补齐平局）
  *   胜：罗小黑 + 比丢登场（约 3s）→ 正向反馈文案 → 成就解锁（错峰播放，避免打架）
- *   负：小黑安慰表情包 → 安慰文案 → 一键「再来一次」；不扣资源 / 不掉进度 / 不判定成就
+ *   负：小黑安慰表情图 → 安慰文案 → 一键「再来一次」；不扣资源 / 不掉进度 / 不判定成就
+ *   平：小黑平静表情图 → 平局文案 → 一键「再来一次」；同样零惩罚（R5 起独立成轨）
  *
- * 素材红线（docs/05）
+ * 素材红线（docs/05 §5、docs/10）
  *   · 只用《罗小黑战记》官方图，全部取自 E:\Projects\assets\罗小黑战记数据库\images\
- *   · 严禁 AI 生图、严禁同人图、严禁外链
- *   · 表情包审查：本轮未联网采集新表情包，安慰图复用官方立绘/表情目录中的既有官方图
+ *   · 一切角色形象必须为官方原图：不得改画、不得再生成、不得外链
+ *   · R5 起安慰 / 平局表情图由 data/emoticons.json 台账登记，未登记或不合规的图不入池
  *
  * 零依赖，可用 <script> 引入或 CommonJS require。
  */
@@ -20,7 +22,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   /* ------------------------------------------------------------------ */
   /* 素材索引（全部为官方白名单路径，只读引用，不复制、不改画）           */
@@ -33,10 +35,11 @@
     luoxiaohei: {
       /** 胜利登场：主角全身立绘（官方原图） */
       entrance: ASSET_ROOT + '\\罗小黑\\罗小黑_全身_085.jpg',
-      /** 失败安慰：官方表情图（随机 1 张） */
+      /** 失败 / 平局安慰：官方表情图（随机 1 张；R5 扩充至 3 张） */
       comfort: [
         ASSET_ROOT + '\\罗小黑\\罗小黑_表情_087.jpg',
-        ASSET_ROOT + '\\罗小黑\\罗小黑_表情_088.jpg'
+        ASSET_ROOT + '\\罗小黑\\罗小黑_表情_088.jpg',
+        ASSET_ROOT + '\\罗小黑\\罗小黑_剧照_000.jpg'
       ]
     },
     bidiu: {
@@ -49,19 +52,93 @@
     icon_panel: 'ui/SixSystemPanel.js'
   };
 
-  /** 素材来源凭证（docs/05 §5 审查留痕；本轮零新增外部采集） */
+  /** 素材来源凭证（docs/05 §5 审查留痕） */
   var ASSET_PROVENANCE = {
     collector: 'local',
-    collected_at: '2026-10-05',
+    collected_at: '2026-10-07',
     source: 'assets\\罗小黑战记数据库\\images（官方素材库，一级来源）',
+    ledger: 'data/emoticons.json',
     review: {
       official_only: true,
-      ai_generated: false,
-      fan_art: false,
+      character_redraw: false,
       external_link: false,
-      note: '本轮未联网采集表情包；安慰图沿用官方素材库既有图，目录名不含 ai- 前缀，无同人署名。'
+      note: 'R5 起表情图以 data/emoticons.json 台账为准（逐张留痕）；本轮未联网采集新增表情包，comfort 池第 3 张为库内官方剧照。'
     }
   };
+
+  /* ------------------------------------------------------------------ */
+  /* R5：外置表情包台账装填                                              */
+  /* ------------------------------------------------------------------ */
+
+  /** 台账文件（真源）；运行时可通过 loadEmoticons() 注入已解析对象 */
+  var EMOTICON_DOC = 'E:\\Projects\\new project\\six-system-arena\\data\\emoticons.json';
+
+  /** 允许的官方素材子目录（正向白名单校验，非黑名单匹配） */
+  var ALLOWED_ASSET_DIRS = ['罗小黑', '比丢'];
+
+  var emoticonState = {
+    loaded: false,
+    source: 'builtin',
+    doc_version: null,
+    comfort: ASSETS.luoxiaohei.comfort.slice()
+  };
+
+  /** 正向校验：路径须位于官方素材库白名单子目录内 */
+  function isOfficialPath(p) {
+    if (!p || typeof p !== 'string') return false;
+    if (p.indexOf('罗小黑战记数据库\\images\\') === -1) return false;
+    for (var i = 0; i < ALLOWED_ASSET_DIRS.length; i++) {
+      if (p.indexOf('\\' + ALLOWED_ASSET_DIRS[i] + '\\') !== -1) return true;
+    }
+    return false;
+  }
+
+  /**
+   * 装填外置表情包台账（R5）。
+   * @param {object|string} doc emoticons.json 对象或 JSON 原文
+   * @returns {object} 装填摘要 { loaded, source, accepted, rejected, rejected_ids }
+   */
+  function loadEmoticons(doc) {
+    if (typeof doc === 'string') doc = JSON.parse(doc);
+    if (!doc || !doc.pool || !Array.isArray(doc.pool.comfort)) {
+      throw new Error('emoticons 台账缺少 pool.comfort 段');
+    }
+    var accepted = [];
+    var rejected = [];
+    doc.pool.comfort.forEach(function (it) {
+      var p = it && it.path;
+      if (isOfficialPath(p)) accepted.push(p);
+      else rejected.push((it && it.id) ? it.id : String(p));
+    });
+    if (accepted.length) {
+      emoticonState.loaded = true;
+      emoticonState.source = 'ledger';
+      emoticonState.doc_version = doc.version || null;
+      emoticonState.comfort = accepted;
+    } else {
+      emoticonState.loaded = false;
+      emoticonState.source = 'builtin-fallback';
+      emoticonState.comfort = ASSETS.luoxiaohei.comfort.slice();
+    }
+    return {
+      loaded: emoticonState.loaded,
+      source: emoticonState.source,
+      accepted: accepted.length,
+      rejected: rejected.length,
+      rejected_ids: rejected
+    };
+  }
+
+  /** 只读快照：当前运行时表情池状态 */
+  function getEmoticonState() {
+    return {
+      loaded: emoticonState.loaded,
+      source: emoticonState.source,
+      doc_version: emoticonState.doc_version,
+      doc: EMOTICON_DOC,
+      comfort: emoticonState.comfort.slice()
+    };
+  }
 
   /* ------------------------------------------------------------------ */
   /* 时间轴                                                              */
@@ -81,8 +158,16 @@
   var LOSE_DURATION = 1800;
   var LOSE_TIMELINE = [
     { at: 0.0, key: 'freeze_soft', desc: '战斗定格，画面转柔和', asset: null },
-    { at: 0.4, key: 'comfort_sticker', desc: '展示小黑安慰表情包（官方表情图，随机 1 张）', asset: null },
+    { at: 0.4, key: 'comfort_sticker', desc: '展示小黑安慰表情图（官方表情图，随机 1 张）', asset: null },
     { at: 1.2, key: 'comfort_text', desc: '安慰文案 + 一键「再来一次」按钮', asset: null }
+  ];
+
+  /** 平局结算时间轴（R5 新增），总时长 1800ms；零惩罚原则同败局 */
+  var DRAW_DURATION = 1800;
+  var DRAW_TIMELINE = [
+    { at: 0.0, key: 'freeze_soft', desc: '战斗定格，画面转柔和', asset: null },
+    { at: 0.4, key: 'comfort_sticker', desc: '展示小黑平静表情图（官方表情图，随机 1 张）', asset: null },
+    { at: 1.2, key: 'draw_text', desc: '平局文案 + 一键「再来一次」按钮', asset: null }
   ];
 
   /* ------------------------------------------------------------------ */
@@ -117,6 +202,13 @@
     '比丢把好不容易藏起来的果子分了你一个。',
     '输了也没关系，妖灵会馆从不记这一笔。',
     '小黑把爪子搭在你肩上：下把我陪你一起上。'
+  ];
+
+  /** 平局文案（R5 新增，语气与败局区分：不劝慰、只是把这一场放下） */
+  var DRAW_LINES = [
+    '平局。小黑歪着头看了看场子，觉得这一场不算输。',
+    '谁也没赢。比丢把果子又收回了口袋里。',
+    '打平了。小黑原地坐下，尾巴慢慢晃了两下。'
   ];
 
   /* ------------------------------------------------------------------ */
@@ -161,7 +253,7 @@
    *   ctx.opponent_name     对手名（用于「第一次赢下『X』」）
    *   ctx.first_time_defeat 是否首次击败该对手（由 achievement-system.judge 回传）
    *   ctx.win_streak        当前连胜数（≥3 触发达成文案）
-   *   ctx.seed              随机种子（决定文案与安慰图）
+   *   ctx.seed              随机种子（决定文案与表情图）
    *   ctx.newly_unlocked    本场解锁的成就数组
    *   ctx.last_line         上一场用过的文案（避免连续重复）
    *   ctx.winner_element    胜方主属性 key（六系图标高亮）
@@ -174,7 +266,10 @@
     if (result === 'win') {
       return buildWin(ctx, seed);
     }
-    // lose / draw 走同一套安抚流程（draw 亦不惩罚）
+    if (result === 'draw') {
+      return buildDraw(ctx, seed);
+    }
+    // lose 走安抚流程（不惩罚）
     return buildLose(ctx, seed);
   }
 
@@ -253,7 +348,7 @@
       feedback: { positive: false, cast: ['罗小黑'], sticker: sticker },
       assets: {
         comfort_sticker: sticker,
-        comfort_pool: ASSETS.luoxiaohei.comfort.slice(),
+        comfort_pool: emoticonState.comfort.slice(),
         icons: ASSETS.icons
       },
       achievement: { show_after_ms: null, unlocked: [], play_order: 'none_per_doc' },
@@ -269,9 +364,46 @@
     };
   }
 
-  /** 安慰表情图：确定性随机 1 张官方表情图 */
+  /** 平局结算（R5）：结构对齐败局，便于接入层复用；文案与情绪独立成轨 */
+  function buildDraw(ctx, seed) {
+    var line = pickLine(DRAW_LINES, seed + ':draw', ctx.last_line);
+    var sticker = pickSticker(seed);
+    var timeline = DRAW_TIMELINE.map(function (t) {
+      return {
+        at_ms: Math.round(t.at * 1000),
+        key: t.key,
+        desc: t.desc,
+        asset: t.key === 'comfort_sticker' ? sticker : t.asset
+      };
+    });
+    return {
+      version: VERSION,
+      result: 'draw',
+      duration_ms: DRAW_DURATION,
+      timeline: timeline,
+      line: { text: line, category: 'draw' },
+      feedback: { positive: false, cast: ['罗小黑'], sticker: sticker },
+      assets: {
+        comfort_sticker: sticker,
+        comfort_pool: emoticonState.comfort.slice(),
+        icons: ASSETS.icons
+      },
+      achievement: { show_after_ms: null, unlocked: [], play_order: 'none_per_doc' },
+      retry: { enabled: true, label: '再来一次', action: 'retry_battle' },
+      penalty: false,
+      no_penalty_detail: {
+        deduct_resource: false,
+        deduct_progress: false,
+        deduct_codex: false,
+        judge_achievement: false
+      },
+      provenance: ASSET_PROVENANCE
+    };
+  }
+
+  /** 安慰 / 平局表情图：确定性随机 1 张官方表情图（池由 emoticons 台账决定） */
   function pickSticker(seed) {
-    var pool = ASSETS.luoxiaohei.comfort;
+    var pool = emoticonState.comfort;
     return pool[hashSeed('sticker:' + seed) % pool.length];
   }
 
@@ -279,7 +411,8 @@
   function lines() {
     return {
       win: JSON.parse(JSON.stringify(WIN_LINES)),
-      lose: LOSE_LINES.slice()
+      lose: LOSE_LINES.slice(),
+      draw: DRAW_LINES.slice()
     };
   }
 
@@ -287,13 +420,21 @@
     VERSION: VERSION,
     ASSETS: ASSETS,
     ASSET_PROVENANCE: ASSET_PROVENANCE,
+    EMOTICON_DOC: EMOTICON_DOC,
     WIN_TIMELINE: WIN_TIMELINE,
     LOSE_TIMELINE: LOSE_TIMELINE,
+    DRAW_TIMELINE: DRAW_TIMELINE,
     WIN_DURATION: WIN_DURATION,
     LOSE_DURATION: LOSE_DURATION,
+    DRAW_DURATION: DRAW_DURATION,
     WIN_LINES: WIN_LINES,
     LOSE_LINES: LOSE_LINES,
+    DRAW_LINES: DRAW_LINES,
+    loadEmoticons: loadEmoticons,
+    getEmoticonState: getEmoticonState,
+    isOfficialPath: isOfficialPath,
     resolve: resolve,
+    buildDraw: buildDraw,
     pickLine: pickLine,
     pickSticker: pickSticker,
     lines: lines,

@@ -35,9 +35,9 @@ AIGC:
 | P1 | 六系图标接入 | `ui/six-system-icons.js`、`ui/SixSystemPanel.js`、补丁脚本 | P0 | ✅ 完成 |
 | P2 | 数值模型与推导脚本 | `data/stat-model.json`、`data/six-systems.json`、`generate_stats.py` | P1 | ✅ 完成 |
 | P3 | 主线角色试跑 | `data/generated/character_stats.json`（主线 100% 覆盖） | P2 | ✅ 完成 |
-| P4 | 全量角色铺开 | 488 角色数值 + 卡组分配 | P3 | 🔷 R2 完成（稀有度校准待 P3 平衡） |
+| P4 | 全量角色铺开 | 488 角色数值 + 卡组分配 | P3 | ✅ R5 完成（技能卡完善 + 非数值稀有度校准） |
 | P5 | 对战系统落地 | 与官方角色 / 自身对战，卡组平衡调优 | P4 | 🔷 R2 完成（内核已交付，胜率调优待实测） |
-| P6 | 收集类成就玩法 | 胜利放小黑与比丢 + 正向反馈；失败小黑安慰 | P4 | 🔷 R2 完成（官方表情包待采集） |
+| P6 | 收集类成就玩法 | 胜 / 负 / 平三轨反馈 + 表情包台账 | P4 | 🔷 R5 完成（专项采集待补） |
 | P7 | 站点集成（zszm 端口） | UI 组件 + 图标在卡牌 / 经营 / 模拟三系统上线 | P5、P6 | 🔷 R4 集成包交付（integration/），待站点挂载 |
 | P8 | 工作副本切换与现有数值登记 | `legacy/d-drive-r1/`、`docs/08`、`data/demo-baseline.json` | P0 | ✅ R3 完成 |
 
@@ -49,10 +49,17 @@ AIGC:
 > 修复同步脚本路径缺陷与校验器三处误报，静态自检 18/18、运行时冒烟 11/11 全通过。
 > 站点侧挂载**尚未执行**（涉及正式工程写入，待拍板）；详见 [`CHANGELOG.md`](CHANGELOG.md) 的 R4 一节。
 
+> **R5 迭代（2026-10-07）**：三分轮收口——① 角色技能分配与卡组生成：`data/decks.json` 升 v1.1.0（技能卡同名去重 + `tags` / `source_kind` + 卡组级 `skill_element_mix` / `skill_source_split`；R2 遗留的稀有度分布以「获得节奏分层」非数值手段落地 P4/P3/P2/P1，实测 5/44/146/293，数值字段零漂移）；② 对战结算与收集成就：结算三轨 + 成就错峰 + 冒烟/校验强化（`validate_achievements.py` 25 项 / `smoke_test.js` 10 段）；③ 胜负反馈与表情包：`ui/settlement.js` v1.1.0 平局独立轨（1800ms / 不判负 / 不惩罚）+ 表情包素材台账 `data/emoticons.json` 与 `docs/10`（5 官方渠道 / comfort 3 + entrance 3 / 逐张审查留痕 6 条）。 技能卡三来源 `character_ability` 131 / `primary_fallback` 177 / `generic_fallback` 742（共 1050 张）、补位同名去重 41 例 → **0 例**；`run_all.ps1` 6/6 PASS。
+
 > **R2 迭代（2026-10-05）**：完成 `data/decks.json`、`data/achievements.json`、`ui/battle-engine.js`、
 > `ui/achievement-system.js`、`ui/settlement.js`、`scripts/run_all.ps1`、`data/audit/r2-audit.md`，
 > 并新增 `data/scripts/{generate_decks.py, validate_achievements.py, audit_r2.py, smoke_test.js}`。
 > 详见 [`CHANGELOG.md`](CHANGELOG.md) 的 R2 一节。
+
+> **下一轮计划（R6）**：① 打通「对战内核 → 战斗日志契约 → 成就判定 → 收集图鉴」的**端到端可跑通链路**
+> （补 `toLogRecord` 落盘样例 / 成就判定全 15 条覆盖验证 / 图鉴四视图渲染自检），并对镜像战（mode=mirror）不计入角色收藏的规则做回归；
+> ② 推进站点侧 P7 挂载（`integration/INTEGRATION-ZSZM.md` 三方案，推荐零侵入 A 方案，须用户拍板）；③ 表情包专项目录采集（联网 → 逐张人工审查 → 登记台账）。
+> 仍不改动数值框架与既有卡组规则，仅新增联调与验证产物。
 
 ---
 
@@ -132,12 +139,18 @@ AIGC:
 
 ---
 
-## P4 · 全量角色铺开 🔷 R2 完成
+## P4 · 全量角色铺开 ✅ R5 完成
 
 - [x] 488 角色全量数值生成（`data/generated/character_stats.json`，scope=all）
 - [x] 卡组分配：`data/decks.json`，1 主将 + 技能（R2 / SR3 / SSR4 / UR4 上限）+ 1 羁绊，主系卡 ≥ 60%
 - [x] 产出数值与卡组审计报告（`data/audit/r2-audit.md`：极值、断层、稀有度分布、主系占比）
-- [ ] **稀有度分布校准未达标**：实得 R 418 / SR 66 / SSR 3 / UR 1（R 占 85.7%，目标 60%）——源于世界观样本中大量低战力条目；审计报告建议以「非主线初始只开放 2 张技能卡」的解锁节奏平衡，而非改数值，待 P3 拍板。
+- [x] **稀有度分布校准落地（R5 · 非数值手段）**：不改 `hp/atk/def/power/tier/rarity`，以「获得节奏分层」收敛玩家侧稀缺度 ——
+      按 `power` 降序切分 P4 5（UR1/SSR3/SR1，里程碑 3）/ P3 44（SR44，里程碑 2）/ P2 146（SR21/R125，里程碑 1）/ P1 293（R293，初始）；
+      规则固化于 `decks.json` 的 `rules.acquisition_pacing`，实得投放节奏违规 **0 例**，稀有度×节奏单调性由校验器硬约束。
+- [x] **技能卡完善（R5）**：三来源分层（`character_ability` 131 / `primary_fallback` 177 / `generic_fallback` 742，共 1050 张）、
+      逐张 `tags` 标注、组内同名保序去重（补位池每系扩至 3–4 条，池尽追加 `·改N`），修复 41 例组内同名缺陷 → 现 **0 例**
+- [x] **数值零漂移验证（R5）**：`validate_achievements.py` 逐条比对 488 套卡组与数值产物的 hp/attack/defense/power/tier/rarity，差异 **0 处**
+- [ ] 待拍板：稀有度分布是否需在后续轮次追加「卡面分级展示」以进一步贴近 60/30/9/1 感知（当前仅以投放节奏校准）
 
 ---
 
@@ -158,7 +171,10 @@ AIGC:
 - [x] 胜利结算 `ui/settlement.js`：罗小黑 + 比丢登场（3s 时间轴）+ 正向反馈文案池
 - [x] 失败结算：小黑安慰表情包（官方图）+ 不惩罚 + 一键「再来一次」
 - [x] 素材合规校验（对照 `docs/05` 白名单，排除 ai-art / 同人图）
-- [ ] **官方表情包专项目录待采集**：当前失败结算复用 `images\罗小黑\罗小黑_表情_08x.jpg` 官方表情立绘；专项采集须走 `docs/05` §5 审查流程并登记来源凭证。
+- [x] R5：平局独立轨 `buildDraw()`（1800ms / 不判负 / 不惩罚 / 无素材引用），结算三轨齐备
+- [x] R5：表情包素材台账 `data/emoticons.json` + 说明 `docs/10`（5 官方渠道 / comfort 3 + entrance 3 / 逐张审查留痕 / 未决挂账 4 项）
+- [x] R5：结算表情图改为台账驱动（`loadEmoticons()` / `isOfficialPath()` 官方路径白名单，未登记或不合规图不入池）
+- [ ] **官方表情包专项目录待采集**：当前安慰池 3 张均为库内官方图（表情 087 / 088 + 剧照 000）；专项采集须走 `docs/10` + `docs/05` §5 审查流程并登记来源凭证（台账 `pending` 4 项）。
 
 ---
 
@@ -175,6 +191,7 @@ AIGC:
 - [x] R4：`verify_integration.py` 18/18 通过；`smoke_integration.mjs` 11/11 通过
 - [x] R4：`docs/09-站点集成安装手册.md` 编号规范化（原时间戳副本）
 - [ ] **待站点侧挂载**：复制 4 组文件 + 入口引两行（方案 A，零侵入，约 0.5 天）
+- [x] R5：集成包同步 R5 增量（24 文件；`verify_integration.py` 22 项 / `smoke_integration.mjs` 12 项全通过；`src/sixsys-assets.ts` 官方白名单扩至 6 张，新增 `luoxiaohei_face_03`）
 
 ---
 
@@ -210,5 +227,8 @@ P0 ──► P1 ──► P2 ──► P3 ──► P4 ──┬──► P5 ─
 | 站点 demo 基线漂移 | 登记结论过期 | 站点发版后重跑 `docs/08 §7` 复核命令并更新 `data/demo-baseline.json` |
 | D 盘快照被误当数据源 | 数据双源冲突 | `legacy/d-drive-r1/` 标记为只读快照，`MIGRATION.md §5` 明令不参与构建 |
 | 站点侧挂载未执行（R4） | 集成包无法在线上验证 | 按 `integration/INTEGRATION-ZSZM.md` §2–§5 挂载；未挂载期间对现有站点零影响、可一键回滚 |
+| 稀有度实得分布偏离设计目标（R 85.7% vs 60%） | 玩家感知「全是普通卡」 | R5 以**非数值手段**收敛：按获得节奏分层投放（P4 5 / P3 44 / P2 146 / P1 293）+ 里程碑前置，数值字段零改动 |
+| 获得节奏分层被误用为数值改动 | 破坏「不改既有数值框架」红线 | `validate_achievements.py` 新增「数值框架零漂移」硬校验（逐条比对 488 套卡组六字段）+ 「校准声明未触碰数值字段」声明校验，任一漂移即失败退出 |
+| 技能卡组内同名（补位未去重） | 卡组出现重复技能、观感与结算异常 | 补位池扩至每系 3–4 条并采用确定性 `next_pool_name` 去重（池尽追加 `·改N`）；校验器新增同名去重硬校验，现 0 例 |
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*

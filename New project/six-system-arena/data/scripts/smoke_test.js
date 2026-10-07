@@ -155,6 +155,28 @@ console.log('=== 9. 素材核验（官方图，禁止 AI 生图）===');
   ok(fs.existsSync(p) && !blocked, pair[0] + ' → ' + p);
 });
 
+/* 10. 平局结算 + 表情包台账（R5） */
+console.log('=== 10. 平局与表情包台账 ===');
+const emoticons = JSON.parse(fs.readFileSync(__dirname + '/../emoticons.json', 'utf8'));
+const loadInfo = Settle.loadEmoticons(emoticons);
+ok(loadInfo.loaded === true && loadInfo.rejected === 0,
+  '台账装填：accept ' + loadInfo.accepted + ' / reject ' + loadInfo.rejected + '（仅官方目录入池）');
+ok(Settle.getEmoticonState().comfort.length >= 3, '安慰池 ≥3 张（R5 扩充）');
+
+const badLoad = Settle.loadEmoticons({ pool: { comfort: [{ id: 'bad', path: 'C:\\tmp\\evil.jpg' }] } });
+ok(badLoad.loaded === false && badLoad.source === 'builtin-fallback' && badLoad.rejected === 1,
+  '越界路径被拒绝并回落内置池');
+Settle.loadEmoticons(emoticons);
+
+const d = Settle.resolve({ result: 'draw', mode: 'arena', opponent_type: 'official', opponent_id: WUXIAN, seed: 20261007 });
+ok(d.result === 'draw' && d.penalty === false && d.no_penalty_detail.judge_achievement === false,
+  '平局独立成轨、零惩罚、不判定成就');
+ok(d.timeline.some(t => t.key === 'comfort_sticker'), '平局复用安慰表情图');
+console.log('  平：' + d.line.text);
+
+ok(emoticons.channels.length >= 3 && emoticons.review_log.length >= 5,
+  '台账渠道 ' + emoticons.channels.length + ' 条 / 审查记录 ' + emoticons.review_log.length + ' 条');
+
 console.log('\n================ 结果 ================');
 console.log(fail === 0 ? '冒烟测试全部通过' : ('冒烟测试失败 ' + fail + ' 项'));
 process.exit(fail === 0 ? 0 : 1);

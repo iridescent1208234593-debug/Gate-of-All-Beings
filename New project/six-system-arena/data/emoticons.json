@@ -1,0 +1,278 @@
+{
+  "version": "1.0.0",
+  "round": "R5",
+  "updated_at": "2026-10-07",
+  "doc": "docs/10-表情包素材台账.md",
+  "purpose": "失败 / 平局结算的安慰素材与胜利登场素材的官方化台账。新增素材只登记不改码：结算引擎 loadEmoticons() 读取本文件覆盖运行时池。",
+  "asset_root": "E:\\Projects\\assets\\罗小黑战记数据库\\images",
+  "asset_dirs_allowed": [
+    "罗小黑",
+    "比丢"
+  ],
+  "redline": {
+    "official_only": true,
+    "block_ai_generated": true,
+    "block_fan_art": true,
+    "block_external_link": true,
+    "block_character_redraw": true,
+    "ui_component_exception": "仅限 UI 拆分组件（图标 / 边框 / 按钮 / 底板）可用非角色重绘；一切角色形象必须为官方原图，不得改画、不得再生成"
+  },
+  "schema": {
+    "fields": [
+      "id",
+      "role",
+      "path",
+      "source_dir",
+      "source_type",
+      "confidence",
+      "review",
+      "note"
+    ],
+    "roles": [
+      "comfort",
+      "entrance",
+      "celebration"
+    ],
+    "confidence_levels": [
+      "high",
+      "medium",
+      "low",
+      "inferred"
+    ],
+    "source_types": [
+      "local-official",
+      "downloaded-official",
+      "pending"
+    ]
+  },
+  "channels": [
+    {
+      "id": "ch_qq_emoji",
+      "name": "QQ 表情商城「罗小黑」系列表情",
+      "type": "official-store",
+      "mediator": "腾讯 QQ 表情商城",
+      "status": "app_only",
+      "confidence": "high",
+      "evidence": "官方微博 @罗小黑CAT 发布的表情包上线公告（2012 年起微表情 / 表情商城系列）",
+      "action": "须在端侧 App 内搜索下载后导出，需用户授权；本轮未执行"
+    },
+    {
+      "id": "ch_wechat_emoji",
+      "name": "微信表情商店「罗小黑」系列表情",
+      "type": "official-store",
+      "mediator": "微信表情开放平台",
+      "status": "app_only",
+      "confidence": "medium",
+      "evidence": "官方发行的微信表情专辑（与 QQ 表情商城同源发行）",
+      "action": "须在端侧 App 内下载导出，需用户授权；本轮未执行"
+    },
+    {
+      "id": "ch_weibo_cat",
+      "name": "官方微博 @罗小黑CAT / 电影官微",
+      "type": "official-social",
+      "mediator": "新浪微博",
+      "status": "manual_only",
+      "confidence": "medium",
+      "evidence": "官方表情包与活动物料发布博文（无网页直链下载入口）",
+      "action": "仅可人工另存归档，无法自动化抓取；本轮未执行"
+    },
+    {
+      "id": "ch_bilibili_official",
+      "name": "官方 B 站账号 / 番剧官方物料",
+      "type": "official-social",
+      "mediator": "哔哩哔哩",
+      "status": "manual_only",
+      "confidence": "low",
+      "evidence": "官方动态与宣传物料",
+      "action": "非表情包主渠道，本轮未执行"
+    },
+    {
+      "id": "ch_merch_offline",
+      "name": "官方联名周边（实体谷子）",
+      "type": "offline-merch",
+      "mediator": "线下 / 电商",
+      "status": "out_of_scope",
+      "confidence": "low",
+      "evidence": "实体周边商品",
+      "action": "非数字素材，依 docs/05 排除"
+    }
+  ],
+  "pool": {
+    "comfort": [
+      {
+        "id": "emo_comfort_087",
+        "role": "comfort",
+        "path": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\罗小黑\\罗小黑_表情_087.jpg",
+        "source_dir": "images\\罗小黑",
+        "source_type": "local-official",
+        "confidence": "high",
+        "review": {
+          "status": "approved",
+          "screened_at": "2026-10-05",
+          "screened_by": "R2"
+        },
+        "note": "R2 起沿用，失败安慰主力图"
+      },
+      {
+        "id": "emo_comfort_088",
+        "role": "comfort",
+        "path": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\罗小黑\\罗小黑_表情_088.jpg",
+        "source_dir": "images\\罗小黑",
+        "source_type": "local-official",
+        "confidence": "high",
+        "review": {
+          "status": "approved",
+          "screened_at": "2026-10-05",
+          "screened_by": "R2"
+        },
+        "note": "R2 起沿用，失败安慰备用图"
+      },
+      {
+        "id": "emo_comfort_shot000",
+        "role": "comfort",
+        "path": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\罗小黑\\罗小黑_剧照_000.jpg",
+        "source_dir": "images\\罗小黑",
+        "source_type": "local-official",
+        "confidence": "medium",
+        "review": {
+          "status": "approved",
+          "screened_at": "2026-10-07",
+          "screened_by": "R5",
+          "basis": "视觉初审：黑猫形态在溪边探头，神态呆萌，适配失败安慰场景；位于 docs/05 白名单目录内"
+        },
+        "note": "R5 新增入池（台账扩充，不改数值与文案框架）"
+      }
+    ],
+    "entrance": [
+      {
+        "id": "ent_lxh_full085",
+        "role": "entrance",
+        "path": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\罗小黑\\罗小黑_全身_085.jpg",
+        "source_dir": "images\\罗小黑",
+        "source_type": "local-official",
+        "confidence": "high",
+        "review": {
+          "status": "approved",
+          "screened_at": "2026-10-05",
+          "screened_by": "R2"
+        },
+        "note": "胜利结算主角登场立绘"
+      },
+      {
+        "id": "ent_bidiu_png",
+        "role": "entrance",
+        "path": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\比丢\\比丢.png",
+        "source_dir": "images\\比丢",
+        "source_type": "local-official",
+        "confidence": "high",
+        "review": {
+          "status": "approved",
+          "screened_at": "2026-10-05",
+          "screened_by": "R2"
+        },
+        "note": "胜利结算搭档登场（静帧）"
+      },
+      {
+        "id": "ent_bidiu_gif",
+        "role": "entrance",
+        "path": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\比丢\\比丢.gif",
+        "source_dir": "images\\比丢",
+        "source_type": "local-official",
+        "confidence": "high",
+        "review": {
+          "status": "approved",
+          "screened_at": "2026-10-05",
+          "screened_by": "R2"
+        },
+        "note": "胜利结算搭档登场（动图备选）"
+      }
+    ],
+    "celebration": []
+  },
+  "pending": [
+    {
+      "id": "pnd_qq_emoji",
+      "kind": "channel",
+      "target": "ch_qq_emoji",
+      "need": "端侧 App 内搜索下载并导出表情图，须用户授权后执行",
+      "blocker": "需 QQ 登录态与端侧导出能力"
+    },
+    {
+      "id": "pnd_wechat_emoji",
+      "kind": "channel",
+      "target": "ch_wechat_emoji",
+      "need": "端侧 App 内下载导出",
+      "blocker": "需微信登录态与端侧导出能力"
+    },
+    {
+      "id": "pnd_album_generic",
+      "kind": "asset",
+      "target": "images\\图片（通用图集）",
+      "need": "逐张人工确认角色与来源后方可入池",
+      "blocker": "通用图集目录，视觉初审识别稳定度不足，宁缺勿滥"
+    },
+    {
+      "id": "pnd_shot_011",
+      "kind": "asset",
+      "target": "罗小黑_剧照_011.jpeg",
+      "need": "人工确认是否适合安慰 / 庆祝场景",
+      "blocker": "适配性待定（雨中场景情绪偏冷）"
+    }
+  ],
+  "review_log": [
+    {
+      "date": "2026-10-05",
+      "by": "R2",
+      "item": "罗小黑_表情_087.jpg",
+      "verdict": "approved",
+      "basis": "位于官方素材库白名单目录；无第三方署名；未做任何改画"
+    },
+    {
+      "date": "2026-10-05",
+      "by": "R2",
+      "item": "罗小黑_表情_088.jpg",
+      "verdict": "approved",
+      "basis": "同上"
+    },
+    {
+      "date": "2026-10-05",
+      "by": "R2",
+      "item": "罗小黑_全身_085.jpg",
+      "verdict": "approved",
+      "basis": "同上"
+    },
+    {
+      "date": "2026-10-05",
+      "by": "R2",
+      "item": "比丢.png / 比丢.gif",
+      "verdict": "approved",
+      "basis": "同上"
+    },
+    {
+      "date": "2026-10-07",
+      "by": "R5（Agent 初审 + 视觉辅助）",
+      "item": "罗小黑_剧照_000.jpg",
+      "verdict": "approved",
+      "basis": "溪边探头神态呆萌，适配安慰场景；目录合规"
+    },
+    {
+      "date": "2026-10-07",
+      "by": "R5（Agent 初审 + 视觉辅助）",
+      "item": "罗小黑_剧照_011.jpeg",
+      "verdict": "pending",
+      "basis": "情绪偏冷，适配性待人工确认，暂不入运行时池"
+    }
+  ],
+  "unresolved": [
+    "QQ / 微信表情商城官方表情包需端侧 App 授权导出，本轮未采集",
+    "通用图集目录（images\\图片）需逐张人工确认角色来源",
+    "本台账 review 中标记 medium 的条目为 Agent 初审结论，人工复核后可升为 high"
+  ],
+  "changelog": [
+    {
+      "round": "R5",
+      "date": "2026-10-07",
+      "change": "建立官方表情包台账：5 条官方发行渠道登记、comfort 池 2→3、entrance 池 3、pending 4 项；结算引擎支持外置注入"
+    }
+  ]
+}

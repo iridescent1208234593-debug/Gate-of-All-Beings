@@ -3,14 +3,14 @@
   "package": "sixsys-zszm-integration",
   "arena_root": "E:\\Projects\\new project\\six-system-arena",
   "integration_root": "E:\\Projects\\new project\\six-system-arena\\integration",
-  "generated_at": "2026-10-07 04:20:16",
+  "generated_at": "2026-10-07 05:26:22",
   "ok": true,
   "failures": [],
   "checks": [
     {
       "check": "files.required",
       "ok": true,
-      "detail": "23/23 存在",
+      "detail": "24/24 存在",
       "missing": []
     },
     {
@@ -26,17 +26,17 @@
         {
           "file": "js/settlement.js",
           "status": "in-sync",
-          "sha256": "c93bd4cfca25441f"
+          "sha256": "a803e6252d86ba32"
         },
         {
           "file": "data/character_stats.json",
           "status": "in-sync",
-          "sha256": "90e3c13e624e78b7"
+          "sha256": "44f74d4bd176e7ff"
         },
         {
           "file": "data/decks.json",
           "status": "in-sync",
-          "sha256": "64fd2f8f846bcd1d"
+          "sha256": "a7904898ccd146c8"
         },
         {
           "file": "data/achievements.json",
@@ -52,6 +52,11 @@
           "file": "data/stat-model.json",
           "status": "in-sync",
           "sha256": "058d15a0b38d1d96"
+        },
+        {
+          "file": "data/emoticons.json",
+          "status": "in-sync",
+          "sha256": "40e6883a32a6afb8"
         }
       ],
       "drifted": []
@@ -59,7 +64,7 @@
     {
       "check": "assets.official-whitelist",
       "ok": true,
-      "detail": "5/5 官方素材在位（本轮未联网采集）",
+      "detail": "6/6 官方素材在位（本轮未联网采集）",
       "rows": [
         {
           "id": "luoxiaohei_full",
@@ -85,6 +90,11 @@
           "id": "bidiu_anim",
           "exists": true,
           "bytes": 40984
+        },
+        {
+          "id": "luoxiaohei_face_03",
+          "exists": true,
+          "bytes": 39632
         }
       ],
       "missing": []
@@ -136,6 +146,16 @@
       "check": "contract.no-abs-path-in-ui",
       "ok": true,
       "detail": "UI 层不含绝对路径（素材经 toSiteUrl 映射）"
+    },
+    {
+      "check": "contract.draw-track",
+      "ok": true,
+      "detail": "settlement.js 含平局独立轨（buildDraw / DRAW_LINES，R5）"
+    },
+    {
+      "check": "contract.emoticon-ledger",
+      "ok": true,
+      "detail": "settlement.js 支持外置表情包台账注入 + 官方路径白名单校验（R5）"
     },
     {
       "check": "data.character-stats",
@@ -196,6 +216,18 @@
       "check": "data.ach_system_001-decision",
       "ok": true,
       "detail": "achievements.json 已落地 element_gate 拍板（替代路径 / 门槛）"
+    },
+    {
+      "check": "data.emoticon-ledger",
+      "ok": true,
+      "detail": "表情包台账 v1.0.0 / 渠道 5 条 / comfort 3 / entrance 3",
+      "channels": 5,
+      "comfort": 3
+    },
+    {
+      "check": "data.emoticon-redline",
+      "ok": true,
+      "detail": "台账红线：仅官方图 + 禁止角色改画（角色形象不得再生成）"
     }
   ],
   "details": {
@@ -209,17 +241,17 @@
         {
           "file": "js/settlement.js",
           "status": "in-sync",
-          "sha256": "c93bd4cfca25441f"
+          "sha256": "a803e6252d86ba32"
         },
         {
           "file": "data/character_stats.json",
           "status": "in-sync",
-          "sha256": "90e3c13e624e78b7"
+          "sha256": "44f74d4bd176e7ff"
         },
         {
           "file": "data/decks.json",
           "status": "in-sync",
-          "sha256": "64fd2f8f846bcd1d"
+          "sha256": "a7904898ccd146c8"
         },
         {
           "file": "data/achievements.json",
@@ -235,6 +267,11 @@
           "file": "data/stat-model.json",
           "status": "in-sync",
           "sha256": "058d15a0b38d1d96"
+        },
+        {
+          "file": "data/emoticons.json",
+          "status": "in-sync",
+          "sha256": "40e6883a32a6afb8"
         }
       ]
     },
@@ -264,6 +301,11 @@
           "id": "bidiu_anim",
           "exists": true,
           "bytes": 40984
+        },
+        {
+          "id": "luoxiaohei_face_03",
+          "exists": true,
+          "bytes": 39632
         }
       ]
     },
@@ -278,7 +320,9 @@
       "achievement_stagger": true,
       "reuse_lxh": true,
       "settlement_driven": true,
-      "no_abs_path": true
+      "no_abs_path": true,
+      "draw_track": true,
+      "emoticon_ledger": true
     },
     "data": {
       "element_counts": {

@@ -4,10 +4,35 @@
   "db_folder": "罗小黑战记数据库",
   "images_rel": "images",
   "whitelist": [
-    { "id": "luoxiaohei_full", "rel": "罗小黑\\罗小黑_全身_085.jpg", "dest": "luoxiaohei_full.jpg" },
-    { "id": "luoxiaohei_face_01", "rel": "罗小黑\\罗小黑_表情_087.jpg", "dest": "luoxiaohei_face_01.jpg" },
-    { "id": "luoxiaohei_face_02", "rel": "罗小黑\\罗小黑_表情_088.jpg", "dest": "luoxiaohei_face_02.jpg" },
-    { "id": "bidiu", "rel": "比丢\\比丢.png", "dest": "bidiu.png" },
-    { "id": "bidiu_anim", "rel": "比丢\\比丢.gif", "dest": "bidiu.gif" }
+    {
+      "id": "luoxiaohei_full",
+      "rel": "罗小黑\\罗小黑_全身_085.jpg",
+      "dest": "luoxiaohei_full.jpg"
+    },
+    {
+      "id": "luoxiaohei_face_01",
+      "rel": "罗小黑\\罗小黑_表情_087.jpg",
+      "dest": "luoxiaohei_face_01.jpg"
+    },
+    {
+      "id": "luoxiaohei_face_02",
+      "rel": "罗小黑\\罗小黑_表情_088.jpg",
+      "dest": "luoxiaohei_face_02.jpg"
+    },
+    {
+      "id": "bidiu",
+      "rel": "比丢\\比丢.png",
+      "dest": "bidiu.png"
+    },
+    {
+      "id": "bidiu_anim",
+      "rel": "比丢\\比丢.gif",
+      "dest": "bidiu.gif"
+    },
+    {
+      "id": "luoxiaohei_face_03",
+      "rel": "罗小黑\\罗小黑_剧照_000.jpg",
+      "dest": "luoxiaohei_face_03.jpg"
+    }
   ]
 }

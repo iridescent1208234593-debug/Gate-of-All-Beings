@@ -200,6 +200,26 @@ check('7. 结算素材全部落在官方白名单内（红线）', () => {
   return `引用 ${[...new Set(names)].length} 个素材，全部在白名单（${allowed.size} 项）内`;
 });
 
+/* ------------------------------------------------------ 7b 平局轨（R5） */
+
+const drawCtx = { result: 'draw', mode: 'arena', opponent_type: 'official', opponent_id: 5, seed: 20261005 };
+
+check('7b. 平局结算独立轨（不判负 / 不惩罚 / 素材合规，R5）', () => {
+  const r = G.SixSystemSettlement.resolve(drawCtx);
+  assert(r && r.result === 'draw', 'result 应为 draw');
+  assert(r.penalty === false, '平局不得惩罚');
+  assert(r.feedback && r.feedback.positive === false, '平局 feedback.positive 应为 false');
+  const getState = G.SixSystemSettlement.getEmoticonState;
+  assert(typeof getState === 'function', '缺少 getEmoticonState（R5 台账接口）');
+  const st = getState();
+  assert(st && Array.isArray(st.comfort) && st.comfort.length >= 2, `表情台账未装填（comfort ${(st && st.comfort || []).length} 张）`);
+  const names = [...JSON.stringify(r).matchAll(/([^"\\/]+\.(?:jpg|png|gif))/gi)].map((m) => m[1]);
+  const allowed = new Set(whitelist.origins.map((o) => o.split('\\').pop()));
+  const bad = names.filter((n) => !allowed.has(n));
+  assert(bad.length === 0, `平局素材不在白名单：${[...new Set(bad)].join(', ')}`);
+  return `平局独立轨成立（${r.duration_ms}ms），素材引用 ${[...new Set(names)].length} 处全合规，comfort 池 ${st.comfort.length} 张`;
+});
+
 /* ---------------------------------------------------------------- 8 对战内核 */
 
 const statsDoc = readJson(P('data/generated/character_stats.json'));
