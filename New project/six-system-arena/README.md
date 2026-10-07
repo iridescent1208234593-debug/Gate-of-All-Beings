@@ -77,6 +77,40 @@ AIGC:
 > R3 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R3** 一节（工作副本切至 E 盘 + 站点现有 demo 数值登记）。
 > R5 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R5** 一节（三分轮收口：角色技能分配与卡组生成 → 对战结算与收集成就 → 胜负反馈与表情包；`decks.json` v1.1.0 + 结算三轨 + 表情包台账 + 集成包同步）。
 
+### R5 · 三分轮收口（2026-10-07）
+
+**本轮产出**
+
+- `data/decks.json` v1.1.0：488 套卡组，技能卡同名去重 + `tags` / `source_kind` + 卡组级 `skill_element_mix` / `skill_source_split`
+- 胜负反馈三轨：`ui/settlement.js` v1.1.0（胜：小黑 + 比丢 / 负：安慰 / 平：独立轨 1800ms，三轨均不惩罚）
+- 表情包素材台账：`data/emoticons.json` v1.0.0 + `docs/10-表情包素材台账.md`（渠道 5 条 / comfort 3 / entrance 3 + 红线与采集 SOP）
+- 校验强化：`validate_achievements.py` 25 项、`data/scripts/smoke_test.js` 10 段；集成包整体刷新（`integration/manifest.json` 24 文件哈希）
+- 交付自检：`run_all.ps1` 6/6、`verify_integration.py` 22/22、`smoke_integration.mjs` 12/12 PASS
+
+**数值 / 资源溯源**
+
+- **数值零改动**：`hp / attack / defense / power / tier / rarity` 沿用 P2 模型（`data/stat-model.json`），校验链逐条比对 488 套卡组，差异 **0**
+- 技能卡三来源：`character_ability` 131 / `primary_fallback` 177 / `generic_fallback` 742（共 1050 张），源自本地世界观库 `worldview_luoxiaohei_v4.db`（`db-record`）
+- 补位同名去重：41 例 → **0 例**
+- 稀有度获得节奏分层（非数值手段）：P4 5 / P3 44 / P2 146 / P1 293
+- 素材：仅复用现有官方素材（白名单 6 项），本轮 **未联网采集**、无 AI 生成角色形象（UI 拆分组件除外）
+
+**未决项**
+
+1. 表情包专项采集仍缺位（台账 v1.0.0 仅登记既有素材，尚无新增采集）
+2. 站点侧 P7 挂载未执行（涉及正式工程写入，待拍板）
+3. `ach_system_001` 土系主属性无 C 档以上角色，已以 `element_gate` 替代路径落地
+4. 结算未含动效 / 音效
+5. 端到端联调产物待补（`toLogRecord` 落盘样例 / 成就判定全 15 条覆盖 / 图鉴四视图渲染自检）
+
+**下一轮（R6）计划**
+
+- ① 打通「对战内核 → 战斗日志契约 → 成就判定 → 收集图鉴」端到端可跑通链路，并对镜像战（mode=mirror）不计入角色收藏做回归
+- ② 站点侧 P7 挂载（`integration/INTEGRATION-ZSZM.md` 三方案，推荐零侵入 A 方案，须拍板）
+- ③ 表情包专项目录采集（联网 → 逐张人工审查 → 登记台账）
+- 仍不改动数值框架与既有卡组规则，仅新增联调与验证产物
+
+
 ### 1.1 世界观与素材红线（最高优先级）
 
 1. **忠于《罗小黑战记》官方世界观**，能力体系严格对齐官方设定（御灵系 / 生灵系 / 造物系 / 空间系 / 心灵系 / 锁御系）。
