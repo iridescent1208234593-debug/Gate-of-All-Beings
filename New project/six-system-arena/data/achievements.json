@@ -1,7 +1,7 @@
 {
-  "version": "1.0.0",
-  "updated": "2026-10-05",
-  "round": "R2",
+  "version": "1.1.0",
+  "updated": "2026-10-08",
+  "round": "R7",
   "project": "six-system-arena",
   "source_doc": "docs/04-成就系统.md",
   "description": "收集类成就全量定义。核心定位：让玩家为了『集齐』而反复对战。失败不惩罚；成就判定只读战斗日志 + 数值产物，不做随机掉率判定。",
@@ -47,8 +47,8 @@
     "challenge_wins": "越档挑战（mode=challenge）取胜次数（目标 5）",
     "mirror_wins": "镜像战（opponent_type=mirror）取胜次数（目标 3）",
     "flawless_wins": "零损血取胜场次（hp_left >= hp_max 且 result=win，目标 1）",
-    "rarity_complete_R": "已解锁 R 档角色数（目标 418）",
-    "rarity_complete_SR": "已解锁 SR 档角色数（目标 66）",
+    "rarity_complete_R": "已解锁 R 档角色数（目标 413）",
+    "rarity_complete_SR": "已解锁 SR 档角色数（目标 71）",
     "rarity_complete_SSR": "已解锁 SSR 档角色数（目标 3）",
     "rarity_complete_UR": "已解锁 UR 档角色数（目标 1）"
   },
@@ -79,8 +79,8 @@
     }
   ],
   "rarity_totals": {
-    "R": 418,
-    "SR": 66,
+    "R": 413,
+    "SR": 71,
     "SSR": 3,
     "UR": 1
   },
@@ -393,11 +393,11 @@
       "category": "rarity",
       "category_name": "稀有度收集",
       "name": "凡品集齐",
-      "desc": "集齐全部 R 档角色（418 名）",
+      "desc": "集齐全部 R 档角色（413 名）",
       "condition": {
         "type": "rarity_complete",
         "rarity": "R",
-        "total": 418
+        "total": 413
       },
       "reward": {
         "type": "badge",
@@ -407,7 +407,7 @@
       },
       "progress": {
         "metric": "rarity_complete_R",
-        "target": 418,
+        "target": 413,
         "unit": "名"
       },
       "hidden": false,
@@ -418,11 +418,11 @@
       "category": "rarity",
       "category_name": "稀有度收集",
       "name": "精锐集齐",
-      "desc": "集齐全部 SR 档角色（66 名）",
+      "desc": "集齐全部 SR 档角色（71 名）",
       "condition": {
         "type": "rarity_complete",
         "rarity": "SR",
-        "total": 66
+        "total": 71
       },
       "reward": {
         "type": "badge",
@@ -432,7 +432,7 @@
       },
       "progress": {
         "metric": "rarity_complete_SR",
-        "target": 66,
+        "target": 71,
         "unit": "名"
       },
       "hidden": false,
@@ -544,28 +544,31 @@
   "settlement_note": "胜负结算的动画时序与文案池由 ui/settlement.js 承载（对应 docs/04 §2 / §3）；本文件只负责成就定义与判定契约。",
   "element_gate": {
     "achievement": "ach_system_001",
-    "status": "proposed",
-    "decided_by": "pending-user-review",
+    "status": "resolved",
+    "decided_by": "round-R7-numeric-fix",
+    "resolved_at": "2026-10-08",
     "min_tier": "C",
     "or_collect_per_element": 3,
-    "gap": "土系主属性 7 名角色最高仅 D 档，静态不满足 min_tier=C",
+    "gap": "（R2 遗留 · 已解除）原判「土系主属性 7 名角色最高仅 D 档，静态不满足 min_tier=C」；R7 核查证实该结论源于派生规则缺陷（并列系写法漏匹配 + 高位身份未识别 + 主属性排序抢先），非世界观事实。修正并全量重跑后土系主属性 7 名（不变；systems 含土系者 11 名）、其中 C 档以上 1 名（池年 id=61 · E → C · 化神），成就静态可达成。",
     "reference_tool": "integration/tools/decide_ach_system_001.py",
-    "primary_fix": {
+    "resolution": {
       "plan": "A · 数据侧补齐土系 C 档",
-      "how": "在 data/manual-overrides.json 为土系角色写入人工校准（经世界观核验），使其 tier >= C",
-      "engine_change": false
+      "how": "修正 data/stat-model.json v1.1.0 的 element.segmentMatch（并列系切段精确认系）与 realm.identityRules（高位身份补正境界）后全量重跑，非人工拔高数值；池年 E → C、境界 金丹 → 化神",
+      "engine_change": false,
+      "landed_in": "R7",
+      "verified_by": "data/scripts/audit_r2.py + integration/verify/verify_integration.py"
     },
     "fallback": {
       "plan": "C · 替代路径 or_collect_per_element",
       "value": 3,
-      "how": "某系无 C 档角色时，收集该系 3 名亦可点亮；需引擎 1.1.0 将 min_tier 与替代分支参数化",
-      "engine_change": true,
-      "scheduled": "与 P4 全量铺开同批"
+      "status": "not-needed",
+      "how": "某系无 C 档角色时，收集该系 3 名亦可点亮（需引擎将 min_tier 与替代分支参数化）。R7 土系已有 C 档，本路径不启用，仅保留定义以待后续新系别扩展",
+      "engine_change": true
     },
     "rejected": {
       "plan": "B · 放宽 min_tier C -> D",
       "reason": "语义降档会使后续所有系别成就一并贬值"
     },
-    "note": "不修改 ach_system_001 现有 condition 语义；本段仅登记处置方案，供引擎参数化与人工校准引用。"
+    "note": "ach_system_001 的 condition 语义（min_tier=C）保持不变，本轮由数值侧修正达成；引擎侧 C_TIER_OR_ABOVE = ['C','B','A'] 与 min_tier 一致，无需参数化改造。"
   }
 }

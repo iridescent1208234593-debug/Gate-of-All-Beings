@@ -1,9 +1,9 @@
 {
   "tool": "verify_integration.py",
   "package": "sixsys-zszm-integration",
-  "arena_root": "E:\\Projects\\new project\\six-system-arena",
-  "integration_root": "E:\\Projects\\new project\\six-system-arena\\integration",
-  "generated_at": "2026-10-07 06:28:12",
+  "arena_root": "E:\\Projects\\New project\\six-system-arena",
+  "integration_root": "E:\\Projects\\New project\\six-system-arena\\integration",
+  "generated_at": "2026-10-08 06:14:14",
   "ok": true,
   "failures": [],
   "checks": [
@@ -31,17 +31,17 @@
         {
           "file": "data/character_stats.json",
           "status": "in-sync",
-          "sha256": "44f74d4bd176e7ff"
+          "sha256": "57a6cf1f856864b9"
         },
         {
           "file": "data/decks.json",
           "status": "in-sync",
-          "sha256": "a7904898ccd146c8"
+          "sha256": "e3dd0e566b9bdb52"
         },
         {
           "file": "data/achievements.json",
           "status": "in-sync",
-          "sha256": "64eaefc912c77ee4"
+          "sha256": "d38241583e467ed7"
         },
         {
           "file": "data/six-systems.json",
@@ -51,7 +51,7 @@
         {
           "file": "data/stat-model.json",
           "status": "in-sync",
-          "sha256": "058d15a0b38d1d96"
+          "sha256": "a9978d09cdb2c63f"
         },
         {
           "file": "data/emoticons.json",
@@ -183,33 +183,36 @@
     {
       "check": "data.ach_system_001-gap",
       "ok": true,
-      "detail": "土系主属性无 C 档以上（缺口确认）",
-      "tu_c_plus": 0,
+      "detail": "土系主属性 C 档以上 1 名（R7 缺口已解除，ach_system_001 静态可达成）",
+      "tu_c_plus": 1,
       "gate": {
         "achievement": "ach_system_001",
-        "status": "proposed",
-        "decided_by": "pending-user-review",
+        "status": "resolved",
+        "decided_by": "round-R7-numeric-fix",
+        "resolved_at": "2026-10-08",
         "min_tier": "C",
         "or_collect_per_element": 3,
-        "gap": "土系主属性 7 名角色最高仅 D 档，静态不满足 min_tier=C",
+        "gap": "（R2 遗留 · 已解除）原判「土系主属性 7 名角色最高仅 D 档，静态不满足 min_tier=C」；R7 核查证实该结论源于派生规则缺陷（并列系写法漏匹配 + 高位身份未识别 + 主属性排序抢先），非世界观事实。修正并全量重跑后土系主属性 7 名（不变；systems 含土系者 11 名）、其中 C 档以上 1 名（池年 id=61 · E → C · 化神），成就静态可达成。",
         "reference_tool": "integration/tools/decide_ach_system_001.py",
-        "primary_fix": {
+        "resolution": {
           "plan": "A · 数据侧补齐土系 C 档",
-          "how": "在 data/manual-overrides.json 为土系角色写入人工校准（经世界观核验），使其 tier >= C",
-          "engine_change": false
+          "how": "修正 data/stat-model.json v1.1.0 的 element.segmentMatch（并列系切段精确认系）与 realm.identityRules（高位身份补正境界）后全量重跑，非人工拔高数值；池年 E → C、境界 金丹 → 化神",
+          "engine_change": false,
+          "landed_in": "R7",
+          "verified_by": "data/scripts/audit_r2.py + integration/verify/verify_integration.py"
         },
         "fallback": {
           "plan": "C · 替代路径 or_collect_per_element",
           "value": 3,
-          "how": "某系无 C 档角色时，收集该系 3 名亦可点亮；需引擎 1.1.0 将 min_tier 与替代分支参数化",
-          "engine_change": true,
-          "scheduled": "与 P4 全量铺开同批"
+          "status": "not-needed",
+          "how": "某系无 C 档角色时，收集该系 3 名亦可点亮（需引擎将 min_tier 与替代分支参数化）。R7 土系已有 C 档，本路径不启用，仅保留定义以待后续新系别扩展",
+          "engine_change": true
         },
         "rejected": {
           "plan": "B · 放宽 min_tier C -> D",
           "reason": "语义降档会使后续所有系别成就一并贬值"
         },
-        "note": "不修改 ach_system_001 现有 condition 语义；本段仅登记处置方案，供引擎参数化与人工校准引用。"
+        "note": "ach_system_001 的 condition 语义（min_tier=C）保持不变，本轮由数值侧修正达成；引擎侧 C_TIER_OR_ABOVE = ['C','B','A'] 与 min_tier 一致，无需参数化改造。"
       }
     },
     {
@@ -246,17 +249,17 @@
         {
           "file": "data/character_stats.json",
           "status": "in-sync",
-          "sha256": "44f74d4bd176e7ff"
+          "sha256": "57a6cf1f856864b9"
         },
         {
           "file": "data/decks.json",
           "status": "in-sync",
-          "sha256": "a7904898ccd146c8"
+          "sha256": "e3dd0e566b9bdb52"
         },
         {
           "file": "data/achievements.json",
           "status": "in-sync",
-          "sha256": "64eaefc912c77ee4"
+          "sha256": "d38241583e467ed7"
         },
         {
           "file": "data/six-systems.json",
@@ -266,7 +269,7 @@
         {
           "file": "data/stat-model.json",
           "status": "in-sync",
-          "sha256": "058d15a0b38d1d96"
+          "sha256": "a9978d09cdb2c63f"
         },
         {
           "file": "data/emoticons.json",
@@ -339,7 +342,7 @@
         "mu": 1,
         "shui": 3,
         "huo": 3,
-        "tu": 0,
+        "tu": 1,
         "kongjian": 1
       }
     }

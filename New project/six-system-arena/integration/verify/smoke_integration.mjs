@@ -248,7 +248,7 @@ check('8. 对战内核（克制环 + 可复现 + 日志契约）', () => {
 
 /* ---------------------------------------------------------------- 9 成就 */
 
-check('9. 成就系统（失败不判定 / 胜利判定 / 土系缺口复现）', () => {
+check('9. 成就系统（失败不判定 / 胜利判定 / 土系 C 档复核 · R7 缺口已解除）', () => {
   const A = G.SixSystemAchievement.createAchievementSystem({ achievements: achDoc, characters: statsDoc });
   assert(achDoc.achievements.length === 15, `成就条数应为 15，实为 ${achDoc.achievements.length}`);
 
@@ -262,10 +262,10 @@ check('9. 成就系统（失败不判定 / 胜利判定 / 土系缺口复现）'
 
   A.unlockCharacters(statsDoc.characters.map((c) => c.id));
   const covered = A.metricValue('elements_c_covered');
-  assert(covered === 4, `五系 C 档覆盖应为 4（土系缺口），实为 ${covered}`);
+  assert(covered === 5, `五系 C 档覆盖应为 5（R7 土系缺口已解除），实为 ${covered}`);
   const tuC = statsDoc.characters.filter((c) => c.element === 'tu' && ['C', 'B', 'A'].includes(c.tier)).length;
-  assert(tuC === 0, `土系 C 档以上应为 0，实为 ${tuC}`);
-  return `15 条成就；全量解锁后五系覆盖 ${covered}/5（土系 0 名 C 档以上，缺口复现）`;
+  assert(tuC >= 1, `土系 C 档以上应 >= 1（R7 复核），实为 ${tuC}`);
+  return `15 条成就；全量解锁后五系覆盖 ${covered}/5（土系 ${tuC} 名 C 档以上，ach_system_001 静态可达成）`;
 });
 
 /* ---------------------------------------------------------------- 10 数据规模 */

@@ -1,9 +1,9 @@
 {
   "package": "sixsys-zszm-integration",
-  "version": "1.1.0",
-  "round": "R5",
-  "generated_at": "2026-10-07",
-  "description": "六系演武 → zszm 端口（众生之门）集成包。把六大系（金/木/水/火/土/空间）能力数值与 UI 图标接入卡牌 / 经营 / 模拟三系统的可视化，并落地胜负结算（小黑 & 比丢正向反馈、失败安慰、平局独立轨）与收集类成就；R5 起安慰 / 平局表情图由 data/emoticons.json 台账登记（逐张留痕）。",
+  "version": "1.2.0",
+  "round": "R7",
+  "generated_at": "2026-10-08",
+  "description": "六系演武 → zszm 端口（众生之门）集成包。把六大系（金/木/水/火/土/空间）能力数值与 UI 图标接入卡牌 / 经营 / 模拟三系统的可视化，并落地胜负结算（小黑 & 比丢正向反馈、失败安慰、平局独立轨）与收集类成就；R5 起安慰 / 平局表情图由 data/emoticons.json 台账登记（逐张留痕）。；R7：修正并列系与境界身份派生缺陷（池年 E→C · 化神），土系首次出现 C 档，ach_system_001 静态可达成。",
   "source_of_truth": "E:\\Projects\\New project\\six-system-arena",
   "target_site": "D:\\Projects\\zszm",
   "red_lines": [
@@ -228,16 +228,16 @@
       "bytes": 9748
     },
     "manifest.json": {
-      "sha256": "4227d6927b5ddbb4ad2fb0de9661197593f245f9a4ba4e18e80938d005a0c3d5",
-      "bytes": 13057
+      "sha256": "ec35b85c7310f4153158d7f90dcb99f216278707cd15a991e8a100801c02ef3f",
+      "bytes": 13198
     },
     "js/six-system-icons.js": {
       "sha256": "5c2a0708c08f4174b2f838a717dcef19cba499f76e43d4591a0ee8aaae5f3c86",
       "bytes": 5040
     },
     "js/settlement.js": {
-      "sha256": "a803e6252d86ba3248705e3a4cc3fe7ec72cbb504ec80648994ab23a2e1fc5df",
-      "bytes": 17109
+      "sha256": "fcec2b7bae1996bb314888a2976d722aecd4e1ddc935801d6270d8b882a8a1cc",
+      "bytes": 17552
     },
     "src/index.ts": {
       "sha256": "91f4df02d3f5ff7ac7b704b3683d3c6e04ad759e6b59dbe2fb229ead19c3f816",
@@ -272,28 +272,28 @@
       "bytes": 4718
     },
     "data/character_stats.json": {
-      "sha256": "44f74d4bd176e7ff52a6d0ec8ee45c8d0774423227656603887b5d485fb683cf",
-      "bytes": 353533
+      "sha256": "57a6cf1f856864b9e6099c6c69e1b438887b433111d993e1994a37dca0a6d0a9",
+      "bytes": 354078
     },
     "data/decks.json": {
-      "sha256": "a7904898ccd146c8bf945ee77157d2876cc9927222cc9aa4966e1cb27b76cbbc",
-      "bytes": 1863114
+      "sha256": "e3dd0e566b9bdb52fd7115a573a17bb469d5208b02152161bc7ac51d754ad54f",
+      "bytes": 1867622
     },
     "data/achievements.json": {
-      "sha256": "64eaefc912c77ee476adf20dad7237fb2489ee17a5fb7c644fde0c59dc22b810",
-      "bytes": 16706
+      "sha256": "d38241583e467ed70194f5d17c3f51d18953dd10fce3174b4120ebd32e32bfc1",
+      "bytes": 17485
     },
     "data/six-systems.json": {
       "sha256": "beb33d0a1a02f098fad180239c265043fad6078c11331d6a418214106d19c4f9",
       "bytes": 4586
     },
     "data/stat-model.json": {
-      "sha256": "058d15a0b38d1d9653854ea0e884523eeba5e08adc5ec1727854841f0130989c",
-      "bytes": 6874
+      "sha256": "a9978d09cdb2c63faa994377c896a8cb6ad88689ed876620e15929ea9894fb58",
+      "bytes": 8939
     },
     "data/emoticons.json": {
-      "sha256": "40e6883a32a6afb867fdd7c726a201c617d6031b9a54bfac97166146913e6245",
-      "bytes": 9090
+      "sha256": "a16c8dea4ce02b54a01e8bd51e8a11636dd6a64d694c5f7aa57a0ba558b40569",
+      "bytes": 9368
     },
     "verify/install_assets.ps1": {
       "sha256": "49c3e0be9db55cb006c5e6d5548e6bb0ec9380229bfd9bcfe7f96898081d1cfe",
@@ -304,18 +304,18 @@
       "bytes": 3064
     },
     "verify/verify_integration.py": {
-      "sha256": "e5db35d5f9c7cd3f2068ce1a2719b318b13e2752b5422b364a4fa193322ac707",
-      "bytes": 16485
+      "sha256": "cdc1e5a034803597bf4a290fbb0fb5122f0de1a41b02ee7bce22adff222c766e",
+      "bytes": 16564
     },
     "verify/smoke_integration.mjs": {
-      "sha256": "881bbbcb4f25c0476cfca1ceff573c1149d3a3c9a53a695c1a077911d625734f",
-      "bytes": 16818
+      "sha256": "374ae2fbe0bd5d89d2770cb0a8415a559e690f2a8729a6ad5914c4a5a5fc7f95",
+      "bytes": 16889
     },
     "verify/assets.source.json": {
       "sha256": "20fe2515369adaa8600cdf3b2b5b03fd003dcb56cecee882153b593f879d0122",
       "bytes": 1103
     }
   },
-  "hashes_refreshed_at": "2026-10-07 05:26:22",
-  "package_version": "1.1.0"
+  "hashes_refreshed_at": "2026-10-08 06:14:14",
+  "package_version": "1.2.0"
 }

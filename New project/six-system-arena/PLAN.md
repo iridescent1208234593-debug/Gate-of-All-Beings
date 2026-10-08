@@ -56,7 +56,15 @@ AIGC:
 > 并新增 `data/scripts/{generate_decks.py, validate_achievements.py, audit_r2.py, smoke_test.js}`。
 > 详见 [`CHANGELOG.md`](CHANGELOG.md) 的 R2 一节。
 
-> **下一轮计划（R6）**：① 打通「对战内核 → 战斗日志契约 → 成就判定 → 收集图鉴」的**端到端可跑通链路**
+> **R7 迭代（2026-10-08）**：**土系系统性偏差修正** —— 用户指出强土系角色「池年」（妖灵会馆长老 · 十五仙之一）被低估；
+> 核查确认 R7 规则已写入 `data/stat-model.json` v1.1.0，但产物长期停留 v1.0.0 基线（规则未生效）。
+> 修正三项缺陷：**FIX-1** 并列系切段精确认系（`element.segmentMatch`）、**FIX-2** 高位身份补正境界（`realm.identityRules`，只升不降）、
+> **FIX-3** 消除主属性顺序偏置；随后全量重跑数值（488 角色）与卡组（488 套）。
+> 结果：土系主属性角色 **7 名**（不变；`systems` 含土系者 11 名）、**C 档以上 0 → 1 名（池年 · 化神）**；池年 E → C（power 1791 → 3729、R → SR、金丹 → 化神）；`ach_system_001`「土系静态不可达成」结论**推翻**，
+> `element_gate.status = resolved`；稀有度同步为 R 413 / SR 71 / SSR 3 / UR 1。
+> 详见 [`CHANGELOG.md`](CHANGELOG.md) R7 一节与 [`docs/11-六系归属与境界身份修正记录.md`](docs/11-六系归属与境界身份修正记录.md)。
+
+> **下一轮计划（R8）**：① 打通「对战内核 → 战斗日志契约 → 成就判定 → 收集图鉴」的**端到端可跑通链路**
 > （补 `toLogRecord` 落盘样例 / 成就判定全 15 条覆盖验证 / 图鉴四视图渲染自检），并对镜像战（mode=mirror）不计入角色收藏的规则做回归；
 > ② 推进站点侧 P7 挂载（`integration/INTEGRATION-ZSZM.md` 三方案，推荐零侵入 A 方案，须用户拍板）；③ 表情包专项目录采集（联网 → 逐张人工审查 → 登记台账）。
 > 仍不改动数值框架与既有卡组规则，仅新增联调与验证产物。

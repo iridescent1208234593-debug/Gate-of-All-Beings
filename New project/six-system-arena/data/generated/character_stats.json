@@ -2,10 +2,10 @@
   "meta": {
     "project": "six-system-arena",
     "generator": "data/scripts/generate_stats.py",
-    "model_version": "1.0.0",
+    "model_version": "1.1.0",
     "systems_version": "1.0.0",
     "scope": "all",
-    "generated_at": "2026-10-07 05:24:26",
+    "generated_at": "2026-10-08 06:07:18",
     "source_db": "E:\\Projects\\assets\\罗小黑战记数据库\\db\\worldview_luoxiaohei_v4.db",
     "source_db_fingerprint": {
       "size": 2392064,
@@ -15,20 +15,20 @@
     "total": 488,
     "mainline_count": 30,
     "tier_distribution": {
-      "C": 15,
+      "C": 16,
       "A": 1,
       "B": 3,
-      "D": 51,
-      "F": 344,
+      "D": 55,
+      "F": 339,
       "E": 74
     },
     "element_distribution": {
       "jin": 33,
       "kongjian": 47,
-      "mu": 29,
-      "shui": 27,
-      "huo": 21,
-      "tu": 9
+      "mu": 30,
+      "shui": 42,
+      "huo": 25,
+      "tu": 11
     },
     "note": "本文件由脚本推导生成，不写回数据库；同输入同输出（确定性）。"
   },
@@ -1018,17 +1018,17 @@
       "element_source": [
         "character_abilities: 御灵系·木"
       ],
-      "realm_id": 3,
-      "realm_key": "golden",
-      "realm_name": "金丹",
-      "realm_reason": "执行者 / 配角 / 妖族",
-      "hp": 2369,
-      "attack": 138,
-      "defense": 114,
-      "power": 1723,
-      "tier": "E",
-      "tier_name": "良品",
-      "rarity": "R",
+      "realm_id": 4,
+      "realm_key": "nascent",
+      "realm_name": "元婴",
+      "realm_reason": "身份补正（FIX-2）：会馆负责人（馆长 / 会长 / 殿主）",
+      "hp": 3610,
+      "attack": 194,
+      "defense": 163,
+      "power": 2528,
+      "tier": "D",
+      "tier_name": "优品",
+      "rarity": "SR",
       "ability_count": 3,
       "abilities": [
         "御灵系·木",
@@ -1748,17 +1748,17 @@
       "systems_label": [],
       "element_confidence": "low",
       "element_source": [],
-      "realm_id": 2,
-      "realm_key": "foundation",
-      "realm_name": "筑基",
-      "realm_reason": "妖精 / 妖族",
-      "hp": 1365,
-      "attack": 95,
-      "defense": 74,
-      "power": 1080,
-      "tier": "F",
-      "tier_name": "凡品",
-      "rarity": "R",
+      "realm_id": 4,
+      "realm_key": "nascent",
+      "realm_name": "元婴",
+      "realm_reason": "身份补正（FIX-2）：会馆负责人（馆长 / 会长 / 殿主）",
+      "hp": 3360,
+      "attack": 200,
+      "defense": 158,
+      "power": 2450,
+      "tier": "D",
+      "tier_name": "优品",
+      "rarity": "SR",
       "ability_count": 1,
       "abilities": [
         "锁御系"
@@ -1938,17 +1938,17 @@
       "element_source": [
         "character_abilities: 御灵系·土"
       ],
-      "realm_id": 3,
-      "realm_key": "golden",
-      "realm_name": "金丹",
-      "realm_reason": "执行者 / 配角 / 妖族",
-      "hp": 2531,
-      "attack": 128,
-      "defense": 131,
-      "power": 1791,
-      "tier": "E",
-      "tier_name": "良品",
-      "rarity": "R",
+      "realm_id": 5,
+      "realm_key": "deity",
+      "realm_name": "化神",
+      "realm_reason": "身份补正（FIX-2）：会馆高阶职位（长老 / 总会长）",
+      "hp": 5545,
+      "attack": 246,
+      "defense": 268,
+      "power": 3729,
+      "tier": "C",
+      "tier_name": "精锐",
+      "rarity": "SR",
       "ability_count": 1,
       "abilities": [
         "御灵系·土"
@@ -3082,17 +3082,17 @@
       "systems_label": [],
       "element_confidence": "low",
       "element_source": [],
-      "realm_id": 2,
-      "realm_key": "foundation",
-      "realm_name": "筑基",
-      "realm_reason": "妖精 / 妖族",
-      "hp": 1323,
-      "attack": 92,
-      "defense": 71,
-      "power": 1044,
-      "tier": "F",
-      "tier_name": "凡品",
-      "rarity": "R",
+      "realm_id": 5,
+      "realm_key": "deity",
+      "realm_name": "化神",
+      "realm_reason": "身份补正（FIX-2）：会馆高阶职位（长老 / 总会长）",
+      "hp": 4683,
+      "attack": 265,
+      "defense": 219,
+      "power": 3356,
+      "tier": "D",
+      "tier_name": "优品",
+      "rarity": "SR",
       "ability_count": 2,
       "abilities": [
         "心灵系、锁御系",
@@ -3815,16 +3815,16 @@
       "systems_label": [],
       "element_confidence": "low",
       "element_source": [],
-      "realm_id": 2,
-      "realm_key": "foundation",
-      "realm_name": "筑基",
-      "realm_reason": "妖精 / 妖族",
-      "hp": 1315,
-      "attack": 91,
-      "defense": 71,
-      "power": 1037,
-      "tier": "F",
-      "tier_name": "凡品",
+      "realm_id": 4,
+      "realm_key": "nascent",
+      "realm_name": "元婴",
+      "realm_reason": "身份补正（FIX-2）：会馆负责人（馆长 / 会长 / 殿主）",
+      "hp": 3237,
+      "attack": 192,
+      "defense": 152,
+      "power": 2357,
+      "tier": "E",
+      "tier_name": "良品",
       "rarity": "R",
       "ability_count": 1,
       "abilities": [
@@ -4728,17 +4728,17 @@
       "systems_label": [],
       "element_confidence": "low",
       "element_source": [],
-      "realm_id": 2,
-      "realm_key": "foundation",
-      "realm_name": "筑基",
-      "realm_reason": "妖精 / 妖族",
-      "hp": 1316,
-      "attack": 91,
-      "defense": 71,
-      "power": 1038,
-      "tier": "F",
-      "tier_name": "凡品",
-      "rarity": "R",
+      "realm_id": 5,
+      "realm_key": "deity",
+      "realm_name": "化神",
+      "realm_reason": "身份补正（FIX-2）：会馆高阶职位（长老 / 总会长）",
+      "hp": 4658,
+      "attack": 263,
+      "defense": 218,
+      "power": 3336,
+      "tier": "D",
+      "tier_name": "优品",
+      "rarity": "SR",
       "ability_count": 0,
       "abilities": []
     },
@@ -4836,16 +4836,16 @@
       "systems_label": [],
       "element_confidence": "low",
       "element_source": [],
-      "realm_id": 2,
-      "realm_key": "foundation",
-      "realm_name": "筑基",
-      "realm_reason": "妖精 / 妖族",
-      "hp": 1324,
-      "attack": 92,
-      "defense": 71,
-      "power": 1044,
-      "tier": "F",
-      "tier_name": "凡品",
+      "realm_id": 4,
+      "realm_key": "nascent",
+      "realm_name": "元婴",
+      "realm_reason": "身份补正（FIX-2）：会馆负责人（馆长 / 会长 / 殿主）",
+      "hp": 3259,
+      "attack": 193,
+      "defense": 153,
+      "power": 2372,
+      "tier": "E",
+      "tier_name": "良品",
       "rarity": "R",
       "ability_count": 0,
       "abilities": []
@@ -11377,9 +11377,9 @@
       "systems_label": [
         "木"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -11409,9 +11409,9 @@
       "systems_label": [
         "木"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -11437,25 +11437,28 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "shui",
         "kongjian"
       ],
       "systems_label": [
         "金",
+        "水",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 825,
-      "attack": 69,
-      "defense": 46,
-      "power": 703,
+      "hp": 857,
+      "attack": 72,
+      "defense": 48,
+      "power": 732,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -11480,7 +11483,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -11511,9 +11514,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -11573,7 +11576,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -11608,7 +11611,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·木",
+        "segment_match: 木",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -11639,9 +11642,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -11667,25 +11670,28 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "mu",
         "kongjian"
       ],
       "systems_label": [
         "金",
+        "木",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
+        "segment_match: 木",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 824,
-      "attack": 69,
-      "defense": 46,
-      "power": 702,
+      "hp": 855,
+      "attack": 72,
+      "defense": 48,
+      "power": 731,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -11706,9 +11712,9 @@
       "systems_label": [
         "金"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·金"
+        "segment_match: 金"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -11738,9 +11744,9 @@
       "systems_label": [
         "火"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·火"
+        "segment_match: 火"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -11765,23 +11771,26 @@
       "element": "mu",
       "element_name": "木系",
       "systems": [
-        "mu"
+        "mu",
+        "huo"
       ],
       "systems_label": [
-        "木"
+        "木",
+        "火"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木",
+        "segment_match: 火"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 827,
-      "attack": 56,
-      "defense": 45,
-      "power": 648,
+      "hp": 860,
+      "attack": 58,
+      "defense": 47,
+      "power": 674,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -11798,25 +11807,28 @@
       "element_name": "木系",
       "systems": [
         "mu",
+        "shui",
         "kongjian"
       ],
       "systems_label": [
         "木",
+        "水",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·木",
+        "segment_match: 木",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 891,
-      "attack": 61,
-      "defense": 48,
-      "power": 700,
+      "hp": 926,
+      "attack": 63,
+      "defense": 50,
+      "power": 726,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -11837,9 +11849,9 @@
       "systems_label": [
         "木"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -11869,9 +11881,9 @@
       "systems_label": [
         "火"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·火"
+        "segment_match: 火"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -11896,23 +11908,26 @@
       "element": "mu",
       "element_name": "木系",
       "systems": [
-        "mu"
+        "mu",
+        "shui"
       ],
       "systems_label": [
-        "木"
+        "木",
+        "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木",
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 868,
-      "attack": 59,
-      "defense": 47,
-      "power": 681,
+      "hp": 902,
+      "attack": 61,
+      "defense": 49,
+      "power": 707,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -11929,25 +11944,28 @@
       "element_name": "木系",
       "systems": [
         "mu",
+        "shui",
         "kongjian"
       ],
       "systems_label": [
         "木",
+        "水",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·木",
+        "segment_match: 木",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 884,
-      "attack": 60,
-      "defense": 48,
-      "power": 693,
+      "hp": 918,
+      "attack": 62,
+      "defense": 50,
+      "power": 719,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -11994,9 +12012,9 @@
       "systems_label": [
         "金"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·金"
+        "segment_match: 金"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12030,7 +12048,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -12056,23 +12074,26 @@
       "element": "jin",
       "element_name": "金系",
       "systems": [
-        "jin"
+        "jin",
+        "shui"
       ],
       "systems_label": [
-        "金"
+        "金",
+        "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·金"
+        "segment_match: 金",
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 789,
-      "attack": 66,
-      "defense": 44,
-      "power": 672,
+      "hp": 820,
+      "attack": 69,
+      "defense": 46,
+      "power": 701,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -12088,23 +12109,26 @@
       "element": "jin",
       "element_name": "金系",
       "systems": [
-        "jin"
+        "jin",
+        "tu"
       ],
       "systems_label": [
-        "金"
+        "金",
+        "土"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·金"
+        "segment_match: 金",
+        "segment_match: 土"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 797,
-      "attack": 67,
-      "defense": 45,
-      "power": 682,
+      "hp": 829,
+      "attack": 70,
+      "defense": 47,
+      "power": 711,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -12125,9 +12149,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12161,7 +12185,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·火",
+        "segment_match: 火",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -12192,9 +12216,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12224,9 +12248,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12252,25 +12276,28 @@
       "element_name": "木系",
       "systems": [
         "mu",
+        "shui",
         "kongjian"
       ],
       "systems_label": [
         "木",
+        "水",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·木",
+        "segment_match: 木",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 895,
-      "attack": 61,
-      "defense": 48,
-      "power": 701,
+      "hp": 929,
+      "attack": 63,
+      "defense": 50,
+      "power": 727,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -12286,23 +12313,26 @@
       "element": "jin",
       "element_name": "金系",
       "systems": [
-        "jin"
+        "jin",
+        "shui"
       ],
       "systems_label": [
-        "金"
+        "金",
+        "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·金"
+        "segment_match: 金",
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 784,
-      "attack": 66,
-      "defense": 44,
-      "power": 670,
+      "hp": 816,
+      "attack": 69,
+      "defense": 46,
+      "power": 700,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -12323,9 +12353,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12359,7 +12389,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·木",
+        "segment_match: 木",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -12390,9 +12420,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12426,7 +12456,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·水",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -12457,9 +12487,9 @@
       "systems_label": [
         "金"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·金"
+        "segment_match: 金"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12489,9 +12519,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12525,7 +12555,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·水",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -12556,9 +12586,9 @@
       "systems_label": [
         "火"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·火"
+        "segment_match: 火"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12588,9 +12618,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12615,23 +12645,26 @@
       "element": "huo",
       "element_name": "火系",
       "systems": [
-        "huo"
+        "huo",
+        "tu"
       ],
       "systems_label": [
-        "火"
+        "火",
+        "土"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·火"
+        "segment_match: 火",
+        "segment_match: 土"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 763,
-      "attack": 69,
-      "defense": 42,
-      "power": 669,
+      "hp": 793,
+      "attack": 71,
+      "defense": 44,
+      "power": 694,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -12656,7 +12689,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·木",
+        "segment_match: 木",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -12687,9 +12720,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12719,9 +12752,9 @@
       "systems_label": [
         "金"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·金"
+        "segment_match: 金"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12755,7 +12788,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -12790,7 +12823,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -12817,25 +12850,28 @@
       "element_name": "木系",
       "systems": [
         "mu",
+        "shui",
         "kongjian"
       ],
       "systems_label": [
         "木",
+        "水",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·木",
+        "segment_match: 木",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 870,
-      "attack": 59,
-      "defense": 47,
-      "power": 682,
+      "hp": 904,
+      "attack": 61,
+      "defense": 49,
+      "power": 707,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -12852,25 +12888,28 @@
       "element_name": "水系",
       "systems": [
         "shui",
+        "huo",
         "kongjian"
       ],
       "systems_label": [
         "水",
+        "火",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·水",
+        "segment_match: 水",
+        "segment_match: 火",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 838,
-      "attack": 64,
-      "defense": 48,
-      "power": 693,
+      "hp": 870,
+      "attack": 67,
+      "defense": 50,
+      "power": 722,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -12895,7 +12934,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·火",
+        "segment_match: 火",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -12922,25 +12961,28 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "shui",
         "kongjian"
       ],
       "systems_label": [
         "金",
+        "水",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 836,
-      "attack": 70,
-      "defense": 47,
-      "power": 714,
+      "hp": 868,
+      "attack": 73,
+      "defense": 49,
+      "power": 743,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -12961,9 +13003,9 @@
       "systems_label": [
         "土"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·土"
+        "segment_match: 土"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -12993,9 +13035,9 @@
       "systems_label": [
         "木"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13029,7 +13071,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -13064,7 +13106,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·水",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -13095,9 +13137,9 @@
       "systems_label": [
         "金"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·金"
+        "segment_match: 金"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13127,9 +13169,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13159,9 +13201,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13187,25 +13229,28 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "shui",
         "kongjian"
       ],
       "systems_label": [
         "金",
+        "水",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 809,
-      "attack": 68,
-      "defense": 46,
-      "power": 693,
+      "hp": 841,
+      "attack": 71,
+      "defense": 47,
+      "power": 719,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -13226,9 +13271,9 @@
       "systems_label": [
         "木"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13258,9 +13303,9 @@
       "systems_label": [
         "木"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13294,7 +13339,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·木",
+        "segment_match: 木",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -13320,23 +13365,26 @@
       "element": "shui",
       "element_name": "水系",
       "systems": [
-        "shui"
+        "shui",
+        "huo"
       ],
       "systems_label": [
-        "水"
+        "水",
+        "火"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水",
+        "segment_match: 火"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 799,
-      "attack": 61,
-      "defense": 46,
-      "power": 662,
+      "hp": 831,
+      "attack": 64,
+      "defense": 48,
+      "power": 691,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -13352,23 +13400,26 @@
       "element": "jin",
       "element_name": "金系",
       "systems": [
-        "jin"
+        "jin",
+        "huo"
       ],
       "systems_label": [
-        "金"
+        "金",
+        "火"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·金"
+        "segment_match: 金",
+        "segment_match: 火"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 805,
-      "attack": 68,
-      "defense": 45,
-      "power": 689,
+      "hp": 838,
+      "attack": 71,
+      "defense": 47,
+      "power": 718,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -13393,7 +13444,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·木",
+        "segment_match: 木",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -13424,9 +13475,9 @@
       "systems_label": [
         "金"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·金"
+        "segment_match: 金"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13460,7 +13511,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·火",
+        "segment_match: 火",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -13491,9 +13542,9 @@
       "systems_label": [
         "木"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13518,23 +13569,26 @@
       "element": "mu",
       "element_name": "木系",
       "systems": [
-        "mu"
+        "mu",
+        "shui"
       ],
       "systems_label": [
-        "木"
+        "木",
+        "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木",
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 828,
-      "attack": 56,
-      "defense": 45,
-      "power": 649,
+      "hp": 861,
+      "attack": 58,
+      "defense": 47,
+      "power": 674,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -13555,9 +13609,9 @@
       "systems_label": [
         "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·水"
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13613,9 +13667,9 @@
       "systems_label": [
         "火"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·火"
+        "segment_match: 火"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13649,7 +13703,7 @@
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·水",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
@@ -13680,9 +13734,9 @@
       "systems_label": [
         "木"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木"
       ],
       "realm_id": 1,
       "realm_key": "qi",
@@ -13707,23 +13761,26 @@
       "element": "mu",
       "element_name": "木系",
       "systems": [
-        "mu"
+        "mu",
+        "shui"
       ],
       "systems_label": [
-        "木"
+        "木",
+        "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木",
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 853,
-      "attack": 58,
-      "defense": 46,
-      "power": 669,
+      "hp": 888,
+      "attack": 60,
+      "defense": 48,
+      "power": 695,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -13740,25 +13797,28 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "shui",
         "kongjian"
       ],
       "systems_label": [
         "金",
+        "水",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 826,
-      "attack": 70,
-      "defense": 46,
-      "power": 707,
+      "hp": 858,
+      "attack": 72,
+      "defense": 48,
+      "power": 732,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -13774,23 +13834,26 @@
       "element": "mu",
       "element_name": "木系",
       "systems": [
-        "mu"
+        "mu",
+        "shui"
       ],
       "systems_label": [
-        "木"
+        "木",
+        "水"
       ],
-      "element_confidence": "medium",
+      "element_confidence": "low",
       "element_source": [
-        "abilities_summary: 御灵系·木"
+        "segment_match: 木",
+        "segment_match: 水"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 829,
-      "attack": 56,
-      "defense": 45,
-      "power": 649,
+      "hp": 862,
+      "attack": 59,
+      "defense": 47,
+      "power": 679,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",
@@ -13807,25 +13870,28 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "shui",
         "kongjian"
       ],
       "systems_label": [
         "金",
+        "水",
         "空间"
       ],
       "element_confidence": "medium",
       "element_source": [
-        "abilities_summary: 御灵系·金",
+        "segment_match: 金",
+        "segment_match: 水",
         "abilities_summary: 空间系"
       ],
       "realm_id": 1,
       "realm_key": "qi",
       "realm_name": "练气",
       "realm_reason": "默认（人类 / 动物 / 同人 / 未知）",
-      "hp": 815,
-      "attack": 69,
-      "defense": 46,
-      "power": 699,
+      "hp": 846,
+      "attack": 71,
+      "defense": 48,
+      "power": 724,
       "tier": "F",
       "tier_name": "凡品",
       "rarity": "R",

@@ -1,7 +1,11 @@
 {
-  "version": "1.0.0",
-  "updated": "2026-10-05",
+  "version": "1.1.0",
+  "updated": "2026-10-07",
   "description": "六系数值模型：hp / attack / defense / element / realm 的取值规则与分档。所有数值由本模型确定性推导，不写回数据库。",
+  "changelog": [
+    { "version": "1.0.0", "date": "2026-10-05", "note": "首版：境界档位 + 系别偏向 + 定位加成 + 战力公式 + 分档阈值 + 稀有度映射。" },
+    { "version": "1.1.0", "date": "2026-10-07", "round": "R7", "note": "土系系统性偏差修正（用户指出强土系角色『池年』）。① element.segmentMatch：abilities_summary / 能力明细中的并列写法（如『御灵系·金、土』）按分隔符切段后精确认系，修复土系漏匹配；② realm.identityRules：新增地位维度线索（会馆长老 / 负责人），只升不降，修复强角色因 type 字段粗粒度（如『执行者』）被压至低境界。两项均参数化、可回滚。" }
+  ],
   "source": {
     "db": "E:\\Projects\\assets\\罗小黑战记数据库\\db\\worldview_luoxiaohei_v4.db",
     "tables": ["characters", "character_abilities", "ability_branches", "cultivation_realm"],
@@ -28,7 +32,12 @@
       { "realm_id": 2, "reason": "妖精 / 妖族", "match": { "category_in": ["妖精"] } },
       { "realm_id": 1, "reason": "默认（人类 / 动物 / 同人 / 未知）", "match": { "default": true } }
     ],
-    "note": "按 rules 顺序首个命中即采用；同 id 多次运行结果一致。"
+    "identityRules": [
+      { "realm_id": 5, "reason": "会馆高阶职位（长老 / 总会长）", "affiliation_contains": ["长老", "总会长", "大长老"] },
+      { "realm_id": 4, "reason": "会馆负责人（馆长 / 会长 / 殿主）", "affiliation_contains": ["馆长", "会长", "殿主"], "affiliation_excludes": ["助理", "副"] }
+    ],
+    "note": "按 rules 顺序首个命中即采用；同 id 多次运行结果一致。",
+    "identityNote": "FIX-2（v1.1.0 · R7）：地位维度补正。affiliation 命中职位线索时给出候选境界，与 rules 结果取较高者（只升不降），reason 记为『身份补正（FIX-2）』，用于修复强角色因 type 字段粗粒度（如『执行者』）被压至低境界的问题。影响面与前后对比见 docs/11-六系归属与境界修正记录.md。"
   },
 
   "element": {
@@ -38,7 +47,7 @@
       { "system": "all", "pattern": "六大系", "note": "如老君『六大系皆有涉猎』→ 直接判定六系全覆盖" }
     ],
     "confidence": {
-      "high": "命中『御灵系·X』精确写法或明确能力名（如 吞噬 / 蕴藏 / 传送）",
+      "high": "命中『御灵系·X』精确写法、并列写法切段精确命中，或明确能力名（如 吞噬 / 蕴藏 / 传送）",
       "medium": "命中系别名（如 冰 / 火焰 / 金属）",
       "low": "仅命中泛化词或未命中"
     },
@@ -50,6 +59,14 @@
       { "system": "tu", "weight": "high", "patterns": ["御灵系·土", "御灵系-土", "御土", "土系"] },
       { "system": "kongjian", "weight": "high", "patterns": ["空间系", "领域", "吞噬", "传送", "蕴藏", "转移", "灵质空间"] }
     ],
+    "segmentMatch": {
+      "note": "FIX-1（v1.1.0 · R7）：abilities_summary / 能力明细中的并列写法（如『御灵系·金、土』『御灵系·火、土』）里第二个系名不带前缀，原先无法被 keywords 命中。此处按分隔符切段、剥离系名前缀后要求『整段等于系名』，避免把描述性文本误判为系别。",
+      "separators": ["、", ",", "，", ";", "；", "/"],
+      "stripPrefixes": ["御灵系"],
+      "nameMap": { "金": "jin", "木": "mu", "水": "shui", "火": "huo", "土": "tu", "空间": "kongjian" },
+      "confidence": "high",
+      "applyTo": ["character_abilities", "abilities_summary"]
+    },
     "abilityTableBonus": {
       "note": "character_abilities 表中的能力明细（191 行 / 77 角色）优先级高于 abilities_summary 文本匹配。",
       "applyTo": ["金", "木", "水", "火", "土", "空间"]
