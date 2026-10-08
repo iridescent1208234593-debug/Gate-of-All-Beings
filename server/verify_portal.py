@@ -21,7 +21,7 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-PORT = int(os.environ.get("PORT", "8080"))
+DEFAULT_PORT = 8080
 HERE = Path(__file__).resolve().parent
 CODE_ROOT = HERE.parent
 
@@ -94,6 +94,22 @@ def cleanup(root, links):
             os.unlink(link)
     shutil.rmtree(root, ignore_errors=True)
 
+
+def select_port():
+    """Use 8080 when free; otherwise isolate the smoke test on an ephemeral port."""
+    if os.environ.get("PORT"):
+        return int(os.environ["PORT"])
+    with socket.socket() as probe:
+        probe.settimeout(0.3)
+        if probe.connect_ex(("127.0.0.1", DEFAULT_PORT)) != 0:
+            return DEFAULT_PORT
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        return probe.getsockname()[1]
+
+
+PORT = select_port()
+
 CHECKS = [
     ("iridescently.xyz", "/", 302),
     ("iridescently.xyz", "/gallery.html", 404),
@@ -165,9 +181,11 @@ CHECKS = [
 ]
 
 
-def wait(port, timeout=25):
+def wait(port, proc, timeout=25):
     end = time.time() + timeout
     while time.time() < end:
+        if proc.poll() is not None:
+            return False
         try:
             socket.create_connection(("127.0.0.1", port), timeout=1).close()
             return True
@@ -204,7 +222,7 @@ def main():
     total = len(CHECKS) + 3
     fails = 0
     try:
-        if not wait(PORT):
+        if not wait(PORT, proc):
             print("FAIL: portal_server 未在端口就绪", PORT)
             return 1
         for host, path, expect in CHECKS:
