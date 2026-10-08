@@ -18,6 +18,7 @@ import datetime
 import os
 from pathlib import Path
 import queue
+import re
 import socket
 import subprocess
 import sys
@@ -44,7 +45,15 @@ POWERSHELL = (Path(os.environ.get('SystemRoot', r'C:\Windows'))
 CLOUDFLARED = Path(r'C:\Program Files (x86)\cloudflared\cloudflared.exe')
 CONFIG = Path.home() / '.cloudflared' / 'config.yml'
 PUBLIC_MAIN = 'https://iridescently.xyz/'
-OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+TUNNEL_NAME = 'main'
+
+
+class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, file, code, message, headers, new_url):
+        return None
+
+
+OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirectHandler())
 
 # ------------------------------------------------------- 西木会馆 · Design Tokens
 # 与 portal/huiguan/design-system/design-system.css 的 :root 一一对应，
@@ -167,6 +176,45 @@ def http_status(url, timeout=5):
         return None
 
 
+def public_probe(url, timeout=6):
+    """Return a classified public HTTP result without following redirects."""
+    status, body, server = None, '', ''
+    try:
+        with OPENER.open(urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'}),
+                         timeout=timeout) as response:
+            status = response.status
+            server = response.headers.get('Server', '')
+            body = response.read(32768).decode('utf-8', 'replace')
+    except urllib.error.HTTPError as error:
+        status = error.code
+        server = error.headers.get('Server', '') if error.headers else ''
+        try:
+            body = error.read(32768).decode('utf-8', 'replace')
+        except Exception:
+            pass
+    except Exception as error:
+        timed_out = isinstance(error, TimeoutError) or isinstance(getattr(error, 'reason', None), TimeoutError)
+        return {'state': 'TIMEOUT' if timed_out else 'ORIGIN_ERROR',
+                'status': None, 'detail': str(error)}
+    return classify_public(status, body, server)
+
+
+def classify_public(status, body='', server=''):
+    if status is None:
+        return {'state': 'ORIGIN_ERROR', 'status': None, 'detail': 'no HTTP response'}
+    if re.search(r'\b1033\b', body):
+        state = 'CLOUDFLARE_ERROR'
+    elif 300 <= status < 400:
+        state = 'REDIRECT'
+    elif 200 <= status < 300:
+        state = 'ONLINE'
+    elif status >= 500 and ('cloudflare' in server.lower() or re.search(r'\b(?:52\d|53\d)\b', body)):
+        state = 'CLOUDFLARE_ERROR'
+    else:
+        state = 'ORIGIN_ERROR'
+    return {'state': state, 'status': status, 'detail': ''}
+
+
 def healthy(code):
     return code is not None and 200 <= code < 400
 
@@ -213,6 +261,55 @@ def tunnel_running():
     if check.returncode != 0:
         return None
     return b'cloudflared.exe' in check.stdout.lower()
+
+
+def tunnel_info(timeout=8):
+    """Return (state, connection count, connector count, detail)."""
+    try:
+        check = subprocess.run([str(CLOUDFLARED), 'tunnel', '--config', str(CONFIG),
+                                'info', TUNNEL_NAME], capture_output=True, text=True,
+                               timeout=timeout, creationflags=subprocess.CREATE_NO_WINDOW)
+    except Exception as error:
+        return 'UNKNOWN', None, None, str(error)
+    output = (check.stdout or '') + '\n' + (check.stderr or '')
+    return parse_tunnel_info(output, check.returncode)
+
+
+def parse_tunnel_info(output, returncode=0):
+    if returncode != 0 or 'CONNECTOR ID' not in output:
+        return 'UNKNOWN', None, None, output.strip()[-300:] or 'cloudflared tunnel info failed'
+    table = output.split('CONNECTOR ID', 1)[1]
+    connector_rows = [line for line in table.splitlines()[1:] if re.search(r'\b[0-9a-f]{8}-[0-9a-f-]{27,}\b', line, re.I)]
+    connections = sum(int(count) for count, _edge in re.findall(r'\b(\d+)x([a-z0-9-]+)\b', table, re.I))
+    state = 'HEALTHY' if connections else 'DOWN'
+    return state, connections, len(connector_rows), ''
+
+
+def inspect_pipeline():
+    """Read-only health layers for the primary public site."""
+    process = tunnel_running()
+    state, connections, connectors, detail = tunnel_info()
+    public = public_probe(PUBLIC_MAIN)
+    local = http_status('http://127.0.0.1:8080/', timeout=4)
+    portal = 'UP' if healthy(local) else 'DOWN'
+    process_state = 'UNKNOWN' if process is None else ('RUNNING' if process else 'STOPPED')
+    if process is False and state != 'UNKNOWN':
+        state = 'DOWN'
+        connections = connections or 0
+        connectors = connectors or 0
+    overall = overall_state(portal, process_state, state, public['state'])
+    return {'portal': portal, 'portal_http': local, 'process': process_state,
+            'tunnel': state, 'connections': connections, 'connectors': connectors,
+            'tunnel_detail': detail, 'public': public, 'overall': overall,
+            'config': CONFIG.is_file(), 'command': CLOUDFLARED.is_file()}
+
+
+def overall_state(portal, process, tunnel, public):
+    if portal == 'UP' and process == 'RUNNING' and tunnel == 'HEALTHY' and public in ('ONLINE', 'REDIRECT'):
+        return 'ONLINE'
+    if portal == 'DOWN' or (tunnel == 'DOWN' and public == 'CLOUDFLARE_ERROR'):
+        return 'OFFLINE'
+    return 'DEGRADED'
 
 
 def build_command(site):
@@ -264,6 +361,13 @@ def entry_missing(site):
 
 def evaluate(site):
     """只读检测单个站点，返回 (level, 文本)。不启动、不结束任何进程。"""
+    if site.get('key') == 'tunnel':
+        state, connections, connectors, detail = tunnel_info()
+        if state == 'UNKNOWN':
+            return 'warn', 'main UNKNOWN · ' + detail
+        if state == 'DOWN':
+            return 'bad', 'main DOWN · 0 connections'
+        return 'good', 'main HEALTHY · %d connections / %d connectors' % (connections, connectors)
     if site.get('kind') == 'process':
         state = tunnel_running()
         if state is None:
@@ -282,8 +386,8 @@ def evaluate(site):
     return 'bad', '端口占用 · HTTP %d（未强制结束进程）' % code
 
 
-def inspect_all(include_public=True):
-    targets = SITES + [TUNNEL_SITE]
+def inspect_all():
+    targets = SITES
 
     def probe(site):
         return site['key'], evaluate(site)
@@ -292,8 +396,15 @@ def inspect_all(include_public=True):
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as pool:
         for key, value in pool.map(probe, targets):
             result[key] = value
-    if include_public:
-        result['public'] = http_status(PUBLIC_MAIN, timeout=6)
+    result['pipeline'] = inspect_pipeline()
+    result['public'] = result['pipeline']['public']
+    pipeline = result['pipeline']
+    result['tunnel'] = (('good' if pipeline['tunnel'] == 'HEALTHY' else
+                         'warn' if pipeline['tunnel'] == 'UNKNOWN' else 'bad'),
+                        ('main %s · %s connections / %s connectors' %
+                         (pipeline['tunnel'], pipeline['connections'], pipeline['connectors'])
+                         if pipeline['connections'] is not None else
+                         'main UNKNOWN · ' + pipeline['tunnel_detail']))
     return result
 
 
@@ -307,15 +418,40 @@ def recover_site(site, report, quiet=False):
             report('「公网连接」无法确认进程状态，请检查任务管理器。', 'warn')
             return False
         if state:
-            if not quiet:
-                report('「公网连接」已在运行，无需重复启动。')
-            return True
+            tunnel_state, connections, connectors, detail = tunnel_info()
+            if tunnel_state == 'HEALTHY':
+                if not quiet:
+                    report('「公网连接」已连接 main Tunnel（%d connections），无需重复启动。' % connections)
+                return True
+            message = ('Tunnel main 为 %s（0 connections）。为避免重复进程，不会再启动 cloudflared。'
+                       % tunnel_state)
+            if detail:
+                message += ' ' + detail
+            report(message, 'bad' if tunnel_state == 'DOWN' else 'warn')
+            return False
         if not CLOUDFLARED.is_file():
             report('找不到 cloudflared 程序：%s' % CLOUDFLARED, 'bad')
             return False
-        launch(site)
-        report('「公网连接」已启动，可能需要数秒完成连接。')
-        return True
+        try:
+            launch(site)
+        except Exception as error:
+            report('「公网连接」启动失败：%s' % error, 'bad')
+            return False
+        deadline = time.time() + 40
+        while time.time() < deadline:
+            if tunnel_running():
+                tunnel_state, connections, _connectors, detail = tunnel_info(timeout=6)
+                if tunnel_state == 'HEALTHY':
+                    public = public_probe(PUBLIC_MAIN)
+                    report('Tunnel main 已连接：%d connections；公网 %s %s。'
+                           % (connections, public['state'], public.get('status') or ''),
+                           None if public['state'] in ('ONLINE', 'REDIRECT') else 'warn')
+                    return public['state'] in ('ONLINE', 'REDIRECT')
+                if tunnel_state == 'UNKNOWN' and detail:
+                    report('Tunnel 状态暂时无法确认：' + detail, 'warn')
+            time.sleep(3)
+        report('cloudflared 进程已启动，但限时内未验证到 main active connection；保留进程，请查 tunnel 日志。', 'bad')
+        return False
 
     if not site.get('deployed', True):
         if not quiet:
@@ -567,7 +703,8 @@ class App:
         summary_box.pack(fill='x', pady=(14, 0))
         self.summary = tk.StringVar(value='正在检查站点状态…')
         tk.Label(summary_box, textvariable=self.summary, bg=QC['bg'], fg=QC['text'],
-                 font=(TEXT_FONT, QC['fs_lg'], 'bold')).pack(side='left')
+                 font=(TEXT_FONT, QC['fs_lg'], 'bold'), justify='left', anchor='w',
+                 wraplength=980).pack(side='left')
         self.clock = tk.StringVar(value='')
         tk.Label(summary_box, textvariable=self.clock, bg=QC['bg'], fg=QC['dim'],
                  font=(TEXT_FONT, QC['fs_sm'])).pack(side='right')
@@ -713,7 +850,7 @@ class App:
         threading.Thread(target=run, daemon=True).start()
 
     def refresh(self):
-        self.work(lambda: inspect_all(True), 'status')
+        self.work(inspect_all, 'status')
 
     def recover_all(self):
         if self.busy:
@@ -753,7 +890,7 @@ class App:
 
         def task():
             recover_all(report, quiet=True)
-            return inspect_all(False)
+            return inspect_all()
 
         self.busy = True
 
@@ -806,17 +943,18 @@ class App:
                 bad += 1
             else:
                 pending += 1
-        tunnel = states.get('tunnel')
-        tunnel_text = '运行中' if tunnel and tunnel[0] == 'good' else ('未运行' if tunnel else '—')
-        public = states.get('public')
-        if public is None:
-            public_text = '公网主站：未检测'
-        elif public == 200:
-            public_text = '公网主站：HTTP 200'
-        else:
-            public_text = '公网主站：HTTP %s' % public
-        summary = ('站点 %d：正常 %d · 异常 %d · 未部署 %d    隧道：%s    %s'
-                   % (total, good, bad, pending, tunnel_text, public_text))
+        pipeline = states.get('pipeline', {})
+        public = pipeline.get('public') or {}
+        public_text = '%s %s' % (public.get('state', 'UNKNOWN'), public.get('status') or '')
+        tunnel_text = ('%s connections / %s connectors' %
+                       (pipeline.get('connections'), pipeline.get('connectors'))
+                       if pipeline.get('connections') is not None else 'UNKNOWN')
+        summary = ('Overall: %s\nPortal 8080: %s (HTTP %s) · cloudflared: %s · '
+                   'Tunnel main: %s · Public iridescently.xyz: %s\n'
+                   '站点 %d：正常 %d · 异常 %d · 未部署 %d'
+                   % (pipeline.get('overall', 'UNKNOWN'), pipeline.get('portal', 'UNKNOWN'),
+                      pipeline.get('portal_http') or '—', pipeline.get('process', 'UNKNOWN'),
+                      tunnel_text, public_text, total, good, bad, pending))
         if self.extra_rows:
             summary += '    未配置域名 %d' % len(self.extra_rows)
         self.summary.set(summary)
@@ -826,7 +964,7 @@ class App:
     def smoke_test(self):
         self.root.update_idletasks()
         self.root.update()
-        states = inspect_all(include_public=False)
+        states = inspect_all()
         self.apply_states(states)
         self.root.update_idletasks()
         self.root.update()
@@ -837,6 +975,19 @@ class App:
         print('[smoke-test] 界面构建成功：控件 %d 个，表格行 %d 行（含未配置域名 %d）'
               % (widgets, rows, len(self.extra_rows)))
         print('[smoke-test] 字体：正文 %s / 标题 %s' % (TEXT_FONT, HAND_FONT))
+        pipeline = states['pipeline']
+        print('[smoke-test] 配置：%s · cloudflared：%s' %
+              ('OK' if pipeline['config'] else 'MISSING',
+               'AVAILABLE' if pipeline['command'] else 'MISSING'))
+        print('[smoke-test] Portal 127.0.0.1:8080：%s · HTTP %s' %
+              (pipeline['portal'], pipeline['portal_http'] or '—'))
+        print('[smoke-test] cloudflared process：%s' % pipeline['process'])
+        print('[smoke-test] Tunnel main：%s · %s connections / %s connectors%s' %
+              (pipeline['tunnel'], pipeline['connections'], pipeline['connectors'],
+               ' · ' + pipeline['tunnel_detail'] if pipeline['tunnel_detail'] else ''))
+        print('[smoke-test] Public iridescently.xyz：%s · HTTP %s' %
+              (pipeline['public']['state'], pipeline['public']['status'] or '—'))
+        print('[smoke-test] 总体状态：%s（只读；未启动任何进程）' % pipeline['overall'])
         print('[smoke-test] 站点状态扫描完成：正常 %d · 异常 %d · 未部署 %d（未启动任何进程）'
               % (good, bad, len(SITES) - good - bad))
         for site in SITES:

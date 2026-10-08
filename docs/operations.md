@@ -19,8 +19,8 @@
 
 - **Cloudflare 隧道**：`~/.cloudflared/config.yml` 把 `iridescently.xyz`、`www`、`huiguan`、`oc`、`spirit` 指向 `127.0.0.1:8080`（统一入口）；`zszm/game/juling/lingjing/psyche/psy/feather` 各自保留。
 - 灵体正式链接为 `https://spirit.iridescently.xyz/games/spirit-playground?room=forest`。页面由 `server/app/modules/softie/` 提供，房间服务使用 softie 上游 4173；账号云存档 API 由会馆提供。
-- **网站管家** `ops/网站恢复/website-manager.py`：按 `SITES` 一键恢复全部站点 + 隧道；`--smoke-test` 自检（不启动任何进程）。
-- **看门狗** `portal/huiguan/watchdog.py`：8080 不在则拉起统一入口（由计划任务每 5 分钟调用）。
+- **网站管家** `ops/网站恢复/website-manager.py`：按 `SITES` 一键恢复全部站点 + 隧道；状态分开检查本机 8080、cloudflared 进程、`main` Tunnel 活动连接和公网主站。`--smoke-test` 只读检查，不启动任何进程。Windows 登录任务 `marvis-cloudflared` 负责登录时启动隧道；网站管家启动前先检查现存进程，避免重复实例。
+- **看门狗** `portal/huiguan/watchdog.py`：只负责 8080 不在时拉起统一入口（由计划任务每 5 分钟调用）；Tunnel 由网站管家负责检查和恢复，避免两个自动器重复启动 cloudflared。
 
 ### 一键恢复
 
