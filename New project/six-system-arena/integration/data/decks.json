@@ -3,42 +3,42 @@
     "project": "six-system-arena",
     "generator": "data/scripts/generate_decks.py",
     "version": "1.1.0",
-    "generated_at": "2026-10-07 05:24:27",
-    "source_stats": "E:\\Projects\\new project\\six-system-arena\\data\\generated\\character_stats.json",
-    "source_stats_generated_at": "2026-10-07 05:24:26",
+    "generated_at": "2026-10-08 06:07:18",
+    "source_stats": "E:\\Projects\\New project\\six-system-arena\\data\\generated\\character_stats.json",
+    "source_stats_generated_at": "2026-10-08 06:07:18",
     "source_stats_fingerprint": {
       "size": 2392064,
       "mtime": 1791230190,
       "fingerprint": "9189541dd8dd7b3e"
     },
     "systems_version": "1.0.0",
-    "model_version": "1.0.0",
+    "model_version": "1.1.0",
     "total": 488,
     "mainline_count": 30,
     "rarity_distribution": {
-      "SR": 66,
+      "SR": 71,
       "UR": 1,
       "SSR": 3,
-      "R": 418
+      "R": 413
     },
     "skill_unlock_distribution": {
       "3/3": 28,
       "4/4": 2,
-      "2/2": 418,
-      "2/3": 38,
+      "2/2": 413,
+      "2/3": 43,
       "2/4": 2
     },
     "primary_ratio_min": 0.6,
     "primary_ratio_violations": [],
     "skill_source_totals": {
       "character_ability": 131,
-      "primary_fallback": 177,
-      "generic_fallback": 742
+      "primary_fallback": 179,
+      "generic_fallback": 745
     },
     "skill_source_ratio": {
-      "character_ability": 0.1248,
-      "primary_fallback": 0.1686,
-      "generic_fallback": 0.7067
+      "character_ability": 0.1242,
+      "primary_fallback": 0.1697,
+      "generic_fallback": 0.7062
     },
     "non_numeric_rarity_calibration": {
       "status": "applied",
@@ -59,14 +59,14 @@
         "UR": 0.01
       },
       "rarity_actual_distribution": {
-        "R": 0.8566,
-        "SR": 0.1352,
+        "R": 0.8463,
+        "SR": 0.1455,
         "SSR": 0.0061,
         "UR": 0.002
       },
       "rarity_deviation": {
-        "R": 0.2566,
-        "SR": -0.1648,
+        "R": 0.2463,
+        "SR": -0.1545,
         "SSR": -0.0839,
         "UR": -0.008
       },
@@ -99,8 +99,8 @@
           "SR": 44
         },
         "P2": {
-          "R": 125,
-          "SR": 21
+          "SR": 26,
+          "R": 120
         },
         "P1": {
           "R": 293
@@ -1208,7 +1208,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 22,
+        "rank": 25,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -1885,7 +1885,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 363,
+        "rank": 367,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -2021,7 +2021,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 30,
+        "rank": 33,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -2520,13 +2520,13 @@
         "generic_fallback": 0
       },
       "pacing": {
-        "pace": "P3",
-        "name": "史诗节奏",
-        "rank": 48,
-        "share_target": 0.09,
-        "acquisition": "中期投放",
-        "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
-        "milestone": 2
+        "pace": "P2",
+        "name": "稀有节奏",
+        "rank": 51,
+        "share_target": 0.3,
+        "acquisition": "早期投放",
+        "unlock_requirement": "同系演武场累计取胜 3 次",
+        "milestone": 1
       },
       "bond_is_system": true,
       "general": {
@@ -2854,7 +2854,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 27,
+        "rank": 30,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -3020,7 +3020,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 79,
+        "rank": 85,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -3165,7 +3165,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 20,
+        "rank": 23,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -3333,7 +3333,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 176,
+        "rank": 178,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -3471,7 +3471,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 73,
+        "rank": 80,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -3611,7 +3611,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 94,
+        "rank": 99,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -3747,7 +3747,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 127,
+        "rank": 132,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -4043,7 +4043,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 103,
+        "rank": 108,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -4179,7 +4179,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 136,
+        "rank": 141,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -4315,7 +4315,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 87,
+        "rank": 92,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -4587,7 +4587,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 165,
+        "rank": 169,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -4701,31 +4701,31 @@
       "systems": [
         "mu"
       ],
-      "rarity": "R",
-      "tier": "E",
-      "power": 1723,
+      "rarity": "SR",
+      "tier": "D",
+      "power": 2528,
       "portrait": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\卡里\\卡里.png",
-      "deck_size": 5,
+      "deck_size": 6,
       "unlocked_deck_size": 5,
       "skill_slots": {
-        "total": 2,
+        "total": 3,
         "unlocked": 2,
         "rule": "non_mainline_initial_2"
       },
       "primary_skill_ratio": 1.0,
       "primary_ratio_basis": "primary",
       "skill_element_mix": {
-        "mu": 2
+        "mu": 3
       },
       "skill_source_split": {
         "character_ability": 2,
-        "primary_fallback": 0,
+        "primary_fallback": 1,
         "generic_fallback": 0
       },
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 84,
+        "rank": 56,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -4746,15 +4746,15 @@
           "木"
         ],
         "stats": {
-          "hp": 2369,
-          "attack": 138,
-          "defense": 114
+          "hp": 3610,
+          "attack": 194,
+          "defense": 163
         },
-        "power": 1723,
-        "tier": "E",
-        "tier_name": "良品",
-        "realm_name": "金丹",
-        "desc": "主将卡 · 木系 / 金丹"
+        "power": 2528,
+        "tier": "D",
+        "tier_name": "优品",
+        "realm_name": "元婴",
+        "desc": "主将卡 · 木系 / 元婴"
       },
       "skills": [
         {
@@ -4804,6 +4804,30 @@
           "source_ability": "御灵系-木（催生植物，可持续存活）",
           "desc": "恢复 · 系数 0.95 / 耗能 2",
           "unlocked": true
+        },
+        {
+          "slot": 3,
+          "card_id": "S0029-3",
+          "type": "skill",
+          "name": "御灵·木·缠生",
+          "element": "mu",
+          "element_name": "木",
+          "is_primary": true,
+          "role": "恢复",
+          "cost": 2,
+          "coeff": 0.95,
+          "pierce": 0.0,
+          "heal": 0.1,
+          "shield": 0.0,
+          "tags": [
+            "续航",
+            "恢复"
+          ],
+          "generic": true,
+          "source_kind": "primary_fallback",
+          "source_ability": "",
+          "desc": "恢复 · 系数 0.95 / 耗能 2",
+          "unlocked": false
         }
       ],
       "bond": {
@@ -4865,7 +4889,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 267,
+        "rank": 277,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -5003,7 +5027,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 21,
+        "rank": 24,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -5167,7 +5191,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 149,
+        "rank": 153,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -5303,7 +5327,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 124,
+        "rank": 129,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -5575,7 +5599,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 75,
+        "rank": 81,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -5713,7 +5737,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 23,
+        "rank": 26,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -5877,7 +5901,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 78,
+        "rank": 84,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -6013,7 +6037,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 258,
+        "rank": 269,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -6149,7 +6173,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 269,
+        "rank": 278,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -6421,7 +6445,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 60,
+        "rank": 64,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -6581,7 +6605,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 353,
+        "rank": 357,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -6717,7 +6741,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 144,
+        "rank": 149,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -6855,7 +6879,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 150,
+        "rank": 154,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -6995,7 +7019,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 57,
+        "rank": 61,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -7291,7 +7315,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 403,
+        "rank": 406,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -7427,7 +7451,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 46,
+        "rank": 49,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -7723,7 +7747,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 126,
+        "rank": 131,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -7859,7 +7883,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 390,
+        "rank": 393,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -7997,7 +8021,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 25,
+        "rank": 28,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -8163,7 +8187,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 83,
+        "rank": 89,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -8279,31 +8303,31 @@
       "element": "none",
       "element_name": "无系",
       "systems": [],
-      "rarity": "R",
-      "tier": "F",
-      "power": 1080,
+      "rarity": "SR",
+      "tier": "D",
+      "power": 2450,
       "portrait": null,
-      "deck_size": 5,
+      "deck_size": 6,
       "unlocked_deck_size": 5,
       "skill_slots": {
-        "total": 2,
+        "total": 3,
         "unlocked": 2,
         "rule": "non_mainline_initial_2"
       },
       "primary_skill_ratio": 1.0,
       "primary_ratio_basis": "neutral",
       "skill_element_mix": {
-        "none": 2
+        "none": 3
       },
       "skill_source_split": {
         "character_ability": 1,
         "primary_fallback": 0,
-        "generic_fallback": 1
+        "generic_fallback": 2
       },
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 146,
+        "rank": 72,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -8320,15 +8344,15 @@
         "systems": [],
         "systems_label": [],
         "stats": {
-          "hp": 1365,
-          "attack": 95,
-          "defense": 74
+          "hp": 3360,
+          "attack": 200,
+          "defense": 158
         },
-        "power": 1080,
-        "tier": "F",
-        "tier_name": "凡品",
-        "realm_name": "筑基",
-        "desc": "主将卡 · 无系 / 筑基"
+        "power": 2450,
+        "tier": "D",
+        "tier_name": "优品",
+        "realm_name": "元婴",
+        "desc": "主将卡 · 无系 / 元婴"
       },
       "skills": [
         {
@@ -8378,6 +8402,30 @@
           "source_ability": "",
           "desc": "通用 · 系数 1.00 / 耗能 2",
           "unlocked": true
+        },
+        {
+          "slot": 3,
+          "card_id": "S0054-3",
+          "type": "skill",
+          "name": "灵质·冲击",
+          "element": "none",
+          "element_name": "无系",
+          "is_primary": false,
+          "role": "通用",
+          "cost": 2,
+          "coeff": 1.0,
+          "pierce": 0.0,
+          "heal": 0.0,
+          "shield": 0.0,
+          "tags": [
+            "通用",
+            "灵活"
+          ],
+          "generic": true,
+          "source_kind": "generic_fallback",
+          "source_ability": "",
+          "desc": "通用 · 系数 1.00 / 耗能 2",
+          "unlocked": false
         }
       ],
       "bond": {
@@ -8575,7 +8623,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 391,
+        "rank": 394,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -8847,7 +8895,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 37,
+        "rank": 40,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -9005,13 +9053,13 @@
         "generic_fallback": 3
       },
       "pacing": {
-        "pace": "P3",
-        "name": "史诗节奏",
-        "rank": 49,
-        "share_target": 0.09,
-        "acquisition": "中期投放",
-        "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
-        "milestone": 2
+        "pace": "P2",
+        "name": "稀有节奏",
+        "rank": 52,
+        "share_target": 0.3,
+        "acquisition": "早期投放",
+        "unlock_requirement": "同系演武场累计取胜 3 次",
+        "milestone": 1
       },
       "bond_is_system": false,
       "general": {
@@ -9165,13 +9213,13 @@
         "generic_fallback": 3
       },
       "pacing": {
-        "pace": "P3",
-        "name": "史诗节奏",
-        "rank": 47,
-        "share_target": 0.09,
-        "acquisition": "中期投放",
-        "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
-        "milestone": 2
+        "pace": "P2",
+        "name": "稀有节奏",
+        "rank": 50,
+        "share_target": 0.3,
+        "acquisition": "早期投放",
+        "unlock_requirement": "同系演武场累计取胜 3 次",
+        "milestone": 1
       },
       "bond_is_system": false,
       "general": {
@@ -9305,35 +9353,35 @@
       "systems": [
         "tu"
       ],
-      "rarity": "R",
-      "tier": "E",
-      "power": 1791,
+      "rarity": "SR",
+      "tier": "C",
+      "power": 3729,
       "portrait": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\池年\\池年.jpg",
-      "deck_size": 5,
+      "deck_size": 6,
       "unlocked_deck_size": 5,
       "skill_slots": {
-        "total": 2,
+        "total": 3,
         "unlocked": 2,
         "rule": "non_mainline_initial_2"
       },
       "primary_skill_ratio": 1.0,
       "primary_ratio_basis": "primary",
       "skill_element_mix": {
-        "tu": 2
+        "tu": 3
       },
       "skill_source_split": {
         "character_ability": 1,
-        "primary_fallback": 1,
+        "primary_fallback": 2,
         "generic_fallback": 0
       },
       "pacing": {
-        "pace": "P2",
-        "name": "稀有节奏",
-        "rank": 74,
-        "share_target": 0.3,
-        "acquisition": "早期投放",
-        "unlock_requirement": "同系演武场累计取胜 3 次",
-        "milestone": 1
+        "pace": "P3",
+        "name": "史诗节奏",
+        "rank": 20,
+        "share_target": 0.09,
+        "acquisition": "中期投放",
+        "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
+        "milestone": 2
       },
       "bond_is_system": true,
       "general": {
@@ -9350,15 +9398,15 @@
           "土"
         ],
         "stats": {
-          "hp": 2531,
-          "attack": 128,
-          "defense": 131
+          "hp": 5545,
+          "attack": 246,
+          "defense": 268
         },
-        "power": 1791,
-        "tier": "E",
-        "tier_name": "良品",
-        "realm_name": "金丹",
-        "desc": "主将卡 · 土系 / 金丹"
+        "power": 3729,
+        "tier": "C",
+        "tier_name": "精锐",
+        "realm_name": "化神",
+        "desc": "主将卡 · 土系 / 化神"
       },
       "skills": [
         {
@@ -9408,6 +9456,30 @@
           "source_ability": "",
           "desc": "防御 · 系数 0.90 / 耗能 2",
           "unlocked": true
+        },
+        {
+          "slot": 3,
+          "card_id": "S0061-3",
+          "type": "skill",
+          "name": "御灵·土·震地",
+          "element": "tu",
+          "element_name": "土",
+          "is_primary": true,
+          "role": "防御",
+          "cost": 2,
+          "coeff": 0.9,
+          "pierce": 0.0,
+          "heal": 0.0,
+          "shield": 0.15,
+          "tags": [
+            "护盾",
+            "固守"
+          ],
+          "generic": true,
+          "source_kind": "primary_fallback",
+          "source_ability": "",
+          "desc": "防御 · 系数 0.90 / 耗能 2",
+          "unlocked": false
         }
       ],
       "bond": {
@@ -9471,7 +9543,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 31,
+        "rank": 34,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -9907,7 +9979,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 41,
+        "rank": 44,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -10067,7 +10139,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 186,
+        "rank": 187,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -10341,7 +10413,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 156,
+        "rank": 160,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -10481,7 +10553,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 52,
+        "rank": 55,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -10777,7 +10849,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 298,
+        "rank": 304,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -10913,7 +10985,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 65,
+        "rank": 69,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -11073,7 +11145,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 44,
+        "rank": 47,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -11233,7 +11305,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 161,
+        "rank": 165,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -11647,7 +11719,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 76,
+        "rank": 82,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -11783,7 +11855,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 122,
+        "rank": 127,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -11919,7 +11991,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 151,
+        "rank": 155,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -12055,7 +12127,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 177,
+        "rank": 179,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -12191,7 +12263,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 42,
+        "rank": 45,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -12351,7 +12423,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 67,
+        "rank": 71,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -12807,7 +12879,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 63,
+        "rank": 67,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -12967,7 +13039,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 392,
+        "rank": 395,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -13103,7 +13175,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 58,
+        "rank": 62,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -13263,7 +13335,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 32,
+        "rank": 35,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -13425,7 +13497,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 114,
+        "rank": 119,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -13565,7 +13637,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 77,
+        "rank": 83,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -13701,7 +13773,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 28,
+        "rank": 31,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -13861,7 +13933,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 152,
+        "rank": 156,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -13999,7 +14071,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 147,
+        "rank": 151,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -14139,7 +14211,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 66,
+        "rank": 70,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -14299,7 +14371,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 45,
+        "rank": 48,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -14461,7 +14533,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 72,
+        "rank": 79,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -14601,7 +14673,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 112,
+        "rank": 117,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -14739,7 +14811,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 80,
+        "rank": 86,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -14879,7 +14951,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 166,
+        "rank": 170,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -15015,7 +15087,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 404,
+        "rank": 407,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -15151,7 +15223,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 61,
+        "rank": 65,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -15287,35 +15359,35 @@
       "element": "none",
       "element_name": "无系",
       "systems": [],
-      "rarity": "R",
-      "tier": "F",
-      "power": 1044,
+      "rarity": "SR",
+      "tier": "D",
+      "power": 3356,
       "portrait": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\西木子\\西木子.png",
-      "deck_size": 5,
+      "deck_size": 6,
       "unlocked_deck_size": 5,
       "skill_slots": {
-        "total": 2,
+        "total": 3,
         "unlocked": 2,
         "rule": "non_mainline_initial_2"
       },
       "primary_skill_ratio": 1.0,
       "primary_ratio_basis": "neutral",
       "skill_element_mix": {
-        "none": 2
+        "none": 3
       },
       "skill_source_split": {
         "character_ability": 2,
         "primary_fallback": 0,
-        "generic_fallback": 0
+        "generic_fallback": 1
       },
       "pacing": {
-        "pace": "P2",
-        "name": "稀有节奏",
-        "rank": 167,
-        "share_target": 0.3,
-        "acquisition": "早期投放",
-        "unlock_requirement": "同系演武场累计取胜 3 次",
-        "milestone": 1
+        "pace": "P3",
+        "name": "史诗节奏",
+        "rank": 21,
+        "share_target": 0.09,
+        "acquisition": "中期投放",
+        "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
+        "milestone": 2
       },
       "bond_is_system": false,
       "general": {
@@ -15328,15 +15400,15 @@
         "systems": [],
         "systems_label": [],
         "stats": {
-          "hp": 1323,
-          "attack": 92,
-          "defense": 71
+          "hp": 4683,
+          "attack": 265,
+          "defense": 219
         },
-        "power": 1044,
-        "tier": "F",
-        "tier_name": "凡品",
-        "realm_name": "筑基",
-        "desc": "主将卡 · 无系 / 筑基"
+        "power": 3356,
+        "tier": "D",
+        "tier_name": "优品",
+        "realm_name": "化神",
+        "desc": "主将卡 · 无系 / 化神"
       },
       "skills": [
         {
@@ -15386,6 +15458,30 @@
           "source_ability": "心灵系·戏梦：操控梦境",
           "desc": "通用 · 系数 1.00 / 耗能 2",
           "unlocked": true
+        },
+        {
+          "slot": 3,
+          "card_id": "S0102-3",
+          "type": "skill",
+          "name": "灵质·凝形",
+          "element": "none",
+          "element_name": "无系",
+          "is_primary": false,
+          "role": "通用",
+          "cost": 2,
+          "coeff": 1.0,
+          "pierce": 0.0,
+          "heal": 0.0,
+          "shield": 0.0,
+          "tags": [
+            "通用",
+            "灵活"
+          ],
+          "generic": true,
+          "source_kind": "generic_fallback",
+          "source_ability": "",
+          "desc": "通用 · 系数 1.00 / 耗能 2",
+          "unlocked": false
         }
       ],
       "bond": {
@@ -15447,7 +15543,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 95,
+        "rank": 100,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -15583,7 +15679,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 40,
+        "rank": 43,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -15743,7 +15839,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 55,
+        "rank": 59,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -15903,7 +15999,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 82,
+        "rank": 88,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -16039,7 +16135,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 69,
+        "rank": 74,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -16199,7 +16295,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 168,
+        "rank": 171,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -16335,7 +16431,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 36,
+        "rank": 39,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -16495,7 +16591,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 56,
+        "rank": 60,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -16655,7 +16751,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 51,
+        "rank": 54,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -16815,7 +16911,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 109,
+        "rank": 114,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -16951,7 +17047,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 116,
+        "rank": 121,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -17495,7 +17591,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 99,
+        "rank": 104,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -17631,7 +17727,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 128,
+        "rank": 133,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -18039,7 +18135,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 187,
+        "rank": 188,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -18311,7 +18407,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 153,
+        "rank": 157,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -18719,7 +18815,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 361,
+        "rank": 365,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -19127,7 +19223,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 188,
+        "rank": 189,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -19240,8 +19336,8 @@
       "element_name": "无系",
       "systems": [],
       "rarity": "R",
-      "tier": "F",
-      "power": 1037,
+      "tier": "E",
+      "power": 2357,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -19263,7 +19359,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 189,
+        "rank": 77,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -19280,15 +19376,15 @@
         "systems": [],
         "systems_label": [],
         "stats": {
-          "hp": 1315,
-          "attack": 91,
-          "defense": 71
+          "hp": 3237,
+          "attack": 192,
+          "defense": 152
         },
-        "power": 1037,
-        "tier": "F",
-        "tier_name": "凡品",
-        "realm_name": "筑基",
-        "desc": "主将卡 · 无系 / 筑基"
+        "power": 2357,
+        "tier": "E",
+        "tier_name": "良品",
+        "realm_name": "元婴",
+        "desc": "主将卡 · 无系 / 元婴"
       },
       "skills": [
         {
@@ -19535,7 +19631,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 108,
+        "rank": 113,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -19671,7 +19767,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 129,
+        "rank": 134,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -19809,7 +19905,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 148,
+        "rank": 152,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -20117,7 +20213,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 29,
+        "rank": 32,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -20283,7 +20379,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 81,
+        "rank": 87,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -20423,7 +20519,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 362,
+        "rank": 366,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -20559,7 +20655,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 26,
+        "rank": 29,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -20721,7 +20817,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 24,
+        "rank": 27,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -21057,7 +21153,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 71,
+        "rank": 78,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -21201,7 +21297,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 85,
+        "rank": 90,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -21341,7 +21437,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 92,
+        "rank": 97,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -21613,7 +21709,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 393,
+        "rank": 396,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -21749,7 +21845,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 178,
+        "rank": 180,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -21885,7 +21981,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 384,
+        "rank": 387,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -22021,7 +22117,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 182,
+        "rank": 184,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -22157,7 +22253,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 413,
+        "rank": 416,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -22429,7 +22525,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 169,
+        "rank": 172,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -22565,7 +22661,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 394,
+        "rank": 397,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -22704,7 +22800,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 145,
+        "rank": 150,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -22848,7 +22944,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 104,
+        "rank": 109,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -22988,7 +23084,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 347,
+        "rank": 351,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -23124,7 +23220,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 311,
+        "rank": 319,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -23532,7 +23628,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 154,
+        "rank": 158,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -23644,35 +23740,35 @@
       "element": "none",
       "element_name": "无系",
       "systems": [],
-      "rarity": "R",
-      "tier": "F",
-      "power": 1038,
+      "rarity": "SR",
+      "tier": "D",
+      "power": 3336,
       "portrait": null,
-      "deck_size": 5,
+      "deck_size": 6,
       "unlocked_deck_size": 5,
       "skill_slots": {
-        "total": 2,
+        "total": 3,
         "unlocked": 2,
         "rule": "non_mainline_initial_2"
       },
       "primary_skill_ratio": 1.0,
       "primary_ratio_basis": "neutral",
       "skill_element_mix": {
-        "none": 2
+        "none": 3
       },
       "skill_source_split": {
         "character_ability": 0,
         "primary_fallback": 0,
-        "generic_fallback": 2
+        "generic_fallback": 3
       },
       "pacing": {
-        "pace": "P2",
-        "name": "稀有节奏",
-        "rank": 183,
-        "share_target": 0.3,
-        "acquisition": "早期投放",
-        "unlock_requirement": "同系演武场累计取胜 3 次",
-        "milestone": 1
+        "pace": "P3",
+        "name": "史诗节奏",
+        "rank": 22,
+        "share_target": 0.09,
+        "acquisition": "中期投放",
+        "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
+        "milestone": 2
       },
       "bond_is_system": false,
       "general": {
@@ -23685,15 +23781,15 @@
         "systems": [],
         "systems_label": [],
         "stats": {
-          "hp": 1316,
-          "attack": 91,
-          "defense": 71
+          "hp": 4658,
+          "attack": 263,
+          "defense": 218
         },
-        "power": 1038,
-        "tier": "F",
-        "tier_name": "凡品",
-        "realm_name": "筑基",
-        "desc": "主将卡 · 无系 / 筑基"
+        "power": 3336,
+        "tier": "D",
+        "tier_name": "优品",
+        "realm_name": "化神",
+        "desc": "主将卡 · 无系 / 化神"
       },
       "skills": [
         {
@@ -23743,6 +23839,30 @@
           "source_ability": "",
           "desc": "通用 · 系数 1.00 / 耗能 2",
           "unlocked": true
+        },
+        {
+          "slot": 3,
+          "card_id": "S0162-3",
+          "type": "skill",
+          "name": "灵质·护体",
+          "element": "none",
+          "element_name": "无系",
+          "is_primary": false,
+          "role": "通用",
+          "cost": 2,
+          "coeff": 1.0,
+          "pierce": 0.0,
+          "heal": 0.0,
+          "shield": 0.0,
+          "tags": [
+            "通用",
+            "灵活"
+          ],
+          "generic": true,
+          "source_kind": "generic_fallback",
+          "source_ability": "",
+          "desc": "通用 · 系数 1.00 / 耗能 2",
+          "unlocked": false
         }
       ],
       "bond": {
@@ -23804,7 +23924,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 38,
+        "rank": 41,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -23964,7 +24084,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 59,
+        "rank": 63,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -24124,7 +24244,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 96,
+        "rank": 101,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -24237,8 +24357,8 @@
       "element_name": "无系",
       "systems": [],
       "rarity": "R",
-      "tier": "F",
-      "power": 1044,
+      "tier": "E",
+      "power": 2372,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -24260,7 +24380,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 170,
+        "rank": 76,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -24277,15 +24397,15 @@
         "systems": [],
         "systems_label": [],
         "stats": {
-          "hp": 1324,
-          "attack": 92,
-          "defense": 71
+          "hp": 3259,
+          "attack": 193,
+          "defense": 153
         },
-        "power": 1044,
-        "tier": "F",
-        "tier_name": "凡品",
-        "realm_name": "筑基",
-        "desc": "主将卡 · 无系 / 筑基"
+        "power": 2372,
+        "tier": "E",
+        "tier_name": "良品",
+        "realm_name": "元婴",
+        "desc": "主将卡 · 无系 / 元婴"
       },
       "skills": [
         {
@@ -24396,7 +24516,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 159,
+        "rank": 163,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -24668,7 +24788,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 162,
+        "rank": 166,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -24940,7 +25060,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 171,
+        "rank": 173,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -25076,7 +25196,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 105,
+        "rank": 110,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -25214,7 +25334,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 86,
+        "rank": 91,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -25356,7 +25476,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 90,
+        "rank": 95,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -25496,7 +25616,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 89,
+        "rank": 94,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -25632,7 +25752,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 70,
+        "rank": 75,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -25792,7 +25912,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 68,
+        "rank": 73,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -25952,7 +26072,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 62,
+        "rank": 66,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -26112,7 +26232,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 34,
+        "rank": 37,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -26272,7 +26392,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 50,
+        "rank": 53,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -26432,7 +26552,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 43,
+        "rank": 46,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -26592,7 +26712,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 39,
+        "rank": 42,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -26752,7 +26872,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 33,
+        "rank": 36,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -27048,7 +27168,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 299,
+        "rank": 305,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -27184,7 +27304,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 405,
+        "rank": 408,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -27320,7 +27440,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 426,
+        "rank": 427,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -28000,7 +28120,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 335,
+        "rank": 339,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -28136,7 +28256,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 300,
+        "rank": 306,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -28272,7 +28392,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 301,
+        "rank": 307,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -28408,7 +28528,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 302,
+        "rank": 308,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -28544,7 +28664,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 303,
+        "rank": 309,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -28816,7 +28936,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 312,
+        "rank": 320,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -28952,7 +29072,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 97,
+        "rank": 102,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -29224,7 +29344,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 421,
+        "rank": 424,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -29496,7 +29616,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 172,
+        "rank": 174,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -29768,7 +29888,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 173,
+        "rank": 175,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -29904,7 +30024,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 179,
+        "rank": 181,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -30040,7 +30160,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 157,
+        "rank": 161,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -30176,7 +30296,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 137,
+        "rank": 142,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -30312,7 +30432,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 140,
+        "rank": 145,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -30448,7 +30568,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 174,
+        "rank": 176,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -30720,7 +30840,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 113,
+        "rank": 118,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -30856,7 +30976,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 163,
+        "rank": 167,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -31264,7 +31384,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 395,
+        "rank": 398,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -31720,7 +31840,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 354,
+        "rank": 358,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -31856,7 +31976,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 158,
+        "rank": 162,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -31992,7 +32112,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 100,
+        "rank": 105,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -32672,7 +32792,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 374,
+        "rank": 377,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -32808,7 +32928,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 375,
+        "rank": 378,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -32944,7 +33064,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 336,
+        "rank": 340,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -33216,7 +33336,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 304,
+        "rank": 310,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -33352,7 +33472,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 305,
+        "rank": 311,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -33624,7 +33744,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 184,
+        "rank": 185,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -33760,7 +33880,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 313,
+        "rank": 321,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -33896,7 +34016,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 337,
+        "rank": 341,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -34032,7 +34152,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 385,
+        "rank": 388,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -34168,7 +34288,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 323,
+        "rank": 329,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -34304,7 +34424,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 376,
+        "rank": 379,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -34576,7 +34696,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 396,
+        "rank": 399,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -34848,7 +34968,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 377,
+        "rank": 380,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -35120,7 +35240,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 414,
+        "rank": 417,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -35256,7 +35376,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 306,
+        "rank": 312,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -35664,7 +35784,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 314,
+        "rank": 322,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -35936,7 +36056,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 164,
+        "rank": 168,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -36480,7 +36600,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 378,
+        "rank": 381,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -36800,7 +36920,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 139,
+        "rank": 144,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -37072,7 +37192,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 307,
+        "rank": 313,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -37480,7 +37600,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 355,
+        "rank": 359,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -37616,7 +37736,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 348,
+        "rank": 352,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -37752,7 +37872,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 397,
+        "rank": 400,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -37888,7 +38008,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 398,
+        "rank": 401,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -38024,7 +38144,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 356,
+        "rank": 360,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -38160,7 +38280,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 379,
+        "rank": 382,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -38296,7 +38416,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 357,
+        "rank": 361,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -38432,7 +38552,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 415,
+        "rank": 418,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -38840,7 +38960,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 406,
+        "rank": 409,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -39248,7 +39368,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 143,
+        "rank": 148,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -39384,7 +39504,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 386,
+        "rank": 389,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -39520,7 +39640,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 324,
+        "rank": 330,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -39656,7 +39776,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 134,
+        "rank": 139,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -39928,7 +40048,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 325,
+        "rank": 331,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -40064,7 +40184,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 364,
+        "rank": 368,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -40200,7 +40320,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 427,
+        "rank": 428,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -40336,7 +40456,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 64,
+        "rank": 68,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -40632,7 +40752,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 326,
+        "rank": 332,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -40904,7 +41024,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 380,
+        "rank": 383,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -41040,7 +41160,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 416,
+        "rank": 419,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -41448,7 +41568,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 54,
+        "rank": 58,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -41608,7 +41728,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 175,
+        "rank": 177,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -42176,7 +42296,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 365,
+        "rank": 369,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -42312,7 +42432,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 399,
+        "rank": 402,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -42448,7 +42568,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 131,
+        "rank": 136,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -42584,7 +42704,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 142,
+        "rank": 147,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -42720,7 +42840,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 138,
+        "rank": 143,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -43152,7 +43272,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 117,
+        "rank": 122,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -43424,7 +43544,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 349,
+        "rank": 353,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -43560,7 +43680,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 130,
+        "rank": 135,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -43696,7 +43816,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 327,
+        "rank": 333,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -44104,7 +44224,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 180,
+        "rank": 182,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -44240,7 +44360,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 155,
+        "rank": 159,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -44376,7 +44496,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 98,
+        "rank": 103,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -44648,7 +44768,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 328,
+        "rank": 334,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -44784,7 +44904,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 350,
+        "rank": 354,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -44920,7 +45040,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 338,
+        "rank": 342,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -45056,7 +45176,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 381,
+        "rank": 384,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -45192,7 +45312,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 339,
+        "rank": 343,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -45328,7 +45448,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 358,
+        "rank": 362,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -45464,7 +45584,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 315,
+        "rank": 323,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -45600,7 +45720,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 351,
+        "rank": 355,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -45736,7 +45856,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 340,
+        "rank": 344,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -45872,7 +45992,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 316,
+        "rank": 324,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -46416,7 +46536,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 382,
+        "rank": 385,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -46688,7 +46808,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 370,
+        "rank": 373,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -47232,7 +47352,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 407,
+        "rank": 410,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -47368,7 +47488,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 341,
+        "rank": 345,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -47646,7 +47766,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 342,
+        "rank": 346,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -47782,7 +47902,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 107,
+        "rank": 112,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -47918,7 +48038,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 118,
+        "rank": 123,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -48214,7 +48334,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 383,
+        "rank": 386,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -48894,7 +49014,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 371,
+        "rank": 374,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -49438,7 +49558,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 119,
+        "rank": 124,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -49574,7 +49694,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 120,
+        "rank": 125,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -49710,7 +49830,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 121,
+        "rank": 126,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -49846,7 +49966,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 160,
+        "rank": 164,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -49982,7 +50102,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 181,
+        "rank": 183,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -50254,7 +50374,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 428,
+        "rank": 429,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -50526,7 +50646,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 88,
+        "rank": 93,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -50662,7 +50782,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 408,
+        "rank": 411,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -50798,7 +50918,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 135,
+        "rank": 140,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -51342,7 +51462,7 @@
       "pacing": {
         "pace": "P3",
         "name": "史诗节奏",
-        "rank": 35,
+        "rank": 38,
         "share_target": 0.09,
         "acquisition": "中期投放",
         "unlock_requirement": "同系挑战赛取胜 1 次 + 图鉴收录 60 名",
@@ -51502,7 +51622,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 123,
+        "rank": 128,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -51638,7 +51758,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 417,
+        "rank": 420,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -51910,7 +52030,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 343,
+        "rank": 347,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -52862,7 +52982,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 53,
+        "rank": 57,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -53022,7 +53142,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 110,
+        "rank": 115,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -53158,7 +53278,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 133,
+        "rank": 138,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -53294,7 +53414,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 132,
+        "rank": 137,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -53430,7 +53550,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 111,
+        "rank": 116,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -53566,7 +53686,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 317,
+        "rank": 325,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -53838,7 +53958,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 387,
+        "rank": 390,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -54110,7 +54230,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 359,
+        "rank": 363,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -54246,7 +54366,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 409,
+        "rank": 412,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -54518,7 +54638,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 352,
+        "rank": 356,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -54654,7 +54774,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 410,
+        "rank": 413,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -55062,7 +55182,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 106,
+        "rank": 111,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -55334,7 +55454,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 360,
+        "rank": 364,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -55470,7 +55590,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 400,
+        "rank": 403,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -55742,7 +55862,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 411,
+        "rank": 414,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -55878,7 +55998,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 308,
+        "rank": 314,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -56014,7 +56134,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 125,
+        "rank": 130,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -56150,7 +56270,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 141,
+        "rank": 146,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -56286,7 +56406,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 91,
+        "rank": 96,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -56694,7 +56814,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 185,
+        "rank": 186,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -56969,7 +57089,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 270,
+        "rank": 281,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -57383,7 +57503,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 329,
+        "rank": 335,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -57519,7 +57639,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 101,
+        "rank": 106,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -57655,7 +57775,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 102,
+        "rank": 107,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -57791,7 +57911,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 418,
+        "rank": 421,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -57927,7 +58047,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 115,
+        "rank": 120,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -58063,7 +58183,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 412,
+        "rank": 415,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -58199,7 +58319,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 344,
+        "rank": 348,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -58471,7 +58591,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 401,
+        "rank": 404,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -58607,7 +58727,7 @@
       "pacing": {
         "pace": "P2",
         "name": "稀有节奏",
-        "rank": 93,
+        "rank": 98,
         "share_target": 0.3,
         "acquisition": "早期投放",
         "unlock_requirement": "同系演武场累计取胜 3 次",
@@ -58745,7 +58865,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 293,
+        "rank": 298,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -58887,7 +59007,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 429,
+        "rank": 430,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -59004,11 +59124,12 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "shui",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 703,
+      "power": 732,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -59030,7 +59151,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 263,
+        "rank": 256,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -59046,18 +59167,20 @@
         "element_name": "金系",
         "systems": [
           "jin",
+          "shui",
           "kongjian"
         ],
         "systems_label": [
           "金",
+          "水",
           "空间"
         ],
         "stats": {
-          "hp": 825,
-          "attack": 69,
-          "defense": 46
+          "hp": 857,
+          "attack": 72,
+          "defense": 48
         },
-        "power": 703,
+        "power": 732,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -59175,7 +59298,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 289,
+        "rank": 295,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -59319,7 +59442,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 430,
+        "rank": 431,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -59459,7 +59582,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 345,
+        "rank": 349,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -59598,7 +59721,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 257,
+        "rank": 267,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -59743,7 +59866,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 283,
+        "rank": 291,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -59887,7 +60010,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 431,
+        "rank": 432,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -60004,11 +60127,12 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "mu",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 702,
+      "power": 731,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -60030,7 +60154,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 264,
+        "rank": 258,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -60046,18 +60170,20 @@
         "element_name": "金系",
         "systems": [
           "jin",
+          "mu",
           "kongjian"
         ],
         "systems_label": [
           "金",
+          "木",
           "空间"
         ],
         "stats": {
-          "hp": 824,
-          "attack": 69,
-          "defense": 46
+          "hp": 855,
+          "attack": 72,
+          "defense": 48
         },
-        "power": 702,
+        "power": 731,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -60174,7 +60300,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 419,
+        "rank": 422,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -60316,7 +60442,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 296,
+        "rank": 302,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -60432,11 +60558,12 @@
       "element": "mu",
       "element_name": "木系",
       "systems": [
-        "mu"
+        "mu",
+        "huo"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 648,
+      "power": 674,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -60458,7 +60585,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 432,
+        "rank": 315,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -60473,17 +60600,19 @@
         "element": "mu",
         "element_name": "木系",
         "systems": [
-          "mu"
+          "mu",
+          "huo"
         ],
         "systems_label": [
-          "木"
+          "木",
+          "火"
         ],
         "stats": {
-          "hp": 827,
-          "attack": 56,
-          "defense": 45
+          "hp": 860,
+          "attack": 58,
+          "defense": 47
         },
-        "power": 648,
+        "power": 674,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -60575,11 +60704,12 @@
       "element_name": "木系",
       "systems": [
         "mu",
+        "shui",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 700,
+      "power": 726,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -60601,7 +60731,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 266,
+        "rank": 260,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -60617,18 +60747,20 @@
         "element_name": "木系",
         "systems": [
           "mu",
+          "shui",
           "kongjian"
         ],
         "systems_label": [
           "木",
+          "水",
           "空间"
         ],
         "stats": {
-          "hp": 891,
-          "attack": 61,
-          "defense": 48
+          "hp": 926,
+          "attack": 63,
+          "defense": 50
         },
-        "power": 700,
+        "power": 726,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -60745,7 +60877,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 346,
+        "rank": 350,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -60887,7 +61019,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 318,
+        "rank": 326,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -61003,11 +61135,12 @@
       "element": "mu",
       "element_name": "木系",
       "systems": [
-        "mu"
+        "mu",
+        "shui"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 681,
+      "power": 707,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -61029,7 +61162,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 290,
+        "rank": 270,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -61044,17 +61177,19 @@
         "element": "mu",
         "element_name": "木系",
         "systems": [
-          "mu"
+          "mu",
+          "shui"
         ],
         "systems_label": [
-          "木"
+          "木",
+          "水"
         ],
         "stats": {
-          "hp": 868,
-          "attack": 59,
-          "defense": 47
+          "hp": 902,
+          "attack": 61,
+          "defense": 49
         },
-        "power": 681,
+        "power": 707,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -61146,11 +61281,12 @@
       "element_name": "木系",
       "systems": [
         "mu",
+        "shui",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 693,
+      "power": 719,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -61172,7 +61308,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 271,
+        "rank": 263,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -61188,18 +61324,20 @@
         "element_name": "木系",
         "systems": [
           "mu",
+          "shui",
           "kongjian"
         ],
         "systems_label": [
           "木",
+          "水",
           "空间"
         ],
         "stats": {
-          "hp": 884,
-          "attack": 60,
-          "defense": 48
+          "hp": 918,
+          "attack": 62,
+          "defense": 50
         },
-        "power": 693,
+        "power": 719,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -61314,7 +61452,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 388,
+        "rank": 391,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -61452,7 +61590,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 321,
+        "rank": 328,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -61595,7 +61733,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 284,
+        "rank": 292,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -61713,11 +61851,12 @@
       "element": "jin",
       "element_name": "金系",
       "systems": [
-        "jin"
+        "jin",
+        "shui"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 672,
+      "power": 701,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -61739,7 +61878,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 320,
+        "rank": 275,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -61754,17 +61893,19 @@
         "element": "jin",
         "element_name": "金系",
         "systems": [
-          "jin"
+          "jin",
+          "shui"
         ],
         "systems_label": [
-          "金"
+          "金",
+          "水"
         ],
         "stats": {
-          "hp": 789,
-          "attack": 66,
-          "defense": 44
+          "hp": 820,
+          "attack": 69,
+          "defense": 46
         },
-        "power": 672,
+        "power": 701,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -61855,11 +61996,12 @@
       "element": "jin",
       "element_name": "金系",
       "systems": [
-        "jin"
+        "jin",
+        "tu"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 682,
+      "power": 711,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -61881,7 +62023,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 285,
+        "rank": 268,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -61896,17 +62038,19 @@
         "element": "jin",
         "element_name": "金系",
         "systems": [
-          "jin"
+          "jin",
+          "tu"
         ],
         "systems_label": [
-          "金"
+          "金",
+          "土"
         ],
         "stats": {
-          "hp": 797,
-          "attack": 67,
-          "defense": 45
+          "hp": 829,
+          "attack": 70,
+          "defense": 47
         },
-        "power": 682,
+        "power": 711,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -62023,7 +62167,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 330,
+        "rank": 336,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -62166,7 +62310,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 262,
+        "rank": 274,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -62452,7 +62596,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 366,
+        "rank": 370,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -62569,11 +62713,12 @@
       "element_name": "木系",
       "systems": [
         "mu",
+        "shui",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 701,
+      "power": 727,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -62595,7 +62740,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 265,
+        "rank": 259,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -62611,18 +62756,20 @@
         "element_name": "木系",
         "systems": [
           "mu",
+          "shui",
           "kongjian"
         ],
         "systems_label": [
           "木",
+          "水",
           "空间"
         ],
         "stats": {
-          "hp": 895,
-          "attack": 61,
-          "defense": 48
+          "hp": 929,
+          "attack": 63,
+          "defense": 50
         },
-        "power": 701,
+        "power": 727,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -62713,11 +62860,12 @@
       "element": "jin",
       "element_name": "金系",
       "systems": [
-        "jin"
+        "jin",
+        "shui"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 670,
+      "power": 700,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -62739,7 +62887,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 322,
+        "rank": 276,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -62754,17 +62902,19 @@
         "element": "jin",
         "element_name": "金系",
         "systems": [
-          "jin"
+          "jin",
+          "shui"
         ],
         "systems_label": [
-          "金"
+          "金",
+          "水"
         ],
         "stats": {
-          "hp": 784,
-          "attack": 66,
-          "defense": 44
+          "hp": 816,
+          "attack": 69,
+          "defense": 46
         },
-        "power": 670,
+        "power": 700,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -62881,7 +63031,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 367,
+        "rank": 371,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -63024,7 +63174,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 277,
+        "rank": 285,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -63168,7 +63318,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 422,
+        "rank": 425,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -63311,7 +63461,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 291,
+        "rank": 296,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -63455,7 +63605,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 294,
+        "rank": 299,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -63597,7 +63747,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 368,
+        "rank": 372,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -63740,7 +63890,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 272,
+        "rank": 282,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -63884,7 +64034,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 420,
+        "rank": 423,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -64026,7 +64176,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 372,
+        "rank": 375,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -64142,11 +64292,12 @@
       "element": "huo",
       "element_name": "火系",
       "systems": [
-        "huo"
+        "huo",
+        "tu"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 669,
+      "power": 694,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -64168,7 +64319,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 331,
+        "rank": 280,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -64183,17 +64334,19 @@
         "element": "huo",
         "element_name": "火系",
         "systems": [
-          "huo"
+          "huo",
+          "tu"
         ],
         "systems_label": [
-          "火"
+          "火",
+          "土"
         ],
         "stats": {
-          "hp": 763,
-          "attack": 69,
-          "defense": 42
+          "hp": 793,
+          "attack": 71,
+          "defense": 44
         },
-        "power": 669,
+        "power": 694,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -64311,7 +64464,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 286,
+        "rank": 293,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -64455,7 +64608,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 297,
+        "rank": 303,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -64597,7 +64750,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 279,
+        "rank": 288,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -64740,7 +64893,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 273,
+        "rank": 283,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -64885,7 +65038,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 255,
+        "rank": 265,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -65004,11 +65157,12 @@
       "element_name": "木系",
       "systems": [
         "mu",
+        "shui",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 682,
+      "power": 707,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -65030,7 +65184,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 287,
+        "rank": 271,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -65046,18 +65200,20 @@
         "element_name": "木系",
         "systems": [
           "mu",
+          "shui",
           "kongjian"
         ],
         "systems_label": [
           "木",
+          "水",
           "空间"
         ],
         "stats": {
-          "hp": 870,
-          "attack": 59,
-          "defense": 47
+          "hp": 904,
+          "attack": 61,
+          "defense": 49
         },
-        "power": 682,
+        "power": 707,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -65149,11 +65305,12 @@
       "element_name": "水系",
       "systems": [
         "shui",
+        "huo",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 693,
+      "power": 722,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -65175,7 +65332,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 274,
+        "rank": 262,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -65191,18 +65348,20 @@
         "element_name": "水系",
         "systems": [
           "shui",
+          "huo",
           "kongjian"
         ],
         "systems_label": [
           "水",
+          "火",
           "空间"
         ],
         "stats": {
-          "hp": 838,
-          "attack": 64,
-          "defense": 48
+          "hp": 870,
+          "attack": 67,
+          "defense": 50
         },
-        "power": 693,
+        "power": 722,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -65320,7 +65479,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 319,
+        "rank": 327,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -65439,11 +65598,12 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "shui",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 714,
+      "power": 743,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -65465,7 +65625,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 256,
+        "rank": 255,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -65481,18 +65641,20 @@
         "element_name": "金系",
         "systems": [
           "jin",
+          "shui",
           "kongjian"
         ],
         "systems_label": [
           "金",
+          "水",
           "空间"
         ],
         "stats": {
-          "hp": 836,
-          "attack": 70,
-          "defense": 47
+          "hp": 868,
+          "attack": 73,
+          "defense": 49
         },
-        "power": 714,
+        "power": 743,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -65609,7 +65771,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 292,
+        "rank": 297,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -65751,7 +65913,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 402,
+        "rank": 405,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -65894,7 +66056,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 281,
+        "rank": 289,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -66039,7 +66201,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 260,
+        "rank": 272,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -66183,7 +66345,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 332,
+        "rank": 337,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -66467,7 +66629,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 373,
+        "rank": 376,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -66584,11 +66746,12 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "shui",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 693,
+      "power": 719,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -66610,7 +66773,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 275,
+        "rank": 264,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -66626,18 +66789,20 @@
         "element_name": "金系",
         "systems": [
           "jin",
+          "shui",
           "kongjian"
         ],
         "systems_label": [
           "金",
+          "水",
           "空间"
         ],
         "stats": {
-          "hp": 809,
-          "attack": 68,
-          "defense": 46
+          "hp": 841,
+          "attack": 71,
+          "defense": 47
         },
-        "power": 693,
+        "power": 719,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -66754,7 +66919,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 282,
+        "rank": 290,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -66896,7 +67061,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 295,
+        "rank": 300,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -67039,7 +67204,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 276,
+        "rank": 284,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -67157,11 +67322,12 @@
       "element": "shui",
       "element_name": "水系",
       "systems": [
-        "shui"
+        "shui",
+        "huo"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 662,
+      "power": 691,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -67183,7 +67349,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 369,
+        "rank": 286,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -67198,17 +67364,19 @@
         "element": "shui",
         "element_name": "水系",
         "systems": [
-          "shui"
+          "shui",
+          "huo"
         ],
         "systems_label": [
-          "水"
+          "水",
+          "火"
         ],
         "stats": {
-          "hp": 799,
-          "attack": 61,
-          "defense": 46
+          "hp": 831,
+          "attack": 64,
+          "defense": 48
         },
-        "power": 662,
+        "power": 691,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -67299,11 +67467,12 @@
       "element": "jin",
       "element_name": "金系",
       "systems": [
-        "jin"
+        "jin",
+        "huo"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 689,
+      "power": 718,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -67325,7 +67494,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 280,
+        "rank": 266,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -67340,17 +67509,19 @@
         "element": "jin",
         "element_name": "金系",
         "systems": [
-          "jin"
+          "jin",
+          "huo"
         ],
         "systems_label": [
-          "金"
+          "金",
+          "火"
         ],
         "stats": {
-          "hp": 805,
-          "attack": 68,
-          "defense": 45
+          "hp": 838,
+          "attack": 71,
+          "defense": 47
         },
-        "power": 689,
+        "power": 718,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -67468,7 +67639,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 261,
+        "rank": 273,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -67612,7 +67783,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 333,
+        "rank": 338,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -67755,7 +67926,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 309,
+        "rank": 316,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -67899,7 +68070,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 389,
+        "rank": 392,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -68015,11 +68186,12 @@
       "element": "mu",
       "element_name": "木系",
       "systems": [
-        "mu"
+        "mu",
+        "shui"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 649,
+      "power": 674,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -68041,7 +68213,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 423,
+        "rank": 317,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -68056,17 +68228,19 @@
         "element": "mu",
         "element_name": "木系",
         "systems": [
-          "mu"
+          "mu",
+          "shui"
         ],
         "systems_label": [
-          "木"
+          "木",
+          "水"
         ],
         "stats": {
-          "hp": 828,
-          "attack": 56,
-          "defense": 45
+          "hp": 861,
+          "attack": 58,
+          "defense": 47
         },
-        "power": 649,
+        "power": 674,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -68183,7 +68357,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 424,
+        "rank": 426,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -68461,7 +68635,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 310,
+        "rank": 318,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -68604,7 +68778,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 278,
+        "rank": 287,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -68748,7 +68922,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 288,
+        "rank": 294,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -68864,11 +69038,12 @@
       "element": "mu",
       "element_name": "木系",
       "systems": [
-        "mu"
+        "mu",
+        "shui"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 669,
+      "power": 695,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -68890,7 +69065,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 334,
+        "rank": 279,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -68905,17 +69080,19 @@
         "element": "mu",
         "element_name": "木系",
         "systems": [
-          "mu"
+          "mu",
+          "shui"
         ],
         "systems_label": [
-          "木"
+          "木",
+          "水"
         ],
         "stats": {
-          "hp": 853,
-          "attack": 58,
-          "defense": 46
+          "hp": 888,
+          "attack": 60,
+          "defense": 48
         },
-        "power": 669,
+        "power": 695,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -69007,11 +69184,12 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "shui",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 707,
+      "power": 732,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -69033,7 +69211,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 259,
+        "rank": 257,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -69049,18 +69227,20 @@
         "element_name": "金系",
         "systems": [
           "jin",
+          "shui",
           "kongjian"
         ],
         "systems_label": [
           "金",
+          "水",
           "空间"
         ],
         "stats": {
-          "hp": 826,
-          "attack": 70,
-          "defense": 46
+          "hp": 858,
+          "attack": 72,
+          "defense": 48
         },
-        "power": 707,
+        "power": 732,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -69151,11 +69331,12 @@
       "element": "mu",
       "element_name": "木系",
       "systems": [
-        "mu"
+        "mu",
+        "shui"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 649,
+      "power": 679,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -69177,7 +69358,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 425,
+        "rank": 301,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -69192,17 +69373,19 @@
         "element": "mu",
         "element_name": "木系",
         "systems": [
-          "mu"
+          "mu",
+          "shui"
         ],
         "systems_label": [
-          "木"
+          "木",
+          "水"
         ],
         "stats": {
-          "hp": 829,
-          "attack": 56,
-          "defense": 45
+          "hp": 862,
+          "attack": 59,
+          "defense": 47
         },
-        "power": 649,
+        "power": 679,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",
@@ -69294,11 +69477,12 @@
       "element_name": "金系",
       "systems": [
         "jin",
+        "shui",
         "kongjian"
       ],
       "rarity": "R",
       "tier": "F",
-      "power": 699,
+      "power": 724,
       "portrait": null,
       "deck_size": 5,
       "unlocked_deck_size": 5,
@@ -69320,7 +69504,7 @@
       "pacing": {
         "pace": "P1",
         "name": "常见节奏",
-        "rank": 268,
+        "rank": 261,
         "share_target": 0.6,
         "acquisition": "初始投放",
         "unlock_requirement": "无前置（初始卡池直出）",
@@ -69336,18 +69520,20 @@
         "element_name": "金系",
         "systems": [
           "jin",
+          "shui",
           "kongjian"
         ],
         "systems_label": [
           "金",
+          "水",
           "空间"
         ],
         "stats": {
-          "hp": 815,
-          "attack": 69,
-          "defense": 46
+          "hp": 846,
+          "attack": 71,
+          "defense": 48
         },
-        "power": 699,
+        "power": 724,
         "tier": "F",
         "tier_name": "凡品",
         "realm_name": "练气",

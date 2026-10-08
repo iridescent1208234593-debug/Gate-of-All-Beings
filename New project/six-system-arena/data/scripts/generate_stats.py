@@ -70,6 +70,42 @@ def match_any(text, patterns):
     return any(p in text for p in patterns)
 
 
+def split_segments(text, separators):
+    """按并列分隔符把文本切成若干段（用于 FIX-1 的并列写法识别）。"""
+    parts = [text or '']
+    for d in separators:
+        nxt = []
+        for p in parts:
+            nxt.extend(p.split(d))
+        parts = nxt
+    return parts
+
+
+def segment_systems(text, model):
+    """FIX-1（模型 v1.1.0）：并列写法切段后精确认系。
+
+    例：『御灵系·金、土』→ 段『御灵系·金』(jin) + 段『土』(tu)；
+    要求「剥离系名前缀后整段等于系名」，避免把描述性文本误判为系别。
+    """
+    cfg = model['element'].get('segmentMatch')
+    if not cfg or not text:
+        return []
+    name_map = cfg.get('nameMap', {})
+    prefixes = cfg.get('stripPrefixes', [])
+    found = []
+    for seg in split_segments(text, cfg.get('separators', ['、', ',', '，', ';', '；', '/'])):
+        s = (seg or '').strip()
+        for p in prefixes:
+            if s.startswith(p):
+                s = s[len(p):].strip()
+                break
+        s = s.strip(' \t·-—－（）()【】[]{}')
+        key = name_map.get(s)
+        if key and key not in found:
+            found.append(key)
+    return found
+
+
 # --------------------------------------------------------------------------
 # 六系归属推导
 # --------------------------------------------------------------------------
@@ -92,6 +128,19 @@ def detect_systems(summary, ability_texts, model):
                     hits.append(key)
                     src.append('character_abilities: %s' % t[:40])
                 break
+
+    # 1.5) 并列写法切段精确认系（FIX-1 · 模型 v1.1.0）
+    #      修复『御灵系·金、土』这类第二个系名不带前缀的漏匹配
+    if model['element'].get('segmentMatch'):
+        seg_keys = []
+        for t in list(ability_texts) + [summary or '']:
+            for k in segment_systems(t, model):
+                if k not in seg_keys:
+                    seg_keys.append(k)
+        for key, _pats in ABILITY_HINTS:
+            if key in seg_keys and key not in hits:
+                hits.append(key)
+                src.append('segment_match: %s' % SYSTEM_CN.get(key, key))
 
     # 2) abilities_summary 关键词（按模型配置顺序）
     for kw in model['element']['keywords']:
@@ -129,7 +178,7 @@ def detect_systems(summary, ability_texts, model):
 # --------------------------------------------------------------------------
 # 境界推导
 # --------------------------------------------------------------------------
-def detect_realm(row, model):
+def detect_realm_base(row, model):
     realm_levels = {r['id']: r for r in model['realm']['levels']}
     for rule in model['realm']['rules']:
         m = rule['match']
@@ -153,6 +202,27 @@ def detect_realm(row, model):
         if 'category_in' in m and (row.get('category') or '') in m['category_in']:
             return realm_levels[rule['realm_id']], rule['reason']
     return realm_levels[1], '兜底'
+
+
+def match_identity_realm(row, model):
+    """FIX-2（模型 v1.1.0）：按 affiliation 中的职位线索给出候选境界规则。"""
+    aff = row.get('affiliation') or ''
+    for rule in model['realm'].get('identityRules', []):
+        inc = rule.get('affiliation_contains', [])
+        exc = rule.get('affiliation_excludes', [])
+        if inc and any(x in aff for x in inc) and not any(x in aff for x in exc):
+            return rule
+    return None
+
+
+def detect_realm(row, model):
+    """基础规则 + 地位维度补正，取较高者（只升不降）。"""
+    base, base_reason = detect_realm_base(row, model)
+    rule = match_identity_realm(row, model)
+    if rule and rule['realm_id'] > base['id']:
+        lv = {r['id']: r for r in model['realm']['levels']}[rule['realm_id']]
+        return lv, '身份补正（FIX-2）：%s' % rule['reason']
+    return base, base_reason
 
 
 # --------------------------------------------------------------------------

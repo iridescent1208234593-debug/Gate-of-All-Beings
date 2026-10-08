@@ -10,7 +10,7 @@ verify_integration.py - 集成包交付自检（R3）
   4. 内容红线扫描：AI 目录 / 同人 / 外链（runtime JS + data JSON + src）
   5. 组件契约：六键图标、window.LXHUI.ICONS、settlement 不惩罚、成就错峰
   6. 数据一致性：488 角色 / 488 卡组 / 15 成就 / 六系定义
-  7. 成就 ach_system_001 的土系缺口与 element_gate 拍板结论是否落地
+  7. 成就 ach_system_001 的土系 C 档复核（R7 缺口已解除）与 element_gate 结论是否落地
   8. 表情包台账（R5）：形态 / 红线 / 官方渠道 / 池内素材在位 / 审查留痕 / 未决挂账
 
 只读参考仓库与数据库，不写除 integration/verify/verify_report.json 之外的文件
@@ -295,8 +295,8 @@ def check_data(rep: Report) -> dict:
     gate = achs.get("element_gate", {})
     rep.add(
         "data.ach_system_001-gap",
-        tu_c_plus == 0,
-        "土系主属性无 C 档以上（缺口确认）",
+        tu_c_plus >= 1,
+        "土系主属性 C 档以上 %d 名（R7 缺口已解除，ach_system_001 静态可达成）" % tu_c_plus,
         tu_c_plus=tu_c_plus,
         gate=gate,
     )

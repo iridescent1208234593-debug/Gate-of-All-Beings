@@ -333,4 +333,108 @@ powershell -ExecutionPolicy Bypass -File "scripts\run_all.ps1"
 
 **下一轮（R6）候选**：A（推荐）端到端联调链路补全（`toLogRecord` 落盘样例 / 全 15 条成就覆盖 / 图鉴四视图渲染自检）＋站点侧 P7 方案 A 挂载（零侵入 / 可一键回滚）；B 表情包专项目录采集（联网 → 逐张人工审查 → 登记台账 → 重跑集成包校验）；C 结算表现增强（动效 / 音效 / 表情池扩容）。
 
+---
+
+## R7 · 土系系统性偏差修正与成就阈值结论翻转（2026-10-08）
+
+> **触发**：用户指出强土系角色「池年」（妖灵会馆长老 · 十五仙之一）在本工程中被判 E 档、境界金丹，
+> 与「池年为强土系」的世界观事实矛盾；据此复核，工程中「土系主属性无 C 档以上角色 → `ach_system_001`
+> 静态不可达成」的结论被推翻。
+> **性质**：R7 规则（`stat-model.json` v1.1.0）此前已写入模型但**未重跑**，产物长期停留 v1.0.0 基线
+> （`generated_at 2026-10-07 05:24:26`）；本轮补齐「规则 → 产物 → 审计 → 文档 → 集成包」全链路。
+
+### R7-A · 池年核查（E 盘 v4 库 · 只读）
+
+| 项 | 核查结果 |
+| --- | --- |
+| 角色 | 池年 · `characters.id = 61`（`type = 执行者`、`category = 妖精`） |
+| 阵营 | `affiliation = 妖灵会馆(长老)` |
+| 六系归属 | `abilities_summary` 含「御灵系-土」；`character_abilities` 有「御灵系·土」 |
+| 世界观身份 | `character_info` 注明「妖灵会馆长老、十五仙之一」 |
+| 修正前派生 | `element = tu`（主属性判对）；`tier = E`；`power = 1791`；`realm = 金丹`（身份未识别） |
+| 修正后派生 | `element = tu`（`element_confidence = high`）；`tier = C`；`power = 3729`；`realm = 化神`（`realm_reason` = 身份补正 FIX-2） |
+| 溯源 | `element_source` = `character_abilities: 御灵系·土` / `realm_reason` 全部保留；**非官方权威值** |
+
+### R7-B · 三项派生缺陷与修正（`data/stat-model.json` v1.1.0）
+
+| 编号 | 缺陷 | 修正 |
+| --- | --- | --- |
+| FIX-1 | `abilities_summary` 顿号并列多系（如「御灵系·金、土」）时元素关键词只做整串精确匹配，**漏掉并列系** | `element.segmentMatch`：按 `、,，;；/` 切段 → 剥离「御灵系」前缀 → 做系名相等匹配 |
+| FIX-2 | 境界推导只看 `type` 前缀 / 包含，**「长老 / 馆长 / 十五仙 / 斗帅宫冠军」等高位身份无识别**，被压至金丹 | `realm.identityRules`：按 `affiliation_contains` / `story_contains` 补正境界，**只升不降** |
+| FIX-3 | 主属性 `primary` 取 `ABILITY_HINTS` 固定顺序首命中，**土系排序末位被抢先** | 由切段结果 + 显式主系标注优先，消除顺序偏置 |
+
+> 影响面评估先行（内存复算、未落盘）：全库 **29 名**角色 `power` 变化、**7 名**提档，无大面积漂移、无滥发。
+
+### R7-C · 全量重跑与前后对比（真实产物，非估算）
+
+命令链：`generate_stats.py --scope all` → `generate_decks.py` → `audit_r2.py`
+
+| 指标 | 修正前（产物 v1.0.0） | 修正后（产物 v1.1.0 · R7） |
+| --- | --- | --- |
+| 角色总数 | 488 | 488（不变） |
+| 档位分布 A/B/C/D/E/F | 1 / 3 / **15** / **51** / 74 / **344** | 1 / 3 / **16** / **55** / 74 / **339** |
+| 主属性六系分布 | jin33 · mu27 · huo16 · shui26 · **tu7** · kongjian7 · none372 | **完全不变** |
+| 含土系属性角色（`systems` 含 tu） | 11 | 11（不变） |
+| **土系主属性 C 档以上** | **0** | **1（池年 · 化神）** |
+| 土系主属性最高档 | D（芷清 / 乙 / 甲 / 丁） | **C（池年）** |
+| 池年 | E · 1791 · 金丹 · R | **C · 3729 · 化神 · SR** |
+| 稀有度总量 | R 418 / SR 66 / SSR 3 / UR 1 | **R 413 / SR 71 / SSR 3 / UR 1** |
+| 技能卡三来源合计 | 1050（131 / 177 / 742） | **1055（131 / 179 / 745）** |
+
+- 提档 7 名：卡里（E→D）、大松（F→D）、**池年（E→C）**、西木子（F→D）、雨笛（F→E）、静一（F→D）、夏诗越（F→E）；其余 22 名仅 `power` 微调（F 档内 +22~+30）。
+- 稀有度变化来源：提档角色 `power` 进入 SR 区间（池年 R → SR）；稀有度**获得节奏分层**与数值字段规则未变。
+- 口径澄清：土系**主属性**角色数修正前后均为 **7 名**，本轮**未改变任何角色的六系归属**，变化在于土系头号角色的档位与境界。
+
+### R7-D · 成就阈值新结论
+
+- **结论翻转**：「土系主属性无 C 档以上角色 → `ach_system_001` 静态不可达成」**不成立**；该判断源于派生规则缺陷，非世界观事实。
+- `ach_system_001`（金 / 木 / 水 / 火 / 土 各 ≥1 名 C 档以上）**静态可达成**，五系覆盖 5/5。
+- `data/achievements.json` → **v1.1.0 / R7**：`element_gate.status` `proposed` → **`resolved`**、`decided_by = round-R7-numeric-fix`；
+  原「方案 A · 人工校准写入 manual-overrides」改写为「`resolution` · 规则修正 + 全量重跑（**非人工拔高数值**）」；
+  备选路径 C（`or_collect_per_element = 3`）标记 `not-needed` 但保留定义；方案 B（放宽 `min_tier` 至 D）维持驳回。
+- **引擎无需改造**：`ui/achievement-system.js` 的 `C_TIER_OR_ABOVE = ['C','B','A']` 与 `min_tier = C` 一致。
+- 稀有度成就阈值同步：R `418 → 413`、SR `66 → 71`（`rarity_totals` / `metrics` / `ach_rarity_R` / `ach_rarity_SR`）。
+
+### R7-E · 同步更新文件
+
+| 文件 | 动作 |
+| --- | --- |
+| `data/stat-model.json` | v1.1.0（FIX-1 / FIX-2 / FIX-3） |
+| `data/scripts/generate_stats.py` | `segment_systems` / `match_identity_realm` |
+| `data/generated/character_stats.json` | 全量重跑（488 名 · v1.1.0） |
+| `data/decks.json` | 全量重跑（488 套，稀有度与技能槽随动） |
+| `data/achievements.json` | v1.1.0：`element_gate.resolved` + 稀有度阈值同步 |
+| `data/audit/r2-audit.md` | 重跑（土系缺口结论改写） |
+| `docs/07-站点集成方案.md` §9 | 待拍板项 1 标记「R7 已解除」 |
+| `docs/09-站点集成安装手册.md` | 自检说明与未决事项表更新 |
+| `docs/11-六系归属与境界身份修正记录.md` | **新增** |
+| `integration/tools/decide_ach_system_001.py` | 降级为历史决策留痕（结论更正） |
+| `integration/verify/verify_integration.py` | 校验项 7 由「缺口确认」改为「缺口已解除」 |
+| `integration/verify/smoke_integration.mjs` | 第 9 项断言翻转（土系 C 档 ≥1 · 五系覆盖 5/5） |
+| `integration/manifest.json` | v1.2.0 / R7（`version` + `package_version` 同步、24 文件哈希刷新） |
+| `README.md` / `PLAN.md` | R7 迭代记录 + R5 未决项 3 关闭 + 下一轮计划改 R8 |
+
+### R7-F · 验证结果
+
+### R7-F · 验证结果
+
+| 环节 | 命令 | 结果 |
+| --- | --- | --- |
+| 一键链路（数值 → 卡组 → 校验 → 审计 → JS 自检 → 冒烟） | `scripts/run_all.ps1 -KeepGoing` | **6/6 PASS**（总耗时 1.42s） |
+| 集成包同步 | `integration/verify/sync_from_arena.ps1` | 8 文件同步（js 2 / data 6） |
+| 集成交付自检 | `integration/verify/verify_integration.py` | **24/24 全部通过**；`data.ach_system_001-gap` → 「土系主属性 C 档以上 1 名（R7 缺口已解除）」 |
+| 清单防漂移 | `verify_integration.py --refresh-hashes` | 24 文件哈希刷新；`drift.arena-source` 与 arena 真源一致 |
+| 运行时冒烟 | `integration/verify/smoke_integration.mjs` | **12/12 全部通过**；第 9 项断言由「土系缺口复现」翻转为「缺口已解除 · 五系覆盖 5/5 · 土系 1 名 C 档以上」 |
+
+> 验证口径：所有断言均基于重跑后的**真实产物**（`character_stats.json` 488 名 / `decks.json` 488 套 / `achievements.json` 15 条），非估算。
+> 收敛结论：R7「规则 → 产物 → 审计 → 集成包 → 自检」链路闭合，`ach_system_001` 静态可达成结论在引擎、数据、校验三层一致。
+
+
+### R7-G · 未决项与下一轮（R8）
+
+1. **站点侧挂载仍未执行**：涉正式工程写入，按中风险处理，待用户拍板。
+2. **表情包专项采集仍缺位**：`emoticons.json:pending` 4 项挂账。
+3. **端到端联调产物待补**：`toLogRecord` 落盘样例 / 全 15 条成就覆盖 / 图鉴四视图渲染自检。
+4. **下一轮（R8）**：端到端联调链路补全 + 站点侧 P7 挂载（待拍板）+ 表情包专项目录采集。
+
 *（内容由AI生成，仅供参考）*
