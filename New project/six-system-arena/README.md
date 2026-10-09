@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_852ba197c3ef11f1b45c525400cd780f
+    ReservedCode1: 5seeKC8OuzqY4RIrToX5B6WAov80Faajjescmull6g4+Fdu5DbmqBDScLmZZQb+4iccm+GEDWGGtRRRG6j2jrXOjdAy97jtSYjVps903jkkMgkBeuxO9vqlD01L0KJPHcZRmxFy53Ee/7hV3gYNXx0uPsoTO/WdJbZDV3SZKZD5GRJlFDowCWZ6cgvw=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_852ba197c3ef11f1b45c525400cd780f
+    ReservedCode2: 5seeKC8OuzqY4RIrToX5B6WAov80Faajjescmull6g4+Fdu5DbmqBDScLmZZQb+4iccm+GEDWGGtRRRG6j2jrXOjdAy97jtSYjVps903jkkMgkBeuxO9vqlD01L0KJPHcZRmxFy53Ee/7hV3gYNXx0uPsoTO/WdJbZDV3SZKZD5GRJlFDowCWZ6cgvw=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_9a8b6a27c15111f1884b525400cd780f
     ReservedCode1: zJwXcYcugEgkvcQzQrnMz7y23NiBV0EW2Yd8ajvxmxMWQFF5PfKaotVDa90TNR1inGkRENj+fDm6dy7SStIQfw0jF1pRcCxBxxcu/rEUy6nW9Up9+sFaRPLYRtsCnRSwApeEzfTf7di077UuLHzfYn7UcinBv+HzjTw30j93J3ahvbS34IyCbvrwKRw=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -199,6 +210,7 @@ AIGC:
 | --- | --- |
 | 表情包台账 | `data/emoticons.json` v1.0.0 → **v1.1.0**（comfort 3→6 / entrance 3 / celebration 0→1 / pending 4→5 / review_log 6→11） |
 | 本地库复用 | `罗小黑_002.jpg`（窥视安慰）、`比丢_1.jpg`（捂脸沮丧）、`比丢_2.png`（睡觉失落）入 comfort；`罗小黑_剧照_011.jpeg`（欢呼）由 pending 转正入 celebration |
+| 候选清单 | 新增 `data/emoticons-candidates.json` + `data/scripts/scan_emoticon_candidates.py`（离线扫描白名单目录，sha256 溯源凭证）+ [`docs/13-表情包候选清单.md`](docs/13-表情包候选清单.md)（编号避让 R7 占用的 docs/11） |
 | 联网采集 | 核实 QQ 表情商城官方专辑「罗小黑1」免费可下载（官方微博公告佐证）；**未采入任何非官方一手图**——AcFun 转载专栏 / fxxz 下载站 / 粉丝 wiki 均不采信 |
 | 回归校验 | `validate_achievements.py` **25/25**（含数值框架零漂移断言）、`smoke_test.js` 全绿（台账 accept 6 / reject 0）、集成包 `verify_integration.py` 22/22、`smoke_integration.mjs` 12/12 |
 | 集成包 | `integration/data/emoticons.json` 已随 `sync_from_arena.ps1` 刷新（8 文件同步） |
@@ -439,6 +451,7 @@ node "$A\integration\verify\smoke_integration.mjs"
 | 站点卡牌工程（现有 demo 数值） | `E:\Projects\server\app\src\cards\` | 数值登记对象，**只读**；登记结论见 `docs/08` |
 | 旧副本工程（第 1 轮成果） | `D:\Projects\new project\` | **保留不删**，仅参考；快照在 `legacy/d-drive-r1/` |
 | zszm 交付集成包 | `E:\Projects\New project\six-system-arena\integration\` | R4 产出；安装指南见 `INTEGRATION-ZSZM.md` |
+*（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*

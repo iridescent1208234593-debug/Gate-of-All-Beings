@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_87196d06c3ef11f1b45c525400cd780f
+    ReservedCode1: jc2a7JRxrvzfH1Ki25ScoxE3oj2U8+CCI1qQwgd56MSDIkCb2WGe9lSLpaeewBlNiKij7oPK+wLBOrJW3UxmnRTWTOdcfSmvAqGSAqQ4Dcuq7OeFq6Tcy0lkKP9dfC7XIOpRRoX+XZFpunWrQBlk9155zt7bqIXG1M2BZAvuik9hee/RINIrrqWz6sc=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_87196d06c3ef11f1b45c525400cd780f
+    ReservedCode2: jc2a7JRxrvzfH1Ki25ScoxE3oj2U8+CCI1qQwgd56MSDIkCb2WGe9lSLpaeewBlNiKij7oPK+wLBOrJW3UxmnRTWTOdcfSmvAqGSAqQ4Dcuq7OeFq6Tcy0lkKP9dfC7XIOpRRoX+XZFpunWrQBlk9155zt7bqIXG1M2BZAvuik9hee/RINIrrqWz6sc=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_9b8df889c15111f1884b525400cd780f
     ReservedCode1: DWyGGnyVnZuPoj5EsEoELdBR0Icw8VFTaZJg+LhDn7bzw2oxMxBNHkB1oBbZy6t4taB//jDkucCFosDl2lsMAs4b8sZy4h5rxpOfLMsrs9JDO7YdnD9nmr8rduhkXd8I+qO6apimW1PR6BqTJxxmtxL0LIaWB1t/Y9X78UjoXgoEApMJqLA4sG9v5Do=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -267,5 +278,6 @@ P5 + P6 ──► P9（端到端联调 · R8）
 | 技能卡组内同名（补位未去重） | 卡组出现重复技能、观感与结算异常 | 补位池扩至每系 3–4 条并采用确定性 `next_pool_name` 去重（池尽追加 `·改N`）；校验器新增同名去重硬校验，现 0 例 |
 | 顶级档位落差过大（R8 实测） | 主线收官「击败无限」只能经自身对战达成，玩法单薄 | 记 `BAL-R8-01` 转 R9：评估 A 档（无限 · power 6189）与次强档位落差，或补非对抗类替代路径；**不在 R8 改动数值** |
 | 联调 / 冒烟职责重叠 | 维护双份断言、结论不一致 | 分工固化：冒烟 = 模块级抽样快检（12 段），端到端 = 契约 / 全量成就 / 四视图全量自检；两者同入 `run_all.ps1` 链路，任一失败即整体失败 |
+*（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
