@@ -678,5 +678,48 @@ powershell -ExecutionPolicy Bypass -File "scripts\run_all.ps1"
 7. `BAL-R8-01` 处置拍板。
 8. 站点实测胜率样本回收（P5 的 45%~55% 平衡目标）。
 
+## R13 · 胜率本地回归与 R10 遗留产物收口（2026-10-09）
+
+**范围**：收口 R12 结束后工作区遗留的已完成产物（BAL-R8-01 替代路径定义、表情素材复审留痕、胜率回归脚本与报告），正式纳入主线；未替用户拍板任何素材入池 / 改名 / 裁切 / 站点挂载事项；**数值框架零改动**。
+
+### R13-A · 收口入库产物
+
+| 项 | 结果 |
+| --- | --- |
+| `data/achievements.json` v1.2.0 | 新增 `alt_paths`：为「击败无限」补充 3 条非对抗替代路径（剧情切磋 / 五系观想引导 / 主线终章文案）；成就保持 15 条、引擎零改动、数值零改动 |
+| `data/emoticons.json` v1.2.0 | R10 视觉复审留痕：通用图集首批 5 张判定不适配、娘化 gif 维持 pending；comfort 6 / entrance 3 / celebration 1 不变 |
+| `data/scripts/sampled_winrate_regression.js` | canonical 胜率回归脚本（确定性内核，只读数据、只写 `winrate/`，仅记录不调参） |
+| `data/generated/winrate/winrate-regression-report.json` | 抽样 300 场 + 镜像 20 场胜率报告，复跑可复现 |
+| `docs/17-胜率回归与R13遗留产物收口记录.md` | 本轮记录（避让 docs/01–16） |
+| `docs/14` / `docs/16` | 各 +12 行 AIGC 头 + 脚注标注，无业务变更 |
+| `local-preview/index.html` | R10-Q2 本地预览页收口登记（只读，不参与构建） |
+
+**清理**：早期时间戳胜率脚本副本 `sampled_winrate_regression_20261009_210743_474.js`（逻辑与 canonical 不同）移入会话中间产物目录留档。
+
+### R13-B · 胜率本地回归结论（P5 平衡目标观察）
+
+- 主战阵容（罗小黑 id=1）：抽样胜率 **99.00%**（297 胜 / 0 平 / 3 负，300 场）；目标区间 45%~55%，**偏离**。
+- 镜像战：胜率 **60.00%**（20 场），偏离。
+- 分档观察：B 档 0% / C~F 档 100%（档位落差，与 `BAL-R8-01` 同源）。
+- 脚本红线：只读 `decks.json` / `character_stats.json`，只写 `winrate/` 报告，结论仅记录、不调参；复跑输出一致。
+- 站点实测样本回收仍需 P7 挂载后执行。
+
+### R13-C · 数值 / 资源溯源
+
+- 数值：未触碰 `character_stats.json` / `decks.json` / `six-systems.json` / `stat-model.json`；`achievements.json` 仅新增 `alt_paths` 数据段，15 条成就原样保留；`validate_achievements.py` **25/25 PASS**（数值框架零漂移）。
+- 素材：本轮零新增；仅将视觉复审结论（通用图集 5 张 + 娘化 gif）登记为留痕，未拷贝 / 修改 / 删除任何源文件。
+- 引擎：`battle-engine.js` / `achievement-system.js` / `settlement.js` 零改动。
+
+### R13-D · 未决项与下一轮（R14）
+
+1. 6 张改名 / 裁切方案拍板（R12-B）。
+2. 33 张「一致」条目升 A 候选入池去向拍板。
+3. A 类 10 张入池去向拍板（卡面 / 表情 / 背景）。
+4. 站点侧 P7 挂载方案拍板（docs/09 零侵入 A 方案推荐）。
+5. QQ / 微信表情商城官方表情包端侧授权采集。
+6. `罗小黑_娘化形象.gif` 入池拍板。
+7. `BAL-R8-01` 替代路径是否启用（`alt_paths` 已定义，启用即由站点侧按需消费）。
+8. 站点实测胜率样本回收（P5 的 45%~55% 平衡目标，需 P7 挂载后）。
+
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
