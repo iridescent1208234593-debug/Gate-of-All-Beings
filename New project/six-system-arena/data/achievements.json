@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
-  "updated": "2026-10-08",
-  "round": "R7",
+  "version": "1.2.0",
+  "updated": "2026-10-09",
+  "round": "R10",
   "project": "six-system-arena",
   "source_doc": "docs/04-成就系统.md",
   "description": "收集类成就全量定义。核心定位：让玩家为了『集齐』而反复对战。失败不惩罚；成就判定只读战斗日志 + 数值产物，不做随机掉率判定。",
@@ -570,5 +570,69 @@
       "reason": "语义降档会使后续所有系别成就一并贬值"
     },
     "note": "ach_system_001 的 condition 语义（min_tier=C）保持不变，本轮由数值侧修正达成；引擎侧 C_TIER_OR_ABOVE = ['C','B','A'] 与 min_tier 一致，无需参数化改造。"
+  },
+  "alt_paths": {
+    "note": "R10 为 BAL-R8-01「击败无限」补充的非对抗替代路径（剧情 / 引导 / 收集类静态可达）。红线：不修改任何数值 / 卡组 / 成就判定数据；不新增成就条（achievements 保持 15 条，smoke / verify 断言 15 不变）；不改 element_gate 与既有 condition；引擎侧 battle-engine / achievement-system 本轮零改动。本段仅作引导文案与替代入口定义，供站点侧按需消费。",
+    "target": "无限（id=2 · A 档 · UR · power 6189）",
+    "decision": "R10 拍板：不修数值；以非对抗替代路径承接『击败无限』的叙事与收集诉求。",
+    "engine_change": false,
+    "numeric_change": false,
+    "paths": [
+      {
+        "id": "alt_story_guest",
+        "type": "story",
+        "name": "妖灵会馆·切磋邀请",
+        "desc": "当玩家达成 ach_character_030（解锁 30 名角色）后，主线结局前出现剧情委托：与「无限」以切磋名义对坐，不设胜负判定，完成即可点亮观想图鉴位。",
+        "reachable": {
+          "static": true,
+          "requires_achievement": "ach_character_030",
+          "mode": "collection",
+          "judge": false
+        },
+        "entry": "主线推进到第 29 名胜后，结算界面出现剧情引导入口「会馆邀约」",
+        "reward": {
+          "type": "codex_slot",
+          "name": "众生之门·观想",
+          "desc": "解锁「与无限对坐」观想图鉴位（非战斗判定，纯收集）"
+        }
+      },
+      {
+        "id": "alt_guide_system",
+        "type": "guide",
+        "name": "五系观想引导",
+        "desc": "当达成 ach_system_001（金木水火土五系各至少 1 名 C 档以上）时，解锁对「无限」的观想图鉴条目：以『观想五系大势』替代『正面击败』完成终章叙事闭环。",
+        "reachable": {
+          "static": true,
+          "requires_achievement": "ach_system_001",
+          "mode": "collection",
+          "judge": false
+        },
+        "entry": "成就解锁横幅后追加引导文案「观想五系大势，亦可直面无限」",
+        "reward": {
+          "type": "codex_slot",
+          "name": "六系通演图谱·观想位",
+          "desc": "解锁终章观想位（非战斗判定）"
+        }
+      },
+      {
+        "id": "alt_guide_mainline",
+        "type": "guide",
+        "name": "主线终章引导文案",
+        "desc": "当 mainline_defeated 达到 29 时，结算文案提示：『最终一战可择日再战；亦可先集齐五系观想，或赴妖灵会馆切磋之约』。",
+        "reachable": {
+          "static": true,
+          "requires_metric": "mainline_defeated >= 29",
+          "mode": "guide_text",
+          "judge": false
+        },
+        "entry": "结算文案池追加引导句（本段仅为数据定义，settlement.js 文案池本轮零改动）",
+        "reward": null
+      }
+    ],
+    "out_of_scope": [
+      "不新增成就条（achievements 保持 15 条，smoke / verify 断言 15 不变）",
+      "不修改 battle-engine / 数值模型 / 卡组 / 成就 condition",
+      "不将「击败无限」改为可战胜（保持 BAL-R8-01 记录的真实性）"
+    ]
   }
 }

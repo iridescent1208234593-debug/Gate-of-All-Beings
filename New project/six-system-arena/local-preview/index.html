@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>six-system-arena · 本地预览页（R10-Q2）</title>
+<style>
+  :root { --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --bg:#f8fafc; --card:#ffffff; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Microsoft YaHei", system-ui, sans-serif; color:var(--ink); background:var(--bg); }
+  header { padding:18px 28px; background:#111827; color:#fff; }
+  header h1 { margin:0 0 6px; font-size:20px; }
+  header p { margin:0; font-size:13px; color:#9ca3af; }
+  main { max-width:1080px; margin:0 auto; padding:24px 20px 60px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px 22px; margin-bottom:20px; }
+  section h2 { margin:0 0 14px; font-size:16px; border-left:4px solid #4f46e5; padding-left:10px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; }
+  .tile { border:1px solid var(--line); border-radius:10px; padding:14px; text-align:center; }
+  .tile .name { margin-top:8px; font-size:14px; font-weight:600; }
+  .tile .key { font-size:12px; color:var(--muted); }
+  .panel { display:flex; gap:24px; flex-wrap:wrap; align-items:center; }
+  .radar { width:220px; height:220px; }
+  .bars { flex:1; min-width:260px; }
+  .bar { display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:13px; }
+  .bar .label { width:60px; color:var(--muted); }
+  .bar .track { flex:1; height:14px; background:#eef2f7; border-radius:7px; overflow:hidden; }
+  .bar .fill { height:100%; border-radius:7px; }
+  .stats { display:flex; gap:18px; margin-top:10px; font-size:13px; }
+  .stats b { font-size:18px; }
+  .btn { border:0; border-radius:8px; padding:9px 16px; font-size:14px; cursor:pointer; color:#fff; margin-right:10px; }
+  .btn.win { background:#16a34a; } .btn.lose { background:#dc2626; } .btn.draw { background:#64748b; }
+  .btn.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  pre { background:#0f172a; color:#e2e8f0; padding:14px; border-radius:8px; overflow:auto; font-size:12px; line-height:1.6; max-height:420px; }
+  .meta { font-size:12px; color:var(--muted); }
+  .badge { display:inline-block; background:#eef2ff; color:#4f46e5; border-radius:6px; padding:2px 8px; font-size:12px; margin-right:6px; }
+  .foot { font-size:12px; color:var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>six-system-arena · R10-Q2 本地预览页</h1>
+  <p>独立 HTML 预览页：六系图标 + 六系数值面板 + 胜负结算组件 · 仅本地打开 · 不挂正式 zszm 站点 · 资源复用 integration\ 交付包（只读）</p>
+</header>
+<main>
+
+  <section>
+    <h2>0 · 加载状态与红线</h2>
+    <p id="load-state" class="meta">正在加载 integration\js\ 运行时代码…</p>
+    <p class="meta">
+      <span class="badge">红线</span>本页未写任何绝对素材路径进 UI；素材引用一律以「官方白名单素材」占位显示。
+      <span class="badge">只读</span>不修改 integration / data / ui 任何交付物。
+    </p>
+  </section>
+
+  <section>
+    <h2>1 · 六系图标（integration/js/six-system-icons.js）</h2>
+    <div class="grid" id="icons"></div>
+  </section>
+
+  <section>
+    <h2>2 · 六系数值面板（结构对齐 integration/src/SixSystemPanel.tsx）</h2>
+    <div class="panel">
+      <canvas class="radar" id="radar"></canvas>
+      <div class="bars" id="bars"></div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <p class="meta">演示数值与 README §3.3 示例一致（罗小黑：hp 3200 / attack 260 / defense 180；六维 [金88 木62 水70 火55 土60 空间95]）。</p>
+  </section>
+
+  <section>
+    <h2>3 · 胜负结算组件（integration/js/settlement.js → window.SixSystemSettlement）</h2>
+    <div>
+      <button class="btn win" onclick="previewSettle('win')">胜利结算</button>
+      <button class="btn lose" onclick="previewSettle('lose')">失败结算（安慰）</button>
+      <button class="btn draw" onclick="previewSettle('draw')">平局结算</button>
+      <button class="btn ghost" onclick="previewSettle('lose', true)">失败 · 再来一次</button>
+    </div>
+    <div id="settle-out" style="margin-top:14px"><pre class="meta">点击按钮触发 resolve(ctx)，结果渲染如下。</pre></div>
+  </section>
+
+  <section>
+    <h2>4 · 集成包自检摘要</h2>
+    <p class="meta">数据规模（verify_integration.py 断言）：488 角色 / 488 卡组 / 15 成就 / 六系定义（金木水火土 + 空间）。</p>
+    <p class="meta">交付组件：SixSystemPanel · SettlementStage · AchievementBanner · six-system-icons.js · settlement.js · styles\sixsys-integration.css。</p>
+    <p class="meta">验证入口：<code>python integration\verify\verify_integration.py</code> 与 <code>node integration\verify\smoke_integration.mjs</code>。</p>
+  </section>
+
+  <p class="foot">six-system-arena · R10-Q2 本地测试页 · 生成于 2026-10-09 · 供本地预览 / 联调，不参与站点交付。</p>
+</main>
+
+<script src="../integration/js/six-system-icons.js"></script>
+<script src="../integration/js/settlement.js"></script>
+<script>
+(function () {
+  'use strict';
+  // —— 素材路径脱敏：UI 绝不展示绝对路径 ——
+  window.displayAsset = function (p) {
+    if (!p) return '(无)';
+    var s = String(p);
+    if (/^[A-Za-z]:[\\/]/.test(s)) {
+      var parts = s.split(/[\\/]/);
+      return '[官方白名单素材] ' + (parts[parts.length - 1] || s);
+    }
+    return s;
+  };
+
+  var loadState = document.getElementById('load-state');
+  var iconsBox = document.getElementById('icons');
+  var sys = window.SixSystemIcons;
+  var settle = window.SixSystemSettlement;
+  if (!sys || !settle) {
+    loadState.textContent = '加载失败：请以本地文件方式打开本页（确保能访问 ../integration/js/ 下两个 js）。';
+    return;
+  }
+  loadState.textContent = 'OK：SixSystemIcons=' + (sys.VERSION || 'v?') + ' · SixSystemSettlement=' + (settle.VERSION || 'v?') + '，六系已注册 ' + Object.keys((window.LXHUI && window.LXHUI.ICONS) || {}).length + ' 键。';
+
+  // —— 1. 六系图标 ——
+  var order = (sys.META && sys.META.order) || ['jin', 'mu', 'shui', 'huo', 'tu', 'kongjian'];
+  var names = { jin: '金', mu: '木', shui: '水', huo: '火', tu: '土', kongjian: '空间' };
+  var icons = (window.LXHUI && window.LXHUI.ICONS) || {};
+  order.forEach(function (k) {
+    var tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.innerHTML = '<div>' + (icons[k] || '(缺 ' + k + ')') + '</div>' +
+      '<div class="name">' + (names[k] || k) + '</div><div class="key">key: ' + k + '</div>';
+    iconsBox.appendChild(tile);
+  });
+
+  // —— 2. 数值面板 ——
+  var demo = { name: '罗小黑', stats: { hp: 3200, attack: 260, defense: 180 }, values: [88, 62, 70, 55, 60, 95] };
+  var fills = ['#f59e0b', '#22c55e', '#0ea5e9', '#ef4444', '#b45309', '#7c3aed'];
+  var labels = ['金', '木', '水', '火', '土', '空间'];
+  var radar = document.getElementById('radar').getContext('2d');
+  var R = 100, cx = 110, cy = 110, n = 6;
+  function pt(i, v) { var a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + R * v / 100 * Math.cos(a), cy + R * v / 100 * Math.sin(a)]; }
+  radar.clearRect(0, 0, 220, 220);
+  [20, 40, 60, 80, 100].forEach(function (lv) {
+    radar.beginPath();
+    for (var i = 0; i < n; i++) { var p = pt(i, lv); i ? radar.lineTo(p[0], p[1]) : radar.moveTo(p[0], p[1]); }
+    radar.closePath(); radar.strokeStyle = '#e2e8f0'; radar.stroke();
+  });
+  radar.beginPath();
+  demo.values.forEach(function (v, i) { var p = pt(i, v); i ? radar.lineTo(p[0], p[1]) : radar.moveTo(p[0], p[1]); });
+  radar.closePath(); radar.fillStyle = 'rgba(79,70,229,.18)'; radar.fill(); radar.strokeStyle = '#4f46e5'; radar.stroke();
+  demo.values.forEach(function (v, i) { var p = pt(i, v); radar.beginPath(); radar.arc(p[0], p[1], 3, 0, 7); radar.fillStyle = '#4f46e5'; radar.fill(); });
+
+  var bars = document.getElementById('bars');
+  demo.values.forEach(function (v, i) {
+    var b = document.createElement('div'); b.className = 'bar';
+    b.innerHTML = '<span class="label">' + labels[i] + '</span><span class="track"><span class="fill" style="width:' + v + '%;background:' + fills[i] + '"></span></span><b>' + v + '</b>';
+    bars.appendChild(b);
+  });
+  var st = document.getElementById('stats');
+  st.innerHTML = '<div><span class="label">体力</span> <b>' + demo.stats.hp + '</b></div>' +
+    '<div><span class="label">攻击</span> <b>' + demo.stats.attack + '</b></div>' +
+    '<div><span class="label">防御</span> <b>' + demo.stats.defense + '</b></div>';
+
+  // —— 3. 结算组件 ——
+  window.previewSettle = function (result, retry) {
+    var out = document.getElementById('settle-out');
+    if (!settle.resolve) { out.innerHTML = '<pre class="meta">settlement.js 未暴露 resolve()，请检查 integration/js/settlement.js 版本。</pre>'; return; }
+    var ctx = {
+      result: result,
+      mode: 'preview',
+      seed: 61009,
+      opponentId: 2,
+      opponentName: '无限',
+      winnerElement: 'tu',
+      onRetry: retry ? function () { out.innerHTML = '<pre class="meta">[再来一次] 触发重试入口（本页仅演示，不重置任何进度）。</pre>'; } : null
+    };
+    var resolved = settle.resolve(ctx);
+    var assetLines = [];
+    (function walk(o) { if (!o || typeof o !== 'object') return; if (typeof o === 'string') { return; } Object.keys(o).forEach(function (k) { var v = o[k]; if (typeof v === 'string' && /^[A-Za-z]:[\\/]/.test(v)) { assetLines.push(displayAsset(v)); } else if (v && typeof v === 'object') { walk(v); } }); })(resolved);
+    var html = '<pre>' + JSON.stringify(resolved, null, 2).replace(/"(E:\\\\[^"]*)"/g, function (m, p) { return '"' + displayAsset(p) + '"'; }) + '</pre>';
+    if (assetLines.length) html += '<p class="meta">本页素材引用（已脱敏）：' + assetLines.join(' · ') + '</p>';
+    out.innerHTML = html;
+  };
+})();
+</script>
+</body>
+</html>
