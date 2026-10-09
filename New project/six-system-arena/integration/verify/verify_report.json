@@ -1,9 +1,9 @@
 {
   "tool": "verify_integration.py",
   "package": "sixsys-zszm-integration",
-  "arena_root": "E:\\Projects\\New project\\six-system-arena",
-  "integration_root": "E:\\Projects\\New project\\six-system-arena\\integration",
-  "generated_at": "2026-10-08 06:14:14",
+  "arena_root": "E:\\Projects\\new project\\six-system-arena",
+  "integration_root": "E:\\Projects\\new project\\six-system-arena\\integration",
+  "generated_at": "2026-10-09 02:05:19",
   "ok": true,
   "failures": [],
   "checks": [
@@ -51,7 +51,7 @@
         {
           "file": "data/stat-model.json",
           "status": "in-sync",
-          "sha256": "a9978d09cdb2c63f"
+          "sha256": "c82933aae7eb2d0e"
         },
         {
           "file": "data/emoticons.json",
@@ -269,7 +269,7 @@
         {
           "file": "data/stat-model.json",
           "status": "in-sync",
-          "sha256": "a9978d09cdb2c63f"
+          "sha256": "c82933aae7eb2d0e"
         },
         {
           "file": "data/emoticons.json",

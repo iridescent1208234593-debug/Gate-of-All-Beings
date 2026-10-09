@@ -72,11 +72,13 @@ AIGC:
 | 成就判定与图鉴 | `ui/achievement-system.js` | 待办 | **完成** |
 | 胜负结算 | `ui/settlement.js` v1.1.0（胜：小黑 + 比丢 / 负：安慰 / 平：独立轨） | 待办 | **完成**（R5 三轨齐备 + 台账驱动） |
 | 数值与卡组审计 | `data/audit/r2-audit.md` | 待办 | **完成** |
+| 端到端联调链路 | `data/scripts/e2e_flow.js`、`data/generated/e2e/*` | 待办 | 待办（**R8 完成**） |
 
 > R2 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R2** 一节。
 > R3 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R3** 一节（工作副本切至 E 盘 + 站点现有 demo 数值登记）。
 > R5 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R5** 一节（三分轮收口：角色技能分配与卡组生成 → 对战结算与收集成就 → 胜负反馈与表情包；`decks.json` v1.1.0 + 结算三轨 + 表情包台账 + 集成包同步）。
 > R7 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R7** 一节（土系系统性偏差修正：并列系精确认系 + 高位身份补正境界 → 池年 E→C；`ach_system_001` 静态可达成结论翻转）。
+> R8 迭代详情见 [`CHANGELOG.md`](CHANGELOG.md) 的 **R8** 一节（端到端联调链路：对战内核 → 战斗日志契约 → 成就判定 → 图鉴四视图 + 镜像战收藏回归）。
 
 ### R5 · 三分轮收口（2026-10-07）
 
@@ -102,7 +104,7 @@ AIGC:
 2. 站点侧 P7 挂载未执行（涉及正式工程写入，待拍板）
 3. ~~`ach_system_001` 土系主属性无 C 档以上角色，已以 `element_gate` 替代路径落地~~ **【R7 已解除】**：修正派生规则并全量重跑后土系出现 C 档角色（池年 · 化神），`element_gate.status = resolved`
 4. 结算未含动效 / 音效
-5. 端到端联调产物待补（`toLogRecord` 落盘样例 / 成就判定全 15 条覆盖 / 图鉴四视图渲染自检）
+5. ~~端到端联调产物待补（`toLogRecord` 落盘样例 / 成就判定全 15 条覆盖 / 图鉴四视图渲染自检）~~ **【R8 已补齐】**：`data/scripts/e2e_flow.js` + `data/generated/e2e/`（8 条日志样例 / 15-15 成就逐条达成 / 四视图渲染自检全 PASS）
 
 ### R7 · 土系系统性偏差修正（2026-10-08）
 
@@ -140,6 +142,45 @@ AIGC:
 - ③ 表情包专项目录采集（联网 → 逐张人工审查 → 登记台账）
 - 仍不改动数值框架与既有卡组规则，仅新增联调与验证产物
 
+### R8 · 端到端联调链路（2026-10-08）
+
+**触发**：R5 / R7 连续挂账的未决项 —— 端到端联调产物待补。本轮补齐「`toLogRecord` 落盘样例 / 全 15 条成就覆盖 /
+图鉴四视图渲染自检」三项，并追加镜像战（`opponent_type=mirror`）不计入角色收藏的回归。
+
+**本轮产出**
+
+| 产物 | 路径 | 说明 |
+| --- | --- | --- |
+| 联调脚本 | `data/scripts/e2e_flow.js` | 零依赖 Node 脚本：对战内核 → 日志契约 → 成就判定 → 图鉴四视图 → 镜像回归 |
+| 联调报告 | `data/generated/e2e/e2e-report.json` | 契约字段、对局统计、15 条成就覆盖、四视图自检、镜像回归、阶段快照、平衡观察 |
+| 日志样例 | `data/generated/e2e/battle-log-sample.jsonl` | 8 条战斗日志契约级落盘样例（JSONL） |
+| 一键链路 | `scripts/run_all.ps1` | 扩展为 **7 步**（新增第 7 步端到端联调，JS 语法自检同步覆盖新脚本） |
+| 文档 | `docs/12-端到端联调记录.md` | 链路、覆盖、自检、平衡观察全记录 |
+
+**验证结果**（脚本真实产出，退出码 0）
+
+| 环节 | 结果 |
+| --- | --- |
+| 真实对局 | **106 场**（arena 98 / challenge 5 / mirror 3），合成记录 **0** 条 |
+| 日志契约 | 字段与顺序逐字符合 `docs/04 §5`，`turn_used ≤ 30` |
+| 成就覆盖 | **15 / 15** 全部达成，逐条标注首次触发阶段，无 `trigger = unknown` |
+| 图鉴四视图 | by_element(7) / by_rarity(4) / by_tier(6) / by_mainline(2) 渲染自检**全 PASS**（组内条目 = 组 owned = 488） |
+| 镜像回归 | 镜像取胜**未**增加角色收藏（`pass = true`），`mirror_wins = 3` 正常达成 `ach_battle_003` |
+| 土系闭环 | 六系取证由 **池年（id=61 · C 档）**真实取胜完成，与 R7 修正结论闭环 |
+
+**平衡观察（转 R9 议题）**：`BAL-R8-01` —— 顶级主将「无限」(id=2 · A 档 UR · power 6189) 在现有数值模型下
+近乎不可战胜（C 档以上候选 19 名各 3 组确定性种子全败，仅「自身对战」可取胜），
+`ach_battle_001` 的最终一步只能经自身对战达成。本轮**未改动任何数值**，仅记录实测结果，
+建议 R9 评估 A 档与次强档位的数值落差。
+
+**本轮未决项 / 下一轮（R9）计划**
+
+- ① 站点侧 P7 挂载（`docs/09-站点集成安装手册.md` 三方案，推荐零侵入 A 方案，**须拍板**）
+- ② 表情包专项目录采集（联网 → 逐张人工审查 → 登记 `docs/10-表情包素材台账.md`）
+- ③ `BAL-R8-01` 平衡议题：评估顶级档位落差，或为「击败无限」补非对抗类替代路径
+- ④ 站点实测胜率样本回收（P5 的 45%~55% 平衡目标）
+- 仍不改动数值框架与既有卡组规则，仅新增联调与验证产物
+
 
 ### 1.1 世界观与素材红线（最高优先级）
 
@@ -169,7 +210,7 @@ six-system-arena/
 ├─ BRANCHING.md              ← 短 git 分支策略与脏工作区处理约定
 ├─ CHANGELOG.md              ← 每轮记录入口（本轮新增文件清单）
 ├─ scripts/
-│  └─ run_all.ps1            ← R2 一键串联：数值 → 卡组 → 成就校验 → 审计 → 自检 → 冒烟
+│  └─ run_all.ps1            ← 一键串联（7 步）：数值 → 卡组 → 成就校验 → 审计 → JS 自检 → 冒烟 → 端到端联调
 ├─ ui/
 │  ├─ six-system-icons.js    ← 六系图标自包含模块（SVG 常量 + 统一 key + 零侵入注册）
 │  ├─ SixSystemPanel.js      ← 数值面板组件（六系雷达 + 五行星图 + 图标）
@@ -189,11 +230,13 @@ six-system-arena/
 │  │  ├─ validate_achievements.py  ← 成就定义 / 卡组规则 / 素材路径校验
 │  │  ├─ audit_r2.py               ← 数值与卡组审计报告生成（含成就可达性）
 │  │  ├─ smoke_test.js             ← 三模块联动冒烟测试（Node，零依赖）
+│  │  ├─ e2e_flow.js               ← R8 端到端联调（内核 → 日志契约 → 成就 → 图鉴）
 │  │  └─ patch_lxh_icons.py        ← lxh-ui.js 六键增量补丁（备份 / 校验 / 回滚）
 │  ├─ audit/
 │  │  └─ r2-audit.md         ← R2 数值与卡组审计报告
 │  └─ generated/
-│     └─ character_stats.json← 推导产出（全量 488 名）
+│     ├─ character_stats.json← 推导产出（全量 488 名）
+│     └─ e2e/                ← R8 联调产物（e2e-report.json + battle-log-sample.jsonl）
 ├─ docs/
 │  ├─ 01-数值模型.md
 │  ├─ 02-六系图标接入.md
@@ -204,7 +247,9 @@ six-system-arena/
 │  ├─ 07-站点集成方案.md          ← R2：zszm 端口接入点与三套方案
 │  ├─ 08-现有游戏数值基线登记.md   ← R3：站点 demo 数值登记与字段对照
 │  ├─ 09-站点集成安装手册.md       ← R4：逐步安装 / 素材安装 / 回滚 / 常见问题
-│  └─ 10-表情包素材台账.md         ← R5：表情包台账 / 素材红线 / 采集 SOP / 未决项
+│  ├─ 10-表情包素材台账.md         ← R5：表情包台账 / 素材红线 / 采集 SOP / 未决项
+│  ├─ 11-六系归属与境界身份修正记录.md ← R7：土系低估根因 / 修正方案 / 前后对比
+│  └─ 12-端到端联调记录.md         ← R8：联调链路 / 成就覆盖 / 四视图自检 / 平衡观察
 ├─ integration/               ← R4：zszm 交付集成包（可直接复制到站点）
 │  ├─ INTEGRATION-ZSZM.md     ← R4：交付级安装指南（零映射 / 四步安装 / 回滚 / FAQ）
 │  ├─ README.md               ← 包结构 / API / 契约 / 红线
@@ -304,7 +349,18 @@ python "data\scripts\patch_lxh_icons.py" --rollback
 </script>
 ```
 
-### 3.4 集成包同步与交付自检（R4）
+### 3.4 端到端联调（R8）
+
+```powershell
+# 内核 → 战斗日志契约 → 落盘样例 → 成就判定（15/15）→ 图鉴四视图自检 → 镜像战收藏回归
+node "data\scripts\e2e_flow.js"
+```
+
+退出码 `0` = 全通过。产物：`data\generated\e2e\e2e-report.json`（联调报告）、
+`data\generated\e2e\battle-log-sample.jsonl`（8 条契约级日志样例）。
+该步骤已并入 `scripts\run_all.ps1` 作为第 **7** 步；详见 [`docs/12-端到端联调记录.md`](docs/12-端到端联调记录.md)。
+
+### 3.5 集成包同步与交付自检（R4）
 
 ```powershell
 $A = "E:\Projects\New project\six-system-arena"

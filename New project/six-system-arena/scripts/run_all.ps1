@@ -1,9 +1,9 @@
 ﻿#Requires -Version 5.1
 <#
 ================================================================================
- run_all.ps1 — 六系演武 R2 一键自动化串联
+ run_all.ps1 — 六系演武一键自动化串联（R2 建立 · R8 扩展端到端联调）
 ================================================================================
- 串联链路：数值生成 → 卡组生成 → 成就校验 → 审计 → JS 语法自检 → 冒烟测试
+ 串联链路：数值生成 → 卡组生成 → 成就校验 → 审计 → JS 语法自检 → 冒烟测试 → 端到端联调
 
  安全边界（重要）
    · 全部产物只落在本仓库 E:\Projects\New project\six-system-arena 内；
@@ -104,7 +104,7 @@ function Get-ToolPath([string]$name) {
 }
 
 # ============================== 前置检查 ==============================
-Write-Head '六系演武 R2 · 一键自动化（数值 → 卡组 → 成就 → 审计 → 自检）'
+Write-Head '六系演武 · 一键自动化（数值 → 卡组 → 成就 → 审计 → 自检 → 端到端联调）'
 Write-Host "项目根目录 : $Root"
 Write-Host "阶段       : $Stage   数值范围: $Scope   跳过数值重算: $($SkipStats.IsPresent)   空跑: $($DryRun.IsPresent)"
 
@@ -118,6 +118,7 @@ $S_DECK  = Join-Path $Root 'data\scripts\generate_decks.py'
 $S_VALID = Join-Path $Root 'data\scripts\validate_achievements.py'
 $S_AUDIT = Join-Path $Root 'data\scripts\audit_r2.py'
 $S_SMOKE = Join-Path $Root 'data\scripts\smoke_test.js'
+$S_E2E   = Join-Path $Root 'data\scripts\e2e_flow.js'
 $UI_DIR  = Join-Path $Root 'ui'
 
 $ok = $true
@@ -126,42 +127,43 @@ $ok = $true
 if ($Stage -in @('all', 'data')) {
 
     if (-not $SkipStats) {
-        $r = Invoke-Step -Name '1/6 数值生成 generation' -File $pythonExe -StepArgs @($S_GEN, '--scope', $Scope)
+        $r = Invoke-Step -Name '1/7 数值生成 generation' -File $pythonExe -StepArgs @($S_GEN, '--scope', $Scope)
         if (-not $r -and -not $KeepGoing) { throw '数值生成失败，链路中止。' }
     }
     else {
         Write-Host ''
-        Write-Host '[步骤] 1/6 数值生成 —— 已按 -SkipStats 跳过，复用现有 character_stats.json' -ForegroundColor Yellow
-        [void]$Results.Add([pscustomobject]@{ Step = '1/6 数值生成'; Status = 'SKIP'; Seconds = 0 })
+        Write-Host '[步骤] 1/7 数值生成 —— 已按 -SkipStats 跳过，复用现有 character_stats.json' -ForegroundColor Yellow
+        [void]$Results.Add([pscustomobject]@{ Step = '1/7 数值生成'; Status = 'SKIP'; Seconds = 0 })
     }
 
-    $r = Invoke-Step -Name '2/6 卡组生成 decks' -File $pythonExe -StepArgs @($S_DECK)
+    $r = Invoke-Step -Name '2/7 卡组生成 decks' -File $pythonExe -StepArgs @($S_DECK)
     if (-not $r -and -not $KeepGoing) { throw '卡组生成失败，链路中止。' }
 }
 
 # ============================== 校验链 ==============================
 if ($Stage -in @('all', 'checks')) {
 
-    $r = Invoke-Step -Name '3/6 成就与卡组校验 validate' -File $pythonExe -StepArgs @($S_VALID)
+    $r = Invoke-Step -Name '3/7 成就与卡组校验 validate' -File $pythonExe -StepArgs @($S_VALID)
     if (-not $r -and -not $KeepGoing) { throw '成就校验失败，链路中止。' }
 
-    $r = Invoke-Step -Name '4/6 审计报告 audit' -File $pythonExe -StepArgs @($S_AUDIT)
+    $r = Invoke-Step -Name '4/7 审计报告 audit' -File $pythonExe -StepArgs @($S_AUDIT)
     if (-not $r -and -not $KeepGoing) { throw '审计生成失败，链路中止。' }
 
     # ---- JS 语法自检（node --check，逐个文件） ----
     Write-Host ''
-    Write-Host '[步骤] 5/6 JS 语法自检 node --check' -ForegroundColor Yellow
+    Write-Host '[步骤] 5/7 JS 语法自检 node --check' -ForegroundColor Yellow
     $jsFiles = @()
     if (Test-Path $UI_DIR) { $jsFiles += Get-ChildItem -Path $UI_DIR -Filter '*.js' -File | Select-Object -ExpandProperty FullName }
     if (Test-Path $S_SMOKE) { $jsFiles += $S_SMOKE }
+    if (Test-Path $S_E2E)   { $jsFiles += $S_E2E }
 
     if (-not $nodeExe) {
         Write-Warning '未检测到 Node.js，跳过语法自检与冒烟测试。'
-        [void]$Results.Add([pscustomobject]@{ Step = '5/6 JS 语法自检'; Status = 'SKIP'; Seconds = 0 })
+        [void]$Results.Add([pscustomobject]@{ Step = '5/7 JS 语法自检'; Status = 'SKIP'; Seconds = 0 })
     }
     elseif ($DryRun) {
         foreach ($f in $jsFiles) { Write-Host "       node --check $f" -ForegroundColor DarkGray }
-        [void]$Results.Add([pscustomobject]@{ Step = '5/6 JS 语法自检'; Status = 'DRYRUN'; Seconds = 0 })
+        [void]$Results.Add([pscustomobject]@{ Step = '5/7 JS 语法自检'; Status = 'DRYRUN'; Seconds = 0 })
     }
     else {
         $sw = [System.Diagnostics.Stopwatch]::StartNew()
@@ -175,17 +177,26 @@ if ($Stage -in @('all', 'checks')) {
         }
         $sw.Stop()
         $secs = [math]::Round($sw.Elapsed.TotalSeconds, 2)
-        [void]$Results.Add([pscustomobject]@{ Step = '5/6 JS 语法自检'; Status = $(if ($syntaxOk) { 'PASS' } else { 'FAIL' }); Seconds = $secs })
+        [void]$Results.Add([pscustomobject]@{ Step = '5/7 JS 语法自检'; Status = $(if ($syntaxOk) { 'PASS' } else { 'FAIL' }); Seconds = $secs })
         if (-not $syntaxOk) { $ok = $false; if (-not $KeepGoing) { throw 'JS 语法自检失败。' } }
     }
 
     # ---- 冒烟测试（三模块联动契约） ----
     if ($nodeExe) {
-        $r = Invoke-Step -Name '6/6 冒烟测试 smoke' -File $nodeExe -StepArgs @($S_SMOKE) -Optional
+        $r = Invoke-Step -Name '6/7 冒烟测试 smoke' -File $nodeExe -StepArgs @($S_SMOKE) -Optional
         if (-not $r) { $ok = $false; if (-not $KeepGoing) { throw '冒烟测试失败。' } }
     }
     else {
-        [void]$Results.Add([pscustomobject]@{ Step = '6/6 冒烟测试'; Status = 'SKIP'; Seconds = 0 })
+        [void]$Results.Add([pscustomobject]@{ Step = '6/7 冒烟测试'; Status = 'SKIP'; Seconds = 0 })
+    }
+
+    # ---- 端到端联调（R8：对战内核 → 战斗日志契约 → 成就判定 → 收集图鉴） ----
+    if ($nodeExe) {
+        $r = Invoke-Step -Name '7/7 端到端联调 e2e' -File $nodeExe -StepArgs @($S_E2E) -Optional
+        if (-not $r) { $ok = $false; if (-not $KeepGoing) { throw '端到端联调失败。' } }
+    }
+    else {
+        [void]$Results.Add([pscustomobject]@{ Step = '7/7 端到端联调'; Status = 'SKIP'; Seconds = 0 })
     }
 }
 
@@ -214,6 +225,8 @@ if (-not $DryRun) {
     Write-Host '    data\decks.json                       卡组产物（488 名）' -ForegroundColor DarkGray
     Write-Host '    data\audit\r2-audit.md                审计报告' -ForegroundColor DarkGray
     Write-Host '    ui\battle-engine.js / achievement-system.js / settlement.js' -ForegroundColor DarkGray
+    Write-Host '    data\generated\e2e\e2e-report.json            端到端联调报告' -ForegroundColor DarkGray
+    Write-Host '    data\generated\e2e\battle-log-sample.jsonl    战斗日志契约落盘样例' -ForegroundColor DarkGray
 }
 
 if ($failed -gt 0 -or -not $ok) { exit 1 }
