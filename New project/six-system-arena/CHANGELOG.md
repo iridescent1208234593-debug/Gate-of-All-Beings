@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_860eae97c3ef11f1b45c525400cd780f
+    ReservedCode1: nTWp7ZbQxiUy9t+YRtPgQe+RnYoMv/qSHHmerp52wcVZgWabAiXXojbIsCc0uiF6LiR+/xrUnBlYYp4coXL1+uiHYltkbZ95ATlHsFg7BD3Yh9uLxUqNeQgt9Y26LGjFlpwzRztQ6kEieqaaE44ZXTnihjQ0s7BrEX/d1JKow/eACZGqtNOk9JN6ShY=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_860eae97c3ef11f1b45c525400cd780f
+    ReservedCode2: nTWp7ZbQxiUy9t+YRtPgQe+RnYoMv/qSHHmerp52wcVZgWabAiXXojbIsCc0uiF6LiR+/xrUnBlYYp4coXL1+uiHYltkbZ95ATlHsFg7BD3Yh9uLxUqNeQgt9Y26LGjFlpwzRztQ6kEieqaaE44ZXTnihjQ0s7BrEX/d1JKow/eACZGqtNOk9JN6ShY=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_9c4b56d5c15111f1887c525400de85a5
     ReservedCode1: w9j3ax+36CinUBigp4bGdUNLrta1p49jXrV6t2kH/U3hjGh36LzXHc6iU7dWDKhr8QHHtDgqThCE87X0n+9nTqrq6Rk9MWooLpp+Fe5lUtqSJ6tFayMHiEmZs62cQXIFijklJk3ueuiGcr/G0WjISvZYm4jCkyTXUj+ZcSsxDJPuC01zfzx9JGpM1jE=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -515,6 +526,7 @@ powershell -ExecutionPolicy Bypass -File "scripts\run_all.ps1"
   - `pending` 4 → 5：`pnd_shot_011` 标记 `status: resolved`；新增 `pnd_lxh_nianghua_gif`（娘化 gif 带文字文案，待用户拍板）。
   - `review_log` 6 → **11**（R9 新增 4 approved + 1 pending）。
 - 素材来源：全部为 `E:\Projects\assets\罗小黑战记数据库\images\` 白名单目录既有官方图，逐张经视觉审查；无 AI 生图、无同人、无第三方署名。
+- 候选清单链路（新增）：`data/scripts/scan_emoticon_candidates.py` 只读扫描白名单目录 → `data/emoticons-candidates.json`（sha256 溯源凭证 / Agent 视觉初筛 / 全部 `status=pending`）→ 终审登记于 [`docs/10`](docs/10-表情包素材台账.md) §5；人工终审清单见 [`docs/13-表情包候选清单.md`](docs/13-表情包候选清单.md)（文档编号避让 R7 已占用的 `docs/11`）。
 
 ### R9-B · 联网采集核实与排除记录
 
@@ -546,4 +558,5 @@ powershell -ExecutionPolicy Bypass -File "scripts\run_all.ps1"
 5. `BAL-R8-01` 处置拍板。
 6. 站点实测胜率样本回收（P5 的 45%~55% 平衡目标）。
 
+*（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
