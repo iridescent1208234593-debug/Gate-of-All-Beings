@@ -30,17 +30,18 @@ AIGC:
 
 | # | 脚本 | 作用 | 输入 | 输出 | 是否写外部 |
 | --- | --- | --- | --- | --- | --- |
-| 1 | `scripts/run_all.ps1` | **R2 一键串联** 6 步流水线（数值 → 卡组 → 成就校验 → 审计 → JS 自检 → 冒烟） | 本目录产物 | 刷新各产物 + 审计报告 | 否 |
+| 1 | `scripts/run_all.ps1` | **一键串联** 7 步流水线（数值 → 卡组 → 成就校验 → 审计 → JS 自检 → 冒烟 → 端到端联调） | 本目录产物 | 刷新各产物 + 审计报告 + 联调报告 | 否 |
 | 2 | `data/scripts/generate_stats.py` | 从 v4 数据库推导角色六系数值 | `worldview_luoxiaohei_v4.db`（只读） | `data/generated/character_stats.json` | 否 |
 | 3 | `data/scripts/generate_decks.py` | 按 `docs/03` §4 规则生成 488 名卡组（规则表驱动） | `character_stats.json` | `data/decks.json` | 否 |
 | 4 | `data/scripts/validate_achievements.py` | 成就定义 / 卡组规则 / 素材路径三合一校验 | `achievements.json`、`decks.json` | 控制台校验结论（非 0 退出即失败） | 否 |
 | 5 | `data/scripts/audit_r2.py` | 生成数值与卡组审计报告（含成就可达性） | 上述两份产物 | `data/audit/r2-audit.md` | 否 |
 | 6 | `data/scripts/smoke_test.js` | 三模块联动冒烟测试（Node，零依赖） | `ui/*.js` + 两份产物 | 控制台断言结论 | 否 |
-| 7 | `data/scripts/patch_lxh_icons.py` | 为 `lxh-ui.js` 的 ICONS 增量补 6 个键 | `shared-ui/lxh-ui.js` | 备份 + 补丁后文件 | **是（仅 `--apply`）** |
-| 8 | `integration/verify/sync_from_arena.ps1` | 以 arena 为唯一真源，刷新 `integration/` 下 js 与 data 副本 | `ui/*.js`、`data/**` | `integration/js`、`integration/data` | 否（仅本工程内） |
-| 9 | `integration/verify/verify_integration.py` | 集成包交付自检：清单 / 漂移 / 红线 / 契约 / 数据五项（`--refresh-hashes` 刷新清单哈希） | `integration/**`、`manifest.json` | `verify_report.json` + 控制台结论 | 否 |
-| 10 | `integration/verify/smoke_integration.mjs` | 运行时冒烟：图标注册零污染、结算契约、克制环确定性、成就判定 | 运行时 JS + 数据 | 控制台断言结论 | 否 |
-| 11 | `integration/verify/install_assets.ps1` | 安装官方结算素材到站点 `public/sixsys/official`（**默认 DRY-RUN**） | `assets.source.json` 白名单 | 站点 `public/sixsys/official/` | **是（仅 `-Apply`）** |
+| 7 | `data/scripts/e2e_flow.js` | **端到端联调（R8）**：对战内核 → 日志契约 → 成就判定（15 条）→ 图鉴四视图自检 → 镜像战收藏回归 | `data/**`、`ui/*.js`（只读） | `data/generated/e2e/e2e-report.json`、`battle-log-sample.jsonl` | 否（仅本工程内） |
+| 8 | `data/scripts/patch_lxh_icons.py` | 为 `lxh-ui.js` 的 ICONS 增量补 6 个键 | `shared-ui/lxh-ui.js` | 备份 + 补丁后文件 | **是（仅 `--apply`）** |
+| 9 | `integration/verify/sync_from_arena.ps1` | 以 arena 为唯一真源，刷新 `integration/` 下 js 与 data 副本 | `ui/*.js`、`data/**` | `integration/js`、`integration/data` | 否（仅本工程内） |
+| 10 | `integration/verify/verify_integration.py` | 集成包交付自检：清单 / 漂移 / 红线 / 契约 / 数据五项（`--refresh-hashes` 刷新清单哈希） | `integration/**`、`manifest.json` | `verify_report.json` + 控制台结论 | 否 |
+| 11 | `integration/verify/smoke_integration.mjs` | 运行时冒烟：图标注册零污染、结算契约、克制环确定性、成就判定 | 运行时 JS + 数据 | 控制台断言结论 | 否 |
+| 12 | `integration/verify/install_assets.ps1` | 安装官方结算素材到站点 `public/sixsys/official`（**默认 DRY-RUN**） | `assets.source.json` 白名单 | 站点 `public/sixsys/official/` | **是（仅 `-Apply`）** |
 
 ---
 
@@ -64,7 +65,7 @@ powershell -ExecutionPolicy Bypass -File "scripts\run_all.ps1" -KeepGoing       
 
 | 参数 | 默认 | 说明 |
 | --- | --- | --- |
-| `-Stage` | `all` | `all` = 全链 6 步；`data` = 只跑数值 + 卡组生成；`checks` = 只跑校验 / 审计 / 自检 / 冒烟 |
+| `-Stage` | `all` | `all` = 全链 7 步；`data` = 只跑数值 + 卡组生成；`checks` = 只跑校验 / 审计 / 自检 / 冒烟 / 端到端联调 |
 | `-Scope` | `all` | 传给 `generate_stats.py` 的范围（`all` / `mainline`） |
 | `-SkipStats` | 关 | 跳过数值生成，直接复用现有 `character_stats.json` |
 | `-DryRun` | 关 | 只打印命令，不实际执行 |
@@ -131,7 +132,25 @@ node "data\scripts\smoke_test.js"
 - `audit_r2.py` 只读产物，不改动任何数据；报告可重复生成，除生成时间外内容一致。
 - `smoke_test.js` 覆盖：对战确定性、克制环系数、空间穿透、镜像战规则、成就判定前置、结算不惩罚、官方素材路径存在性。
 
-### 2.4 `patch_lxh_icons.py`
+### 2.4 端到端联调（R8 新增）
+
+```powershell
+# 端到端联调：内核 → 日志契约 → 15 条成就判定 → 图鉴四视图自检 → 镜像战收藏回归
+node "data\scripts\e2e_flow.js"
+
+# 产物（只写本工程 data\generated\e2e\）
+#   e2e-report.json         联调报告（契约 / 对局统计 / 成就覆盖 / 四视图自检 / 平衡观察）
+#   battle-log-sample.jsonl 战斗日志契约级落盘样例（8 条）
+```
+
+**行为保证**
+
+- 零依赖 Node；对 `data/**` 与 `ui/*.js` **只读**，写盘范围仅限 `data/generated/e2e/`。
+- 退出码：全部环节通过 `0`，任一断言失败 `1`（已接入 `run_all.ps1` 第 7 步）。
+- 对局全部为**真实对局**（合成记录 0 条），结果确定性可复现。
+- 报告内数值为**派生值**并保留 `source` 溯源标记，**不称官方权威值**。
+
+### 2.5 `patch_lxh_icons.py`
 
 ```powershell
 # 1) 预览差异（默认行为，绝对不写文件）
@@ -154,7 +173,7 @@ python "data\scripts\patch_lxh_icons.py" --rollback
 > ⚠️ 本项目默认采用**零侵入**接入（加载 `ui/six-system-icons.js` 即自动注册六键），
 > **无需**执行 `--apply`。仅当站点希望把六键固化进共享 UI 文件时，才显式执行并同步 D 盘副本。
 
-### 2.5 集成包同步与交付自检（R4 新增）
+### 2.6 集成包同步与交付自检（R4 新增）
 
 ```powershell
 $A = "E:\Projects\New project\six-system-arena"
@@ -185,7 +204,8 @@ powershell -ExecutionPolicy Bypass -File "$A\integration\verify\install_assets.p
 
 | 任务 | 频率 | 触发方式 | 说明 |
 | --- | --- | --- | --- |
-| **全链回归（`run_all.ps1`）** | 每次改动产物 / 脚本后 | 手动 | 一条命令跑完 6 步，退出码可直接用于 CI 判定 |
+| **全链回归（`run_all.ps1`）** | 每次改动产物 / 脚本后 | 手动 | 一条命令跑完 7 步，退出码可直接用于 CI 判定 |
+| **端到端联调（`e2e_flow.js`）** | 每轮迭代收尾 | 手动 | 15 条成就覆盖 + 图鉴四视图自检 + 镜像战收藏回归；产物写入 `data/generated/e2e/` |
 | 数值重算 | 数据库更新后 / 每周 | 手动 或 任务计划程序 | v4 库有新角色时重跑 `generate_stats.py` |
 | 卡组重算 | 数值或 `docs/03` §4 规则变更后 | 手动 | 重跑 `generate_decks.py`，须复核主系占比 ≥ 60% |
 | 主线试跑校验 | 每次提交前 | 手动 | `--scope mainline`，快速回归 |
@@ -218,5 +238,4 @@ Register-ScheduledTask -TaskName "sixsys-generate-stats" -Action $action -Trigge
 | Python | 3.9+ | 仅使用标准库（`sqlite3` / `json` / `argparse` / `hashlib`） |
 | Node.js | 可选 | 仅用于对 `lxh-ui.js` 做语法自检（`node --check`） |
 | 无需第三方包 | — | `generate_stats.py` 零依赖，便于在站点侧直接运行 |
-*（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*

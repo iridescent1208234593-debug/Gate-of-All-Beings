@@ -1,0 +1,8 @@
+{"battle_id":"BD2OG-1-2-arena","mode":"arena","my_character_id":1,"opponent_id":2,"opponent_type":"official","result":"lose","turn_used":12,"hp_left":0,"hp_max":6176,"seed":610000,"_sample_note":"基础对局：罗小黑 vs 无限（arena）"}
+{"battle_id":"BD2QV-2-2-arena","mode":"arena","my_character_id":2,"opponent_id":2,"opponent_type":"official","result":"win","turn_used":18,"hp_left":997,"hp_max":8666,"seed":610087,"_sample_note":"主线收官：无限自身对战（official 口径）击败无限"}
+{"battle_id":"BD2R4-2-224-arena","mode":"arena","my_character_id":2,"opponent_id":224,"opponent_type":"official","result":"win","turn_used":1,"hp_left":8666,"hp_max":8666,"seed":610096,"_sample_note":"六系取证：无限(jin) 取胜"}
+{"battle_id":"BD2R5-3-224-arena","mode":"arena","my_character_id":3,"opponent_id":224,"opponent_type":"official","result":"win","turn_used":3,"hp_left":6666,"hp_max":6668,"seed":610097,"_sample_note":"六系取证：风息(mu) 取胜"}
+{"battle_id":"BD2R6-12-224-arena","mode":"arena","my_character_id":12,"opponent_id":224,"opponent_type":"official","result":"win","turn_used":2,"hp_left":6475,"hp_max":6476,"seed":610098,"_sample_note":"六系取证：玄离(shui) 取胜"}
+{"battle_id":"BD2R7-14-224-arena","mode":"arena","my_character_id":14,"opponent_id":224,"opponent_type":"official","result":"win","turn_used":2,"hp_left":5809,"hp_max":5810,"seed":610099,"_sample_note":"六系取证：哪吒(huo) 取胜"}
+{"battle_id":"BD2R8-61-224-arena","mode":"arena","my_character_id":61,"opponent_id":224,"opponent_type":"official","result":"win","turn_used":4,"hp_left":5541,"hp_max":5545,"seed":610100,"_sample_note":"六系取证：池年(tu) 取胜"}
+{"battle_id":"BD2R9-11-224-arena","mode":"arena","my_character_id":11,"opponent_id":224,"opponent_type":"official","result":"win","turn_used":3,"hp_left":5450,"hp_max":5452,"seed":610101,"_sample_note":"六系取证：那伽(kongjian) 取胜"}
