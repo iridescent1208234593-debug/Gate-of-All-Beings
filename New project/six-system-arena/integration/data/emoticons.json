@@ -1,7 +1,7 @@
 {
-  "version": "1.0.0",
-  "round": "R5",
-  "updated_at": "2026-10-07",
+  "version": "1.1.0",
+  "round": "R9",
+  "updated_at": "2026-10-09",
   "doc": "docs/10-表情包素材台账.md",
   "purpose": "失败 / 平局结算的安慰素材与胜利登场素材的官方化台账。新增素材只登记不改码：结算引擎 loadEmoticons() 读取本文件覆盖运行时池。",
   "asset_root": "E:\\Projects\\assets\\罗小黑战记数据库\\images",
@@ -141,6 +141,51 @@
           "basis": "视觉初审：黑猫形态在溪边探头，神态呆萌，适配失败安慰场景；位于 docs/05 白名单目录内"
         },
         "note": "R5 新增入池（台账扩充，不改数值与文案框架）"
+      },
+      {
+        "id": "emo_comfort_002",
+        "role": "comfort",
+        "path": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\罗小黑\\罗小黑_002.jpg",
+        "source_dir": "images\\罗小黑",
+        "source_type": "local-official",
+        "confidence": "high",
+        "review": {
+          "status": "approved",
+          "screened_at": "2026-10-09",
+          "screened_by": "R9",
+          "basis": "视觉审查：黑猫窥视、圆睁大眼呆萌无辜，适配失败安慰；官方素材库白名单目录，无第三方署名"
+        },
+        "note": "R9 本地官方库复用审查新增"
+      },
+      {
+        "id": "emo_comfort_bidiu1",
+        "role": "comfort",
+        "path": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\比丢\\比丢_1.jpg",
+        "source_dir": "images\\比丢",
+        "source_type": "local-official",
+        "confidence": "high",
+        "review": {
+          "status": "approved",
+          "screened_at": "2026-10-09",
+          "screened_by": "R9",
+          "basis": "视觉审查：比丢捂脸沮丧，适配失败后‘没眼看’安慰情绪；官方素材库白名单目录"
+        },
+        "note": "R9 本地官方库复用审查新增"
+      },
+      {
+        "id": "emo_comfort_bidiu2",
+        "role": "comfort",
+        "path": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\比丢\\比丢_2.png",
+        "source_dir": "images\\比丢",
+        "source_type": "local-official",
+        "confidence": "high",
+        "review": {
+          "status": "approved",
+          "screened_at": "2026-10-09",
+          "screened_by": "R9",
+          "basis": "视觉审查：比丢安静睡觉，适配失败后失落躺平情绪；官方素材库白名单目录"
+        },
+        "note": "R9 本地官方库复用审查新增"
       }
     ],
     "entrance": [
@@ -187,7 +232,23 @@
         "note": "胜利结算搭档登场（动图备选）"
       }
     ],
-    "celebration": []
+    "celebration": [
+      {
+        "id": "emo_celebration_shot011",
+        "role": "celebration",
+        "path": "E:\\Projects\\assets\\罗小黑战记数据库\\images\\罗小黑\\罗小黑_剧照_011.jpeg",
+        "source_dir": "images\\罗小黑",
+        "source_type": "local-official",
+        "confidence": "high",
+        "review": {
+          "status": "approved",
+          "screened_at": "2026-10-09",
+          "screened_by": "R9",
+          "basis": "视觉复审：小黑欢呼挥拳大笑、背景明亮，适配成就达成 / 赛季庆典；R5 曾判 pending（情绪偏冷）经 R9 视觉复核后转 approved"
+        },
+        "note": "R9 由 pending 转 celebration 池（预留池首次入池）"
+      }
+    ]
   },
   "pending": [
     {
@@ -195,7 +256,8 @@
       "kind": "channel",
       "target": "ch_qq_emoji",
       "need": "端侧 App 内搜索下载并导出表情图，须用户授权后执行",
-      "blocker": "需 QQ 登录态与端侧导出能力"
+      "blocker": "需 QQ 登录态与端侧导出能力",
+      "evidence": "R9 联网核实：官方微博公告 QQ 表情商城搜索【罗小黑1】可免费下载；第三方转载站（AcFun / fxxz / 粉丝 wiki）不符合官方一手标准，已排除"
     },
     {
       "id": "pnd_wechat_emoji",
@@ -216,7 +278,17 @@
       "kind": "asset",
       "target": "罗小黑_剧照_011.jpeg",
       "need": "人工确认是否适合安慰 / 庆祝场景",
-      "blocker": "适配性待定（雨中场景情绪偏冷）"
+      "blocker": "适配性待定（雨中场景情绪偏冷）",
+      "status": "resolved",
+      "resolution": "R9 视觉复核：欢呼挥拳大笑适配庆祝场景，已入 celebration 池（emo_celebration_shot011）"
+    },
+    {
+      "id": "pnd_lxh_nianghua_gif",
+      "kind": "asset",
+      "target": "罗小黑_娘化形象.gif",
+      "need": "人工确认 Q 版猫耳形象 + 文字文案是否可入安慰池",
+      "blocker": "带文字文案（求包养）且为动图，游戏语境适配性待用户拍板",
+      "candidate": "R9 视觉初审：Q 版求包养神态适合安慰，但文案与形象风格需人工确认"
     }
   ],
   "review_log": [
@@ -261,11 +333,47 @@
       "item": "罗小黑_剧照_011.jpeg",
       "verdict": "pending",
       "basis": "情绪偏冷，适配性待人工确认，暂不入运行时池"
+    },
+    {
+      "date": "2026-10-09",
+      "by": "R9（Agent 视觉审查）",
+      "item": "罗小黑_002.jpg",
+      "verdict": "approved",
+      "basis": "黑猫窥视圆睁大眼，呆萌无辜，适配失败安慰；官方素材库白名单目录"
+    },
+    {
+      "date": "2026-10-09",
+      "by": "R9（Agent 视觉审查）",
+      "item": "比丢_1.jpg",
+      "verdict": "approved",
+      "basis": "比丢捂脸沮丧，适配失败后‘没眼看’情绪；官方素材库白名单目录"
+    },
+    {
+      "date": "2026-10-09",
+      "by": "R9（Agent 视觉审查）",
+      "item": "比丢_2.png",
+      "verdict": "approved",
+      "basis": "比丢安静睡觉，适配失败后失落躺平情绪；官方素材库白名单目录"
+    },
+    {
+      "date": "2026-10-09",
+      "by": "R9（Agent 视觉复审）",
+      "item": "罗小黑_剧照_011.jpeg",
+      "verdict": "approved",
+      "basis": "欢呼挥拳大笑、背景明亮，适配庆祝；R5 pending 结论翻转，入 celebration 池"
+    },
+    {
+      "date": "2026-10-09",
+      "by": "R9（Agent 视觉初审）",
+      "item": "罗小黑_娘化形象.gif",
+      "verdict": "pending",
+      "basis": "Q 版求包养神态适合安慰，但带文字文案且为动图，待人工确认是否入池"
     }
   ],
   "unresolved": [
-    "QQ / 微信表情商城官方表情包需端侧 App 授权导出，本轮未采集",
+    "QQ / 微信表情商城官方表情包需端侧 App 授权导出，本轮未采集（官方渠道已核实：QQ 表情商城搜索【罗小黑1】免费）",
     "通用图集目录（images\\图片）需逐张人工确认角色来源",
+    "罗小黑_娘化形象.gif（带文字文案）入池与否待用户拍板",
     "本台账 review 中标记 medium 的条目为 Agent 初审结论，人工复核后可升为 high"
   ],
   "changelog": [
@@ -273,6 +381,11 @@
       "round": "R5",
       "date": "2026-10-07",
       "change": "建立官方表情包台账：5 条官方发行渠道登记、comfort 池 2→3、entrance 池 3、pending 4 项；结算引擎支持外置注入"
+    },
+    {
+      "round": "R9",
+      "date": "2026-10-09",
+      "change": "表情包专项目录采集（本地复用优先）：逐张视觉审查官方素材库，comfort 池 3→6（新增 罗小黑_002 / 比丢_1 / 比丢_2），celebration 池 0→1（剧照_011 由 pending 转正）；联网核实 QQ 表情商城渠道并排除第三方转载站；新增娘化 gif 人工确认挂账"
     }
   ]
 }

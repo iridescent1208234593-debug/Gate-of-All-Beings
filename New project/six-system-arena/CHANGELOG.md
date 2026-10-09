@@ -503,4 +503,47 @@ powershell -ExecutionPolicy Bypass -File "scripts\run_all.ps1"
 4. **站点实测胜率样本回收**：P5 的 45%~55% 平衡目标需真实样本回归。
 5. **下一轮（R9）**：平衡议题落地 + 站点挂载（待拍板）+ 表情包专项目录采集。
 
+## R9 · 表情包专项目录采集与平衡议题记录（2026-10-09）
+
+**范围**：素材层扩容（表情包专项目录），数值框架零改动；`BAL-R8-01` 仅记录评估结论。
+
+### R9-A · 表情包台账扩充（本地官方库复用优先）
+
+- `data/emoticons.json` v1.0.0 → **v1.1.0**：
+  - `pool.comfort` 3 → **6**：新增 `emo_comfort_002`（罗小黑_002.jpg，窥视安慰）、`emo_comfort_bidiu1`（比丢_1.jpg，捂脸沮丧）、`emo_comfort_bidiu2`（比丢_2.png，睡觉失落）。
+  - `pool.celebration` 0 → **1**：`emo_celebration_shot011`（罗小黑_剧照_011.jpeg，欢呼挥拳，R5 pending 转正）。
+  - `pending` 4 → 5：`pnd_shot_011` 标记 `status: resolved`；新增 `pnd_lxh_nianghua_gif`（娘化 gif 带文字文案，待用户拍板）。
+  - `review_log` 6 → **11**（R9 新增 4 approved + 1 pending）。
+- 素材来源：全部为 `E:\Projects\assets\罗小黑战记数据库\images\` 白名单目录既有官方图，逐张经视觉审查；无 AI 生图、无同人、无第三方署名。
+
+### R9-B · 联网采集核实与排除记录
+
+- 官方渠道核实：QQ 表情商城搜索【罗小黑1】可免费下载（官方微博公告佐证）；微信表情商店官方专辑存在。
+- 排除项（非官方一手）：AcFun 转载专栏「罗小黑战记GIF动图表情包合集」（第三方转载、侵删声明）、fxxz 下载站 eip 包（第三方下载站）、罗小黑粉丝 wiki（粉丝托管）。均未采图入池。
+- 端侧授权前置项（QQ / 微信表情商城）继续挂账，待用户授权后在端侧导出。
+
+### R9-C · 校验与集成包同步
+
+| 环节 | 命令 | 结果 |
+| --- | --- | --- |
+| 台账 / 数值校验 | `python data/scripts/validate_achievements.py` | **25/25 PASS**（含「数值框架零漂移：488 套卡组逐条一致」） |
+| 三模块冒烟 | `node data\scripts\smoke_test.js` | 全 PASS（台账 accept 6 / reject 0，渠道 5 / 审查记录 11） |
+| 集成包同步 | `integration\verify\sync_from_arena.ps1` | 8 文件 APPLY（含 `emoticons.json` 14.6KB） |
+| 交付自检（静态） | `python integration\verify\verify_integration.py` | **22/22 PASS**（台账 v1.1.0 / comfort 6 / entrance 3 / 红线零命中） |
+| 运行时冒烟 | `node integration\verify\smoke_integration.mjs` | **12/12 PASS** |
+
+### R9-D · BAL-R8-01 评估记录（不改数值）
+
+- 实测复现：`champion_scan` 对 C 档以上 19 名候选 × 3 组确定性种子全部落败（`beaters = []`），「无限」仅自身对战可胜。
+- 结论：数值落差客观存在；本轮**不修改任何数值 / 卡组 / 成就数据**，处置选项（A 档间微调 / 非对抗替代成就路径 / 维持现状 + 引导文案）移交 R10 用户拍板。
+
+### R9-E · 未决项与下一轮（R10）
+
+1. 站点侧 P7 挂载方案拍板（`docs/09-站点集成安装手册.md` 零侵入 A 方案推荐）。
+2. QQ / 微信表情商城官方表情包端侧授权采集（渠道已核实，仅剩授权执行）。
+3. `罗小黑_娘化形象.gif` 入池拍板。
+4. `images\图片`（通用图集）逐张人工确认。
+5. `BAL-R8-01` 处置拍板。
+6. 站点实测胜率样本回收（P5 的 45%~55% 平衡目标）。
+
 *（内容由AI生成，仅供参考）*

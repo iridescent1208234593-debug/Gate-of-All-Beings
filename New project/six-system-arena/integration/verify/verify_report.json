@@ -3,7 +3,7 @@
   "package": "sixsys-zszm-integration",
   "arena_root": "E:\\Projects\\new project\\six-system-arena",
   "integration_root": "E:\\Projects\\new project\\six-system-arena\\integration",
-  "generated_at": "2026-10-09 02:05:19",
+  "generated_at": "2026-10-09 13:43:11",
   "ok": true,
   "failures": [],
   "checks": [
@@ -56,7 +56,7 @@
         {
           "file": "data/emoticons.json",
           "status": "in-sync",
-          "sha256": "a16c8dea4ce02b54"
+          "sha256": "71490841ba8496dc"
         }
       ],
       "drifted": []
@@ -223,9 +223,9 @@
     {
       "check": "data.emoticon-ledger",
       "ok": true,
-      "detail": "表情包台账 v1.0.0 / 渠道 5 条 / comfort 3 / entrance 3",
+      "detail": "表情包台账 v1.1.0 / 渠道 5 条 / comfort 6 / entrance 3",
       "channels": 5,
-      "comfort": 3
+      "comfort": 6
     },
     {
       "check": "data.emoticon-redline",
@@ -274,7 +274,7 @@
         {
           "file": "data/emoticons.json",
           "status": "in-sync",
-          "sha256": "a16c8dea4ce02b54"
+          "sha256": "71490841ba8496dc"
         }
       ]
     },
