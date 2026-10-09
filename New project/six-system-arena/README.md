@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_6443664cc42311f1b45c525400cd780f
+    ReservedCode1: xnj7RAKSgtb1EEZqhr7SZffjIuCaS/QtTfI5s5nYXQY1fBwkdDQUFeMEqBNaxkB6Tl0qUTpgR/JXX204x4kShdQEUfyXjFDhe5E+Pwwwk9p3WPsQCMsn34fETWAF9R0piOUptwXyol3eF4D9nyHNMpojlMjjEaNl6KXIRCHAFkQZXv65s/fvXkWQH/U=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_6443664cc42311f1b45c525400cd780f
+    ReservedCode2: xnj7RAKSgtb1EEZqhr7SZffjIuCaS/QtTfI5s5nYXQY1fBwkdDQUFeMEqBNaxkB6Tl0qUTpgR/JXX204x4kShdQEUfyXjFDhe5E+Pwwwk9p3WPsQCMsn34fETWAF9R0piOUptwXyol3eF4D9nyHNMpojlMjjEaNl6KXIRCHAFkQZXv65s/fvXkWQH/U=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_852ba197c3ef11f1b45c525400cd780f
     ReservedCode1: 5seeKC8OuzqY4RIrToX5B6WAov80Faajjescmull6g4+Fdu5DbmqBDScLmZZQb+4iccm+GEDWGGtRRRG6j2jrXOjdAy97jtSYjVps903jkkMgkBeuxO9vqlD01L0KJPHcZRmxFy53Ee/7hV3gYNXx0uPsoTO/WdJbZDV3SZKZD5GRJlFDowCWZ6cgvw=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -393,6 +404,33 @@ AIGC:
 - 仍不改动数值框架与既有卡组规则
 
 
+### R14 · 升 A 候选终审对照与胜率报告独立复核（证据补强轮，2026-10-09）
+
+**触发**：R13 末节「下一轮（R14）计划」8 项全部为待用户拍板项，无可本地独立执行项；本轮转为「拍板前证据补强」——把拍板所需证据做扎实，不假造已完成轮次。**未入池、未改名、未裁切、未触碰任何源文件；数值框架零改动。**
+
+**本轮产出**
+
+| 项 | 结果 |
+| --- | --- |
+| 6 张升 A 候选终审对照 | `docs/18 §1`：B8 / B26 / B30 / B38 / B39 角色与文件名对应获独立视觉复核 + 世界观库设定佐证；B26 实为双角色设计稿（漏标「虚淮」）、B37 实为「并肩同行」预告封面（含播放按钮，文件名「并肩破局」文案不符）——均建议拍板改名 / 裁切方案 |
+| 胜率报告独立复核 | `docs/18 §2`：独立脚本复现 R13 报告——300 场 99.00%、镜像 60.00%、B 档 0/3、C~F 档 100%，**逐项数字与原报告完全一致**，报告可信、可复现 |
+| 记录文档 | 新增 [`docs/18-升A候选终审对照与胜率报告独立复核.md`](docs/18-升A候选终审对照与胜率报告独立复核.md)（避让 docs/01–17） |
+
+**本轮结论**：6 张候选全部为官方画面（无 AI 痕迹、无同人 / 第三方署名），可进入用户拍板队列；胜率偏离结论（主战 99.00% vs 45%~55% 目标）复核成立，仍不改数值。拍板前不做任何素材 / 数值动作。
+
+**数值 / 资源溯源**
+
+- 数值：未触碰 `character_stats.json` / `decks.json` / `achievements.json` / `six-systems.json` / `stat-model.json`，数值框架零漂移。
+- 素材：仅对 6 张源图只读复核，未拷贝 / 修改 / 删除；世界观主库只读查询。
+- 引擎：`battle-engine.js` / `achievement-system.js` / `settlement.js` 零改动；复核脚本置于会话中间产物目录，不进入工程。
+
+**本轮未决项 / 下一轮（R15）计划**
+
+- R14 计划 8 项未决**全部不变**（见上节列表），均待用户拍板。
+- 拍板后按结果执行（改名 / 裁切 / 入池登记 / 站点挂载 / 端侧采集 / 数值处置）；未拍板前继续证据补强。
+- 仍不改动数值框架与既有卡组规则。
+
+
 ### 1.1 世界观与素材红线（最高优先级）
 
 1. **忠于《罗小黑战记》官方世界观**，能力体系严格对齐官方设定（御灵系 / 生灵系 / 造物系 / 空间系 / 心灵系 / 锁御系）。
@@ -613,6 +651,7 @@ node "$A\integration\verify\smoke_integration.mjs"
 | 站点卡牌工程（现有 demo 数值） | `E:\Projects\server\app\src\cards\` | 数值登记对象，**只读**；登记结论见 `docs/08` |
 | 旧副本工程（第 1 轮成果） | `D:\Projects\new project\` | **保留不删**，仅参考；快照在 `legacy/d-drive-r1/` |
 | zszm 交付集成包 | `E:\Projects\New project\six-system-arena\integration\` | R4 产出；安装指南见 `INTEGRATION-ZSZM.md` |
+*（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
