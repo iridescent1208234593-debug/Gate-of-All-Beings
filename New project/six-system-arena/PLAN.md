@@ -93,6 +93,8 @@ AIGC:
 
 > **R16 迭代（2026-10-09）**：**三分轮完成度核实与 AIGC 元数据收口** —— 用户指令按 README 分轮计划推进「角色技能分配与卡组生成 → 对战结算与收集成就 → 胜负反馈与表情包」；核实确认该三分轮已于 R5 全部完成并合入主线，R16 计划 8 项全部待用户拍板。本轮收口 `docs/17` / `docs/18` / `docs/19` 的 AIGC 元数据补录（各 +12 行，无业务变更），回归校验 `validate_achievements.py` 25/25 PASS、`smoke_test.js` 全绿；8 项待拍板事项原样挂账至 R17；数值 / 素材 / 引擎零改动。
 
+> **R17 迭代（2026-10-10）**：**集成包同步与主线健康复核** —— 用户指令按 README 分轮计划推进三分轮；核实确认三分轮已于 R5 全部完成并合入主线（git 链复验一致），R17 计划 8 项全部待用户拍板、无可本地独立执行项。本轮修复集成包 R5 后遗留的 **2 处副本漂移**（`integration/data/achievements.json` / `emoticons.json` 与真源对齐，R13 v1.2.0 增量），刷新 manifest 24 文件哈希；`verify_integration.py` 全项 PASS、`smoke_integration.mjs` 12/12 PASS、`validate_achievements.py` 25/25 PASS；新增 [`docs/20-R17集成包同步与主线健康复核.md`](docs/20-R17集成包同步与主线健康复核.md)；8 项待拍板事项原样挂账至 R18；数值 / 素材 / 引擎零改动。
+
 ---
 
 ## P0 · 目录骨架与规划文档 ✅
@@ -197,6 +199,7 @@ AIGC:
 - [x] R14：胜率报告独立复核（`docs/18 §2`：独立脚本复现 300 场 99.00% / 镜像 60.00% / 分档逐项一致，报告可信可复现；结论仅记录不改数值）
 - [x] R15：待拍板决策总览（`docs/19`：8 项逐项证据 + 方案 + 建议；6 张源图只读尺寸测算；`validate_achievements.py` 25/25 / `smoke_test.js` 全绿；拍板入口 §9；未替用户拍板、数值零改动）
 - [x] R16：三分轮完成度核实与 AIGC 元数据收口（docs/17/18/19 各 +12 行补录纳入主线；validate 25/25 / smoke 全绿；数值零改动）
+- [x] R17：集成包同步与主线健康复核（docs/20；integration/data 2 处漂移收口；verify 全项 PASS / smoke_integration 12/12；数值零改动）
 
 ---
 
@@ -218,6 +221,7 @@ AIGC:
 - [x] R14：升 A 候选 6 张终审对照（`docs/18 §1`：B8 / B26 / B30 / B38 / B39 角色对应获佐证、B26 漏标「虚淮」、B37 实为「并肩同行」预告封面文案不符；全部官方画面无 AI 痕迹、无同人 / 第三方署名；入池 / 改名 / 裁切待用户拍板；数值框架零改动）
 - [x] R15：待拍板决策总览（`docs/19`：8 项待拍板逐项证据 + 方案 + 建议；6 张源图只读尺寸测算；`validate_achievements.py` 25/25 / `smoke_test.js` 全绿；未替用户拍板、数值框架零改动）
 - [x] R16：三分轮完成度核实与 AIGC 元数据收口（docs/17/18/19 各 +12 行补录纳入主线；validate 25/25 / smoke 全绿；数值零改动）
+- [x] R17：集成包同步与主线健康复核（docs/20；integration/data 2 处漂移收口；verify 全项 PASS / smoke_integration 12/12；数值零改动）
 - [ ] **官方表情包专项目录（端侧授权部分）待采集**：QQ / 微信表情商城官方表情包须端侧授权导出；`罗小黑_娘化形象.gif` 带文字文案、通用图集 B 类 39 张人工复核与 A 类 10 张入池去向，均待用户拍板（台账 `pending` 5 项）。
 
 ---
@@ -236,6 +240,7 @@ AIGC:
 - [x] R4：`docs/09-站点集成安装手册.md` 编号规范化（原时间戳副本）
 - [ ] **待站点侧挂载**：复制 4 组文件 + 入口引两行（方案 A，零侵入，约 0.5 天）
 - [x] R5：集成包同步 R5 增量（24 文件；`verify_integration.py` 22 项 / `smoke_integration.mjs` 12 项全通过；`src/sixsys-assets.ts` 官方白名单扩至 6 张，新增 `luoxiaohei_face_03`）
+- [x] R17：集成包同步与主线健康复核（docs/20；integration/data 2 处漂移收口——R13 v1.2.0 增量（achievements alt_paths / emoticons 复审留痕）；manifest 刷新 24 文件；verify 全项 PASS / smoke_integration 12/12；数值零改动）
 
 ---
 

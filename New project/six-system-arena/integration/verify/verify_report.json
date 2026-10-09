@@ -1,9 +1,9 @@
 {
   "tool": "verify_integration.py",
   "package": "sixsys-zszm-integration",
-  "arena_root": "E:\\Projects\\new project\\six-system-arena",
-  "integration_root": "E:\\Projects\\new project\\six-system-arena\\integration",
-  "generated_at": "2026-10-09 15:37:56",
+  "arena_root": "E:\\Projects\\New project\\six-system-arena",
+  "integration_root": "E:\\Projects\\New project\\six-system-arena\\integration",
+  "generated_at": "2026-10-10 00:04:36",
   "ok": true,
   "failures": [],
   "checks": [
@@ -41,7 +41,7 @@
         {
           "file": "data/achievements.json",
           "status": "in-sync",
-          "sha256": "d38241583e467ed7"
+          "sha256": "b546d140d95f8bae"
         },
         {
           "file": "data/six-systems.json",
@@ -56,7 +56,7 @@
         {
           "file": "data/emoticons.json",
           "status": "in-sync",
-          "sha256": "71490841ba8496dc"
+          "sha256": "770727c2412e2902"
         }
       ],
       "drifted": []
@@ -223,7 +223,7 @@
     {
       "check": "data.emoticon-ledger",
       "ok": true,
-      "detail": "表情包台账 v1.1.0 / 渠道 5 条 / comfort 6 / entrance 3",
+      "detail": "表情包台账 v1.2.0 / 渠道 5 条 / comfort 6 / entrance 3",
       "channels": 5,
       "comfort": 6
     },
@@ -259,7 +259,7 @@
         {
           "file": "data/achievements.json",
           "status": "in-sync",
-          "sha256": "d38241583e467ed7"
+          "sha256": "b546d140d95f8bae"
         },
         {
           "file": "data/six-systems.json",
@@ -274,7 +274,7 @@
         {
           "file": "data/emoticons.json",
           "status": "in-sync",
-          "sha256": "71490841ba8496dc"
+          "sha256": "770727c2412e2902"
         }
       ]
     },

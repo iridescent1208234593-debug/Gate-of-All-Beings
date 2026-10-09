@@ -852,6 +852,41 @@ PowerShell System.Drawing 只读测算（未改源文件），对应 docs/16 §4
 2. 拍板后按 docs/19 方案执行（改名 / 裁切 / 入池登记 / P7 挂载 / 端侧采集 / alt_paths 启用 / 胜率样本回收）。
 3. 仍不改动数值框架与既有卡组规则。
 
+## R17 · 集成包同步与主线健康复核（2026-10-10）
+
+**范围**：用户指令按 README 分轮计划推进「角色技能分配与卡组生成 → 对战结算与收集成就 → 胜负反馈与表情包」三分轮；核实确认 R5 已全部完成并合入主线（R16 复核成立，git 链复验一致）。R17 计划 8 项全部待用户拍板，无可本地独立执行项；本轮做主线健康复核 + 集成包遗留收口。**未入池、未改名、未裁切、未触碰任何源文件；数值框架零改动。**
+
+### R17-A · 主线回归校验
+
+| 项 | 结果 |
+| --- | --- |
+| `validate_achievements.py` | **25/25 PASS**（含数值框架零漂移 / 台账 9 张在位 / 未决挂账 5 项显式） |
+| `smoke_test.js` | 全绿（台账 accept 6 / reject 0 / 结算三轨 / 图鉴四视图 / 败局不判定 / 平局独立轨 PASS） |
+
+### R17-B · 集成包遗留收口（R5 后首次同步）
+
+集成包 `integration/` 于 R5 后未再同步，静态自检暴露 **2 处副本漂移**（`drift.arena-source`）：
+
+| 漂移文件 | 根因 | 处置 |
+| --- | --- | --- |
+| `integration/data/achievements.json` | R13 真源升 v1.2.0（新增 `alt_paths`，BAL-R8-01 非对抗替代路径 3 条），副本未跟随 | `sync_from_arena.ps1` APPLY 同步，与真源 sha256 一致 |
+| `integration/data/emoticons.json` | R9/R13 真源升 v1.2.0（comfort 3→6 / celebration 0→1 / 复审留痕 13 条），副本未跟随 | 同上 |
+
+同步 8 文件后刷新 manifest（24 文件哈希）：`verify_integration.py` **全项 PASS**（drift.arena-source 全部一致 / 官方白名单 6/6 / 红线零命中 / 契约全过）；`smoke_integration.mjs` **12/12 PASS**。
+
+### R17-C · 数值 / 资源溯源
+
+- 数值：真源 `character_stats.json` / `decks.json` / `achievements.json` / `six-systems.json` / `stat-model.json` **零改动**（`validate_achievements.py` 数值框架零漂移硬校验 25/25 PASS）；`integration/data/` 两份副本与真源对齐属**副本同步**，非数值变更。
+- 素材：零新增、零拷贝、零修改；本轮未联网采集；官方白名单 6/6 在位核验通过。
+- 引擎：`battle-engine.js` / `achievement-system.js` / `settlement.js` 零改动；世界观主库只读。
+
+### R17-D · 未决项与下一轮（R18）
+
+1. 8 项待拍板事项（docs/19 §1–§8）**全部不变**，均待用户拍板。
+2. 拍板后按 docs/19 方案执行（改名 / 裁切 / 入池登记 / P7 挂载 / 端侧采集 / alt_paths 启用 / 胜率样本回收）。
+3. 集成包已与真源一致（本轮收口），P7 挂载（零侵入 A 方案）可直接使用本交付包。
+4. 仍不改动数值框架与既有卡组规则。
+
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
