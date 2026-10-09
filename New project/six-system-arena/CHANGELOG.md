@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_653d173bc42311f1b45c525400cd780f
+    ReservedCode1: 0g0vDVV6SNzDtq370MRLPlgNWI454lebHfsndj1osN+UF6KGjlDF3mApum7/dG0VrhG8/MmdvqqFBkIQ7+c18eTO2ThJn3AXeZwABqKYJUYrWnj6YzrTem4qfK41ls4jY8WO9bgxlqBylgMghLoMWY6kzhb0dLwF+nnlnBiW6CMQ1HPzroJF4vdO+uc=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_653d173bc42311f1b45c525400cd780f
+    ReservedCode2: 0g0vDVV6SNzDtq370MRLPlgNWI454lebHfsndj1osN+UF6KGjlDF3mApum7/dG0VrhG8/MmdvqqFBkIQ7+c18eTO2ThJn3AXeZwABqKYJUYrWnj6YzrTem4qfK41ls4jY8WO9bgxlqBylgMghLoMWY6kzhb0dLwF+nnlnBiW6CMQ1HPzroJF4vdO+uc=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_860eae97c3ef11f1b45c525400cd780f
     ReservedCode1: nTWp7ZbQxiUy9t+YRtPgQe+RnYoMv/qSHHmerp52wcVZgWabAiXXojbIsCc0uiF6LiR+/xrUnBlYYp4coXL1+uiHYltkbZ95ATlHsFg7BD3Yh9uLxUqNeQgt9Y26LGjFlpwzRztQ6kEieqaaE44ZXTnihjQ0s7BrEX/d1JKow/eACZGqtNOk9JN6ShY=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -721,5 +732,46 @@ powershell -ExecutionPolicy Bypass -File "scripts\run_all.ps1"
 7. `BAL-R8-01` 替代路径是否启用（`alt_paths` 已定义，启用即由站点侧按需消费）。
 8. 站点实测胜率样本回收（P5 的 45%~55% 平衡目标，需 P7 挂载后）。
 
+## R14 · 升 A 候选终审对照与胜率报告独立复核（证据补强轮，2026-10-09）
+
+**范围**：R13 末节「下一轮（R14）计划」8 项全部为待用户拍板项，无可本地独立执行项；本轮转为「拍板前证据补强」，不假造进度。**未入池、未改名、未裁切、未触碰任何源文件；数值框架零改动。**
+
+### R14-A · 6 张升 A 候选终审对照（docs/18 §1）
+
+对 R14 计划 ② 点名的 6 张图（B8 鸠老_03 / B26 叶子_01 / B30 兆岳_01 / B37 罗小黑战记2 并肩破局海报 / B38 哪吒_01 / B39 哪吒_02）做独立视觉复核（强制忽略文件名、仅描述画面）+ 世界观主库设定对照：
+
+- **B8 / B30 / B38 / B39**：角色与文件名对应获佐证，官方原图（片源标题 / 设定稿署名），可进入拍板队列。
+- **B26**：实为「叶子 + 虚淮」双角色设计稿（文件名漏标「虚淮」），建议拍板改名。
+- **B37**：实为《罗小黑战记 II》「并肩同行」**预告片封面**（含视频播放按钮），文件名「并肩破局」与官方文案「并肩同行」不符，作卡面需裁切、作海报用途不成立。
+- 6 张均无 AI 痕迹、无同人 / 第三方署名（「七点GAME」为既有口径平台水印，docs/14 §4）；判定框架不变（docs/15 一致 33 / 存疑 4 / 不一致 2 原样保留）。
+
+### R14-B · R13 胜率报告独立复核（docs/18 §2）
+
+独立脚本（会话中间产物目录，只读 `decks.json` / `character_stats.json` / `battle-engine.js`）按相同抽样公式（100 对手 = `(i*7+3)%488`、每对手 3 种子、`SEED_BASE=61009`；镜像 20 场）复现：
+
+| 项 | 原报告 | 独立复现 | 一致 |
+| --- | --- | --- | --- |
+| 总场次 / 胜 / 平 / 负 | 300 / 297 / 0 / 3 | 300 / 297 / 0 / 3 | ✓ |
+| 胜率 | 99.00% | 99.00% | ✓ |
+| 分档 | B 0/3、C 12/12、D 33/33、E 57/57、F 195/195 | 同左 | ✓ |
+| 镜像 | 60.00%（12/20） | 60.00%（12/20） | ✓ |
+
+结论：报告**可信且可复现**（确定性内核成立）；「主战 99.00% 偏离 P5 目标 45%~55%」结论成立；仍不改数值。
+
+### R14-C · 本轮产出与溯源
+
+| 项 | 结果 |
+| --- | --- |
+| `docs/18-升A候选终审对照与胜率报告独立复核.md` | 本轮记录（避让 docs/01–17）：终审对照表 + 胜率复核对照表 + 溯源 + 未决项 |
+| `README.md` | 新增 R14 节（产出 / 结论 / 溯源 / R15 计划） |
+| 数值 / 素材 / 引擎 | `character_stats.json` / `decks.json` / `achievements.json` / `six-systems.json` / `stat-model.json` 零改动；6 张源图只读；`battle-engine.js` 等引擎零改动；世界观主库只读 |
+
+### R14-D · 未决项与下一轮（R15）
+
+1. R14 计划 8 项未决**全部不变**（见 R13-D），均待用户拍板。
+2. 拍板后按结果执行（改名 / 裁切 / 入池登记 / 站点挂载 / 端侧采集 / 数值处置）；未拍板前继续证据补强。
+3. 仍不改动数值框架与既有卡组规则。
+
+*（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
