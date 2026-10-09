@@ -491,6 +491,32 @@ AIGC:
 - 仍不改动数值框架与既有卡组规则。
 
 
+### R17 · 集成包同步与主线健康复核（2026-10-10）
+
+**触发**：用户指令要求按 README 分轮计划推进「角色技能分配与卡组生成 → 对战结算与收集成就 → 胜负反馈与表情包」。核实确认该三分轮已于 **R5（2026-10-07）全部完成并合入主线**（R16 复核成立，git 链复验：`master = a2cd7f4`，`New project/six-system-arena/` 工作区干净）。R17 计划 8 项全部待用户拍板、无可本地独立执行项；本轮按工程惯例做**主线健康复核 + 集成包遗留收口**——修复 R5 后集成包与真源 2 处漂移，为拍板后的 P7 挂载准备健康交付包。**未替用户拍板任何事项；数值框架零改动。**
+
+**本轮产出**
+
+| 项 | 结果 |
+| --- | --- |
+| 主线回归 | `validate_achievements.py` **25/25 PASS**（数值框架零漂移 / 台账 9 张在位 / 未决挂账 5 项显式）；`smoke_test.js` 全绿 |
+| 集成包同步 | `sync_from_arena.ps1` APPLY 同步 8 文件；2 处漂移收口（`integration/data/achievements.json` R13 v1.2.0 alt_paths、`integration/data/emoticons.json` R9/R13 v1.2.0 复审留痕）；`manifest.json` 刷新 24 文件哈希 |
+| 集成自检 | `verify_integration.py` **全项 PASS**（drift.arena-source 全部一致）；`smoke_integration.mjs` **12/12 PASS** |
+| 记录文档 | 新增 [`docs/20-R17集成包同步与主线健康复核.md`](docs/20-R17集成包同步与主线健康复核.md)（避让 docs/01–19） |
+
+**数值 / 资源溯源**
+
+- 数值：真源 `character_stats.json` / `decks.json` / `achievements.json` / `six-systems.json` / `stat-model.json` **零改动**（数值框架零漂移）；`integration/data/` 两份副本与真源对齐属**副本同步**，非数值变更。
+- 素材：零新增、零拷贝、零修改；本轮未联网采集；官方白名单 6/6 在位核验通过。
+- 引擎：`battle-engine.js` / `achievement-system.js` / `settlement.js` 零改动；世界观主库只读。
+
+**本轮未决项 / 下一轮（R18）计划**
+
+- 8 项待拍板事项（docs/19 §1–§8）**全部不变**，均待用户拍板；拍板后按 docs/19 方案执行（改名 / 裁切 / 入池登记 / P7 挂载 / 端侧采集 / alt_paths 启用 / 胜率样本回收）。
+- 集成包已与真源一致（本轮收口），P7 挂载（零侵入 A 方案）可直接使用本交付包。
+- 仍不改动数值框架与既有卡组规则。
+
+
 ### 1.1 世界观与素材红线（最高优先级）
 
 1. **忠于《罗小黑战记》官方世界观**，能力体系严格对齐官方设定（御灵系 / 生灵系 / 造物系 / 空间系 / 心灵系 / 锁御系）。

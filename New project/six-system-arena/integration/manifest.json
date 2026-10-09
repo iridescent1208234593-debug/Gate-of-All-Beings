@@ -228,7 +228,7 @@
       "bytes": 9748
     },
     "manifest.json": {
-      "sha256": "ec35b85c7310f4153158d7f90dcb99f216278707cd15a991e8a100801c02ef3f",
+      "sha256": "604064abfe8826c9a7f5809e89e8345a407aadf49fbfec7232377a454913a289",
       "bytes": 13198
     },
     "js/six-system-icons.js": {
@@ -280,20 +280,20 @@
       "bytes": 1867622
     },
     "data/achievements.json": {
-      "sha256": "d38241583e467ed70194f5d17c3f51d18953dd10fce3174b4120ebd32e32bfc1",
-      "bytes": 17485
+      "sha256": "b546d140d95f8bae4018e85096857f03c9c9081d5b0fbdd24eba8acc49b500ac",
+      "bytes": 20809
     },
     "data/six-systems.json": {
       "sha256": "beb33d0a1a02f098fad180239c265043fad6078c11331d6a418214106d19c4f9",
       "bytes": 4586
     },
     "data/stat-model.json": {
-      "sha256": "a9978d09cdb2c63faa994377c896a8cb6ad88689ed876620e15929ea9894fb58",
-      "bytes": 8939
+      "sha256": "c82933aae7eb2d0e8745eeaca3f083f50b60de89d1824e28ce8686dea4fabba9",
+      "bytes": 9071
     },
     "data/emoticons.json": {
-      "sha256": "a16c8dea4ce02b54a01e8bd51e8a11636dd6a64d694c5f7aa57a0ba558b40569",
-      "bytes": 9368
+      "sha256": "770727c2412e29027e60116cfe44d71a16cb131aa52796d57287b58a5aab13d3",
+      "bytes": 17879
     },
     "verify/install_assets.ps1": {
       "sha256": "49c3e0be9db55cb006c5e6d5548e6bb0ec9380229bfd9bcfe7f96898081d1cfe",
@@ -316,6 +316,6 @@
       "bytes": 1103
     }
   },
-  "hashes_refreshed_at": "2026-10-08 06:14:14",
+  "hashes_refreshed_at": "2026-10-10 00:04:36",
   "package_version": "1.2.0"
 }
