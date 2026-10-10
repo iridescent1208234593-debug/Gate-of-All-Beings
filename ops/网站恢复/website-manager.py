@@ -423,7 +423,7 @@ def recover_site(site, report, quiet=False):
             if quiet:
                 report('隧道进程仍在，但没有活动连接；自动照看不会中断进程，请点「恢复隧道」处理。', 'warn')
                 return False
-            stopped = subprocess.run(['taskkill.exe', '/PID', str(pids[0])],
+            stopped = subprocess.run(['taskkill.exe', '/F', '/PID', str(pids[0])],
                                      capture_output=True, text=True, timeout=10,
                                      creationflags=subprocess.CREATE_NO_WINDOW)
             if stopped.returncode != 0:
