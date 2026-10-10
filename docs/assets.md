@@ -12,6 +12,10 @@ Git 保存源码、Design System、配置、文档、SVG/icons，以及目前被
 
 适合后续迁移到 Cloudflare R2 并通过 CDN 提供的内容：图库高清原图、视频、音频、GLB/3D 模型和大型纹理。迁移时先核对应用运行时路径、对象键、部署缓存和回滚方式，再复制资源并验证线上访问；本仓库不自动上传或移动这些文件。
 
+首页 Gallery 的迁移清单由 `npm run assets:manifest` 生成到 `ops/assets/gallery-manifest.json`。它沿用首页构建使用的 `discoverGallery()`，只收录 JPG/JPEG/PNG/WebP，记录相对对象键、源文件相对路径、字节数、SHA-256、MIME 和分类；GIF 会列在 `UNSUPPORTED/EXCLUDED` 中。音乐、数据库、备份和上传内容都不在输入目录或允许类型内。当前清单覆盖 384 张图片（约 304.4 MiB）。`GALLERY_DIR` 可指定本机素材目录；不设置时使用下文的原始 Gallery 目录。清单是复制计划，生成或构建时不会移动、覆盖或删除源素材。
+
+统一流程见 [`update-system.md`](update-system.md)。R2 订阅和 bucket 尚未就绪前，`npm run update` 会停止并记录报告，不执行上传或 DNS/custom-domain 操作。远端同步必须先输出 NEW、CHANGED、UNCHANGED、REMOTE_ONLY 和总字节数；只上传 NEW/CHANGED，保留 REMOTE_ONLY，永不自动删除远端或本地对象。
+
 可继续留在 Git 的资源：SVG/icons、小型 UI 图片、组件示例和必须与代码版本同步的文件。Design System 中当前使用的图片即使超过 1 MB，也先保留在 Git，待有明确替代 URL 和完整性验证后再单独迁移。
 
 ## `asset()`

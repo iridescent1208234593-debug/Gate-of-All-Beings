@@ -11,6 +11,7 @@ Iridescently / 众生之门 工作区文档。总览见根 [README.md](../README
 | [hooks.md](hooks.md) | 钩子与约定：embed、dispose、portal.json、构建、扩展点 |
 | [networking.md](networking.md) | 联机：现状与预留接口设计 |
 | [operations.md](operations.md) | 部署运营：端口、网站管家、Cloudflare 隧道、看门狗、排障 |
+| [update-system.md](update-system.md) | 统一 Git / Gallery manifest / R2 更新流程和安全门 |
 
 ## 快速事实
 

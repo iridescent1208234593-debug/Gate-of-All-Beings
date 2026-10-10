@@ -11,6 +11,18 @@
     "build:homepage": "node portal/www/scripts/build-homepage.mjs",
     "dev:homepage": "node portal/www/scripts/build-homepage.mjs --dev",
     "build:modules": "node server/app/scripts/build-modules.mjs",
-    "test:portal": "python server/verify_portal.py"
+    "test:portal": "python server/verify_portal.py",
+    "assets:manifest": "node ops/assets-manifest.mjs",
+    "update:status": "node ops/update.mjs status",
+    "update:check": "node ops/update.mjs check",
+    "update:code": "node ops/update.mjs code",
+    "update:assets": "node ops/update.mjs assets",
+    "update": "node ops/update.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4.147.0"
+  },
+  "overrides": {
+    "sharp": "^0.35.5"
   }
 }

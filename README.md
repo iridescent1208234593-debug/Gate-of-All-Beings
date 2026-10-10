@@ -131,6 +131,10 @@ import { get, set } from "@lxh/shared-session/save";
 
 根目录 Git 是唯一仓库。源码与文档集中由根仓库管理；构建输出、依赖、数据库、日志、密钥、会话导出和本地大型数据不纳入版本控制。部署前构建命令见上文；运行数据库、外部素材和上传内容需独立备份。
 
+### 统一更新
+
+Git 与 Gallery/R2 更新流程及安全门见 [`docs/update-system.md`](docs/update-system.md)。
+
 ## 边界
 
 - `shared-types` 协议标识 `eco='ecoplanet3d-js'`、`lj='lingjing-huiguan'` 与旧 localStorage 键保持不变。
