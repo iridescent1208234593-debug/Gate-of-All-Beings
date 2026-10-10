@@ -97,6 +97,8 @@ class TrailController {
   }
 
   dispose() {
+    this.trail.object.removeFromParent()
+    this.trailHeadParticles.object.removeFromParent()
     this.trail.dispose()
     this.trailHeadParticles.dispose()
     this.runtimeState.hasSeededInitialPoints = false
