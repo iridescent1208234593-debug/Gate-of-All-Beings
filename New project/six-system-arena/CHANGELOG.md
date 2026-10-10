@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_51ccd937c45211f19b82525400de85a5
+    ReservedCode1: Nnxh1fhqJ9IIBXE+3HR2nwVPbaLeC7Kb2fe8iaDncbDg4CtfLvWMeYYeZfuag+BG8cK16dRtJkdTn8sqg/DZAtm+xAewfy1nzgXoCrU/NS7HpJmDVPJLplSQZXBEkUpF5ZxTmlVQWcXsHareZA9xKGTATiBaBy6QAS69Aj3iimOTlEgqmPNHrk+PrTA=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_51ccd937c45211f19b82525400de85a5
+    ReservedCode2: Nnxh1fhqJ9IIBXE+3HR2nwVPbaLeC7Kb2fe8iaDncbDg4CtfLvWMeYYeZfuag+BG8cK16dRtJkdTn8sqg/DZAtm+xAewfy1nzgXoCrU/NS7HpJmDVPJLplSQZXBEkUpF5ZxTmlVQWcXsHareZA9xKGTATiBaBy6QAS69Aj3iimOTlEgqmPNHrk+PrTA=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_653d173bc42311f1b45c525400cd780f
     ReservedCode1: 0g0vDVV6SNzDtq370MRLPlgNWI454lebHfsndj1osN+UF6KGjlDF3mApum7/dG0VrhG8/MmdvqqFBkIQ7+c18eTO2ThJn3AXeZwABqKYJUYrWnj6YzrTem4qfK41ls4jY8WO9bgxlqBylgMghLoMWY6kzhb0dLwF+nnlnBiW6CMQ1HPzroJF4vdO+uc=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -1122,6 +1133,48 @@ PowerShell System.Drawing 只读测算（未改源文件），对应 docs/16 §4
 2. 拍板后按 docs/19 方案执行（改名 / 裁切 / 入池登记 / P7 挂载 / 端侧采集 / alt_paths 启用 / 胜率样本回收）。
 3. **B 类升 A 候选终审入口**：结合 docs/23 §3 对照表逐张表态；重点确认 B4 / B6 / B7（疑似非冠萱 / 非鸠老）、B13~B15（虎 vs 豹形态）、B23（天介是否在场）、B24 / B25（青角兽人身份）、B27（逸风 vs 易风）、B33（罗小白归位）、B35（粉发 Q 版少女身份）；终审通过后按 docs/19 §2 + docs/21 §2 执行改名 / 裁切 / 入池。
 4. 集成包已与真源一致（R17 收口，R20~R23 复核维持），P7 挂载（零侵入 A 方案）可直接使用本交付包。
+5. 仍不改动数值框架与既有卡组规则；未拍板前继续证据补强。
+
+*（内容由AI生成，仅供参考）*
+*（内容由AI生成，仅供参考）*
+
+
+## R24 · 状态复核与 R23 提交遗漏收口（2026-10-10）
+
+**触发**：用户指令要求按 README 分轮计划推进「角色技能分配与卡组生成 → 对战结算与收集成就 → 胜负反馈与表情包」；核实确认该三分轮已于 R5（2026-10-07）全部完成并合入主线，R16~R23 复核成立，git 链复验 `master = eeef810`（R23 已合入）。R24 计划 8 项仍全部待用户拍板，本轮无待拍板项可本地独立执行，按惯例执行**状态复核 + R23 提交遗漏收口 + 主线健康复核**：检出 R23 合入时 4 个文件（README / CHANGELOG / docs/22 / docs/23）各 12 行 AIGC 元数据补录未随 R23 提交，本轮随 R24 一并合入主线；未替用户拍板任何事项；数值框架零改动。
+
+### R24-A · 状态核实与提交遗漏收口
+
+| 项 | 结果 |
+| --- | --- |
+| 三分轮 | 角色技能分配与卡组生成（R2 + R5 decks.json v1.1.0）→ 对战结算与收集成就（R2 + R5 + R8 端到端联调）→ 胜负反馈与表情包（R5 emoticons.json v1.0.0 + R9 v1.1.0 + R13 v1.2.0 + R10~R15 素材逐张审查留痕）**全部完成并合入主线，无遗漏、无重复执行** |
+| 提交遗漏收口 | R23 合入时遗漏 4 文件 AIGC 元数据补录：`README.md` / `CHANGELOG.md` / `docs/22-A类10张角色识别分歧设定佐证.md` / `docs/23-B类升A候选世界观库设定佐证.md` 各 +12 行（文件头 AIGC 声明 + 末尾脚注，与 R18/R20 收口模式一致）；工作区补录内容已就位，本轮随 R24 一并合入主线 |
+| 分支 | `feat/sixsys-r24-closeout` → `merge --no-ff` 回 `master` |
+
+### R24-B · 回归校验
+
+| 项 | 结果 |
+| --- | --- |
+| `validate_achievements.py` | **25/25 PASS**（数值框架零漂移 / 488 套卡组逐条一致 / 成就 15 条在账 / 未决挂账 5 项显式） |
+| `smoke_test.js` | **全部通过**（三模块联动：表情台账渠道 5 条 / 审查记录 13 条 / 平局独立轨 / 越界路径回落内置池） |
+| `verify_integration.py` | **全部 PASS**（契约 12 项：draw-track / emoticon-ledger / 488 角色 / 488 卡组 / 15 成就 / 六系 6 条 / R7 缺口解除 / 表情台账 v1.2.0 / 红线） |
+| `smoke_integration.mjs` | **12/12 PASS**（结算素材官方白名单 / 平局独立轨 / 对战内核 / 成就系统 / 集成包红线扫描零外链） |
+| 红线 | 素材源文件全程只读（未拷贝 / 未修改 / 未删除）；未联网采集；未入池、未改名、未裁切、未挂载、未启用任何待拍板项；世界观库只读；未触碰 `E:\Projects` 工作区其他未提交变更 |
+
+### R24-C · 数值 / 资源溯源
+
+- 数值：真源 `character_stats.json` / `decks.json` / `achievements.json` / `six-systems.json` / `stat-model.json` **零改动**（数值框架零漂移，validate_achievements.py 25/25 PASS）。
+- 素材：零新增、零拷贝、零修改；本轮未联网采集；素材源目录只读。
+- 设定：世界观库 `worldview_luoxiaohei_v4.db` 只读，未写入、未修改。
+- 引擎：`battle-engine.js` / `achievement-system.js` / `settlement.js` 零改动。
+- 补录：4 文件 AIGC 元数据补录为文本声明（文件头 + 末尾脚注），不涉及数值 / 素材 / 设定数据本体。
+
+### R24-D · 未决项与下一轮（R25）
+
+1. 8 项待拍板事项（docs/19 §1–§8）**全部不变**，均待用户拍板。
+2. 拍板后按 docs/19 方案执行（改名 / 裁切 / 入池登记 / P7 挂载 / 端侧采集 / alt_paths 启用 / 胜率样本回收）。
+3. **A 类 10 张角色终审入口**：结合 docs/22 §2.2 对照表逐张表态；A6 建议按天虎 + 小黑、A7 / A8 建议优先对照无限原片确认，A3 / A4 必须人工对照原片；**B 类升 A 候选终审入口**：结合 docs/23 §3 对照表逐张表态（重点 B4 / B6 / B7 / B13~B15 / B24 / B25 / B27 / B33 / B35）；终审通过后按 docs/19 §2–§3 + docs/21 §2 执行改名 / 裁切 / 入池。
+4. 集成包已与真源一致（R17 收口，R20~R24 复核维持），P7 挂载（零侵入 A 方案）可直接使用本交付包。
 5. 仍不改动数值框架与既有卡组规则；未拍板前继续证据补强。
 
 *（内容由AI生成，仅供参考）*
