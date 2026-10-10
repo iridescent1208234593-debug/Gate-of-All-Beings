@@ -2,6 +2,17 @@
 AIGC:
     Label: "1"
     ContentProducer: 001191440300708461136T1XGW3
+    ProduceID: a56f9206a4d0ca36c9be567d4febd43b_50cc98bac45211f19b82525400de85a5
+    ReservedCode1: khvLsSNks+eoNprcCJ42gvsyhNJt8375YpXlCPqLHICU5g9jeR4arc3R+L9hhiExZsHmbDzpdxmOkaE0ofh1bn8zoul665QpgfXUbp2l9A00lrM9nAXdPT39JVDMkrEQjx7VF+pWk1fFAw4kKwwMTlxy5Yu6hI8+sMZ9bHL7i0gmCeNQrmiPgwo+RL8=
+    ContentPropagator: 001191440300708461136T1XGW3
+    PropagateID: a56f9206a4d0ca36c9be567d4febd43b_50cc98bac45211f19b82525400de85a5
+    ReservedCode2: khvLsSNks+eoNprcCJ42gvsyhNJt8375YpXlCPqLHICU5g9jeR4arc3R+L9hhiExZsHmbDzpdxmOkaE0ofh1bn8zoul665QpgfXUbp2l9A00lrM9nAXdPT39JVDMkrEQjx7VF+pWk1fFAw4kKwwMTlxy5Yu6hI8+sMZ9bHL7i0gmCeNQrmiPgwo+RL8=
+---
+
+---
+AIGC:
+    Label: "1"
+    ContentProducer: 001191440300708461136T1XGW3
     ProduceID: a56f9206a4d0ca36c9be567d4febd43b_6443664cc42311f1b45c525400cd780f
     ReservedCode1: xnj7RAKSgtb1EEZqhr7SZffjIuCaS/QtTfI5s5nYXQY1fBwkdDQUFeMEqBNaxkB6Tl0qUTpgR/JXX204x4kShdQEUfyXjFDhe5E+Pwwwk9p3WPsQCMsn34fETWAF9R0piOUptwXyol3eF4D9nyHNMpojlMjjEaNl6KXIRCHAFkQZXv65s/fvXkWQH/U=
     ContentPropagator: 001191440300708461136T1XGW3
@@ -694,6 +705,24 @@ AIGC:
 - 仍不改动数值框架与既有卡组规则；未拍板前继续证据补强。
 
 
+### R24 · 状态复核与 R23 提交遗漏收口（2026-10-10）
+
+**触发**：用户指令要求按 README 分轮计划推进「角色技能分配与卡组生成 → 对战结算与收集成就 → 胜负反馈与表情包」。核实确认该三分轮已于 **R5（2026-10-07）全部完成并合入主线**；R16~R23 复核成立，git 链复验 `master = eeef810`（R23 已合入）。R24 计划 8 项仍全部待用户拍板，本轮无待拍板项可本地独立执行，按惯例执行**状态复核 + R23 提交遗漏收口 + 主线健康复核**；未替用户拍板任何事项；数值框架零改动。
+
+| 项 | 结果 |
+| --- | --- |
+| 状态核实 | 三分轮（① 角色技能分配与卡组生成 → ② 对战结算与收集成就 → ③ 胜负反馈与表情包）R5 全部完成并合入主线；R8 端到端联调打通；R9~R23 素材审查 / 证据补强 / 集成包复核持续成立 |
+| 提交遗漏收口 | R23 合入时遗漏 4 文件 AIGC 元数据补录（README / CHANGELOG / docs/22 / docs/23 各 +12 行，与 R18/R20 收口模式一致），本轮随 R24 一并合入主线 |
+| 回归校验 | `validate_achievements.py` 25/25 PASS · `smoke_test.js` 全绿 · `verify_integration.py` 全 PASS · `smoke_integration.mjs` 12/12 PASS（数值框架零漂移，红线零触碰） |
+| 分支 | `feat/sixsys-r24-closeout` → `merge --no-ff` 回 `master` |
+
+**本轮未决项 / 下一轮（R25）计划**
+
+- 8 项待拍板事项（docs/19 §1–§8）**全部不变**，均待用户拍板；拍板后按 docs/19 方案执行（改名 / 裁切 / 入池登记 / P7 挂载 / 端侧采集 / alt_paths 启用 / 胜率样本回收）。
+- **A 类 10 张角色终审入口**：结合 docs/22 §2.2 对照表逐张表态（A6 按天虎 + 小黑 / A7、A8 优先对照无限原片 / A3、A4 必须人工对照原片）；**B 类升 A 候选终审入口**：结合 docs/23 §3 对照表逐张表态（重点 B4 / B6 / B7 / B13~B15 / B24 / B25 / B27 / B33 / B35）。
+- 集成包已与真源一致（R17 收口，R20~R24 复核维持），P7 挂载（零侵入 A 方案）可直接使用本交付包。
+- 仍不改动数值框架与既有卡组规则；未拍板前继续证据补强。
+
 ### 1.1 世界观与素材红线（最高优先级）
 
 1. **忠于《罗小黑战记》官方世界观**，能力体系严格对齐官方设定（御灵系 / 生灵系 / 造物系 / 空间系 / 心灵系 / 锁御系）。
@@ -914,6 +943,7 @@ node "$A\integration\verify\smoke_integration.mjs"
 | 站点卡牌工程（现有 demo 数值） | `E:\Projects\server\app\src\cards\` | 数值登记对象，**只读**；登记结论见 `docs/08` |
 | 旧副本工程（第 1 轮成果） | `D:\Projects\new project\` | **保留不删**，仅参考；快照在 `legacy/d-drive-r1/` |
 | zszm 交付集成包 | `E:\Projects\New project\six-system-arena\integration\` | R4 产出；安装指南见 `INTEGRATION-ZSZM.md` |
+*（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
 *（内容由AI生成，仅供参考）*
