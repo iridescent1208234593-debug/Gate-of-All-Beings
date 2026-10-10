@@ -34,6 +34,20 @@ const publishDir = path.join(homepageRoot, ".homepage-publish");
 const publicDir = path.join(homepageRoot, "assets/homepage");
 const viteBin = path.join(galleryRoot, "node_modules/vite/bin/vite.js");
 const viteConfig = path.join(homepageRoot, "vite.config.mjs");
+const viteNodeModule = path.join(
+  galleryRoot,
+  "node_modules/vite/dist/node/index.js",
+);
+const galleryPluginModule = path.join(galleryRoot, "gallery-plugin.js");
+const [{ loadEnv }, { resolveGalleryAssetBase, discoverGallery }] =
+  await Promise.all([
+    import(pathToFileURL(viteNodeModule)),
+    import(pathToFileURL(galleryPluginModule)),
+  ]);
+const galleryAssetBase = resolveGalleryAssetBase(
+  loadEnv("production", homepageRoot, "VITE_"),
+);
+const galleryUsesCdn = /^https?:\/\//i.test(galleryAssetBase);
 
 function ensureInside(parent, candidate) {
   const relative = path.relative(parent, candidate);
@@ -89,10 +103,7 @@ const build = runVite(["build"]);
 if (build.error) throw build.error;
 if (build.status !== 0) process.exit(build.status ?? 1);
 
-const manifestModule = await import(
-  pathToFileURL(path.join(galleryRoot, "gallery-plugin.js"))
-);
-const manifest = await manifestModule.discoverGallery(galleryDir);
+const manifest = await discoverGallery(galleryDir);
 if (manifest.length === 0)
   throw new Error(`No supported Gallery images found in ${galleryDir}`);
 
@@ -122,28 +133,30 @@ const versionedHomepage = [
 
 const stagedGalleryDir = path.join(stageDir, "gallery-files");
 const stagedGalleryFiles = [];
-for (const file of manifest) {
-  const source = path.resolve(galleryDir, ...file.name.split("/"));
-  const staged = path.resolve(stagedGalleryDir, ...file.name.split("/"));
-  ensureInside(galleryDir, source);
-  ensureInside(stagedGalleryDir, staged);
-  if (!existsSync(staged))
-    throw new Error(`Gallery build output is missing ${file.name}`);
-  if (statSync(source).size !== statSync(staged).size) {
-    throw new Error(`Gallery build size changed for ${file.name}`);
+if (!galleryUsesCdn) {
+  for (const file of manifest) {
+    const source = path.resolve(galleryDir, ...file.name.split("/"));
+    const staged = path.resolve(stagedGalleryDir, ...file.name.split("/"));
+    ensureInside(galleryDir, source);
+    ensureInside(stagedGalleryDir, staged);
+    if (!existsSync(staged))
+      throw new Error(`Gallery build output is missing ${file.name}`);
+    if (statSync(source).size !== statSync(staged).size) {
+      throw new Error(`Gallery build size changed for ${file.name}`);
+    }
+    stagedGalleryFiles.push({ source, staged, name: file.name });
   }
-  stagedGalleryFiles.push({ source, staged, name: file.name });
-}
 
-if (stagedGalleryFiles.length !== manifest.length) {
-  throw new Error(
-    `Expected ${manifest.length} Gallery files; staged ${stagedGalleryFiles.length}`,
-  );
-}
+  if (stagedGalleryFiles.length !== manifest.length) {
+    throw new Error(
+      `Expected ${manifest.length} Gallery files; staged ${stagedGalleryFiles.length}`,
+    );
+  }
 
-for (const file of stagedGalleryFiles) {
-  if ((await hashFile(file.source)) !== (await hashFile(file.staged))) {
-    throw new Error(`Gallery build SHA-256 mismatch: ${file.name}`);
+  for (const file of stagedGalleryFiles) {
+    if ((await hashFile(file.source)) !== (await hashFile(file.staged))) {
+      throw new Error(`Gallery build SHA-256 mismatch: ${file.name}`);
+    }
   }
 }
 
@@ -167,5 +180,7 @@ rmSync(publishDir, { recursive: true, force: true });
 writeFileSync(path.join(homepageRoot, "index.html"), versionedHomepage);
 
 console.log(
-  `[homepage] Published ${manifest.length} Gallery assets with matching SHA-256 hashes.`,
+  galleryUsesCdn
+    ? `[homepage] Published ${manifest.length} Gallery CDN references; source images were not copied.`
+    : `[homepage] Published ${manifest.length} Gallery assets with matching SHA-256 hashes.`,
 );

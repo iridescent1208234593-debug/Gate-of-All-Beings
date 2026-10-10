@@ -5,6 +5,8 @@ import path from 'node:path'
 const imageExtension = /\.(jpe?g|png|webp)$/i
 const collator = new Intl.Collator('zh-CN', { numeric: true, sensitivity: 'base' })
 export const encodePath = (name) => name.split('/').map(encodeURIComponent).join('/')
+export const resolveGalleryAssetBase = (env = {}) =>
+  (env.VITE_ASSET_BASE_URL ?? '').trim().replace(/\/+$/, '')
 
 export async function discoverGallery(directory) {
   const entries = await readdir(directory, { recursive: true, withFileTypes: true })
@@ -32,10 +34,12 @@ export function externalGallery(directory) {
   const moduleId = '\0virtual:gallery'
   let manifest = []
   let config
+  let assetBase = ''
   return {
     name: 'external-gallery',
     configResolved(value) {
       config = value
+      assetBase = resolveGalleryAssetBase(value.env)
     },
     async buildStart() {
       manifest = await discoverGallery(directory)
@@ -46,7 +50,7 @@ export function externalGallery(directory) {
     },
     load(id) {
       if (id !== moduleId) return
-      return `export default ${JSON.stringify(manifest)}.map(file => ({...file, url: import.meta.env.BASE_URL + 'gallery-files/' + file.name.split('/').map(encodeURIComponent).join('/') + '?v=' + encodeURIComponent(file.version)}))`
+      return `const assetBase = ${JSON.stringify(assetBase)}; export default ${JSON.stringify(manifest)}.map(file => ({...file, url: (assetBase ? assetBase + '/' : import.meta.env.BASE_URL) + 'gallery-files/' + file.name.split('/').map(encodeURIComponent).join('/') + '?v=' + encodeURIComponent(file.version)}))`
     },
     configureServer(server) {
       let timer
@@ -80,7 +84,7 @@ export function externalGallery(directory) {
         clearTimeout(timer)
       })
       server.middlewares.use(async (req, res, next) => {
-        const prefix = `${config.base === './' ? '/' : config.base}gallery-files/`
+        const prefix = `${assetBase && !/^https?:\/\//i.test(assetBase) ? assetBase + '/' : config.base === './' ? '/' : config.base}gallery-files/`
         if (!req.url?.startsWith(prefix)) return next()
         if (req.method !== 'GET' && req.method !== 'HEAD') {
           res.statusCode = 405
@@ -122,6 +126,7 @@ export function externalGallery(directory) {
       })
     },
     async writeBundle() {
+      if (/^https?:\/\//i.test(assetBase)) return
       const output = path.resolve(config.root, config.build.outDir, 'gallery-files')
       // Sequential copy keeps build memory bounded and leaves originals untouched.
       for (const file of manifest) {

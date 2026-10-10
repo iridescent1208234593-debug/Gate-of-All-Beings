@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, writeFile, rm } from 'node:fs/promises'
+import { mkdtemp, writeFile, readFile, rm, stat } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { createColor } from 'colorthief'
-import { discoverGallery, encodePath } from '../gallery-plugin.js'
+import { loadEnv } from 'vite'
+import { discoverGallery, encodePath, externalGallery, resolveGalleryAssetBase } from '../gallery-plugin.js'
 import { mapAtmosphere } from '../src/data/palette.js'
 
 const directory = await mkdtemp(path.join(os.tmpdir(), 'depth-gallery-test-'))
@@ -27,6 +28,49 @@ try {
   assert.deepEqual(files, await discoverGallery(directory))
   await writeFile(path.join(directory, '图3.png'), 'new fixture')
   assert.equal((await discoverGallery(directory)).length, 5)
+  assert.equal(resolveGalleryAssetBase(), '')
+  for (const [index, [override, expectedBase]] of [
+    [undefined, '/assets/homepage'],
+    ['', '/assets/homepage'],
+    ['/custom/', '/custom'],
+    ['https://cdn.example.invalid/assets///', 'https://cdn.example.invalid/assets'],
+  ].entries()) {
+    const plugin = externalGallery(directory)
+    const outDir = `build-${index}`
+    plugin.configResolved({ root: directory, base: '/assets/homepage/', env: { VITE_ASSET_BASE_URL: override }, build: { outDir } })
+    await plugin.buildStart.call({ warn: () => {} })
+    const source = plugin.load(plugin.resolveId('virtual:gallery')).replaceAll('import.meta.env.BASE_URL', JSON.stringify('/assets/homepage/'))
+    const { default: gallery } = await import(`data:text/javascript,${encodeURIComponent(source)}`)
+    const prefix = `${expectedBase}/gallery-files/`
+    assert.equal(gallery.length, 5)
+    for (const file of gallery) {
+      assert.ok(file.url.startsWith(prefix), file.url)
+      assert.equal(decodeURIComponent(file.url.slice(prefix.length).split('?')[0]), file.name)
+      assert.match(file.url, /\?v=/)
+    }
+    await plugin.writeBundle()
+    const copied = path.join(directory, outDir, 'gallery-files', '图1.jpeg')
+    if (override?.startsWith('https:')) await assert.rejects(stat(copied), { code: 'ENOENT' })
+    else assert.equal(await readFile(copied, 'utf8'), 'fixture')
+    // Keep subsequent discovery independent of the test build output.
+    await rm(path.join(directory, outDir), { recursive: true, force: true })
+  }
+  const previousOverride = process.env.VITE_ASSET_BASE_URL
+  try {
+    delete process.env.VITE_ASSET_BASE_URL
+    assert.equal(resolveGalleryAssetBase(loadEnv('production', directory)), '')
+    await writeFile(path.join(directory, '.env'), 'VITE_ASSET_BASE_URL=/common\n')
+    await writeFile(path.join(directory, '.env.production.local'), 'VITE_ASSET_BASE_URL=https://cdn.example.invalid/from-file/\n')
+    assert.equal(resolveGalleryAssetBase(loadEnv('development', directory)), '/common')
+    assert.equal(resolveGalleryAssetBase(loadEnv('production', directory)), 'https://cdn.example.invalid/from-file')
+    process.env.VITE_ASSET_BASE_URL = 'https://cdn.example.invalid/from-process///'
+    assert.equal(resolveGalleryAssetBase(loadEnv('production', directory)), 'https://cdn.example.invalid/from-process')
+    process.env.VITE_ASSET_BASE_URL = ''
+    assert.equal(resolveGalleryAssetBase(loadEnv('production', directory)), '')
+  } finally {
+    if (previousOverride === undefined) delete process.env.VITE_ASSET_BASE_URL
+    else process.env.VITE_ASSET_BASE_URL = previousOverride
+  }
 } finally {
   assert.ok(
     path.resolve(directory).startsWith(path.resolve(os.tmpdir()) + path.sep + 'depth-gallery-test-')
