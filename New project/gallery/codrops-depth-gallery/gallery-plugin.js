@@ -4,7 +4,6 @@ import path from 'node:path'
 
 const imageExtension = /\.(jpe?g|png|webp)$/i
 const collator = new Intl.Collator('zh-CN', { numeric: true, sensitivity: 'base' })
-export const DEFAULT_GALLERY_CDN_BASE_URL = 'https://assets.iridescently.xyz'
 export const encodePath = (name) => name.split('/').map(encodeURIComponent).join('/')
 
 export async function discoverGallery(directory) {
@@ -33,15 +32,10 @@ export function externalGallery(directory) {
   const moduleId = '\0virtual:gallery'
   let manifest = []
   let config
-  let assetBase = ''
   return {
     name: 'external-gallery',
     configResolved(value) {
       config = value
-      assetBase = (
-        value.env.VITE_ASSET_BASE_URL ||
-        (value.command === 'build' ? DEFAULT_GALLERY_CDN_BASE_URL : '')
-      ).replace(/\/+$/, '')
     },
     async buildStart() {
       manifest = await discoverGallery(directory)
@@ -52,7 +46,7 @@ export function externalGallery(directory) {
     },
     load(id) {
       if (id !== moduleId) return
-      return `const assetBase = ${JSON.stringify(assetBase)};\nexport default ${JSON.stringify(manifest)}.map(file => ({...file, url: (assetBase ? assetBase + '/' : import.meta.env.BASE_URL) + 'gallery-files/' + file.name.split('/').map(encodeURIComponent).join('/') + '?v=' + encodeURIComponent(file.version) + '&cors=1'}))`
+      return `export default ${JSON.stringify(manifest)}.map(file => ({...file, url: import.meta.env.BASE_URL + 'gallery-files/' + file.name.split('/').map(encodeURIComponent).join('/') + '?v=' + encodeURIComponent(file.version)}))`
     },
     configureServer(server) {
       let timer
@@ -128,7 +122,6 @@ export function externalGallery(directory) {
       })
     },
     async writeBundle() {
-      if (/^https?:\/\//i.test(assetBase)) return
       const output = path.resolve(config.root, config.build.outDir, 'gallery-files')
       // Sequential copy keeps build memory bounded and leaves originals untouched.
       for (const file of manifest) {
