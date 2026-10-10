@@ -1,9 +1,9 @@
 {
   "tool": "verify_integration.py",
   "package": "sixsys-zszm-integration",
-  "arena_root": "E:\\Projects\\New project\\six-system-arena",
-  "integration_root": "E:\\Projects\\New project\\six-system-arena\\integration",
-  "generated_at": "2026-10-10 01:31:41",
+  "arena_root": "E:\\Projects\\new project\\six-system-arena",
+  "integration_root": "E:\\Projects\\new project\\six-system-arena\\integration",
+  "generated_at": "2026-10-10 02:06:30",
   "ok": true,
   "failures": [],
   "checks": [
