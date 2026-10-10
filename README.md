@@ -42,7 +42,7 @@ Iridescently/
 
 ## 统一入口与上线状态
 
-`server/portal_server.py` 单进程按 `Host` 与路径分发；**生产已切换**：`iridescently.xyz`、`www`、`huiguan`、`oc` 四个域名由 Cloudflare 隧道指向本进程。
+`server/portal_server.py` 单进程按 `Host` 与路径分发；网站管家配置由同一入口提供 `iridescently.xyz`、`www`、`huiguan`、`oc` 与 `zszm`。本轮更新了本地路由与网站管家清单，未重载隧道或部署生产。
 
 灵体互动试验场有独立入口：[spirit.iridescently.xyz](https://spirit.iridescently.xyz/games/spirit-playground?room=forest)。该子域仍由统一门户托管，静态文件来自 `server/app/modules/softie/` 构建产物，灵体房间 WebSocket / API 代理至本机 softie 上游（4173）；项目首页和统一壳也保留内部入口。网站管家已将独立域名登记到软乎乎上游服务。账号登录通过会馆 SSO，灵体参数写入独立 `softie` 云存档范围。
 
@@ -51,13 +51,16 @@ Iridescently/
 | 主域 `/`                  | `portal/www`                                                    |
 | `huiguan.*`               | `portal/huiguan`                                                |
 | `oc.*`                    | `portal/oc`                                                     |
+| `zszm.* /`                | 当前众生之门卡牌应用（`server/app/modules/cards/`）；`/api/sso-user` 走会馆共享 SSO，OAuth API 代理到 5174，数值配置 API 代理到 5178 |
 | `spirit.*`                | 灵体互动场景（softie 构建产物；API / WebSocket 由统一入口转发） |
 | `/app/shell/`             | 统一壳（SPA 路径路由 `/app/shell/m/<名>`）                      |
 | `/app/modules/<名>/`      | 游戏模块（构建产物）                                            |
 | `/shared/*`               | 设计系统 / 会话存档等公用资源                                   |
 | `/app/modules/<名>/api/*` | 反向代理到各游戏 API 上游                                       |
 
-游戏 API 代理上游：`cards→5174`、`softie→4173`、`juling→5177`。
+旧 `lingjing.iridescently.xyz` 与 `juling.iridescently.xyz` 页面入口重定向到众生之门内的据点经营与聚灵模块；聚灵 5177 进程仍作为统一模块的 API 上游保留。
+
+游戏 API 代理上游：`cards/OAuth→5174`、`cards/card-balance→5178`、`softie→4173`、`juling→5177`。
 
 灵体专属域名通过 Cloudflare tunnel ingress 连接到 8080；新增子域时同时在 `server/portal_server.py` 添加 Host 路由、`portal/huiguan/server_huiguan.py` 允许对应精确 SSO CORS 来源，并在 `server/app/portal.json` 登记链接。隧道配置重载后以 `server/verify_portal.py` 和线上页面 / WebSocket 验证。
 
@@ -136,3 +139,10 @@ import { get, set } from "@lxh/shared-session/save";
 - `shared-types` 协议标识 `eco='ecoplanet3d-js'`、`lj='lingjing-huiguan'` 与旧 localStorage 键保持不变。
 - 会馆/人设站的 SSO 与设计系统走独立子域，跨域在本地会被 ORB/CORS 拦，属预期。
 - 世界观库 `assets/罗小黑战记数据库` 用 `relink_db.py` 维护路径（搬移后可重链）。
+
+## 工具与整理入口
+
+- [统一更新流程](docs/update-system.md)：显式运行的 Git / Gallery 清单工具；不会因保存而发布。
+- [目录整理记录](docs/maintenance/repository-cleanup-2026-10-10.md)：worktree 成果、迁出范围与验证边界。
+- [研发工作区](New%20project/README.md)：实验、设计资料与开发参考。
+- 独立创作入口：`E:\New project\README.md`，不参与网站构建。

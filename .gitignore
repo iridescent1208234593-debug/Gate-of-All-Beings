@@ -52,3 +52,6 @@ Thumbs.db
 Desktop.ini
 .vscode/
 .idea/
+
+# Local update reports
+/.updates/

@@ -11,6 +11,7 @@ Iridescently / 众生之门 工作区文档。总览见根 [README.md](../README
 | [hooks.md](hooks.md) | 钩子与约定：embed、dispose、portal.json、构建、扩展点 |
 | [networking.md](networking.md) | 联机：现状与预留接口设计 |
 | [operations.md](operations.md) | 部署运营：端口、网站管家、Cloudflare 隧道、看门狗、排障 |
+| [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | 当前 GitHub / Cloudflare 状态、未提交现场和新对话接续入口 |
 
 ## 快速事实
 
@@ -19,3 +20,9 @@ Iridescently / 众生之门 工作区文档。总览见根 [README.md](../README
 - 公用包：`@lxh/shared-{ui,types,data,session}`。
 - 统一存档：`localStorage['iridescently.save.v1']`。
 - 数据库：世界观库 `assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db`；会馆 `portal/huiguan/users.db`；聚灵 `server/app/src/juling/data/save.db`。
+
+## 维护与研发资料
+
+- [统一更新流程](update-system.md)
+- [2026-10-10 目录整理](maintenance/repository-cleanup-2026-10-10.md)
+- [生命模拟研究](../New%20project/doc/zszm-life-research/00-index.md)：保留项目相对路径，作为研发专题文档入口。

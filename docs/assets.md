@@ -41,3 +41,7 @@ const modelUrl = asset("models/example.glb");
 ## 禁止提交
 
 `.env*`（仅 `.env.example` 例外）、API keys、token、密码、Cloudflare 凭据、数据库凭据、私钥、数据库和日志、本机会话导出、`node_modules/`、构建输出、缓存，以及根目录 `assets/罗小黑战记数据库/` 与 `assets/网站素材/` 不得进入 Git。`assets/素材/` 和 `assets/罗小黑组件合成/` 按前文说明处理。不要把生产密钥写进 `.env.example` 或公开前端变量。
+
+## Gallery 清单工具
+
+`npm run assets:manifest` 将 JPG/JPEG/PNG/WebP 的对象键、SHA-256、字节数和 MIME 写入 `ops/assets/gallery-manifest.json`；GIF 明确排除。沿用 Gallery 的 `discoverGallery()`，支持 `GALLERY_DIR`。这是本地清单，生成过程不上传或移动原件。命令安全边界见 [update-system.md](update-system.md)。
