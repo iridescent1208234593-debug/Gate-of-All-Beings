@@ -26,6 +26,8 @@ Iridescently/
 ├─ portal/                     # 主站、会馆、人设站，以及独立的 activation-core 应用
 ├─ ops/网站恢复/               # 网站管家（一键重启站点 + 隧道）
 ├─ assets/                     # 素材：素材 / 网站素材 / 罗小黑战记数据库 / 罗小黑组件合成
+├─ docs/                       # 生产架构、部署、维护与研发入口索引
+├─ New project/                # 项目研发、实验、Gallery、DAY100 与设计参考
 ├─ package.json                # 根 workspaces（shared/*）
 └─ README.md
 ```

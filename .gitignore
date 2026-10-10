@@ -55,3 +55,8 @@ Desktop.ini
 
 # Local update reports
 /.updates/
+
+# Installed experimental runtimes; retain locally, keep evidence/source visible
+/New project/experiments/zszm-life-stage2/runtimes/*-venv/
+/New project/experiments/zszm-life-stage2/runtimes/microsoft-jdk-21.0.11/
+**/.godot/
