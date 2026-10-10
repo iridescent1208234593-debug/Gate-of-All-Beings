@@ -35,6 +35,7 @@ server/app/modules/
 # Local website snapshots and extracted build material
 /assets/网站素材/
 /conversations.json
+/.codex-remote-attachments/
 /New project/gallery/curve-gallery/
 /New project/gallery/infinite-gsap-gallery/
 /New project/gallery/scroll-revealed-webgl/
