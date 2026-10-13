@@ -8,13 +8,14 @@
 
 import http.server
 import os
+from urllib.parse import unquote
 
 # 禁止直接下载的敏感后缀
-BLOCKED_SUFFIXES = (".py", ".db", ".log", ".sqlite", ".json.bak", ".bak")
+BLOCKED_SUFFIXES = (".py", ".db", ".db-shm", ".db-wal", ".log", ".sqlite", ".sqlite3", ".json.bak", ".bak", ".pem", ".key", ".pfx", ".p12")
 # 禁止直接下载的精确文件名
-BLOCKED_NAMES = {"characters.json"}
+BLOCKED_NAMES = {"characters.json", "game_saves.json"}
 # 禁止访问的目录名（含所有 . 开头的隐藏目录）
-BLOCKED_DIRS = {".git", "__pycache__", ".vscode", ".idea", "backup", "store"}
+BLOCKED_DIRS = {".git", "__pycache__", ".vscode", ".idea", "backup", "store", "node_modules"}
 
 # 安全响应头（所有请求统一附加）
 SECURITY_HEADERS = {
@@ -35,7 +36,7 @@ CACHE_MAX_AGE = {
 
 def static_allowed(path):
     """检查路径是否允许对外提供。"""
-    parts = [p for p in path.split("/") if p]
+    parts = [p.lower() for p in unquote(path).replace("\\", "/").split("/") if p]
     for p in parts:
         if p in BLOCKED_DIRS or p.startswith("."):
             return False
