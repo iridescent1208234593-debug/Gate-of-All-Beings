@@ -1,7 +1,7 @@
 {
   "version": "0.1.0",
-  "round": "R9",
-  "generated_at": "2026-10-09 15:29:58",
+  "round": "R10",
+  "generated_at": "2026-10-10 20:16:41",
   "generator": "data/scripts/scan_emoticon_candidates.py",
   "doc": "docs/13-表情包候选清单.md",
   "ledger": "data/emoticons.json",
@@ -11,10 +11,11 @@
     "罗小黑",
     "比丢"
   ],
-  "scan_scope": "仅白名单目录，未联网（联网采集须端侧 App 授权导出，见 docs/13 待采集清单）",
+  "scan_scope": "白名单目录扫描 + R10 Q3B 微信表情商店端侧采集（ch_wechat_emoji，18 张已登记候选）",
   "counts": {
     "reject": 9,
-    "in_pool": 10
+    "in_pool": 10,
+    "candidate": 18
   },
   "candidates": [
     {
@@ -244,6 +245,251 @@
       "basis": "已在运行时池（approved），非本轮新增",
       "status": "pending",
       "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_01.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_01.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 17496,
+      "sha256": "55d46c21a431a2cab3702fbba12b0fd1634776b1de5e95c8aa6cd9de7dd65cff",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_02.bmp",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_02.bmp",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "cover",
+      "size_bytes": 186838,
+      "sha256": "ff9e632d405530068b137d54afc57a63fd5db41d37bc16475df738c4c7c4cb03",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_03.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_03.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 8436,
+      "sha256": "c364173e5d179af2fcff3a6c976c576358393b6b0a3912359553228ef4cb6be3",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_04.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_04.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 4789,
+      "sha256": "3378995c9954fb01555e692f69b5e949e5ad101507eb71d0c355f19bdaf68770",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_05.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_05.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 4000,
+      "sha256": "0663796f7db63a8af1df98d0ec3b74b190d1d22b99acabd25c0eb6fc3b80f24b",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_06.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_06.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 6627,
+      "sha256": "d8e539ef2c67f77f056b0d7224ee80c46fa868cd9129f7c2c0fd142a136f6f70",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_07.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_07.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 10865,
+      "sha256": "9c6a6840df683016a47e8dde29e130e3f8eace0874e4fdfb63d73194df145342",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_08.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_08.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 4340,
+      "sha256": "960fb154ae2078553282011517f5c76c73c25cc0a68bc49beba6354bb1886c06",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_09.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_09.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 7901,
+      "sha256": "4576d0507ce9c2d15a00cadf42f098915c780e76801a897810e99a6268fb8a94",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_10.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_10.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 7088,
+      "sha256": "94f37e0310165fdd2cea9c4ea972bcc15eb698a4f16768f3200efe3c4bcdd9eb",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_11.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_11.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 6425,
+      "sha256": "1488918ab038fcc2f43c725b73a7555d9a0f32357be604d4cd468c22d4fe9eba",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_12.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_12.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 5889,
+      "sha256": "e0cdd775816b5980756f4837b62c40a39c26e75a620aa52c88a353077cdabf7c",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_13.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_13.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 4958,
+      "sha256": "595b25adccf870311ff76e44c05865c0ed0c9881dbf8b4f58fbdc6745de828a5",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_14.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_14.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 6010,
+      "sha256": "2a19220a7d2bc310a42b79db1c48fe048c03fda7526ac72e6836a914c591eeff",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_15.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_15.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 4773,
+      "sha256": "54929062c06bc513944c3481b2ebaa5b8f8d1afbbab138be5509b0cccfbeaa0e",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_16.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_16.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 4034,
+      "sha256": "4da7fd1e7f809f9399960de11d42fd8159de1086aab5428f9e13933b112c3405",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_17.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_17.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 2506,
+      "sha256": "7f2557c85730eedce57dd00a7159b450455c81e70a1c0c42872ab3bdf18c0d72",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
+    },
+    {
+      "file_name": "wx_lxh_18.png",
+      "path": "E:\\Projects\\New project\\six-system-arena\\data\\candidates\\wechat_emoji\\wx_lxh_18.png",
+      "source_dir": "candidates\\wechat_emoji",
+      "category": "emoticon",
+      "size_bytes": 7727,
+      "sha256": "2b8b244005e5b7a600ef09e23245a945c065032e650d529f5f789e972c1c1a69",
+      "verdict": "candidate",
+      "basis": "罗小黑的日常1（微信表情商店官方专辑，艺术家：罗小黑CAT）；Agent 视觉初审通过，待人工复核",
+      "confidence": "medium",
+      "status": "pending",
+      "destination": "unassigned"
     }
-  ]
+  ],
+  "channel_status": {
+    "ch_wechat_emoji": {
+      "name": "微信表情商店「罗小黑」系列表情",
+      "type": "official-store",
+      "mediator": "微信表情开放平台",
+      "status": "app_only",
+      "authorized_collection": true,
+      "collected_at": "2026-10-10T19:25:53+08:00",
+      "updated_at": "2026-10-10"
+    }
+  }
 }

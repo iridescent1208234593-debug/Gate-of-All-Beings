@@ -4,13 +4,17 @@
 
 这是进入工作区的地图，不是新页面实现说明。本文区分 **已核实的本地事实**、**下一阶段建议** 和 **Needs verification**。本轮只新增此 README；没有实现 Connections、修改源码或 reference、安装依赖、运行构建、删除/移动文件、创建分支、提交或发布。
 
+## 2026-10-13 生产 Gallery 归位
+
+正式首页的 Atmospheric Depth Gallery 已从 `gallery/codrops-depth-gallery/` 移到 [`../portal/www/gallery-engine/`](../portal/www/gallery-engine/)。引擎、MIT 来源、嵌套 Git checkpoint、依赖与既有未提交修改完整保留；首页构建和素材清单入口已改用新路径。`New project/` 继续保留研发、实验与上游参考，不再承担此生产引擎的源码位置。下文关于旧路径与旧 Git 分支的记录是历史快照，不代表当前入口。
+
 ## 2026-10-10 整理后的入口
 
 - 生产与研发目录保持现有相对路径：`gallery/`、`day100-film/`、`six-system-arena/`、`experiments/`、`doc/`、`references/`、`motion/`、`skills/`。
 - 实验入口：[experiments/README.md](experiments/README.md)，阶段实现与评审证据分开索引。
 - `doc/` 是项目研究文档，统一索引在 [doc/README.md](doc/README.md)，无需移动而破坏研究/实验引用。
 - `InternalBeyond/` 继续作为 Persona 开发参考保留；其内层 Git 已有暂存文件，本次不提交、不删除。
-- 独立小说 `A小说/` 已整体迁至 `E:\New project\小说\植物A`，入口 `E:\New project\README.md`。
+- 独立小说 `A小说/` 已整体迁至 `E:\External Projects\小说\植物A`，入口 `E:\External Projects\README.md`。
 - `merge_out.txt` 为零字节历史临时输出，迁入 `../docs/maintenance/archive/` 保留，不再平铺于研发根目录。
 - 下文是此前审计与设计地图，旧现场和“本轮未删除”等描述属于该次历史记录；此次实际动作以 [整理记录](../docs/maintenance/repository-cleanup-2026-10-10.md) 为准。
 
@@ -49,7 +53,7 @@
 
 ## Active Projects
 
-1. **生产源码依赖：** `gallery/codrops-depth-gallery`，被当前主站首页构建和入口直接引用。实际图源是目录外 `E:\Projects\assets\罗小黑战记数据库\罗小黑节气贺图（gallery素材）`；本轮文件元数据计数为 384 张支持格式图片，不能清掉这一数据源。
+1. **生产源码依赖（已迁出本研发目录）：** `E:\Projects\portal\www\gallery-engine`，被当前主站首页构建和入口直接引用。实际图源是目录外 `E:\Projects\assets\罗小黑战记数据库\罗小黑节气贺图（gallery素材）`；图库计数为 384 张支持格式图片，不能清掉这一数据源。
 2. **有发布脚本的创作源码：** `day100-film/versions/v3/site`；目标为 `portal/www/100-days/v3`。公网当前内容未重新验收。
 3. **有站点发布副本的游戏源码：** `shengsheng-shoot-web`；Web 游戏与恢复工程分别承担运行实现、来源/审计职责。
 4. **独立活跃孵化项目：** `six-system-arena`。自动化和集成包还在更新；不把“已有交付包”写成“已生产接入”。
