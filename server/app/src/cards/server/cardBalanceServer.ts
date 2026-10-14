@@ -66,7 +66,8 @@ function localAdmin(req:Request){
   const address=req.socket.remoteAddress;
   if(!['127.0.0.1','::1','::ffff:127.0.0.1'].includes(address||''))return false;
   try{
-    const host=new URL(`http://${req.headers.host}`);
+    // The portal replaces this header with the original client host.
+    const host=new URL(`http://${req.headers["x-forwarded-host"] || req.headers.host}`);
     if(!['127.0.0.1','localhost','[::1]'].includes(host.hostname))return false;
     if(req.headers.origin){const origin=new URL(req.headers.origin);if(origin.host!==host.host||!['http:','https:'].includes(origin.protocol))return false;}
     return true;
