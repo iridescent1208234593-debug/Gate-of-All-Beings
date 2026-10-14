@@ -4,7 +4,7 @@ import {SVGLoader} from 'three/examples/jsm/loaders/SVGLoader.js';
 import {SCENE_LAYERS,WIDTH,HEIGHT,layerState,palette,stars,starState,type LayerVisibility,type SceneLayer} from './sceneModel';
 import type {ThemeMode} from '../../types';
 
-interface Props {seconds:number;theme:ThemeMode;layers:LayerVisibility;resetView:number;onCreatureClick?:(name:string)=>void;onReady?:()=>void;}
+interface Props {seconds:number;theme:ThemeMode;layers:LayerVisibility;resetView:number;onCreatureClick?:(name:string)=>void;onReady?:()=>void;onFail?:()=>void;}
 interface LayerObject {source:SceneLayer;group:THREE.Group;materials:Array<{material:THREE.Material & {opacity:number};base:number}>;}
 
 export function ReferenceScene3D(props:Props){
@@ -16,7 +16,7 @@ export function ReferenceScene3D(props:Props){
   const container=host.current;
   let renderer:THREE.WebGLRenderer;
   try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});}
-  catch{setFailed(true);return;}
+  catch{setFailed(true);latest.current.onFail?.();return;}
   renderer.setClearColor(0x000000);renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.NoToneMapping;renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   renderer.domElement.setAttribute('aria-label','众生之门 3D 复现，可拖动旋转、双指捏合缩放');
@@ -49,7 +49,7 @@ export function ReferenceScene3D(props:Props){
       if(part.fill){
        const front=addMat(trackMaterial(new THREE.MeshBasicMaterial({color:colors[part.fill],side:THREE.DoubleSide,depthWrite:(part.opacity??1)===1}),part.fill),part.opacity??1);
        const side=addMat(trackMaterial(new THREE.MeshLambertMaterial({color:colors[part.fill],side:THREE.DoubleSide,depthWrite:(part.opacity??1)===1}),part.fill,true),(part.opacity??1)*.9);
-       for(const shape of SVGLoader.createShapes(path)){
+       for(const shape of path.toShapes()){
         // Opaque shapes have thickness. Transparent spirits use a single front
         // surface plus side walls so front/back alpha does not double up.
         const geometry=trackGeometry(new THREE.ExtrudeGeometry(shape,{depth:layer.depth,bevelEnabled:false,curveSegments:24,steps:1}));

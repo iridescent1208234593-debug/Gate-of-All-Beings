@@ -18,10 +18,12 @@ import re
 import select
 import socket
 import sys
+from urllib.parse import parse_qs, urlsplit
 from pathlib import Path
 
 PORT = int(os.environ.get("PORT", "8080"))
-ROOT = Path(__file__).resolve().parents[1]
+CODE_ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", CODE_ROOT)).resolve()
 
 
 def _load(name, path):
@@ -32,16 +34,16 @@ def _load(name, path):
     return mod
 
 
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(CODE_ROOT / "server"))
 from base_static import BaseStaticHandler  # noqa: E402
 
-www = _load("portal_www", ROOT / "portal" / "www" / "server.py")
-oc = _load("portal_oc", ROOT / "portal" / "oc" / "server.py")
-huiguan = _load("portal_huiguan", ROOT / "portal" / "huiguan" / "server_huiguan.py")
+www = _load("portal_www", CODE_ROOT / "portal" / "www" / "server.py")
+oc = _load("portal_oc", CODE_ROOT / "portal" / "oc" / "server.py")
+huiguan = _load("portal_huiguan", CODE_ROOT / "portal" / "huiguan" / "server_huiguan.py")
 
-APP_DIR = ROOT / "server" / "app"
-MODULES_DIR = APP_DIR / "modules"
-PROXY_PORTS = {"cards": 5174, "softie": 4173, "juling": 5177}
+APP_DIR = CODE_ROOT / "server" / "app"
+MODULES_DIR = ROOT / "server" / "app" / "modules"
+PROXY_PORTS = {"cards": 5174, "card-balance": 5178, "softie": 4173, "juling": 5177}
 
 API_RE = re.compile(r"^/app/modules/([^/]+)/api/")
 
@@ -49,6 +51,21 @@ API_RE = re.compile(r"^/app/modules/([^/]+)/api/")
 class StaticHandler(BaseStaticHandler):
     """按请求配置 root/strip 的静态处理类。"""
     protocol_version = "HTTP/1.1"
+
+
+class RedirectHandler(www.Handler):
+    protocol_version = "HTTP/1.1"
+
+    def _redirect(self):
+        self.send_response(308)
+        self.send_header("Location", self.redirect_to)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
+    do_GET = do_HEAD = _redirect
+
+    def log_message(self, fmt, *args):
+        print("[redirect] %s" % args[0], flush=True)
 
 
 class ProxyHandler(http.server.BaseHTTPRequestHandler):
@@ -61,7 +78,16 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
         path = self.path
         if self.strip and path.startswith(self.strip):
             path = path[len(self.strip):] or "/"
-        length = int(self.headers.get("Content-Length") or 0)
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            self.close_connection = True
+            self.send_error(400, "invalid content length")
+            return
+        if length < 0 or length > 8 * 1024 * 1024:
+            self.close_connection = True
+            self.send_error(413 if length > 0 else 400, "request body exceeds 8 MiB")
+            return
         body = self.rfile.read(length) if length else None
         headers = {k: v for k, v in self.headers.items()
                    if k.lower() not in ("host", "connection", "content-length", "x-forwarded-host", "x-forwarded-proto")}
@@ -70,6 +96,7 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
         headers["X-Forwarded-Proto"] = "https" if self.headers.get("X-Forwarded-Proto") == "https" else "http"
         if body is not None:
             headers["Content-Length"] = str(len(body))
+        conn = None
         try:
             conn = http.client.HTTPConnection("127.0.0.1", self.upstream_port, timeout=30)
             conn.request(method, path, body=body, headers=headers)
@@ -78,6 +105,9 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
         except OSError as e:
             self.send_error(502, "upstream unavailable: %s" % e)
             return
+        finally:
+            if conn is not None:
+                conn.close()
         self.send_response(resp.status)
         for k, v in resp.getheaders():
             if k.lower() in ("transfer-encoding", "connection", "content-length"):
@@ -87,7 +117,6 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         if method != "HEAD":
             self.wfile.write(data)
-        conn.close()
 
     do_GET = do_POST = do_PUT = do_DELETE = do_PATCH = do_HEAD = \
         lambda self: self._proxy(self.command)
@@ -165,11 +194,28 @@ def route(host, path):
     if h == "oc.iridescently.xyz" or h.endswith(".oc.iridescently.xyz"):
         return oc.Handler, {}
     p = (path or "").split("?")[0]
+    legacy_destinations = {
+        "game.iridescently.xyz": "https://zszm.iridescently.xyz/#home",
+        "lingjing.iridescently.xyz": "https://zszm.iridescently.xyz/#management",
+        "juling.iridescently.xyz": "https://zszm.iridescently.xyz/app/shell/m/juling",
+    }
+    if h in legacy_destinations:
+        if h == "juling.iridescently.xyz" and p.startswith("/api/"):
+            return ProxyHandler, {"port": PROXY_PORTS["juling"], "strip": ""}
+        return RedirectHandler, {"location": legacy_destinations[h]}
+    if p == "/management" or p.startswith("/management/"):
+        if "embed" in parse_qs(urlsplit(path or "").query):
+            return StaticHandler, {"root": str(MODULES_DIR / "management"), "strip": "/management"}
+        return RedirectHandler, {"location": "https://zszm.iridescently.xyz/#management"}
+    if h == "zszm.iridescently.xyz" and (p == "/api/card-balance" or p.startswith("/api/card-balance/")):
+        return ProxyHandler, {"port": PROXY_PORTS["card-balance"], "strip": ""}
     if p == "/app/modules/softie/api/spirit-room/ws":
         return WebSocketProxyHandler, {"port": PROXY_PORTS["softie"], "strip": "/app/modules/softie"}
     m = API_RE.match(p)
     if m and m.group(1) in PROXY_PORTS:
         name = m.group(1)
+        if name == "cards" and p.startswith("/app/modules/cards/api/card-balance"):
+            return ProxyHandler, {"port": PROXY_PORTS["card-balance"], "strip": "/app/modules/cards"}
         return ProxyHandler, {"port": PROXY_PORTS[name], "strip": "/app/modules/" + name}
     if h == "spirit.iridescently.xyz":
         if p == "/api/sso-user":
@@ -181,14 +227,21 @@ def route(host, path):
         }
     if p == "/app/shell" or p.startswith("/app/shell/"):
         return StaticHandler, {"root": str(APP_DIR), "strip": "/app", "spa": "/shell/index.html"}
-    if p == "/app" or p.startswith("/app/"):
+    if p == "/app/portal.json":
         return StaticHandler, {"root": str(APP_DIR), "strip": "/app"}
+    if p == "/app/modules" or p.startswith("/app/modules/"):
+        return StaticHandler, {"root": str(MODULES_DIR), "strip": "/app/modules"}
+    # Embedded modules and shared resources must win before the Cards SPA fallback.
     if p.startswith("/shared/"):
-        return StaticHandler, {"root": str(ROOT / "shared"), "strip": "/shared"}
-    if p == "/management" or p.startswith("/management/"):
-        return StaticHandler, {"root": str(MODULES_DIR / "management"), "strip": "/management"}
+        return StaticHandler, {"root": str(CODE_ROOT / "shared"), "strip": "/shared"}
     if p == "/ecology" or p.startswith("/ecology/"):
         return StaticHandler, {"root": str(MODULES_DIR / "ecology"), "strip": "/ecology"}
+    if h == "zszm.iridescently.xyz":
+        if p == "/api/sso-user":
+            return www.Handler, {}
+        if p.startswith("/api/"):
+            return ProxyHandler, {"port": PROXY_PORTS["cards"], "strip": ""}
+        return StaticHandler, {"root": str(MODULES_DIR / "cards"), "spa": "/index.html"}
     return www.Handler, {}
 
 
@@ -225,6 +278,8 @@ class Dispatcher(www.Handler):
         if issubclass(target, ProxyHandler):
             self.upstream_port = cfg["port"]
             self.strip = strip
+        if issubclass(target, RedirectHandler):
+            self.redirect_to = cfg["location"]
         return ok
 
 

@@ -77,6 +77,13 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const p = url.pathname;
 
+  // The old subdomain now points visitors to the module inside ZSZM; keep this
+  // process available for the unified shell's /api/* proxy.
+  if (url.hostname === 'juling.iridescently.xyz' && !p.startsWith('/api/')) {
+    res.writeHead(308, { Location: 'https://zszm.iridescently.xyz/app/shell/m/juling' });
+    return res.end();
+  }
+
   if (req.method === 'GET' && p === '/api/state') {
     return send(res, 200, engine.getState(currentRun));
   }

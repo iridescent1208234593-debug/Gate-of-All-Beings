@@ -12,7 +12,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const galleryRoot = path.join(root, "New project/gallery/codrops-depth-gallery");
+const galleryRoot = path.join(root, "portal/www/gallery-engine");
 const sourceDir = process.env.GALLERY_DIR || path.join(
   root,
   "assets/罗小黑战记数据库/罗小黑节气贺图（gallery素材）",

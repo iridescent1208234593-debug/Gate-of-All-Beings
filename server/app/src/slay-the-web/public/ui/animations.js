@@ -99,3 +99,11 @@ export default gsap
 
 // So we can use it in the browser.
 window.gsap = gsap
+
+export function disposeAnimations(container) {
+  const clones = [...document.querySelectorAll('[data-slay-owner="play-card"]')];
+  const elements = [container, ...container.querySelectorAll('*'), ...clones];
+  gsap.killTweensOf(elements);
+  elements.forEach(element => Draggable.get(element)?.kill());
+  clones.forEach(element => element.remove());
+}

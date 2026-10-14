@@ -3,7 +3,7 @@
   "links": [
     { "key": "main", "group": "站点", "name": "主站", "desc": "佳霖的首页", "url": "https://iridescently.xyz", "icon": "🏠" },
     { "key": "huiguan", "group": "站点", "name": "西木会馆", "desc": "故事与角色档案", "url": "https://huiguan.iridescently.xyz", "icon": "🏛" },
-    { "key": "oc", "group": "站点", "name": "馆长设定", "desc": "原创角色设定页", "url": "https://oc.iridescently.xyz", "icon": "🌟" },
+    { "key": "oc", "group": "站点", "name": "佳霖馆长设定", "desc": "原创角色设定页", "url": "https://oc.iridescently.xyz", "icon": "🌟" },
     { "key": "psyche", "group": "站点", "name": "心理档案云", "desc": "心灵探索项目", "url": "https://psyche.iridescently.xyz", "icon": "🔮" },
     { "key": "spirit", "group": "站点", "name": "灵体互动", "desc": "进入林间灵域，与小灵体相遇", "url": "https://spirit.iridescently.xyz/games/spirit-playground?room=forest", "icon": "🌌" },
 
@@ -13,6 +13,7 @@
     { "key": "juling", "group": "游戏", "name": "聚灵", "desc": "五行聚灵 · 化形修炼", "url": "/app/modules/juling/", "icon": "🌀", "embed": true },
     { "key": "slay", "group": "游戏", "name": "重生之门", "desc": "卡牌 roguelike 引擎", "url": "/app/modules/slay/", "icon": "⚔", "embed": true },
     { "key": "softie", "group": "游戏", "name": "灵体互动", "desc": "自定义灵体与多人互动", "url": "/app/modules/softie/", "icon": "🌌", "embed": true },
-    { "key": "aeon", "group": "游戏", "name": "AEON", "desc": "神经演化文明模拟", "url": "/app/modules/aeon/", "icon": "🧠", "embed": true }
+    { "key": "aeon", "group": "游戏", "name": "AEON", "desc": "神经演化文明模拟", "url": "/app/modules/aeon/", "icon": "🧠", "embed": true },
+    { "key": "shengsheng-shoot", "group": "游戏", "name": "省省海滩射击试玩", "desc": "省省角色小游戏 · 海滩像素射击", "url": "/playtest/shengsheng-shoot/", "icon": "🎯" }
   ]
 }

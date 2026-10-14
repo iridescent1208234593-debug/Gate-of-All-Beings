@@ -36,7 +36,7 @@ function hasWebGL(): boolean {
   }
 }
 
-export function EntryGate({ leaving, onEnter }: { leaving: boolean; onEnter: () => void }) {
+export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEnter: () => void; onSkip: () => void }) {
   const [clock, setClock] = useState(0);
   const [sceneReady, setSceneReady] = useState(false);
   const [webgl] = useState(hasWebGL);
@@ -142,6 +142,7 @@ export function EntryGate({ leaving, onEnter }: { leaving: boolean; onEnter: () 
         <p className="gate-subtitle">THE GATE OF ALL BEINGS</p>
         <p className="gate-hint">单指旋转 · 双指缩放</p>
         <button className="gate-enter" disabled={!usable} onClick={onEnter}>进入众生之门</button>
+        <button className="gate-skip" type="button" onClick={onSkip}>跳过 / Skip</button>
         <p className="gate-progress">
           <span>{usable ? '门已开启' : '正在开启众生之门…'}</span>
           <span className="gate-bar">

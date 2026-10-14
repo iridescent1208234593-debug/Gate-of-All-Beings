@@ -62,3 +62,5 @@
 4. `portal.json` 增加条目（`embed: true`）。
 5. 若有 API，在 `portal_server.PROXY_PORTS` 加上游端口，并把前端调用改成 base 感知（`/app/modules/<名>/api/...`）。
 6. 跑 `verify_portal.py` 与对应测试。
+
+2026-10-14：Cards提供`window.__iridescentlyMount`，返回当前root的dispose；壳缓存factory并复用已加载React runtime，避免每次执行整份bundle重复安装document代理。未提供factory的模块仍按既有脚本挂载，但必须实现真实owner清理。壳使用shell前缀DOM/style，避免与模块topbar等id碰撞。切换由AbortController+generation串行化，旧fetch不能回写新页面。

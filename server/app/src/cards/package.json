@@ -12,7 +12,6 @@
     "test": "node --import tsx --test src/game/core/*.test.ts",
     "test:backend": "node --import tsx --test server/*.test.ts",
     "check:game": "tsc --project tsconfig.game.json --noEmit",
-    "dev:legacy-redirect": "node scripts/legacy-redirect.mjs",
     "build:modules": "node scripts/build-modules.mjs",
     "predev": "npm run build:modules"
   },

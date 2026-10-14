@@ -11,15 +11,21 @@ export default class AccountBar extends Component {
 		this.state = {state: 'checking', user: null}
 	}
 	componentDidMount() {
+		this.events = new AbortController()
 		this.checkLogin()
+	}
+	componentWillUnmount() {
+		this.events.abort()
+		clearTimeout(this.logoutTimer)
 	}
 	async checkLogin() {
 		try {
-			const r = await fetch(`${HUIGUAN_BASE}/api/user`, {credentials: 'include'})
+			const r = await fetch(`${HUIGUAN_BASE}/api/user`, {credentials: 'include', signal: this.events.signal})
 			if (!r.ok) throw new Error('bad status ' + r.status)
 			const d = await r.json()
 			this.setState({state: 'done', user: d && d.logged_in ? d : null})
 		} catch (e) {
+			if (this.events.signal.aborted) return
 			// 网络不可达/未部署域名时静默隐藏，不影响离线游玩
 			this.setState({state: 'done', user: null})
 		}
@@ -28,7 +34,7 @@ export default class AccountBar extends Component {
 		fetch(`${HUIGUAN_BASE}/api/logout`, {credentials: 'include', redirect: 'manual'})
 			.catch(() => {})
 			.finally(() => {
-				setTimeout(() => location.reload(), 200)
+				this.logoutTimer = setTimeout(() => location.reload(), 200)
 			})
 	}
 	render(props, {state, user}) {
@@ -51,7 +57,10 @@ export default class AccountBar extends Component {
 }
 
 // 挂载容器不存在（如 collection.html 等子页）时不渲染，避免报错
-const mount = document.getElementById('QcAccountBar')
-if (mount) {
+export function mountAccountBar() {
+	const mount = document.getElementById('QcAccountBar')
+	if (!mount) return () => {}
 	render(html`<${AccountBar} />`, mount)
+	return () => render(null, mount)
 }
+if (!document.getElementById('SlayTheWeb')) mountAccountBar()

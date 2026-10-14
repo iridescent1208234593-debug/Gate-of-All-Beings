@@ -250,6 +250,6 @@ export class RenderEngine {
     this.canvas.removeEventListener('webglcontextlost', this._lost); this.canvas.removeEventListener('webglcontextrestored', this._restored);
     this.labels.remove(); this.tooltipEl?.classList.add('hidden'); this.terrain?.dispose(); this.overlayMaterial.dispose();
     this.selection.geometry.dispose(); this.selection.material.dispose(); this.factory.dispose(); this.scene.clear();
-    this.objects.clear(); this.resourceObjects.clear(); this.renderer.dispose();
+    this.objects.clear(); this.resourceObjects.clear(); this.renderer.dispose(); this.renderer.forceContextLoss();
   }
 }

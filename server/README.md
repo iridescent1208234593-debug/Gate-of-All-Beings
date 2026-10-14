@@ -1,34 +1,9 @@
-# server/ · 统一后端与前端壳
+# 统一后端与门户
 
-统一入口、共享后端、前端壳与全部游戏源码。总览见根 [README.md](../README.md)。
+`portal_server.py` 按 Host/路径分发静态站点、壳、发布模块、共享资源、API/WebSocket。`base_static.py` 禁止解码后敏感路径、目录列表与数据下载；`hx_sso.py` 复用会馆 cookie；`account_security.py` 保留原账户安全逻辑。
 
-## 内容
+生产8080，OAuth5174，数值配置5178，聚灵5177，Softie4173。旧 game/lingjing/juling 前端域名转入众生之门；API仍留必要上游。源码公开下载 `/app/src` 不允许。
 
-| 文件 | 作用 |
-| --- | --- |
-| `portal_server.py` | 统一入口：单进程按 `Host`/路径分发（www / huiguan / oc / 壳 / 游戏模块 / API 代理 / SPA 回退） |
-| `verify_portal.py` | 本地自检（27 项） |
-| `base_static.py` | 静态站点基类（安全头 / 静态白名单 / 静默断连） |
-| `hx_sso.py` | 跨站 SSO cookie（`.iridescently.xyz`） |
-| `account_security.py` | 站内账号找回 / 限流 / 改密 |
-| `app/shell/index.html` | 统一壳：History API 路径路由，7 游戏全部内嵌（无 iframe） |
-| `app/portal.json` | 门户清单（导航唯一数据源，含 `embed` 标记） |
-| `app/scripts/build-modules.mjs` | 构建全部游戏到 `app/modules/` |
-| `app/src/<名>/` | 游戏源码（由项目根目录 Git 统一管理） |
-| `app/modules/<名>/` | 构建产物（gitignore，运行所需） |
+`build:modules` 只生成候选；`publish:modules` 更新 modules；`build:site`/`publish:site` 冻结静态与Python源码。网站管家从发布快照启动 Portal/OAuth，`IRIDESCENTLY_PROJECT_ROOT` 保持原用户数据路径。无自动启动构建。详见 [发布流程](../docs/release-workflow.md)。
 
-`portal/www`、`portal/oc`、`portal/huiguan`、`app/src/cards` 的 server 均从此目录导入共享模块。
-
-## 路由与分发
-
-- 按 `Host`：`huiguan.*`→会馆、`oc.*`→人设站、其余主域→主站。
-- 按路径（主域）：`/app/shell/*`→统一壳（SPA 回退到 `shell/index.html`）、`/app/modules/<名>/`→游戏、`/shared/*`→公用资源。
-- `POST/GET /app/modules/<名>/api/*`→反向代理到上游（cards 5174 / softie 4173 / juling 5177）。
-
-## 运行
-
-```bash
-PORT=8080 python server/portal_server.py
-python server/verify_portal.py
-node server/app/scripts/build-modules.mjs
-```
+开发可 `python server/portal_server.py`，生产用网站管家；`python server/verify_portal.py` 使用未占用端口检查49项路径/JSON/真实模块内容，不接受误连已有服务器。`python server/test_static_security.py` 检查编码/大小写敏感文件拦截。

@@ -82,6 +82,10 @@ const STANCES = ['ally', 'neutral', 'rival', 'war'];
 
 export class UI {
   constructor() {
+    this._timers = new Set();
+    this._frames = new Set();
+    this._ownedNodes = new Set();
+    this._host = window.__iridescentlyEmbed || document.body;
     this.el = {
       hud: $('hud'), modeBadge: $('mode-badge'),
       year: $('stat-year'), pop: $('stat-pop'), gen: $('stat-gen'),
@@ -845,15 +849,15 @@ export class UI {
     d.innerHTML = `<span>Pick a nation to lead — open <b>⚑ Nations</b> or click a people — or just shape the world as a god.</span>
       <button id="onboard-x" aria-label="dismiss">✕</button>`;
     this.el.hud.appendChild(d);
-    requestAnimationFrame(() => d.classList.add('show'));
+    this._frame(() => d.classList.add('show'));
     $('onboard-x').onclick = () => this._dismissOnboard();
-    this._onboardTimer = setTimeout(() => this._dismissOnboard(), 16000);
+    this._onboardTimer = this._later(() => this._dismissOnboard(), 16000);
   }
   _dismissOnboard() {
     const d = $('onboard'); if (!d) return;
     clearTimeout(this._onboardTimer);
     d.classList.remove('show');
-    setTimeout(() => d.remove(), 400);
+    this._later(() => d.remove(), 400);
   }
 
   // ---- first-time Survival tutorial (coach-marks) ----------------------
@@ -889,7 +893,7 @@ export class UI {
           </div>
         </div>
       </div>`;
-    document.body.appendChild(root);
+    this._appendOwned(root);
     root.querySelector('.tut-skip').onclick = () => this._endTutorial();
     root.querySelector('.tut-next').onclick = () => this._tutAdvance();
     this._renderTutorial();
@@ -918,7 +922,7 @@ export class UI {
 
   _endTutorial() {
     const root = document.getElementById('tutorial');
-    if (root) { root.style.opacity = '0'; setTimeout(() => root.remove(), 250); }
+    if (root) { root.style.opacity = '0'; this._later(() => root.remove(), 250); }
     this._tutorialOpen = false;
     try { localStorage.setItem('aeon_tutorial_seen', '1'); } catch { /* no storage */ }
   }
@@ -950,10 +954,11 @@ export class UI {
 
   // ---- tooltip ---------------------------------------------------------
   _buildTooltip() {
+    this.events = new AbortController();
     this._tip = document.createElement('div');
     this._tip.id = 'tooltip';
     this._tip.className = 'hidden';
-    document.body.appendChild(this._tip);
+    this._appendOwned(this._tip);
     // Delegated data-tip system: any element (now or added later) carrying a
     // [data-tip] attribute gets a plain-language tooltip on hover. Replaces the
     // browser's native title=, positioned on-screen and flipped near edges.
@@ -961,11 +966,35 @@ export class UI {
       const t = e.target.closest && e.target.closest('[data-tip]');
       if (!t || t.classList.contains('tool')) return; // .tool uses the rich tip
       this._showDataTip(t);
-    });
+    }, { signal: this.events.signal });
     document.addEventListener('mouseout', (e) => {
       const t = e.target.closest && e.target.closest('[data-tip]');
       if (t && !t.classList.contains('tool')) this._hideTip();
-    });
+    }, { signal: this.events.signal });
+  }
+  _later(callback, delay) {
+    const timer = setTimeout(() => { this._timers.delete(timer); callback(); }, delay);
+    this._timers.add(timer);
+    return timer;
+  }
+  _frame(callback) {
+    const frame = requestAnimationFrame(() => { this._frames.delete(frame); callback(); });
+    this._frames.add(frame);
+    return frame;
+  }
+  _appendOwned(node) {
+    this._ownedNodes.add(node);
+    this._host.appendChild(node);
+  }
+  dispose() {
+    this._timers.forEach(clearTimeout);
+    this._frames.forEach(cancelAnimationFrame);
+    this._ownedNodes.forEach(node => node.remove());
+    this._timers.clear(); this._frames.clear(); this._ownedNodes.clear();
+    this.events?.abort();
+    clearTimeout(this._onboardTimer);
+    this._tip?.remove();
+    this.game = null;
   }
   // rich tip for the god-tool dock (icon + name + hotkey)
   _showTip(btn, info) {
@@ -1121,12 +1150,12 @@ export class UI {
         </div>
       </div>`;
     if (tribe) root.style.setProperty('--end-hue', hueToCss(tribe.hue));
-    document.body.appendChild(root);
-    requestAnimationFrame(() => root.classList.add('show'));
+    this._appendOwned(root);
+    this._frame(() => root.classList.add('show'));
     root.querySelector('.end-restart').onclick = () => location.reload();
     root.querySelector('.end-watch').onclick = () => {
       root.classList.remove('show');
-      setTimeout(() => root.remove(), 300);
+      this._later(() => root.remove(), 300);
     };
   }
 
@@ -1136,8 +1165,8 @@ export class UI {
     if (e.color != null) div.style.borderLeftColor = hueToCss(e.color);
     div.textContent = e.msg;
     this.el.eventlog.appendChild(div);
-    requestAnimationFrame(() => div.classList.add('show'));
-    setTimeout(() => { div.classList.remove('show'); setTimeout(() => div.remove(), 400); }, 4200);
+    this._frame(() => div.classList.add('show'));
+    this._later(() => { div.classList.remove('show'); this._later(() => div.remove(), 400); }, 4200);
     while (this.el.eventlog.children.length > 5) this.el.eventlog.firstChild.remove();
   }
 }

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -621,6 +621,8 @@
   }
   .auth-usso:hover { border-color: var(--gold); background: rgba(212,168,75,0.08); }
 </style>
+<link rel="stylesheet" href="/homepage.css?v=20261011-feedback-1">
+<script>document.documentElement.classList.add('home-booting');</script>
 </head>
 <body>
 <!-- ============================================
@@ -688,67 +690,12 @@
   body.has-topnav {
     padding-top: 3.2rem !important;
   }
-  /* ====== ink canvas and theme animations ====== */
-  #ink-canvas {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 0; pointer-events: none;
-  }
-  .video-hero {
-    position: relative; width: 100%; max-width: 860px;
-    margin: 0 auto 24px; border-radius: 14px; overflow: hidden;
-    border: 1px solid var(--border);
-    
-    aspect-ratio: 16/9; background: #000;
-  }
-  .video-hero video { width: 100%; height: 100%; object-fit: contain; display: block; }
-  .video-hero .video-overlay {
-    position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 20px;
-    background: linear-gradient(transparent, rgba(26,10,20,0.92));
-    display: flex; align-items: flex-end; justify-content: space-between; pointer-events: none;
-  }
-  .video-hero .video-title { font-size: 15px; color: var(--gold); letter-spacing: 3px; text-shadow: 0 0 16px rgba(212,168,75,0.4); }
-  .video-hero .video-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; letter-spacing: 1px; }
-  .video-hero .video-badge { font-size: 10px; color: var(--accent); letter-spacing: 1px; border: 1px solid var(--accent); border-radius: 4px; padding: 2px 8px; }
-
-/* ===== 众生之门 · 开场门动画 ===== */
-.video-hero { position: relative; }
-.video-hero .gate-canvas-host { position: absolute; inset: 0; z-index: 1; }
-.video-hero .gate-canvas-host canvas { width: 100%; height: 100%; display: block; }
-.video-hero.gate-mode #gateFallbackVideo { display: none; }
-.video-hero.gate-fallback .gate-canvas-host { display: none; }
-.video-hero .video-overlay { z-index: 2; }
-
-/* 全屏 cinema 态 */
-.video-hero.is-cinema {
-  position: fixed; inset: 0; z-index: 9999;
-  width: 100vw; height: 100vh; max-width: none;
-  margin: 0; border: 0; border-radius: 0;
-  aspect-ratio: auto; background: #050807;
-  overflow: hidden;
-}
-.video-hero.is-cinema .video-overlay { opacity: 0; }
-.video-hero.is-cinema .gate-board { opacity: 1; pointer-events: auto; }
-body.gate-lock { overflow: hidden; }
-/* 全屏态需真正铺满：隐藏两个 fixed 角落按钮（其 z-index 高于 9999） */
-body.gate-lock .cream-corner-btn,
-body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
-
-/* 主题色板 */
-.gate-board {
-  position: absolute; top: 18px; right: 18px; z-index: 3;
-  display: flex; gap: 8px; opacity: 0; pointer-events: none;
-  transition: opacity .35s ease;
-}
-.gate-dot {
-  width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
-  border: 1px solid rgba(253,251,229,.45); background: var(--dot, #84a046);
-  box-shadow: 0 0 10px rgba(0,0,0,.45); padding: 0;
-}
-.gate-dot.on { border-color: #d4a840; box-shadow: 0 0 12px #d4a84099; }
-
-@media (prefers-reduced-motion: reduce) {
-  .video-hero.is-cinema, .gate-board { transition: none; }
-}
+  /* 首页开屏与入口的独立样式见 homepage.css。 */
+  .video-hero { position: relative; }
+  .video-hero .gate-canvas-host { position: absolute; inset: 0; z-index: 1; }
+  .video-hero .gate-canvas-host canvas { width: 100%; height: 100%; display: block; }
+  .video-hero.gate-mode #gateFallbackVideo { display: none; }
+  .video-hero.gate-fallback .gate-canvas-host { display: none; }
 
   .header { position: relative; overflow: hidden; }
   .header::before {
@@ -787,7 +734,7 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
   <div class="links">
     <a href="https://iridescently.xyz" data-site="main">主页</a>
     <a href="https://huiguan.iridescently.xyz" data-site="huiguan">西木会馆</a>
-    <a href="https://oc.iridescently.xyz" data-site="oc">馆长设定</a>
+    <a href="https://oc.iridescently.xyz" data-site="oc">佳霖馆长设定</a>
     <a href="https://zszm.iridescently.xyz" data-site="zszm"><span class="beta-wrap">众生之门<i class="beta">beta</i></span></a>
     <a href="https://psy.iridescently.xyz" data-site="psy">心理测试</a>
   </div>
@@ -894,37 +841,90 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
 <!-- 全局弹出提示 -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<!-- Video hero section -->
-<div class="video-hero" id="gateHero">
-  <video id="gateFallbackVideo" autoplay muted loop playsinline poster="assets/video_poster.png">
-    <source src="assets/luoxiaohei_ep29.mp4" type="video/mp4">
-  </video>
-  <div class="video-overlay">
-    <div>
-      <div class="video-title">罗小黑战记</div>
-      <div class="video-sub">第29集 · 灵质空间</div>
+<div id="homeBoot" class="home-boot" role="status"><span>西木会馆</span><small>正在点亮众生之门</small></div>
+<section class="home-flow" id="homeFlow" aria-label="西木会馆首页入口" data-home-state="loading">
+  <div class="home-flow-stage">
+    <div class="home-hero-area">
+    <div class="video-hero" id="gateHero">
+      <div class="gate-canvas-host" aria-hidden="true"></div>
+      <video id="gateFallbackVideo" muted playsinline preload="none" poster="assets/video_poster.png">
+        <source src="assets/luoxiaohei_ep29.mp4" type="video/mp4">
+      </video>
+      <div class="gate-theme-controls" role="group" aria-label="开屏配色">
+        <button type="button" class="gate-dot" data-theme="original" title="Classic Night" aria-label="会馆原色" style="--dot:#85A96F"></button>
+        <button type="button" class="gate-dot" data-theme="twilight" title="Twilight Blue" aria-label="靛蓝" style="--dot:#74B9FF"></button>
+        <button type="button" class="gate-dot" data-theme="emerald" title="Emerald Forest" aria-label="翠绿" style="--dot:#2ED573"></button>
+        <button type="button" class="gate-dot" data-theme="golden" title="Golden Dusk" aria-label="金暮" style="--dot:#F3C248"></button>
+        <button type="button" class="gate-dot" data-theme="cyber" title="Cyber Neon" aria-label="霓虹紫" style="--dot:#FD79A8"></button>
+      </div>
+      <div class="gate-controls" role="group" aria-label="开屏动画播放控制">
+        <button type="button" id="gatePlayToggle" class="gate-control-button" aria-label="播放开屏动画" aria-pressed="false">播放</button>
+        <input type="range" id="gateProgress" min="0" max="6" step="0.01" value="0" aria-label="开屏动画进度">
+        <span class="gate-time"><span id="gateCurrentTime">0:00</span> / <span id="gateTotalTime">0:06</span></span>
+        <button type="button" id="gateSkip" class="gate-skip" title="跳过开屏并前往档案室">跳过 ↘</button>
+      </div>
     </div>
-    <span class="video-badge">EP.29</span>
+    </div>
+    <section class="archive-room" id="archiveRoom" aria-label="西木会馆档案室" aria-hidden="true">
+      <div class="archive-room-heading">
+        <span class="archive-room-kicker">XIMU HUIGUAN · ARCHIVE ROOM</span>
+        <h2>西木会馆档案室</h2>
+        <p>在《罗小黑战记》的世界里，翻阅官方记录，写下自己的角色，也看看其他创作者带来的故事。</p>
+      </div>
+      <div class="archive-room-tools"><button id="archiveReset" type="button" hidden>← 三列档案</button><button id="heroReturn" type="button">↑ 返回开场</button></div>
+      <div class="archive-door-grid" aria-label="档案室目录">
+        <section class="archive-door" data-door="official">
+          <button class="door-main" type="button" aria-label="官方角色档案" aria-expanded="false" aria-controls="officialContent">
+            <span class="door-number">01</span>
+            <span class="door-title">官方角色档案</span>
+            <span class="door-english">Official Archive</span>
+            <span class="door-description">查阅《罗小黑战记》世界里的角色与官方记录。</span>
+            <span class="door-arrow" aria-hidden="true">↗</span>
+          </button>
+          <div class="archive-body" id="officialContent">
+            <div class="archive-links"><a href="/gallery.html">角色画廊 ↗</a><a href="/relation.html">人物关系图 ↗</a><a href="/stickers.html">罗小黑表情包收录 ↗</a><button id="homeScribeApply" type="button">申请成为编辑</button></div>
+            <div class="archive-search"><input id="homeOfficialSearch" type="search" placeholder="搜索官方角色" aria-label="搜索官方角色"><span id="homeOfficialCount"></span></div>
+            <div id="homeOfficialGrid" class="home-character-grid" aria-live="polite"><p class="archive-note">正在翻开官方档案…</p></div>
+            <button id="homeOfficialMore" class="archive-more" type="button" hidden>更多角色 ↓</button>
+          </div>
+        </section>
+        <section class="archive-door" data-door="character">
+          <button class="door-main" type="button" aria-label="人设登记" aria-expanded="false" aria-controls="registrationMount">
+            <span class="door-number">02</span>
+            <span class="door-title">人设登记</span>
+            <span class="door-english">Character File · OC Archive</span>
+            <span class="door-description">为你的角色留下一份属于会馆的档案。</span>
+            <span class="door-arrow" aria-hidden="true">↗</span>
+          </button>
+          <div class="archive-body" id="registrationMount">
+            <a class="registration-poster" href="/haibao/">自定义角色配色海报 ↗</a>
+            <div class="registration-preview"><img src="/api/official/img?cid=1&n=0&t=1" alt="罗小黑" decoding="async"><p>名字、能力、经历。<br>从这里，留下你的角色档案。</p><span>在这一列向下滑，逐页写下角色。</span></div>
+          </div>
+        </section>
+        <section class="archive-door" data-door="fan">
+          <button class="door-main" type="button" aria-label="同人角色档案" aria-expanded="false" aria-controls="fanContent">
+            <span class="door-number">03</span>
+            <span class="door-title">同人角色档案</span>
+            <span class="door-english">Fan Archive</span>
+            <span class="door-description">看看其他创作者的角色，也分享属于你的故事。</span>
+            <span class="door-arrow" aria-hidden="true">↗</span>
+          </button>
+          <div class="archive-body" id="fanContent">
+            <div id="homeMyCharacter" class="my-character"><p class="archive-note">正在查阅你的登记…</p></div>
+            <div class="fan-public-heading"><span>会馆里的其他角色</span><a href="/fan.html">完整画廊 ↗</a></div>
+            <div id="homeFanGrid" class="home-character-grid" aria-live="polite"><p class="archive-note">正在翻开公开档案…</p></div>
+          </div>
+        </section>
+      </div>
+    </section>
   </div>
-</div>
-
-<!-- Leaf particles -->
-<div class="leaf-particle"></div><div class="leaf-particle"></div>
-<div class="leaf-particle"></div><div class="leaf-particle"></div>
-<div class="leaf-particle"></div>
-
-<!-- Particle canvas -->
-<canvas id="ink-canvas"></canvas>
-
-<div class="header">
-  <a href="fan.html" style="display:inline-block;margin-bottom:12px;padding:10px 28px;font-size:16px;letter-spacing:2px;font-weight:600;color:#fff;background:#b8892a;border-radius:8px;text-decoration:none;transition:all .2s;">原创同人角色画廊 →</a>
-  <div style="margin-bottom:10px;font-size:13px;color:var(--text-dim);">熟悉《罗小黑战记》？<a href="gallery.html" style="color:var(--gold);text-decoration:none;font-weight:600;">成为「编辑」</a>，一起审查与补充官方设定 →</div>
-  <a href="gallery.html" style="display:inline-block;margin-bottom:12px;padding:10px 28px;font-size:16px;letter-spacing:2px;font-weight:600;color:#fff;background:var(--accent);border-radius:8px;text-decoration:none;transition:all .2s;">官方角色画廊 →</a>
-  <h1>西木会馆 · 人设登记</h1>
+</section>
+<section id="characterRegistration" hidden aria-label="人设登记">
+<header class="header registration-header">
+  <h1>人设登记</h1>
   <div class="divider"></div>
-  <div class="sub">你所登记的人设，将汇入众生之门 · 由馆长佳霖创制</div>
-</div>
-
+  <div class="sub">为角色写下一份档案，让它在会馆里留下名字。</div>
+</header>
 <div class="container">
   <form id="charForm" novalidate>
     <div class="edit-tip" id="editTip" style="display:none;margin-bottom:14px;padding:10px 14px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-glow);color:var(--accent);font-size:13px;"></div>
@@ -941,23 +941,18 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
     </div>
 
     <!-- ══════ 角色配色 ══════ -->
-    <div class="section">
-      <div class="haibao-entry-banner" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:12px 16px;border:2px solid var(--gold);border-radius:10px;background:linear-gradient(135deg, rgba(212,168,75,.14), rgba(90,158,143,.08));">
-        <div style="min-width:0;">
-          <div style="font-weight:700;font-size:15px;color:var(--text);letter-spacing:1px;">自定义角色配色海报</div>
-          <div style="font-size:12px;color:var(--text-dim);margin-top:2px;">用主/辅双色环自由取色、命名保存，一键生成角色水墨海报；保存后同步配色库，全馆可用。</div>
-        </div>
-        <a href="/haibao/" class="wheel-redirect-btn" style="flex:none;text-decoration:none;white-space:nowrap;">去制作海报 →</a>
-      </div>
-      <h2>角色配色 <span style="color:var(--text-dim);font-size:11px">（快速搭配 / 自由选色）</span></h2>
+    <details class="section registration-palette" id="registrationPalette">
+      <summary>角色配色 <span>点击展开 · 别忘了为角色选一组配色</span></summary>
+      <div class="registration-palette-body">
+      <div class="palette-section-heading"><h3>快速搭配</h3><p>选一组现成配色，或在下方分别挑选主色与辅色。</p></div>
       <div class="color-grid" id="formColorGrid"></div>
-      <label style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--text-dim);cursor:pointer;">
+      <label class="palette-import-option" style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;color:var(--text-dim);cursor:pointer;">
         <input type="checkbox" id="autoImportToggle" checked style="accent-color:var(--accent);">
         选中与已有角色相同的配色时，自动导入该角色设定表（可关闭）
       </label>
       <div class="custom-color-section" id="customColorSection">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-          <h3 style="margin:0;">自由选色 · 479 种中国古色 · 五行归类</h3>
+          <div class="palette-section-heading"><h3>自由选色</h3><p>中国古色 · 五行归类 · 先选主色，再选辅色</p></div>
           <input type="text" id="ancientSearch" placeholder="搜色名 / 五行（金木水火土）" oninput="onAncientSearch(this.value)" style="flex:0 1 200px;font-size:12px;padding:6px 10px;background:var(--paper,#fff);color:var(--text);border:1px solid var(--border);border-radius:6px;outline:none;">
         </div>
         <div class="pick-slots">
@@ -975,24 +970,24 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
         </div>
         <div class="color-tabs" id="colorTabs"></div>
         <div class="swatch-grid" id="swatchGrid"></div>
-        <div class="wheel-section" id="wheelSection">
-          <div class="wheel-head">
-            <span style="font-weight:600;">色环选色</span>
-            <span style="color:var(--text-dim);font-size:11px;">色环取色已迁移至配色海报页，选色更直观、可命名保存</span>
+        <details class="wheel-section inline-wheel" id="wheelSection">
+          <summary>色环取色 <span>同页展开 · 不会丢失设表内容</span></summary>
+          <p class="hint">在色环上选色，调节亮度；点击应用后预览角色配色。配色命名后可保存到会馆配色库。</p>
+          <div class="wheel-wrap">
+            <div class="wheel-slot"><label for="wheelPrimaryV">主色</label><canvas id="wheelPrimary" width="140" height="140" aria-label="主色色环"></canvas><input id="wheelPrimaryV" type="range" min="5" max="100" value="82" oninput="onWheelV('primary',this.value)" aria-label="主色亮度"><span id="wheelPrimaryHex"></span><input id="wheelPrimaryName" placeholder="主色名" maxlength="12" aria-label="主色名称"></div>
+            <div class="wheel-slot"><label for="wheelAccentV">辅色</label><canvas id="wheelAccent" width="140" height="140" aria-label="辅色色环"></canvas><input id="wheelAccentV" type="range" min="5" max="100" value="72" oninput="onWheelV('accent',this.value)" aria-label="辅色亮度"><span id="wheelAccentHex"></span><input id="wheelAccentName" placeholder="辅色名" maxlength="12" aria-label="辅色名称"></div>
           </div>
-          <div class="wheel-redirect">
-            <p class="wheel-redirect-tip">配色海报页提供主/辅双色环自由取色与亮度调节，保存后同步到西木会馆配色库（下方 ⭐ 用户配色），全馆可用。</p>
-            <a class="wheel-redirect-btn" href="/haibao/">去配色海报页用色环取色 →</a>
-          </div>
-        </div>
+          <div class="wheel-actions"><button type="button" onclick="applyCustomTheme()">应用到角色配色</button><button type="button" id="wheelSaveBtn" onclick="saveWheelScheme()" disabled>保存命名配色</button></div><p id="wheelSaveMsg" class="wheel-msg" role="status"></p>
+        </details>
       </div>
       <div class="form-row" style="margin-top:12px;">
         <div class="hint">上方可选快速搭配，也可从自由选色中自定主色和辅色；网页主题将同步变化，提交时以此配色生成角色展示页。</div>
       </div>
-    </div>
+      </div>
+    </details>
 
     <!-- ══════ 基本信息 ══════ -->
-    <div class="section">
+    <div class="section" id="registrationBasics">
       <h2>基本信息</h2>
       <div class="row-flex">
         <div class="form-row" id="row-code">
@@ -1095,7 +1090,7 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
         <label>人设图片 <span style="color:var(--text-dim);font-size:11px">（选填）</span></label>
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imgInput').click()">
           <div class="icon">&#x1F5BC;</div>
-          <div class="tip">点击上传人设图，可多选，支持 JPG / PNG（单张≤2MB）</div>
+          <div class="tip">点击上传人设图，可多选，支持 JPG / PNG / WebP（单张≤8MB）</div>
           <input type="file" id="imgInput" name="image" accept="image/jpeg,image/png,image/webp" multiple onchange="handleImage(event)">
         </div>
         <div id="imgGallery" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
@@ -1106,14 +1101,18 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
     </div>
 
     <!-- ══════ 能力 ══════ -->
-    <div class="section">
+    <div class="section ability-section">
       <h2>能力 <span style="color:var(--text-dim);font-size:11px">（可选）</span>
         <span style="margin-left:auto;display:flex;gap:8px;align-items:center;">
           <button type="button" class="btn-elder-apply limit-apply" onclick="applyElder()">申请长老 · 突破限制</button>
-          <a class="ability-detail-link" href="#ability-detail-section" title="跳转到下方能力详解">查看能力详解 ↓</a>
+          <a class="ability-detail-link" href="#ability-detail-section" onclick="document.getElementById('ability-detail-section').open = true" title="展开本栏能力详解">能力详解 ↓</a>
         </span>
       </h2>
-      <div class="hint" style="margin-bottom:12px;">妖精默认都具备御灵基础，可选择某系别特化（非必选）。未登录御灵系最多 1 系、年龄上限 450 岁；注册账号默认成为<strong>执行者</strong>（御灵系可选 2 系）；<strong>长老</strong>在执行者基础上年龄上限提升至 1500 岁（需申请并经馆长批准）。最多可再选两个大系；空间系只能选一个特殊能力，其他系别最多选两个能力。治愈系与空间系互斥；选治愈系后生灵系还可再选 1 个分支，其他大系分支不可选（名额受限时会自动取消治愈系）。双系合璧技能（如画灵＝造物×生灵）占用两个大系、计 2 个分支名额。选择治愈系/空间系后会弹出限定提示。</div>
+      <div class="ability-guidance hint">
+        <p><strong>基础与身份</strong>妖精默认具备御灵基础，系别特化可选。未登录御灵系最多选 1 系，年龄上限 450 岁；注册后默认成为执行者，御灵系可选 2 系。长老在执行者基础上，年龄上限提升至 1500 岁，需申请并经馆长批准。</p>
+        <p><strong>系别与技能</strong>最多可再选两个大系。空间系只能选一个特殊能力，其他系别最多选两个能力。双系合璧技能（如画灵＝造物×生灵）占用两个大系、计 2 个分支名额。</p>
+        <p><strong>特殊限制</strong>治愈系与空间系互斥。选治愈系后，生灵系还可再选 1 个分支，其他大系分支不可选；名额受限时会自动取消治愈系。选择治愈系或空间系后会弹出限定提示。</p>
+      </div>
 
       <div class="ability-panel">
         <!-- 御灵系 - 必选 -->
@@ -1133,8 +1132,8 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
           </div>
           <!-- 御灵系自定义分支 -->
           <div class="branch-custom-row" id="royalCustomRow" style="margin-top:10px;display:none;">
-            <span class="branch-preset-label">自定义分支</span>
-            <input type="text" id="royalCustomName" placeholder="自定义御灵分支名称（可选）" style="flex:1;">
+            <span class="branch-preset-label">自定义分支技能</span>
+            <input type="text" id="royalCustomName" placeholder="自定义御灵分支技能名称（可选）" style="flex:1;">
           </div>
         </div>
 
@@ -1175,6 +1174,12 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
       </div>
       <div class="notice" id="abilityNotice" style="display:none;"></div>
       <div class="err" id="abilityErr" style="margin-top:8px;"></div>
+      <details class="ability-explanations" id="ability-detail-section">
+        <summary>能力详解 <span>点击展开 · 记得核对技能说明，自设技能请补充</span></summary>
+        <div id="abilityDetailPanel">
+          <div class="empty-tip" style="padding:16px;" id="abilityDetailEmpty">选择能力系别和分支技能后，这里会自动显示解释；未收录的技能可自行补充说明。</div>
+        </div>
+      </details>
     </div>
 
     <!-- ══════ 武器/法宝 ══════ -->
@@ -1253,14 +1258,6 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
       </div>
     </div>
 
-    <!-- ══════ 能力详解（独立板块） ══════ -->
-    <div class="section" id="ability-detail-section">
-      <h2>能力详解 <span style="color:var(--text-dim);font-size:11px">（根据所选能力自动生成）</span></h2>
-      <div id="abilityDetailPanel">
-        <div class="empty-tip" style="padding:16px;" id="abilityDetailEmpty">在上方选择能力系别和分支后，此处将自动显示能力解释。数据库中未收录的分支将提供输入框供你自行填写。</div>
-      </div>
-    </div>
-
     <!-- ══════ 备注 ══════ -->
     <div class="section">
       <h2>备注 <span style="color:var(--text-dim);font-size:11px">（选填）</span></h2>
@@ -1271,6 +1268,7 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
     </div>
 
     <!-- ══════ 按钮 ══════ -->
+    <div id="formFeedback" class="form-feedback" role="alert" hidden></div>
     <div class="btn-row">
       <button type="button" class="btn" onclick="resetForm()">重 置</button>
       <button type="submit" class="btn primary" id="btnSubmit">提 交 登 记</button>
@@ -1285,6 +1283,7 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
     <button class="btn-clear-all" id="btnClearAll" style="display:none;" onclick="clearAll()">清空全部登记</button>
   </div>
 </div>
+ </section>
 
 <!-- ══════ 颜色选择弹窗 ══════ -->
 <div class="modal-overlay" id="colorModal">
@@ -1299,6 +1298,8 @@ body.gate-lock .fan-corner-btn { opacity: 0; pointer-events: none; }
   </div>
 </div>
 
+<script src="/image-upload.js?v=20261013"></script>
+<script src="/character-colors.js?v=20261013"></script>
 <script>
 const STORAGE_KEY = 'luoxiaohei_characters';
 
@@ -1396,11 +1397,9 @@ async function checkLogin() {
   }
 }
 
-// 依据已存配色还原 colors（预设用 colorIndex，自选用主/辅色 hex）
+// Saved HEX takes precedence; an index is only a fallback for older records.
 function colorsFromData(d) {
-  if (d && d.colorIndex != null && COLOR_SCHEMES[d.colorIndex]) return COLOR_SCHEMES[d.colorIndex];
-  if (d && d.colorPrimary && d.colorAccent) { try { return buildCustomTheme(d.colorPrimary, d.colorAccent); } catch(e) {} }
-  return COLOR_SCHEMES[4];
+  return HuiguanColors.resolve(d, COLOR_SCHEMES);
 }
 // 自动修复：把当前用户未生成展示页的人设重新生成并保存
 async function fixBrokenShowcase() {
@@ -1413,7 +1412,7 @@ async function fixBrokenShowcase() {
     let ok = 0;
     for (const item of list) {
       try {
-        const data = item.data || {};
+        const data = await HuiguanImages.character(item.data || {});
         const html = generateShowcaseHTML(data, colorsFromData(data));
         const sr = await fetch('/api/save-character', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1449,6 +1448,7 @@ function renderAuthBar(user) {
   checkRoyalLimit();
   updateRegNotice();
   updateBreakBoxes();
+  document.dispatchEvent(new CustomEvent('huiguan:auth-change', { detail: user }));
 }
 
 async function renameUser() {
@@ -1538,11 +1538,7 @@ async function syncFromServer() {
       // 服务器没有数据，但本地有：把本地数据全部推送到服务器
       const st = document.getElementById('syncStatus');
       if (st) { st.textContent = '正在同步本地数据...'; st.className = 'sync-status'; }
-      await fetch('/api/save-all-characters', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ characters: local })
-      });
+      await saveCharactersToServer(local);
       if (st) { st.textContent = '已同步'; st.className = 'sync-status ok'; }
     }
   } catch(e) {
@@ -1554,17 +1550,31 @@ async function syncFromServer() {
 async function pushToServer(data) {
   if (!currentUser) return;
   try {
-    await fetch('/api/save-character', {
+    data = await HuiguanImages.character(data);
+    const response = await fetch('/api/save-character', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ code: data.code, html: '', data: data })
     });
+    if (!response.ok) throw new Error('保存失败');
     const st = document.getElementById('syncStatus');
     if (st) { st.textContent = '已同步'; st.className = 'sync-status ok'; }
   } catch(e) {
     const st = document.getElementById('syncStatus');
     if (st) { st.textContent = '待同步'; st.className = 'sync-status'; }
   }
+}
+
+async function saveCharactersToServer(characters) {
+  const normalized = [];
+  for (const character of characters) normalized.push(await HuiguanImages.character(character));
+  const response = await fetch('/api/save-all-characters', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ characters: normalized })
+  });
+  const result = await response.json();
+  if (!response.ok || !result.ok) throw new Error(result.error || '同步失败');
+  saveAll(normalized);
 }
 
 const ABILITY_BRANCHES = {
@@ -1641,27 +1651,7 @@ let prevManualSet = new Set();
 let branchOrder = [];
 
 // 中国古色配色方案 — 精选自 longtian/ancient-chinese-color 与 chroma-cathay/chinese-color-atlas
-const COLOR_SCHEMES = [
-  { name: '罗小黑·漆黑×翠绿', primary: '#1A1F2E', primaryDark: '#10131C', accent: '#0EB83A', accentLight: '#86DB9C', accentPale: '#B6E9C3', text: '#DFDBD8', dim: '#72707D', line: 'rgba(14,184,58,0.25)' },
-  { name: '无限·靛蓝×银白', primary: '#065279', primaryDark: '#03324B', accent: '#D1D9E0', accentLight: '#E8ECEF', accentPale: '#F1F3F5', text: '#DCE3E4', dim: '#678CA6', line: 'rgba(209,217,224,0.25)' },
-  { name: '鹿野·黛蓝×缟白', primary: '#3B3561', primaryDark: '#242042', accent: '#F0EFEB', accentLight: '#F6F5F2', accentPale: '#FBFAF8', text: '#E6E4F0', dim: '#8B87A6', line: 'rgba(240,239,235,0.25)' },
-  { name: '哪吒·品红×橙黄', primary: '#8B1942', primaryDark: '#560F28', accent: '#FFA400', accentLight: '#FFD17F', accentPale: '#FFE3B2', text: '#F0DADB', dim: '#B06C88', line: 'rgba(255,164,0,0.25)' },
-  { name: '三足乌馆长·暮紫×金橙', primary: '#4a1033', primaryDark: '#170a14', accent: '#e8a33d', accentLight: '#f5c26b', accentPale: '#ffd9a0', text: '#f3e6e0', dim: '#b99aa9', line: 'rgba(232,163,61,0.25)' },
-  { name: '深绿×暖黄', primary: '#1b4d3e', primaryDark: '#103428', accent: '#e8c050', accentLight: '#f0d878', accentPale: '#f8e8a8', text: '#e4efe0', dim: '#8a9e80', line: 'rgba(232,192,80,0.25)' },
-  { name: '黛蓝×缃色', primary: '#425066', primaryDark: '#27303d', accent: '#F0C239', accentLight: '#f7e09c', accentPale: '#faecc3', text: '#e5e3e1', dim: '#888b9c', line: 'rgba(240,194,57,0.25)' },
-  { name: '绛紫×月白', primary: '#8C4356', primaryDark: '#542833', accent: '#D6ECF0', accentLight: '#eaf5f7', accentPale: '#f2f9fa', text: '#f1e1de', dim: '#b18393', line: 'rgba(214,236,240,0.25)' },
-  { name: '鸦青×酡颜', primary: '#424C50', primaryDark: '#272d30', accent: '#F9906F', accentLight: '#fcc7b7', accentPale: '#fdddd3', text: '#e5e2de', dim: '#888890', line: 'rgba(249,144,111,0.25)' },
-  { name: '玄青×赤金', primary: '#3D3B4F', primaryDark: '#24232f', accent: '#F2BE45', accentLight: '#f8dea2', accentPale: '#fbebc7', text: '#e5dfdd', dim: '#857f8f', line: 'rgba(242,190,69,0.25)' },
-  { name: '黛绿×珊瑚赫', primary: '#2F4A4A', primaryDark: '#1D2D2D', accent: '#C12C1F', accentLight: '#e0958f', accentPale: '#ecbfbb', text: '#e3e2dd', dim: '#7d878c', line: 'rgba(193,44,31,0.25)' },
-  { name: '紫檀×松花', primary: '#4C221B', primaryDark: '#2d1410', accent: '#FFEE6F', accentLight: '#fff6b7', accentPale: '#fff9d3', text: '#e7dcd6', dim: '#8d7172', line: 'rgba(255,238,111,0.25)' },
-  { name: '苍色×茶色', primary: '#55666A', primaryDark: '#343F41', accent: '#B35C44', accentLight: '#d9ada1', accentPale: '#e8cec6', text: '#e8e6e1', dim: '#92979e', line: 'rgba(179,92,68,0.25)' },
-  { name: '漆黑×牙色', primary: '#161823', primaryDark: '#0d0e15', accent: '#EEDEB0', accentLight: '#f6eed7', accentPale: '#f9f5e7', text: '#dfdad7', dim: '#706c77', line: 'rgba(238,222,176,0.25)' },
-  { name: '靛蓝×藕荷色', primary: '#065279', primaryDark: '#033148', accent: '#E4C6D0', accentLight: '#f1e2e7', accentPale: '#f6edf0', text: '#dce3e4', dim: '#678ca6', line: 'rgba(228,198,208,0.25)' },
-  { name: '黧×樱草色', primary: '#5D513C', primaryDark: '#373024', accent: '#EAFF56', accentLight: '#f4ffaa', accentPale: '#f8ffcc', text: '#e9e3db', dim: '#978b85', line: 'rgba(234,255,86,0.25)' },
-  { name: '水绿×葱青', primary: '#D4F2E7', primaryDark: '#7f918a', accent: '#3E6E4E', accentLight: '#9eb6a6', accentPale: '#c3d3ca', text: '#2a3a2e', dim: '#6e8a78', line: 'rgba(62,110,78,0.25)' },
-  { name: '苍黄×丁香色', primary: '#2E5C48', primaryDark: '#1C392C', accent: '#CCA4E3', accentLight: '#e5d1f1', accentPale: '#efe3f6', text: '#e2e4dc', dim: '#7d918b', line: 'rgba(204,164,227,0.25)' },
-  { name: '众生之门·霓虹紫', primary: '#2A1A33', primaryDark: '#170E1F', accent: '#D0A9DA', accentLight: '#E8C8F0', accentPale: '#F3E2F8', text: '#EDE4F2', dim: '#8F7F9C', line: 'rgba(173,113,187,0.25)' }
-];
+const COLOR_SCHEMES = HuiguanColors.presets;
 
 // 内置预设角色：选择同名配色且本地没有该角色时，自动填充完整设定
 // （数据来自 oc.iridescently.xyz 馆长设定页，可随设定更新同步维护）
@@ -1910,11 +1900,11 @@ function renderExtraBranches() {
     }).join('');
 
     html += `<div class="ability-cat" style="margin-top:12px;">
-      <div class="ability-cat-title">${sys} · 分支（至少选一项）</div>
+      <div class="ability-cat-title">${sys}分支技能 <span class="branch-requirement">（至少选一项）</span></div>
       <div class="ability-branches">${comboChips}${branchChecks}</div>
       <div class="branch-custom-row combo-row" style="margin-top:8px;">
-        <span class="branch-preset-label">自定义分支</span>
-        <input type="text" placeholder="自定义${sys}分支名称" style="flex:1;" data-custom-branch="${sys}" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomBranch('${sys}')}">
+        <span class="branch-preset-label">自定义分支技能</span>
+        <input type="text" placeholder="自定义${sys}分支技能名称" style="flex:1;" data-custom-branch="${sys}" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomBranch('${sys}')}">
         <button type="button" onclick="addCustomBranch('${sys}')">添加</button>
       </div>
       <div id="cbTags_${sys}" style="margin-top:4px;"></div>
@@ -2164,7 +2154,7 @@ function updateAbilityDetail() {
   }
 
   if (blocks.length === 0) {
-    panel.innerHTML = '<div class="empty-tip" style="padding:16px;" id="abilityDetailEmpty">在上方选择能力系别和分支后，此处将自动显示能力解释。数据库中未收录的分支将提供输入框供你自行填写。</div>';
+    panel.innerHTML = '<div class="empty-tip" style="padding:16px;" id="abilityDetailEmpty">选择能力系别和分支技能后，这里会自动显示解释；未收录的技能可自行补充说明。</div>';
     return;
   }
 
@@ -2269,19 +2259,13 @@ const JUNK_FIELDS = [
 ];
 function validate() {
   let ok = true;
+  document.querySelectorAll('#charForm .form-row.error').forEach(r => { r.classList.remove('error'); r.querySelector('.err').textContent = ''; });
   const err = (id, msg) => { const r = document.getElementById('row-'+id); if(r) { r.classList.add('error'); r.querySelector('.err').textContent = msg; } ok = false; };
   const clr = (id) => { const r = document.getElementById('row-'+id); if(r) { r.classList.remove('error'); r.querySelector('.err').textContent = ''; } };
   const f = document.getElementById('charForm');
 
   if (!f.code.value.trim()) err('code', '请输入代号'); else clr('code');
   if (!f.name.value.trim()) err('name', '请输入名字'); else clr('name');
-  // 垃圾内容过筛
-  let junkHit = false;
-  JUNK_FIELDS.forEach(([id, label]) => {
-    const el = f[id]; if (!el) return;
-    if (isJunk(el.value)) { err(id, label + '含无意义占位内容（纯标点/符号），请填写真实设定'); junkHit = true; }
-  });
-  if (junkHit) showToast('error', '⚠ 检测到无意义占位内容（如纯标点 / 数字 / 符号）。请认真填写真实设定后再提交，多次恶意提交可能被限制。', 7000);
   if (!f.gender.value) err('gender', '请选择性别'); else clr('gender');
   if (!f.species_type.value) err('species', '请选择人或妖精');
   else if (f.species_type.value === '妖精' && !f.species_detail.value.trim()) err('species', '请填写妖精种族');
@@ -2320,6 +2304,13 @@ function validate() {
   if (weapon.includes('若木')) err('weapon', '不可使用若木作为武器');
   else clr('weapon');
 
+  // 垃圾内容过筛
+  let junkHit = false;
+  JUNK_FIELDS.forEach(([id, label]) => {
+    const el = f.elements.namedItem(id === 'bg' ? 'background' : id); if (!el) return;
+    if (isJunk(el.value)) { err(id, label + '请至少填写两个汉字或字母，不要只填数字或标点'); junkHit = true; }
+  });
+  if (window.renderFormFeedback) window.renderFormFeedback();
   return ok;
 }
 
@@ -2624,24 +2615,6 @@ function tryAutoImportFromScheme(scheme) {
   abilityNotice('已按配色「' + scheme.name + '」自动导入角色「' + (ch.name || ch.code) + '」的设定表（可关闭自动导入）。');
 }
 
-// 字体颜色自适应：保证前景色对每个背景的 WCAG 对比度均 ≥ minRatio；深底自动提亮，浅底自动压暗
-function ensureContrastRatio(hex, bgHexes, minRatio) {
-  const parse = h => { const x = h.replace('#', ''); return { r: parseInt(x.substring(0, 2), 16), g: parseInt(x.substring(2, 4), 16), b: parseInt(x.substring(4, 6), 16) }; };
-  const lum = o => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(o.r) + 0.7152 * f(o.g) + 0.0722 * f(o.b); };
-  let c = parse(hex);
-  const bgs = bgHexes.map(parse);
-  const minC = () => { let m = 1e9; for (let i = 0; i < bgs.length; i++) { const l1 = lum(c), l2 = lum(bgs[i]); const cr = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); if (cr < m) m = cr; } return m; };
-  if (minC() >= minRatio) return hex;
-  let bgAvg = 0; for (let i = 0; i < bgs.length; i++) bgAvg += lum(bgs[i]); bgAvg /= bgs.length;
-  const step = lum(c) < bgAvg ? -10 : 10;
-  for (let i = 0; i < 80 && minC() < minRatio; i++) {
-    c.r = Math.min(255, Math.max(0, c.r + step));
-    c.g = Math.min(255, Math.max(0, c.g + step));
-    c.b = Math.min(255, Math.max(0, c.b + step));
-  }
-  return '#' + [c.r, c.g, c.b].map(v => v.toString(16).padStart(2, '0')).join('');
-}
-
 // ========== 会馆米白背景切换（不影响已选角色配色数据） ==========
 // 配色值与展示页 :root[data-theme="cream"]、char/gallery/fan 等页保持一致
 const CREAM_THEME = {
@@ -2668,40 +2641,13 @@ function toggleCreamMode() {
   if (window.__gateSetTheme) { try { window.__gateSetTheme('original', false); } catch (e) {} }
 }
 function applyFormTheme(colors) {
-  // 应用角色配色（非米白）时自动退出米白模式并同步按钮
   if (colors !== CREAM_THEME && creamMode) { creamMode = false; syncCreamBtn(); }
-  document.body.classList.add('theme-transition'); setTimeout(() => document.body.classList.remove('theme-transition'), 1000);
+  document.body.classList.add('theme-transition');
+  setTimeout(() => document.body.classList.remove('theme-transition'), 1000);
   const root = document.documentElement.style;
-  root.setProperty('--bg', colors.primaryDark);
-  root.setProperty('--surface', colors.primary);
-  root.setProperty('--surface-hover', colors.primary);
-  root.setProperty('--paper', colors.primaryDark);
-  root.setProperty('--border', colors.line);
-  // 字体颜色自适应：按当前配色的两个背景色校验对比度，不足则自动提亮/压暗，正文与中灰标题均 ≥ 4.5
-  const bgList = [colors.primaryDark, colors.primary];
-  const autoText = ensureContrastRatio(colors.text, bgList, 4.5);
-  const autoDim = ensureContrastRatio(colors.dim, bgList, 4.5);
-  root.setProperty('--text', autoText);
-  root.setProperty('--text-dim', autoDim);
-  // 描边/墨线自适应：浅色表面用深墨线，深色表面用提亮线，避免固定深色边框在深色主题下突兀
-  const sfHex = colors.primary.replace('#', '');
-  const sfLum = 0.2126 * parseInt(sfHex.substring(0, 2), 16) + 0.7152 * parseInt(sfHex.substring(2, 4), 16) + 0.0722 * parseInt(sfHex.substring(4, 6), 16);
-  root.setProperty('--outline', sfLum > 140 ? '#2a3a2e' : autoDim);
-  root.setProperty('--accent', colors.accent);
+  for (const [name, value] of Object.entries(HuiguanColors.tokens(colors))) root.setProperty(name, value);
   root.setProperty('--accent-glow', hexToRgba(colors.accent, 0.16));
-  root.setProperty('--gold', colors.accentLight);
-  root.setProperty('--gold-dim', autoDim);
-  // 按钮文字色自适应：accent 偏亮用深字，偏暗用白字，保证对比度
-  const acc = colors.accent.replace('#', '');
-  const ar = parseInt(acc.substring(0, 2), 16), ag = parseInt(acc.substring(2, 4), 16), ab = parseInt(acc.substring(4, 6), 16);
-  const accLum = (0.2126 * ar + 0.7152 * ag + 0.0722 * ab);
-  const btnText = accLum > 140 ? '#161823' : '#ffffff';
-  root.setProperty('--btn-text', btnText);
-  // hover 色：亮 accent 变深，暗 accent 变亮，避免写死粉色
-  const hoverR = accLum > 140 ? Math.round(ar * 0.78) : Math.round(ar + (255 - ar) * 0.18);
-  const hoverG = accLum > 140 ? Math.round(ag * 0.78) : Math.round(ag + (255 - ag) * 0.18);
-  const hoverB = accLum > 140 ? Math.round(ab * 0.78) : Math.round(ab + (255 - ab) * 0.18);
-  root.setProperty('--accent-hover', '#' + [hoverR, hoverG, hoverB].map(v => v.toString(16).padStart(2, '0')).join(''));
+  root.setProperty('--accent-hover', colors.accent);
   document.body.style.backgroundImage =
     'radial-gradient(ellipse at 20% 10%, ' + hexToRgba(colors.accent, 0.10) + ' 0%, transparent 50%),' +
     'radial-gradient(ellipse at 80% 90%, ' + hexToRgba(colors.accentLight, 0.08) + ' 0%, transparent 50%)';
@@ -2787,19 +2733,7 @@ function pickCustomColor(hex, name) {
 }
 
 function buildCustomTheme(primaryHex, accentHex) {
-  const darken = (h, f) => { var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return '#'+('0'+Math.round(r*f).toString(16)).slice(-2)+('0'+Math.round(g*f).toString(16)).slice(-2)+('0'+Math.round(b*f).toString(16)).slice(-2); };
-  const lighten = (h, f) => { var r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return '#'+('0'+Math.round(r+(255-r)*f).toString(16)).slice(-2)+('0'+Math.round(g+(255-g)*f).toString(16)).slice(-2)+('0'+Math.round(b+(255-b)*f).toString(16)).slice(-2); };
-  var pr=parseInt(primaryHex.slice(1,3),16),pg=parseInt(primaryHex.slice(3,5),16),pb=parseInt(primaryHex.slice(5,7),16);
-  var tr=Math.min(255,Math.round(pr*0.18)+20),tg=Math.min(255,Math.round(pg*0.18)+18),tb=Math.min(255,Math.round(pb*0.18)+22);
-  var dr=Math.min(255,Math.round(pr*0.4)+70),dg=Math.min(255,Math.round(pg*0.4)+66),db=Math.min(255,Math.round(pb*0.4)+72);
-  return {
-    name: (customPrimary?customPrimary.name:'自选')+'×'+(customAccent?customAccent.name:'自选'),
-    primary: primaryHex, primaryDark: darken(primaryHex,0.6),
-    accent: accentHex, accentLight: lighten(accentHex,0.5), accentPale: lighten(accentHex,0.7),
-    text: '#'+('0'+tr.toString(16)).slice(-2)+('0'+tg.toString(16)).slice(-2)+('0'+tb.toString(16)).slice(-2),
-    dim: '#'+('0'+dr.toString(16)).slice(-2)+('0'+dg.toString(16)).slice(-2)+('0'+db.toString(16)).slice(-2),
-    line: 'rgba('+parseInt(accentHex.slice(1,3),16)+','+parseInt(accentHex.slice(3,5),16)+','+parseInt(accentHex.slice(5,7),16)+',0.25)'
-  };
+  return { ...HuiguanColors.build(primaryHex, accentHex), name: (customPrimary ? customPrimary.name : '自选') + '×' + (customAccent ? customAccent.name : '自选') };
 }
 
 function applyCustomTheme() {
@@ -2983,7 +2917,7 @@ function initWheelPickers() {
     canvas.addEventListener('touchstart', (ev) => { ev.preventDefault(); wheelPickFromEvent(slot, ev.touches[0]); }, { passive: false });
     canvas.addEventListener('touchmove', (ev) => { ev.preventDefault(); wheelPickFromEvent(slot, ev.touches[0]); }, { passive: false });
     drawColorWheel(slot);
-    updateWheelPick(slot);
+    document.getElementById(slot === 'primary' ? 'wheelPrimaryHex' : 'wheelAccentHex').textContent = wheelHexFromState(slot);
   });
 }
 
@@ -3099,49 +3033,12 @@ function confirmColor() {
 
 // ========== 生成展示页 HTML ==========
 function generateShowcaseHTML(data, _colors) {
-  // 深拷贝，避免修改原 COLOR_SCHEMES 影响表单页
-  const colors = JSON.parse(JSON.stringify(_colors));
-  // raw：未做乳白亮度适配的原始配色，供"角色配色"主题使用
-  const raw = JSON.parse(JSON.stringify(_colors));
-  // 亮 accent 自适应：gold-light / gold-pale 压暗以防文字看不清
-  (() => {
-    const r = parseInt(colors.accent.slice(1,3),16);
-    const g = parseInt(colors.accent.slice(3,5),16);
-    const b = parseInt(colors.accent.slice(5,7),16);
-    const lum = 0.2126*r + 0.7152*g + 0.0722*b;
-    if (lum > 140) {
-      const f = Math.max(0.3, 1 - (lum - 140) / 200);
-      const d = c => Math.round(c * f), h = v => v.toString(16).padStart(2,'0');
-      colors.accentLight = '#' + h(d(r)) + h(d(g)) + h(d(b));
-      colors.accentPale  = '#' + h(Math.round(d(r)*0.55)) + h(Math.round(d(g)*0.55)) + h(Math.round(d(b)*0.55));
-    }
-  })();
-  // 展示页深色背景自适应：text/dim 太暗时提亮
-  (() => {
-    const r = parseInt(colors.text.slice(1,3),16);
-    const g = parseInt(colors.text.slice(3,5),16);
-    const b = parseInt(colors.text.slice(5,7),16);
-    const lum = 0.2126*r + 0.7152*g + 0.0722*b;
-    if (lum < 100) {
-      const f = Math.min(3, 120 / Math.max(lum, 20));
-      const d = c => Math.min(255, Math.round(c * f));
-      const h = v => v.toString(16).padStart(2,'0');
-      colors.text = '#' + h(d(r)) + h(d(g)) + h(d(b));
-      const rd = parseInt(colors.dim.slice(1,3),16);
-      const gd = parseInt(colors.dim.slice(3,5),16);
-      const bd = parseInt(colors.dim.slice(5,7),16);
-      colors.dim = '#' + h(d(rd)) + h(d(gd)) + h(d(bd));
-    }
-  })();
-  // 角色主题混色：以 primaryDark 为底，混入 primary / text 得到卡片、纸面与描边色
-  const mixHex = (a, b, t) => {
-    const pa = [1, 3, 5].map(i => parseInt(a.slice(i, i + 2), 16));
-    const pb = [1, 3, 5].map(i => parseInt(b.slice(i, i + 2), 16));
-    return '#' + pa.map((v, i) => Math.round(v + (pb[i] - v) * t).toString(16).padStart(2, '0')).join('');
-  };
-  const tSurface = mixHex(raw.primaryDark, raw.primary, 0.16);
-  const tPaper = mixHex(raw.primaryDark, raw.primary, 0.30);
-  const tOutline = mixHex(raw.primaryDark, colors.text, 0.42);
+  const raw = colorsFromData(data) || _colors;
+  const token = HuiguanColors.tokens(raw);
+  const colors = { ...raw, text: token['--text'], dim: token['--dim'] };
+  const tSurface = token['--surface'];
+  const tPaper = token['--paper'];
+  const tOutline = token['--outline'];
   const abilityTags = data.abilities.map(a => a.split('·')[0]).filter((v, i, arr) => arr.indexOf(v) === i);
   const abilityCards = data.abilities.map(a => {
     const parts = a.split('·');
@@ -3203,6 +3100,8 @@ function generateShowcaseHTML(data, _colors) {
 <title>${escapeHtml(data.code)} | 人设表</title>
 <style>
 :root {
+  --character-primary: ${raw.primary};
+  --character-accent: ${raw.accent};
   --bg: ${raw.primaryDark};
   --paper: ${tPaper};
   --surface: ${tSurface};
@@ -3646,32 +3545,7 @@ body.theme-transition, body.theme-transition * { transition: background-color 0.
   };
 })();
 <\/script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
-<script>
-(function(){
-  var b=document.getElementById('saveImgBtn'); if(!b) return;
-  b.addEventListener('click', function(){
-    if(!window.html2canvas){ alert('图片库加载失败，请检查网络后刷新重试'); return; }
-    b.disabled=true; b.textContent='生成中…';
-    var page=document.querySelector('.page')||document.body;
-    /* 修复“保存为图片颜色变淡”：入场动画在截图克隆文档中停留在 opacity:0 关键帧，
-       截图前临时禁用动画并强制所有区块可见，保证截图 = 肉眼所见 */
-    var st=document.createElement('style');
-    st.textContent='*,*::before,*::after{animation:none !important;transition:none !important;}.reveal,.hero{opacity:1 !important;transform:none !important;}';
-    document.head.appendChild(st);
-    var oldY=window.pageYOffset; window.scrollTo(0,0);
-    var restore=function(){ st.remove(); window.scrollTo(0,oldY); b.disabled=false; b.textContent='⬇ 保存为图片'; };
-    setTimeout(function(){
-      html2canvas(page,{backgroundColor:getComputedStyle(document.body).backgroundColor,scale:2,useCORS:true}).then(function(cv){
-        var a=document.createElement('a');
-        a.download=(document.title||'人设表')+'.png';
-        a.href=cv.toDataURL('image/png');
-        a.click(); restore();
-      }).catch(function(e){ restore(); alert('生成图片失败：'+e); });
-    },80);
-  });
-})();
-<\/script>
+<script src="/showcase-download.js?v=20261014"><\/script>
 </body>
 </html>`;
 }
@@ -3711,17 +3585,19 @@ document.getElementById('charForm').addEventListener('submit', function(e) {
     const n = document.querySelectorAll('.form-row.error').length +
       (document.getElementById('abilityErr').textContent.trim() ? 1 : 0);
     showToast('error', '⚠ 还有 <strong>' + n + '</strong> 处未填或填写有误，已用红色标出，请检查后重新提交。', 6000);
-    const first = document.querySelector('.form-row.error');
-    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (window.focusFirstFormError) window.focusFirstFormError();
     return;
   }
 
   const data = collectData();
   const colors = selectedColor || COLOR_SCHEMES[4];
-  generateAndSave(data, colors);
+  try { generateAndSave(data, colors); } catch (error) { if (window.showSubmissionProblem) window.showSubmissionProblem('暂时无法生成展示页，填写内容已保留。请稍后重试。'); }
 });
 
 function generateAndSave(data, colors) {
+  data.colorPrimary = colors.primary;
+  data.colorAccent = colors.accent;
+  data.colorIndex = COLOR_SCHEMES.findIndex(theme => theme.primary.toLowerCase() === colors.primary.toLowerCase() && theme.accent.toLowerCase() === colors.accent.toLowerCase());
   const html = generateShowcaseHTML(data, colors);
 
   // 保存到 localStorage：编辑模式原位替换，否则追加到头部
@@ -3729,7 +3605,8 @@ function generateAndSave(data, colors) {
   if (editingIndex !== null) {
     all[editingIndex] = data;
   } else {
-    all.unshift(data);
+    const previous = all.findIndex(item => item.code === data.code);
+    if (previous >= 0) all[previous] = data; else all.unshift(data);
   }
   saveAll(all);
 
@@ -3745,36 +3622,49 @@ function generateAndSave(data, colors) {
   }
 }
 
-function postSave(data, html) {
-  fetch('/api/save-character', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ code: data.code, html: html, data: data })
-  })
-  .then(async r => {
+async function postSave(data, html) {
+  const button = document.getElementById('btnSubmit');
+  if (button.disabled) return false;
+  button.disabled = true;
+  const label = button.textContent;
+  button.textContent = '正在保存…';
+  try {
+    data = await HuiguanImages.character(data);
+    html = generateShowcaseHTML(data, colorsFromData(data));
+    const r = await fetch('/api/save-character', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: data.code, html, data }), signal: AbortSignal.timeout(30000)
+    });
     const result = await r.json().catch(() => ({}));
-    if (!r.ok || result.error) throw new Error(result.error || ('服务器返回 ' + r.status));
+    if (!r.ok || !result.ok || !result.url) {
+      const messages = { 401: '登录已过期，请重新登录后提交。', 403: '当前账户无法登记，请联系馆长确认账户状态。', 413: '图片和展示页的总大小超出限制，请减少图片数量或压缩图片后重试。', 429: '提交太频繁，请稍等一会儿再试。' };
+      throw new Error(messages[r.status] || (r.status >= 500 ? '会馆保存服务暂时不可用，请稍后重试。' : '这次登记未被接受，请检查设表内容；仍有问题可联系馆长。'));
+    }
     document.getElementById('successMsg').classList.add('show');
-    document.getElementById('successMsg').innerHTML = '登记成功！展示页已生成：<a href="' + result.url + '" target="_blank" style="color:var(--gold);">查看展示页</a>';
-    setTimeout(() => { document.getElementById('successMsg').classList.remove('show'); }, 5000);
-    showToast('success', '✔ 登记成功！「' + escapeHtml(data.name || data.code) + '」已收录至会馆名册，<a href="' + result.url + '" target="_blank">查看展示页</a>', 7000);
+    document.getElementById('successMsg').innerHTML = '登记成功！<a href="' + result.url + '" target="_blank">查看展示页</a>';
+    showToast('success', '✔ 登记成功！「' + escapeHtml(data.name || data.code) + '」已收录至会馆名册。', 7000);
+    pendingSave = null;
+    const local = loadAll();
+    const index = local.findIndex(item => item.code === data.code);
+    if (index >= 0) { local[index] = data; saveAll(local); }
     resetForm();
+    if (window.renderFormFeedback) window.renderFormFeedback();
     renderList();
-  })
-  .catch(err => {
-    document.getElementById('successMsg').classList.add('show');
-    document.getElementById('successMsg').innerHTML = '保存失败：' + escapeHtml(err.message) + '。数据已存入本地；若需生成展示页，请先登录后再提交。';
-    setTimeout(() => { document.getElementById('successMsg').classList.remove('show'); }, 6000);
-    showToast('error', '⚠ 展示页保存失败：' + escapeHtml(err.message) + '。数据已存入本地，登录后重新提交即可。', 7000);
-    resetForm();
-    renderList();
-  });
+    return true;
+  } catch (error) {
+    const message = error.name === 'TypeError' || error.name === 'TimeoutError' ? '暂时连接不上会馆保存服务，请检查网络后重试。' : error.message;
+    if (window.showSubmissionProblem) window.showSubmissionProblem(message + ' 填写内容已保留，不用重新填写。');
+    showToast('error', escapeHtml(message) + ' 填写内容已保留。', 7000);
+    return false;
+  } finally {
+    button.disabled = false;
+    button.textContent = label;
+  }
 }
 
 function flushPending() {
   if (pendingSave) {
     const p = pendingSave;
-    pendingSave = null;
     postSave(p.data, p.html);
   }
 }
@@ -3786,7 +3676,7 @@ function resetForm() {
   renderGallery();
   const zone = document.getElementById('uploadZone');
   zone.querySelector('.icon').textContent = '\uD83D\uDDBC';
-  zone.querySelector('.tip').textContent = '点击上传人设图，可多选，支持 JPG / PNG（单张≤2MB）';
+  zone.querySelector('.tip').textContent = '点击上传人设图，可多选，支持 JPG / PNG / WebP（单张≤8MB）';
   document.getElementById('persPreset').value = '_custom';
   document.getElementById('persInput').style.display = '';
   document.getElementById('persInput').value = '';
@@ -3797,7 +3687,7 @@ function resetForm() {
   weaponList = []; customBranches = {};
   renderWeaponTags();
   const _wi = document.getElementById('weaponInput'); if (_wi) _wi.value = '';
-  document.getElementById('abilityDetailPanel').innerHTML = '<div class="empty-tip" style="padding:16px;" id="abilityDetailEmpty">在上方选择能力系别和分支后，此处将自动显示能力解释。数据库中未收录的分支将提供输入框供你自行填写。</div>';
+  document.getElementById('abilityDetailPanel').innerHTML = '<div class="empty-tip" style="padding:16px;" id="abilityDetailEmpty">选择能力系别和分支技能后，这里会自动显示解释；未收录的技能可自行补充说明。</div>';
   renderRoleLine();
   document.getElementById('sliderVal').textContent = '50';
   document.getElementById('factionLabel').textContent = '中立';
@@ -3926,8 +3816,9 @@ function fillFormFromData(c) {
     zone.querySelector('.tip').textContent = '已载入 ' + imageList.length + ' 张原图，可继续上传或删除';
   }
   // 配色
-  if (c.colorIndex != null && COLOR_SCHEMES[c.colorIndex]) {
-    selectedColorIdx = c.colorIndex;
+  selectedColorIdx = COLOR_SCHEMES.findIndex(theme => theme.primary.toLowerCase() === String(c.colorPrimary).toLowerCase() && theme.accent.toLowerCase() === String(c.colorAccent).toLowerCase());
+  if (selectedColorIdx < 0 && !(c.colorPrimary && c.colorAccent) && COLOR_SCHEMES[c.colorIndex]) selectedColorIdx = c.colorIndex;
+  if (selectedColorIdx >= 0) {
     selectedColor = COLOR_SCHEMES[selectedColorIdx];
   } else if (c.colorPrimary && c.colorAccent) {
     selectedColorIdx = -1;
@@ -4023,7 +3914,7 @@ function restoreIdx(i) {
   const all = loadAll();
   if (!all.find(c => c.code === it.code)) all.unshift(it);
   saveAll(all); renderList();
-  if (currentUser) fetch('/api/save-all-characters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ characters: all }) }).catch(() => {});
+  if (currentUser) saveCharactersToServer(all).catch(() => showToast('error', '同步失败，本地内容已保留。'));
 }
 function purgeIdx(i) {
   const t = loadTrash(); const item = t[i]; if (!item) return;
@@ -4042,11 +3933,7 @@ function delChar(i) {
   renderList();
   // 同步删除到服务器（主列表不再含该项，避免复活）
   if (currentUser) {
-    fetch('/api/save-all-characters', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ characters: all })
-    }).catch(() => {});
+    saveCharactersToServer(all).catch(() => showToast('error', '同步失败，本地内容已保留。'));
   }
 }
 function restoreChar(code) {
@@ -4056,7 +3943,7 @@ function restoreChar(code) {
   if (!all.find(c => c.code === item.code)) all.unshift(item);
   saveAll(all);
   renderList();
-  if (currentUser) fetch('/api/save-all-characters', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ characters: all }) }).catch(() => {});
+  if (currentUser) saveCharactersToServer(all).catch(() => showToast('error', '同步失败，本地内容已保留。'));
 }
 function purgeChar(code) {
   if (!confirm('彻底删除该人设？此操作不可恢复。')) return;
@@ -4079,282 +3966,26 @@ function escapeHtml(s) {
 
 renderFormColorGrid();
 initCustomPicker();
-initWheelPickers();
+['wheelPrimaryName', 'wheelAccentName'].forEach(id => document.getElementById(id).addEventListener('input', updateWheelSaveBtn));
+let inlineWheelReady = false;
+document.getElementById('wheelSection').addEventListener('toggle', function () { if (this.open && !inlineWheelReady) { inlineWheelReady = true; initWheelPickers(); } });
 loadUserSchemes();
 applyFormTheme(COLOR_SCHEMES[selectedColorIdx]);
 renderList();
 window.__HUIGUAN_OWN_AUTH = true;
-window.__HUIGUAN_OWN_CONTACT = true;
 checkLogin();
 window.__AUTH_NEXT = new URLSearchParams(location.search).get('next') || '';
 if (new URLSearchParams(location.search).get('openauth')) setTimeout(() => openAuthModal('登录后即可申请编辑 / 登记人设'), 400);
 </script>
 
-<style>
-.jl-wrap{position:relative;display:inline-block;cursor:help;}
-.jl-pop{display:none;position:absolute;left:50%;bottom:135%;transform:translateX(-50%);z-index:99;
-  background:#fbf8f2;border:1px solid #d4cfbe;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.18);
-  padding:10px 16px;white-space:nowrap;text-align:left;color:#5a6a5e !important;font-size:12px !important;line-height:1.9;}
-.jl-wrap:hover .jl-pop,.jl-wrap.open .jl-pop{display:block;}
-.qr-wrap{position:relative;display:inline-block;cursor:zoom-in;}
-.qr-wrap .qr-mini{width:20px;height:20px;border-radius:3px;border:1px solid #d4cfbe;vertical-align:-5px;}
-.qr-pop{display:none;position:absolute;left:50%;bottom:135%;transform:translateX(-50%);z-index:99;
-  background:#fff;border:1px solid #d4cfbe;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.18);padding:8px;}
-.qr-wrap:hover .qr-pop,.qr-wrap.open .qr-pop{display:block;}
-.qr-pop img{width:230px;height:auto;display:block;}
-</style>
-<nav style="text-align:center;padding:32px 20px 28px;">
-  <a href="https://iridescently.xyz" style="color:#888 !important;text-decoration:none !important;font-size:13px;">西木会馆</a>
-  <span style="color:#888 !important;font-size:13px;">· by <span class="jl-wrap">佳霖<span class="jl-pop">微信：JiaLinkuo<br>QQ：1208234593<br>抖音：JiaLinkuo</span></span></span>
-  <div style="margin-top:8px;">
-    <span style="color:#888 !important;font-size:12px;">讨论 QQ 群：878029597</span>
-    <span style="color:#888 !important;font-size:12px;margin-left:14px;">微信群：<span class="qr-wrap"><img class="qr-mini" src="https://iridescently.xyz/assets/wechat-group-qr.png" alt="微信群二维码"><span class="qr-pop"><img src="https://iridescently.xyz/assets/wechat-group-qr.png" alt="西木会馆-众生之门 微信群二维码"></span></span></span>
-  </div>
-</nav>
-<script>
-(function () {
-  var c = document.getElementById('ink-canvas');
-  if (!c) return;
-  var ctx = c.getContext('2d');
-  var w, h, dots = [], MAX = 40;
-  function resize() { w = c.width = window.innerWidth; h = c.height = window.innerHeight; }
-  resize(); window.addEventListener('resize', resize);
-  for (var i = 0; i < MAX; i++) {
-    dots.push({
-      x: Math.random() * w, y: Math.random() * h,
-      r: Math.random() * 1.8 + 0.4,
-      vx: (Math.random() - 0.5) * 0.12,
-      vy: (Math.random() - 0.5) * 0.1 - 0.03,
-      o: Math.random() * 0.08 + 0.02,
-      phase: Math.random() * Math.PI * 2,
-      speed: 0.002 + Math.random() * 0.005
-    });
-  }
-  (function draw() {
-    ctx.clearRect(0, 0, w, h);
-    for (var i = 0; i < dots.length; i++) {
-      var d = dots[i];
-      d.phase += d.speed;
-      d.x += d.vx + Math.sin(d.phase) * 0.06;
-      d.y += d.vy + Math.cos(d.phase * 0.8) * 0.05;
-      if (d.x < -5) d.x = w + 5; if (d.x > w + 5) d.x = -5;
-      if (d.y < -5) d.y = h + 5; if (d.y > h + 5) d.y = -5;
-      ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(42, 58, 46,' + d.o + ')'; ctx.fill();
-    }
-    requestAnimationFrame(draw);
-  })();
-})();
-</script>
-</nav>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"6fa5e24ac49f4de687c113b64d110992","r":1}' crossorigin="anonymous"></script>
 
-<!-- 版权与免责声明 -->
-<style>
-.ip-footer {
-  margin-top: 48px; padding: 16px 16px 28px;
-  border-top: 1px solid rgba(128,128,128,0.35);
-  text-align: center; font-size: 12px; letter-spacing: 1px;
-  color: inherit; opacity: 0.78; line-height: 1.9;
-}
-.ip-footer details { display: inline-block; }
-.ip-footer details[open] { display: block; }
-.ip-footer:has(details[open]) .ip-dot { display: none; }
-.ip-footer summary {
-  cursor: pointer; display: inline; user-select: none;
-  text-decoration: underline dotted;
-}
-.ip-footer summary::-webkit-details-marker { display: none; }
-.ip-footer .ip-disclaimer {
-  max-width: 680px; margin: 8px auto 0; text-align: left; line-height: 1.9;
-}
-</style>
-<footer class="ip-footer">
-  <span>罗小黑战记相关 IP 版权归寒木春华动画工作室所有</span>
-  <span aria-hidden="true" class="ip-dot"> · </span>
-  <details><summary>免责声明</summary>
-    <p class="ip-disclaimer">本站为非商业性粉丝社区项目，仅为用户提供信息交流与身份认证服务。所有涉及"罗小黑战记"及相关角色、形象、作品的内容，其著作权、商标权等知识产权均归原作者及寒木春华动画工作室所有。本站未获官方授权，如有侵权请联系管理员删除。</p>
-  </details>
-</footer>
-<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c12"></script>
-<script src="assets/gate/gate-scene.js"></script>
-<script>
-/* ===== 众生之门 · 开场门动画控制 ===== */
-(function () {
-  'use strict';
-  var GATE_KEY = 'lhx_gate_played';
-  var LOOP_START = 1.02, COLLAPSE_MS = 1100;
-
-  // 动画主题 → 会馆配色（缺失的已新增到 COLOR_SCHEMES）
-  var SCHEME_BY_THEME = {
-    original: '__CREAM__',            // 会馆米白（默认基准）
-    emerald:  '深绿×暖黄',
-    twilight: '无限·靛蓝×银白',
-    golden:   '黛蓝×缃色',
-    cyber:    '众生之门·霓虹紫'
-  };
-  // 反向：会馆配色名 → 动画主题
-  var THEME_BY_SCHEME = {
-    '深绿×暖黄': 'emerald', '水绿×葱青': 'emerald',
-    '无限·靛蓝×银白': 'twilight', '靛蓝×藕荷色': 'twilight',
-    '黛蓝×缃色': 'golden', '苍色×茶色': 'golden',
-    '众生之门·霓虹紫': 'cyber', '绛紫×月白': 'cyber'
-  };
-
-  var hero = document.getElementById('gateHero');
-  if (!hero) return;
-  var lib = window.LXHGate;
-  function fallback() { hero.classList.remove('gate-mode', 'is-cinema'); hero.classList.add('gate-fallback'); document.body.classList.remove('gate-lock'); }
-  if (!lib || typeof lib.createScene !== 'function' || !lib.hasWebGL()) { fallback(); return; }
-
-  var played = false;
-  try { played = sessionStorage.getItem(GATE_KEY) === '1'; } catch (e) {}
-  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-
-  // host + 色板
-  var host = document.createElement('div'); host.className = 'gate-canvas-host';
-  hero.insertBefore(host, hero.firstChild);
-  var board = document.createElement('div'); board.className = 'gate-board';
-  board.innerHTML = lib.THEMES.map(function (t) {
-    return '<button type="button" class="gate-dot" data-theme="' + t.id + '" title="' + t.label + '" style="--dot:' + t.color + '"></button>';
-  }).join('');
-  hero.appendChild(board);
-
-  var cinema = !played && !reduce;   // 是否走全屏开场
-  var collapsed = false;             // 全屏开场是否已收缩进首页框
-  var scene = lib.createScene(host, {
-    theme: 'original',
-    loop: !cinema,                   // 开场阶段绝不循环：完整播一遍后立即收缩
-    loopStart: LOOP_START,
-    autoplay: !reduce,
-    onFrame: function (f) {          // 动画内部时钟到达片尾（6s）即收缩，不再回绕重播
-      if (cinema && !collapsed && f.t >= lib.DURATION) collapse();
-    }
-  });
-  if (!scene) { hero.classList.remove('gate-mode'); fallback(); return; }
-  hero.classList.add('gate-mode');
-  if (reduce) scene.seek(5.5);       // 减弱动效偏好：黑框内定格，不自动播放
-
-  function markDot(id) {
-    Array.prototype.forEach.call(board.querySelectorAll('.gate-dot'), function (b) { b.classList.toggle('on', b.dataset.theme === id); });
-  }
-  function setTheme(id, syncPage) {
-    scene.setTheme(id);
-    markDot(id);
-    if (syncPage) applyGateTheme(id);
-  }
-  board.addEventListener('click', function (e) {
-    var btn = e.target.closest ? e.target.closest('.gate-dot') : null;
-    if (!btn) return;
-    setTheme(btn.dataset.theme, true);
-  });
-  markDot('original');
-
-  /* ---- 配色双向联动：动画主题 ⇄ 会馆页面配色 ---- */
-  var GATE_VARS = ['--bg', '--surface', '--surface-hover', '--paper', '--border', '--accent',
-                   '--accent-glow', '--gold', '--gold-dim', '--text', '--text-dim', '--outline',
-                   '--btn-text', '--accent-hover'];
-  var preGateVars = null;    // 门动画接管前，页面自身的行内配色快照
-  var gateThemeOn = false;   // 页面配色当前是否被门动画接管
-
-  function findScheme(name) {
-    if (!name || name === '__CREAM__' || typeof COLOR_SCHEMES === 'undefined') return null;
-    for (var i = 0; i < COLOR_SCHEMES.length; i++) { if (COLOR_SCHEMES[i].name === name) return COLOR_SCHEMES[i]; }
-    return null;
-  }
-  function snapshotPageVars() {
-    var st = document.documentElement.style; preGateVars = {};
-    GATE_VARS.forEach(function (k) { preGateVars[k] = st.getPropertyValue(k); });
-  }
-  function restorePageVars() {
-    if (!preGateVars) return;
-    var st = document.documentElement.style;
-    GATE_VARS.forEach(function (k) {
-      if (preGateVars[k]) st.setProperty(k, preGateVars[k]); else st.removeProperty(k);
-    });
-  }
-  // 复用会馆页自身的 applyFormTheme 落色：描边/按钮字色/hover/背景光晕等派生变量由页面统一计算
-  function applyGateTheme(themeId) {
-    var root = document.documentElement;
-    var scheme = (themeId === 'original') ? null : findScheme(SCHEME_BY_THEME[themeId]);
-    if (themeId !== 'original' && !scheme) return;   // 未登记的映射：不接管页面配色
-    if (!gateThemeOn) { snapshotPageVars(); gateThemeOn = true; }
-    if (typeof applyFormTheme === 'function' && typeof CREAM_THEME !== 'undefined') {
-      applyFormTheme(scheme || CREAM_THEME);         // original → 会馆米白
-    } else if (scheme) {
-      var st = root.style;
-      st.setProperty('--bg', scheme.primaryDark); st.setProperty('--surface', scheme.primary);
-      st.setProperty('--paper', scheme.primaryDark); st.setProperty('--border', scheme.line);
-      st.setProperty('--accent', scheme.accent); st.setProperty('--gold', scheme.accentLight);
-      st.setProperty('--text', scheme.text); st.setProperty('--text-dim', scheme.dim);
-    }
-    root.setAttribute('data-gate-theme', themeId);
-  }
-  // 交还页面配色：还原门动画接管前的行内配色；不触碰页面自身的 data-theme 模式
-  function clearGateTheme() {
-    if (gateThemeOn) restorePageVars();
-    gateThemeOn = false; preGateVars = null;
-    document.documentElement.removeAttribute('data-gate-theme');
-  }
-  window.__gateClearTheme = clearGateTheme;
-  window.__gateSetTheme = setTheme;
-
-  /* ---- 反向联动：页面自身切换角色配色（applyFormTheme）时，动画主题跟随 THEME_BY_SCHEME 映射 ----
-     仅包装、不改变原函数行为；门动画正在接管页面配色时跳过，避免自反馈 */
-  try {
-    if (typeof applyFormTheme === 'function') {
-      var __origApplyFormTheme = applyFormTheme;
-      window.applyFormTheme = function (colors) {
-        __origApplyFormTheme.apply(this, arguments);
-        if (gateThemeOn || !colors) return;
-        var id = (typeof CREAM_THEME !== 'undefined' && colors === CREAM_THEME) ? 'original' : THEME_BY_SCHEME[colors.name];
-        if (id) setTheme(id, false);
-      };
-    }
-  } catch (e) {}
-
-  /* ---- 全屏开场（完整一遍） → FLIP 收缩 → 框内循环 ---- */
-  if (cinema) {
-    hero.classList.add('is-cinema');
-    document.body.classList.add('gate-lock');
-    applyGateTheme('original');   // 首访开场：动画默认浅绿主题 ↔ 会馆米白，开局即同步
-    // 兜底：万一 onFrame 未触发，按动画内部时钟在完整播完一遍（6s）后收缩
-    var watchdog = setInterval(function () {
-      if (collapsed) { clearInterval(watchdog); return; }
-      if (scene.getTime() >= lib.DURATION) { clearInterval(watchdog); collapse(); }
-    }, 200);
-  }
-
-  function collapse() {
-    if (collapsed) return;      // 只收缩一次（onFrame 与兜底定时器共用）
-    collapsed = true;
-    var first = host.getBoundingClientRect();
-    hero.classList.remove('is-cinema');
-    document.body.classList.remove('gate-lock');
-    var last = host.getBoundingClientRect();
-    var sx = first.width / Math.max(1, last.width), sy = first.height / Math.max(1, last.height);
-    var dx = first.left - last.left, dy = first.top - last.top;
-    host.style.transformOrigin = 'top left';
-    host.style.transition = 'none';
-    host.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
-    requestAnimationFrame(function () {
-      host.style.transition = 'transform ' + COLLAPSE_MS + 'ms cubic-bezier(.22,.61,.36,1)';
-      host.style.transform = 'none';
-      window.setTimeout(function () {
-        host.style.transition = ''; host.style.transform = '';
-        scene.resize();
-        hero.classList.remove('gate-board-show');
-        scene.setLoop(true);   // 收缩完成后恢复框内循环（与回访时框内表现一致）
-        scene.play();          // 单遍播完已停在片尾，需重新起播才会进入框内循环
-        try { sessionStorage.setItem(GATE_KEY, '1'); } catch (e) {}
-      }, COLLAPSE_MS + 60);
-    });
-  }
-  if (cinema) hero.classList.add('gate-board-show');
-
-  window.addEventListener('resize', function () { scene.resize(); });
-})();
-</script>
+<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c13"></script>
+<script src="/assets/gate/gate-scene.js?v=20261009-6"></script>
+<script src="/homepage-chrome.js?v=20261009-2"></script>
+<script src="/homepage-content.js?v=20261009-2"></script>
+<script src="/homepage.js?v=20261009-9"></script>
+<script src="/homepage-registration.js?v=20261009-1"></script>
 <script>
 /* 链接框（浏览器标签 / 分享链接标题）文字轮播：小猫脸眨眼 → 站点文案打字机 */
 (function () {
@@ -4387,5 +4018,6 @@ if (new URLSearchParams(location.search).get('openauth')) setTimeout(() => openA
   setTimeout(function () { clearInterval(blink); type(); }, 2400);
 })();
 </script>
+<script src="/form-feedback.js?v=20261011-1"></script>
 </body>
 </html>

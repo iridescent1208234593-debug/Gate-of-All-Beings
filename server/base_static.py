@@ -15,7 +15,7 @@ BLOCKED_SUFFIXES = (".py", ".db", ".db-shm", ".db-wal", ".log", ".sqlite", ".sql
 # 禁止直接下载的精确文件名
 BLOCKED_NAMES = {"characters.json", "game_saves.json"}
 # 禁止访问的目录名（含所有 . 开头的隐藏目录）
-BLOCKED_DIRS = {".git", "__pycache__", ".vscode", ".idea", "backup", "store", "node_modules"}
+BLOCKED_DIRS = {".git", "__pycache__", ".vscode", ".idea", "backup", "store", "node_modules", "gallery-engine"}
 
 # 安全响应头（所有请求统一附加）
 SECURITY_HEADERS = {
@@ -82,6 +82,11 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
             super().send_header("Expires", "0")
         else:
             ext = os.path.splitext(self.path.split("?")[0])[1].lower()
+            if ("image/" in ct or ext in (".woff", ".woff2", ".ttf", ".otf")) and not any(
+                header.lower().startswith(b"access-control-allow-origin:") for header in self._headers_buffer
+            ):
+                # Public media remains exportable from the opaque showcase sandbox.
+                super().send_header("Access-Control-Allow-Origin", "*")
             max_age = CACHE_MAX_AGE.get(ext)
             if max_age:
                 super().send_header("Cache-Control", f"public, max-age={max_age}")
@@ -111,7 +116,7 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
     def handle_one_request(self):
         try:
             super().handle_one_request()
-        except (ConnectionResetError, BrokenPipeError):
+        except (ConnectionResetError, ConnectionAbortedError, BrokenPipeError):
             pass
 
     def log_message(self, fmt, *args):

@@ -36,11 +36,6 @@ server/app/modules/
 /assets/网站素材/
 /conversations.json
 /.codex-remote-attachments/
-/New project/gallery/curve-gallery/
-/New project/gallery/infinite-gsap-gallery/
-/New project/gallery/scroll-revealed-webgl/
-/New project/motion/
-/New project/skills/
 /ops/网站恢复/logs/
 portal/huiguan/assets/uploads/
 portal/huiguan/assets/thumbs/
@@ -56,8 +51,13 @@ Desktop.ini
 
 # Local update reports
 /.updates/
+/.releases/
 
 # Installed experimental runtimes; retain locally, keep evidence/source visible
-/New project/experiments/zszm-life-stage2/runtimes/*-venv/
-/New project/experiments/zszm-life-stage2/runtimes/microsoft-jdk-21.0.11/
 **/.godot/
+
+# Canonical source and private runtime records
+/portal/huiguan/characters.json
+/portal/huiguan/game_saves.json
+/portal/huiguan/design-system/ui/
+/portal/www/index.html

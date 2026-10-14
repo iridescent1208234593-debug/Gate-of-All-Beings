@@ -25,8 +25,10 @@ View your app in AI Studio: https://ai.studio/apps/3bd5bc23-3c10-4d00-9fd8-57702
 
 > 本仓库位于统一工作区 `server/app/src/cards/`。总览见 [根 README](../../../../README.md)，架构/数据库/API 见 [docs/](../../../../docs/)。
 
-- 运行：`npm run dev`（5173）；OAuth 代理 `python server.py`（5174）。
+- 运行：`npm run dev`（5173）；OAuth 代理 `python server.py`（5174）；统一门户数值配置 API 由 `vite preview`（5178）提供，先运行 `npm run build` / 门户模块构建。
 - 构建挂载：`node server/app/scripts/build-modules.mjs`（base `/app/modules/cards/`）；统一壳内以 React `createRoot` 无 iframe 挂载。
+- 开场入口与 Skip：`src/gate/GameShell.tsx`、`src/gate/EntryGate.tsx`；跳过时直接挂载主应用，正常入口仍沿用淡出转场。`/api/sso-user` 是右上角账户状态的唯一来源，登录入口转到会馆 SSO；返回本页时会重新读取共享会话。
+- 主游戏首页模块入口在 `src/game/GameApp.tsx`；灵境会馆复用 `ManagementPanel`，聚灵从统一壳路由 `/app/shell/m/juling` 打开。旧独立场景选择应用已移除；开场仍复用 `src/components/reference/ReferenceScene2D.tsx`、`ReferenceScene3D.tsx` 与 `sceneModel.ts`。
 - 存档：IndexedDB `zszm-adventure-v1`（主）+ 统一存档摘要 `m:cards:summary`；用户库 `users.db`。
 - API：`/api/login`、`/api/callback`、`/api/user`、`/api/sso-user`、`/api/logout`（见 docs/api.md）。
 - 测试：`npm test`、`npm run check:game`。

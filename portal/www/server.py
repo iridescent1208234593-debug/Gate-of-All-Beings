@@ -9,10 +9,17 @@ import json
 import os
 import shutil
 import sys
+import concurrent.futures
+import threading
+import time
+import urllib.error
+import urllib.request
+import urllib.parse
 from urllib.parse import urlparse
 
 PORT = 8088
 STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
+RUNTIME_DIR = os.path.join(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", os.path.dirname(os.path.dirname(STATIC_DIR))), "portal", "www")
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "server"))
 import hx_sso
 from base_static import BaseStaticHandler
@@ -27,6 +34,46 @@ EDIT_TARGETS = {
     "/api/admin/links": "links.json",
     "/api/admin/thanks": "thanks.json",
 }
+
+SITE_STATUS_TARGETS = {
+    "huiguan": "https://huiguan.iridescently.xyz/",
+    "zszm": "https://zszm.iridescently.xyz/",
+    "oc": "https://oc.iridescently.xyz/",
+}
+_SITE_STATUS_LOCK = threading.Lock()
+_SITE_STATUS_CACHE = {"expires": 0, "sites": {}}
+
+
+def _probe_site(url):
+    request = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            "Range": "bytes=0-0",
+        },
+    )
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    try:
+        with opener.open(request, timeout=3) as response:
+            return 200 <= response.status < 400
+    except urllib.error.HTTPError as error:
+        return 200 <= error.code < 400
+    except (OSError, urllib.error.URLError, TimeoutError):
+        return False
+
+
+def _site_status():
+    now = time.monotonic()
+    with _SITE_STATUS_LOCK:
+        if _SITE_STATUS_CACHE["expires"] > now:
+            return _SITE_STATUS_CACHE["sites"]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(SITE_STATUS_TARGETS)) as pool:
+            sites = dict(zip(SITE_STATUS_TARGETS, pool.map(_probe_site, SITE_STATUS_TARGETS.values())))
+        # The domain responds today, but this project has not been added to the released site group.
+        sites["psyche"] = "unpublished"
+        _SITE_STATUS_CACHE.update(expires=now + 45, sites=sites)
+        return sites
 
 
 def _text(v, limit):
@@ -95,7 +142,7 @@ def _clean_thanks(payload):
 
 def _write_json(name, data):
     """原子写入，写前留 .bak 备份（.bak 不可被静态下载）"""
-    path = os.path.join(STATIC_DIR, name)
+    path = os.path.join(RUNTIME_DIR, name)
     if os.path.exists(path):
         shutil.copy2(path, path + ".bak")
     tmp = path + ".tmp"
@@ -109,8 +156,17 @@ class Handler(BaseStaticHandler):
     protocol_version = "HTTP/1.1"
     _static_dir = STATIC_DIR
 
+    def translate_path(self, path):
+        decoded = urllib.parse.unquote(urllib.parse.urlparse(path).path)
+        if decoded in ("/", "/index.html", "/links.json", "/thanks.json") or decoded.startswith("/assets/homepage/"):
+            target = os.path.abspath(os.path.join(RUNTIME_DIR, decoded.lstrip("/") or "index.html"))
+            if os.path.commonpath((os.path.abspath(RUNTIME_DIR), target)) == os.path.abspath(RUNTIME_DIR):
+                return target
+            return os.path.join(STATIC_DIR, "__missing__")
+        return super().translate_path(path)
+
     def _is_api_path(self):
-        return self.path.split("?")[0] == "/api/sso-user"
+        return self.path.split("?")[0] in ("/api/sso-user", "/api/site-status")
 
     # ---- 通用 JSON 响应 ----
     def _json(self, code, obj):
@@ -144,7 +200,27 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "JSON 解析失败"})
             return None
 
+    def _legacy_redirect(self):
+        path = self.path.split("?")[0]
+        redirects = {
+            "/links.html": "/connections.html#neighbors",
+            "/thanks.html": "/connections.html#with-thanks",
+        }
+        if path in redirects:
+            self.send_response(308)
+            self.send_header("Location", redirects[path])
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return True
+        return False
+
+    def do_HEAD(self):
+        if not self._legacy_redirect():
+            super().do_HEAD()
+
     def do_GET(self):
+        if self._legacy_redirect():
+            return
         path = self.path.split("?")[0]
         if path == "/api/sso-user":
             u = hx_sso.read_cookie(self.headers)
@@ -154,6 +230,9 @@ class Handler(BaseStaticHandler):
             else:
                 body = {"logged_in": False, "admin": False}
             self._json(200, body)
+            return
+        if path == "/api/site-status":
+            self._json(200, {"sites": _site_status()})
             return
         super().do_GET()
 

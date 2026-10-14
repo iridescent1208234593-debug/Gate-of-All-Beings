@@ -8,7 +8,7 @@
 
 ## 1. 证据范围与判断边界
 
-完整读取了用户 brief、[设计参考基线](<../New project/REFERENCE_BASELINE.md>)，阅读指定的 [web-design-engineer 方法](<../New project/skills/garden-skills/skills/web-design-engineer/SKILL.md>) 及 redesign/critique 相关参考。按 Ponytail full 原则做架构取舍：先确认实际依赖，再决定什么值得共享。
+完整读取了用户 brief、[设计参考基线](<E:/External Projects/Iridescently Labs/research/REFERENCE_BASELINE.md>)，阅读指定的 [web-design-engineer 方法](<E:/External Projects/Iridescently Labs/references/skills/garden-skills/skills/web-design-engineer/SKILL.md>) 及 redesign/critique 相关参考。按 Ponytail full 原则做架构取舍：先确认实际依赖，再决定什么值得共享。
 
 本轮模式是 **Redesign · Overhaul 的方案阶段**：可以推翻视觉架构，但保留业务、数据和路由契约。方法参考里的样式配方、固定颜色数量、英文标题倍数和交付 HTML 的默认流程不直接套用本项目；用户本轮要求的审计报告优先。
 
@@ -217,13 +217,13 @@ Huiguan 可沿用纸底 `#f5f0e8`、面板 `#fbf8f2`、正文 `#3a4a3e` 作为�
 
 | 本地参考与实际证据 | 吸收什么 | 不直接带入 |
 |---|---|---|
-| Depth：[palette.js](<../New project/gallery/codrops-depth-gallery/src/data/palette.js:1>)、[GalleryResources](<../New project/gallery/codrops-depth-gallery/src/Experience/GalleryResources.js:1>) | 颜色份额/色度筛选 → mood；并发加载、邻域纹理、AbortController、worker fallback、dispose | Z 轴布局、参数原样照搬、不断流动的 grain/blob 成为全站底纹 |
-| Curve：[state.js](<../New project/gallery/curve-gallery/src/state.js:1>)、[path.js](<../New project/gallery/curve-gallery/src/path.js:1>) | progress/activeProject 与镜头姿态分开，基于 dt 的阻尼，内容节点保持身份 | 相机路径即信息架构；当前视觉缺陷不能靠 token 修复 |
-| Infinite GSAP：[Transition.js](<../New project/gallery/infinite-gsap-gallery/src/Transition.js:1>)、[Slider.js](<../New project/gallery/infinite-gsap-gallery/src/Slider.js:1>) | closed/opening/open/closing、解码竞态检查、缩略图与详情几何连续、退出交还浏览控制 | 默认 1.2 秒转场、所有中文逐字 reveal、无限滚动取代可定位 URL |
-| Story：[media.ts](<../New project/gallery/scroll-revealed-webgl/src/app/components/media.ts:1>) | DOM bounds 对齐 shader plane，uProgress 揭示，进入叙事时保留图像关系 | 所有 Gallery 都做章节剧场；destroy 已清 material/geometry，但此处未见对纹理单独释放，不能当现成生命周期范本 |
-| Dotmatter：[renderer.ts](<../New project/motion/dotmatter/packages/core/src/renderer.ts:336>)、[halftone shader](<../New project/motion/dotmatter/packages/shaders/src/index.ts:300>) | 图像采样、圆点大小/色彩、alpha、点阵材质 | 宣称现成 A→B；setSource 上传单纹理并重建 field，spacing 改变也重建 |
-| Motion primitives：[dialog.tsx](<../New project/motion/motion-primitives/components/core/dialog.tsx:1>) | controlled/uncontrolled 状态、trigger/content 分工、离场与关闭的关系 | 为原生页面引入 React + motion + utility CSS + icon 依赖链 |
-| Layout morph：[index.js](<../New project/motion/scroll-layout-animations/js/index.js:1>) | 改真实布局 class、记录几何、Flip 连接前后布局 | 全站 Lenis、长距离 pin、未配套取消的 RAF 循环 |
+| Depth：[palette.js](<../portal/www/gallery-engine/src/data/palette.js:1>)、[GalleryResources](<../portal/www/gallery-engine/src/Experience/GalleryResources.js:1>) | 颜色份额/色度筛选 → mood；并发加载、邻域纹理、AbortController、worker fallback、dispose | Z 轴布局、参数原样照搬、不断流动的 grain/blob 成为全站底纹 |
+| Curve：[state.js](<E:/External Projects/Iridescently Labs/references/gallery/curve-gallery/src/state.js:1>)、[path.js](<E:/External Projects/Iridescently Labs/references/gallery/curve-gallery/src/path.js:1>) | progress/activeProject 与镜头姿态分开，基于 dt 的阻尼，内容节点保持身份 | 相机路径即信息架构；当前视觉缺陷不能靠 token 修复 |
+| Infinite GSAP：[Transition.js](<E:/External Projects/Iridescently Labs/references/gallery/infinite-gsap-gallery/src/Transition.js:1>)、[Slider.js](<E:/External Projects/Iridescently Labs/references/gallery/infinite-gsap-gallery/src/Slider.js:1>) | closed/opening/open/closing、解码竞态检查、缩略图与详情几何连续、退出交还浏览控制 | 默认 1.2 秒转场、所有中文逐字 reveal、无限滚动取代可定位 URL |
+| Story：[media.ts](<E:/External Projects/Iridescently Labs/references/gallery/scroll-revealed-webgl/src/app/components/media.ts:1>) | DOM bounds 对齐 shader plane，uProgress 揭示，进入叙事时保留图像关系 | 所有 Gallery 都做章节剧场；destroy 已清 material/geometry，但此处未见对纹理单独释放，不能当现成生命周期范本 |
+| Dotmatter：[renderer.ts](<E:/External Projects/Iridescently Labs/references/motion/dotmatter/packages/core/src/renderer.ts:336>)、[halftone shader](<E:/External Projects/Iridescently Labs/references/motion/dotmatter/packages/shaders/src/index.ts:300>) | 图像采样、圆点大小/色彩、alpha、点阵材质 | 宣称现成 A→B；setSource 上传单纹理并重建 field，spacing 改变也重建 |
+| Motion primitives：[dialog.tsx](<E:/External Projects/Iridescently Labs/references/motion/motion-primitives/components/core/dialog.tsx:1>) | controlled/uncontrolled 状态、trigger/content 分工、离场与关闭的关系 | 为原生页面引入 React + motion + utility CSS + icon 依赖链 |
+| Layout morph：[index.js](<E:/External Projects/Iridescently Labs/references/motion/scroll-layout-animations/js/index.js:1>) | 改真实布局 class、记录几何、Flip 连接前后布局 | 全站 Lenis、长距离 pin、未配套取消的 RAF 循环 |
 
 **优先级判断：**
 
@@ -334,3 +334,5 @@ Dot Dissolve 的研究方案：在同一过渡坐标中同时保留 A/B 纹理�
 需要后续实现验证的项目：字体真实加载与授权、不同 Host 的资源分发、完整业务状态、游戏 CSS 污染的具体复现、真实移动设备/GPU 成本、以及 Dot Dissolve 的 A/B 对应视觉。它们不妨碍本轮确定职责边界，但不能被包装成已通过的验收。
 
 **评审建议先看三个决定：shared-ui 负责契约而非全站皮肤；先用古色页证明最小架构；签名媒体转场通过独立实验后再进入正式体验。按本轮要求，到此停止，等待方案评审，不进入实现。**
+
+2026-10-14 索引修正：本文件保留原审计结论作为历史设计参考；生产Gallery已迁入portal/www/gallery-engine，实验与参考已移到工作区外Labs。当前端口/服务/发布状态以根README及release-workflow为准。

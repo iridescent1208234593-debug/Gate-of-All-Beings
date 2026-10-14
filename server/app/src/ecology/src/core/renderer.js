@@ -17,6 +17,8 @@ import { ORDER } from './tribe.js';
 
 export class Renderer {
   constructor(canvas) {
+    this.events = new AbortController();
+    const on = (target, type, listener) => target.addEventListener(type, listener, { signal: this.events.signal });
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -250,13 +252,13 @@ export class Renderer {
     this._hasPointer = false;
     this._hoverIdx = -1;
     this._raycaster = new THREE.Raycaster();
-    canvas.addEventListener('pointermove', (e) => {
+    on(canvas, 'pointermove', (e) => {
       const rect = canvas.getBoundingClientRect();
       this._pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       this._pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
       this._hasPointer = true;
     });
-    canvas.addEventListener('pointerleave', () => {
+    on(canvas, 'pointerleave', () => {
       this._hasPointer = false;
       this._hoverIdx = -1;
     });
@@ -268,11 +270,11 @@ export class Renderer {
     this._map = null; // stage-13：本帧地图快照（地面拾取需要 cols/rows/cellSize）
     let downX = 0;
     let downY = 0;
-    canvas.addEventListener('pointerdown', (e) => {
+    on(canvas, 'pointerdown', (e) => {
       downX = e.clientX;
       downY = e.clientY;
     });
-    canvas.addEventListener('pointerup', (e) => {
+    on(canvas, 'pointerup', (e) => {
       if (Math.hypot(e.clientX - downX, e.clientY - downY) > 8) return;
       const rect = canvas.getBoundingClientRect();
       const px = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -399,11 +401,35 @@ export class Renderer {
     this.civCity.visible = false;
     this.scene.add(this.civCity);
 
-    window.addEventListener('resize', () => {
+    on(window, 'resize', () => {
       this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
       this.renderer.setSize(window.innerWidth, window.innerHeight);
     });
+  }
+
+  dispose() {
+    this.events.abort();
+    this.controls.dispose();
+    const geometries = new Set(), materials = new Set(), textures = new Set();
+    const collect = object => {
+      if (object?.isBufferGeometry) geometries.add(object);
+      if (object?.isMaterial) materials.add(object);
+      if (object?.isTexture) textures.add(object);
+      if (object?.geometry) geometries.add(object.geometry);
+      for (const material of [object?.material].flat()) if (material) materials.add(material);
+    };
+    this.scene.traverse(collect);
+    Object.values(this).forEach(collect);
+    for (const material of materials) {
+      Object.values(material).forEach(value => { if (value?.isTexture) textures.add(value); });
+      material.dispose();
+    }
+    textures.forEach(texture => texture.dispose());
+    geometries.forEach(geometry => geometry.dispose());
+    this.scene.clear();
+    this.renderer.dispose();
+    this.renderer.forceContextLoss();
   }
 
   syncFoods(foods) {

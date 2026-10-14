@@ -14,6 +14,8 @@
 .gate-enter{margin-top:11px;padding:11px 32px;font:inherit;font-size:13px;letter-spacing:.34em;text-indent:.34em;color:#fdfbe5;background:#fdfbe514;border:1px solid #d4a840b3;border-radius:999px;cursor:pointer;transition:background .3s ease,border-color .3s ease,box-shadow .3s ease,color .3s ease}
 .gate-enter:hover:not(:disabled),.gate-enter:focus-visible:not(:disabled){background:#d4a8402e;border-color:#d4a840;box-shadow:0 0 34px #d4a8404d;outline:none}
 .gate-enter:disabled{opacity:.45;cursor:progress}
+.gate-skip{min-height:44px;padding:8px 14px;margin-top:1px;color:#fdfbe5a8;background:transparent;border:1px solid #fdfbe533;border-radius:999px;font:inherit;font-size:11px;letter-spacing:.08em;cursor:pointer;transition:background .2s ease,color .2s ease}
+.gate-skip:hover,.gate-skip:focus-visible{color:#fdfbe5;background:#fdfbe51a;outline:2px solid #d4a840;outline-offset:2px}
 .gate-progress{margin:0;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:9.5px;letter-spacing:3px;text-indent:3px;color:#fdfbe58c}
 .gate-bar{position:relative;display:block;width:206px;height:3px;background:#fdfbe524;border-radius:3px}
 .gate-bar i{position:absolute;inset:0 auto 0 0;display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#84a046,#d4a840);transition:width .12s linear}

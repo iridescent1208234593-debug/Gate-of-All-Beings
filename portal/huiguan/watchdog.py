@@ -11,7 +11,7 @@ from pathlib import Path
 
 PORT = 8080
 ROOT = Path(__file__).resolve().parents[2]
-SERVER_DIR = ROOT / "server"
+SERVER_DIR = ROOT / ".releases/production/site/server"
 
 
 def port_alive():
@@ -25,14 +25,19 @@ def port_alive():
 def main():
     if port_alive():
         return 0
-    subprocess.run(["node", "server/app/scripts/build-modules.mjs"], cwd=ROOT, check=True)
-    log = SERVER_DIR / "portal.log"
-    err = SERVER_DIR / "portal.err.log"
+    required = [ROOT / "portal/www/index.html", SERVER_DIR / "portal_server.py"] + [
+        ROOT / "server/app/modules" / name / "index.html"
+        for name in ("cards", "management", "ecology", "softie", "juling", "slay", "aeon")
+    ]
+    if any(not item.is_file() for item in required):
+        raise RuntimeError("Published artifacts are incomplete; build and explicitly publish before starting.")
+    log = ROOT / "server/portal.log"
+    err = ROOT / "server/portal.err.log"
     with open(log, "ab") as out, open(err, "ab") as e:
         subprocess.Popen(
             [sys.executable, "portal_server.py"],
             cwd=SERVER_DIR,
-            env={**os.environ, "PORT": str(PORT)},
+            env={**os.environ, "PORT": str(PORT), "IRIDESCENTLY_PROJECT_ROOT": str(ROOT)},
             stdout=out,
             stderr=e,
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),

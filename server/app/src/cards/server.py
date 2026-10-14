@@ -28,7 +28,7 @@ SCOPES = "openid basic email profile"
 
 SESSION_TIMEOUT = 3600
 
-USER_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "users.db")
+USER_DB = os.path.join(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", str(__import__("pathlib").Path(__file__).resolve().parents[4])), "server", "app", "src", "cards", "users.db")
 
 def init_user_db():
     conn = sqlite3.connect(USER_DB)

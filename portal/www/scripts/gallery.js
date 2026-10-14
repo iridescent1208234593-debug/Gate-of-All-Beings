@@ -1,6 +1,6 @@
-import "../../../New project/gallery/codrops-depth-gallery/src/css/base.css";
-import "../../../New project/gallery/codrops-depth-gallery/src/css/canvas.css";
-import { Engine } from "../../../New project/gallery/codrops-depth-gallery/src/Experience/Engine.js";
+import "../gallery-engine/src/css/base.css";
+import "../gallery-engine/src/css/canvas.css";
+import { Engine } from "../gallery-engine/src/Experience/Engine.js";
 import { createAppearanceControls } from "./appearance-controls.js";
 
 const loading = document.querySelector("#gallery-status");
@@ -14,8 +14,11 @@ const prefersReducedMotionNow = () =>
   reducedMotion.matches ||
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const autoplayButton = document.querySelector("[data-gallery-autoplay]");
-const AUTOPLAY_DELAY_MS = 8000;
+const DEFAULT_AUTOPLAY_INTERVAL_MS = 3000;
 const AUTOPLAY_RETRY_MS = 300;
+const AUTOPLAY_SETTLE_LIMIT_MS = 12000;
+const STEP_HOLD_DELAY_MS = 250;
+const STEP_REPEAT_INTERVAL_MS = 380;
 
 const showReady = () => {
   if (root.dataset.galleryState === "ready") return;
@@ -49,6 +52,8 @@ try {
     trailController,
     reducedMotion,
   });
+  const autoplayIntervalMs = () =>
+    appearance.autoplayIntervalMs ?? DEFAULT_AUTOPLAY_INTERVAL_MS;
   let autoplayEnabled = appearance.autoplayEnabled && !prefersReducedMotionNow();
   let autoplayDirection = 1;
   const resources = gallery.resources;
@@ -88,6 +93,9 @@ try {
   let settleFrame = 0;
   let autoplayTimer = 0;
   let autoplayTargetIndex = null;
+  let autoplayCadenceStartedAt = 0;
+  const activeStepPointers = new Set();
+  const stepPressCleanups = [];
 
   const clearDetent = () => {
     if (!detentLocked) return;
@@ -109,26 +117,24 @@ try {
   };
 
   const galleryIsMoving = () =>
-    detentLocked || Math.abs(scroll.scrollTarget - scroll.scrollCurrent) > 1;
+    detentLocked ||
+    Math.abs(scroll.scrollTarget - scroll.scrollCurrent) >
+      (compactViewport.matches ? 1.75 : 1);
 
-  const scheduleAutoplay = (delay = AUTOPLAY_DELAY_MS) => {
+  const scheduleAutoplay = (delay = autoplayIntervalMs()) => {
     clearAutoplay();
-    if (prefersReducedMotionNow()) {
-      if (autoplayEnabled) onReducedMotionChange();
-      return;
-    }
     if (!autoplayEnabled || !engine.isInitialized || gallery.planes.length < 2)
       return;
 
     const deadline = performance.now() + delay;
     const waitForTurn = () => {
-      if (prefersReducedMotionNow()) {
-        onReducedMotionChange();
-        return;
-      }
       if (!autoplayEnabled) return;
       const remaining = deadline - performance.now();
-      if (remaining > 0 || galleryIsMoving()) {
+      if (
+        remaining > 0 ||
+        galleryIsMoving() ||
+        activeStepPointers.size > 0
+      ) {
         autoplayTimer = window.setTimeout(
           waitForTurn,
           remaining > 0
@@ -147,29 +153,38 @@ try {
       autoplayTargetIndex = null;
       if (currentIndex >= gallery.planes.length - 1) autoplayDirection = -1;
       else if (currentIndex <= 0) autoplayDirection = 1;
+      autoplayCadenceStartedAt = performance.now();
       moveToIndex(currentIndex + autoplayDirection, true);
-      scheduleAutoplayAfterArrival();
+      scheduleAutoplayAfterArrival(autoplayCadenceStartedAt);
     };
 
     autoplayTimer = window.setTimeout(waitForTurn, delay);
   };
 
-  const scheduleAutoplayAfterArrival = () => {
+  const scheduleAutoplayAfterArrival = (moveStartedAt) => {
     clearAutoplay();
     if (!autoplayEnabled || !engine.isInitialized || gallery.planes.length < 2)
       return;
 
+    const settleDeadline = performance.now() + AUTOPLAY_SETTLE_LIMIT_MS;
     const waitForArrival = () => {
-      if (prefersReducedMotionNow()) {
-        onReducedMotionChange();
-        return;
-      }
       if (!autoplayEnabled) return;
       if (galleryIsMoving()) {
-        autoplayTimer = window.setTimeout(waitForArrival, AUTOPLAY_RETRY_MS);
-        return;
+        if (performance.now() < settleDeadline) {
+          autoplayTimer = window.setTimeout(waitForArrival, AUTOPLAY_RETRY_MS);
+          return;
+        }
+        scroll.scrollCurrent = scroll.scrollTarget;
+        scroll.previousScrollCurrent = scroll.scrollTarget;
+        scroll.rawVelocity = 0;
+        scroll.velocity = 0;
+        engine.camera.position.z = scroll.cameraZFromScroll(scroll.scrollTarget);
       }
-      scheduleAutoplay();
+      const remaining = Math.max(
+        0,
+        autoplayIntervalMs() - (performance.now() - moveStartedAt),
+      );
+      scheduleAutoplay(remaining);
     };
 
     autoplayTimer = window.setTimeout(waitForArrival, AUTOPLAY_RETRY_MS);
@@ -177,6 +192,7 @@ try {
 
   const noteManualInteraction = () => {
     clearDetent();
+    autoplayCadenceStartedAt = performance.now();
     scheduleAutoplay();
   };
 
@@ -184,7 +200,10 @@ try {
     autoplayEnabled = !autoplayEnabled;
     appearance.setAutoplayEnabled(autoplayEnabled);
     syncAutoplayButton();
-    if (autoplayEnabled) scheduleAutoplay();
+    if (autoplayEnabled) {
+      autoplayCadenceStartedAt = performance.now();
+      scheduleAutoplay(0);
+    }
     else {
       clearAutoplay();
       autoplayTargetIndex = null;
@@ -195,8 +214,19 @@ try {
     const enabled = event.detail?.autoplayEnabled === true;
     autoplayEnabled = enabled && !prefersReducedMotionNow();
     syncAutoplayButton();
-    if (autoplayEnabled) scheduleAutoplay();
+    if (autoplayEnabled) {
+      autoplayCadenceStartedAt = performance.now();
+      scheduleAutoplay(0);
+    }
     else clearAutoplay();
+  };
+
+  const onAutoplaySpeedChange = () => {
+    if (!autoplayEnabled) return;
+    const elapsed = performance.now() - autoplayCadenceStartedAt;
+    scheduleAutoplay(
+      Math.max(0, autoplayIntervalMs() - Math.max(0, elapsed)),
+    );
   };
 
   const onReducedMotionChange = () => {
@@ -206,7 +236,10 @@ try {
       clearAutoplay();
     } else {
       autoplayEnabled = appearance.autoplayEnabled;
-      if (autoplayEnabled) scheduleAutoplay();
+      if (autoplayEnabled) {
+        autoplayCadenceStartedAt = performance.now();
+        scheduleAutoplay(0);
+      }
     }
     syncAutoplayButton();
   };
@@ -265,9 +298,15 @@ try {
   };
   compactViewport.addEventListener("change", onCompactViewportChange);
 
-  const moveToIndex = (index, isAutoplay = false) => {
+  const moveToIndex = (index, isAutoplay = false, isContinuous = false) => {
     const lastIndex = gallery.planes.length - 1;
-    if (!engine.isInitialized || lastIndex < 0 || detentLocked) return;
+    if (
+      !engine.isInitialized ||
+      lastIndex < 0 ||
+      (detentLocked && !isContinuous)
+    )
+      return;
+    if (isContinuous) clearDetent();
 
     const currentIndex = getCurrentIndex();
     const targetIndex = Math.max(0, Math.min(index, lastIndex));
@@ -283,7 +322,7 @@ try {
     scroll.scrollTarget = targetScroll;
     autoplayTargetIndex = isAutoplay ? targetIndex : null;
     const pauseDuration = appearance.pauseDurationMs;
-    if (pauseDuration === 0) return;
+    if (pauseDuration === 0 || isContinuous) return;
 
     detentLocked = true;
 
@@ -336,10 +375,118 @@ try {
   };
 
   document.querySelectorAll("[data-gallery-step]").forEach((button) => {
-    button.addEventListener("click", () => {
+    const direction = button.dataset.galleryStep === "next" ? 1 : -1;
+    let heldPointerId = null;
+    let heldTargetIndex = -1;
+    let holdTimer = 0;
+    let repeatTimer = 0;
+    let holdTriggered = false;
+    let suppressPointerClick = false;
+
+    const clearStepTimers = () => {
+      window.clearTimeout(holdTimer);
+      window.clearTimeout(repeatTimer);
+      holdTimer = 0;
+      repeatTimer = 0;
+    };
+
+    const repeatStepWhileHeld = () => {
+      if (heldPointerId === null || !holdTriggered) return;
+      const nextIndex = heldTargetIndex + direction;
+      if (nextIndex < 0 || nextIndex >= gallery.planes.length) return;
+      heldTargetIndex = nextIndex;
+      moveToIndex(nextIndex, false, true);
+      repeatTimer = window.setTimeout(
+        repeatStepWhileHeld,
+        STEP_REPEAT_INTERVAL_MS,
+      );
+    };
+
+    const stopStepPress = (event, resumeAutoplay = true) => {
+      if (
+        heldPointerId === null ||
+        (event && event.pointerId !== heldPointerId)
+      )
+        return;
+      activeStepPointers.delete(heldPointerId);
+      clearStepTimers();
+      heldPointerId = null;
+      if (!holdTriggered) {
+        heldTargetIndex = -1;
+        return;
+      }
+
+      suppressPointerClick = true;
+      if (autoplayEnabled && resumeAutoplay) {
+        autoplayCadenceStartedAt = performance.now();
+        scheduleAutoplay();
+      }
+      window.setTimeout(() => {
+        suppressPointerClick = false;
+      }, 0);
+      holdTriggered = false;
+      heldTargetIndex = -1;
+    };
+
+    const onInputLost = () => {
+      const wasHeld = heldPointerId !== null;
+      stopStepPress(null, false);
+      if (wasHeld && autoplayEnabled) clearAutoplay();
+    };
+    const onPointerLeave = (event) => {
+      if (event.buttons !== 0) {
+        suppressPointerClick = true;
+        window.setTimeout(() => {
+          suppressPointerClick = false;
+        }, 0);
+      }
+      stopStepPress(event);
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") onInputLost();
+    };
+
+    button.addEventListener("pointerdown", (event) => {
+      if (!event.isPrimary || event.button !== 0) return;
+      clearStepTimers();
+      heldPointerId = event.pointerId;
+      activeStepPointers.add(event.pointerId);
+      holdTriggered = false;
+      heldTargetIndex = autoplayTargetIndex ?? getCurrentIndex();
+      button.setPointerCapture(event.pointerId);
       noteManualInteraction();
-      const direction = button.dataset.galleryStep === "next" ? 1 : -1;
+      holdTimer = window.setTimeout(() => {
+        holdTimer = 0;
+        if (heldPointerId === null) return;
+        holdTriggered = true;
+        suppressPointerClick = true;
+        repeatStepWhileHeld();
+      }, STEP_HOLD_DELAY_MS);
+    });
+    button.addEventListener("pointerup", stopStepPress);
+    button.addEventListener("pointercancel", stopStepPress);
+    button.addEventListener("lostpointercapture", stopStepPress);
+    button.addEventListener("pointerleave", onPointerLeave);
+    window.addEventListener("blur", onInputLost);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    button.addEventListener("click", (event) => {
+      if (suppressPointerClick && event.detail > 0) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        suppressPointerClick = false;
+        return;
+      }
+      noteManualInteraction();
       moveBy(direction);
+    });
+    stepPressCleanups.push(() => {
+      onInputLost();
+      button.removeEventListener("pointerup", stopStepPress);
+      button.removeEventListener("pointercancel", stopStepPress);
+      button.removeEventListener("lostpointercapture", stopStepPress);
+      button.removeEventListener("pointerleave", onPointerLeave);
+      window.removeEventListener("blur", onInputLost);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     });
   });
 
@@ -349,7 +496,7 @@ try {
     if (
       event.target instanceof Element &&
       event.target.closest(
-        ".site-chrome, .gallery-customizer, .gallery-settings, input, textarea, select",
+        ".site-chrome, .gallery-customizer, .gallery-settings, .gallery-music, input, textarea, select",
       )
     )
       return;
@@ -381,7 +528,7 @@ try {
     if (
       event.target instanceof Element &&
       event.target.closest(
-        ".site-chrome, .gallery-customizer, .gallery-settings",
+        ".site-chrome, .gallery-customizer, .gallery-settings, .gallery-music",
       )
     ) {
       event.stopImmediatePropagation();
@@ -390,6 +537,7 @@ try {
 
   window.addEventListener("keydown", onGalleryKey);
   autoplayButton.addEventListener("click", onAutoplayClick);
+  window.addEventListener("gallery-autoplay-speedchange", onAutoplaySpeedChange);
   window.addEventListener(
     "gallery-appearance-preferencechange",
     onAppearancePreferenceChange,
@@ -450,6 +598,7 @@ try {
     compactViewport.removeEventListener("change", onCompactViewportChange);
     window.removeEventListener("keydown", onGalleryKey);
     autoplayButton.removeEventListener("click", onAutoplayClick);
+    window.removeEventListener("gallery-autoplay-speedchange", onAutoplaySpeedChange);
     window.removeEventListener(
       "gallery-appearance-preferencechange",
       onAppearancePreferenceChange,
@@ -466,6 +615,7 @@ try {
     });
     document.removeEventListener("keydown", handleStepClick);
     document.removeEventListener("pointerdown", closeMenuOnOutsideClick);
+    stepPressCleanups.forEach((cleanup) => cleanup());
     engine.dispose();
   });
 } catch (error) {

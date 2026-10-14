@@ -1,5 +1,7 @@
 import { loadWorld, saveWorld } from './core/persistence.js';
 import { mountSpacePanel } from './ui/spacePanel.js';
+const events = new AbortController();
+const on = (target, type, listener) => target.addEventListener(type, listener, { signal: events.signal });
 // 入口：装配 state + renderer + 游戏循环（单向数据流）
 // stage-03：HUD 新增基因统计（存活种群平均速度/感知/体型、色系多样性）
 // stage-04：HUD 新增分裂/压力淘汰计数，左下角世代结算面板（auto-evo 趋势）
@@ -56,7 +58,7 @@ let initialError='';
 let state;
 try { state=loadWorld(); } catch(e) { initialError='旧存档读取失败，已保留；当前仅临时游玩。'; }
 if(!state){state=createInitialState(crypto.getRandomValues(new Uint32Array(1))[0]);state.worldId=`eco-${crypto.randomUUID()}`;state.space.id=state.worldId;}
-window.addEventListener('pagehide',()=>{if(!initialError)try{saveWorld(state);}catch{/* A pending harvest was already persisted before sending. */}});
+on(window,'pagehide',()=>{if(!initialError)try{saveWorld(state);}catch{/* A pending harvest was already persisted before sending. */}});
 const spacePanel=mountSpacePanel(()=>state,dispatch,initialError);
 const renderer = new Renderer(canvas);
 // ---- stage-10：世代趋势图（DOM Canvas2D 覆盖层，不参与 three.js 渲染）----
@@ -167,8 +169,8 @@ function togglePause() {
   }
   dispatch(Actions.togglePause());
 }
-btnEditor.addEventListener('click', togglePause);
-window.addEventListener('keydown', (e) => {
+on(btnEditor, 'click', togglePause);
+on(window, 'keydown', (e) => {
   if (e.key === 'e' || e.key === 'E') togglePause();
 });
 
@@ -192,8 +194,8 @@ function toggleOrgEditor() {
   }
   dispatch(Actions.openOrgEditor(target.id));
 }
-if (btnOrgEditor) btnOrgEditor.addEventListener('click', toggleOrgEditor);
-window.addEventListener('keydown', (e) => {
+if (btnOrgEditor) on(btnOrgEditor, 'click', toggleOrgEditor);
+on(window, 'keydown', (e) => {
   if (e.key === 'g' || e.key === 'G') toggleOrgEditor();
   // 组装模式按 Esc 等同“关闭（丢弃）”
   if (e.key === 'Escape' && state.orgEditor) dispatch(Actions.closeOrgEditor());
@@ -202,13 +204,13 @@ window.addEventListener('keydown', (e) => {
 });
 
 // ---- stage-07：手动投放随机有机体（上限保护在 reducer 内）----
-btnSpawn.addEventListener('click', () => dispatch(Actions.spawnOrganism()));
-window.addEventListener('keydown', (e) => {
+on(btnSpawn, 'click', () => dispatch(Actions.spawnOrganism()));
+on(window, 'keydown', (e) => {
   if (e.key === 'o' || e.key === 'O') dispatch(Actions.spawnOrganism());
 });
 
 // ---- stage-12：时间流速快捷键（1/2/3 对应 1x/2x/3x，与面板按钮同源动作）----
-window.addEventListener('keydown', (e) => {
+on(window, 'keydown', (e) => {
   if (WORLD.timeScaleOptions.includes(Number(e.key))) {
     dispatch(Actions.setTimeScale(Number(e.key)));
   }
@@ -256,7 +258,7 @@ renderer.onPickGround = (tile, screenX, screenY) => {
 renderer.render(state);
 editorUI.update(state);
 trendChart.update(state);
-window.addEventListener('resize', () => {
+on(window, 'resize', () => {
   trendChart.resize();
   trendChart.update(state);
 });
@@ -266,9 +268,11 @@ let frames = 0;
 let fpsTime = 0;
 
 let disposed = false;
+let frameId;
 function loop(now) {
-  if (disposed) return;
-  requestAnimationFrame(loop);
+  frameId = 0;
+  if (disposed || document.hidden) { last = now; return; }
+  frameId = requestAnimationFrame(loop);
   const dt = (now - last) / 1000;
   last = now;
 
@@ -387,6 +391,21 @@ function loop(now) {
   }
 }
 
-requestAnimationFrame(loop);
-// 供统一壳无 iframe 挂载时卸载（停止循环）
-window.__iridescentlyDispose = () => { disposed = true; };
+frameId = requestAnimationFrame(loop);
+on(document, 'visibilitychange', () => {
+  if (document.hidden) { cancelAnimationFrame(frameId); frameId = 0; }
+  else if (!disposed && !frameId) { last = performance.now(); frameId = requestAnimationFrame(loop); }
+});
+window.__iridescentlyDispose = () => {
+  if (disposed) return;
+  disposed = true;
+  cancelAnimationFrame(frameId);
+  events.abort();
+  if (!initialError) try { saveWorld(state); } catch { /* Keep the prior valid save. */ }
+  spacePanel.dispose();
+  envMenu.dispose();
+  editorUI.el.remove();
+  orgEditorUI.el.remove();
+  document.body.classList.remove("paused");
+  renderer.dispose();
+};

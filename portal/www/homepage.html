@@ -98,6 +98,55 @@
         </button>
       </div>
 
+      <div class="gallery-music" data-music-player>
+        <button
+          class="gallery-music__toggle"
+          type="button"
+          data-music-toggle
+          aria-label="播放音乐"
+          aria-pressed="false"
+          aria-expanded="false"
+          aria-controls="gallery-music-panel"
+          title="单击播放或暂停，双击打开音乐控制"
+        >
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M8 15V4l9-2v11" />
+            <circle cx="5.5" cy="15.5" r="2.5" />
+            <circle cx="14.5" cy="13.5" r="2.5" />
+          </svg>
+        </button>
+        <div
+          class="gallery-music__panel"
+          id="gallery-music-panel"
+          data-music-panel
+          role="group"
+          aria-label="音乐播放控制"
+          hidden
+        >
+          <div class="gallery-music__track">
+            <span class="gallery-music__eyebrow">正在播放</span>
+            <span class="gallery-music__title" data-music-title>不再流浪</span>
+            <span class="gallery-music__status" data-music-status aria-live="polite"></span>
+          </div>
+          <div class="gallery-music__transport">
+            <button type="button" data-music-previous aria-label="上一首" title="上一首">‹</button>
+            <button type="button" data-music-play aria-label="暂停音乐" aria-pressed="true" title="暂停音乐">
+              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                <path class="gallery-music__play-icon" d="M6 3.8v12.4L16 10 6 3.8Z" />
+                <path class="gallery-music__pause-icon" d="M6.5 4.5v11m7-11v11" />
+              </svg>
+            </button>
+            <button type="button" data-music-next aria-label="下一首" title="下一首">›</button>
+          </div>
+          <div class="gallery-music__timeline">
+            <output data-music-current>0:00</output>
+            <input type="range" min="0" max="1000" step="1" value="0" data-music-seek aria-label="播放进度" />
+            <output data-music-duration>0:00</output>
+          </div>
+          <audio data-music-audio preload="metadata" playsinline></audio>
+        </div>
+      </div>
+
       <div class="gallery-customizer">
         <button
           class="gallery-settings-toggle"
@@ -158,6 +207,24 @@
                 value="0"
                 data-gallery-setting="pause"
               />
+            </label>
+            <label class="gallery-setting gallery-setting--autoplay">
+              <span>自动播放</span>
+              <input
+                id="gallery-setting-autoplay-seconds"
+                type="range"
+                min="1"
+                max="10"
+                step="0.5"
+                value="3"
+                data-gallery-setting="autoplaySeconds"
+                aria-label="自动播放速度"
+              />
+              <output
+                class="gallery-setting__value"
+                data-gallery-setting-value="autoplaySeconds"
+                aria-live="polite"
+              >3 秒/张</output>
             </label>
             <label class="gallery-setting">
               <span>大小</span>
@@ -236,39 +303,50 @@
       </a>
 
       <nav class="site-nav" aria-label="站点导航">
-        <a class="site-nav__link" href="https://huiguan.iridescently.xyz/"
-          >西木会馆</a
-        >
-        <a
-          class="site-nav__link site-nav__link--secondary"
-          href="https://oc.iridescently.xyz/"
-          >角色设定</a
-        >
-        <details class="site-menu">
-          <summary class="site-menu__toggle">
-            <span>更多去处</span>
-            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-              <path d="m4 6 4 4 4-4" />
-            </svg>
-          </summary>
-          <div class="site-menu__panel">
-            <p class="site-menu__eyebrow">继续探索</p>
-            <a href="https://zszm.iridescently.xyz/">众生之门</a>
-            <a href="https://psyche.iridescently.xyz/">心理档案云</a>
-            <a href="https://lingjing.iridescently.xyz/">灵境会馆</a>
-            <a href="https://juling.iridescently.xyz/">聚灵</a>
-            <span class="site-menu__rule" aria-hidden="true"></span>
-            <a href="/connections.html">连接与鸣谢</a>
-            <details class="site-menu__legal">
-              <summary>版权与免责声明</summary>
-              <p>罗小黑战记相关 IP 版权归寒木春华动画工作室所有。</p>
-              <p>
-                本站为非商业性粉丝社区项目，仅为用户提供信息交流与身份认证服务。所有涉及“罗小黑战记”及相关角色、形象、作品的内容，其著作权、商标权等知识产权均归原作者及寒木春华动画工作室所有。本站未获官方授权，如有侵权请联系管理员删除。
-              </p>
-            </details>
-            <small class="site-menu__copyright">© 2026 Iridescently</small>
-          </div>
-        </details>
+        <div class="site-nav__primary">
+          <a class="site-nav__link" href="https://huiguan.iridescently.xyz/">
+            <span>西木会馆</span>
+            <span class="site-status-dot" data-site-status="huiguan" role="img" aria-label="状态检测中"></span>
+          </a>
+          <a class="site-nav__link site-nav__link--zszm" href="https://zszm.iridescently.xyz/">
+            <span>众生之门</span>
+            <small class="site-nav__beta">beta</small>
+            <span class="site-status-dot" data-site-status="zszm" role="img" aria-label="状态检测中"></span>
+          </a>
+          <details class="site-menu">
+            <summary class="site-menu__toggle">
+              <span>更多去处</span>
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="m4 6 4 4 4-4" />
+              </svg>
+            </summary>
+            <div class="site-menu__panel">
+              <p class="site-menu__eyebrow">继续探索</p>
+              <a href="https://oc.iridescently.xyz/">
+                <span>佳霖馆长设定</span>
+                <span class="site-status-dot" data-site-status="oc" role="img" aria-label="状态检测中"></span>
+              </a>
+              <a href="https://psyche.iridescently.xyz/">
+                <span>心理档案云</span>
+                <span class="site-status-dot" data-site-status="psyche" data-state="unpublished" role="img" aria-label="尚未并入本站" title="尚未并入本站"></span>
+              </a>
+              <a href="https://zszm.iridescently.xyz/#management">灵境会馆 · 据点经营</a>
+              <a href="https://zszm.iridescently.xyz/app/shell/m/juling">聚灵</a>
+              <details class="site-menu__legal">
+                <summary>版权与免责声明</summary>
+                <p>罗小黑战记相关 IP 版权归寒木春华动画工作室所有。</p>
+                <p>
+                  本站为非商业性粉丝社区项目，仅为用户提供信息交流与身份认证服务。所有涉及“罗小黑战记”及相关角色、形象、作品的内容，其著作权、商标权等知识产权均归原作者及寒木春华动画工作室所有。本站未获官方授权，如有侵权请联系管理员删除。
+                </p>
+              </details>
+              <small class="site-menu__copyright">© 2026 Iridescently</small>
+            </div>
+          </details>
+        </div>
+        <div class="site-nav__bottom">
+          <span class="site-nav__divider" aria-hidden="true"></span>
+          <a class="site-nav__credits" href="/connections.html">连接与鸣谢</a>
+        </div>
       </nav>
     </header>
 

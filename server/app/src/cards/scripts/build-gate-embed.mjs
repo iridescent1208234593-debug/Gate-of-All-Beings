@@ -14,7 +14,8 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const entry = path.join(root, 'src', 'embed', 'gateEmbed.ts');
-const outfile = 'E:\\Projects\\portal\\huiguan\\assets\\gate\\gate-scene.js';
+const projectRoot = path.resolve(root, '../../../..');
+const outfile = process.env.GATE_OUTFILE || path.join(projectRoot, '.releases/candidate/gate/gate-scene.js');
 
 mkdirSync(path.dirname(outfile), { recursive: true });
 

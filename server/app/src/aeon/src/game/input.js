@@ -5,6 +5,8 @@ const TOOL_KEYS = {
 };
 
 export function bindInput(game) {
+  const events = new AbortController();
+  const on = (target, type, listener, options) => target.addEventListener(type, listener, { ...options, signal: events.signal });
   const canvas = game.canvas;
   const cam = game.cam;
   let dragging = false, panning = false, selecting = false, orbiting = false;
@@ -15,7 +17,7 @@ export function bindInput(game) {
 
   const isPanTool = () => game.tool === 'inspect' || game.tool === 'possess';
 
-  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  on(canvas, 'contextmenu', (e) => e.preventDefault());
 
   // minimap: click/drag to jump the camera across the world (Civ-style)
   const mini = document.getElementById('minimap');
@@ -26,12 +28,12 @@ export function bindInput(game) {
       const w = game.renderer.miniToWorld(e.clientX - r.left, e.clientY - r.top);
       game.cam.setTarget(w.x, w.y, game.cam.zoom);
     };
-    mini.addEventListener('pointerdown', (e) => { miniDrag = true; mini.setPointerCapture(e.pointerId); jump(e); e.stopPropagation(); });
-    mini.addEventListener('pointermove', (e) => { if (miniDrag) jump(e); });
-    mini.addEventListener('pointerup', (e) => { miniDrag = false; });
+    on(mini, 'pointerdown', (e) => { miniDrag = true; mini.setPointerCapture(e.pointerId); jump(e); e.stopPropagation(); });
+    on(mini, 'pointermove', (e) => { if (miniDrag) jump(e); });
+    on(mini, 'pointerup', (e) => { miniDrag = false; });
   }
 
-  canvas.addEventListener('pointerdown', (e) => {
+  on(canvas, 'pointerdown', (e) => {
     canvas.setPointerCapture(e.pointerId);
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (pointers.size === 2) { // begin pinch
@@ -58,7 +60,7 @@ export function bindInput(game) {
     }
   });
 
-  canvas.addEventListener('pointermove', (e) => {
+  on(canvas, 'pointermove', (e) => {
     if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
     // pinch zoom
@@ -114,16 +116,16 @@ export function bindInput(game) {
     }
     dragging = false; panning = false;
   };
-  canvas.addEventListener('pointerup', endPointer);
-  canvas.addEventListener('pointercancel', endPointer);
+  on(canvas, 'pointerup', endPointer);
+  on(canvas, 'pointercancel', endPointer);
 
-  canvas.addEventListener('wheel', (e) => {
+  on(canvas, 'wheel', (e) => {
     e.preventDefault();
     const factor = e.deltaY < 0 ? 1.16 : 1 / 1.16;
     cam.zoomAt(e.clientX, e.clientY, factor);
   }, { passive: false });
 
-  window.addEventListener('keydown', (e) => {
+  on(window, 'keydown', (e) => {
     const k = e.key.toLowerCase();
     game.keys.add(k);
     if (e.repeat) return;
@@ -139,9 +141,10 @@ export function bindInput(game) {
       else { game.selection = null; game.renderer.selection = null; game.ui.hideInspector(); }
     }
   });
-  window.addEventListener('keyup', (e) => game.keys.delete(e.key.toLowerCase()));
+  on(window, 'keyup', (e) => game.keys.delete(e.key.toLowerCase()));
 
-  window.addEventListener('resize', () => game.resize());
+  on(window, 'resize', () => game.resize());
+  return () => { events.abort(); pointers.clear(); game.keys.clear(); };
 }
 
 function ghostColor(tool) {

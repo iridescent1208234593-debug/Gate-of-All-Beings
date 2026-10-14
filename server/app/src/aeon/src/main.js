@@ -8,6 +8,8 @@ import { tribeName } from './sim/names.js';
 import { RNG } from './core/rng.js';
 
 let __aeonDisposed = false;
+let progressTimer, frameId, disposeInput;
+const events = new AbortController();
 
 const canvas = document.getElementById('game');
 const loadbar = document.getElementById('loadbar');
@@ -30,6 +32,7 @@ let chosenHue = 205;
 const chosenTraits = new Set();
 
 function progress(i) {
+  if (__aeonDisposed) return;
   if (i >= steps.length) { boot(); return; }
   const [label, pct] = steps[i];
   loadstatus.textContent = label;
@@ -39,13 +42,13 @@ function progress(i) {
     const seed = (Math.floor(Math.random() * 1e9)) >>> 0; // varied world each load
     game = new Game(canvas, ui, { w: 260, h: 162, seed, cap: 2600 });
     ui.bind(game);
-    bindInput(game);
+    disposeInput = bindInput(game);
     game.speedIdx = 0; // paused while the player is at the menus
     // frame the whole world (god's-eye view behind the menus)
     game.cam.zoom = game.cam.tzoom = Math.min(
       window.innerWidth / game.world.w, window.innerHeight / game.world.h) * 0.92;
   }
-  setTimeout(() => progress(i + 1), 170);
+  progressTimer = setTimeout(() => progress(i + 1), 170);
 }
 
 function boot() {
@@ -147,7 +150,8 @@ function startRenderLoop() {
   let statTimer = 0, frames = 0, fpsTimer = 0;
   window.__perf = { fps: 0, frameMs: 0 };
   function frame(now) {
-    if (__aeonDisposed) return;
+    frameId = 0;
+    if (__aeonDisposed || document.hidden) { last = now; return; }
     const dt = Math.min(100, now - last);
     last = now;
     const t0 = performance.now();
@@ -157,9 +161,13 @@ function startRenderLoop() {
     if (fpsTimer >= 500) { window.__perf.fps = Math.round((frames * 1000) / fpsTimer); frames = 0; fpsTimer = 0; }
     statTimer += dt;
     if (statTimer > 200) { ui.updateStats(game.sim); statTimer = 0; }
-    requestAnimationFrame(frame);
+    frameId = requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
+  frameId = requestAnimationFrame(frame);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { cancelAnimationFrame(frameId); frameId = 0; }
+    else if (!__aeonDisposed && !frameId) { last = performance.now(); frameId = requestAnimationFrame(frame); }
+  }, { signal: events.signal });
   installDebugAPI();
 }
 
@@ -176,6 +184,7 @@ function installDebugAPI() {
     fastForward: async (years = 10) => {
       const ticks = years * 60, CHUNK = 60;
       for (let i = 0; i < ticks; i += CHUNK) {
+        if (__aeonDisposed) return;
         const end = Math.min(ticks, i + CHUNK);
         for (let k = i; k < end; k++) s.step();
         await new Promise((r) => requestAnimationFrame(r));
@@ -198,4 +207,17 @@ function installDebugAPI() {
 
 progress(0);
 // 供统一壳无 iframe 挂载时卸载
-window.__iridescentlyDispose = () => { __aeonDisposed = true; };
+window.__iridescentlyDispose = () => {
+  if (__aeonDisposed) return;
+  __aeonDisposed = true;
+  clearTimeout(progressTimer);
+  cancelAnimationFrame(frameId);
+  events.abort();
+  disposeInput?.();
+  ui?.dispose();
+  if (game) {
+    game.sim.onEvent = null;
+    game.renderer.dispose?.();
+    if (window.AEON?.game === game) delete window.AEON;
+  }
+};

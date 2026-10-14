@@ -109,6 +109,7 @@ body{background:var(--bg);color:var(--text);font-family:"Noto Serif SC","Source 
   </div>
 </div>
 <div id="lightbox" onclick="this.classList.remove('show')"><img id="lbImg" alt=""></div>
+<script src="/image-upload.js?v=20261013"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function zoom(src){document.getElementById('lbImg').src=src;document.getElementById('lightbox').classList.add('show');}
@@ -237,25 +238,11 @@ async function doUpload(){
   const desc=(document.getElementById('upDesc').value||'').trim();
   btn.disabled=true; setMsg('上传中…','');
   try{
-    const dataURL=await new Promise((res,rej)=>{
-      const fr=new FileReader();
-      fr.onload=()=>res(fr.result);
-      fr.onerror=()=>rej(new Error('read error'));
-      fr.readAsDataURL(file);
-    });
-    const r=await fetch('/api/official/sticker/upload',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
+    const d=await HuiguanImages.request('/api/official/sticker/upload',{
         character_id:SEL_CHAR?parseInt(SEL_CHAR.id,10):null,
         filename:file.name,
-        description:desc||file.name,
-        data:dataURL
-      })
-    });
-    let d={};
-    try{ d=await r.json(); }catch(e){}
-    if(r.status===401){ setMsg('登录状态已失效，请先 <a href="/?openauth=1" style="color:var(--gold)">重新登录</a>','err'); return; }
-    if(!r.ok||!d.ok){ setMsg(d.error||'上传失败，请重试','err'); return; }
+        description:desc||file.name
+    },file);
     setMsg('上传成功 ✔','ok');
     document.getElementById('upFile').value='';
     document.getElementById('upDesc').value='';
@@ -263,7 +250,7 @@ async function doUpload(){
     document.getElementById('upPanel').classList.remove('show');
     await loadStickers();
   }catch(e){
-    setMsg('上传失败，请重试','err');
+    setMsg(e.status===401?'登录状态已失效，请先 <a href="/?openauth=1" style="color:var(--gold)">重新登录</a>':esc(e.message||'上传失败，请重试'),'err');
   }finally{
     btn.disabled=false;
   }
@@ -284,6 +271,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   checkLogin().then(loadStickers);
 });
 </script>
-<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c12"></script>
+<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c13"></script>
 </body>
 </html>

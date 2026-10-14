@@ -76,7 +76,13 @@ export interface GateSceneOptions {
   layers?: Partial<LayerVisibility>;
   /** 是否接管指针/滚轮/触摸交互（旋转、缩放），默认 true；页面内嵌黑框建议设为 false 以免抢滚动 */
   interactive?: boolean;
+  /** Preserve page wheel/vertical-touch scrolling while retaining mouse rotation. */
+  scrollFriendly?: boolean;
+  /** Centre the complete artwork, rather than the source artboard, for homepage morphing. */
+  centerModel?: boolean;
+  pixelRatio?: number;
   onFrame?: (info: GateFrameInfo) => void;
+  onRotate?: () => void;
   /** t 首次跨过 GATE_OPEN_AT 时回调一次（回退到开启前会重新武装） */
   onGateOpen?: () => void;
   onThemeChange?: (themeId: string) => void;
@@ -93,6 +99,7 @@ export interface GateSceneHandle {
   resize(): void;
   destroy(): void;
   getTime(): number;
+  getLayout(): { center: number[]; bounds: number[][]; projectedCenter: number[]; cameraTarget: number[] };
   readonly canvas: HTMLCanvasElement;
 }
 
@@ -134,7 +141,7 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
   renderer.setClearColor(0x000000);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.NoToneMapping;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, options.pixelRatio || 2));
   renderer.domElement.setAttribute('aria-label', '众生之门 3D 复现');
   renderer.domElement.setAttribute('role', 'img');
   renderer.domElement.style.display = 'block';
@@ -302,6 +309,22 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
     return { star, mesh, material };
   });
 
+  // Layer pivots drive their reveals; they are not the complete artwork's visual centre.
+  // Measure fully revealed geometry once, excluding the transient star particles.
+  const modelBounds = new THREE.Box3();
+  for (const item of objects) {
+    const final = layerState(item.source, SCENE_DURATION);
+    const [px, py] = item.source.pivot;
+    item.group.position.set(px - WIDTH / 2, HEIGHT / 2 - py - final.dy, item.source.z);
+    item.group.scale.set(final.sx, final.sy, final.sx);
+    item.group.updateMatrixWorld(true);
+    if (layers[item.source.visibility] && final.opacity > 0) {
+      modelBounds.union(new THREE.Box3().setFromObject(item.group));
+    }
+  }
+  const measuredCenter = modelBounds.getCenter(new THREE.Vector3());
+  const modelCenter = options.centerModel ? measuredCenter : new THREE.Vector3();
+
   /* ---------- 视角状态与交互 ---------- */
   let rotX = 0;
   let rotY = 0;
@@ -312,7 +335,7 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
   const ZMAX = 3;
   const clampZoom = (value: number) => Math.max(ZMIN, Math.min(ZMAX, value));
   const interactive = options.interactive !== false;
-  if (interactive) renderer.domElement.style.touchAction = 'none';
+  if (interactive) renderer.domElement.style.touchAction = options.scrollFriendly ? 'pan-y pinch-zoom' : 'none';
 
   // 正交相机下 1 像素对应的世界单位随 zoom 收缩：捏合缩放与双指平移据此换算锚点，保证手指下的内容不动
   const metrics = (value: number) => {
@@ -329,19 +352,31 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
     };
   };
 
-  let pointer: { id: number; x: number; y: number } | null = null;
+  let pointer: { id: number; x: number; y: number; touch: boolean; rotating: boolean } | null = null;
   const down = (event: PointerEvent) => {
-    if (event.pointerType === 'touch') return;
+    if ((event.target as HTMLElement).closest('button,input,a')) return;
+    const touch = event.pointerType === 'touch';
+    if (touch && !options.scrollFriendly) return;
     if (event.button !== 0) return;
-    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY };
-    container.setPointerCapture(event.pointerId);
+    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, touch, rotating: !touch };
+    if (!touch) container.setPointerCapture(event.pointerId);
   };
   const move = (event: PointerEvent) => {
     if (!pointer || pointer.id !== event.pointerId) return;
+    if (Math.abs(event.clientX - pointer.x) + Math.abs(event.clientY - pointer.y) < .5) return;
+    if (!pointer.rotating) {
+      const dx = Math.abs(event.clientX - pointer.x);
+      const dy = Math.abs(event.clientY - pointer.y);
+      if (dx < 8 || dx <= dy * 1.15) return;
+      pointer.rotating = true;
+      container.setPointerCapture(event.pointerId);
+    }
     rotY += (event.clientX - pointer.x) * 0.006;
     rotX = Math.max(-0.75, Math.min(0.75, rotX + (event.clientY - pointer.y) * 0.004));
     pointer.x = event.clientX;
     pointer.y = event.clientY;
+    options.onRotate?.();
+    if (!playing) draw();
   };
   const up = (event: PointerEvent) => {
     if (!pointer || pointer.id !== event.pointerId) return;
@@ -361,6 +396,7 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
     panX += sx * (before.x - after.x);
     panY += -sy * (before.y - after.y);
     zoom = next;
+    if (!playing) draw();
   };
 
   const touches = new Map<number, { x: number; y: number }>();
@@ -404,6 +440,7 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
       zoom = next;
       pinch.cx = info.cx;
       pinch.cy = info.cy;
+      if (!playing) draw();
       return;
     }
     if (drag && touches.size === 1) {
@@ -412,6 +449,8 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
       rotX = Math.max(-0.75, Math.min(0.75, rotX + (touch.y - drag.y) * 0.004));
       drag.x = touch.x;
       drag.y = touch.y;
+      options.onRotate?.();
+      if (!playing) draw();
     }
   };
   const touchEnd = (event: TouchEvent) => {
@@ -432,18 +471,24 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
     container.addEventListener('pointermove', move);
     container.addEventListener('pointerup', up);
     container.addEventListener('pointercancel', cancel);
-    container.addEventListener('wheel', wheel, { passive: false });
-    container.addEventListener('touchstart', touchStart, { passive: false });
-    container.addEventListener('touchmove', touchMove, { passive: false });
-    container.addEventListener('touchend', touchEnd, { passive: false });
-    container.addEventListener('touchcancel', touchEnd, { passive: false });
+    if (!options.scrollFriendly) {
+      container.addEventListener('wheel', wheel, { passive: false });
+      container.addEventListener('touchstart', touchStart, { passive: false });
+      container.addEventListener('touchmove', touchMove, { passive: false });
+      container.addEventListener('touchend', touchEnd, { passive: false });
+      container.addEventListener('touchcancel', touchEnd, { passive: false });
+    }
   }
 
   /* ---------- 视锥 cover 自适应（容器非 16:9 时扩展视域，不拉伸变形） ---------- */
+  let renderWidth = 0;
+  let renderHeight = 0;
   const resize = () => {
     const w = container.clientWidth;
     const h = container.clientHeight;
     if (!w || !h) return;
+    renderWidth = w;
+    renderHeight = h;
     renderer.setSize(w, h, false);
     const base = WIDTH / HEIGHT;
     const aspect = w / h;
@@ -461,7 +506,7 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
     }
     camera.updateProjectionMatrix();
   };
-  const observer = new ResizeObserver(resize);
+  const observer = new ResizeObserver(() => { resize(); draw(); });
   observer.observe(container);
   resize();
 
@@ -491,8 +536,8 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
       zoom,
       panX,
       panY,
-      container.clientWidth,
-      container.clientHeight,
+      renderWidth,
+      renderHeight,
     ]);
     if (state === lastState) return;
     lastState = state;
@@ -515,14 +560,14 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
       const s = layerState(item.source, time);
       const [px, py] = item.source.pivot;
       item.group.visible = layers[item.source.visibility] && s.opacity > 0;
-      item.group.position.set(px - WIDTH / 2, HEIGHT / 2 - py - s.dy, item.source.z);
+      item.group.position.set(px - WIDTH / 2 - modelCenter.x, HEIGHT / 2 - py - s.dy - modelCenter.y, item.source.z - modelCenter.z);
       item.group.scale.set(Math.max(s.sx, 0.00001), Math.max(s.sy, 0.00001), Math.max(s.sx, 0.00001));
       for (const m of item.materials) m.material.opacity = m.base * s.opacity;
     }
 
     for (const item of starObjects) {
       const s = starState(item.star, time);
-      item.mesh.position.set(s.x - WIDTH / 2, HEIGHT / 2 - s.y, 200);
+      item.mesh.position.set(s.x - WIDTH / 2 - modelCenter.x, HEIGHT / 2 - s.y - modelCenter.y, 200 - modelCenter.z);
       item.mesh.visible = layers.moon && s.opacity > 0;
       item.material.opacity = s.opacity;
     }
@@ -535,9 +580,9 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
   };
 
   const tick = (now: number) => {
-    raf = requestAnimationFrame(tick);
+    raf = 0;
     if (destroyed) return;
-    const dt = Math.min((now - lastTick) / 1000, 1 / 30);
+    const dt = Math.min((now - lastTick) / 1000, 0.1);
     lastTick = now;
     if (playing) {
       time += dt;
@@ -565,8 +610,9 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
     if (options.onFrame) {
       options.onFrame({ t: time, frame: Math.min(143, Math.floor(time * 24 + 1e-6)), gateOpen });
     }
+    if (playing && !destroyed) raf = requestAnimationFrame(tick);
   };
-  raf = requestAnimationFrame(tick);
+  if (playing) raf = requestAnimationFrame(tick);
 
   /* ---------- 句柄 ---------- */
   const handle: GateSceneHandle = {
@@ -574,14 +620,19 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
       if (destroyed) return;
       if (time >= SCENE_DURATION - 1e-6) time = loopEnabled ? loopStart : clampTime(loopStart);
       playing = true;
+      if (!raf) { lastTick = performance.now(); raf = requestAnimationFrame(tick); }
     },
     pause() {
       playing = false;
+      cancelAnimationFrame(raf);
+      raf = 0;
     },
     seek(value: number) {
       if (destroyed) return;
       time = clampTime(value);
       playing = false; // 与 zszm 进度条接管语义一致：seek 后停止自动推进，需显式 play()
+      cancelAnimationFrame(raf);
+      raf = 0;
       draw();
     },
     setTheme(id: string) {
@@ -633,6 +684,15 @@ export function createScene(container: HTMLElement, options: GateSceneOptions = 
     },
     getTime() {
       return time;
+    },
+    getLayout() {
+      const projected = measuredCenter.clone().sub(modelCenter).applyMatrix4(root.matrixWorld).project(camera);
+      return {
+        center: measuredCenter.toArray(),
+        bounds: [modelBounds.min.toArray(), modelBounds.max.toArray()],
+        projectedCenter: [(projected.x + 1) / 2, (1 - projected.y) / 2],
+        cameraTarget: [0, 0, 0],
+      };
     },
     get canvas() {
       return renderer.domElement;

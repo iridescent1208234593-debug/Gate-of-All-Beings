@@ -20,13 +20,10 @@
 		<div id="QcAccountBar"></div>
 		<div id="SlayTheWeb"></div>
 		<script async src="ui/index.js" type="module"></script>
-		<script async src="ui/account-bar.js" type="module"></script>
-		<script>
+		<script type="module">
 			// Offline support
-			if (!location.origin.includes('localhost') && 'serviceWorker' in navigator) {
-				window.addEventListener('load', () => {
-					navigator.serviceWorker.register('/service-worker.js')
-				})
+			if (location.pathname.startsWith('/app/modules/slay/') && 'serviceWorker' in navigator) {
+				navigator.serviceWorker.register(new URL('./service-worker.js', import.meta.url)).catch(() => {})
 			}
 			window.TONE_SILENCE_LOGGING = true
 		</script>

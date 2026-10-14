@@ -137,7 +137,32 @@ let cdnAudioUrlIndex = 0;
 // 注意：这里必须用 <audio> 而不是隐藏的 <video>——手机端（微信/QQ 的 X5 内核等）
 // 会把播放中的 <video> 交给原生播放器渲染，CSS 的 display/opacity 对其无效，
 // 页面会被视频层盖住（表现为「打开 2D/3D 直接变成视频」）。
-function playCdnOriginalAudio(onEnd?: () => void): boolean {
+
+// 语音合成兜底：CDN 原声拿不到或被浏览器拒绝时，用系统 TTS 顶上，避免开场整段静默
+function speakViaSynthesis(text: string, onEnd?: () => void) {
+  if (!('speechSynthesis' in window)) return;
+
+  window.speechSynthesis.cancel(); // Stop prior speech
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'zh-CN';
+  utterance.rate = 0.95;
+  utterance.pitch = 1.1;
+
+  if (onEnd) {
+    utterance.onend = onEnd;
+  }
+
+  // Try to find a nice female / natural Chinese voice
+  const voices = window.speechSynthesis.getVoices();
+  const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('CN'));
+  if (zhVoice) {
+    utterance.voice = zhVoice;
+  }
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function playCdnOriginalAudio(text: string, onEnd?: () => void): boolean {
   try {
     if (!cdnAudioEl) {
       cdnAudioEl = document.createElement('audio');
@@ -159,7 +184,8 @@ function playCdnOriginalAudio(onEnd?: () => void): boolean {
     cdnAudioEl.muted = false;
     cdnAudioEl.volume = 1.0;
     const p = cdnAudioEl.play();
-    if (p && typeof p.catch === 'function') p.catch(() => {});
+    // 播放被拒（无用户手势 / 移动端省电策略）或音轨不可用时，回退到语音合成
+    if (p && typeof p.catch === 'function') p.catch(() => speakViaSynthesis(text, onEnd));
     return true;
   } catch (e) {
     console.warn('CDN original audio play failed:', e);
@@ -173,29 +199,11 @@ export function speakGreeting(text = '你好，欢迎来到众生之门', onEnd?
     return;
   }
 
-  // 无挂载原视频时，播放已缓存的 CDN 原视频音频（替代 speechSynthesis AI 配音）
-  if (playCdnOriginalAudio(onEnd)) {
+  // 无挂载原视频时，播放已缓存的 CDN 原视频音频（替代 speechSynthesis AI 配音）；
+  // 资源不可用或被浏览器拒绝播放时，回退到语音合成，保证开场不会整段静默
+  if (playCdnOriginalAudio(text, onEnd)) {
     return;
   }
 
-  if (!('speechSynthesis' in window)) return;
-  
-  window.speechSynthesis.cancel(); // Stop prior speech
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'zh-CN';
-  utterance.rate = 0.95;
-  utterance.pitch = 1.1;
-  
-  if (onEnd) {
-    utterance.onend = onEnd;
-  }
-  
-  // Try to find a nice female / natural Chinese voice
-  const voices = window.speechSynthesis.getVoices();
-  const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('CN'));
-  if (zhVoice) {
-    utterance.voice = zhVoice;
-  }
-  
-  window.speechSynthesis.speak(utterance);
+  speakViaSynthesis(text, onEnd);
 }

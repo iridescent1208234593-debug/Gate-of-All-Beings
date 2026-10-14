@@ -32,6 +32,8 @@ function clearSelection(targets) {
 }
 
 export default function enableDragDrop(container, afterRelease) {
+	const events = new AbortController()
+	const instances = []
 	const targets = container.querySelectorAll('.Target')
 	const cards = container.querySelectorAll('.Hand .Card')
 
@@ -46,7 +48,7 @@ export default function enableDragDrop(container, afterRelease) {
 				clearSelection(targets)
 				afterRelease(cardEl.dataset.id, targetString, cardEl)
 			}
-		})
+		}, {signal: events.signal})
 	})
 
 	// 点击空白区域取消选中（点击卡片/目标本身不取消）
@@ -54,10 +56,10 @@ export default function enableDragDrop(container, afterRelease) {
 		if (!selectedCard) return
 		if (ev.target.closest('.Hand .Card, .Target')) return
 		clearSelection(targets)
-	})
+	}, {signal: events.signal})
 
 	cards.forEach((card) => {
-		Draggable.create(card, {
+		instances.push(...Draggable.create(card, {
 			onPress() {
 				// 记录按下位置，用于区分"点击"与"拖拽"
 				this._pressX = this.x
@@ -145,6 +147,7 @@ export default function enableDragDrop(container, afterRelease) {
 				// Remove active class from any other targets.
 				targets.forEach((t) => t.classList.remove(overClass))
 			},
-		})
+		}))
 	})
+	return () => { events.abort(); instances.forEach(instance => instance.kill()); clearSelection(targets) }
 }

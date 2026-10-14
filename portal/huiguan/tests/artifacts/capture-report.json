@@ -1,0 +1,78 @@
+{
+  "capturedAt": "2026-10-09T16:23:57.597Z",
+  "interactionAcceptance": "User review; no detailed desktop/mobile acceptance performed for this revision.",
+  "captures": [
+    {
+      "name": "desktop-opening.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "url": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "name": "desktop-hero.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "url": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "name": "desktop-archives.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "url": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "name": "desktop-registration-start.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "url": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "name": "desktop-registration-focused.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "url": "https://huiguan.iridescently.xyz/#charForm"
+    },
+    {
+      "name": "desktop-official.png",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "url": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "name": "mobile-hero.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "url": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "name": "mobile-archives.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "url": "https://huiguan.iridescently.xyz/"
+    },
+    {
+      "name": "mobile-fan.png",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "url": "https://huiguan.iridescently.xyz/"
+    }
+  ]
+}

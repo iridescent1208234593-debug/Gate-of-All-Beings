@@ -1,0 +1,68 @@
+/* Editor UI only. Poster artwork and canvas rendering keep their own styles. */
+.poster-wheel { margin: 20px 0; scroll-margin-top: 80px; }
+.poster-wheel > summary { cursor: pointer; font-size: 14px; padding: 12px 0; border-top: 1px solid var(--qc-border); }
+.poster-wheel > summary span { display: inline-block; margin-left: 8px; font-size: 11px; color: var(--qc-dim); }
+.poster-wheel .wheel-wrap { flex-wrap: nowrap; }
+.poster-wheel .wheel-slot { min-width: 0; }
+.poster-wheel canvas { touch-action: none; }
+body { align-items: flex-start; }
+.stage { min-width: 0; flex-direction: column; gap: 14px; padding: 24px; background: radial-gradient(ellipse at 45% 40%, #3d5946, #172c24 75%); }
+.stage-caption { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; width: min(100%, 450px); color: #dedbc4; font-size: 12px; letter-spacing: .12em; }
+.stage-caption small { font-size: 10px; color: #b4bdac; letter-spacing: .03em; }
+.canvas-wrap { height: min(78vh, calc(100vw - 570px)); max-width: 100%; border-radius: 2px; border-color: #b9b39366; box-shadow: 0 20px 55px #0005; }
+.panel { width: clamp(430px, 38vw, 560px); padding: 28px 26px 40px; background: var(--qc-bg); }
+.editor-heading { margin-bottom: 24px; }
+.editor-eyebrow { color: var(--qc-dim); font-size: 11px; letter-spacing: .14em; margin-bottom: 9px; }
+.panel h1 { font-size: 28px; letter-spacing: .12em; font-weight: 500; }
+.panel .sub { margin: 10px 0 18px; line-height: 1.8; letter-spacing: 0; }
+.editor-steps { display: flex; gap: 6px; padding-top: 14px; border-top: 1px solid var(--qc-border); }
+.editor-steps a { flex: 1; text-decoration: none; color: var(--qc-text); font-size: 12px; padding: 9px 4px; white-space: nowrap; }
+.editor-steps small, .editor-section-title small { color: var(--qc-accent); font-size: 10px; margin-right: 5px; font-variant-numeric: tabular-nums; }
+.panel .qc-card { padding: 18px 0; margin-bottom: 10px; border: 0; border-top: 1px solid var(--qc-border); border-radius: 0; box-shadow: none; background: transparent; }
+.layer-head { margin-bottom: 14px; flex-wrap: wrap; }
+.layer-name { font-size: 15px; font-weight: 500; }
+.editor-section-title { margin: 32px 0 12px; font-size: 18px; font-weight: 500; letter-spacing: .04em; scroll-margin-top: 75px; }
+.editor-section-title span { display: block; margin: 8px 0 0 21px; color: var(--qc-dim); font-size: 11px; font-weight: 400; }
+#posterColors, #saveCard { scroll-margin-top: 75px; }
+.scheme-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; }
+.scheme-card { padding: 8px; border-radius: 3px; text-align: left; }
+.scheme-card .sw { height: 34px; border-radius: 2px; margin-bottom: 8px; }
+.scheme-card .sw span:first-child { flex: 2; }
+.scheme-card:hover { transform: none; }
+.scheme-card.is-active { border-color: var(--qc-accent); box-shadow: inset 0 -2px var(--qc-accent); }
+.sub-row { margin: 22px 0 10px; color: var(--qc-text); font-size: 13px; }
+.mini-tip { line-height: 1.85; margin-top: 9px; }
+.panel .row { gap: 10px; margin-bottom: 10px; }
+.panel .row .qc-range { min-width: 0; flex: 1; }
+.ancient-palette { margin: 14px 0; }
+.ancient-palette > summary { cursor: pointer; font-size: 12px; padding: 10px 0; color: var(--qc-text); }
+.ancient-palette > summary span { font-size: 10px; color: var(--qc-dim); margin-left: 8px; }
+.panel .qc-swatch-grid { max-height: 240px; padding: 8px; background: var(--qc-panel); border: 1px solid var(--qc-border); border-radius: 3px; }
+.wheel-wrap { justify-content: space-around; gap: 16px; padding: 18px 8px; background: var(--qc-panel); border: 1px solid var(--qc-border); border-radius: 3px; }
+.panel .actions { gap: 8px; flex-wrap: wrap; }
+.panel .qc-btn { min-height: 36px; }
+.hb-lock-overlay { justify-content: flex-end; align-items: flex-start; padding: 48px 0 0; font-size: 11px; }
+.editor-steps a:focus-visible, summary:focus-visible, .panel button:focus-visible, .panel input:focus-visible, .panel select:focus-visible { outline: 2px solid var(--qc-accent); outline-offset: 3px; }
+@media (max-width: 1000px) and (min-width: 861px) {
+  .panel { width: 420px; padding: 22px; }
+  .canvas-wrap { height: min(74vh, calc((100vw - 470px) * 16 / 9)); }
+}
+@media (max-width: 860px) {
+  .stage { gap: 8px; padding: 12px 16px 16px; }
+  .stage-caption { max-width: 390px; font-size: 10px; }
+  .stage-caption small { font-size: 9px; }
+  .canvas-wrap { height: min(34svh, 380px); max-width: 100%; }
+  .panel { width: 100%; padding: 24px 20px 36px; }
+  .panel h1 { font-size: 24px; }
+  .editor-steps a { font-size: 11px; }
+  .panel .qc-slots { flex-wrap: wrap; }
+  .panel .qc-slot { flex: 1; min-width: 120px; }
+  .panel .qc-slots .qc-btn { width: 100%; margin-left: 0 !important; }
+  .wheel-wrap { gap: 14px 8px; padding: 14px 0; }
+  .panel .scheme-del { opacity: .85; pointer-events: auto; }
+  .ancient-palette > summary span { display: block; margin: 6px 0 0 16px; }
+  #posterColors, #posterComposition, #saveCard { scroll-margin-top: calc(34svh + 120px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel *, .panel *::before, .panel *::after { transition: none !important; }
+}

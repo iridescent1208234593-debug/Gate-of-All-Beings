@@ -5,7 +5,7 @@ const homepageRoot = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(homepageRoot, "../..");
 const galleryRoot = path.join(
   projectRoot,
-  "New project/gallery/codrops-depth-gallery",
+  "portal/www/gallery-engine",
 );
 const [{ default: glsl }, { externalGallery }] = await Promise.all([
   import(
@@ -52,7 +52,7 @@ export default ({ command }) => ({
     },
   },
   build: {
-    outDir: path.join(homepageRoot, ".homepage-build"),
+    outDir: path.join(projectRoot, ".releases/.work/homepage"),
     assetsDir: "",
     cssCodeSplit: false,
     emptyOutDir: true,

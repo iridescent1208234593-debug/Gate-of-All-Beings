@@ -100,41 +100,34 @@ VITE = 'node_modules/vite/bin/vite.js'
 
 SITES = [
     dict(key='portal', name='统一门户 · www/huiguan/oc', cwd=str(ROOT / 'server'),
-         domains=['iridescently.xyz', 'www.iridescently.xyz',
-                  'huiguan.iridescently.xyz', 'oc.iridescently.xyz'],
-         port=8080, runner='python', args=['-u', 'portal_server.py'], wait=30,
-         note='统一入口：按 Host 分发 www/huiguan/oc（旧单站 8088/8089/8090 已由它接管）'),
-    dict(key='zszm', name='众生之门 · 前端（构建产物预览）', cwd=r'D:\Projects\zszm',
-         domains=['zszm.iridescently.xyz'], port=5178,
-         runner='node',
-         args=[VITE, 'preview', '--host', '127.0.0.1', '--port', '5178', '--strictPort'], wait=45,
-         note='Vite 预览 dist 构建产物（开发源码在 D:\\Projects\\zszm）'),
+        domains=['iridescently.xyz', 'www.iridescently.xyz',
+                  'huiguan.iridescently.xyz', 'oc.iridescently.xyz',
+                  'zszm.iridescently.xyz', 'spirit.iridescently.xyz',
+                  'game.iridescently.xyz', 'lingjing.iridescently.xyz',
+                  'juling.iridescently.xyz'],
+        port=8080, runner='python', args=['-u', 'portal_server.py'], env={'PYTHONUTF8': '1'}, wait=30,
+         note='统一入口：按 Host 分发主站、会馆、OC 与众生之门（静态模块来自 server/app/modules）'),
     dict(key='zszm-oauth', name='众生之门 · OAuth 代理', cwd=str(ROOT / 'server/app/src/cards'),
          domains=[], port=5174, runner='python', args=['-u', 'server.py'], wait=25,
          note='无独立域名，供 zszm 站内回调使用'),
-    dict(key='game', name='旧卡牌入口 · 转向众生之门', cwd=str(ROOT / 'server/app/src/cards'),
-         domains=['game.iridescently.xyz'], port=5176, runner='node',
-         args=['scripts/legacy-redirect.mjs'], wait=25,
-         note='旧网址自动转向新版，不运行旧工程'),
+    dict(key='zszm-balance', name='众生之门 · 数值配置 API', cwd=str(ROOT / 'server/app/src/cards'),
+         domains=[], port=5178, runner='node',
+         args=[VITE, 'preview', '--host', '127.0.0.1', '--port', '5178', '--strictPort',
+               '--outDir', str(ROOT / 'server/app/modules/cards')], wait=25,
+         note='使用 cards 已显式发布的产物提供数值配置 API；启动不构建、不发布'),
     dict(key='juling', name='众生之门 · 聚灵', cwd=str(ROOT / 'server/app/src/juling'),
-         domains=['juling.iridescently.xyz'], port=5177, runner='node',
+         domains=[], port=5177, runner='node',
          args=['server.js'], env={'PORT': '5177'}, wait=25, note='Node 服务，端口取自 PORT 变量'),
     dict(key='softie', name='灵体互动 · 独立域名 / 软乎乎 API 上游', cwd=str(ROOT / 'server/app/src/softie-webgpu'),
          domains=['spirit.iridescently.xyz'], port=4173, runner='node',
-         args=[VITE, 'preview', '--host', '127.0.0.1', '--port', '4173'], wait=25,
+         args=[VITE, 'preview', '--host', '127.0.0.1', '--port', '4173',
+               '--outDir', str(ROOT / 'server/app/modules/softie')], wait=25,
          note='独立域名静态模块由统一门户托管；房间 WebSocket 与灵体 API 转发至此服务'),
-    dict(key='lingjing', name='灵境 · 会馆', cwd=str(ROOT / 'server/app/src/management'),
-         domains=['lingjing.iridescently.xyz'], port=5179, runner='node',
-         args=[VITE, '--host', '127.0.0.1', '--port', '5179', '--strictPort'], wait=45,
-         note='Vite 开发服务器（源码已并入 server/app/src/management）'),
     dict(key='psyche', name='心理评估数据库平台 · psyche',
          cwd=r'E:\心理\心理评估数据库平台_v2',
-         domains=['psyche.iridescently.xyz'], port=8000, runner='powershell',
+         domains=['psyche.iridescently.xyz'], port=8000, runner='powershell', deployed=False,
          args=['-File', str(Path.home() / 'marvis-services/start-psyche.ps1')], wait=90,
-         note='Docker 方式启动，首次拉起引擎较慢'),
-    dict(key='psy', name='psy · 未部署', cwd=None,
-         domains=['psy.iridescently.xyz'], port=5000, deployed=False,
-         note='本机暂未找到对应项目，清单中标注为未部署'),
+         note='独立项目尚未并入本站；不随网站一键恢复启动'),
 ]
 
 TUNNEL_SITE = dict(key='tunnel', name='公网连接 · Cloudflare 隧道', kind='process',
@@ -329,6 +322,12 @@ def launch(site):
         env = os.environ.copy()
         env.update(site.get('env') or {})
         cwd = site.get('cwd') or str(HERE)
+        if site.get('key') in ('portal', 'zszm-oauth'):
+            published = ROOT / '.releases/production/site'
+            if not published.is_dir():
+                raise RuntimeError('缺少已发布源码；请先 build:site / publish:site')
+            cwd = str(published / Path(cwd).relative_to(ROOT))
+            env['IRIDESCENTLY_PROJECT_ROOT'] = str(ROOT)
         return subprocess.Popen(build_command(site), cwd=cwd, env=env,
                                 stdin=subprocess.DEVNULL, stdout=handle, stderr=handle,
                                 creationflags=subprocess.CREATE_NO_WINDOW)
@@ -489,9 +488,12 @@ def recover_site(site, report, quiet=False):
 
     try:
         if site['key'] == 'portal':
-            node = NODE if NODE.is_file() else Path('node')
-            subprocess.run([str(node), 'server/app/scripts/build-modules.mjs'],
-                           cwd=ROOT, check=True)
+            required = [ROOT / 'portal/www/index.html'] + [
+                ROOT / 'server/app/modules' / name / 'index.html'
+                for name in ('cards', 'management', 'ecology', 'softie', 'juling', 'slay', 'aeon')
+            ]
+            if any(not item.is_file() for item in required):
+                raise RuntimeError('正式产物不完整；请先构建候选、检查并显式 publish:modules')
         child = launch(site)
     except Exception as error:
         report('「%s」启动失败：%s' % (site['name'], error), 'bad')

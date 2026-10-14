@@ -1,7 +1,18 @@
 # 西木会馆跨站 SSO 共享模块（huiguan 发 cookie，其他站点读取验证）
 import hmac, hashlib, base64, json, time, os
+from pathlib import Path
 
 HX_SSO_SECRET = os.environ.get('HX_SSO_SECRET', '')
+if not HX_SSO_SECRET:
+    # 本地启动器不自动加载 dotenv；所有 Python 站点共享同一个私密配置。
+    try:
+        for line in (Path(os.environ.get('IRIDESCENTLY_PROJECT_ROOT', Path(__file__).resolve().parents[1])) / 'server' / '.env.local').read_text(encoding='utf-8').splitlines():
+            key, separator, value = line.strip().partition('=')
+            if separator and key == 'HX_SSO_SECRET':
+                HX_SSO_SECRET = value.strip().strip('\"\'')
+                break
+    except FileNotFoundError:
+        pass
 
 def _secret_bytes():
     if not HX_SSO_SECRET:

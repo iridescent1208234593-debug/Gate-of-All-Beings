@@ -34,7 +34,11 @@
   }
 
   .site-nav {
-    gap: 12px;
+    gap: 5px;
+  }
+
+  .site-nav__primary {
+    gap: 8px;
   }
 
   .site-nav__link,
@@ -43,8 +47,8 @@
     font-size: 11px;
   }
 
-  .site-nav__link--secondary {
-    display: none;
+  .site-nav__credits {
+    font-size: 9px;
   }
 
   .site-menu__panel {
@@ -57,6 +61,25 @@
     gap: 5px;
     min-height: 42px;
     padding: 3px;
+  }
+
+  .gallery-music {
+    left: max(13px, env(safe-area-inset-left));
+    top: calc(env(safe-area-inset-top) + 78px);
+  }
+
+  .gallery-music__panel {
+    width: min(320px, calc(100vw - 62px));
+    gap: 1px 7px;
+    padding: 8px 10px 7px;
+  }
+
+  .gallery-music__transport {
+    gap: 2px;
+  }
+
+  .gallery-music__timeline {
+    gap: 6px;
   }
 
   .gallery-customizer {
@@ -77,6 +100,11 @@
     grid-template-columns: 24px minmax(0, 1fr);
     gap: 4px;
     font-size: 9px;
+  }
+
+  .gallery-setting--autoplay {
+    grid-column: span 2;
+    grid-template-columns: 54px minmax(0, 1fr) 48px;
   }
 
   .gallery-settings__items {

@@ -1,29 +1,34 @@
-// 把所有 web 游戏挂到 server/app/modules/<name>/（内路径）。
+// 构建候选到 .releases/candidate/modules/；显式 publish 才更新运行目录。
 // - 已并入源码的三模块（cards/management/ecology）从 server/app/src 构建
 // - 其余游戏从 games/ 构建或拷贝；静态站必要时修正根绝对链接
 // 用法：node server/app/scripts/build-modules.mjs
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { candidateRoot, recordCandidate } from '../../../ops/release-artifacts.mjs';
 
 const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const srcRoot = path.join(appDir, 'src');
-const outRoot = path.join(appDir, 'modules');
+const outRoot = path.join(candidateRoot, 'modules');
+rmSync(path.join(candidateRoot, 'modules.json'), { force: true });
+reset(outRoot);
 
 function reset(dest) {
+  const relative = path.relative(candidateRoot, dest);
+  if (!relative || relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) {
+    throw new Error(`Refusing to clean outside candidate output: ${dest}`);
+  }
   rmSync(dest, { recursive: true, force: true });
   mkdirSync(dest, { recursive: true });
 }
 
 function viteModule(srcDir, destName) {
+  const dest = path.join(outRoot, destName);
   const r = spawnSync(process.execPath,
-    [path.join(srcDir, 'node_modules/vite/bin/vite.js'), 'build', '--base', `/app/modules/${destName}/`],
+    [path.join(srcDir, 'node_modules/vite/bin/vite.js'), 'build', '--base', `/app/modules/${destName}/`, '--outDir', dest, '--emptyOutDir'],
     { cwd: srcDir, stdio: 'inherit' });
   if (r.status !== 0) throw new Error(`${destName} build failed`);
-  const dest = path.join(outRoot, destName);
-  reset(dest);
-  cpSync(path.join(srcDir, 'dist'), dest, { recursive: true });
   console.log(`[vite] ${destName}`);
 }
 
@@ -47,6 +52,7 @@ for (const name of ['management', 'ecology', 'cards']) viteModule(path.join(srcR
 viteModule(path.join(srcRoot, 'softie-webgpu'), 'softie');
 copyModule(path.join(srcRoot, 'juling', 'public'), 'juling');
 copyModule(path.join(srcRoot, 'slay-the-web', 'public'), 'slay');
+cpSync(path.join(srcRoot, 'slay-the-web', 'LICENSE'), path.join(outRoot, 'slay', 'LICENSE'));
 copyModule(path.join(srcRoot, 'aeon'), 'aeon',
   (src) => !/[\\/](\.git|\.github|node_modules|test|notes|research)([\\/]|$)/.test(src) && !src.endsWith('.md'));
 
@@ -59,19 +65,17 @@ walk(path.join(outRoot, 'slay'), (p) => {
 });
 console.log('[fix] slay root-absolute /ui/');
 
-// slay 的 ui/images 原为指向共享素材的联接，拷贝会丢失 -> 重建 junction
+// 候选产物包含真实素材，避免发布后仍依赖候选目录或源码 junction。
 const slayImages = path.join(outRoot, 'slay', 'ui', 'images');
 const sharedImages = path.join(appDir, '..', '..', 'shared', 'shared-ui', 'AI image', 'images');
-try {
-  rmSync(slayImages, { recursive: true, force: true });
-  symlinkSync(sharedImages, slayImages, 'junction');
-  console.log('[link] slay ui/images -> shared assets');
-} catch (e) {
-  console.error('[warn] slay ui/images link failed:', e.message);
-}
+rmSync(slayImages, { recursive: true, force: true });
+cpSync(sharedImages, slayImages, { recursive: true, dereference: true });
+console.log('[copy] slay shared images');
 
-// The root homepage is Gallery-first; publish its shell and discovered assets with the site build.
+// 同时生成首页候选，不改动生产入口或资源。
 const homepageBuild = spawnSync(process.execPath,
   [path.join(appDir, '..', '..', 'portal', 'www', 'scripts', 'build-homepage.mjs')],
   { cwd: path.resolve(appDir, '..', '..'), stdio: 'inherit' });
 if (homepageBuild.status !== 0) throw new Error('Homepage build failed');
+await recordCandidate('modules');
+console.log(`[modules] Candidate ready: ${outRoot} — review before npm run publish:modules.`);

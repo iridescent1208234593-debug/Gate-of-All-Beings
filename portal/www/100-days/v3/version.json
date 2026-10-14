@@ -1,0 +1,39 @@
+{
+  "version": "v3-20261008.f51c8a2a8d80",
+  "publishedAt": "2026-10-08T06:10:15.069Z",
+  "route": "/100-days/v3/",
+  "duration": 169,
+  "segments": 13,
+  "resources": {
+    "film.css": "e693818dd8d5b2264953b4b73ca0c5c6c1d0a39bb7a9d4c64cbf35134f3fae2e",
+    "film.js": "b6b70e1441f9b90838e4c80957df841e932b5aae51297323dbda7c1734f256a7",
+    "media/error-desktop.jpg": "51229ff398b35de04a77561e1affcac40916afe70586d840c11f152cd74a70d7",
+    "media/error-mobile.jpg": "a9fa4c9472e51a8a0e02e0af2b043e79519a52ac32663b0f78e105e8f19fc548",
+    "media/fan-muzi.jpg": "4999e7990b97f8aee70a220a7150e112be5ec234b97ba25ac0bdbb49c54900e8",
+    "media/fan-night.jpg": "b22ed94c8c83dc3c81e2da3ccce83773e086a16fd3982cbbdb4810b0091d81f2",
+    "media/fan-sheng.jpg": "fd1ee68b4c09595be4d90e96e1ae76201ac306232e80c1b3234eb15b998145c6",
+    "media/fan-white.jpg": "4debe1d41fbf27941887c9cb28cf4b02c5d4c4bcfaa793ad6e9502a8a7e58b93",
+    "media/folders.jpg": "980b5b2c6092de111dcc14bf3740e1ecd581eab070d4f385c3fdcb2d53a40150",
+    "media/form-early.jpg": "71e9d5894679e296ee41611681278b6b01c6d9b02f4cd738867f9dc019db626b",
+    "media/gallery.jpg": "2dea9dd6dd4caca53227cd820da8dbe91903dd67893c2a9b52a2abd075e2297f",
+    "media/game-menu.jpg": "eb73768dc0bc6e6b7739227fad8bce119fccbe3c849df23d51935b9bac3f564c",
+    "media/gate-mobile.jpg": "8cccdb171e9480f1e52516a30facc815f77c580820435745fcb636bb0f5ac3fd",
+    "media/gate.jpg": "88b10234e867fdedbc30207bf6c79eabef28a862ec6bcb64e263f65536e99e33",
+    "media/gemini.jpg": "1a3f96a64fb9b77fa79cf46482a8db7d56f21071c5d5b27c85590475546c7c35",
+    "media/management.jpg": "2d747125fb001a36ba92d2c21ff8df8b055bf708c071617b3eb625d093d151b1",
+    "media/official.jpg": "8f65154832fc27e87960956876ef610155cc2f0e8dca623efc198b3f071d3aa7",
+    "media/palette.jpg": "5f0af2cbb8cf49a8400a45cca0206691dbb746292bd2017d19a0db4190663d19",
+    "media/poster.jpg": "05a3d1b611f98c5bf114b009e79f0f22dd77adc5f20f92ad520b00b9036a7011",
+    "media/qq.jpg": "34c0132050b4a152722ca11d21410ce489f845d7e8b1177fb92fc17372607c83",
+    "media/relation.jpg": "89bf1cf16bfccab6f530ed6a2f65e5213b095f9e1741ae50f3a411d647a630c1",
+    "media/traffic.jpg": "0f239c612eb24bed281aa82d9fa26ba4f4e3d5d938b9d897b2907027027fc1e7",
+    "media/unsaved.jpg": "dcec69fe7e0fab77796f933e5650dd7de45a7e44a9ed8af2d4eada834781b818"
+  },
+  "entrySha256": "eff8fa5da24bf2c5b86b3da776e9d4e4ce1e714def9b4ddcf0133426521b83a1",
+  "preservedV2": {
+    "index.html": "63045dbc7ea3b29877bfc77e98ebdfb1c987e55bdc82b391ac786311d0096de4",
+    "experience.css": "09adf8a869ecc3513a8475caf5af7001df5b89097b7856193cc8e347292cc703",
+    "experience.js": "e89d49355ef9a376628782d21337af36e8b154e4edead3b3d1a50c96acd0eac0",
+    "ASSET_BINDING.md": "70c310d244762fb4172711b46c92f077b7c51c4cbc62cea446896c34aef7053f"
+  }
+}

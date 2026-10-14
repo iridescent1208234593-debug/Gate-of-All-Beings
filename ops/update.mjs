@@ -215,14 +215,8 @@ async function runCode() {
   const unknown = changed.filter((file) => !allowlist.has(file.replaceAll("\\", "/")));
   if (unknown.length) throw new Error(`Unknown worktree changes; stopped without staging: ${unknown.join(", ")}`);
   run("git", ["diff", "--check"]);
-  const homepagePath = path.join(root, "portal/www/index.html");
-  const originalHomepage = await readFile(homepagePath);
-  try {
-    run("npm", ["run", "build:modules"]);
-    report.build = { status: "passed" };
-  } finally {
-    await writeFile(homepagePath, originalHomepage);
-  }
+  run("npm", ["run", "build:modules"]);
+  report.build = { status: "passed", output: ".releases/candidate", published: false };
   run("npm", ["run", "test:portal"]);
   report.tests = { status: "passed" };
   run(process.execPath, [manifestScript, "--check"]);

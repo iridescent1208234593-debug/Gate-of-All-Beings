@@ -40,3 +40,36 @@ if (chrome) {
     event.preventDefault();
   });
 }
+
+const statusDots = [...document.querySelectorAll("[data-site-status]")];
+if (statusDots.length) {
+  fetch("/api/site-status", { cache: "no-store" })
+    .then((response) => (response.ok ? response.json() : Promise.reject()))
+    .then(({ sites = {} }) => {
+      for (const dot of statusDots) {
+        const value = sites[dot.dataset.siteStatus];
+        const state =
+          value === true ? "online" : value === false ? "offline" : value;
+        const label =
+          state === "online"
+            ? "在线"
+            : state === "offline"
+              ? "离线"
+              : state === "unpublished"
+                ? "尚未并入本站"
+                : "状态未知";
+        dot.dataset.state = state || "unknown";
+        dot.setAttribute("aria-label", label);
+        dot.title = label;
+      }
+    })
+    .catch(() => {
+      for (const dot of statusDots) {
+        if (dot.dataset.siteStatus !== "psyche") {
+          dot.dataset.state = "unknown";
+          dot.setAttribute("aria-label", "状态未知");
+          dot.title = "状态未知";
+        }
+      }
+    });
+}

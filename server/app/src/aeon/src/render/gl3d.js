@@ -809,6 +809,7 @@ export class GL3D {
   // two triangles per quad. Per-vertex normal from the height gradient; per-vertex
   // color from biome + a little height/slope shading baked in. Static VBO.
   _buildTerrain() {
+    this._releaseBuffers("terrain");
     const gl = this.gl, W = this.world;
     const w = W.w, h = W.h, elev = W.elev, biome = W.biome;
     const hAt = (x, y) => {
@@ -884,7 +885,7 @@ export class GL3D {
     gl.bindVertexArray(this.vaoTerrain);
 
     const mk = (loc, data, size) => {
-      const buf = gl.createBuffer();
+      const buf = this._createBuffer("terrain");
       gl.bindBuffer(gl.ARRAY_BUFFER, buf);
       gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
       gl.enableVertexAttribArray(loc);
@@ -899,13 +900,13 @@ export class GL3D {
     // Dynamic — refreshed from sim.territory whenever ownership changes. One vertex
     // per tile, same indexing as the heightmap, so updating it is a flat scan.
     this._owner = new Float32Array(nVerts * 4);   // all zero => no overlay initially
-    this._tOwn = gl.createBuffer();
+    this._tOwn = this._createBuffer("terrain");
     gl.bindBuffer(gl.ARRAY_BUFFER, this._tOwn);
     gl.bufferData(gl.ARRAY_BUFFER, this._owner, gl.DYNAMIC_DRAW);
     gl.enableVertexAttribArray(3);
     gl.vertexAttribPointer(3, 4, gl.FLOAT, false, 0, 0);
 
-    this._tIdx = gl.createBuffer();
+    this._tIdx = this._createBuffer("terrain");
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._tIdx);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idx, gl.STATIC_DRAW);
 
@@ -954,12 +955,13 @@ export class GL3D {
 
   // ------------------------------------------------------------- water plane
   _buildWater() {
+    this._releaseBuffers("water");
     const gl = this.gl;
     // one quad (two triangles) in 0..1 XZ space; the VS maps it across the world
     const quad = new Float32Array([0,0, 1,0, 1,1,  0,0, 1,1, 0,1]);
     this.vaoWater = gl.createVertexArray();
     gl.bindVertexArray(this.vaoWater);
-    const buf = gl.createBuffer();
+    const buf = this._createBuffer("water");
     gl.bindBuffer(gl.ARRAY_BUFFER, buf);
     gl.bufferData(gl.ARRAY_BUFFER, quad, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
@@ -974,6 +976,7 @@ export class GL3D {
   // extra anim vector (phase, speed, packedState) lets the whole crowd walk/strike/
   // carry/die in ONE draw call, animated in-shader from uTime.
   _buildSpriteQuad() {
+    this._releaseBuffers("sprites");
     const gl = this.gl;
     const corners = new Float32Array([
       -0.5,-0.5,  0.5,-0.5,  0.5,0.5,
@@ -982,14 +985,14 @@ export class GL3D {
     this.vaoSprite = gl.createVertexArray();
     gl.bindVertexArray(this.vaoSprite);
 
-    const cbuf = gl.createBuffer();
+    const cbuf = this._createBuffer("sprites");
     gl.bindBuffer(gl.ARRAY_BUFFER, cbuf);
     gl.bufferData(gl.ARRAY_BUFFER, corners, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0);
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
     // instance buffer (dynamic)
-    this._instBuf = gl.createBuffer();
+    this._instBuf = this._createBuffer("sprites");
     gl.bindBuffer(gl.ARRAY_BUFFER, this._instBuf);
     const stride = 12 * 4;
     // iPos (loc 1) : 3 floats
@@ -1017,6 +1020,7 @@ export class GL3D {
   // instance buffer: iBase(3) + iSize(4: footX,height,footZ,roofKind) + iColor(3)
   // = 10 floats/instance. Whole skyline = ONE instanced draw call.
   _buildBoxMesh() {
+    this._releaseBuffers("boxes");
     const gl = this.gl;
     // 24 verts (4 per face), positions + normals; 36 indices. Y up, box stands on 0.
     const P = [], Nr = [];
@@ -1042,24 +1046,24 @@ export class GL3D {
 
     this.vaoBuild = gl.createVertexArray();
     gl.bindVertexArray(this.vaoBuild);
-    const pbuf = gl.createBuffer();
+    const pbuf = this._createBuffer("boxes");
     gl.bindBuffer(gl.ARRAY_BUFFER, pbuf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(P), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-    const nbuf = gl.createBuffer();
+    const nbuf = this._createBuffer("boxes");
     gl.bindBuffer(gl.ARRAY_BUFFER, nbuf);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(Nr), gl.STATIC_DRAW);
     gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0);
 
     // instance buffer (dynamic): 10 floats/instance
-    this._buildInstBuf = gl.createBuffer();
+    this._buildInstBuf = this._createBuffer("boxes");
     gl.bindBuffer(gl.ARRAY_BUFFER, this._buildInstBuf);
     const stride = 10 * 4;
     gl.enableVertexAttribArray(2); gl.vertexAttribPointer(2, 3, gl.FLOAT, false, stride, 0);  gl.vertexAttribDivisor(2, 1); // iBase
     gl.enableVertexAttribArray(3); gl.vertexAttribPointer(3, 4, gl.FLOAT, false, stride, 12); gl.vertexAttribDivisor(3, 1); // iSize
     gl.enableVertexAttribArray(4); gl.vertexAttribPointer(4, 3, gl.FLOAT, false, stride, 28); gl.vertexAttribDivisor(4, 1); // iColor
 
-    this._boxIdx = gl.createBuffer();
+    this._boxIdx = this._createBuffer("boxes");
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._boxIdx);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
     this._boxCount = idx.length;
@@ -1072,6 +1076,7 @@ export class GL3D {
   // (phase, hueShift) so each tree sways out of phase and varies in tint. The whole
   // forest is ONE instanced draw call; sway is entirely in-shader (free per frame).
   _buildTrees() {
+    this._releaseBuffers("trees");
     const gl = this.gl, W = this.world, w = W.w, h = W.h, biome = W.biome;
     const ox = -this.cx, oz = -this.cz;
     // deterministic hash for stable placement/jitter (no per-frame churn)
@@ -1106,12 +1111,12 @@ export class GL3D {
     gl.bindVertexArray(this.vaoTree);
     // shared corner quad
     const corners = new Float32Array([-0.5,-0.5, 0.5,-0.5, 0.5,0.5, -0.5,-0.5, 0.5,0.5, -0.5,0.5]);
-    const cbuf = gl.createBuffer();
+    const cbuf = this._createBuffer("trees");
     gl.bindBuffer(gl.ARRAY_BUFFER, cbuf);
     gl.bufferData(gl.ARRAY_BUFFER, corners, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
     // baked instance buffer: iPos(4) + iVar(2) = 6 floats
-    const ibuf = gl.createBuffer();
+    const ibuf = this._createBuffer("trees");
     gl.bindBuffer(gl.ARRAY_BUFFER, ibuf);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
     const stride = 6 * 4;
@@ -1126,16 +1131,17 @@ export class GL3D {
   // settlement seeds a small column of puffs (rise/drift/fade animated in-shader).
   // Rebuilt only when the settlement set changes — not per frame.
   _buildSmokeQuad() {
+    this._releaseBuffers("smoke");
     const gl = this.gl;
     if (this.vaoSmoke) gl.deleteVertexArray(this.vaoSmoke);
     this.vaoSmoke = gl.createVertexArray();
     gl.bindVertexArray(this.vaoSmoke);
     const corners = new Float32Array([-0.5,-0.5, 0.5,-0.5, 0.5,0.5, -0.5,-0.5, 0.5,0.5, -0.5,0.5]);
-    const cbuf = gl.createBuffer();
+    const cbuf = this._createBuffer("smoke");
     gl.bindBuffer(gl.ARRAY_BUFFER, cbuf);
     gl.bufferData(gl.ARRAY_BUFFER, corners, gl.STATIC_DRAW);
     gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    this._smokeBuf = gl.createBuffer();
+    this._smokeBuf = this._createBuffer("smoke");
     gl.bindBuffer(gl.ARRAY_BUFFER, this._smokeBuf);
     // iPos(4): x, baseY, z, seed
     gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0); gl.vertexAttribDivisor(1, 1);
@@ -1707,7 +1713,25 @@ export class GL3D {
     return null;
   }
 
+  _createBuffer(group) {
+    this._buffers ??= new Map();
+    if (!this._buffers.has(group)) this._buffers.set(group, new Set());
+    const buffer = this.gl.createBuffer();
+    this._buffers.get(group).add(buffer);
+    return buffer;
+  }
+
+  _releaseBuffers(group) {
+    const buffers = this._buffers?.get(group);
+    if (!buffers) return;
+    for (const buffer of buffers) this.gl.deleteBuffer(buffer);
+    this._buffers.delete(group);
+  }
+
   dispose() {
+    if (this._disposed) return;
+    this._disposed = true;
+    for (const group of this._buffers?.keys() || []) this._releaseBuffers(group);
     const gl = this.gl;
     this.canvas.removeEventListener('webglcontextlost', this._onLost);
     this.canvas.removeEventListener('webglcontextrestored', this._onRestored);

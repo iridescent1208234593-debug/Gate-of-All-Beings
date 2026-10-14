@@ -22,7 +22,7 @@ export default function ManagementPanel({packets,onDelivered}:{packets:EcoExchan
     return()=>{window.removeEventListener('message',receive);clearInterval(retry);};
   },[]);
   useEffect(send,[packets]);
-  return <section><div className="section-heading"><div><span className="eyebrow">A HOME FOR ALL BEINGS</span><h1>据点经营</h1><p className="subtle">建造、种植、安顿居民，让一方灵境成为归处。</p></div><a className="text-button" href="/management/index.html" target="_blank" rel="noreferrer">独立打开 ↗</a></div>
+  return <section><div className="section-heading"><div><span className="eyebrow">A HOME FOR ALL BEINGS</span><h1>据点经营</h1><p className="subtle">建造、种植、安顿居民，让一方灵境成为归处。</p></div></div>
     <div className="ecology-summary"><span role="status">{status}</span><span>待入库 {packets.length} 批</span>{inventory&&<span>最近入库后：粮 {inventory.food||0} · 药 {inventory.herb||0} · 灵 {inventory.spirit||0}</span>}<a href="#ecosystem">前往灵境收获 →</a></div>
     <iframe ref={frame} className="ecology-frame management-frame" src="/management/index.html?embed=1" title="灵境据点经营" allow="fullscreen" onLoad={()=>{ready.current=false;frame.current?.contentWindow?.postMessage({type:'zszm:management-ping'},location.origin);}}/>
   </section>;

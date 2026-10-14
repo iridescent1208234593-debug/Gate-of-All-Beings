@@ -15,6 +15,7 @@ const DEFAULTS = {
   motion: 50,
   atmosphere: 50,
   grain: 50,
+  autoplaySeconds: 3,
 };
 
 function normalizeValues(source) {
@@ -30,7 +31,11 @@ function normalizeValues(source) {
           ? Number(raw)
           : Number.NaN;
     if (Number.isFinite(value)) {
-      values[key] = Math.max(0, Math.min(100, value));
+      const minimum = key === "autoplaySeconds" ? 1 : 0;
+      const maximum = key === "autoplaySeconds" ? 10 : 100;
+      const clamped = Math.max(minimum, Math.min(maximum, value));
+      values[key] =
+        key === "autoplaySeconds" ? Math.round(clamped * 2) / 2 : clamped;
       validCount += 1;
     } else {
       values[key] = fallback;
@@ -160,8 +165,17 @@ export function createAppearanceControls({
     if (gallery.isInitialized) gallery.updatePlaneScale();
     background.update(reducedMotion.matches ? 0 : performance.now());
 
-    for (const input of inputs)
-      input.value = String(values[input.dataset.gallerySetting]);
+    for (const input of inputs) {
+      const value = values[input.dataset.gallerySetting];
+      input.value = String(value);
+      if (input.dataset.gallerySetting === "autoplaySeconds")
+        input.setAttribute("aria-valuetext", `${value} 秒/张`);
+    }
+    const autoplayOutput = panel.querySelector(
+      '[data-gallery-setting-value="autoplaySeconds"]',
+    );
+    if (autoplayOutput)
+      autoplayOutput.textContent = `${values.autoplaySeconds} 秒/张`;
   };
 
   const persist = () => {
@@ -244,6 +258,8 @@ export function createAppearanceControls({
     const input = event.currentTarget;
     values[input.dataset.gallerySetting] = Number(input.value);
     apply();
+    if (input.dataset.gallerySetting === "autoplaySeconds")
+      window.dispatchEvent(new Event("gallery-autoplay-speedchange"));
   };
   const onChange = () => persist();
   const onReset = () => {
@@ -305,6 +321,9 @@ export function createAppearanceControls({
     },
     get pauseDurationMs() {
       return values.pause === 0 ? 0 : 30 + values.pause * 4.7;
+    },
+    get autoplayIntervalMs() {
+      return values.autoplaySeconds * 1000;
     },
     get autoplayEnabled() {
       return values.autoplayEnabled === true;

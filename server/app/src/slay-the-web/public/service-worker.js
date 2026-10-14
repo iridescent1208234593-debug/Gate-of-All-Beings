@@ -13,7 +13,7 @@ if (workbox) {
 }
 
 // Make sure index.html is cached.
-precacheAndRoute([{url: '/index.html', revision: '166'}])
+precacheAndRoute([{url: './index.html', revision: '166'}])
 
 // Cache script resources, i.e. JS files.
 registerRoute(({request}) => request.destination === 'script', new NetworkFirst())

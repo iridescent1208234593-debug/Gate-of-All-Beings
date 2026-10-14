@@ -16,7 +16,7 @@
 
 各处理类由 `server/base_static.py` 的 `BaseStaticHandler` 派生，请求时按 `parse_request` 动态切换类；**每个 keep-alive 请求都会重新分发**（见 `Dispatcher.handle_one_request` 的 try/finally）。
 
-## 统一壳（单 SPA，无 iframe）
+## 统一壳（embed模块同页挂载）
 
 - 壳页面 `server/app/shell/index.html`，History API 路径路由：
   - `/app/shell/` 首页；`/app/shell/m/<key>` 某模块。
@@ -67,3 +67,7 @@
 - 生态 → 主入口：`shared-types` 的 eco-harvest 包 + cards 的 exchangeQueue（IndexedDB）。
 - 经营 ← 主入口：iframe 消息（现仍在 cards 内嵌 management/ecology 时用 postMessage）；统一壳下为同文档挂载，可逐步替换为直接的模块调用。
 - 统一存档：`shared-session` 命名空间键，跨模块可读。
+
+## 2026-10-14 当前发布边界
+
+正式入口均经8080；game/lingjing/juling旧域名308进入众生之门，旧5176/5179前端关闭。Portal/OAuth从`.releases/production/site`源码快照运行，原目录只承担用户数据/媒体和显式发布产物。Node API插件为进程启动时加载；preview静态输出指向发布目录。壳对embed:true模块执行真实卸载；非embed试玩保留iframe。详情以根README、portal.json及release-workflow为准。

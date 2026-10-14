@@ -6,6 +6,9 @@ import LoseScreen from './lose-screen.js'
 import LingzhiXiuxingActivity from './lingzhi-xiuxing.js'
 import {resetSessionUnlocks} from '../content/collection-progress.js'
 import {loadRun} from '../game/save-system.js'
+import {mountAccountBar} from './account-bar.js'
+import bgm from './bgm.js'
+import {disposeAnimations} from './animations.js'
 
 /** @enum {string} */
 const GameModes = {
@@ -87,4 +90,15 @@ class SlayTheWeb extends Component {
 	}
 }
 
-render(html` <${SlayTheWeb} /> `, document.querySelector('#SlayTheWeb'))
+const mount = document.querySelector('#SlayTheWeb')
+render(html` <${SlayTheWeb} /> `, mount)
+const disposeAccountBar = mountAccountBar()
+let disposed = false
+window.__iridescentlyDispose = () => {
+	if (disposed) return
+	disposed = true
+	disposeAnimations(mount)
+	bgm.stop()
+	render(null, mount)
+	disposeAccountBar()
+}

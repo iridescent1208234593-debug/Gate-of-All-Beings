@@ -20,6 +20,9 @@ import sqlite3
 import threading
 import time
 import traceback
+from io import BytesIO
+from email import policy
+from email.parser import BytesParser
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone, timedelta
@@ -33,6 +36,9 @@ from base_static import BaseStaticHandler, static_allowed as _base_static_allowe
 # ========== 配置 ==========
 PORT = 8089
 STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.environ.get("IRIDESCENTLY_PROJECT_ROOT", os.path.dirname(os.path.dirname(STATIC_DIR)))
+RUNTIME_DIR = os.path.join(PROJECT_ROOT, "portal", "huiguan")
+CODE_ROOT = os.path.dirname(os.path.dirname(STATIC_DIR))
 
 # USSO 配置（去 https://sso.umrc.cn/dev.php 创建应用后获取）
 CLIENT_ID = "client_6e6b9df8063a9bc2"
@@ -54,19 +60,18 @@ ADMIN_USSO_IDS = {"7"}
 SESSION_DAYS = 30
 
 # 角色卡保存
-DATA_FILE = os.path.join(STATIC_DIR, "characters.json")
+DATA_FILE = os.path.join(RUNTIME_DIR, "characters.json")
 DATA_LOCK = threading.Lock()
 
 # 灵境会馆云存档（按用户 uid 隔离，独立文件避免污染 characters.json）
-GAME_SAVE_FILE = os.path.join(STATIC_DIR, "game_saves.json")
+GAME_SAVE_FILE = os.path.join(RUNTIME_DIR, "game_saves.json")
 GAME_SAVE_LOCK = threading.Lock()
 
 # 用户信息本地数据库（SQLite）
-USER_DB = os.path.join(STATIC_DIR, "users.db")
+USER_DB = os.path.join(RUNTIME_DIR, "users.db")
 DB_LOCK = threading.Lock()
 
 # 罗小黑战记世界观库（只读直查）；大型素材目录由部署环境单独提供。
-PROJECT_ROOT = os.path.dirname(os.path.dirname(STATIC_DIR))
 WV_ROOT_DIR = os.path.join(PROJECT_ROOT, "assets", "罗小黑战记数据库")
 WV_DB = os.path.join(WV_ROOT_DIR, "db", "worldview_luoxiaohei_v4.db")
 WV_IMG_DIR = os.path.join(WV_ROOT_DIR, "images")
@@ -590,8 +595,12 @@ def load_data():
 
 def save_data(data_dict):
     with DATA_LOCK:
-        with open(DATA_FILE, "w", encoding="utf-8") as f:
+        temporary = DATA_FILE + ".tmp"
+        with open(temporary, "w", encoding="utf-8") as f:
             json.dump(data_dict, f, ensure_ascii=False, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temporary, DATA_FILE)
 
 
 # ---------- 灵境会馆云存档 ----------
@@ -615,12 +624,50 @@ def save_game_saves(data_dict):
 
 
 # ---------- 外置存储（展示页 HTML / 上传图），给 characters.json 瘦身 ----------
-STORE_DIR = os.path.join(STATIC_DIR, "assets", "store")
-UPLOAD_DIR = os.path.join(STATIC_DIR, "assets", "uploads")
+STORE_DIR = os.path.join(RUNTIME_DIR, "assets", "store")
+UPLOAD_DIR = os.path.join(RUNTIME_DIR, "assets", "uploads")
 os.makedirs(STORE_DIR, exist_ok=True)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 _DATAURI_EXT = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif"}
+IMAGE_LIMIT = 8 * 1024 * 1024
+UPLOAD_METADATA_LIMIT = 256 * 1024
+UPLOAD_REQUEST_LIMIT = IMAGE_LIMIT + UPLOAD_METADATA_LIMIT + 64 * 1024
+
+def validate_image(raw, mime):
+    """Check the declared type, file signature and bounded size before storage."""
+    mime = (mime or "").lower()
+    detected = None
+    if raw.startswith(b"\x89PNG\r\n\x1a\n"):
+        detected = "image/png"
+    elif raw.startswith(b"\xff\xd8\xff"):
+        detected = "image/jpeg"
+    elif raw[:6] in (b"GIF87a", b"GIF89a"):
+        detected = "image/gif"
+    elif raw.startswith(b"RIFF") and raw[8:12] == b"WEBP":
+        detected = "image/webp"
+    if mime != detected or mime not in _DATAURI_EXT:
+        raise ValueError("图片格式或文件内容无效，仅支持 JPG / PNG / WebP / GIF")
+    limit = 5 * 1024 * 1024 if mime == "image/gif" else IMAGE_LIMIT
+    if not raw or len(raw) > limit:
+        raise ValueError("动图需≤5MB" if mime == "image/gif" else "图片需≤8MB")
+    from PIL import Image
+    try:
+        with Image.open(BytesIO(raw)) as image:
+            if image.width * image.height > 40_000_000:
+                raise ValueError("图片分辨率过大（≤4000万像素）")
+            image.verify()
+    except (OSError, Image.DecompressionBombError) as error:
+        raise ValueError("图片文件损坏或分辨率过大") from error
+    return raw, mime
+
+def store_image(raw, mime):
+    name = hashlib.sha256(raw).hexdigest() + _DATAURI_EXT[mime]
+    path = os.path.join(UPLOAD_DIR, name)
+    if not os.path.exists(path):
+        with open(path, "wb") as f:
+            f.write(raw)
+    return "/assets/uploads/" + name
 
 def store_showcase_html(html):
     """把展示页 HTML 写成独立文件，返回文件名（存进 JSON 的 html_ref）。"""
@@ -711,6 +758,17 @@ class Handler(BaseStaticHandler):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def translate_path(self, path):
+        decoded = urllib.parse.unquote(urllib.parse.urlparse(path).path)
+        for prefix, root in (("/assets/uploads/", UPLOAD_DIR), ("/design-system/ui/", os.path.join(CODE_ROOT, "shared", "shared-ui"))):
+            if decoded.startswith(prefix):
+                relative = decoded[len(prefix):]
+                target = os.path.abspath(os.path.join(root, relative))
+                if os.path.commonpath((os.path.abspath(root), target)) == os.path.abspath(root):
+                    return target
+                return os.path.join(STATIC_DIR, "__missing__")
+        return super().translate_path(path)
 
     # send_header / end_headers 由 BaseStaticHandler 统一处理安全头+缓存
 
@@ -896,6 +954,8 @@ class Handler(BaseStaticHandler):
             return self._api_game_save()
         if path == "/api/color-schemes":
             return self._api_color_schemes_save()
+        if path == "/api/images/upload":
+            return self._api_images_upload()
         if path == "/api/posters/save":
             return self._api_posters_save()
         if path == "/api/posters/delete":
@@ -1432,6 +1492,17 @@ class Handler(BaseStaticHandler):
                 if c.get("code") == code:
                     html = get_record_html(c)
                     if html:
+                        data = c.get("data") or {}
+                        primary, accent = data.get("colorPrimary"), data.get("colorAccent")
+                        index = data.get("colorIndex")
+                        has_hex = all(isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", value) for value in (primary, accent))
+                        has_index = isinstance(index, int) and not isinstance(index, bool) and 0 <= index < 19
+                        if has_hex or has_index:
+                            # HEX is authoritative; the shared preset map covers index-only snapshots.
+                            theme = json.dumps({"colorPrimary": primary if has_hex else None, "colorAccent": accent if has_hex else None, "colorIndex": index if has_index else None})
+                            injection = ('<script src="/character-colors.js?v=20261013"></script>'
+                                         '<script>HuiguanColors.installShowcase(' + theme + ');</script>')
+                            html = html.replace("</head>", injection + "</head>", 1)
                         self._send_html(html)
                         return
         body = "角色不存在".encode("utf-8")
@@ -1525,7 +1596,8 @@ class Handler(BaseStaticHandler):
         ident = self._require_ident()
         if not ident:
             return
-        body = self._read_json()
+        # New clients upload image files first; the bounded allowance supports cached legacy imports.
+        body = self._read_json(max_bytes=64 * 1024 * 1024)
         if body is None:
             return
 
@@ -1576,7 +1648,8 @@ class Handler(BaseStaticHandler):
         ident = self._require_ident()
         if not ident:
             return
-        body = self._read_json()
+        # 图片以 base64 传输，封面 / 多图 / 展示页可能重复包含图片。
+        body = self._read_json(max_bytes=64 * 1024 * 1024)
         if body is None:
             return
 
@@ -2552,24 +2625,27 @@ class Handler(BaseStaticHandler):
         return ident
 
     def _api_official_image_add(self):
+        body = self._read_image_form()
+        if body is None:
+            return
         ident = self._require_edit()
         if not ident:
-            return
-        body = self._read_json()
-        if body is None:
             return
         cid = body.get("character_id")
         filename = (body.get("filename") or "").strip()
         data = body.get("data") or ""
+        image_file = body.pop("_image_file", None)
         itype = (body.get("image_type") or "wiki").strip()[:32] or "wiki"
-        if not cid or not data:
+        if not cid or not (data or image_file):
             self._json(400, {"error": "缺少角色 ID 或图片数据"}); return
         # 解析 base64
         try:
-            header, b64 = data.split(",", 1)
-            mime = header.split(":")[1].split(";")[0].strip().lower()
-            ext = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif"}.get(mime, ".jpg")
-            raw = base64.b64decode(b64)
+            if image_file:
+                raw, mime = image_file
+            else:
+                header, b64 = data.split(",", 1)
+                raw, mime = validate_image(base64.b64decode(b64, validate=True), header.split(":")[1].split(";")[0].strip().lower())
+            ext = _DATAURI_EXT[mime]
         except Exception:
             self._json(400, {"error": "图片数据无效"}); return
         if mime == "image/gif" and len(raw) > 5 * 1024 * 1024:
@@ -2602,17 +2678,18 @@ class Handler(BaseStaticHandler):
         self._json(200, {"ok": True, "msg": "图片已添加", "image_id": new_id})
 
     def _api_official_sticker_upload(self):
+        body = self._read_image_form()
+        if body is None:
+            return
         ident = self._require_ident()
         if not ident:
-            return
-        body = self._read_json()
-        if body is None:
             return
         cid_raw = body.get("character_id")
         filename = (body.get("filename") or "").strip()
         desc = (body.get("description") or "").strip() or filename
         data = body.get("data") or ""
-        if not data:
+        image_file = body.pop("_image_file", None)
+        if not (data or image_file):
             self._json(400, {"error": "缺少图片数据"}); return
         # character_id：传空 = 站友投稿（character_images.character_id NOT NULL，用哨兵 0 表示无归属）
         cid = 0
@@ -2628,10 +2705,12 @@ class Handler(BaseStaticHandler):
                 self._json(400, {"error": "角色不存在或已合并"}); return
         # 解析 base64
         try:
-            header, b64 = data.split(",", 1)
-            mime = header.split(":")[1].split(";")[0].strip().lower()
-            ext = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif"}.get(mime, ".jpg")
-            raw = base64.b64decode(b64)
+            if image_file:
+                raw, mime = image_file
+            else:
+                header, b64 = data.split(",", 1)
+                raw, mime = validate_image(base64.b64decode(b64, validate=True), header.split(":")[1].split(";")[0].strip().lower())
+            ext = _DATAURI_EXT[mime]
         except Exception:
             self._json(400, {"error": "图片数据无效"}); return
         if mime == "image/gif" and len(raw) > 5 * 1024 * 1024:
@@ -3195,6 +3274,17 @@ class Handler(BaseStaticHandler):
         self._json(200, {"ok": True})
 
     # ---------- 自定义配色海报 ----------
+    def _api_images_upload(self):
+        body = self._read_image_form()
+        if body is None:
+            return
+        if not self._require_ident():
+            return
+        image = body.pop("_image_file", None)
+        if not image:
+            self._json(400, {"error": "缺少图片文件"}); return
+        self._json(200, {"ok": True, "url": store_image(*image)})
+
     def _poster_row_out(self, r):
         d = dict(r)
         d["is_public"] = bool(d.get("is_public"))
@@ -3243,12 +3333,14 @@ class Handler(BaseStaticHandler):
         self._json(200, {"poster": d})
 
     def _api_posters_save(self):
+        body = self._read_image_form()
+        if body is None:
+            return
         ident = self._require_ident()
         if not ident:
             return
-        body = self._read_json()
-        if body is None:
-            return
+        if any(value is not None and not isinstance(value, str) for value in (body.get(key) for key in ("title", "char_code", "char_name", "primary_name", "accent_name", "primary_color", "accent_color"))):
+            self._json(400, {"error": "海报文字及颜色格式错误"}); return
         title = (body.get("title") or "").strip()
         if not title or len(title) > 60:
             self._json(400, {"error": "海报标题需为 1-60 个字符"}); return
@@ -3259,22 +3351,41 @@ class Handler(BaseStaticHandler):
         primary = (body.get("primary_color") or "").strip().lower()
         accent = (body.get("accent_color") or "").strip().lower()
         for v in (primary, accent):
-            if v and not re.match(r"^#[0-9a-f]{6}$", v):
+            if not re.fullmatch(r"#[0-9a-f]{6}", v):
                 self._json(400, {"error": "颜色格式需为 #RRGGBB"}); return
         state = body.get("state")
         if state is not None and not isinstance(state, dict):
             self._json(400, {"error": "state 格式错误"}); return
+        if state and state.get("charImg") and not re.fullmatch(r"/assets/uploads/[a-f0-9]+\.(?:png|jpg|webp|gif)", str(state["charImg"])):
+            self._json(400, {"error": "角色图片需先作为文件上传"}); return
+        if state:
+            state.update(colorA=primary, colorB=accent)
         state_json = json.dumps(state, ensure_ascii=False) if state else ""
-        img = body.get("image") or ""
-        if isinstance(img, str) and len(img) > 40 * 1024 * 1024:
-            self._json(400, {"error": "海报图片过大（≤40MB）"}); return
-        img_ref = store_data_uri(img) if img else ""
+        image_file = body.pop("_image_file", None)
+        if image_file:
+            if image_file[1] != "image/png":
+                self._json(400, {"error": "海报需为 PNG 图片"}); return
+            img_ref = store_image(*image_file)
+        else:
+            # Cached older clients may still submit a bounded data URL.
+            img = body.get("image") or ""
+            try:
+                head, encoded = img.split(",", 1)
+                raw, mime = validate_image(base64.b64decode(encoded, validate=True), head[5:].split(";")[0])
+                if mime != "image/png":
+                    raise ValueError("海报需为 PNG 图片")
+                img_ref = store_image(raw, mime)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "海报图片无效或超过8MB"}); return
         # 绑定的人设必须属于本人，防止多个人设混淆
+        character_data = load_data()
+        character = None
         if char_code:
-            mine = [c.get("code") for c in load_data().get(self._data_key(ident), [])]
-            if char_code not in mine:
+            character = next((c for c in character_data.get(self._data_key(ident), []) if c.get("code") == char_code), None)
+            if character is None:
                 self._json(400, {"error": "绑定的人设不存在或不属于你"}); return
         user_name = ident.get("nickname") or ident.get("username") or ""
+        conn = None
         try:
             with DB_LOCK:
                 conn = db()
@@ -3289,10 +3400,20 @@ class Handler(BaseStaticHandler):
                      now_iso(), now_iso())
                 )
                 pid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+                if character is not None:
+                    character_data = load_data()
+                    character = next(c for c in character_data.get(self._data_key(ident), []) if c.get("code") == char_code)
+                    saved = character.setdefault("data", {})
+                    saved.update(colorPrimary=primary, colorAccent=accent, colorIndex=-1)
+                    save_data(character_data)
                 conn.commit()
-                conn.close()
         except Exception:
+            if conn is not None:
+                conn.rollback()
             self._json(500, {"error": "保存海报失败"}); return
+        finally:
+            if conn is not None:
+                conn.close()
         self._json(200, {"ok": True, "id": pid})
 
     def _api_posters_delete(self):
@@ -3700,13 +3821,55 @@ class Handler(BaseStaticHandler):
     def _sso_clear_cookie(self):
         return f"{hx_sso.COOKIE_NAME}=; Path=/; Domain={hx_sso.COOKIE_DOMAIN}; Max-Age=0; HttpOnly; SameSite=Lax"
 
-    def _read_json(self):
+    def _read_image_form(self):
+        content_type = self.headers.get("Content-Type", "")
+        if not content_type.lower().startswith("multipart/form-data"):
+            return self._read_json()
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            if length <= 0 or length > UPLOAD_REQUEST_LIMIT:
+                self._json(413, {"error": "上传过大，图片需≤8MB"}); return None
+            raw = self.rfile.read(length)
+            if len(raw) != length:
+                raise ValueError("上传内容不完整")
+            message = BytesParser(policy=policy.default).parsebytes(b"Content-Type: " + content_type.encode("ascii") + b"\r\nMIME-Version: 1.0\r\n\r\n" + raw)
+            if not message.is_multipart():
+                raise ValueError("上传格式无效")
+            fields = {}
+            for part in message.iter_parts():
+                name = part.get_param("name", header="content-disposition")
+                if part.is_multipart() or name not in ("metadata", "image") or name in fields:
+                    raise ValueError("上传字段无效")
+                fields[name] = part
+            if "metadata" not in fields or "image" not in fields:
+                raise ValueError("缺少图片或编辑信息")
+            metadata = fields["metadata"].get_payload(decode=True)
+            if len(metadata) > UPLOAD_METADATA_LIMIT:
+                raise ValueError("编辑信息过大（≤256KB）")
+            body = json.loads(metadata.decode("utf-8"))
+            if not isinstance(body, dict):
+                raise ValueError("编辑信息格式错误")
+            for key in ("filename", "description", "image_type", "data"):
+                if key in body and not isinstance(body[key], str):
+                    raise ValueError("上传文字字段格式错误")
+            body["_image_file"] = validate_image(fields["image"].get_payload(decode=True), fields["image"].get_content_type())
+            return body
+        except (ValueError, TypeError, UnicodeError):
+            self._json(400, {"error": "图片或上传格式无效，图片≤8MB / 动图≤5MB"})
+            return None
+
+    def _read_json(self, max_bytes=8 * 1024 * 1024):
         try:
             length = int(self.headers.get("Content-Length", 0))
-            if length > 2 * 1024 * 1024:
+            if length < 0:
+                raise ValueError("invalid Content-Length")
+            if length > max_bytes:
                 self._json(413, {"error": "请求内容过大"})
                 return None
-            return json.loads(self.rfile.read(length).decode("utf-8"))
+            body = json.loads(self.rfile.read(length).decode("utf-8"))
+            if not isinstance(body, dict):
+                raise ValueError("JSON body must be an object")
+            return body
         except Exception:
             self._json(400, {"error": "请求数据格式错误"})
             return None
@@ -3723,6 +3886,10 @@ class Handler(BaseStaticHandler):
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        if status >= 400:
+            # A rejected upload may still have unread bytes; never parse them as another request.
+            self.close_connection = True
+            self.send_header("Connection", "close")
         for k, v in self._cors_headers():
             self.send_header(k, v)
         if use_gzip:
@@ -3744,15 +3911,12 @@ class Handler(BaseStaticHandler):
             "https://game.iridescently.xyz",
             "https://huiguan.iridescently.xyz",
             "https://psy.iridescently.xyz",
-            "https://lingjing.iridescently.xyz",
             "http://127.0.0.1:4173",
             "http://localhost:4173",
             "http://127.0.0.1:5180",
             "http://localhost:5180",
             "http://127.0.0.1:5176",
             "http://localhost:5176",
-            "http://127.0.0.1:5179",
-            "http://localhost:5179",
             "http://127.0.0.1:8089",
             "http://localhost:8089",
         )

@@ -21,6 +21,7 @@ function node(tag, className, text) {
 }
 
 function safeHttpUrl(value) {
+  if (!String(value || "").trim()) return "";
   try {
     const url = new URL(value, window.location.href);
     return url.protocol === "http:" || url.protocol === "https:"
@@ -52,9 +53,7 @@ function renderNeighbors() {
     const imageUrl = safeHttpUrl(item.avatar);
     if (imageUrl) {
       avatar.src = imageUrl;
-      avatar.addEventListener("error", () => avatar.remove(), { once: true });
-    } else {
-      avatar.remove();
+      avatar.addEventListener("error", () => { avatar.remove(); card.classList.add("neighbor-card--text-only"); }, { once: true });
     }
 
     const text = node("span", "neighbor-card__text");
@@ -62,7 +61,9 @@ function renderNeighbors() {
     text.append(
       node("span", "neighbor-card__description", item.desc || item.url),
     );
-    card.append(avatar, text, node("span", "neighbor-card__arrow", "↗"));
+    if (imageUrl) card.append(avatar);
+    else card.classList.add("neighbor-card--text-only");
+    card.append(text, node("span", "neighbor-card__arrow", "↗"));
     neighbors.append(card);
   }
 }
@@ -366,3 +367,19 @@ async function showAdminEditor() {
 
 void loadContent();
 void showAdminEditor();
+
+const siteMenu = document.querySelector(".site-menu");
+function closeSiteMenu(event) {
+  if (!siteMenu?.open) return;
+  if (event.type === "keydown") { if (event.key !== "Escape") return; }
+  else if (siteMenu.contains(event.target)) return;
+  siteMenu.open = false;
+  if (event.type === "keydown") siteMenu.querySelector("summary").focus();
+}
+document.addEventListener("pointerdown", closeSiteMenu);
+document.addEventListener("keydown", closeSiteMenu);
+window.addEventListener("pagehide", (event) => {
+  if (event.persisted) return;
+  document.removeEventListener("pointerdown", closeSiteMenu);
+  document.removeEventListener("keydown", closeSiteMenu);
+}, { once: true });

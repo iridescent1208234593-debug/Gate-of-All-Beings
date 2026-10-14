@@ -13,6 +13,7 @@ import {
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { candidateRoot, releaseRoot, recordCandidate } from "../../../ops/release-artifacts.mjs";
 
 const homepageRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -21,7 +22,7 @@ const homepageRoot = path.resolve(
 const projectRoot = path.resolve(homepageRoot, "../..");
 const galleryRoot = path.join(
   projectRoot,
-  "New project/gallery/codrops-depth-gallery",
+  "portal/www/gallery-engine",
 );
 const galleryDir =
   process.env.GALLERY_DIR ||
@@ -29,9 +30,9 @@ const galleryDir =
     projectRoot,
     "assets/罗小黑战记数据库/罗小黑节气贺图（gallery素材）",
   );
-const stageDir = path.join(homepageRoot, ".homepage-build");
-const publishDir = path.join(homepageRoot, ".homepage-publish");
-const publicDir = path.join(homepageRoot, "assets/homepage");
+const stageDir = path.join(releaseRoot, ".work/homepage");
+const homepageCandidate = path.join(candidateRoot, "homepage");
+const publicDir = path.join(homepageCandidate, "assets/homepage");
 const viteBin = path.join(galleryRoot, "node_modules/vite/bin/vite.js");
 const viteConfig = path.join(homepageRoot, "vite.config.mjs");
 const viteNodeModule = path.join(
@@ -95,9 +96,10 @@ if (process.argv.includes("--dev")) {
   process.exit(dev.status ?? 1);
 }
 
-ensureInside(homepageRoot, stageDir);
-ensureInside(homepageRoot, publishDir);
-ensureInside(path.join(homepageRoot, "assets"), publicDir);
+ensureInside(releaseRoot, stageDir);
+ensureInside(candidateRoot, homepageCandidate);
+ensureInside(homepageCandidate, publicDir);
+rmSync(path.join(candidateRoot, "homepage.json"), { force: true });
 
 const build = runVite(["build"]);
 if (build.error) throw build.error;
@@ -160,27 +162,20 @@ if (!galleryUsesCdn) {
   }
 }
 
-rmSync(publishDir, { recursive: true, force: true });
-mkdirSync(publishDir, { recursive: true });
+rmSync(homepageCandidate, { recursive: true, force: true });
+mkdirSync(publicDir, { recursive: true });
 for (const entry of readdirSync(stageDir, { withFileTypes: true })) {
   if (entry.name === "homepage.html" || entry.name === "index.html") continue;
-  cpSync(path.join(stageDir, entry.name), path.join(publishDir, entry.name), {
+  cpSync(path.join(stageDir, entry.name), path.join(publicDir, entry.name), {
     recursive: true,
   });
 }
-
-rmSync(publicDir, { recursive: true, force: true });
-mkdirSync(publicDir, { recursive: true });
-for (const entry of readdirSync(publishDir, { withFileTypes: true })) {
-  cpSync(path.join(publishDir, entry.name), path.join(publicDir, entry.name), {
-    recursive: true,
-  });
-}
-rmSync(publishDir, { recursive: true, force: true });
-writeFileSync(path.join(homepageRoot, "index.html"), versionedHomepage);
+writeFileSync(path.join(homepageCandidate, "index.html"), versionedHomepage);
+await recordCandidate("homepage");
 
 console.log(
   galleryUsesCdn
-    ? `[homepage] Published ${manifest.length} Gallery CDN references; source images were not copied.`
-    : `[homepage] Published ${manifest.length} Gallery assets with matching SHA-256 hashes.`,
+    ? `[homepage] Candidate: ${manifest.length} Gallery CDN references; source images were not copied.`
+    : `[homepage] Candidate: ${manifest.length} Gallery assets with matching SHA-256 hashes.`,
 );
+console.log(`[homepage] ${homepageCandidate} — run npm run publish:homepage only after review.`);

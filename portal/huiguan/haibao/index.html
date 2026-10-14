@@ -204,10 +204,12 @@
   /* 方正书宋（色名大字 / 匾文同款字体） */
   @font-face { font-family: 'FZShuSong'; src: url('FZSSJW.TTF') format('truetype'); }
 </style>
+<link rel="stylesheet" href="/haibao/editor.css?v=20261011-1">
 </head>
 <body>
 
-<div class="stage">
+<div class="stage" aria-label="海报实时预览">
+  <div class="stage-caption"><span>海报预览</span><small>9 : 16 · 导出 1080 × 1920 PNG</small></div>
   <div class="canvas-wrap">
     <canvas id="cv"></canvas>
     <div id="selBox" class="sel-box" style="display:none;">
@@ -223,17 +225,18 @@
   </div>
 </div>
 
-<div class="panel">
-  <h1>配色海报</h1>
-  <div class="sub">为你的角色定制双色水墨海报 · 古色 / 色环 / 上传角色图</div>
+<main class="panel" aria-label="海报编辑工具">
+  <header class="editor-heading"><div class="editor-eyebrow">西木会馆 · 角色创作</div><h1>配色海报</h1>
+  <p class="sub">用一组双色、一幅角色图，做一张自己的水墨海报。</p>
+  <nav class="editor-steps" aria-label="编辑步骤"><a href="#posterColors"><small>01</small> 选配色</a><a href="#posterComposition"><small>02</small> 调整画面</a><a href="#saveCard"><small>03</small> 保存 / 导出</a></nav></header>
 
   <!-- ═══ ① 配色 ═══ -->
-  <div class="qc-card">
-    <div class="layer-head"><span class="layer-name">① 配色</span><span class="qc-tag qc-tag--gold">古色 · 色环</span></div>
+  <div class="qc-card" id="posterColors">
+    <div class="layer-head"><span class="layer-name">挑选配色</span><span class="qc-tag qc-tag--gold">古色 · 色环</span></div>
     <div class="lbl" style="margin-bottom:5px;">快速搭配</div>
     <div class="scheme-grid" id="schemeGrid"></div>
 
-    <div class="sub-row">自由选色 · 479 种中国古色 · 五行归类</div>
+    <div class="sub-row">中国古色 · 按五行挑选</div>
     <div class="row">
       <input type="text" class="qc-input sm" id="ancientSearch" placeholder="搜色名 / 五行（金木水火土）" style="flex:1;">
     </div>
@@ -248,11 +251,11 @@
       </div>
       <button type="button" class="qc-btn qc-btn--sm" id="applyCustomBtn" onclick="applyCustomColors()" disabled style="margin-left:auto;align-self:center;">应用</button>
     </div>
-    <div class="qc-tabs" id="colorTabs"></div>
-    <div class="qc-swatch-grid" id="swatchGrid"></div>
+    <details class="ancient-palette" open><summary>古色色板 <span>选择主色 / 辅色后，点击「应用」</span></summary><div class="qc-tabs" id="colorTabs"></div>
+    <div class="qc-swatch-grid" id="swatchGrid"></div></details>
 
-    <div class="sub-row">色环选色</div>
-    <div class="mini-tip" style="margin:0 0 8px;">在色环上点选任意颜色，立即应用于海报左右主辅色。</div>
+    <details id="wheel-tools" class="poster-wheel"><summary>色环取色 <span>点击展开 · 直接调整当前海报</span></summary>
+    <div class="mini-tip" style="margin:0 0 8px;">想自由取色？点选下方色环，颜色立即显示在海报上；亮度可单独调整。</div>
     <div class="wheel-wrap">
       <div class="wheel-slot">
         <div class="wheel-label">主色（左）</div>
@@ -280,10 +283,12 @@
       <button type="button" class="qc-btn qc-btn--sm" id="wheelSaveBtn" onclick="hbSaveScheme()" style="margin-left:auto;">保存配色</button>
     </div>
     <div class="mini-tip" id="wheelSaveMsg" style="min-height:14px;margin-top:4px;">保存后同步到西木会馆配色库，全馆可用。</div>
+    </details>
     <div class="sub-row">馆友保存的配色</div>
     <div class="scheme-grid" id="schemeGridUser"><div class="hb-empty">加载中…</div></div>
   </div>
 
+  <h2 class="editor-section-title" id="posterComposition"><small>02</small> 调整画面 <span>图像、背景与装饰图层</span></h2>
   <!-- ═══ ② 角色图像 ═══ -->
   <div class="qc-card" id="layerBox-charImg">
     <div class="layer-head">
@@ -308,7 +313,7 @@
         </div>
       </div>
       <div class="row" style="margin-top:8px;">
-        <span class="lbl">透明</span>
+        <span class="lbl">不透明度</span>
         <input type="range" class="qc-range" min="0" max="100" value="100" data-layer="charImg">
         <span class="val" data-opacity-label="charImg">100%</span>
       </div>
@@ -476,9 +481,10 @@
     </div>
   </div>
 
+  <h2 class="editor-section-title"><small>03</small> 保存与导出</h2>
   <!-- ═══ ⑨ 保存与共享 ═══ -->
   <div class="qc-card" id="saveCard">
-    <div class="layer-head"><span class="layer-name">⑨ 保存与共享</span><span class="qc-tag qc-tag--gold">云端 · 与人设互通</span></div>
+    <div class="layer-head"><span class="layer-name">保存与共享</span><span class="qc-tag qc-tag--gold">云端 · 与人设互通</span></div>
     <div class="row">
       <span class="lbl">标题</span>
       <input type="text" class="qc-input sm" id="posterTitle" placeholder="海报标题（必填，≤60字）" maxlength="60" style="flex:1;">
@@ -489,7 +495,7 @@
         <option value="">不关联人设</option>
       </select>
     </div>
-    <div class="mini-tip">关联人设后：保存时海报配色会同步到该人设的登记配色，人设页配色改动也可在此应用；共享画廊时按人设一一对应，多人设不混淆。草稿会自动保存在本机，刷新不丢。</div>
+    <div class="mini-tip">关联人设后，保存海报会同步更新该人设的登记配色；人设页的配色也可在这里应用。共享画廊按人设分别对应。草稿自动保存在本机，刷新不丢。</div>
     <div class="actions">
       <button type="button" class="qc-btn qc-btn--gold" id="btnSavePoster" onclick="savePoster()">保存到云端</button>
     </div>
@@ -504,11 +510,13 @@
     <button class="qc-btn qc-btn--gold" id="btnMergeMild" style="display:none;">合并淡墨</button>
   </div>
   <div class="mini-tip" style="margin-top:10px;">
-    拖动滑块调节透明度与缩放，点击开关显隐图层，可直接拖动画布中的组件调整位置；▲▼ 调整图层上下顺序。导出为 1080×1920 成品图。
+    登录后可编辑组件、保存海报与导出 PNG。拖动滑条调整不透明度与缩放，开关控制图层显示；在画布中拖动组件调整位置，▲▼ 调整叠放顺序。成品尺寸为 1080 × 1920。
   </div>
-</div>
+</main>
 
 <script src="/design-system/ancient-colors.js"></script>
+<script src="/image-upload.js?v=20261013"></script>
+<script src="/character-colors.js?v=20261013"></script>
 <script>
 const W = 1080, H = 1920;
 const cv = document.getElementById('cv');
@@ -565,22 +573,6 @@ function hexToRgb(hex) {
 }
 
 // —— 双色背景 ——
-let grain = null;
-function getGrain() {
-  if (grain) return grain;
-  grain = document.createElement('canvas');
-  grain.width = W; grain.height = H;
-  const g = grain.getContext('2d');
-  const id = g.createImageData(W, H);
-  const d = id.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const v = 116 + Math.random() * 24;
-    d[i] = d[i + 1] = d[i + 2] = v;
-    d[i + 3] = 255;
-  }
-  g.putImageData(id, 0, 0);
-  return grain;
-}
 function duotoneHalf(c2, color, x, w) {
   const g = c2.createLinearGradient(0, 0, 0, H);
   g.addColorStop(0, color);
@@ -593,11 +585,7 @@ function duotoneHalf(c2, color, x, w) {
 function drawDuotoneBg(c2) {
   duotoneHalf(c2, colorA(), 0, 540);
   duotoneHalf(c2, colorB(), 540, W - 540);
-  c2.save();
-  c2.globalAlpha = 0.35;
-  c2.globalCompositeOperation = 'overlay';
-  c2.drawImage(getGrain(), 0, 0);
-  c2.restore();
+  // The solid upper region is the selected HEX; only the lower gradient derives from it.
 }
 
 // —— 双色文字（竖排色名 + RGB 标注，颜色与所在半边背景互换）——
@@ -1160,15 +1148,14 @@ function renderPosterCanvas() {
   renderScene(out.getContext('2d'));
   return out;
 }
-document.getElementById('btnExport').addEventListener('click', () => {
+document.getElementById('btnExport').addEventListener('click', async () => {
   if (!window.HB_USER) { if (window.hbShowAuthModal) hbShowAuthModal('保存图片需要登录'); return; }
-  const a = document.createElement('a');
   const nameA2 = document.getElementById('nameA').value.trim();
   const nameB2 = document.getElementById('nameB').value.trim();
   const nm = (nameA2 || nameB2) ? `${nameA2}x${nameB2}_` : '';
-  a.download = `配色海报_${nm}1080x1920.png`;
-  a.href = renderPosterCanvas().toDataURL('image/png');
-  a.click();
+  try {
+    HuiguanImages.download(await HuiguanImages.canvasBlob(renderPosterCanvas()), `配色海报_${nm}1080x1920.png`);
+  } catch (error) { document.getElementById('saveMsg').textContent = '⚠ ' + error.message; }
 });
 
 
@@ -1437,7 +1424,7 @@ function initWheelPickers() {
     canvas.addEventListener('touchstart', (ev) => { ev.preventDefault(); wheelPickFromEvent(slot, ev.touches[0]); }, { passive: false });
     canvas.addEventListener('touchmove', (ev) => { ev.preventDefault(); wheelPickFromEvent(slot, ev.touches[0]); }, { passive: false });
     drawColorWheel(slot);
-    updateWheelPick(slot);
+    document.getElementById(slot === 'primary' ? 'wheelPrimaryHex' : 'wheelAccentHex').textContent = wheelHex(slot).toUpperCase();
   });
 }
 
@@ -1451,7 +1438,7 @@ function handleCharFile(file) {
   rd.onload = () => loadCharFromDataUrl(rd.result, file.name);
   rd.readAsDataURL(file);
 }
-function loadCharFromDataUrl(url, fname) {
+function loadCharFromDataUrl(url, fname, placement) {
   if (charObjUrl && charObjUrl.startsWith('blob:')) URL.revokeObjectURL(charObjUrl);
   charObjUrl = url;
   const img = new Image();
@@ -1464,6 +1451,10 @@ function loadCharFromDataUrl(url, fname) {
     charPos.bw = bw; charPos.bh = bh;
     charPos.cx = W / 2; charPos.cy = H * 0.55;
     layers.charImg.scale = 1;
+    if (placement) {
+      Object.assign(charPos, placement.position);
+      layers.charImg.scale = placement.scale;
+    }
     const sc = document.querySelector('[data-scale="charImg"]');
     if (sc) sc.value = 100;
     const sl = document.querySelector('[data-scale-label="charImg"]');
@@ -1481,6 +1472,7 @@ function loadCharFromDataUrl(url, fname) {
 }
 function removeCharImg() {
   layers.charImg.img = null;
+  layers.charImg.dataUrl = null;
   if (charObjUrl) { URL.revokeObjectURL(charObjUrl); charObjUrl = null; }
   document.getElementById('charUpload').style.display = '';
   document.getElementById('charCtl').style.display = 'none';
@@ -1636,9 +1628,9 @@ function applyState(st) {
   setMildSplit(!!st.mildSplit);
   setDarkSplit(!!st.darkSplit);
   // 角色图
-  if (st.charImg && !layers.charImg.img) {
-    loadCharFromDataUrl(st.charImg, '上次保存的角色图');
-  }
+  if (st.charImg) {
+    loadCharFromDataUrl(st.charImg, '上次保存的角色图', { position: { ...charPos }, scale: layers.charImg.scale });
+  } else if (layers.charImg.img) removeCharImg();
   drawColorWheel('primary'); drawColorWheel('accent');
   ['primary', 'accent'].forEach(slot => {
     const hexEl = document.getElementById(slot === 'primary' ? 'wheelPrimaryHex' : 'wheelAccentHex');
@@ -1709,31 +1701,35 @@ async function savePoster() {
   const rec = code ? MY_CHARS.find(c => (c.data && c.data.code === code) || c.code === code) : null;
   const cd = rec ? (rec.data || rec) : null;
   msgEl.textContent = '正在生成并上传…';
+  const button = document.getElementById('btnSavePoster');
+  if (button && button.disabled) return;
+  if (button) button.disabled = true;
+  try {
   const state = collectState();
-  const image = renderPosterCanvas().toDataURL('image/png');
+  const sourceImage = state.charImg;
+  const imagePromise = HuiguanImages.canvasBlob(renderPosterCanvas());
   const body = {
     title,
     char_code: code, char_name: cd ? (cd.name || '') : '',
     primary_name: (picked.primary && picked.primary.hex.toUpperCase() === colorA().toUpperCase()) ? (picked.primary.name || '') : '',
     accent_name: (picked.accent && picked.accent.hex.toUpperCase() === colorB().toUpperCase()) ? (picked.accent.name || '') : '',
     primary_color: colorA(), accent_color: colorB(),
-    state, image
+    state
   };
-  try {
-    const r = await fetch('/api/posters/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    const d = await r.json();
+    if (state.charImg) state.charImg = await HuiguanImages.upload(state.charImg);
+    const image = await imagePromise;
+    const d = await HuiguanImages.request('/api/posters/save', body, image);
     if (!d.ok) { msgEl.textContent = '⚠ ' + (d.error || '保存失败'); return; }
     msgEl.textContent = '✔ 已保存到云端（本地草稿也已保留）';
-    // 互通：把海报配色写回关联人设的登记配色
+    if (state.charImg && layers.charImg.dataUrl === sourceImage) layers.charImg.dataUrl = state.charImg;
+    queueDraftSave();
+    // The save endpoint confirms both the poster and its character's source colors.
     if (cd && code) {
-      const nd = JSON.parse(JSON.stringify(cd));
-      nd.colorPrimary = colorA();
-      nd.colorAccent = colorB();
-      nd.colorIndex = -1;
-      fetch('/api/save-character', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, data: nd }) }).catch(() => {});
+      cd.colorPrimary = body.primary_color; cd.colorAccent = body.accent_color; cd.colorIndex = -1;
     }
     loadMyPosters();
-  } catch (e) { msgEl.textContent = '⚠ 网络错误，保存失败'; }
+  } catch (e) { msgEl.textContent = '⚠ ' + (e.message || '网络错误，保存失败'); }
+  finally { if (button) button.disabled = false; }
 }
 
 async function loadMyPosters() {
@@ -1852,7 +1848,8 @@ loadUserSchemesHb();
 renderSchemeGrid();
 renderColorTabs();
 renderSwatchGrid();
-initWheelPickers();
+let posterWheelReady = false;
+document.getElementById('wheel-tools').addEventListener('toggle', function () { if (this.open && !posterWheelReady) { posterWheelReady = true; initWheelPickers(); } });
 updateOrderUI();
 // 恢复本地草稿（刷新不丢）
 try {
@@ -1876,7 +1873,7 @@ try {
 
 <!-- 全站统一导航（与西木会馆主站一致）；登录栏由本页自挂 -->
 <script>window.__HUIGUAN_OWN_AUTH = true; window.__HUIGUAN_OWN_CONTACT = true;</script>
-<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c12"></script>
+<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c13"></script>
 <script>
 (function () {
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }

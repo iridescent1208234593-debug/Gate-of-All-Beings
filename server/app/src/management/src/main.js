@@ -97,6 +97,7 @@ const ready = (async () => {
     if(existing&&!loaded){saveWritable=false;ui.flashSaveHint('旧存档读取失败，当前临时游玩；原存档已保留');}
     if (loaded) state = loaded;
   } finally {
+    if (engine.disposed) return;
     engine.setState(state);
     ui.onUserChange(currentUser());
     ui.refresh();
@@ -108,9 +109,10 @@ const ready = (async () => {
 
 // 暴露调试句柄（控制台可用）
 const disposeBridge=mountHubBridge({getState:()=>state,dispatch,isReady:()=>bootReady});
-function dispose() { if(engine.disposed)return;loop.stop();if(bootReady&&saveWritable)saveGame(state);disposeBridge();ui.dispose();engine.dispose(); }
+const onPageHide = e => { if (!e.persisted) dispose(); };
+function dispose() { if(engine.disposed)return;window.removeEventListener("pagehide", onPageHide);if(window.__lingjing?.engine===engine)delete window.__lingjing;loop.stop();if(bootReady&&saveWritable)saveGame(state);disposeBridge();ui.dispose();engine.dispose(); }
 // 供统一壳无 iframe 挂载时卸载
 window.__iridescentlyDispose = dispose;
-window.addEventListener('pagehide', e => { if (!e.persisted) dispose(); });
+window.addEventListener('pagehide', onPageHide);
 if (import.meta.hot) import.meta.hot.dispose(dispose);
 window.__lingjing = { state: () => state, dispatch, loop, events, engine, ui, ready, dispose };

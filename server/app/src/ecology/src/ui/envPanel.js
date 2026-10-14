@@ -22,6 +22,7 @@ const MENU_ITEMS = [
 export class EnvMenu {
   // onIntervene(kind, payload)：点击菜单项时回调，payload 形如 { gx, gy }（调温类为空对象）
   constructor(root, onIntervene) {
+    this.events = new AbortController();
     this.root = root;
     this.onIntervene = onIntervene;
     this.target = null; // { gx, gy, tile }
@@ -30,8 +31,10 @@ export class EnvMenu {
     // 点空白处 / 按 Esc 收起菜单（菜单自身点击不冒泡到此）
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.isOpen) this.close();
-    });
+    }, { signal: this.events.signal });
   }
+
+  dispose() { this.events.abort(); this.close(); }
 
   get isOpen() {
     return !this.root.hidden;

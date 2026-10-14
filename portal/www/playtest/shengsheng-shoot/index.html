@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#173d39">
+  <title>省省 · 海滩射击试玩</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" href="assets/beach.webp" as="image">
+  <link rel="preload" href="assets/victory.jpg" as="image">
+  <link rel="preload" href="assets/defeat.jpg" as="image">
+  <link rel="stylesheet" href="style.css?v=3">
+</head>
+<body>
+  <main id="app">
+    <header>
+      <div class="identity"><strong>省省 <span>海滩射击</span></strong><small>隐藏试玩 · 01</small></div>
+      <nav aria-label="游戏工具">
+        <button id="pause" class="icon" title="暂停 / 继续（Esc）" aria-label="暂停" disabled><img src="assets/pause.svg" alt=""></button>
+        <button id="restart" class="icon" title="重新开始" aria-label="重新开始" disabled><img src="assets/rotate-ccw.svg" alt=""></button>
+        <button id="sound" class="icon" title="静音 / 开启声音" aria-label="开启声音" aria-pressed="false"><img src="assets/volume-x.svg" alt=""></button>
+        <button id="help" class="icon" title="游戏说明" aria-label="游戏说明"><img src="assets/circle-help.svg" alt=""></button>
+        <button id="fullscreen" class="icon" title="全屏" aria-label="全屏"><img src="assets/maximize.svg" alt=""></button>
+      </nav>
+    </header>
+    <section id="stage" aria-label="游戏区域">
+      <canvas id="game" width="576" height="324" tabindex="0" aria-label="海滩射击游戏，使用方向键或 WASD 移动，自动射击"></canvas>
+      <div id="overlay">
+        <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+          <span class="eyebrow" id="dialog-eyebrow">省省的海滩练习</span>
+          <h1 id="dialog-title">海风，和三发子弹。</h1>
+          <img id="settlement-art" class="settlement-art" hidden alt="">
+          <p id="dialog-description">躲开迎面而来的敌人，争取更高分。</p>
+          <p id="load-status" role="status">正在准备海滩…</p>
+          <progress id="load-progress" max="1" value="0" aria-label="加载进度"></progress>
+          <div id="instructions" hidden>
+            <p>方向键 / WASD 移动。站定时自动向右三路射击，移动时停火。击败一个敌人得 1 分，碰到敌人即结束。</p>
+            <p>手机：左侧摇杆移动，也可以按住画面拖动。横竖屏都可玩。</p>
+            <p>Esc / P 暂停，R 重开。切到后台会暂停，回来后点击继续。</p>
+          </div>
+          <div id="volume-setting"><label for="volume">音量</label><input id="volume" type="range" min="0" max="100" value="35"><output id="volume-value">35%</output></div>
+          <button id="primary" disabled>准备中…</button>
+          <button id="secondary" hidden>返回</button>
+        </div>
+      </div>
+      <div id="hud" aria-live="off"><span>得分 <b id="score">0</b></span><span>最佳 <b id="best">0</b></span></div>
+    </section>
+    <section id="touch-controls" aria-label="触屏控制">
+      <div id="joystick" role="group" aria-label="移动摇杆"><div class="cross"></div><div id="stick"></div></div>
+      <div class="touch-right"><span class="auto-fire"><i></i> 站定开火</span><button id="touch-pause" aria-label="暂停游戏"><img src="assets/pause.svg" alt="">暂停</button></div>
+    </section>
+    <footer><span id="status">海滩待命</span><span id="control-hint">WASD / 方向键 · 站定开火</span></footer>
+    <noscript>需要开启 JavaScript 才能运行游戏。</noscript>
+  </main>
+  <script type="module" src="game.js?v=4"></script>
+</body>
+</html>

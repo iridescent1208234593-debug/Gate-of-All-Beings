@@ -146,8 +146,11 @@ export default class App extends Component {
 		this.enableConsole()
 	}
 	componentWillUnmount() {
+		this.disposeDragDrop?.()
 		if (this.collectionToastTimer) clearInterval(this.collectionToastTimer)
 		if (this.collectionToastHideTimer) clearTimeout(this.collectionToastHideTimer)
+		bgm.stop()
+		if (window.stw?.game === this.game) delete window.stw
 	}
 	// 消费收集提示队列：距上次展示 ≥1.6s 才弹出（避免战斗连收多条时闪烁），3.4s 后自动消失
 	pollCollectionToasts() {
@@ -226,18 +229,20 @@ stw.dealCards()`)
 
 		// Create a clone on top of the card to animate.
 		const clone = cardElement.cloneNode(true)
+		clone.dataset.slayOwner = "play-card"
 		this.base.appendChild(clone)
 		if (supportsFlip) Flip.fit(clone, cardElement, {absolute: true})
 
 		// Update state and re-enable dragdrop
 		this.update(() => {
-			enableDragDrop(this.base, this.playCard)
+			this.disposeDragDrop?.()
+			this.disposeDragDrop = enableDragDrop(this.base, this.playCard)
 
 			sfx.playCard({card, target})
 
 			// Animate cloned card away
 			gsap.effects.playCard(clone).then(() => {
-				clone.parentNode.removeChild(clone)
+				clone.remove()
 			})
 
 			// Reposition hand
@@ -264,7 +269,8 @@ stw.dealCards()`)
 	dealCards() {
 		gsap.effects.dealCards('.Hand .Card')
 		sfx.startTurn()
-		enableDragDrop(this.base, this.playCard)
+		this.disposeDragDrop?.()
+		this.disposeDragDrop = enableDragDrop(this.base, this.playCard)
 	}
 	toggleOverlay(el) {
 		if (typeof el === 'string') el = this.base.querySelector(el)

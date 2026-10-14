@@ -7,7 +7,7 @@
 ## 顺序
 
 1. 确认当前分支和工作区干净，读取当前提交。
-2. 运行 `npm run build:modules` 与 `npm run test:portal`；任一失败即停止。
+2. 运行 `npm run build:modules` 与 `npm run test:portal`；任一失败即停止。构建只生成 `.releases/candidate/`，不更新生产运行目录；发布需单独执行 [显式发布流程](release-workflow.md)。
 3. 对 outgoing Git 历史扫描环境文件、密钥、数据库、备份和会话附件路径；发现风险就禁止推送。
 4. 生成 Gallery manifest，列出相对对象键、大小、SHA-256 和 MIME 类型。
 5. 检查 Wrangler/R2 状态。R2 不可用时停止，不执行后续远程操作。
