@@ -57,7 +57,7 @@ README 已同步生产/研究地图、服务、启动、候选/发布流程、�
 
 主要服务：8080 统一门户；5174 OAuth；5178 数值配置；5177 聚灵；4173 灵体 API/WebSocket。5176/5179 旧服务未监听。game、lingjing、juling 旧域名 308 到众生之门对应入口。
 
-构建通过；独立端口 Portal 回归 **49/49** 和静态安全测试通过。14 项公网入口/跳转/私有文件防护检查通过；公网 homepage.js、character-colors.js SHA-256 与正式输出一致。公网会馆登录成功，众生之门显示同一账户；Skip 后内容与导航正常。公网 Gallery 初始化 384 图、下一张与同页导航保持位置；设置带可开关，无新增 console error。移动端海报公网端到端通过，见上。
+构建通过；独立端口 Portal 回归 **49/49** 和静态安全测试通过。14 项公网入口/跳转/私有文件防护检查通过；公网 homepage.js、character-colors.js SHA-256 与正式输出一致。公网会馆登录成功，众生之门显示同一账户；Skip 后内容与导航正常。公网灵体试验场实际显示三维灵体与场地，点击戳一下后仍正常、无 console error；该路由初始化明确要求 native WebGPU 且无 fallback，源码检查与画面共同验证此独立路由，不把它等同于七模块默认 Softie 页面全功能验证。公网 Gallery 初始化 384 图、下一张与同页导航保持位置；设置带可开关，无新增 console error。移动端海报公网端到端通过，见上。
 
 Windows 发布目录被 Python 服务 cwd 锁住时，首次 promotion 未成功并恢复旧产物；只停止受影响 Portal/OAuth，再发布并由现有管家启动，两次服务恢复 HTTP200。其余 API/Tunnel 不做无意义重启。detached Python 没有可用 shutdown/console handler，无法声称本次停止通过应用级优雅关闭；用户数据写请求完成后才执行受控重启。
 
@@ -70,7 +70,7 @@ Connections 按实际用途补充 ECharts、React/Lucide、html2canvas、Three�
 ## 明确未完成/需决定的边界
 
 - HUIGUAN_CLIENT_SECRET / ZSZM_CLIENT_SECRET 当前未配置，外部 OAuth 无法验收；用户账户密码不是应用密钥。本地账户与跨站签名会话已经实际通过，密码不写文件或 Git。
-- 实机 iOS/Android 相册/分享、真实 Softie WebGPU 渲染尚未验证。
+- 实机 iOS/Android 相册/分享尚未验证；公网灵体试验场 native WebGPU 画面已验证，默认 Softie 模块的完整 GPU 交互仍未做公网验收。
 - Slay 上游 AGPL 已保留署名与许可证；修改版完整 corresponding-source 的公开提供方式和素材范围仍需许可审查，不能把主站 private 当作这一义务已满足。
 - 第三首 .mgg0.flac 不属于可直接播放的标准 FLAC；界面保留不可播放提示，需标准可播放源，不尝试解密。
 - 跨任务新研究记录仍回写旧路径，已识别为进行中工作；应让该任务改用研究根。未丢弃这些新记录。
