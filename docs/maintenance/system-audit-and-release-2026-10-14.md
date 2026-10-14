@@ -69,7 +69,7 @@ Connections 按实际用途补充 ECharts、React/Lucide、html2canvas、Three�
 
 ## 明确未完成/需决定的边界
 
-- HUIGUAN_CLIENT_SECRET / ZSZM_CLIENT_SECRET 当前未配置，外部 OAuth 无法验收；用户账户密码不是应用密钥。本地账户与跨站签名会话已经实际通过，密码不写文件或 Git。
+- OAuth 密钥当前未配置，外部 OAuth 无法验收；实际变量名是 `USSO_CLIENT_SECRET`（会馆）和 `ZSZM_CLIENT_SECRET`（众生之门），此前的 `HUIGUAN_CLIENT_SECRET` 是文档误名。用户账户密码不是应用密钥。本地账户与跨站签名会话已经实际通过，密码不写文件或 Git。
 - 实机 iOS/Android 相册/分享尚未验证；公网灵体试验场 native WebGPU 画面已验证，默认 Softie 模块的完整 GPU 交互仍未做公网验收。
 - Slay 上游 AGPL 已保留署名与许可证；修改版完整 corresponding-source 的公开提供方式和素材范围仍需许可审查，不能把主站 private 当作这一义务已满足。
 - 第三首 .mgg0.flac 不属于可直接播放的标准 FLAC；界面保留不可播放提示，需标准可播放源，不尝试解密。

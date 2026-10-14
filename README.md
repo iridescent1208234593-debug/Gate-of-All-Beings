@@ -57,7 +57,7 @@ npm run publish:site       # 显式提升静态/Python 源码
 
 外部 `assets/罗小黑战记数据库` 是真实媒体数据（不纳入 Git），供 Gallery 384 图构建与会馆使用；部署到其他机器需单独提供并确认素材许可。`assets/素材` 是现有会馆资产；网站快照与会话导出是本地资料。生产数据库和媒体需要单独备份，Git 不能恢复它们。
 
-配置：`HUIGUAN_CLIENT_SECRET`、`ZSZM_CLIENT_SECRET` 仅从环境变量读取；`HX_SSO_SECRET` 环境优先，也可从忽略的 `server/.env.local` 读取。所有账户逻辑仍复用会馆和 `shared-session`，无第二套身份系统。
+配置：会馆 USSO OAuth 使用 `USSO_CLIENT_SECRET`，众生之门 OAuth 使用 `ZSZM_CLIENT_SECRET`，均只从运行环境读取；`HX_SSO_SECRET` 环境优先，也可从忽略的 `server/.env.local` 读取。会馆 OAuth 的 Client ID 在 `portal/huiguan/server_huiguan.py` 配置；真实 OAuth 应用密钥需由 USSO 应用管理端签发，不能用站内账户密码代替。所有账户逻辑仍复用会馆和 `shared-session`，无第二套身份系统。
 
 ## 颜色与海报
 

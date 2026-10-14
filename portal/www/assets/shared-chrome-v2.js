@@ -117,6 +117,13 @@
   document.addEventListener('keydown', closeMenu);
   window.addEventListener('pagehide', function (event) { if (event.persisted) return; observer.disconnect(); nav.removeEventListener('click', click); document.removeEventListener('pointerdown', closeMenu); document.removeEventListener('keydown', closeMenu); document.body.style.paddingTop = previousPadding; }, { once: true });
 
+  if (!document.querySelector('script[data-site-language]')) {
+    var localeScript = document.createElement('script');
+    localeScript.src = 'https://iridescently.xyz/assets/site-language.js?v=20261014-1';
+    localeScript.dataset.siteLanguage = '';
+    document.head.appendChild(localeScript);
+  }
+
   if (window.__HUIGUAN_OWN_AUTH) return;
   function node(tag, text, href) { var element = document.createElement(tag); element.textContent = text; if (href) element.href = href; return element; }
   function login() { auth.replaceChildren(node('a', '登录 / 注册', 'https://huiguan.iridescently.xyz/?openauth=1')); }

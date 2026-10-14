@@ -22,6 +22,8 @@ npm ci --prefix "portal/www/gallery-engine"
 
 ## 修改入口
 
+- 站群页面内中英文切换与文案词条：`assets/site-language.js`。偏好写入 `Domain=.iridescently.xyz` 的一年期 first-party cookie，匿名用户也可在子域间保留；不接触登录资料或角色内容。`shared-chrome-v2.js`、主站 Gallery / Connections、会馆页面与众生之门 Cards 入口加载该脚本；Softie 模块保持独立，不由此脚本改动。
+
 - 首页标题、说明文字、图库状态、导航内容与菜单链接：`homepage.html`。右侧主导航、Beta 标、分隔线与连接入口样式在 `styles/chrome.css`，小屏间距在 `styles/responsive.css`。
 - 站点标志图片：`assets/iridescently-mark.png`，由 `scripts/homepage.js` 按 Vite 资源路径载入。站名字样在桌面悬停或键盘聚焦时随机切换七种颜文字，手机点按可切换、再次点按还原：`scripts/brand-interaction.js` 与 `styles/chrome.css`（Connections 页使用 `styles/connections.css`）。
 - Gallery 启动、桌面画面居中、节气图标题、单张步进、键盘控制、autoplay、启动反馈和资源生命周期：`scripts/gallery.js`。生产与开发默认使用本地图库；只有显式设置 `VITE_ASSET_BASE_URL` 才覆盖为 CDN 根地址，不把已有 Pilot 当作整库上线。自动播放默认关闭，默认约每 3 秒一张；自定义设置中的速度滑块可调 1–10 秒，右侧实时显示当前“X 秒/张”，并沿用 Appearance 偏好存储。开启后立即开始浏览，播放间隔包含图片移动时间，到达两端会折返。左右按钮短按移动一张，长按约 250 ms 后以约 380 ms 的节奏连续浏览，松开即停止且不补发单击；手动滚动和导航会延后下一轮自动播放。系统减少动态效果时不会自动启动，用户可明确点按开启；运行中切换到减少动态效果会暂停。
