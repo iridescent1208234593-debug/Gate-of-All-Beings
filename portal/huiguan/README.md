@@ -46,7 +46,7 @@
 
 ## 账户服务配置
 
-共享 SSO 必须配置 `HX_SSO_SECRET`。环境变量优先；本机启动也可从 Git 忽略的 `server/.env.local` 读取同名变量，示例为 `server/.env.example`。所有使用 `server/hx_sso.py` 的 Python 站点读取同一配置。更改后重启对应服务；不要把真实密钥提交进 Git。缺少该配置会使登录在签发跨站 Cookie 时中断，前端表现为“网络错误，请重试”。
+共享会话签名使用 `HX_SSO_SECRET`。邮箱验证邮件使用 `ACCOUNT_EMAIL_SMTP_*`；两者都支持环境变量优先、本机 Git 忽略的 `server/.env.local` 作为回退配置，样例在 `server/.env.example`。邮箱 SMTP 凭据应使用邮箱客户端授权码，不要复用邮箱网页登录密码。配置邮件后重启会馆服务；不要把真实密钥提交进 Git。
 
 ## 图片传输与颜色真值
 

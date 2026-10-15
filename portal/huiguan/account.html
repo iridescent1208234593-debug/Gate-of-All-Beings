@@ -55,10 +55,20 @@ async function init(){
   try{
     const r=await fetch('/api/user'); const u=await r.json();
     if(!u.logged_in){document.getElementById('content').innerHTML='<div class="state-box">请先登录后管理账户。<br><a href="/" style="color:var(--gold)">去登录 / 注册</a></div>';return;}
-    render(u);
+    const emailRes=await fetch('/api/account/email');
+    const emailState=emailRes.ok?await emailRes.json():{email:'',verified:false,pending:false};
+    render(u,emailState);
+    const token=new URLSearchParams(location.hash.slice(1)).get('verify-email');
+    if(token){
+      history.replaceState(null,'',location.pathname+location.search);
+      const result=await fetch('/api/account/email/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+      const data=await result.json();
+      alert(data.ok?'邮箱验证成功：'+data.email:(data.error||'邮箱验证失败'));
+      if(data.ok)init();
+    }
   }catch(e){document.getElementById('content').innerHTML='<div class="state-box">加载失败，请刷新。</div>';}
 }
-function render(u){
+function render(u,emailState){
   const isElder=u.role==='elder', isAdmin=u.is_admin, isScribe=u.edit_role==='scribe';
   const curP=((u.theme_primary||'#f5f0e8').match(/^#[0-9a-fA-F]{6}$/)?u.theme_primary:'#f5f0e8').toLowerCase();
   const curA=((u.theme_accent||'#5a9e8f').match(/^#[0-9a-fA-F]{6}$/)?u.theme_accent:'#5a9e8f').toLowerCase();
@@ -67,6 +77,17 @@ function render(u){
       <h2 class="qc-h2">账户安全</h2>
       <p class="qc-hint">设置找回问题、修改密码，或检查你的站内登录账号。</p>
       <a class="qc-btn" href="/security.html" style="margin-top:var(--qc-sp-3)">管理账户安全</a>
+    </div>
+    <div class="card" id="email-binding">
+      <h2>邮箱验证</h2>
+      ${emailState.verified?`<div class="row"><span class="k">已验证邮箱</span><span>${esc(emailState.email)} <span class="tag green">已验证</span></span></div>`:'<div class="hint">绑定并验证一个常用邮箱，后续可用于账户安全验证。当前不会把 USSO 返回的邮箱自动视为已验证。</div>'}
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input id="accountEmail" type="email" maxlength="254" autocomplete="email" placeholder="${emailState.verified?'输入新邮箱以更换':'你的邮箱地址'}" value="" style="flex:1;min-width:0;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:14px;">
+        <button class="btn" id="emailSend" onclick="sendEmailVerification()">发送验证链接</button>
+      </div>
+      <div class="hint">验证链接 30 分钟有效；旧邮箱在新邮箱验证成功前保持绑定。</div>
+      <div class="hint" id="emailHint">${emailState.pending?'已有一封待验证邮件，请检查收件箱。':''}</div>
+      <div class="err" id="emailErr"></div>
     </div>
     <div class="card">
       <h2>身份信息</h2>
@@ -120,12 +141,26 @@ function render(u){
       <div class="err" id="themeErr"></div>
     </div>
     <div class="card">
-      <h2>USSO 账户绑定</h2>
-      <div class="row"><span class="k">当前绑定</span><span>${u.kind==='usso'?'<span class="tag green">已绑定 USSO</span>':'<span class="tag">站内账号（未绑定 USSO）</span>'}</span></div>
-      ${u.kind==='local'?'<div class="hint">绑定 USSO 后可用统一身份登录站群各站。点击下方按钮走 USSO 授权完成绑定。</div><button class="btn ghost" style="margin-top:10px;" onclick="location.href=\'/api/login\'">绑定 / 使用 USSO 登录</button>':'<div class="hint">你已通过 USSO 登录，站群各站共用此身份。</div>'}
+      <h2>登录方式</h2>
+      <div class="row"><span class="k">当前账户</span><span>${u.kind==='usso'?'<span class="tag">既有 USSO 账户</span>':'<span class="tag green">会馆站内账号</span>'}</span></div>
+      <div class="hint">USSO 新登录与绑定暂时停用。既有账户资料和角色记录保留；跨站会话仍由共享会话服务处理。</div>
     </div>
   `;
   updatePrev();
+}
+async function sendEmailVerification(){
+  const input=document.getElementById('accountEmail'), button=document.getElementById('emailSend');
+  const hint=document.getElementById('emailHint'), err=document.getElementById('emailErr');
+  err.textContent=''; hint.textContent='';
+  if(!input.value.trim()){err.textContent='请输入邮箱地址';input.focus();return;}
+  button.disabled=true;
+  try{
+    const r=await fetch('/api/account/email/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:input.value.trim()})});
+    const d=await r.json();
+    if(d.ok)hint.textContent=d.message||'验证链接已发送，请检查收件箱。';
+    else err.textContent=d.error||'发送失败';
+  }catch(e){err.textContent='网络错误，请稍后重试';}
+  finally{button.disabled=false;}
 }
 function elderBtn(u){
   if(u.role==='elder'||u.is_admin) return '<span class="tag green">已是长老/管理员</span>';

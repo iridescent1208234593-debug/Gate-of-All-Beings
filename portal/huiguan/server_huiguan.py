@@ -31,6 +31,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "server"))
 import hx_sso
 from account_security import init_schema as init_security_schema, handle_security
+from account_email import init_schema as init_email_schema, handle_email
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 
 # ========== 配置 ==========
@@ -43,6 +44,7 @@ CODE_ROOT = os.path.dirname(os.path.dirname(STATIC_DIR))
 # USSO 配置（去 https://sso.umrc.cn/dev.php 创建应用后获取）
 CLIENT_ID = "client_6e6b9df8063a9bc2"
 CLIENT_SECRET = os.environ.get("USSO_CLIENT_SECRET", "")
+USSO_LOGIN_ENABLED = os.environ.get("USSO_LOGIN_ENABLED", "0").strip().lower() in ("1", "true", "yes", "on")
 SCOPE = "openid basic email profile"
 
 # 回调地址（必须与 USSO 后台配置完全一致）
@@ -181,6 +183,7 @@ def init_user_db():
     with DB_LOCK:
         conn = db()
         init_security_schema(conn)
+        init_email_schema(conn)
         conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id TEXT PRIMARY KEY,
@@ -791,6 +794,8 @@ class Handler(BaseStaticHandler):
             return self._api_callback(qs)
         if path == "/api/user":
             return self._api_user()
+        if path == "/api/account/email":
+            return handle_email(self, "status", globals())
         if path == "/api/sso-user":
             return self._api_sso_user()
         if path == "/api/logout":
@@ -877,6 +882,8 @@ class Handler(BaseStaticHandler):
 
         if path.startswith("/api/security/"):
             return handle_security(self, path.rsplit("/", 1)[-1], globals())
+        if path.startswith("/api/account/email/"):
+            return handle_email(self, path.rsplit("/", 1)[-1], globals())
 
         if path == "/api/login":
             return self._api_local_login()
@@ -1125,6 +1132,9 @@ class Handler(BaseStaticHandler):
 
     # ---------- USSO 登录 ----------
     def _api_sso_login(self):
+        if not USSO_LOGIN_ENABLED:
+            self._json(410, {"error": "USSO 登录暂时停用，请使用会馆站内账号"})
+            return
         if not CLIENT_ID or not CLIENT_SECRET:
             self._json(400, {"error": "服务器未配置 CLIENT_ID/CLIENT_SECRET"})
             return
@@ -1144,6 +1154,9 @@ class Handler(BaseStaticHandler):
         self.end_headers()
 
     def _api_callback(self, qs):
+        if not USSO_LOGIN_ENABLED:
+            self._json(410, {"error": "USSO 登录暂时停用，请使用会馆站内账号"})
+            return
         code = qs.get("code", [None])[0]
         state = qs.get("state", [None])[0]
         error = qs.get("error", [None])[0]
