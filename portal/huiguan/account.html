@@ -80,7 +80,7 @@ function render(u,emailState){
     </div>
     <div class="card" id="email-binding">
       <h2>邮箱验证</h2>
-      ${emailState.verified?`<div class="row"><span class="k">已验证邮箱</span><span>${esc(emailState.email)} <span class="tag green">已验证</span></span></div>`:'<div class="hint">绑定并验证一个常用邮箱，后续可用于账户安全验证。当前不会把 USSO 返回的邮箱自动视为已验证。</div>'}
+      ${emailState.verified?`<div class="row"><span class="k">已验证邮箱</span><span>${esc(emailState.email)} <span class="tag green">可用于账号找回</span></span></div>`:'<div class="hint">绑定并验证一个常用邮箱，可用于找回站内账号名和重置密码。旧资料中的邮箱不会自动视为已验证。</div>'}
       <div style="display:flex;gap:8px;margin-top:10px;">
         <input id="accountEmail" type="email" maxlength="254" autocomplete="email" placeholder="${emailState.verified?'输入新邮箱以更换':'你的邮箱地址'}" value="" style="flex:1;min-width:0;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:14px;">
         <button class="btn" id="emailSend" onclick="sendEmailVerification()">发送验证链接</button>

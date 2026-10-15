@@ -27,7 +27,7 @@ def init_schema(conn):
     conn.execute("CREATE INDEX IF NOT EXISTS account_email_attempts_bucket ON account_email_attempts(bucket, at)")
 
 
-def _send_email(email, token):
+def _mail_setting():
     import os
 
     config = {}
@@ -42,6 +42,12 @@ def _send_email(email, token):
     def setting(name, default=""):
         return os.environ.get(name, config.get(name, default))
 
+    return setting
+
+
+def _send_message(email, subject, content):
+    setting = _mail_setting()
+
     host = setting("ACCOUNT_EMAIL_SMTP_HOST").strip()
     username = setting("ACCOUNT_EMAIL_SMTP_USER").strip()
     password = setting("ACCOUNT_EMAIL_SMTP_PASSWORD")
@@ -52,17 +58,34 @@ def _send_email(email, token):
         port = int(setting("ACCOUNT_EMAIL_SMTP_PORT", "465"))
     except ValueError as exc:
         raise RuntimeError("invalid SMTP port") from exc
-    base = setting("ACCOUNT_EMAIL_BASE_URL", "https://huiguan.iridescently.xyz/account.html").strip()
-    link = f"{base}#verify-email={token}"
     message = EmailMessage()
-    message["Subject"] = "验证你的西木会馆邮箱"
+    message["Subject"] = subject
     message["From"] = sender
     message["To"] = email
-    message.set_content(f"请打开以下链接验证邮箱（30 分钟内有效）：\n\n{link}\n\n如果不是你本人操作，请忽略此邮件。")
+    message.set_content(content)
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL(host, port, timeout=10, context=context) as smtp:
         smtp.login(username, password)
         smtp.send_message(message)
+
+
+def _send_email(email, token):
+    setting = _mail_setting()
+    base = setting("ACCOUNT_EMAIL_BASE_URL", "https://huiguan.iridescently.xyz/account.html").strip()
+    link = f"{base}#verify-email={token}"
+    _send_message(email, "验证你的西木会馆邮箱", f"请打开以下链接验证邮箱（30 分钟内有效）：\n\n{link}\n\n如果不是你本人操作，请忽略此邮件。")
+
+
+def send_recovery_email(email, token, username):
+    setting = _mail_setting()
+    base = setting("ACCOUNT_EMAIL_RECOVERY_URL", "https://huiguan.iridescently.xyz/security.html?mode=recover").strip()
+    link = f"{base}#email-recovery={token}"
+    content = (
+        f"你的西木会馆账号名是：{username}\n\n"
+        f"如需重置密码，请打开以下链接（30 分钟内有效且只能使用一次）：\n\n{link}\n\n"
+        "如果不是你本人操作，请忽略此邮件。"
+    )
+    _send_message(email, "西木会馆账号找回", content)
 
 
 def handle_email(handler, action, api):

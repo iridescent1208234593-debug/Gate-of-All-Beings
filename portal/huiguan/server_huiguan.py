@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
 import hx_sso
 from account_security import init_schema as init_security_schema, handle_security
 from account_email import init_schema as init_email_schema, handle_email
+from account_recovery import init_schema as init_recovery_schema, handle_recovery
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 
 # ========== 配置 ==========
@@ -184,6 +185,7 @@ def init_user_db():
         conn = db()
         init_security_schema(conn)
         init_email_schema(conn)
+        init_recovery_schema(conn)
         conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id TEXT PRIMARY KEY,
@@ -884,6 +886,8 @@ class Handler(BaseStaticHandler):
             return handle_security(self, path.rsplit("/", 1)[-1], globals())
         if path.startswith("/api/account/email/"):
             return handle_email(self, path.rsplit("/", 1)[-1], globals())
+        if path.startswith("/api/account/recovery/"):
+            return handle_recovery(self, path.rsplit("/", 1)[-1], globals())
 
         if path == "/api/login":
             return self._api_local_login()
