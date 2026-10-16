@@ -230,6 +230,7 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
         >
           {soundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
         </button>
+        <span className="gate-language-host" />
       </div>
       <img className="gate-mark" src="https://iridescently.xyz/assets/iridescently-mark.png" alt="Iridescently" />
       <div className="gate-content">

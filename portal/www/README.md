@@ -22,7 +22,7 @@ npm ci --prefix "portal/www/gallery-engine"
 
 ## 修改入口
 
-- 站群页面内中英文切换与文案词条：`assets/site-language.js`。偏好写入 `Domain=.iridescently.xyz` 的一年期 first-party cookie，匿名用户也可在子域间保留；不接触登录资料或角色内容。`shared-chrome-v2.js`、主站 Gallery / Connections、会馆页面与众生之门 Cards 入口加载该脚本；Softie 模块保持独立，不由此脚本改动。
+- 站群页面内中英文切换与文案词条：`assets/site-language.js`。偏好写入 `Domain=.iridescently.xyz` 的一年期 first-party cookie，匿名用户也可在子域间保留；不接触登录资料或角色内容。`shared-chrome-v2.js`、主站 Gallery / Connections、会馆页面与众生之门 Cards 入口加载该脚本；Softie 模块保持独立，不由此脚本改动。全屏 Cards 开场通过 `.gate-language-host` 将切换按钮放进自己的右上角 flex 控件组；React 入口延迟出现时由脚本观察并挂载，不使用悬浮角标。
 
 - 首页标题、说明文字、图库状态、导航内容与菜单链接：`homepage.html`。右侧主导航、Beta 标、分隔线与连接入口样式在 `styles/chrome.css`，小屏间距在 `styles/responsive.css`。
 - 站点标志图片：`assets/iridescently-mark.png`，由 `scripts/homepage.js` 按 Vite 资源路径载入。站名字样在桌面悬停或键盘聚焦时随机切换七种颜文字，手机点按可切换、再次点按还原：`scripts/brand-interaction.js` 与 `styles/chrome.css`（Connections 页使用 `styles/connections.css`）。

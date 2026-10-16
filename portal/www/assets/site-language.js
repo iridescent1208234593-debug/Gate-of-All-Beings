@@ -223,19 +223,27 @@
     parent.appendChild(button);
     updateButtons();
   }
-  function mount() {
+  function mountButton() {
+    var gate = document.querySelector('.gate-language-host');
     var shared = document.querySelector('#qc-nav .qc-right');
     var home = document.querySelector('.site-nav__bottom') || document.querySelector('.site-chrome');
-    if (shared) addButton(shared, false);
+    if (gate) addButton(gate, false);
+    else if (shared) addButton(shared, false);
     else if (home) addButton(home, false);
-    else addButton(document.body, true);
+    else if (!document.querySelector('#root')) addButton(document.body, true);
+  }
+  function mount() {
+    mountButton();
     document.documentElement.lang = language;
     apply(document.head);
     apply(document.body);
     if (!observer) {
       observer = new MutationObserver(function (records) {
         records.forEach(function (record) {
-          if (record.type === 'childList') record.addedNodes.forEach(function (node) { if (node.nodeType === 1) apply(node); else if (node.nodeType === 3) translateText(node); });
+          if (record.type === 'childList') {
+            record.addedNodes.forEach(function (node) { if (node.nodeType === 1) apply(node); else if (node.nodeType === 3) translateText(node); });
+            mountButton();
+          }
           else if (record.type === 'attributes') translateElement(record.target);
         });
       });
