@@ -54,7 +54,12 @@
 .contact-copy h3 { font-size: 18px; font-weight: 500; margin: 0 0 10px; }
 .contact-copy p { font-size: 12px; color: var(--connections-muted); margin: 6px 0; }
 .contact-copy a { display: inline-block; margin-right: 16px; color: var(--connections-accent); text-decoration: none; }
-.contact-codes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding-top: 24px; border-top: 1px solid var(--connections-line); }
+.project-support { margin: 28px 0 0; padding: 22px 0; border-top: 1px solid var(--connections-line); }
+.project-support h3 { margin: 0 0 7px; font-size: 16px; font-weight: 500; }
+.project-support > p { margin: 0 0 14px; color: var(--connections-muted); font-size: 12px; line-height: 1.8; }
+.contact-codes__details { border-top: 1px solid var(--connections-line); }
+.contact-codes__details > summary { padding: 18px 0; color: var(--connections-ink); cursor: pointer; font-size: 13px; }
+.contact-codes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 0 0 24px; }
 .contact-codes figure { margin: 0; min-width: 0; }
 .contact-codes figure > a { display: flex; justify-content: center; align-items: center; height: 270px; padding: 12px; background: white; border: 1px solid var(--connections-line); }
 .contact-codes img { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
