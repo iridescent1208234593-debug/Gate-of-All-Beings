@@ -1,24 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
+import '@lxh/shared-ui/lxh-ui.css';
+import '@lxh/shared-ui/lxh-intro.js';
+import '@lxh/shared-ui/intro-controls.css';
 import { ReferenceScene2D } from '../components/reference/ReferenceScene2D';
-import { ReferenceScene3D } from '../components/reference/ReferenceScene3D';
 import { ALL_LAYERS, DURATION } from '../components/reference/sceneModel';
+import type { GateSceneHandle } from '../embed/gateEmbed';
 import { speakGreeting } from '../utils/sound';
 import type { ThemeMode } from '../types';
 import '../components/reference/reference.css';
 import './gate.css';
 
-/**
- * 开场加载页：全屏复用复现场景的 3D 渲染逻辑，叠加标题、可拖动的进度条与「进入众生之门」按钮。
- * 与卡牌主游戏完全解耦——本组件只负责开场，主游戏由 GameShell 决定何时挂载。
- */
-const GATE_LAYERS = { ...ALL_LAYERS, text: false }; // 隐去场景内的标题图层，避免与页面标题重影
-const MIN_WAIT = 2.5;   // 最短停留：让场景「门扉展开」的动画走完，避免一闪而过
-const FORCE_WAIT = 4.5; // 场景迟迟不就绪时的兜底时间，同时也是降级 2D 的阈值
-const FRAME_CAP = 1 / 30; // 进度与场景时钟按 30fps 更新
-const SPEAK_AT = 2.5;   // 场景展开完成后补回原版开场问候音
+const GATE_LAYERS = { ...ALL_LAYERS, text: false };
+const MIN_WAIT = 2.5;
+const FRAME_CAP = 1 / 30;
+const SPEAK_AT = 2.5;
 const GREETING = '你好，欢迎来到众生门';
-// 右上角配色控件：每次加载随机取一套，随时可手动切换
 const THEMES: { id: ThemeMode; label: string; color: string }[] = [
   { id: 'original', label: 'Classic Night', color: '#85A96F' },
   { id: 'twilight', label: 'Twilight Blue', color: '#74B9FF' },
@@ -27,25 +24,26 @@ const THEMES: { id: ThemeMode; label: string; color: string }[] = [
   { id: 'cyber', label: 'Cyber Neon', color: '#FD79A8' },
 ];
 
-function hasWebGL(): boolean {
-  try {
-    const canvas = document.createElement('canvas');
-    return Boolean(canvas.getContext('webgl2') ?? canvas.getContext('webgl'));
-  } catch {
-    return false;
-  }
-}
-
 export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEnter: () => void; onSkip: () => void }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<GateSceneHandle | null>(null);
+  const fallbackPlaying = useRef(true);
+  const fallbackTime = useRef(0);
+  const spoken = useRef(false);
+  const rangeRef = useRef<HTMLInputElement>(null);
+  const skipRef = useRef<HTMLButtonElement>(null);
+  const themeRef = useRef<ThemeMode>('original');
+  const lastUiUpdate = useRef(0);
   const [clock, setClock] = useState(0);
   const [sceneReady, setSceneReady] = useState(false);
-  const [webgl] = useState(hasWebGL);
+  const [using3D, setUsing3D] = useState(false);
   const [theme, setTheme] = useState<ThemeMode>(() => THEMES[Math.floor(Math.random() * THEMES.length)].id);
   const [soundOn, setSoundOn] = useState(true);
-  const [unlocked, setUnlocked] = useState(false); // 音频需先由用户手势解锁，否则浏览器会拒绝播放
-  const [gateOpen, setGateOpen] = useState(false); // 门一旦开启便保持可用：把进度拖回去也不会让「进入」失效
-  const playing = useRef(true); // 默认只播一遍：推进到 DURATION 后停下，拖动进度条后交用户控制
-  const spoken = useRef(false);
+  const [unlocked, setUnlocked] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  themeRef.current = theme;
+
+  useEffect(() => window.LXHIntro.bindSkip(skipRef.current, onSkip), [onSkip]);
 
   useEffect(() => {
     const unlock = () => setUnlocked(true);
@@ -58,41 +56,135 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
   }, []);
 
   useEffect(() => {
-    let raf = 0;
-    let last = 0;
-    let acc = 0;
-    const step = (time: number) => {
-      raf = requestAnimationFrame(step);
-      if (!last) last = time;
-      acc += (time - last) / 1000;
-      last = time;
-      if (acc < FRAME_CAP) return;
-      const dt = acc;
-      acc = 0;
-      if (!playing.current) return;
-      setClock(value => {
-        const next = Math.min(DURATION, value + dt);
-        if (next >= DURATION) playing.current = false;
-        return next;
-      });
+    let cancelled = false;
+    let fallbackRaf = 0;
+    let lastTime = 0;
+    let elapsed = 0;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const fallbackTick = (time: number) => {
+      fallbackRaf = 0;
+      if (cancelled || document.hidden || !fallbackPlaying.current) return;
+      if (!lastTime) lastTime = time;
+      elapsed += (time - lastTime) / 1000;
+      lastTime = time;
+      if (elapsed >= FRAME_CAP) {
+        const step = elapsed;
+        elapsed = 0;
+        fallbackTime.current = Math.min(DURATION, fallbackTime.current + step);
+        setClock(fallbackTime.current);
+        if (fallbackTime.current >= MIN_WAIT) setGateOpen(true);
+        if (fallbackTime.current >= DURATION) fallbackPlaying.current = false;
+      }
+      if (fallbackPlaying.current) fallbackRaf = requestAnimationFrame(fallbackTick);
     };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
+
+    const startFallback = () => {
+      if (cancelled) return;
+      setSceneReady(true);
+      setUsing3D(false);
+      if (reducedMotion.matches) {
+        fallbackPlaying.current = false;
+        fallbackTime.current = DURATION;
+        setClock(DURATION);
+        setGateOpen(true);
+      } else {
+        fallbackPlaying.current = true;
+        fallbackRaf = requestAnimationFrame(fallbackTick);
+      }
+    };
+
+    const onVisibilityChange = () => {
+      const scene = sceneRef.current;
+      if (document.hidden) {
+        scene?.pause();
+        if (fallbackRaf) cancelAnimationFrame(fallbackRaf);
+        fallbackRaf = 0;
+      } else if (scene) {
+        if (!reducedMotion.matches && scene.getTime() < DURATION) scene.play();
+      } else if (fallbackPlaying.current) {
+        lastTime = 0;
+        fallbackRaf = requestAnimationFrame(fallbackTick);
+      }
+    };
+
+    const onMotionChange = (event: MediaQueryListEvent) => {
+      if (!event.matches) return;
+      sceneRef.current?.seek(DURATION);
+      fallbackPlaying.current = false;
+      fallbackTime.current = DURATION;
+      setClock(DURATION);
+      setGateOpen(true);
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    reducedMotion.addEventListener('change', onMotionChange);
+
+    void import('../embed/gateEmbed').then(({ LXHGate }) => {
+      if (cancelled) return;
+      const host = hostRef.current;
+      if (!host || !LXHGate.hasWebGL()) {
+        startFallback();
+        return;
+      }
+
+      try {
+        const scene = LXHGate.createScene(host, {
+          theme: themeRef.current,
+          autoplay: false,
+          layers: GATE_LAYERS,
+          interactive: true,
+          scrollFriendly: false,
+          pixelRatio: 1.5,
+          onFrame: ({ t }) => {
+            const now = performance.now();
+            if (t >= DURATION || now - lastUiUpdate.current >= 1000 * FRAME_CAP) {
+              lastUiUpdate.current = now;
+              setClock(t);
+            }
+            if (t >= MIN_WAIT) setGateOpen(true);
+          },
+          onGateOpen: () => setGateOpen(true),
+        });
+        if (!scene) {
+          startFallback();
+          return;
+        }
+        sceneRef.current = scene;
+        setUsing3D(true);
+        setSceneReady(true);
+        if (reducedMotion.matches) {
+          scene.seek(DURATION);
+          setClock(DURATION);
+          setGateOpen(true);
+        } else if (!document.hidden) {
+          scene.play();
+        }
+      } catch (error) {
+        console.warn('[众生之门] 开场场景初始化失败：', error);
+        startFallback();
+      }
+    }).catch(error => {
+      console.warn('[众生之门] 开场动画资源加载失败：', error);
+      startFallback();
+    });
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      reducedMotion.removeEventListener('change', onMotionChange);
+      if (fallbackRaf) cancelAnimationFrame(fallbackRaf);
+      sceneRef.current?.destroy();
+      sceneRef.current = null;
+    };
   }, []);
 
-  // 场景秒数单调走完一遍后定格，不再往复呼吸
   const seconds = Math.min(DURATION, clock);
-  const ratio = seconds / DURATION;
-  // 门开启后不再收回：拖动进度条回看动画时，「进入」按钮依旧可点
+  useEffect(() => { window.LXHIntro.syncProgress(rangeRef.current, seconds, DURATION); }, [seconds]);
   useEffect(() => {
-    if (gateOpen) return;
-    if ((sceneReady && seconds >= MIN_WAIT) || seconds >= FORCE_WAIT) setGateOpen(true);
-  }, [gateOpen, sceneReady, seconds]);
-  const usable = gateOpen;
-  // 3D 走不动（设备无 WebGL 或初始化超时）时，退回 2D 矢量场景
-  const use3D = webgl && (sceneReady || clock < FORCE_WAIT);
-
-  // 手势解锁后、场景展开完成时补回原版开场音频（CDN 原声，失败再退回语音合成）
+    if (sceneReady && seconds >= MIN_WAIT) setGateOpen(true);
+  }, [sceneReady, seconds]);
+  useEffect(() => { sceneRef.current?.setTheme(theme); }, [theme]);
   useEffect(() => {
     if (leaving || !soundOn || !unlocked || spoken.current || seconds < SPEAK_AT) return;
     spoken.current = true;
@@ -100,16 +192,19 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
   }, [leaving, soundOn, unlocked, seconds]);
 
   function seek(value: number) {
-    playing.current = false; // 接管后不再自动推进，便于停在任意一帧
-    setClock(Math.max(0, Math.min(DURATION, value)));
+    const next = Math.max(0, Math.min(DURATION, value));
+    fallbackPlaying.current = false;
+    fallbackTime.current = next;
+    sceneRef.current?.seek(next);
+    setClock(next);
+    if (next >= MIN_WAIT) setGateOpen(true);
   }
 
   return (
     <section className={`gate ${leaving ? 'is-leaving' : ''}`} aria-label="众生之门 开场">
       <div className="gate-stage" aria-hidden="true">
-        {use3D
-          ? <ReferenceScene3D seconds={seconds} theme={theme} layers={GATE_LAYERS} resetView={0} onReady={() => setSceneReady(true)} />
-          : <ReferenceScene2D seconds={seconds} theme={theme} layers={GATE_LAYERS} />}
+        <div ref={hostRef} className="gate-scene-host" />
+        {!using3D && <ReferenceScene2D seconds={seconds} theme={theme} layers={GATE_LAYERS} />}
       </div>
       <div className="gate-veil" aria-hidden="true" />
       <div className="gate-tools">
@@ -136,19 +231,19 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
           {soundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
         </button>
       </div>
+      <img className="gate-mark" src="https://iridescently.xyz/assets/iridescently-mark.png" alt="Iridescently" />
       <div className="gate-content">
         <p className="gate-eyebrow">罗小黑战记 · 非商业同人</p>
         <h1 className="gate-title">众生之门</h1>
         <p className="gate-subtitle">THE GATE OF ALL BEINGS</p>
         <p className="gate-hint">单指旋转 · 双指缩放</p>
-        <button className="gate-enter" disabled={!usable} onClick={onEnter}>进入众生之门</button>
-        <button className="gate-skip" type="button" onClick={onSkip}>跳过 / Skip</button>
+        <button className="gate-enter" disabled={!gateOpen} onClick={onEnter}>进入众生之门</button>
         <p className="gate-progress">
-          <span>{usable ? '门已开启' : '正在开启众生之门…'}</span>
-          <span className="gate-bar">
-            <i style={{ width: `${ratio * 100}%` }} />
+          <span>{gateOpen ? '门已开启' : sceneReady ? '正在开启众生之门…' : '正在准备开场…'}</span>
+          <span className="gate-bar lxh-intro-track">
             <input
-              className="gate-range"
+              ref={rangeRef}
+              className="gate-range lxh-intro-range"
               type="range"
               min={0}
               max={DURATION}
@@ -159,8 +254,10 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
               onChange={event => seek(Number(event.target.value))}
             />
           </span>
+          <span className="gate-progress-time"><time>{window.LXHIntro.formatTime(seconds)}</time><span>/</span><time>{window.LXHIntro.formatTime(DURATION)}</time></span>
         </p>
       </div>
+      <button ref={skipRef} className="gate-skip lxh-intro-skip" type="button">跳过 ↘</button>
     </section>
   );
 }

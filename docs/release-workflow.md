@@ -5,8 +5,10 @@
 | 命令 | 结果 |
 | --- | --- |
 | `build:homepage` | `.releases/candidate/homepage` |
+| `build:cards` | `.releases/candidate/cards` |
 | `build:modules` | 七个模块和首页候选 |
 | `publish:homepage` / `publish:modules` | 校验全文件 SHA-256 后提升构建输出 |
+| `publish:cards` | 校验 Cards 模块 SHA-256 后仅提升众生之门前端模块 |
 | `build:site` | 从 Git HEAD 导出 portal/server/shared 源码快照到 candidate/site |
 | `publish:site` | 提升到 `.releases/production/site` |
 
@@ -16,7 +18,7 @@ Portal/OAuth 从已发布快照启动；`IRIDESCENTLY_PROJECT_ROOT` 指向原工
 
 候选 JSON 记录 sourceHead/sourceDirty、时间、文件 hash；production.json 仅在显式发布成功后合并组件记录。工作树有修改的模块构建不能声称是纯提交构建；最终发布时应使用审查提交或附有逐文件比对证明。site 始终取 HEAD。
 
-顺序：审查并提交源码 → 构建候选 → 测试 → 显式发布 → 仅重启受影响服务 → 公网验收。代码/数据库不一起覆盖；数据库及上传需要单独备份。门户、OAuth、API 上游和 Tunnel 的重启由现有网站管家完成，不引入新 CDN/DNS。
+顺序：审查并提交源码 → 构建候选 → 测试 → 显式发布 → 仅重启受影响服务 → 公网验收。只更新众生之门前端时用 `build:cards` / `publish:cards`，避免同时发布首页与其他模块。代码/数据库不一起覆盖；数据库及上传需要单独备份。门户、OAuth、API 上游和 Tunnel 的重启由现有网站管家完成，不引入新 CDN/DNS。
 
 publish 先复制、验证，再逐目录提升，异常逆序恢复；中断的 `.promotion` 会阻止覆盖，需要检查恢复。多目录发布不是零停机原子切换，维护窗口中完成一致切换。要回退版本，检出已知提交重新构建/发布，用户运行数据不回滚。
 

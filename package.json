@@ -10,6 +10,8 @@
   "scripts": {
     "build:homepage": "node portal/www/scripts/build-homepage.mjs",
     "dev:homepage": "node portal/www/scripts/build-homepage.mjs --dev",
+    "build:cards": "node ops/build-cards.mjs",
+    "publish:cards": "node ops/publish-release.mjs cards",
     "build:modules": "node server/app/scripts/build-modules.mjs",
     "publish:homepage": "node ops/publish-release.mjs homepage",
     "publish:modules": "node ops/publish-release.mjs modules",

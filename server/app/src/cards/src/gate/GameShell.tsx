@@ -24,13 +24,6 @@ export default function GameShell() {
     timer.current = window.setTimeout(() => setGateVisible(false), EXIT_MS);
   }
 
-  function skipOpening() {
-    if (timer.current !== null) window.clearTimeout(timer.current);
-    setEntered(true);
-    setLeaving(false);
-    setGateVisible(false);
-  }
-
   // 从主游戏返回开场加载动画：重新挂载加载页让动画从 0 重播一遍，主游戏保持挂载以保留进度
   function returnToGate() {
     if (timer.current !== null) window.clearTimeout(timer.current);
@@ -42,7 +35,7 @@ export default function GameShell() {
   return (
     <>
       {entered && <GameApp onReturnGate={returnToGate} />}
-      {gateVisible && <EntryGate leaving={leaving} onEnter={enter} onSkip={skipOpening} />}
+      {gateVisible && <EntryGate leaving={leaving} onEnter={enter} onSkip={enter} />}
     </>
   );
 }

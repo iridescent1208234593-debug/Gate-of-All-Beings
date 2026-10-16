@@ -42,8 +42,10 @@ API 上游：5174 Cards OAuth、5178 数值配置、5177 聚灵、4173 灵体 We
 ```powershell
 npm ci
 npm run build:modules       # 七模块和首页只写候选
+npm run build:cards         # 只构建众生之门前端候选
 npm run test:portal         # 使用独立未占用端口检查
 npm run publish:modules    # 显式提升模块和首页
+npm run publish:cards      # 只更新众生之门前端模块
 npm run build:site          # 从 Git HEAD 导出源码快照，排除密钥/数据
 npm run publish:site       # 显式提升静态/Python 源码
 # 再由 ops/网站恢复/website-manager.py 启动/重启所需服务

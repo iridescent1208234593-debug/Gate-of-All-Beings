@@ -16,8 +16,8 @@ async function promoteRename(source, target) {
 }
 
 const command = process.argv[2];
-if (!['homepage', 'modules', 'site'].includes(command) || process.argv.length > 3) {
-  throw new Error('Usage: node ops/publish-release.mjs homepage|modules|site');
+if (!['homepage', 'modules', 'cards', 'site'].includes(command) || process.argv.length > 3) {
+  throw new Error('Usage: node ops/publish-release.mjs homepage|modules|cards|site');
 }
 const components = command === 'modules' ? ['modules', 'homepage'] : [command];
 const productionRecord = path.join(releaseRoot, 'production.json');
@@ -25,8 +25,11 @@ const previous = existsSync(productionRecord) ? JSON.parse(readFileSync(producti
 // Validate every candidate before touching any production output.
 const records = await Promise.all(components.map(verifyCandidate));
 const homepage = path.join(candidateRoot, 'homepage');
-if (command !== 'site' && (!existsSync(path.join(homepage, 'index.html')) || !existsSync(path.join(homepage, 'assets/homepage/homepage.js')))) {
+if (['homepage', 'modules'].includes(command) && (!existsSync(path.join(homepage, 'index.html')) || !existsSync(path.join(homepage, 'assets/homepage/homepage.js')))) {
   throw new Error('Homepage candidate is incomplete.');
+}
+if (command === 'cards' && !existsSync(path.join(candidateRoot, 'cards', 'index.html'))) {
+  throw new Error('Cards candidate is incomplete.');
 }
 if (command === 'modules') {
   for (const name of ['management', 'ecology', 'cards', 'softie', 'juling', 'slay', 'aeon']) {
@@ -44,9 +47,10 @@ if (command === 'modules') {
     swaps.push({ source: `modules/${name}`, target: `server/app/modules/${name}` });
   }
 }
+if (command === 'cards') swaps.push({ source: 'cards', target: 'server/app/modules/cards' });
 if (command === 'site') {
   swaps.push({ source: 'site', target: '.releases/production/site' });
-} else {
+} else if (command === 'homepage' || command === 'modules') {
   swaps.push({ source: 'homepage/assets/homepage', target: 'portal/www/assets/homepage' });
 // Update HTML last, after its matching assets are in place.
 swaps.push({ source: 'homepage/index.html', target: 'portal/www/index.html' });
