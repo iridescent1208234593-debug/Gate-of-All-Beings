@@ -9,13 +9,13 @@ const LEGACY_KEYS = [
   ["iridescently.homepage.appearance.v1", 1],
 ];
 const DEFAULTS = {
-  transition: 50,
-  pause: 0,
+  transition: 0,
+  pause: 100,
   size: 50,
   motion: 50,
   atmosphere: 50,
   grain: 50,
-  autoplaySeconds: 3,
+  autoplaySeconds: 4.5,
 };
 
 function normalizeValues(source) {

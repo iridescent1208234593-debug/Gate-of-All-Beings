@@ -732,11 +732,20 @@
 }
 
 .gallery-settings {
+  box-sizing: border-box;
+  position: relative;
   display: grid;
   width: min(460px, calc(100vw - 100px));
   gap: 5px;
+  padding: 8px 10px 7px;
+  border: 1px solid rgba(246, 248, 248, 0.1);
+  border-radius: 12px;
   color: var(--home-ink);
   text-shadow: 0 1px 9px rgba(7, 15, 21, 0.76);
+  background: rgba(11, 19, 25, 0.22);
+  -webkit-backdrop-filter: blur(12px) saturate(115%);
+  backdrop-filter: blur(12px) saturate(115%);
+  box-shadow: 0 8px 28px rgba(3, 9, 13, 0.12);
 }
 
 .gallery-settings[hidden] {

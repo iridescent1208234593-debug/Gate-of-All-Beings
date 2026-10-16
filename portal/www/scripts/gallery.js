@@ -14,7 +14,7 @@ const prefersReducedMotionNow = () =>
   reducedMotion.matches ||
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const autoplayButton = document.querySelector("[data-gallery-autoplay]");
-const DEFAULT_AUTOPLAY_INTERVAL_MS = 3000;
+const DEFAULT_AUTOPLAY_INTERVAL_MS = 4500;
 const AUTOPLAY_RETRY_MS = 300;
 const AUTOPLAY_SETTLE_LIMIT_MS = 12000;
 const STEP_HOLD_DELAY_MS = 250;
