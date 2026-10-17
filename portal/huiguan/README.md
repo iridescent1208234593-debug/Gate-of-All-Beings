@@ -46,6 +46,8 @@
 
 ## 账户服务配置
 
+本地未发布的首屏性能修正：head 精确预加载 intro / gate / homepage 脚本，先初始化门景再加载共享导航和内容；fallback 使用监听先于 load、幂等 ready 与 8 秒出口，未缩短模型动画时间轴。真实测量、延迟导航与视频 smoke 见 [加载审查](../../docs/zszm-loading-audit.md)。正式服务仍读取发布快照，源码通过不等于线上已生效。
+
 共享会话签名使用 `HX_SSO_SECRET`。邮箱验证邮件使用 `ACCOUNT_EMAIL_SMTP_*`；两者都支持环境变量优先、本机 Git 忽略的 `server/.env.local` 作为回退配置，样例在 `server/.env.example`。邮箱 SMTP 凭据应使用邮箱客户端授权码，不要复用邮箱网页登录密码。配置邮件后重启会馆服务；不要把真实密钥提交进 Git。
 
 站内账号可在个人账户页绑定并验证邮箱。只有 `account_emails` 中已验证的地址可用于找回账号名和重置密码；旧用户资料邮箱不会自动获得验证状态。找回邮件含一次性 30 分钟链接，成功重置后该账号的现有会话全部失效。提示问题找回仍作为兼容入口保留。
@@ -57,5 +59,17 @@
 `character-colors.js` 是会馆角色颜色的唯一解析 / 派生入口，同时保存 19 个现有预设；设表只引用该预设表。保存的 `colorPrimary` 与 `colorAccent` HEX 优先，`colorIndex` 只用于缺少 HEX 的旧记录，包含读取历史展示快照时的 fallback。设表与展示页复用原色 surface / accent 和显式派生的 background / text；展示页不再私自混合 16% / 30% surface。海报上半双色区域保留准确的选色 RGB，下半向白色过渡属于明确派生效果。保存绑定海报时，由同一个保存请求更新本人角色的 HEX；展示 HTML 的旧快照在读取时注入当前颜色，无需重新登记。
 
 `show.html` 中的用户展示 HTML 保持不透明来源的安全沙箱。`showcase-download.js` 只发送导出请求和经过格式限制的颜色值，不能读取父页。`showcase-export.js` 在可信父页中处理导出：使用父页已经取到的 HTML 快照，去除活动节点、事件和非上传图 URL，再放入禁止脚本 / 表单、带资源 CSP 的离屏副本，用现有 html2canvas 渲染并下载 PNG。可读取的离屏副本与正在展示的用户沙箱是不同对象；旧快照的原导出监听由捕获阶段接管。按 2 倍清晰度导出，极长页面以 1600 万像素 / 16384 高度上限收敛，避免移动端巨型 Canvas。
+
+## 账户、OC 与众生之门形象
+
+三类资料互相独立。账户身份键是 `(kind, uid)`：当前站内账号使用 `kind=local` 和 `local_users.uid`；暂停的旧 USSO 资料使用 `kind=usso` 和原有用户 ID。邮箱验证是账户邮箱绑定 / 找回能力，不是邮箱密码登录系统：注册登录仍使用会馆站内用户名与密码，验证邮箱单独存入 `account_emails`。
+
+`users.picture` / `local_users.picture` 保留为既有资料或 OAuth 来源头像；用户主动设置的通用账户头像保存在 `users.db` 新增的 `account_profiles.account_avatar_url`。会馆启动时以 `CREATE TABLE IF NOT EXISTS` 幂等建表，不改旧账户或 OC 表。头像先由共享裁切器输出 1:1 图片，再由 Pillow 重新解码、去元数据并缩到最长边 512px；文件按 SHA-256 内容寻址，数据库只存资源引用。
+
+每条 OC 仍保存在 `characters.json` 原有角色记录的 `data` 中，原有 `species_type` / `species_detail` 不变；新增 `data.avatar_asset_id` 和 `data.avatar_display_shape` (`square` / `circle`) 是可选字段，旧 OC 缺省时继续用原封面或首字 fallback。设定图候选由用户选择并进入同一 1:1 裁切器，不自动选择或裁切。替换 / 清空头像不会立即删资源：上传目录还被角色图、海报、展示页和跨模块引用共用，当前没有可证明全站无引用的垃圾回收器，因此保留内容寻址文件以避免破坏其他内容。
+
+众生之门 Identity 位于相同 `account_profiles` 行的 `gate_identity_json`，结构带 `schema_version: 1`，包含 `display_name`、自由文本 `species_name`、独立 `avatar_asset_id`、`avatar_frame_id`、`avatar_mode` 与可选 `source_oc_id`。登录账户读取已签名的 `hx_sso` cookie，再用 `(kind, uid)` 解析会馆账户；从自己的 OC 导入必须用户主动确认，只复制名称、`species_type + species_detail` 和头像引用，之后编辑只写 Gate Identity，不回写 OC。匿名形象仅存当前标签页 `sessionStorage`。头像引用指向不可变内容文件，三种资料的可变字段和记录彼此分离。
+
+相关接口：`GET /api/user` 和 `/api/sso-user` 返回 `account_avatar_url`；`POST /api/account/avatar` 更新 / 清除账户头像；`POST /api/avatars/upload` 供已登录用户上传 OC 头像；`GET /api/user/ocs` 返回本人 OC 候选。众生之门使用 Cards 服务的 `GET /api/gate/identity`、`POST /api/gate/identity`、`GET /api/gate/ocs`，登录态只认共享 `hx_sso`；Cards 自己的旧 OAuth `/api/login` 返回 410，不创建第二个账户状态。
 
 `node portal/huiguan/tests/poster-color-flow.cjs` 在临时账户、临时图片目录与临时数据库中执行 Chrome 390px / 1440px 回归：6 MiB 图片上传、海报生成 / 保存 / PNG 下载 / 重新打开、旧展示快照的颜色恢复、HEX / 实际 RGB 像素比对、MIME 冒充、大小限制和账户权限。展示 iframe 保留脚本和下载能力，但使用不透明来源，不能读取父页账户 DOM；导出另外验证该安全隔离不影响 PNG 下载。只读取现有账户数据库的表结构，不复制用户记录。需要现有 Playwright 与 Sharp 运行时；可以用 `IRIDESCENT_SCHEMA_ROOT` 指定提供数据库结构的工作区，用 `IRIDESCENT_EVIDENCE_DIR` 保存截图和 JSON 结果。

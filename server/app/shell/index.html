@@ -51,6 +51,7 @@
 <body>
 <header class="shell-topbar" id="iridescently-shell-chrome">
   <a class="brand" href="/app/shell/">众生之门</a>
+  <a class="nav" id="iridescently-shell-return" href="https://zszm.iridescently.xyz/#home">← 返回门庭</a>
   <div id="iridescently-shell-navlinks" style="display:flex;gap:14px"></div>
   <span class="spacer"></span>
   <span class="user" id="iridescently-shell-user"></span>
@@ -64,6 +65,9 @@ import { get, set } from '/shared/shared-session/save.js';
 const view = document.getElementById('iridescently-shell-view');
 const navlinks = document.getElementById('iridescently-shell-navlinks');
 const BASE_PATH = '/app/shell/';
+if (['zszm.iridescently.xyz', '127.0.0.1', 'localhost'].includes(location.hostname)) {
+  document.getElementById('iridescently-shell-return').href = '/#home';
+}
 let portal = { links: [] };
 let mountVersion = 0;
 let activeMount = null;

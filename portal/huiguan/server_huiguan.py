@@ -33,6 +33,7 @@ import hx_sso
 from account_security import init_schema as init_security_schema, handle_security
 from account_email import init_schema as init_email_schema, handle_email
 from account_recovery import init_schema as init_recovery_schema, handle_recovery
+from account_profile import init_schema as init_profile_schema, get_profile, set_account_avatar, store_avatar_image as normalize_avatar_image
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 
 # ========== 配置 ==========
@@ -187,6 +188,7 @@ def init_user_db():
         init_security_schema(conn)
         init_email_schema(conn)
         init_recovery_schema(conn)
+        init_profile_schema(conn)
         conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id TEXT PRIMARY KEY,
@@ -675,6 +677,46 @@ def store_image(raw, mime):
             f.write(raw)
     return "/assets/uploads/" + name
 
+def store_avatar_image(raw, mime):
+    """Normalize a confirmed avatar crop to a metadata-free square image."""
+    return normalize_avatar_image(raw, mime, PROJECT_ROOT)
+
+def store_avatar_data_uri(uri):
+    if not isinstance(uri, str) or not uri.startswith("data:image/"):
+        raise ValueError("头像格式无效")
+    head, separator, encoded = uri.partition(",")
+    mime = head[5:].split(";", 1)[0].lower()
+    if not separator or not head.endswith(";base64"):
+        raise ValueError("头像编码无效")
+    raw = base64.b64decode(encoded, validate=True)
+    validate_image(raw, mime)
+    return store_avatar_image(raw, mime)
+
+def store_source_data_uri(uri):
+    if not isinstance(uri, str) or not uri.startswith("data:image/"):
+        raise ValueError("图片格式无效")
+    head, separator, encoded = uri.partition(",")
+    mime = head[5:].split(";", 1)[0].lower()
+    if not separator or not head.endswith(";base64"):
+        raise ValueError("图片编码无效")
+    raw, mime = validate_image(base64.b64decode(encoded, validate=True), mime)
+    return store_image(raw, mime)
+
+def normalize_oc_avatar(data):
+    if not isinstance(data, dict):
+        return
+    asset = data.get("avatar_asset_id") or ""
+    shape = data.get("avatar_display_shape")
+    if asset.startswith("data:image/"):
+        asset = store_avatar_data_uri(asset)
+        data["avatar_asset_id"] = asset
+    if asset and (not valid_asset_url(asset) or not os.path.isfile(os.path.join(UPLOAD_DIR, os.path.basename(asset)))):
+        raise ValueError("OC 头像资源无效")
+    if shape not in (None, "", "square", "circle"):
+        raise ValueError("OC 头像显示形状无效")
+    if shape:
+        data["avatar_display_shape"] = shape
+
 def store_showcase_html(html):
     """把展示页 HTML 写成独立文件，返回文件名（存进 JSON 的 html_ref）。"""
     name = hashlib.md5(html.encode("utf-8")).hexdigest() + ".html"
@@ -797,6 +839,8 @@ class Handler(BaseStaticHandler):
             return self._api_callback(qs)
         if path == "/api/user":
             return self._api_user()
+        if path == "/api/user/ocs":
+            return self._api_user_ocs()
         if path == "/api/account/email":
             return handle_email(self, "status", globals())
         if path == "/api/sso-user":
@@ -887,6 +931,10 @@ class Handler(BaseStaticHandler):
             return handle_security(self, path.rsplit("/", 1)[-1], globals())
         if path.startswith("/api/account/email/"):
             return handle_email(self, path.rsplit("/", 1)[-1], globals())
+        if path == "/api/account/avatar":
+            return self._api_account_avatar()
+        if path == "/api/avatars/upload":
+            return self._api_avatar_asset_upload()
         if path.startswith("/api/account/recovery/"):
             return handle_recovery(self, path.rsplit("/", 1)[-1], globals())
 
@@ -1375,8 +1423,58 @@ class Handler(BaseStaticHandler):
         ident = self._require_ident_optional()
         if not ident:
             self._json(200, {"logged_in": False}); return
-        self._json(200, {"logged_in": True, "name": ident.get("nickname") or ident.get("username") or "",
-                         "role": ident.get("role"), "is_admin": ident.get("is_admin")})
+        conn = db()
+        account_avatar = get_profile(conn, ident["kind"], ident["uid"])["account_avatar_url"]
+        conn.close()
+        self._json(200, {"logged_in": True, "kind": ident["kind"], "user_id": ident["uid"],
+                         "name": ident.get("nickname") or ident.get("username") or "",
+                         "role": ident.get("role"), "is_admin": ident.get("is_admin"),
+                         "account_avatar_url": account_avatar, "picture": ident.get("picture") or ""})
+
+    def _api_account_avatar(self):
+        ident = self._require_ident()
+        if not ident:
+            return
+        content_type = self.headers.get("Content-Type", "").lower()
+        if content_type.startswith("multipart/form-data"):
+            body = self._read_image_form()
+            if body is None:
+                return
+            image = body.pop("_image_file", None)
+            if not image:
+                self._json(400, {"error": "缺少头像图片"}); return
+            try:
+                asset_url = store_avatar_image(*image)
+            except ValueError as error:
+                self._json(400, {"error": str(error)}); return
+        else:
+            body = self._read_json()
+            if body is None:
+                return
+            if body.get("remove") is not True:
+                self._json(400, {"error": "头像操作无效"}); return
+            asset_url = ""
+        with DB_LOCK:
+            conn = db()
+            set_account_avatar(conn, ident["kind"], ident["uid"], asset_url, now_iso())
+            conn.commit()
+            conn.close()
+        self._json(200, {"ok": True, "account_avatar_url": asset_url})
+
+    def _api_avatar_asset_upload(self):
+        if not self._require_ident():
+            return
+        body = self._read_image_form()
+        if body is None:
+            return
+        image = body.pop("_image_file", None)
+        if not image:
+            self._json(400, {"error": "缺少头像图片"}); return
+        try:
+            asset_url = store_avatar_image(*image)
+        except ValueError as error:
+            self._json(400, {"error": str(error)}); return
+        self._json(200, {"ok": True, "avatar_asset_id": asset_url})
 
     # ---------- /api/user ----------
     def _api_user(self):
@@ -1405,6 +1503,7 @@ class Handler(BaseStaticHandler):
         theme = conn.execute(
             "SELECT theme_primary, theme_accent FROM local_users WHERE uid=?", (ident["uid"],)).fetchone() if ident["kind"] == "local" \
             else conn.execute("SELECT theme_primary, theme_accent FROM users WHERE user_id=?", (ident["uid"],)).fetchone()
+        account_avatar = get_profile(conn, ident["kind"], ident["uid"])["account_avatar_url"]
         conn.close()
         ex = self._get_exempts(ident)
         self._json(200, {
@@ -1415,7 +1514,7 @@ class Handler(BaseStaticHandler):
             "nickname": ident["nickname"],
             "email": ident["email"],
             "picture": ident["picture"],
-            "avatar": ident["picture"],
+            "account_avatar_url": account_avatar,
             "role": ident["role"],
             "is_admin": ident["is_admin"],
             "edit_role": self._get_edit_role(ident),
@@ -1498,6 +1597,36 @@ class Handler(BaseStaticHandler):
             return
         data = load_data()
         self._json(200, {"characters": data.get(self._data_key(ident), [])})
+
+    def _api_user_ocs(self):
+        ident = self._require_ident()
+        if not ident:
+            return
+        characters = load_data().get(self._data_key(ident), [])
+        result = []
+        for record in characters[:100]:
+            data = record.get("data") if isinstance(record, dict) else None
+            if not isinstance(data, dict):
+                continue
+            images = data.get("images") if isinstance(data.get("images"), list) else [data.get("image", "")]
+            candidates = []
+            for source in images[:20]:
+                if isinstance(source, str) and source.startswith("data:image/"):
+                    try:
+                        source = store_source_data_uri(source)
+                    except ValueError:
+                        continue
+                if isinstance(source, str) and (source.startswith("/assets/uploads/") or source.startswith("https://")):
+                    candidates.append(source)
+            result.append({
+                "id": str(data.get("code") or record.get("code") or ""),
+                "name": str(data.get("name") or "")[:80],
+                "species_type": str(data.get("species_type") or "")[:40],
+                "species_detail": str(data.get("species_detail") or "")[:100],
+                "avatar_asset_id": str(data.get("avatar_asset_id") or ""),
+                "images": candidates,
+            })
+        self._json(200, {"ocs": result})
 
     def _api_get_character(self, qs):
         code = qs.get("code", [None])[0]
@@ -1623,6 +1752,11 @@ class Handler(BaseStaticHandler):
         html = body.get("html", "")
         data_field = body.get("data", {})
 
+        try:
+            normalize_oc_avatar(data_field)
+        except ValueError as error:
+            self._json(400, {"error": str(error)}); return
+
         # 外置大字段：展示页 HTML -> 文件；base64 图片 -> 独立文件 URL
         html_ref = store_showcase_html(html) if html else None
         if isinstance(data_field, dict):
@@ -1681,6 +1815,10 @@ class Handler(BaseStaticHandler):
             code = c.get("code", "")
             entry_old = old_map.get(code, {})
             if isinstance(c, dict):
+                try:
+                    normalize_oc_avatar(c)
+                except ValueError as error:
+                    self._json(400, {"error": str(error)}); return
                 if c.get("image", "").startswith("data:"):
                     c["image"] = store_data_uri(c["image"])
                 if isinstance(c.get("images"), list):

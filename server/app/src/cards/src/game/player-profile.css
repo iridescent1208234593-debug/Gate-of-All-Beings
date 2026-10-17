@@ -1,0 +1,8 @@
+.gate-profile-loading{position:fixed;inset:0;display:grid;align-content:center;justify-items:center;gap:16px;background:#07100d;color:#fdf9e4;font-family:serif;z-index:10}
+.gate-profile-loading h1{font-size:28px;font-weight:400;letter-spacing:.2em}.gate-profile-loading p{font-size:14px}.gate-profile-loading button{padding:10px 22px;background:transparent;border:1px solid #b99654;border-radius:6px;color:#f1d7a1;cursor:pointer}
+.gate-player-avatar{display:inline-block;flex:none;width:38px;aspect-ratio:230/232;color:#f3a82b;--appearance-color:#f3a82b;--appearance-surface:#faebca}
+.gate-player-avatar>svg{display:block;width:100%;height:100%}
+.identity-entry .gate-player-avatar{width:28px}.identity-avatar__preview .gate-player-avatar{width:100%;height:100%}.identity-avatar__preview:has(.gate-player-avatar){border:0;border-radius:0;background:transparent;overflow:visible}
+@media(max-width:560px){.zszm-game .identity-entry{flex:none;width:42px;padding:6px;justify-content:center}.zszm-game .identity-entry>span:not(.gate-player-avatar){display:none}.identity-entry .gate-player-avatar{width:26px}}
+
+.gate-profile-status{position:fixed;bottom:16px;right:16px;z-index:2200;max-width:calc(100vw - 32px);padding:12px 16px;border:1px solid #b99654;border-radius:8px;background:#101c1d;color:#fdf9e4;font-size:13px}.gate-profile-status button{margin-left:10px;background:transparent;color:#f3c248;border:0;cursor:pointer}

@@ -1,0 +1,49 @@
+.mode-hall { --hall-ink: #f5efcf; --hall-gold: #e4b354; min-width: 0; color: var(--ink, #253c31); }
+.mode-hall__heading { display: flex; justify-content: space-between; align-items: center; gap: 32px; padding: 15px 0 30px; }
+.mode-hall__heading>div { min-width: 0; }
+.mode-hall__eyebrow { font-size: 10px; letter-spacing: .18em; color: #7b713d; }
+.mode-hall__heading h1 { margin: 12px 0; font-size: clamp(24px, 2.6vw, 40px); font-weight: 400; letter-spacing: .05em; }
+.mode-hall__heading p:last-child { font-size: 13px; line-height: 1.8; color: #617263; }
+.mode-hall__player { display: flex; align-items: center; gap: 14px; text-align: left; flex: none; max-width: 100%; border: 0; padding: 8px; background: transparent; color: inherit; cursor: pointer; }
+.mode-hall__player:disabled { cursor: default; }
+.mode-hall__player>span { display: grid; gap: 4px; }
+.mode-hall__player>span:not(.gate-player-avatar) { min-width: 0; max-width: 200px; overflow-wrap: anywhere; }
+.mode-hall__player small { font-size: 10px; color: #6b785d; }
+.mode-hall__player strong { max-width: 200px; overflow-wrap: anywhere; font-size: 20px; font-weight: 500; }
+.mode-hall__player em { color: #8a6932; font-size: 12px; font-style: normal; }
+.mode-hall__avatar { width: 68px; height: 69px; --appearance-color: #b58b43; --appearance-surface: #e9dfbd; color: var(--appearance-color); }
+.mode-hall__avatar svg { display: block; width: 100%; height: 100%; }
+.mode-hall__paths { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.mode-path { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 300px; overflow: hidden; isolation: isolate; padding: 23px 25px; text-align: left; text-decoration: none; border: 1px solid #77826280; border-radius: 2px 2px 44px 2px; background: #213d34; color: var(--hall-ink)!important; font: inherit; cursor: pointer; transition: transform 220ms ease, box-shadow 220ms ease; }
+.mode-path::before { position: absolute; z-index: -2; inset: 0; content: ''; background-image: var(--mode-image, linear-gradient(145deg, #435c43, #182d29)); background-size: cover; background-position: center; transition: transform 700ms cubic-bezier(.2,.7,.2,1); }
+.mode-path::after { position: absolute; z-index: -1; inset: 0; content: ''; background: linear-gradient(180deg, #091c261c, #091d2a55 25%, #081f24e8 100%); }
+.mode-path--shore { grid-column: span 2; min-height: 380px; }
+.mode-path--shore::after { background: linear-gradient(180deg, #071a1d10, #09242d30 25%, #071d29ef 100%); }
+.mode-path--cards { min-height: 380px; }
+.mode-path--management::before { background-image: linear-gradient(150deg, #806d3a, #2b4737); }
+.mode-path--juling::before { background-image: radial-gradient(ellipse at 80% 10%, #826a3c, transparent 70%), linear-gradient(150deg, #4d6241, #263d35); }
+.mode-path--slay::before { background-image: linear-gradient(135deg, #6a3d35, #302d2d); }
+.mode-path--softie::before { background-image: radial-gradient(ellipse at 80% 10%, #778169, transparent 65%), linear-gradient(145deg, #2d5860, #183b3f); }
+.mode-path--aeon::before { background-image: linear-gradient(135deg, #365065, #243134); }
+.mode-path--shengsheng-shoot::before { background-image: linear-gradient(135deg, #9a773a, #315356); }
+.mode-path__number { position: relative; z-index: 1; font-size: 10px; letter-spacing: .12em; color: #f6edcfb8; }
+.mode-path__glyph { position: absolute; top: 40px; right: 28px; font-size: 60px; opacity: .5; filter: saturate(.65); transform: rotate(-7deg); pointer-events: none; }
+.mode-path__body { position: relative; display: grid; gap: 12px; margin-top: 48px; max-width: 440px; }
+.mode-path__body small { color: #ebc77a; font-size: 10px; letter-spacing: .14em; }
+.mode-path__body strong { font-weight: 400; font-size: clamp(24px, 2.2vw, 34px); letter-spacing: .1em; }
+.mode-path__body>span { font-size: 12px; line-height: 1.85; color: #e9eddfbd; }
+.mode-path__body b { display: inline-flex; gap: 9px; align-items: center; margin-top: 9px; color: var(--hall-gold); font-size: 11px; font-weight: 400; }
+.mode-hall :where(button,a):focus-visible { outline: 3px solid #c4943f; outline-offset: 4px; }
+@media (hover:hover) and (pointer:fine) { .mode-path:hover { transform: translateY(-4px); box-shadow: 0 13px 28px #1c372325; } .mode-path:hover::before { transform: scale(1.035); } }
+.mode-hall__desk { display: flex; gap: 40px; align-items: center; padding: 34px 0 22px; margin-top: 22px; border-top: 1px solid #88967966; }
+.mode-hall__desk>div { flex: 0 0 210px; }
+.mode-hall__desk h2 { margin: 9px 0; font-weight: 400; font-size: 24px; }
+.mode-hall__desk small { font-size: 10px; color: #65785f; }
+.mode-hall__desk nav { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px 28px; flex: 1; }
+.mode-hall__desk button { display: flex; gap: 11px; align-items: center; padding: 10px 0; border: 0; border-bottom: 1px solid #8391764d; background: transparent; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.mode-hall__desk button>span { display: grid; gap: 5px; flex: 1; }
+.mode-hall__desk strong { font-weight: 400; font-size: 13px; }
+.mode-hall__save-note { margin: 20px 0 0; color: #66765e; font-size: 10px; line-height: 1.8; }
+@media (max-width: 900px) { .mode-hall__paths { grid-template-columns: repeat(2,minmax(0,1fr)); } .mode-path--shore { grid-column: span 2; min-height: 330px; } .mode-path--cards { min-height: 300px; } .mode-hall__desk { align-items: flex-start; gap: 22px; } .mode-hall__desk>div { flex-basis: 180px; } }
+@media (max-width: 560px) { .mode-hall__heading { display: block; padding-top: 0; } .mode-hall__heading h1 { max-width: 300px; line-height: 1.6; } .mode-hall__player { padding: 10px 0 0; } .mode-hall__avatar { width: 53px; height: 54px; } .mode-hall__player strong { font-size: 17px; } .mode-hall__paths { grid-template-columns: 1fr; gap: 14px; } .mode-path,.mode-path--cards { grid-column: auto; min-height: 255px; padding: 22px; } .mode-path--shore { min-height: 335px; } .mode-path__body { gap: 10px; margin-top: 44px; } .mode-path__body strong { font-size: 28px; } .mode-hall__desk { display: block; } .mode-hall__desk nav { grid-template-columns: 1fr; margin-top: 18px; gap: 9px; } .mode-hall__desk button { min-height: 58px; } }
+@media (prefers-reduced-motion: reduce) { .mode-path,.mode-path::before { transition: none; } }

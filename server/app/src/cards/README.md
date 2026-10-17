@@ -1,25 +1,24 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# 众生之门
 
-# Run and deploy your AI Studio app
+正式前端源码：保留门景开场，随后进入玩家初始化与统一门庭；卡牌历练是其中一个模式。线上入口为 `https://zszm.iridescently.xyz/`，本轮集成仅写工作源码和候选，尚未发布。
 
-This contains everything you need to run your app locally.
+## 本地运行
 
-View your app in AI Studio: https://ai.studio/apps/3bd5bc23-3c10-4d00-9fd8-57702da16358
+在本目录安装依赖后运行 `python server.py`（默认 5174）和 `npm run dev`（默认 5173）。需要根门户提供共享静态资源和成熟模块时，另按根 README 启动门户。无须为玩家初始化配置 Gemini key，也不要将密钥写入源码。
 
-## Run Locally
+端口冲突时可以单独指定：`PORT=5194` 启动 Python API，`ZSZM_DEV_API_TARGET=http://127.0.0.1:5194` 配合 Vite `--port 5195 --host 127.0.0.1`。这些环境变量在 PowerShell 使用 `$env:变量名='值'` 设置。生产构建通过根目录 `npm run build:cards` 写候选，不等于发布。
 
-**Prerequisites:**  Node.js
+## 新版流程与维护边界
 
+- `src/gate/EntryGate.tsx`：保留正式门景、Skip、进度、颜色、缩放。
+- `src/gate/GameShell.tsx`：单次开场 → 资料读取 → 未完成者初始化 / 已完成者门庭。异步资料请求与门景并行，失败可重试。
+- `src/onboarding/`：已验收原型的改名、种族树、头像列表、种族确认与设置/拍摄。没有复制原型开场或整站入口；参见本目录 README。
+- `src/game/PlayerProfile.tsx`：已确认玩家资料唯一 React owner；设置、HUD、门庭和浅滩共同读取，账户/OC 仍为独立实体。
+- `src/game/ModeHall.tsx`、`MODES.md`：从 `server/app/portal.json` 读取玩法清单；模式及路由的实际映射见 MODES.md。
+- `src/game/ShoreMode.tsx`、`shore/`：原型浅滩作为独立小游戏，退出回门庭。
+- `src/game/PlayerIdentity.tsx`：保留已有高级编辑、OC 导入和裁切；保存后更新同一 provider。
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
-
----
+整合、来源、验证和未发布边界见 [集成记录](../../../../docs/zszm-flow-integration.md)；身份与存档边界见 [数据关系](../../../../docs/zszm-identity-and-save-map.md)。
 
 ## 在统一工作区中的位置
 
@@ -31,5 +30,6 @@ View your app in AI Studio: https://ai.studio/apps/3bd5bc23-3c10-4d00-9fd8-57702
 - 开场右上角的声音与语言按钮属于同一个 `.gate-tools` 控件组。主站 `assets/site-language.js` 通过 `.gate-language-host` 挂载语言按钮；入口组件尚未渲染时延迟挂载，不能退回到独立的 fixed 右上角按钮。
 - 主游戏首页模块入口在 `src/game/GameApp.tsx`；灵境会馆复用 `ManagementPanel`，聚灵从统一壳路由 `/app/shell/m/juling` 打开。旧独立场景选择应用已移除；正式开场用 `src/embed/gateEmbed.ts` 驱动全屏门景、进度、主题和缩放，WebGL 降级场景与主游戏仍复用 `ReferenceScene2D.tsx`、`ReferenceScene3D.tsx` 和 `sceneModel.ts`。
 - 存档：IndexedDB `zszm-adventure-v1`（主）+ 统一存档摘要 `m:cards:summary`；用户库 `users.db`。
-- API：`/api/login`、`/api/callback`、`/api/user`、`/api/sso-user`、`/api/logout`（见 docs/api.md）。
+- API：旧 Cards OAuth `/api/login` 保留为 410 停用响应；`/api/sso-user`、`/api/gate/identity` 与 `/api/gate/ocs` 使用会馆共享 `hx_sso`，不创建第二套账户状态。
+- 身份资料：账号使用 `(kind, uid)` 隔离。Gate Identity 保存于会馆 `users.db.account_profiles.gate_identity_json`；OC 仍在会馆 `characters.json` 每条记录的 `data` 中。导入 OC 是经用户确认的一次字段复制，不保持同步，种族名称为自由文本。账户头像、OC 头像和 Gate 头像彼此独立；API / 资源细节见 `portal/huiguan/README.md` 的“账户、OC 与众生之门形象”。
 - 测试：`npm test`、`npm run check:game`。

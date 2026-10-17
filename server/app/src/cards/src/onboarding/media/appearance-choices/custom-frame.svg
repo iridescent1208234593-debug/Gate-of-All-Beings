@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 232" fill="none" aria-hidden="true">
+  <!-- EP29 03:41: frame proportions, clean curves instead of screenshot tracing. -->
+  <defs><clipPath id="custom-frame-window"><rect x="21" y="26" width="188" height="192" rx="5"/></clipPath></defs>
+  <rect x="9" y="13" width="212" height="218" rx="14" fill="currentColor"/>
+  <rect x="21" y="26" width="188" height="192" rx="5" fill="var(--appearance-surface, #d9e4df)"/>
+  <g class="frame-placeholder" clip-path="url(#custom-frame-window)">
+    <path d="M65 220c0-34 19-57 50-57s50 23 50 57" fill="#fff"/>
+    <ellipse cx="115" cy="120" rx="73" ry="59" fill="#fff"/>
+    <g fill="currentColor"><circle cx="84" cy="121" r="5"/><circle cx="147" cy="121" r="5"/></g>
+    <path d="M107 118c-2 12 0 16 9 16s11-5 9-16" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  </g>
+</svg>

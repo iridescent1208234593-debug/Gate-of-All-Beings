@@ -1,0 +1,808 @@
+/* Accepted original-ui onboarding. Scoped design pixels; no document-wide font-size. */
+.gate-onboarding { position: fixed; inset: 0; z-index: 80; isolation: isolate; overflow: hidden; background: #000; color: #fdf9e4; font-family: 'GateOnboardingHand', 'Microsoft YaHei', sans-serif; -webkit-font-smoothing: antialiased; --onboarding-unit: 1px; }
+.gate-onboarding *, .gate-onboarding *::before, .gate-onboarding *::after { box-sizing: border-box; }
+.gate-onboarding [hidden] { display: none !important; }
+@font-face {
+  font-family: 'GateOnboardingHand';
+  src: url('./media/font.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GateOnboardingId';
+  src: url('./media/fonts/zaozi-puyue.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GateOnboardingInput';
+  src: url('./media/fonts/zihun-wennuan.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.gate-onboarding {
+  --design-w: 1920;
+  --design-h: 1080;
+  --id-orange: #ffb649;
+  --field-cream: #fdf9e4;
+
+  --ui-font: 'GateOnboardingHand', 'Microsoft YaHei', 'PingFang SC', 'Noto Sans CJK SC', sans-serif;
+
+  --t-screen: 600ms;
+  --ease-soft: cubic-bezier(0.33, 0, 0.2, 1);
+}
+
+
+.gate-onboarding .opening-progress__range:focus-visible { outline: 2px solid var(--id-orange); outline-offset: 5px; }
+
+.gate-onboarding .opening-progress {
+  position: fixed;
+  z-index: 5;
+  right: 6vw;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  left: 6vw;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0 16px;
+  color: rgb(253 249 228 / 72%);
+  font: 11px var(--ui-font);
+}
+
+.gate-onboarding .opening-progress__track {
+  grid-column: 1;
+  grid-row: 1;
+  height: 2px;
+  background: rgb(253 249 228 / 24%);
+}
+
+.gate-onboarding .opening-progress__track > span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--id-orange);
+}
+
+.gate-onboarding .opening-progress__range {
+  grid-column: 1;
+  grid-row: 1;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+.gate-onboarding .opening-progress__range::-webkit-slider-thumb { width: 8px; height: 8px; appearance: none; border: 0; border-radius: 50%; background: var(--field-cream); box-shadow: 0 0 9px rgb(253 249 228 / 65%); }
+.gate-onboarding .opening-progress__range::-moz-range-thumb { width: 8px; height: 8px; border: 0; border-radius: 50%; background: var(--field-cream); box-shadow: 0 0 9px rgb(253 249 228 / 65%); }
+
+.gate-onboarding .opening-progress__time {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 82px;
+  text-align: right;
+  font: 10px Georgia, serif;
+  font-variant-numeric: tabular-nums;
+}
+
+.gate-onboarding .login {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-screen) var(--ease-soft);
+}
+
+.gate-onboarding .login.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gate-onboarding .login-form {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: calc(24 * var(--onboarding-unit));
+  margin: 0;
+  transform: translateY(calc(-48 * var(--onboarding-unit)));
+}
+.gate-onboarding .login-body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: calc(640 * var(--onboarding-unit));
+}
+.gate-onboarding .login-field {
+  display: flex;
+  align-items: center;
+  gap: calc(20 * var(--onboarding-unit));
+  width: 100%;
+  height: calc(96 * var(--onboarding-unit));
+  padding: 0 calc(26 * var(--onboarding-unit));
+  border-radius: calc(22 * var(--onboarding-unit));
+  background: var(--field-cream);
+  transition: box-shadow 200ms var(--ease-soft);
+  cursor: text;
+}
+
+.gate-onboarding .login-field:focus-within {
+  box-shadow: 0 0 0 calc(4 * var(--onboarding-unit)) rgb(255 182 73 / 55%), 0 0 calc(40 * var(--onboarding-unit)) rgb(255 182 73 / 22%);
+}
+.gate-onboarding .login-field.is-invalid {
+  box-shadow: 0 0 0 calc(4 * var(--onboarding-unit)) rgb(255 130 40 / 75%);
+}
+.gate-onboarding .login-badge {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: calc(62 * var(--onboarding-unit));
+  height: calc(62 * var(--onboarding-unit));
+  border-radius: calc(16 * var(--onboarding-unit));
+  background: var(--id-orange);
+  color: #fff;
+  font-size: calc(26 * var(--onboarding-unit));
+  font-family: 'GateOnboardingId', sans-serif;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+.gate-onboarding .login-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--id-orange);
+  font-family: 'GateOnboardingInput', var(--ui-font);
+  font-size: calc(40 * var(--onboarding-unit));
+  line-height: 1;
+  text-align: center;
+  caret-color: var(--id-orange);
+}
+
+.gate-onboarding .login-input::placeholder {
+  color: rgb(255 182 73 / 45%);
+  letter-spacing: 0.06em;
+  font-family: 'GateOnboardingInput', var(--ui-font);
+}
+.gate-onboarding .login-counter {
+  position: absolute;
+  top: calc(100% + calc(12 * var(--onboarding-unit)));
+  right: calc(4 * var(--onboarding-unit));
+  margin: 0;
+  font-size: calc(24 * var(--onboarding-unit));
+  line-height: 1;
+  color: rgb(255 182 73 / 70%);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-soft);
+}
+
+.gate-onboarding .login-counter.is-active {
+  opacity: 1;
+}
+.gate-onboarding .login-error {
+  min-height: calc(34 * var(--onboarding-unit));
+  margin: calc(12 * var(--onboarding-unit)) 0 0;
+  font-size: calc(28 * var(--onboarding-unit));
+  line-height: 1.2;
+  color: var(--id-orange);
+  text-align: center;
+  opacity: 0;
+  transform: translateY(calc(-6 * var(--onboarding-unit)));
+  transition: opacity 200ms var(--ease-soft), transform 200ms var(--ease-soft);
+}
+
+.gate-onboarding .login-error.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.gate-onboarding .login-submit {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: calc(96 * var(--onboarding-unit));
+  height: calc(96 * var(--onboarding-unit));
+  padding: 0;
+  border: 0;
+  border-radius: calc(22 * var(--onboarding-unit));
+  background: var(--id-orange);
+  color: var(--field-cream);
+  cursor: pointer;
+  transition: transform 140ms var(--ease-soft), filter 140ms var(--ease-soft);
+}
+
+.gate-onboarding .login-submit svg {
+  width: calc(48 * var(--onboarding-unit));
+  height: calc(48 * var(--onboarding-unit));
+}
+
+.gate-onboarding .login-submit:hover {
+  filter: brightness(1.06);
+}
+
+.gate-onboarding .login-submit:active {
+  transform: scale(0.94);
+}
+
+.gate-onboarding .login-submit:focus-visible {
+  outline: calc(4 * var(--onboarding-unit)) solid rgb(253 249 228 / 85%);
+  outline-offset: calc(5 * var(--onboarding-unit));
+}
+
+.gate-onboarding .screen {
+  position: absolute;
+  inset: 0;
+  z-index: 24;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-screen) var(--ease-soft);
+}
+
+.gate-onboarding .screen.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.gate-onboarding .race-node,
+.gate-onboarding .race-chip,
+.gate-onboarding .race-submit,
+.gate-onboarding .race-card,
+.gate-onboarding .back-button {
+  font: inherit;
+}
+.gate-onboarding .back-button {
+  position: absolute;
+  left: calc(40 * var(--onboarding-unit));
+  top: calc(40 * var(--onboarding-unit));
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: calc(68 * var(--onboarding-unit));
+  height: calc(68 * var(--onboarding-unit));
+  padding: 0;
+  border: 0;
+  border-radius: calc(20 * var(--onboarding-unit));
+  background: transparent;
+  color: var(--id-orange);
+  cursor: pointer;
+  transition: transform 140ms var(--ease-soft), filter 140ms var(--ease-soft);
+}
+
+.gate-onboarding .back-button svg {
+  width: calc(46 * var(--onboarding-unit));
+  height: calc(46 * var(--onboarding-unit));
+}
+
+.gate-onboarding .back-button:hover {
+  filter: brightness(1.18);
+}
+
+.gate-onboarding .back-button:active {
+  transform: scale(0.9);
+}
+
+.gate-onboarding .back-button:focus-visible {
+  outline: calc(3 * var(--onboarding-unit)) solid rgb(255 182 73 / 80%);
+  outline-offset: calc(4 * var(--onboarding-unit));
+}
+
+.gate-onboarding .race-tree-canvas {
+  position: relative;
+  width: 1064em;
+  height: 798em;
+  font-size: calc(1 * var(--onboarding-unit));
+}
+.gate-onboarding .race-tree-links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.gate-onboarding .race-tree-progress {
+  z-index: 6;
+  right: 6vw;
+  bottom: max(22px, env(safe-area-inset-bottom));
+  left: 6vw;
+}
+
+.gate-onboarding .race-tree-wire {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.gate-onboarding .race-node {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 22em;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 220ms var(--ease-soft), filter 220ms var(--ease-soft), box-shadow 220ms var(--ease-soft);
+}
+
+.gate-onboarding .race-node .race-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+.gate-onboarding .race-node-tint {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #f3a82b;
+  mix-blend-mode: color;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms var(--ease-soft);
+}
+
+.gate-onboarding .race-node:hover,
+.gate-onboarding .race-node.is-selected {
+  z-index: 2;
+  filter: brightness(1.08) saturate(1.1) drop-shadow(0 0 14em rgb(243 168 43 / 55%));
+  animation: gate-onboarding-node-breathe 2.8s ease-in-out infinite;
+}
+
+.gate-onboarding .race-node:hover .race-node-tint,
+.gate-onboarding .race-node.is-selected .race-node-tint {
+  opacity: 0.88;
+}
+
+.gate-onboarding .race-node:active {
+  transform: scale(0.98);
+}
+
+.gate-onboarding .race-node:focus-visible {
+  outline: 3em solid rgb(255 182 73 / 90%);
+  outline-offset: 4em;
+}
+
+@keyframes gate-onboarding-node-breathe {
+  0%, 100% { transform: scale(1.015); }
+  50% { transform: scale(1.035); }
+}
+
+.gate-onboarding .race-tree-screen.is-intro .race-node {
+  transform: scale(var(--arrival-scale, 1));
+}
+
+.gate-onboarding .race-list-canvas {
+  position: relative;
+  width: 1341em;
+  height: 863em;
+  font-size: calc(1 * var(--onboarding-unit));
+}
+
+.gate-onboarding .race-chip {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 80em;
+  height: 80em;
+  padding: 0;
+  border: 0;
+  border-radius: 20em;
+  background: #a1b89e;
+  color: #fefeff;
+  cursor: pointer;
+  transition: background 160ms var(--ease-soft), transform 140ms var(--ease-soft);
+}
+.gate-onboarding .race-chip.is-selected {
+  background: #d1dbd6;
+}
+
+.gate-onboarding .race-chip:hover {
+  filter: brightness(1.08);
+}
+
+.gate-onboarding .race-chip:active {
+  transform: scale(0.94);
+}
+
+.gate-onboarding .race-chip .race-category-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.gate-onboarding .race-search {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 12em;
+  padding: 0 18em;
+  border: 3em solid #4d4943;
+  border-radius: 14em;
+  background: #000;
+}
+
+.gate-onboarding .race-search:focus-within {
+  border-color: #a1b89e;
+}
+
+.gate-onboarding .race-search-icon {
+  flex: 0 0 auto;
+  width: 40em;
+  height: 40em;
+  color: #d1dbd6;
+}
+
+.gate-onboarding .race-search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--field-cream);
+  font-family: inherit;
+  font-size: 26em;
+  line-height: 1;
+  caret-color: var(--field-cream);
+}
+
+.gate-onboarding .race-submit {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 58em;
+  height: 58em;
+  padding: 0;
+  border: 0;
+  border-radius: 14em;
+  background: #d1dbd6;
+  color: #fefeff;
+  cursor: pointer;
+  transition: transform 140ms var(--ease-soft), filter 140ms var(--ease-soft);
+}
+
+.gate-onboarding .race-submit .race-submit-icon {
+  width: 62%;
+  height: 62%;
+}
+
+.gate-onboarding .race-submit:hover {
+  filter: brightness(1.08);
+}
+
+.gate-onboarding .race-submit:active {
+  transform: scale(0.94);
+}
+
+.gate-onboarding .race-divider {
+  position: absolute;
+  height: 2em;
+  background: #d7ded4;
+}
+.gate-onboarding .race-grid-scroll {
+  position: absolute;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.gate-onboarding .race-grid-scroll::-webkit-scrollbar {
+  width: 10em;
+}
+
+.gate-onboarding .race-grid-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.gate-onboarding .race-grid-scroll::-webkit-scrollbar-thumb {
+  background: #d1dbd6;
+  border-radius: 6em;
+}
+
+.gate-onboarding .race-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 144em);
+  align-content: start;
+  justify-content: start;
+}
+
+.gate-onboarding .race-card {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 26em;
+  background: #d1dbd6;
+  color: #fefeff;
+  cursor: pointer;
+  transition: transform 140ms var(--ease-soft), filter 140ms var(--ease-soft), box-shadow 140ms var(--ease-soft);
+}
+
+.gate-onboarding .race-avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+.gate-onboarding .race-card::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #f3a82b;
+  mix-blend-mode: color;
+  opacity: 0;
+  pointer-events: none;
+  content: '';
+  transition: opacity 180ms var(--ease-soft);
+}
+
+.gate-onboarding .race-card:hover {
+  z-index: 1;
+  filter: brightness(1.06) drop-shadow(0 0 10em rgb(243 168 43 / 55%));
+  animation: gate-onboarding-node-breathe 2.8s ease-in-out infinite;
+}
+
+.gate-onboarding .race-card:active {
+  transform: scale(0.97);
+}
+.gate-onboarding .race-card.is-selected {
+  z-index: 1;
+  box-shadow: 0 0 0 4em var(--id-orange);
+}
+
+.gate-onboarding .race-card:hover::after,
+.gate-onboarding .race-card.is-selected::after {
+  opacity: 0.9;
+}
+
+.gate-onboarding .race-card:focus-visible {
+  outline: 3em solid rgb(255 182 73 / 90%);
+  outline-offset: 4em;
+}
+
+.gate-onboarding .appearance-choice-options {
+  position: absolute;
+  top: calc(50% - calc(250 * var(--onboarding-unit)));
+  left: 50%;
+  display: grid;
+  grid-template-columns: repeat(2, calc(460 * var(--onboarding-unit)));
+  gap: calc(212 * var(--onboarding-unit));
+  transform: translateX(-50%);
+}
+
+.gate-onboarding .appearance-mode {
+  position: relative;
+  display: block;
+  width: calc(460 * var(--onboarding-unit));
+  --appearance-color: #acc3ae;
+  --appearance-surface: #d9e4df;
+  color: var(--appearance-color);
+  transition: color 200ms ease;
+}
+
+.gate-onboarding .appearance-mode:has(.appearance-action:hover),
+.gate-onboarding .appearance-mode:has(.appearance-action:focus-visible),
+.gate-onboarding .appearance-mode.is-selected {
+  --appearance-color: #f3a82b;
+  --appearance-surface: #faebca;
+}
+
+.gate-onboarding .appearance-frame {
+  position: relative;
+  width: 100%;
+  height: calc(464 * var(--onboarding-unit));
+  pointer-events: none;
+}
+
+.gate-onboarding .appearance-frame__art,
+.gate-onboarding .appearance-frame__art > svg { display: block; width: 100%; height: 100%; }
+.gate-onboarding .appearance-frame__art svg { overflow: visible; }
+.gate-onboarding .appearance-frame__art rect,
+.gate-onboarding .appearance-frame__art path,
+.gate-onboarding .appearance-frame__art circle { transition: fill 200ms ease, stroke 200ms ease; }
+.gate-onboarding .appearance-frame.has-avatar .frame-placeholder { visibility: hidden; }
+
+.gate-onboarding .appearance-action-row {
+  display: grid;
+  grid-template-columns: calc(68 * var(--onboarding-unit)) calc(252 * var(--onboarding-unit)) calc(68 * var(--onboarding-unit));
+  gap: calc(18 * var(--onboarding-unit));
+  width: calc(424 * var(--onboarding-unit));
+  height: calc(90 * var(--onboarding-unit));
+  margin: calc(18 * var(--onboarding-unit)) auto 0;
+  color: #fff;
+}
+
+.gate-onboarding .appearance-action-side,
+.gate-onboarding .appearance-action {
+  border: 0;
+  border-radius: calc(9 * var(--onboarding-unit));
+  background: var(--appearance-color);
+  transition: background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.gate-onboarding .appearance-action {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: max(3px, calc(10 * var(--onboarding-unit)));
+  padding: 0;
+  color: #fff;
+  font: clamp(12px, 1.2vw, 22px) var(--ui-font);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.gate-onboarding .appearance-action > svg { width: max(12px, calc(42 * var(--onboarding-unit))); height: max(12px, calc(42 * var(--onboarding-unit))); flex: none; }
+.gate-onboarding .appearance-action:focus-visible { outline: 2px solid var(--field-cream); outline-offset: 4px; }
+.gate-onboarding .appearance-action:active {
+  background: #df961e;
+  transform: translateY(1px) scale(.985);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .gate-onboarding .appearance-action:hover {
+    filter: brightness(1.04);
+    box-shadow: 0 3px 9px rgb(36 49 39 / 16%);
+    transform: translateY(-3px);
+  }
+}
+
+.gate-onboarding .appearance-action:focus-visible {
+  box-shadow: 0 2px 7px rgb(36 49 39 / 12%);
+  transform: translateY(-2px);
+}
+.gate-onboarding .appearance-action::after {
+  position: absolute;
+  inset: 50% -4px auto;
+  height: max(100%, 44px);
+  transform: translateY(-50%);
+  content: '';
+}
+
+.gate-onboarding .appearance-action__hint {
+  position: absolute;
+  top: calc(100% + max(8px, calc(18 * var(--onboarding-unit))));
+  left: 50%;
+  width: max-content;
+  color: #fdf9e4;
+  font-size: clamp(12px, 1.4vw, 24px);
+  letter-spacing: .08em;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  transition: opacity 180ms ease, transform 180ms var(--ease-soft);
+  pointer-events: none;
+}
+
+.gate-onboarding .appearance-action:hover .appearance-action__hint,
+.gate-onboarding .appearance-action:focus-visible .appearance-action__hint { opacity: 1; transform: translate(-50%, 0); }
+
+.gate-onboarding .avatar-upload {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.gate-onboarding .avatar-continue {
+  position: absolute;
+  bottom: max(82px, calc(env(safe-area-inset-bottom) + 70px));
+  left: 50%;
+  padding: 11px 28px;
+  border: 1px solid rgb(255 182 73 / 74%);
+  border-radius: 999px;
+  background: rgb(255 182 73 / 14%);
+  color: var(--field-cream);
+  font: 13px var(--ui-font);
+  letter-spacing: .18em;
+  cursor: pointer;
+  transform: translateX(-50%);
+}
+
+.gate-onboarding .avatar-continue:disabled { opacity: .42; cursor: not-allowed; }
+.gate-onboarding .avatar-continue:focus-visible { outline: 2px solid var(--id-orange); outline-offset: 4px; }
+
+.gate-onboarding .appearance-choice-caption {
+  position: absolute;
+  bottom: max(30px, env(safe-area-inset-bottom));
+  left: 50%;
+  width: max-content;
+  max-width: calc(100% - calc(80 * var(--onboarding-unit)));
+  margin: 0;
+  color: #fefeff;
+  font-size: clamp(12px, 1.25vw, 22px);
+  line-height: 1.3;
+  text-align: center;
+  text-shadow: 0 calc(2 * var(--onboarding-unit)) calc(5 * var(--onboarding-unit)) rgb(0 0 0 / 80%);
+  transform: translateX(-50%);
+}
+
+@media (max-width: 700px) {
+  .gate-onboarding .avatar-continue { bottom: max(66px, calc(env(safe-area-inset-bottom) + 58px)); padding: 9px 20px; font-size: 12px; }
+  .gate-onboarding .appearance-choice-caption { bottom: max(18px, env(safe-area-inset-bottom)); width: calc(100vw - 24px); max-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gate-onboarding .race-tree-screen.is-intro .race-node,
+  .gate-onboarding .race-node:hover,
+  .gate-onboarding .race-node.is-selected,
+  .gate-onboarding .race-card:hover,
+  .gate-onboarding .appearance-action,
+  .gate-onboarding .appearance-action__hint,
+  .gate-onboarding .appearance-frame__art rect,
+  .gate-onboarding .appearance-frame__art path,
+  .gate-onboarding .appearance-frame__art circle { transition: none; }
+  .gate-onboarding .race-node:hover,
+  .gate-onboarding .race-node.is-selected,
+  .gate-onboarding .race-card:hover { animation: none; }
+}
+.gate-onboarding .species-dialog {
+  position: fixed;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  box-sizing: border-box;
+  margin: 0;
+  padding: clamp(24px, calc(42 * var(--onboarding-unit)), 42px);
+  border: 1px solid rgb(253 249 228 / 34%);
+  border-radius: 18px;
+  background: #101c1d;
+  color: var(--field-cream);
+  box-shadow: 0 24px 90px rgb(0 0 0 / 42%);
+  font: clamp(16px, calc(23 * var(--onboarding-unit)), 21px) / 1.5 var(--ui-font);
+}
+.gate-onboarding .species-dialog::backdrop { background: rgb(0 0 0 / 64%); }
+.gate-onboarding .species-dialog[open] { animation: gate-onboarding-species-appear 180ms var(--ease-soft); }
+.gate-onboarding .species-dialog form { display: grid; gap: 14px; }
+.gate-onboarding .species-dialog h2 { margin: 0 22px 8px 0; font-size: 1.3em; font-weight: 400; }
+.gate-onboarding .species-dialog label { color: var(--field-cream); }
+.gate-onboarding .species-dialog button, .gate-onboarding .species-dialog input { min-height: 44px; border-radius: 8px; font: inherit; }
+.gate-onboarding .species-dialog input { box-sizing: border-box; width: 100%; min-width: 0; padding: 8px 12px; border: 1px solid rgb(253 249 228 / 34%); background: rgb(253 249 228 / 8%); color: var(--field-cream); }
+.gate-onboarding .species-dialog button { cursor: pointer; padding: 8px 18px; border: 1px solid var(--id-orange); color: var(--id-orange); background: rgb(255 182 73 / 10%); transition: background 160ms ease, transform 160ms ease; }
+.gate-onboarding .species-dialog button:hover { background: rgb(255 182 73 / 20%); }
+.gate-onboarding .species-dialog button:active { transform: translateY(1px); }
+.gate-onboarding .species-dialog :focus-visible { outline: 2px solid var(--id-orange); outline-offset: 3px; }
+.gate-onboarding .species-dialog .species-close { position: absolute; top: 8px; right: 8px; width: 44px; padding: 0; border: 0; background: transparent; font-size: 26px; color: var(--field-cream); }
+.gate-onboarding .species-dialog .species-submit { color: #101c1d; background: var(--id-orange); }
+.gate-onboarding .species-error { min-height: 1.5em; margin: 0; color: var(--id-orange); font-size: .8em; }
+@keyframes gate-onboarding-species-appear { from { opacity: 0; transform: translate(-50%, calc(-50% + 6px)); } to { opacity: 1; transform: translate(-50%, -50%); } }
+@media (prefers-reduced-motion: reduce) { .gate-onboarding .species-dialog[open] { animation: none; } .gate-onboarding .species-dialog button { transition: none; } }
+
+.gate-onboarding .onboarding-save-status { position: absolute; bottom: 24px; left: 24px; right: 24px; z-index: 40; color: var(--id-orange); text-align: center; font-size: 14px; pointer-events: none; }
+.gate-onboarding .back-button { min-width: 44px; min-height: 44px; left: max(12px, env(safe-area-inset-left)); top: max(12px, env(safe-area-inset-top)); }
+.gate-onboarding .back-button svg { min-width: 20px; min-height: 20px; }
+@media (max-width: 600px) { .gate-onboarding .opening-progress { right: 18px; left: 18px; gap: 0 10px; bottom: max(16px, env(safe-area-inset-bottom)); } .gate-onboarding .opening-progress__time { min-width: 70px; font-size: 9px; } }
+
+.gate-onboarding .screen, .gate-onboarding .login { visibility: hidden; transition: opacity var(--t-screen) var(--ease-soft), visibility 0s linear var(--t-screen); }
+.gate-onboarding .screen.is-active, .gate-onboarding .login.is-active { visibility: visible; transition-delay: 0s; }

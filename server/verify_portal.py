@@ -23,6 +23,8 @@ CHECKS = [
     ("iridescently.xyz", "/api/sso-user", 200),
     ("iridescently.xyz", "/api/site-status", 200),
     ("zszm.iridescently.xyz", "/", 200),
+    ("zszm.iridescently.xyz", "/playtest/shengsheng-shoot/", 200),
+    ("zszm.iridescently.xyz", "/playtest/shengsheng-shoot/index.html", 200),
     ("zszm.iridescently.xyz", "/api/sso-user", 200),
     ("zszm.iridescently.xyz", "/ecology/index.html", 200),
     ("zszm.iridescently.xyz", "/shared/shared-session/session.js", 200),

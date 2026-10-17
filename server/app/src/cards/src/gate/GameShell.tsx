@@ -1,41 +1,41 @@
-import { useEffect, useRef, useState } from 'react';
-import GameApp from '../game/GameApp';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { EntryGate } from './EntryGate';
-
-/** 与 .gate 的淡出过渡保持一致，保证加载页完全透明后再卸载 */
+import { PlayerProfileProvider, accountScope, identityComplete, usePlayerProfile } from '../game/PlayerProfile';
+const GameApp = lazy(() => import('../game/GameApp'));
+const PlayerOnboarding = lazy(() => import('../onboarding/PlayerOnboarding').then(module => ({ default: module.PlayerOnboarding })));
 const EXIT_MS = 760;
 
-/**
- * 站点入口：entered 为 false 时只渲染开场加载页，点击「进入众生之门」后才挂载卡牌主游戏。
- * 刷新页面会重新回到加载页（entered 只存在内存中，不落任何存储）。
- */
-export default function GameShell() {
+function GateFlow() {
   const [entered, setEntered] = useState(false);
   const [gateVisible, setGateVisible] = useState(true);
   const [leaving, setLeaving] = useState(false);
   const timer = useRef<number | null>(null);
-
+  const profile = usePlayerProfile();
   useEffect(() => () => { if (timer.current !== null) window.clearTimeout(timer.current); }, []);
-
   function enter() {
     if (leaving) return;
     setLeaving(true);
-    setEntered(true); // 主游戏在加载页淡出的同时开始挂载
+    setEntered(true);
     timer.current = window.setTimeout(() => setGateVisible(false), EXIT_MS);
   }
-
-  // 从主游戏返回开场加载动画：重新挂载加载页让动画从 0 重播一遍，主游戏保持挂载以保留进度
   function returnToGate() {
     if (timer.current !== null) window.clearTimeout(timer.current);
     window.scrollTo({ top: 0 });
-    setLeaving(false);
-    setGateVisible(true);
+    setLeaving(false); setGateVisible(true);
   }
-
-  return (
-    <>
-      {entered && <GameApp onReturnGate={returnToGate} />}
-      {gateVisible && <EntryGate leaving={leaving} onEnter={enter} onSkip={enter} />}
-    </>
-  );
+  return <>
+    {entered && <Suspense fallback={<div className="gate-profile-loading" role="status">正在展开众生之门…</div>}>
+      {profile.loading || (!profile.resolved && profile.error) ? <div className="gate-profile-loading" role="status">
+        <h1>众生之门</h1><p>{profile.error || '正在读取你的玩家资料…'}</p>
+        {profile.error && <button type="button" onClick={() => void profile.refresh()}>重新读取</button>}
+      </div> : identityComplete(profile.identity) ? <GameApp onReturnGate={returnToGate} /> :
+        <PlayerOnboarding key={accountScope(profile.account)} initialIdentity={profile.identity}
+          onComplete={profile.saveIdentity} onCancel={returnToGate} />}
+    </Suspense>}
+    {entered && profile.resolved && profile.error && <div className="gate-profile-status" role="status">{profile.error}<button type="button" onClick={() => void profile.refresh()}>重试</button></div>}
+    {gateVisible && <EntryGate leaving={leaving} onEnter={enter} onSkip={enter} />}
+  </>;
+}
+export default function GameShell() {
+  return <PlayerProfileProvider><GateFlow /></PlayerProfileProvider>;
 }

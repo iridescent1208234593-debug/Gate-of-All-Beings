@@ -44,6 +44,8 @@
   var resumeHidden = false;
   var disposed = false;
   var cleanups = [];
+  var readyCalled = false;
+  var readyTimeout = 0;
   var raf = 0;
   var lastTick = 0;
   var settleStart = 0;
@@ -61,7 +63,7 @@
   function clamp(value) { return Math.max(0, Math.min(1, value)); }
   function mobileHint() { return matchMedia('(max-width: 700px)').matches ? '左右拖动旋转模型 · 上下滑动浏览' : '拖动，可旋转模型'; }
   function ease(value) { return 1 - Math.pow(1 - clamp(value), 3); }
-  function timeLabel(value) { var s = Math.floor(Math.max(0, value)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+  function timeLabel(value) { return window.LXHIntro.formatTime(value); }
   function currentTime() { return scene ? scene.getTime() : video.currentTime || 0; }
   function setPlaying(value) {
     playing = value;
@@ -85,8 +87,7 @@
   }
   function updateTime(time) {
     document.getElementById('gateCurrentTime').textContent = timeLabel(time);
-    if (!seeking) range.value = time;
-    range.setAttribute('aria-valuetext', timeLabel(time) + ' / ' + timeLabel(duration));
+    window.LXHIntro.syncProgress(range, time, duration);
     if (state.phase === 'intro' && time >= introStop) {
       pause();
       transition('INTRO_END');
@@ -236,19 +237,22 @@
     }
   });
   if (scene) hero.classList.add('gate-mode');
-  else { hero.classList.add('gate-fallback'); video.preload = 'auto'; video.load(); }
+  else hero.classList.add('gate-fallback');
   range.max = duration; document.getElementById('gateTotalTime').textContent = timeLabel(duration);
   var played = false;
   try { played = sessionStorage.getItem(INTRO_KEY) === '1'; } catch (error) {}
   var initialForm = location.hash === '#charForm';
   firstIntroFinished = played || reduced;
   introStop = lib && lib.GATE_FULLY_OPEN_AT || introStop;
-  function ready() {
-    if (disposed) return;
-    state.phase = reduced || played || initialForm ? 'hero' : 'intro';
+  function ready(fallbackUnavailable) {
+    if (disposed || readyCalled) return;
+    readyCalled = true;
+    clearTimeout(readyTimeout);
+    var skipIntro = reduced || played || initialForm || fallbackUnavailable === true;
+    state.phase = skipIntro ? 'hero' : 'intro';
     state.intro = state.phase === 'intro' ? 1 : 0;
     document.body.classList.toggle('home-intro', state.phase === 'intro');
-    if (reduced || played || initialForm) seek(duration);
+    if (skipIntro) seek(duration);
     render();
     boot.hidden = true; document.documentElement.classList.remove('home-booting');
     if (state.phase === 'intro') play();
@@ -256,7 +260,16 @@
     schedule();
   }
   if (scene) requestAnimationFrame(ready);
-  else { listen(video, 'loadeddata', ready, { once: true }); listen(video, 'error', ready, { once: true }); }
+  else {
+    // Register before load: a cached response can complete immediately. A stalled
+    // fallback must not keep the archive hidden indefinitely.
+    listen(video, 'loadeddata', ready, { once: true });
+    listen(video, 'error', function () { ready(true); }, { once: true });
+    readyTimeout = setTimeout(function () { ready(video.readyState < 2); }, 8000);
+    cleanups.push(function () { clearTimeout(readyTimeout); });
+    video.preload = 'auto';
+    video.load();
+  }
   setTheme('original', true);
 
   listen(window, 'scroll', schedule, { passive: true });
@@ -274,15 +287,17 @@
     window.scrollTo({ top: geometry.flowTop, behavior: 'instant' });
     seek(0); render(); play();
   });
-  listen(range, 'pointerdown', function () { seeking = true; resumeSeek = playing; pause(); });
-  listen(range, 'input', function () { if (!seeking) { seeking = true; resumeSeek = playing; pause(); } seek(range.value); });
   function endSeek() { if (!seeking) return; seeking = false; if (resumeSeek && currentTime() < duration) play(); }
-  listen(range, 'change', endSeek); listen(document, 'pointerup', endSeek); listen(document, 'pointercancel', endSeek);
-  listen(document.getElementById('gateSkip'), 'click', function () {
+  cleanups.push(window.LXHIntro.bindSeek(range, {
+    start: function () { seeking = true; resumeSeek = playing; pause(); },
+    input: function (value) { seek(value); },
+    end: endSeek
+  }));
+  cleanups.push(window.LXHIntro.bindSkip(document.getElementById('gateSkip'), function () {
     pause(); seek(duration); transition('HERO');
     try { sessionStorage.setItem(INTRO_KEY, '1'); } catch (error) {}
     window.scrollTo({ top: geometry.archiveTop - 76, behavior: reduced ? 'instant' : 'smooth' });
-  });
+  }));
   listen(grid, 'click', function (event) {
     var button = event.target.closest('.door-main');
     if (!button) return;

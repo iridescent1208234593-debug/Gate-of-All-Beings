@@ -25,8 +25,9 @@
     return result;
   }
   async function upload(source) {
-    if (!/^data:image\//.test(source || '')) return source;
-    const file = await (await fetch(source)).blob();
+    let file = source instanceof Blob ? source : null;
+    if (!file && /^data:image\//.test(source || '')) file = await (await fetch(source)).blob();
+    if (!file) return source;
     const result = await request('/api/images/upload', {}, file);
     if (!/^\/assets\/uploads\/[a-f0-9]+\.(png|jpg|webp|gif)$/.test(result.url || '')) throw new Error('图片保存地址无效');
     return result.url;
@@ -39,6 +40,17 @@
       return cache.get(value);
     };
     if (next.image) next.image = await resolve(next.image);
+    if (next.avatar_asset_id) {
+      const avatar = next.avatar_asset_id;
+      if (avatar instanceof Blob || /^data:image\//.test(avatar || '')) {
+        const file = avatar instanceof Blob ? avatar : await (await fetch(avatar)).blob();
+        const result = await request('/api/avatars/upload', {}, file);
+        if (!/^\/assets\/uploads\/[a-f0-9]{64}\.(png|jpg)$/.test(result.avatar_asset_id || '')) throw new Error('头像保存地址无效');
+        next.avatar_asset_id = result.avatar_asset_id;
+      }
+    }
+    if (next.avatar_asset_id && !/^\/assets\/uploads\/[a-f0-9]{32,64}\.(png|jpg|webp|gif)$/.test(next.avatar_asset_id)) throw new Error('OC 头像资源地址无效');
+    if (next.avatar_display_shape && !['square', 'circle'].includes(next.avatar_display_shape)) throw new Error('OC 头像显示形状无效');
     if (Array.isArray(next.images)) {
       next.images = [];
       for (const image of data.images) next.images.push(await resolve(image));

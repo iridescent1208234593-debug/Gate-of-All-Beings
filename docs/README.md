@@ -16,7 +16,7 @@ Iridescently / 众生之门 工作区文档。总览见根 [README.md](../README
 ## 快速事实
 
 - 统一入口：`server/portal_server.py`，端口 `8080`，生产由 Cloudflare 隧道接入。
-- 壳：`server/app/shell/index.html`，History API 路径路由 `/app/shell/m/<名>`，7 游戏无 iframe。
+- 壳：`server/app/shell/index.html`，路径 `/app/shell/m/<名>`；embed 模块同页挂载，非 embed 试玩沿用 iframe，不能概括为全站无 iframe。
 - 公用包：`@lxh/shared-{ui,types,data,session}`。
 - 统一存档：`localStorage['iridescently.save.v1']`。
 - 数据库：世界观库 `assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db`；会馆 `portal/huiguan/users.db`；聚灵 `server/app/src/juling/data/save.db`。
@@ -24,5 +24,9 @@ Iridescently / 众生之门 工作区文档。总览见根 [README.md](../README
 ## 维护与研发资料
 
 - [统一更新流程](update-system.md)
+- [众生之门新版流程集成](zszm-flow-integration.md)：单次开场、玩家初始化、门庭与小游戏入口；本地候选未发布。
+- [身份、头像与存档关系](zszm-identity-and-save-map.md)：Account / OC / Gate 的数据边界、跨站限制和后续风险。
+- [主站与西木会馆加载审查](zszm-loading-audit.md)：真实测量、开场阻塞根因和源码优化边界。
 - [2026-10-10 目录整理](maintenance/repository-cleanup-2026-10-10.md)
-- [生命模拟研究](../New%20project/doc/zszm-life-research/00-index.md)：保留项目相对路径，作为研发专题文档入口。
+- [生命模拟研究](../../External%20Projects/Iridescently%20Labs/research/doc/zszm-life-research/00-index.md)：当前研发资料在 `E:/External Projects/Iridescently Labs/research/`，独立于生产工作区；此链接用于本机资料阅读。
+- [玩家与自主生命：Build-vs-Adopt](../../External%20Projects/Iridescently%20Labs/research/doc/zszm-life-research/33-gameplay-systems-build-vs-adopt.md)：玩法系统的源码筛选、复用边界与下一实验。

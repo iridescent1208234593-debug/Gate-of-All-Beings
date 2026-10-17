@@ -7,6 +7,7 @@
 <title>个人账户 · 西木会馆</title>
 <link rel="icon" href="favicon.png">
 <link rel="stylesheet" href="/design-system/design-system.css">
+<link rel="stylesheet" href="/avatar-cropper.css">
 <style>
 :root{--bg:#f5f0e8;--panel:#fbf8f2;--border:#d4cfbe;--text:#3a4a3e;--dim:#7a8a7e;--accent:#5a9e8f;--gold:#d4a840;--danger:#b3543f}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -40,6 +41,9 @@ input[type=color]{width:42px;height:32px;border:1px solid var(--border);border-r
 .hex-in{width:92px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;color:var(--text);background:var(--bg)}
 .theme-prev{border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:12px;background:var(--bg);min-height:52px}
 .theme-prev .btn{pointer-events:none}
+.account-avatar-row{display:flex;align-items:center;gap:14px}.account-avatar-row>img{width:76px;height:76px;flex:none;border-radius:50%;object-fit:cover;background:#e6e1d5;border:1px solid var(--border)}
+.account-avatar-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.account-avatar-actions .btn{min-height:40px}
+@media(max-width:480px){.account-avatar-actions .btn{flex:1 1 auto}}
 </style>
 </head>
 <body>
@@ -48,9 +52,12 @@ input[type=color]{width:42px;height:32px;border:1px solid var(--border);border-r
   <h1>个人账户<small>西木会馆 · iridescently.xyz</small></h1>
   <div id="content"><div class="state-box">加载中…</div></div>
 </div>
+<script src="/image-upload.js"></script>
+<script src="/avatar-cropper.js"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 const roleName={executor:'执行者',elder:'长老',admin:'管理员'};
+let accountAvatarDraft=null, accountAvatarPreviewUrl='';
 async function init(){
   try{
     const r=await fetch('/api/user'); const u=await r.json();
@@ -73,6 +80,13 @@ function render(u,emailState){
   const curP=((u.theme_primary||'#f5f0e8').match(/^#[0-9a-fA-F]{6}$/)?u.theme_primary:'#f5f0e8').toLowerCase();
   const curA=((u.theme_accent||'#5a9e8f').match(/^#[0-9a-fA-F]{6}$/)?u.theme_accent:'#5a9e8f').toLowerCase();
   document.getElementById('content').innerHTML=`
+    <div class="card">
+      <h2>账户头像</h2>
+      <div class="account-avatar-row"><img id="accountAvatarPreview" src="${esc(u.account_avatar_url||u.picture||'')}" alt="账户头像" onerror="this.hidden=true"><div><strong>${esc(u.nickname||u.username||'账户')}</strong><div class="hint">这是账户本人在网站中的通用头像，不会更改 OC 或众生之门形象。</div></div></div>
+      <input id="accountAvatarFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
+      <div class="account-avatar-actions"><button class="btn ghost" id="accountAvatarChoose" type="button">选择并裁切</button><button class="btn" id="accountAvatarSave" type="button" disabled>保存头像</button><button class="btn ghost" id="accountAvatarRemove" type="button">移除自定义头像</button></div>
+      <div class="hint" id="accountAvatarHint">支持 JPG、PNG、WebP、GIF；保存为去除元数据的 1:1 头像。</div>
+    </div>
     <div class="qc-card" style="margin-bottom:var(--qc-sp-4)">
       <h2 class="qc-h2">账户安全</h2>
       <p class="qc-hint">设置找回问题、修改密码，或检查你的站内登录账号。</p>
@@ -148,6 +162,26 @@ function render(u,emailState){
   `;
   updatePrev();
 }
+document.addEventListener('click',async event=>{
+  const id=event.target?.id;
+  if(id==='accountAvatarChoose') document.getElementById('accountAvatarFile')?.click();
+  if(id==='accountAvatarSave'&&accountAvatarDraft){
+    const button=event.target,hint=document.getElementById('accountAvatarHint');button.disabled=true;hint.textContent='正在保存头像…';
+    try{await window.HuiguanImages.request('/api/account/avatar',{},accountAvatarDraft);accountAvatarDraft=null;if(accountAvatarPreviewUrl)URL.revokeObjectURL(accountAvatarPreviewUrl);accountAvatarPreviewUrl='';await init();}
+    catch(error){hint.textContent=error.message||'头像保存失败';button.disabled=false;}
+  }
+  if(id==='accountAvatarRemove'){
+    const button=event.target,hint=document.getElementById('accountAvatarHint');button.disabled=true;
+    try{const r=await fetch('/api/account/avatar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({remove:true})});const d=await r.json();if(!r.ok||!d.ok)throw new Error(d.error||'移除失败');accountAvatarDraft=null;await init();}
+    catch(error){hint.textContent=error.message||'移除失败';button.disabled=false;}
+  }
+});
+document.addEventListener('change',async event=>{
+  if(event.target?.id!=='accountAvatarFile')return;
+  const file=event.target.files?.[0];event.target.value='';if(!file)return;
+  try{accountAvatarDraft=await window.HuiguanAvatarCropper.open(file);if(accountAvatarDraft){if(accountAvatarPreviewUrl)URL.revokeObjectURL(accountAvatarPreviewUrl);accountAvatarPreviewUrl=URL.createObjectURL(accountAvatarDraft);const preview=document.getElementById('accountAvatarPreview');preview.src=accountAvatarPreviewUrl;preview.hidden=false;document.getElementById('accountAvatarSave').disabled=false;document.getElementById('accountAvatarHint').textContent='预览已更新；点击“保存头像”后同步到你的账户。';}}
+  catch(error){document.getElementById('accountAvatarHint').textContent=error.message||'图片处理失败';}
+});
 async function sendEmailVerification(){
   const input=document.getElementById('accountEmail'), button=document.getElementById('emailSend');
   const hint=document.getElementById('emailHint'), err=document.getElementById('emailErr');

@@ -52,7 +52,6 @@ huiguan = _load("portal_huiguan", CODE_ROOT / "portal" / "huiguan" / "server_hui
 APP_DIR = CODE_ROOT / "server" / "app"
 MODULES_DIR = ROOT / "server" / "app" / "modules"
 PROXY_PORTS = {"cards": 5174, "card-balance": 5178, "softie": 4173, "juling": 5177}
-
 OZTREE_STATIC = Path(r"E:\External Projects\众生之门生物树可视化前端\OZtree\static")
 
 API_RE = re.compile(r"^/app/modules/([^/]+)/api/")
@@ -245,6 +244,9 @@ def route(host, path):
     # Embedded modules and shared resources must win before the Cards SPA fallback.
     if p.startswith("/shared/"):
         return StaticHandler, {"root": str(CODE_ROOT / "shared"), "strip": "/shared"}
+    # The shooter lives in the main site's static tree, not the Cards SPA.
+    if p == "/playtest/shengsheng-shoot" or p.startswith("/playtest/shengsheng-shoot/"):
+        return www.Handler, {}
     # 生物树可视化测试入口（OneZoom 改造 · 鳞翅目导入试用）
     if p == "/ozmtree" or p.startswith("/ozmtree/"):
         return StaticHandler, {"root": str(OZTREE_STATIC), "strip": "/ozmtree"}

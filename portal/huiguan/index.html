@@ -620,8 +620,15 @@
     padding: 7px 0; transition: all 0.2s;
   }
   .auth-usso:hover { border-color: var(--gold); background: rgba(212,168,75,0.08); }
+  .auth-legacy { margin-top: 8px; text-align: center; }
+  .auth-legacy summary { cursor: pointer; color: var(--text-dim); font-size: 11px; }
+  .auth-legacy .auth-hint { margin: 6px 0 0; }
 </style>
-<link rel="stylesheet" href="/homepage.css?v=20261011-feedback-1">
+<link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261015-1">
+<link rel="stylesheet" href="/homepage.css?v=20261015-1">
+<link rel="preload" as="script" href="/design-system/ui/lxh-intro.js?v=20261015-1">
+<link rel="preload" as="script" href="/assets/gate/gate-scene.js?v=20261009-6">
+<link rel="preload" as="script" href="/homepage.js?v=20261016-1">
 <script>document.documentElement.classList.add('home-booting');</script>
 </head>
 <body>
@@ -832,9 +839,8 @@
     <input class="auth-input" id="authPassword" type="password" maxlength="128" autocomplete="current-password" placeholder="登录使用已有密码；新注册需至少 12 位">
     <button type="button" class="auth-submit" id="authSubmit" onclick="submitAuth()">登录 / 注册</button>
     <div class="auth-hint">用户名不存在时将自动注册并登录。请使用注册用户名，不是昵称；密码区分大小写。</div>
-    <a class="auth-usso" href="/security.html?mode=recover">忘记密码？回答提示问题找回</a>
-    <div class="auth-divider"><span>或</span></div>
-    <a class="auth-usso" href="/api/login">使用 USSO 账号登录</a>
+    <a class="auth-usso" href="/security.html?mode=recover">找回账号 / 密码（已验证邮箱或找回问题）</a>
+    <details class="auth-legacy"><summary>其他登录方式</summary><div class="auth-hint">USSO 外部登录已暂停；既有账户资料与角色数据保留。请使用会馆站内账号登录。</div></details>
   </div>
 </div>
 
@@ -859,9 +865,9 @@
       </div>
       <div class="gate-controls" role="group" aria-label="开屏动画播放控制">
         <button type="button" id="gatePlayToggle" class="gate-control-button" aria-label="播放开屏动画" aria-pressed="false">播放</button>
-        <input type="range" id="gateProgress" min="0" max="6" step="0.01" value="0" aria-label="开屏动画进度">
+        <input type="range" id="gateProgress" class="lxh-intro-range" min="0" max="6" step="0.01" value="0" aria-label="开屏动画进度">
         <span class="gate-time"><span id="gateCurrentTime">0:00</span> / <span id="gateTotalTime">0:06</span></span>
-        <button type="button" id="gateSkip" class="gate-skip" title="跳过开屏并前往档案室">跳过 ↘</button>
+        <button type="button" id="gateSkip" class="gate-skip lxh-intro-skip" title="跳过开屏并前往档案室">跳过 ↘</button>
       </div>
     </div>
     </div>
@@ -1094,6 +1100,21 @@
           <input type="file" id="imgInput" name="image" accept="image/jpeg,image/png,image/webp" multiple onchange="handleImage(event)">
         </div>
         <div id="imgGallery" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
+        <div class="oc-avatar-editor" aria-labelledby="ocAvatarHeading">
+          <div class="oc-avatar-editor__preview"><img id="ocAvatarPreview" alt="OC 头像预览" hidden><span id="ocAvatarFallback" aria-hidden="true">人设</span></div>
+          <div class="oc-avatar-editor__body">
+            <strong id="ocAvatarHeading">这份 OC 的独立头像</strong>
+            <p>从本 OC 的设定图中选择，或上传后裁切。不会使用或修改账户头像。</p>
+            <div id="ocAvatarCandidates" class="oc-avatar-editor__candidates" aria-label="从已有图片选择头像"></div>
+            <div class="oc-avatar-editor__actions">
+              <button type="button" class="btn-edit" onclick="document.getElementById('ocAvatarInput').click()">上传并裁切</button>
+              <button type="button" class="btn-edit" onclick="setOCAvatarShape('square')" aria-pressed="true" id="ocAvatarSquare">方形显示</button>
+              <button type="button" class="btn-edit" onclick="setOCAvatarShape('circle')" aria-pressed="false" id="ocAvatarCircle">圆形显示</button>
+              <button type="button" class="btn-del" onclick="clearOCAvatar()">删除头像</button>
+              <input type="file" id="ocAvatarInput" accept="image/png,image/jpeg,image/webp,image/gif" hidden onchange="handleOCAvatarFile(event)">
+            </div>
+          </div>
+        </div>
         <div class="haibao-entry">
           <a href="/haibao/" target="_blank">🎨 配色海报工坊 · 用你选的古色/色环为角色制作双色水墨海报，还可叠上角色图像 →</a>
         </div>
@@ -1299,6 +1320,8 @@
 </div>
 
 <script src="/image-upload.js?v=20261013"></script>
+<link rel="stylesheet" href="/avatar-cropper.css">
+<script src="/avatar-cropper.js"></script>
 <script src="/character-colors.js?v=20261013"></script>
 <script>
 const STORAGE_KEY = 'luoxiaohei_characters';
@@ -1430,7 +1453,8 @@ function renderAuthBar(user) {
   const bar = document.getElementById('authBar');
   if (bar) {
     if (user) {
-      const avatar = user.avatar ? `<img class="user-avatar" src="${escapeHtml(user.avatar)}" alt="">` : '';
+      const accountAvatar = user.account_avatar_url || user.picture || '';
+      const avatar = accountAvatar ? `<img class="user-avatar" src="${escapeHtml(accountAvatar)}" alt="账户头像">` : '';
       const accountLink = '<a class="btn-logout" href="/account.html">账户</a>';
       const memberLink = (user.is_admin || user.role === 'elder') ? '<a class="btn-logout" href="/member.html">成员管理</a>' : '';
       const roleTag = user.role && roleName[user.role] ? `<span class="role-tag">${roleName[user.role]}</span>` : '';
@@ -2190,6 +2214,58 @@ document.addEventListener('input', function(e) {
 
 // ========== 图片上传（多张 + 可删除） ==========
 let imageList = [];
+let ocAvatarAsset = '';
+let ocAvatarDisplayShape = 'circle';
+let ocAvatarPreviewUrl = '';
+function setOCAvatarShape(shape) {
+  ocAvatarDisplayShape = shape === 'square' ? 'square' : 'circle';
+  document.getElementById('ocAvatarSquare').setAttribute('aria-pressed', String(ocAvatarDisplayShape === 'square'));
+  document.getElementById('ocAvatarCircle').setAttribute('aria-pressed', String(ocAvatarDisplayShape === 'circle'));
+  renderOCAvatarPreview();
+}
+function renderOCAvatarPreview() {
+  const img = document.getElementById('ocAvatarPreview');
+  const fallback = document.getElementById('ocAvatarFallback');
+  if (!img || !fallback) return;
+  const source = ocAvatarPreviewUrl || ocAvatarAsset;
+  img.hidden = !source;
+  fallback.hidden = !!source;
+  img.style.borderRadius = ocAvatarDisplayShape === 'circle' ? '50%' : '6px';
+  img.src = source || '';
+}
+function renderOCAvatarCandidates() {
+  const root = document.getElementById('ocAvatarCandidates');
+  if (!root) return;
+  root.replaceChildren();
+  if (!imageList.length) return;
+  const label = document.createElement('span');
+  label.textContent = '从已有图片选择头像：'; root.appendChild(label);
+  imageList.forEach((source, index) => {
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'oc-avatar-candidate';
+    button.setAttribute('aria-label', `裁切第 ${index + 1} 张人设图作为头像`);
+    const image = document.createElement('img'); image.src = source; image.alt = ''; button.appendChild(image);
+    button.addEventListener('click', () => cropOCAvatar(source)); root.appendChild(button);
+  });
+}
+async function cropOCAvatar(source) {
+  if (!window.HuiguanAvatarCropper) { showToast('error', '头像裁切器暂不可用，请刷新后重试。'); return; }
+  try {
+    const blob = await window.HuiguanAvatarCropper.open(source);
+    if (!blob) return;
+    const reader = new FileReader();
+    reader.onload = () => { ocAvatarAsset = String(reader.result); if (ocAvatarPreviewUrl) URL.revokeObjectURL(ocAvatarPreviewUrl); ocAvatarPreviewUrl = URL.createObjectURL(blob); renderOCAvatarPreview(); };
+    reader.readAsDataURL(blob);
+  } catch (error) { showToast('error', error.message || '头像图片处理失败'); }
+}
+function handleOCAvatarFile(event) {
+  const file = event.target.files && event.target.files[0]; event.target.value = '';
+  if (file) void cropOCAvatar(file);
+}
+function clearOCAvatar() {
+  ocAvatarAsset = '';
+  if (ocAvatarPreviewUrl) URL.revokeObjectURL(ocAvatarPreviewUrl);
+  ocAvatarPreviewUrl = ''; renderOCAvatarPreview();
+}
 function handleImage(e) {
   const files = Array.from(e.target.files || []);
   if (!files.length) return;
@@ -2237,6 +2313,7 @@ function renderGallery() {
       '<button type="button" onclick="removeImage(' + i + ')" title="删除这张" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:var(--panel,#fff);color:var(--danger,#b3543f);cursor:pointer;font-size:12px;line-height:1;">×</button>' +
     '</div>'
   ).join('');
+  renderOCAvatarCandidates();
 }
 
 // ========== 阵营滑块 ==========
@@ -2365,6 +2442,8 @@ function collectData() {
     appearance: f.appearance.value.trim(),
     image: imageList[0] || '',
     images: imageList.slice(),
+    avatar_asset_id: ocAvatarAsset,
+    avatar_display_shape: ocAvatarDisplayShape,
     abilities: abilities,
     weapon: getWeaponString(),
     background: f.background.value.trim(),
@@ -2468,6 +2547,7 @@ function fillCharacterToForm(ch) {
   renderWeaponTags();
   const _wInp = document.getElementById('weaponInput'); if (_wInp) _wInp.value = '';
   imageList = [];
+  clearOCAvatar();
   renderGallery();
   document.querySelectorAll('[data-ability-custom]').forEach(el => el.value = '');
   const byName = (n, v) => { if (f && f[n] && v != null && v !== '') f[n].value = v; };
@@ -3199,6 +3279,7 @@ body::before {
   transition: all 0.3s; font-weight: 600; letter-spacing: 1px;
 }
 .hero .tags span:hover { border-color: var(--accent); background: rgba(90, 158, 143, 0.1); color: var(--accent); }
+.oc-profile-avatar { width:76px;height:76px;object-fit:cover;border:2px solid var(--outline);padding:3px;background:var(--paper);margin:14px auto 0;display:block; }
 .content { padding: 20px 28px 28px; }
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(24px); }
@@ -3375,6 +3456,7 @@ body.theme-transition, body.theme-transition * { transition: background-color 0.
       ${abilityTags.map(t => `<span>${escapeHtml(t)}</span>`).join('')}
     </div>
   </div>
+  ${data.avatar_asset_id ? `<img class="oc-profile-avatar" src="${escapeHtml(data.avatar_asset_id)}" alt="${escapeHtml(data.name)} 的人设头像" style="border-radius:${data.avatar_display_shape === 'square' ? '6px' : '50%'}">` : ''}
   ${(() => {
     const imgs = (data.images && data.images.length) ? data.images : (data.image ? [data.image] : []);
     if (!imgs.length) return '';
@@ -3673,6 +3755,7 @@ function flushPending() {
 function resetForm() {
   document.getElementById('charForm').reset();
   imageList = [];
+  clearOCAvatar();
   renderGallery();
   const zone = document.getElementById('uploadZone');
   zone.querySelector('.icon').textContent = '\uD83D\uDDBC';
@@ -3809,6 +3892,9 @@ function fillFormFromData(c) {
   }
   // 图片：沿用原图（多张），可重新上传/删除
   imageList = Array.isArray(c.images) && c.images.length ? c.images.slice() : (c.image ? [c.image] : []);
+  ocAvatarAsset = c.avatar_asset_id || '';
+  ocAvatarDisplayShape = c.avatar_display_shape === 'square' ? 'square' : 'circle';
+  renderOCAvatarPreview();
   renderGallery();
   if (imageList.length) {
     const zone = document.getElementById('uploadZone');
@@ -3874,7 +3960,7 @@ function renderList() {
   btn.style.display = all.length ? '' : 'none';
   let html = all.length ? all.map((c, i) => `
     <div class="char-card">
-      ${c.image ? `<img class="thumb" src="${c.image}" alt="" data-fallback="${escapeHtml((c.name || c.code || '?')[0])}" onerror="thumbFallback(this)">` : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:22px;">' + escapeHtml((c.name || c.code || '?')[0]) + '</div>'}
+      ${(c.avatar_asset_id || c.image) ? `<img class="thumb" src="${escapeHtml(c.avatar_asset_id || c.image)}" alt="" data-fallback="${escapeHtml((c.name || c.code || '?')[0])}" onerror="thumbFallback(this)" style="object-fit:cover;${c.avatar_display_shape === 'circle' ? 'border-radius:50%;' : ''}">` : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:22px;">' + escapeHtml((c.name || c.code || '?')[0]) + '</div>'}
       <div class="info">
         <div class="name">${escapeHtml(c.code)} · ${escapeHtml(c.name)}</div>
         <div class="meta">
@@ -3980,11 +4066,12 @@ if (new URLSearchParams(location.search).get('openauth')) setTimeout(() => openA
 
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"6fa5e24ac49f4de687c113b64d110992","r":1}' crossorigin="anonymous"></script>
 
-<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c14"></script>
+<script src="/design-system/ui/lxh-intro.js?v=20261015-1"></script>
 <script src="/assets/gate/gate-scene.js?v=20261009-6"></script>
+<script src="/homepage.js?v=20261016-1"></script>
+<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c14"></script>
 <script src="/homepage-chrome.js?v=20261009-2"></script>
 <script src="/homepage-content.js?v=20261009-2"></script>
-<script src="/homepage.js?v=20261009-9"></script>
 <script src="/homepage-registration.js?v=20261009-1"></script>
 <script>
 /* 链接框（浏览器标签 / 分享链接标题）文字轮播：小猫脸眨眼 → 站点文案打字机 */

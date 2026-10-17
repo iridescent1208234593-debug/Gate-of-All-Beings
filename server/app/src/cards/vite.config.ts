@@ -19,8 +19,12 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
       proxy: {
+        '/app': 'http://127.0.0.1:8080',
+        '/assets': 'http://127.0.0.1:8080',
+        '/playtest': 'http://127.0.0.1:8080',
+        '/design-system': 'http://127.0.0.1:8080',
         '/api': {
-          target: 'http://127.0.0.1:5174',
+          target: process.env.ZSZM_DEV_API_TARGET || 'http://127.0.0.1:5174',
           changeOrigin: true,
         },
       },

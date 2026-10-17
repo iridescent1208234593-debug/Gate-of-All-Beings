@@ -61,14 +61,10 @@
 .gate-dot { width: 18px; height: 18px; border: 1px solid #fff9; border-radius: 50%; background: var(--dot); cursor: pointer; }
 .gate-dot.on { outline: 2px solid #eed492; outline-offset: 4px; }
 .gate-controls { inset: auto 0 0; display: grid; grid-template-columns: auto minmax(60px, 1fr) auto auto; gap: 12px; align-items: center; padding: 16px 16px 3px; background: linear-gradient(transparent,#0009); }
-.gate-control-button, .gate-skip { min-height: 40px; padding: 6px 8px; border: 0; background: transparent; color: #f9f1d1bd; font: inherit; cursor: pointer; }
+.gate-control-button { min-height: 40px; padding: 6px 8px; border: 0; background: transparent; color: #f9f1d1bd; font: inherit; cursor: pointer; }
 .gate-control-button { font-size: 19px; min-width: 40px; }
 .gate-time { font: 10px ui-monospace, Consolas, monospace; white-space: nowrap; color: #f9f1d180; }
-.gate-controls input { appearance: none; width: 100%; height: 32px; margin: 0; background: transparent; cursor: pointer; touch-action: pan-x; }
-.gate-controls input::-webkit-slider-runnable-track { height: 1px; background: #f9f1d155; }
-.gate-controls input::-moz-range-track { height: 1px; background: #f9f1d155; }
-.gate-controls input::-webkit-slider-thumb { appearance: none; height: 5px; width: 5px; margin-top: -2px; border: 0; border-radius: 50%; background: #ebd592b0; }
-.gate-controls input::-moz-range-thumb { height: 5px; width: 5px; border: 0; border-radius: 50%; background: #ebd592b0; }
+.gate-controls input.lxh-intro-range { width: 100%; height: 32px; margin: 0; cursor: pointer; }
 .gate-controls input:focus-visible { outline: 1px solid #eed492; outline-offset: 2px; }
 .gate-controls button:focus-visible, .gate-dot:focus-visible { outline: 2px solid #e5bd61; outline-offset: 3px; }
 
