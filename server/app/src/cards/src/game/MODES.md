@@ -8,7 +8,7 @@
 - 发布模块的名称、描述、真实 URL 和加载方式继续由 `server/app/portal.json` 唯一管理。门庭直接 import 此清单；`cards → adventure`、`management → management`、`ecology → ecosystem` 是现有同页路由映射，不是第二份模块注册表。
 - `GameApp.tsx`：hash 路由及成熟卡牌、日常、图鉴、手札的 owner。卡牌同行者选择放在 `#adventure` 无存档状态下。
 - `ShoreMode.tsx` / `shore/`：原型最后的雾隐浅滩独立为探索小游戏，退出回门庭。
-- `server/app/shell/index.html`：成熟独立模块继续使用现有壳生命周期；顶部「返回门庭」回到众生之门 `/#home`。
+- `server/app/shell/index.html`：成熟独立模块继续使用现有壳生命周期。顶部是站点全局栏（`shared/shared-ui/site-nav.js`），其下一条米白本地栏：「门庭」回到众生之门 `/#home`，其余为模块页签（重生之门、聚灵、灵境会馆、生态进化、灵体互动、AEON）。壳根路径 `/app/shell/` 不再展示独立入口页，直接回门庭。
 
 ## 当前路由
 

@@ -1,6 +1,6 @@
 # Iridescently Design System v2 Audit & Architecture Proposal
 
-审计日期：2026-10-04。状态：供评审的方案，尚未实施。
+审计日期：2026-10-04。状态：供评审的方案。2026-10-17 更新：「站群公共外框 / 游戏导航」一项已由 `shared/shared-ui/site-nav.js` 统一实现，见 `shared/shared-ui/README.md`；其余仍未实施。
 
 **建议建立“共享基础与交互契约 + 模块拥有的主题和版式 + 按需加载的体验能力”。不把会馆皮肤升级成全站皮肤，不把全部页面迁入 React，也不把五个概念层拆成五个软件包。**
 

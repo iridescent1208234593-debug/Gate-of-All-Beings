@@ -751,7 +751,7 @@
   <span class="sign">故事与角色档案</span>
 </nav>
 
-<!-- 兜底：外部统一导航（shared-chrome-v2.js）若仍注入"配色海报"入口，页面层隐藏 -->
+<!-- 兜底：外部统一导航（shared/shared-ui/site-nav.js）若仍注入"配色海报"入口，页面层隐藏 -->
 <script>
 (function() {
   var hideHbEntry = function() {
@@ -801,7 +801,7 @@
 <button type="button" class="cream-corner-btn" id="creamToggleBtn" onclick="toggleCreamMode()" title="切换为会馆米白背景">☾ 会馆米白</button>
 <script>
 // 将米白切换按钮移入外部导航栏 #qc-nav 的 .qc-right 内（authBar 登录/注册之前），
-// 与账户区水平排开、互不遮挡；导航栏由 shared-chrome-v2.js 在页面末尾注入，故轮询等待
+// 与账户区水平排开、互不遮挡；导航栏由 site-nav.js 在页面末尾注入，故轮询等待
 (function () {
   var btn = document.getElementById('creamToggleBtn');
   if (!btn) return;
@@ -809,16 +809,16 @@
     if (!btn.isConnected) return;
     var nav = document.getElementById('qc-nav');
     if (!nav) { setTimeout(place, 200); return; }
-    var right = nav.querySelector('.qc-right');
-    var bar = right && right.querySelector('#authBar');
-    if (!right || !bar) { setTimeout(place, 200); return; }
-    if (btn.parentNode !== right) {
-      btn.style.position = 'static';
-      btn.style.top = 'auto';
-      btn.style.right = 'auto';
-      btn.style.marginLeft = '2px';
-      right.insertBefore(btn, bar);
-    }
+    var slot = nav.querySelector('.qc-slot');
+    if (!slot) { setTimeout(place, 200); return; }
+    // Corner controls live in the shared bar's page slot (design-system.md 布局约束).
+    [document.querySelector('.fan-corner-btn'), btn].forEach(function (control) {
+      if (!control || control.parentNode === slot) return;
+      control.style.position = 'static';
+      control.style.top = 'auto';
+      control.style.right = 'auto';
+      slot.appendChild(control);
+    });
   }
   if (document.readyState === 'complete') setTimeout(place, 250);
   else window.addEventListener('load', function () { setTimeout(place, 250); });
@@ -4069,7 +4069,7 @@ if (new URLSearchParams(location.search).get('openauth')) setTimeout(() => openA
 <script src="/design-system/ui/lxh-intro.js?v=20261015-1"></script>
 <script src="/assets/gate/gate-scene.js?v=20261009-6"></script>
 <script src="/homepage.js?v=20261016-1"></script>
-<script src="https://iridescently.xyz/assets/shared-chrome-v2.js?v=c14"></script>
+<script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017"></script>
 <script src="/homepage-chrome.js?v=20261009-2"></script>
 <script src="/homepage-content.js?v=20261009-2"></script>
 <script src="/homepage-registration.js?v=20261009-1"></script>

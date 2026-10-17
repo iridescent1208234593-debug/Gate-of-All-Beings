@@ -22,14 +22,14 @@ npm ci --prefix "portal/www/gallery-engine"
 
 ## 修改入口
 
-- 站群页面内中英文切换与文案词条：`assets/site-language.js`。偏好写入 `Domain=.iridescently.xyz` 的一年期 first-party cookie，匿名用户也可在子域间保留；不接触登录资料或角色内容。`shared-chrome-v2.js`、主站 Gallery / Connections、会馆页面与众生之门 Cards 入口加载该脚本；Softie 模块保持独立，不由此脚本改动。全屏 Cards 开场通过 `.gate-language-host` 将切换按钮放进自己的右上角 flex 控件组；React 入口延迟出现时由脚本观察并挂载，不使用悬浮角标。
+- 站群页面内中英文切换与文案词条：`assets/site-language.js`。偏好写入 `Domain=.iridescently.xyz` 的一年期 first-party cookie，匿名用户也可在子域间保留；不接触登录资料或角色内容。站点全局栏 `shared/shared-ui/site-nav.js`（主站 Gallery / Connections、会馆、OC、众生之门与模块共用）和众生之门 Cards 入口加载该脚本；Softie 模块保持独立，不由此脚本改动。全屏 Cards 开场通过 `.gate-language-host` 将切换按钮放进自己的右上角 flex 控件组；React 入口延迟出现时由脚本观察并挂载，不使用悬浮角标。
 
-- 首页标题、说明文字、图库状态、导航内容与菜单链接：`homepage.html`。右侧主导航、Beta 标、分隔线与连接入口样式在 `styles/chrome.css`，小屏间距在 `styles/responsive.css`。
-- 站点标志图片：`assets/iridescently-mark.png`，由 `scripts/homepage.js` 按 Vite 资源路径载入。站名字样在桌面悬停或键盘聚焦时随机切换七种颜文字，手机点按可切换、再次点按还原：`scripts/brand-interaction.js` 与 `styles/chrome.css`（Connections 页使用 `styles/connections.css`）。
+- 首页标题、说明文字、图库状态：`homepage.html`。站点导航不在本目录维护：首页与 Connections 都只引入 `/shared/shared-ui/site-nav.js`（首页用 `data-variant="overlay"` 叠在图库上），条目、样式与账户见 `shared/shared-ui/README.md`。`styles/chrome.css` 里旧 `.site-chrome` 规则已无对应元素，待下一次样式清理移除。
+- 站点标志：像素直角坐标系品牌标，源文件 `shared/shared-ui/brand/iridescently-mark.svg`；`assets/iridescently-mark.png` 是供旧页面与众生之门开场角标使用的 PNG 副本。站名字样在桌面悬停或键盘聚焦时随机切换七种颜文字，手机点按可切换、再次点按还原：`scripts/brand-interaction.js` 与 `styles/chrome.css`（Connections 页使用 `styles/connections.css`）。
 - Gallery 启动、桌面画面居中、节气图标题、单张步进、键盘控制、autoplay、启动反馈和资源生命周期：`scripts/gallery.js`。生产与开发默认使用本地图库；只有显式设置 `VITE_ASSET_BASE_URL` 才覆盖为 CDN 根地址，不把已有 Pilot 当作整库上线。自动播放默认关闭，默认约每 4.5 秒一张；自定义设置中的速度滑块可调 1–10 秒，右侧实时显示当前“X 秒/张”，并沿用 Appearance 偏好存储。开启后立即开始浏览，播放间隔包含图片移动时间，到达两端会折返。左右按钮短按移动一张，长按约 250 ms 后以约 380 ms 的节奏连续浏览，松开即停止且不补发单击；手动滚动和导航会延后下一轮自动播放。系统减少动态效果时不会自动启动，用户可明确点按开启；运行中切换到减少动态效果会暂停。新用户与“恢复默认”的过渡、停留分别设为 0 和 100；已有个人偏好继续优先。
 - 同页音乐控制带与三首本地曲目：`scripts/music-player.js`、`assets/music/`。音符入口位于画廊上方；页面载入时优先尝试播放《早安喵》，浏览器禁止有声自动播放时会在首次用户操作后重试。单曲结束后停留，不自动切歌；用户仍可在控制带手动切歌、暂停/播放和拖动进度，操作不会触发 Gallery 手势。《不再流浪》的源文件实际是 AAC/M4A 容器，因此项目内以 `.m4a` 保存。第三首当前附件无法按标准 FLAC 解码，浏览器会显示格式错误；提供普通 FLAC/MP3 文件后可直接替换。
 - 可调观感控制带及偏好：`scripts/appearance-controls.js`。右侧设置按钮横向展开六项滑块，默认收起且不占布局空间。六项观感与 autoplay 开关通过 `shared/shared-session/save.js` 保存在 `localStorage['iridescently.save.v1']`，使用 `homepage.appearance.v1:account:<kind>:<uid>` 区分账户，匿名设置单独使用 `homepage.appearance.v1:anonymous`。旧首页 v1/v2 本地值只在首次账户没有 Appearance 值时迁移一次；已有账户值优先。当前 shared-session save 没有云端通用偏好接口，因此按账户分区只在本浏览器持久化，不提供跨设备同步。连续拖动即时预览，滑块松开后本地保存；系统减少动态效果仍优先于账户中的微动值。
-- 当前页导航保护与站点状态点：`scripts/site-navigation.js` 根据 canonical path 标记 `aria-current="page"`，并阻止重复导航到当前首页；它读取 `/api/site-status`，45 秒缓存的可达性由 `server.py` 探测。心理档案云按“未并入本站”显示红点，即使直达域名当前可访问。
+- 站点状态点：全局栏在主域上读取 `/api/site-status`（45 秒缓存的可达性由 `server.py` 探测），在西木会馆、众生之门旁显示绿/红点；`scripts/site-navigation.js` 仍保留给页面内旧状态点使用。心理档案云按“未并入本站”显示红点，即使直达域名当前可访问。
 - 首页脚本入口：`scripts/homepage.js`
 - 首页色彩、字体、画布背景、focus 和 loading：`styles/home.css`
 - 桌面导航、菜单、图库控制与横向设置带：`styles/chrome.css`；设置展开后有轻薄磨砂底层，提升鲜艳背景上的可读性

@@ -1,9 +1,12 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import '@lxh/shared-ui/site-nav.js';
 import { EntryGate } from './EntryGate';
 import { EMPTY_IDENTITY, PlayerProfileProvider, accountScope, identityComplete, usePlayerProfile, type GateIdentity } from '../game/PlayerProfile';
 const GameApp = lazy(() => import('../game/GameApp'));
 const PlayerOnboarding = lazy(() => import('../onboarding/PlayerOnboarding').then(module => ({ default: module.PlayerOnboarding })));
 const EXIT_MS = 760;
+type SiteNav = { mount: () => void; unmount: () => void };
+const siteNav = () => (window as Window & { IridescentlyNav?: SiteNav }).IridescentlyNav;
 // Coming back from a module (or reloading) within this window goes straight to the hall.
 const INTRO_SEEN_KEY = 'zszm.introSeenAt';
 const INTRO_SKIP_MS = 6 * 60 * 60 * 1000;
@@ -24,6 +27,16 @@ function GateFlow() {
   const timer = useRef<number | null>(null);
   const profile = usePlayerProfile();
   useEffect(() => () => { if (timer.current !== null) window.clearTimeout(timer.current); }, []);
+  // Fetch the app while the intro plays, so entering never stops on a loading page.
+  useEffect(() => {
+    const load = () => { void import('../game/GameApp'); void import('../game/ModeHall'); };
+    const idle = (window as Window & { requestIdleCallback?: (callback: () => void) => number }).requestIdleCallback;
+    if (idle) idle(load); else window.setTimeout(load, 1200);
+  }, []);
+  const onboarding = entered && !profile.loading && profile.resolved && (creatingNew || !identityComplete(profile.identity));
+  // The shared site bar belongs to the app and its loading state, not to the intro or onboarding screens.
+  const showBar = entered && !gateVisible && !onboarding;
+  useEffect(() => { if (!showBar) return; siteNav()?.mount(); return () => siteNav()?.unmount(); }, [showBar]);
   function enter() {
     if (leaving) return;
     setLeaving(true);
@@ -45,9 +58,9 @@ function GateFlow() {
     setCreatingNew(false);
   }
   return <>
-    {entered && <Suspense fallback={<div className="gate-profile-loading" role="status">正在展开众生之门…</div>}>
-      {profile.loading || (!profile.resolved && profile.error) ? <div className="gate-profile-loading" role="status">
-        <h1>众生之门</h1><p>{profile.error || '正在读取你的玩家资料…'}</p>
+    {entered && <Suspense fallback={<div className="qc-loading qc-loading--page" role="status">正在打开众生之门…</div>}>
+      {profile.loading || (!profile.resolved && profile.error) ? <div className="qc-loading qc-loading--page" role={profile.error ? 'alert' : 'status'}>
+        {profile.error || '正在读取玩家资料…'}
         {profile.error && <button type="button" onClick={() => void profile.refresh()}>重新读取</button>}
       </div> : creatingNew ? gateVisible && !leaving ? null : <PlayerOnboarding key={`new:${accountScope(profile.account)}`} initialIdentity={{ ...EMPTY_IDENTITY }}
           onComplete={finishNew} onCancel={() => setCreatingNew(false)} />

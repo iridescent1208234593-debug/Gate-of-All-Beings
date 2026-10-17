@@ -245,7 +245,8 @@ try {
   };
 
   const customizer = document.querySelector(".gallery-customizer");
-  const siteChrome = document.querySelector(".site-chrome");
+  // The shared site bar (shared/shared-ui/site-nav.js) mounts before this module runs.
+  const siteChrome = document.getElementById("qc-nav") ?? document.createElement("nav");
   syncAutoplayButton();
 
   resources.onTexture = (index, texture) => {
@@ -496,7 +497,7 @@ try {
     if (
       event.target instanceof Element &&
       event.target.closest(
-        ".site-chrome, .gallery-customizer, .gallery-settings, .gallery-music, input, textarea, select",
+        "#qc-nav, .gallery-customizer, .gallery-settings, .gallery-music, input, textarea, select",
       )
     )
       return;
@@ -528,7 +529,7 @@ try {
     if (
       event.target instanceof Element &&
       event.target.closest(
-        ".site-chrome, .gallery-customizer, .gallery-settings, .gallery-music",
+        "#qc-nav, .gallery-customizer, .gallery-settings, .gallery-music",
       )
     ) {
       event.stopImmediatePropagation();
