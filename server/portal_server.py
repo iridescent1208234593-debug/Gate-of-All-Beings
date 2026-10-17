@@ -53,6 +53,9 @@ huiguan = _load("portal_huiguan", CODE_ROOT / "portal" / "huiguan" / "server_hui
 
 APP_DIR = CODE_ROOT / "server" / "app"
 MODULES_DIR = ROOT / "server" / "app" / "modules"
+# Unhashed JS/CSS under modules/: 0 = always revalidate (default). Rollback to the old 4-hour cache:
+# set IRIDESCENTLY_MODULE_CODE_MAX_AGE=14400 and restart portal (see server/app/README.md).
+MODULE_CODE_MAX_AGE = max(0, int(os.environ.get("IRIDESCENTLY_MODULE_CODE_MAX_AGE", "0") or 0))
 PROXY_PORTS = {"cards": 5174, "card-balance": 5178, "softie": 4173, "juling": 5177}
 OZTREE_STATIC = Path(r"E:\External Projects\众生之门生物树可视化前端\OZtree\static")
 
@@ -312,6 +315,7 @@ class Dispatcher(www.Handler):
             if root:
                 self._static_dir = root
                 self.directory = root
+                self.code_max_age = MODULE_CODE_MAX_AGE if str(root).startswith(str(MODULES_DIR)) else None
         strip = cfg.get("strip", "")
         if strip and (self.path == strip or self.path.startswith(strip + "/")):
             rest = self.path[len(strip):]

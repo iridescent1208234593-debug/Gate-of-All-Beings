@@ -8,6 +8,7 @@
 
 import http.server
 import os
+import re
 from urllib.parse import unquote
 
 # 禁止直接下载的敏感后缀
@@ -43,7 +44,11 @@ CACHE_MAX_AGE = {
     ".png": 86400, ".jpg": 86400, ".jpeg": 86400,
     ".gif": 86400, ".webp": 86400, ".svg": 86400, ".ico": 86400,
     ".woff": 604800, ".woff2": 604800, ".mp4": 604800,
+    ".ttf": 604800, ".otf": 604800,
 }
+# The 8-char hash segment must contain a digit, uppercase letter or underscore: a plain lowercase word of
+# 8 letters ("site-language.js") is a mutable file name, not a content hash, and must not become immutable.
+HASHED_ASSET = re.compile(r"/assets/[^/]+-(?=[A-Za-z0-9_-]{0,7}[0-9A-Z_])[A-Za-z0-9_-]{8}\.(?:js|css|ttf|otf|woff2?|png|jpe?g|webp|svg|gif|mp4)$")
 
 
 def static_allowed(path):
@@ -63,6 +68,8 @@ def static_allowed(path):
 
 
 class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
+    # None = default per-suffix caching; set per request by portal_server for /app/modules code.
+    code_max_age = None
     """带安全头 + 静态防护 + 错误静默的通用 Handler 基类。"""
     _static_dir = None  # 子类覆写
 
@@ -108,7 +115,17 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
                 # Public media remains exportable from the opaque showcase sandbox.
                 super().send_header("Access-Control-Allow-Origin", "*")
             max_age = CACHE_MAX_AGE.get(ext)
-            if max_age:
+            if self.code_max_age is not None and ext in (".js", ".mjs", ".css") and not HASHED_ASSET.search(self.path.split("?")[0]):
+                # Unhashed game module code: browsers and the CDN must revalidate so a publish is visible at once.
+                # code_max_age > 0 is the rollback switch (see server/app/README.md).
+                if self.code_max_age > 0:
+                    super().send_header("Cache-Control", f"public, max-age={self.code_max_age}")
+                else:
+                    super().send_header("Cache-Control", "no-cache, max-age=0, must-revalidate")
+            elif HASHED_ASSET.search(self.path.split("?")[0]):
+                # Vite content-hashed file: the name changes whenever the bytes do.
+                super().send_header("Cache-Control", "public, max-age=31536000, immutable")
+            elif max_age:
                 super().send_header("Cache-Control", f"public, max-age={max_age}")
         self._observe_public_response()
         super().end_headers()
