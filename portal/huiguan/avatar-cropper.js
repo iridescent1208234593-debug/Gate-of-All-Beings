@@ -85,7 +85,7 @@
         if (!active) return;
         const out = document.createElement('canvas'); out.width = out.height = 512;
         const crop = cropRect();
-        out.getContext('2d').drawImage(img, (stageSize / 2 - crop.left) / (base * scale), (stageSize / 2 - crop.top) / (base * scale), stageSize / (base * scale), stageSize / (base * scale), 0, 0, out.width, out.height);
+        out.getContext('2d').drawImage(img, (0 - crop.left) / (base * scale), (0 - crop.top) / (base * scale), stageSize / (base * scale), stageSize / (base * scale), 0, 0, out.width, out.height);
         out.toBlob(blob => blob ? finish(blob) : reject(new Error('头像裁切失败')), 'image/png');
       });
       window.addEventListener('keydown', onKey);

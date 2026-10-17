@@ -24,11 +24,35 @@
     }
     return result;
   }
+  // Large camera/screenshot files crawl through the tunnel on save; downscale before upload.
+  const SHRINK_OVER = 700 * 1024, MAX_SIDE = 1800;
+  async function shrink(file) {
+    if (!(file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/webp') || file.size <= SHRINK_OVER) return file;
+    try {
+      const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      const ratio = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
+      const w = Math.max(1, Math.round(bitmap.width * ratio)), h = Math.max(1, Math.round(bitmap.height * ratio));
+      const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      let alpha = false;
+      if (file.type !== 'image/jpeg') {
+        const probe = document.createElement('canvas'); probe.width = probe.height = 128;
+        const pctx = probe.getContext('2d'); pctx.drawImage(bitmap, 0, 0, 128, 128);
+        const px = pctx.getImageData(0, 0, 128, 128).data;
+        for (let i = 3; i < px.length; i += 4) if (px[i] < 250) { alpha = true; break; }
+      }
+      if (!alpha) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, w, h); }
+      ctx.drawImage(bitmap, 0, 0, w, h); bitmap.close && bitmap.close();
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, alpha ? 'image/webp' : 'image/jpeg', 0.9));
+      if (!blob || blob.size >= file.size || (alpha && blob.type !== 'image/webp')) return file;
+      return blob;
+    } catch (error) { return file; }
+  }
   async function upload(source) {
     let file = source instanceof Blob ? source : null;
     if (!file && /^data:image\//.test(source || '')) file = await (await fetch(source)).blob();
     if (!file) return source;
-    const result = await request('/api/images/upload', {}, file);
+    const result = await request('/api/images/upload', {}, await shrink(file));
     if (!/^\/assets\/uploads\/[a-f0-9]+\.(png|jpg|webp|gif)$/.test(result.url || '')) throw new Error('图片保存地址无效');
     return result.url;
   }
@@ -36,9 +60,12 @@
     const next = { ...data };
     const cache = new Map();
     const resolve = async value => {
-      if (!cache.has(value)) cache.set(value, await upload(value));
+      if (!cache.has(value)) cache.set(value, upload(value));
       return cache.get(value);
     };
+    // Warm the cache concurrently so several pictures do not upload one after another.
+    const sources = [...new Set([next.image, ...(Array.isArray(data.images) ? data.images : [])].filter(Boolean))];
+    await Promise.all(sources.map(resolve));
     if (next.image) next.image = await resolve(next.image);
     if (next.avatar_asset_id) {
       const avatar = next.avatar_asset_id;
