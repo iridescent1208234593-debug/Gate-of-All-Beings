@@ -6,3 +6,32 @@
 @media(max-width:560px){.zszm-game .identity-entry{flex:none;width:42px;padding:6px;justify-content:center}.zszm-game .identity-entry>span:not(.gate-player-avatar){display:none}.identity-entry .gate-player-avatar{width:26px}}
 
 .gate-profile-status{position:fixed;bottom:16px;right:16px;z-index:2200;max-width:calc(100vw - 32px);padding:12px 16px;border:1px solid #b99654;border-radius:8px;background:#101c1d;color:#fdf9e4;font-size:13px}.gate-profile-status button{margin-left:10px;background:transparent;color:#f3c248;border:0;cursor:pointer}
+/* Identity roster + layered species (PlayerIdentity). */
+.identity-roster{display:flex;gap:8px;margin:16px 0 4px;padding:2px 2px 8px;overflow-x:auto;scrollbar-width:thin}
+.identity-roster__item{position:relative;display:flex;align-items:center;gap:8px;flex:none;max-width:200px;min-height:52px;padding:6px 12px 6px 6px;border:1px solid #c8c2a6;border-radius:10px;background:#fffaf0aa;color:#26382f;font:inherit;text-align:left;cursor:pointer}
+.identity-roster__item .gate-player-avatar{width:38px;height:38px;flex:none;color:#b58b43}
+.identity-roster__item .gate-player-avatar svg{width:100%;height:100%;display:block}
+.identity-roster__item>span:not(.gate-player-avatar){display:grid;gap:2px;min-width:0}
+.identity-roster__item strong{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.identity-roster__item small{font-size:10px;color:#6b785d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.identity-roster__item em{position:absolute;top:-7px;right:6px;display:inline-flex;align-items:center;gap:2px;padding:1px 6px;border-radius:9px;background:#5d7a5d;color:#f5f0df;font-size:9px;font-style:normal}
+.identity-roster__item.is-editing{border-color:#a2762d;background:#fff;box-shadow:0 0 0 2px #e4b35455}
+.identity-roster__item.is-draft{border-style:dashed;cursor:default}
+.identity-roster__plus{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;background:#e8e2c9;color:#8a6932}
+.identity-roster__add{display:inline-flex;align-items:center;gap:5px;flex:none;min-height:52px;padding:0 14px;border:1px dashed #a5a58a;border-radius:10px;background:transparent;color:#5d6f58;font:inherit;font-size:12px;cursor:pointer}
+.identity-roster__add:hover,.identity-roster__item:hover:not(:disabled){border-color:#a2762d}
+.identity-species{display:grid;gap:10px;margin:0;padding:12px;border:1px solid #cdc7ad;border-radius:10px;min-width:0}
+.identity-species legend{padding:0 6px;font-size:12px}
+.identity-species label small{color:#8a8a74;font-size:10px}
+.identity-kinds{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.identity-kinds button{min-height:36px;border:1px solid #aeb5a6;border-radius:7px;background:#fff9;color:#26382f;font:inherit;font-size:13px;cursor:pointer}
+.identity-kinds button[aria-checked="true"]{border-color:#5d7a5d;background:#5d7a5d;color:#f5f0df}
+.identity-species__row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.identity-species__preview{display:flex;flex-wrap:wrap;gap:6px;align-items:baseline;margin:0;font-size:11px;color:#667468}
+.identity-species__preview b{color:#8a6932;font-size:13px;font-weight:600}
+.identity-species__preview span{padding:1px 8px;border-radius:9px;background:#e8e2c9;color:#6f5c33}
+.identity-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.identity-delete{display:inline-flex;align-items:center;gap:4px;color:#9c4339!important;border-color:transparent!important;background:transparent!important}
+.identity-confirm{display:inline-flex;align-items:center;gap:8px;font-size:12px;color:#9c4339}
+.identity-panel .danger{min-height:34px;padding:6px 12px;border:1px solid #9c4339;border-radius:7px;background:#9c4339;color:#fff;font:inherit;font-size:12px;cursor:pointer}
+@media(max-width:560px){.identity-species__row{grid-template-columns:1fr}.identity-actions{width:100%;justify-content:space-between}.identity-actions .primary{flex:1}}

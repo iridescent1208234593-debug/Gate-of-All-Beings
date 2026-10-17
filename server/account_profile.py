@@ -20,6 +20,10 @@ def init_schema(conn):
         updated_at TEXT NOT NULL DEFAULT '',
         PRIMARY KEY (kind, uid)
     )""")
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(account_profiles)")}
+    if "gate_identities_json" not in columns:
+        # The roster of saved Gate identities; gate_identity_json stays the active one.
+        conn.execute("ALTER TABLE account_profiles ADD COLUMN gate_identities_json TEXT NOT NULL DEFAULT ''")
 
 
 def open_db(project_root=None):
@@ -112,16 +116,21 @@ def store_source_image(raw, mime, project_root=None):
 
 def get_profile(conn, kind, uid):
     row = conn.execute(
-        "SELECT account_avatar_url, gate_identity_json FROM account_profiles WHERE kind=? AND uid=?",
+        "SELECT account_avatar_url, gate_identity_json, gate_identities_json FROM account_profiles WHERE kind=? AND uid=?",
         (kind, str(uid)),
     ).fetchone()
     if not row:
-        return {"account_avatar_url": "", "gate_identity": None}
+        return {"account_avatar_url": "", "gate_identity": None, "gate_identities": []}
     try:
         identity = json.loads(row["gate_identity_json"]) if row["gate_identity_json"] else None
     except (TypeError, ValueError):
         identity = None
-    return {"account_avatar_url": row["account_avatar_url"] or "", "gate_identity": identity}
+    try:
+        identities = json.loads(row["gate_identities_json"]) if row["gate_identities_json"] else []
+    except (TypeError, ValueError):
+        identities = []
+    return {"account_avatar_url": row["account_avatar_url"] or "", "gate_identity": identity,
+            "gate_identities": identities if isinstance(identities, list) else []}
 
 
 def set_account_avatar(conn, kind, uid, asset_url, updated_at):
@@ -136,6 +145,13 @@ def set_gate_identity(conn, kind, uid, identity, updated_at):
         VALUES (?,?,?,?) ON CONFLICT(kind,uid) DO UPDATE SET
         gate_identity_json=excluded.gate_identity_json, updated_at=excluded.updated_at""",
         (kind, str(uid), json.dumps(identity, ensure_ascii=False, separators=(",", ":")), updated_at))
+
+
+def set_gate_identities(conn, kind, uid, identities, updated_at):
+    conn.execute("""INSERT INTO account_profiles (kind,uid,gate_identities_json,updated_at)
+        VALUES (?,?,?,?) ON CONFLICT(kind,uid) DO UPDATE SET
+        gate_identities_json=excluded.gate_identities_json, updated_at=excluded.updated_at""",
+        (kind, str(uid), json.dumps(identities, ensure_ascii=False, separators=(",", ":")), updated_at))
 
 
 def resolve_sso_identity(token_payload, project_root=None):
@@ -163,6 +179,7 @@ def resolve_sso_identity(token_payload, project_root=None):
         profile = get_profile(conn, kind, uid)
         return {"kind": kind, "uid": uid, "name": name, "picture": picture,
                 "account_avatar_url": profile["account_avatar_url"],
-                "gate_identity": profile["gate_identity"]}
+                "gate_identity": profile["gate_identity"],
+                "gate_identities": profile["gate_identities"]}
     finally:
         conn.close()

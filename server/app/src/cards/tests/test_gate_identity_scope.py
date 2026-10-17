@@ -53,6 +53,7 @@ class GateIdentityScopeTest(unittest.TestCase):
         self.connection = FakeConnection()
         self.open_db = Mock(return_value=self.connection)
         self.write = Mock()
+        self.write_roster = Mock()
         self.upload = Mock(return_value="/assets/uploads/" + "a" * 64 + ".webp")
         self.fixtures = {
             uid: {"kind": "local", "uid": uid, "name": f"Player {uid}", "picture": "", "account_avatar_url": "", "gate_identity": {"schema_version": 1, "display_name": f"Saved {uid}", "species_name": "猫妖", "avatar_asset_id": "", "avatar_frame_id": "r02", "avatar_mode": "default", "source_oc_id": ""}}
@@ -64,6 +65,7 @@ class GateIdentityScopeTest(unittest.TestCase):
             patch.object(module, "_shared_user", side_effect=lambda handler: copy.deepcopy(self.fixtures.get(handler.headers.get("X-Test-Account")))),
             patch.object(module, "open_profile_db", self.open_db),
             patch.object(module, "set_gate_identity", self.write),
+            patch.object(module, "set_gate_identities", self.write_roster),
             patch.object(module, "normalize_avatar_image", self.upload),
         ]
         for replacement in patches:
@@ -85,7 +87,7 @@ class GateIdentityScopeTest(unittest.TestCase):
         self.server.server_close()
         self.thread.join(timeout=2)
 
-    def request(self, account="A", identity=None, multipart=False):
+    def request(self, account="A", identity=None, multipart=False, path="/api/gate/identity"):
         headers = {}
         if account:
             headers["X-Test-Account"] = account
@@ -102,7 +104,7 @@ class GateIdentityScopeTest(unittest.TestCase):
             else:
                 body = json.dumps(identity).encode()
                 headers["Content-Type"] = "application/json"
-        request = Request(self.base + "/api/gate/identity", data=body, headers=headers)
+        request = Request(self.base + path, data=body, headers=headers)
         try:
             response = urlopen(request, timeout=3)
         except HTTPError as error:
@@ -120,6 +122,7 @@ class GateIdentityScopeTest(unittest.TestCase):
     def assert_no_persistence(self):
         self.open_db.assert_not_called()
         self.write.assert_not_called()
+        self.write_roster.assert_not_called()
         self.upload.assert_not_called()
 
     def test_get_returns_the_current_profile_owner(self):
@@ -176,6 +179,39 @@ class GateIdentityScopeTest(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(result["owner"], {"kind": "local", "user_id": "B"})
         self.assertEqual(self.write.call_args.args[1:3], ("local", "B"))
+
+    def test_legacy_identity_is_listed_and_edited_in_place(self):
+        status, result = self.request(account="A")
+        self.assertEqual([item["id"] for item in result["identities"]], ["main"])
+        status, result = self.request(account="A", identity=self.draft())
+        self.assertEqual(status, 200)
+        self.assertEqual([item["id"] for item in result["identities"]], ["main"])
+        self.assertEqual(result["identity"]["display_name"], "新旅人")
+
+    def test_create_select_and_delete_identities(self):
+        draft = {**self.draft(), "create": True, "species_name": "妖精 · 鸦科 · 三足乌", "species_kind": "妖精",
+                 "species_family": "鸦科", "species_sub": "三足乌", "species_note": "上古鸦科神鸟后裔"}
+        status, result = self.request(account="A", identity=draft)
+        self.assertEqual(status, 200)
+        created = result["identity"]
+        self.assertEqual((created["species_family"], created["species_note"]), ("鸦科", "上古鸦科神鸟后裔"))
+        roster = self.write_roster.call_args.args[3]
+        self.assertEqual([item["id"] for item in roster], ["main", created["id"]])
+        self.fixtures["A"].update(gate_identities=roster, gate_identity=created)
+        status, result = self.request(account="A", identity={"id": "main"}, path="/api/gate/identity/select")
+        self.assertEqual((status, result["identity"]["id"]), (200, "main"))
+        self.fixtures["A"]["gate_identity"] = result["identity"]
+        status, result = self.request(account="A", identity={"id": "main"}, path="/api/gate/identity/delete")
+        self.assertEqual(status, 200)
+        self.assertEqual(result["identity"]["id"], created["id"])
+        self.assertEqual([item["id"] for item in result["identities"]], [created["id"]])
+
+    def test_roster_actions_reject_other_owners_and_unknown_ids(self):
+        status, _ = self.request(account="B", identity={"id": "main", "expected_owner": {"kind": "local", "user_id": "A"}}, path="/api/gate/identity/select")
+        self.assertEqual(status, 409)
+        status, _ = self.request(account="A", identity={"id": "missing"}, path="/api/gate/identity/delete")
+        self.assertEqual(status, 404)
+        self.assert_no_persistence()
 
 
 if __name__ == "__main__":

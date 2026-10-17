@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.join(PROJECT_ROOT, "server"))
 sys.path.insert(0, PROJECT_ROOT)
 from base_static import BaseStaticHandler
 import hx_sso
-from account_profile import open_db as open_profile_db, get_profile, resolve_sso_identity, set_gate_identity, valid_asset_url, asset_public_url, store_avatar_image as normalize_avatar_image, store_source_image
+from account_profile import open_db as open_profile_db, get_profile, resolve_sso_identity, set_gate_identity, set_gate_identities, valid_asset_url, asset_public_url, store_avatar_image as normalize_avatar_image, store_source_image
 
 # ========== 配置 ==========
 CLIENT_ID = "client_1ab6604db009b647"
@@ -167,6 +167,36 @@ def _owned_ocs(user):
             "images": candidates,
         })
     return result
+
+
+GATE_ROSTER_LIMIT = 6
+SPECIES_FIELDS = {"species_kind": 20, "species_family": 40, "species_sub": 40, "species_note": 120}
+
+
+def _gate_roster(user):
+    """Saved identities with ids; an account saved before rosters existed has just its active one."""
+    roster = [item for item in (user.get("gate_identities") or []) if isinstance(item, dict) and item.get("id")]
+    active = user.get("gate_identity")
+    if not roster and isinstance(active, dict) and active.get("display_name"):
+        roster = [{**active, "id": active.get("id") or "main"}]
+    return roster[:GATE_ROSTER_LIMIT]
+
+
+def _public_identity(identity):
+    if not identity:
+        return identity
+    return {**identity, "avatar_url": asset_public_url(identity.get("avatar_asset_id", ""))} if identity.get("avatar_asset_id") else identity
+
+
+def _write_roster(user, roster, active):
+    conn = open_profile_db(PROJECT_ROOT)
+    try:
+        now = datetime.now(timezone.utc).isoformat()
+        set_gate_identities(conn, user["kind"], user["uid"], roster, now)
+        set_gate_identity(conn, user["kind"], user["uid"], active, now)
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def _avatar_form(handler):
@@ -322,9 +352,11 @@ class OAuthHandler(BaseStaticHandler):
         elif path == "/api/gate/identity":
             user = _shared_user(self)
             profile = user["gate_identity"] if user else None
-            if profile and profile.get("avatar_asset_id"):
-                profile = {**profile, "avatar_url": asset_public_url(profile["avatar_asset_id"])}
-            self._json_resp(200, {"logged_in": bool(user), "identity": profile,
+            roster = _gate_roster(user) if user else []
+            if profile and not profile.get("id") and roster:
+                profile = {**profile, "id": roster[0]["id"]}
+            self._json_resp(200, {"logged_in": bool(user), "identity": _public_identity(profile),
+                "identities": [_public_identity(item) for item in roster],
                 "owner": {"kind": user["kind"], "user_id": user["uid"]} if user else None,
                 "account_avatar_url": asset_public_url(user["account_avatar_url"]) if user else ""})
 
@@ -354,11 +386,13 @@ class OAuthHandler(BaseStaticHandler):
 
     def do_POST(self):
         path = urllib.parse.urlparse(self.path).path
-        if path != "/api/gate/identity":
+        if path not in ("/api/gate/identity", "/api/gate/identity/select", "/api/gate/identity/delete"):
             return self._json_resp(404, {"error": "接口不存在"})
         user = _shared_user(self)
         if not user:
             return self._json_resp(401, {"error": "登录已失效，请重新登录会馆账户"})
+        if path != "/api/gate/identity":
+            return self._roster_action(user, path.rsplit("/", 1)[1])
         if self.headers.get("Content-Type", "").lower().startswith("multipart/form-data"):
             identity, image = _avatar_form(self)
             if identity is None:
@@ -386,8 +420,18 @@ class OAuthHandler(BaseStaticHandler):
         frame = str(identity.get("avatar_frame_id", "")).strip()
         source_oc = str(identity.get("source_oc_id", "")).strip()
         mode = str(identity.get("avatar_mode", "default")).strip()
-        if not name or not species or len(name) > 60 or len(species) > 100 or len(frame) > 80 or mode not in ("default", "upload", "account", "oc"):
+        identity_id = str(identity.get("id", "")).strip()
+        species_fields = {key: str(identity.get(key, "")).strip() for key in SPECIES_FIELDS}
+        if not name or not species or len(name) > 60 or len(species) > 100 or len(frame) > 80 or mode not in ("default", "upload", "account", "oc")                 or any(len(species_fields[key]) > limit for key, limit in SPECIES_FIELDS.items()) or len(identity_id) > 40:
             return self._json_resp(400, {"error": "名称、种族或头像选项无效"})
+        roster = _gate_roster(user)
+        if not identity_id and not identity.get("create") and roster:
+            # Clients without rosters edit their one (active) identity in place.
+            identity_id = (user.get("gate_identity") or {}).get("id") or roster[0]["id"]
+        if identity_id and not any(item["id"] == identity_id for item in roster):
+            return self._json_resp(404, {"error": "这个形象已不存在，请刷新后重试"})
+        if not identity_id and len(roster) >= GATE_ROSTER_LIMIT:
+            return self._json_resp(400, {"error": f"最多保存 {GATE_ROSTER_LIMIT} 个形象，请先删除一个"})
         if image:
             try:
                 avatar = normalize_avatar_image(*image, PROJECT_ROOT)
@@ -400,17 +444,44 @@ class OAuthHandler(BaseStaticHandler):
         if source_oc and not any(oc["id"] == source_oc for oc in owned):
             return self._json_resp(403, {"error": "导入来源不属于当前账户"})
         gate_identity = {
-            "schema_version": 1, "display_name": name, "species_name": species,
-            "avatar_asset_id": avatar, "avatar_frame_id": frame,
+            "schema_version": 1, "id": identity_id or secrets.token_hex(6), "display_name": name, "species_name": species,
+            **species_fields, "avatar_asset_id": avatar, "avatar_frame_id": frame,
             "avatar_mode": mode, "source_oc_id": source_oc,
         }
-        conn = open_profile_db(PROJECT_ROOT)
+        if identity_id:
+            roster = [gate_identity if item["id"] == identity_id else item for item in roster]
+        else:
+            roster = [*roster, gate_identity]
+        _write_roster(user, roster, gate_identity)
+        self._json_resp(200, {"ok": True, "owner": owner, "identity": _public_identity(gate_identity),
+                              "identities": [_public_identity(item) for item in roster]})
+
+    def _roster_action(self, user, action):
         try:
-            set_gate_identity(conn, user["kind"], user["uid"], gate_identity, datetime.now(timezone.utc).isoformat())
-            conn.commit()
-        finally:
-            conn.close()
-        self._json_resp(200, {"ok": True, "owner": owner, "identity": {**gate_identity, "avatar_url": asset_public_url(avatar)}})
+            length = int(self.headers.get("Content-Length", "0"))
+            if length > 4096:
+                return self._json_resp(413, {"error": "请求过大"})
+            body = json.loads(self.rfile.read(length).decode("utf-8"))
+            if not isinstance(body, dict):
+                raise ValueError("invalid body")
+        except (ValueError, UnicodeError):
+            return self._json_resp(400, {"error": "请求格式无效"})
+        owner = {"kind": user["kind"], "user_id": user["uid"]}
+        if body.get("expected_owner") is not None and body.get("expected_owner") != owner:
+            return self._json_resp(409, {"error": "账户已切换，请重新确认玩家资料"})
+        roster = _gate_roster(user)
+        target = next((item for item in roster if item["id"] == str(body.get("id", ""))), None)
+        if not target:
+            return self._json_resp(404, {"error": "这个形象已不存在，请刷新后重试"})
+        if action == "select":
+            active = target
+        else:
+            current_id = (user.get("gate_identity") or {}).get("id") or "main"
+            roster = [item for item in roster if item["id"] != target["id"]]
+            active = next((item for item in roster if item["id"] == current_id), None) or (roster[0] if roster else None)
+        _write_roster(user, roster, active)
+        self._json_resp(200, {"ok": True, "owner": owner, "identity": _public_identity(active),
+                              "identities": [_public_identity(item) for item in roster]})
 
     def _json_resp(self, status, data):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")

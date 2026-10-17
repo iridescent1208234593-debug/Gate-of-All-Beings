@@ -12,7 +12,7 @@ import './onboarding.css';
 
 export interface PlayerOnboardingProps {
   initialIdentity: GateIdentity;
-  onComplete: (identity: GateIdentity, avatarBlob?: Blob | null) => Promise<void> | void;
+  onComplete: (identity: GateIdentity, avatarBlob?: Blob | null) => Promise<unknown> | void;
   onCancel: () => void;
 }
 

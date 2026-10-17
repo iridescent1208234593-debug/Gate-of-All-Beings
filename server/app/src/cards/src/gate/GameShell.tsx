@@ -4,10 +4,20 @@ import { PlayerProfileProvider, accountScope, identityComplete, usePlayerProfile
 const GameApp = lazy(() => import('../game/GameApp'));
 const PlayerOnboarding = lazy(() => import('../onboarding/PlayerOnboarding').then(module => ({ default: module.PlayerOnboarding })));
 const EXIT_MS = 760;
+// Coming back from a module (or reloading) within this window goes straight to the hall.
+const INTRO_SEEN_KEY = 'zszm.introSeenAt';
+const INTRO_SKIP_MS = 6 * 60 * 60 * 1000;
+function introRecentlySeen() {
+  try { return Date.now() - Number(localStorage.getItem(INTRO_SEEN_KEY) || 0) < INTRO_SKIP_MS; } catch { return false; }
+}
+function rememberIntro() {
+  try { localStorage.setItem(INTRO_SEEN_KEY, String(Date.now())); } catch { /* private mode: replay next time */ }
+}
 
 function GateFlow() {
-  const [entered, setEntered] = useState(false);
-  const [gateVisible, setGateVisible] = useState(true);
+  const [skipIntro] = useState(introRecentlySeen);
+  const [entered, setEntered] = useState(skipIntro);
+  const [gateVisible, setGateVisible] = useState(!skipIntro);
   const [leaving, setLeaving] = useState(false);
   const timer = useRef<number | null>(null);
   const profile = usePlayerProfile();
@@ -16,6 +26,7 @@ function GateFlow() {
     if (leaving) return;
     setLeaving(true);
     setEntered(true);
+    rememberIntro();
     timer.current = window.setTimeout(() => setGateVisible(false), EXIT_MS);
   }
   function returnToGate() {
