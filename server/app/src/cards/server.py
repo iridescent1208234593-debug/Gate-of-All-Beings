@@ -19,8 +19,10 @@ from email.parser import BytesParser
 from datetime import datetime, timezone
 
 PROJECT_ROOT = os.environ.get("IRIDESCENTLY_PROJECT_ROOT", str(__import__("pathlib").Path(__file__).resolve().parents[4]))
-sys.path.insert(0, os.path.join(PROJECT_ROOT, "server"))
-sys.path.insert(0, PROJECT_ROOT)
+# Code comes from the tree this file lives in (the published snapshot in production); PROJECT_ROOT is data only.
+# Importing from PROJECT_ROOT/server would let uncommitted source-tree edits go live on any restart.
+CODE_ROOT = str(__import__("pathlib").Path(__file__).resolve().parents[4])
+sys.path.insert(0, os.path.join(CODE_ROOT, "server"))
 from base_static import BaseStaticHandler
 import hx_sso
 from account_profile import open_db as open_profile_db, get_profile, resolve_sso_identity, set_gate_identity, set_gate_identities, valid_asset_url, asset_public_url, store_avatar_image as normalize_avatar_image, store_source_image
@@ -123,7 +125,7 @@ def _get_session(handler):
     if s is None:
         return None, None
     if s.expires_at < time.time():
-        del sessions[sid.value]
+        sessions.pop(sid.value, None)  # another thread may have removed it already (threaded server)
         return None, None
     return sid.value, s
 
@@ -254,7 +256,8 @@ class OAuthHandler(BaseStaticHandler):
                 self._json_resp(400, {"error": f"授权被取消: {error}"})
                 return
 
-            if not code or not state or state not in state_map:
+            # Single-use state, consumed atomically so concurrent callbacks cannot both pass or KeyError later.
+            if not code or not state or state_map.pop(state, None) is None:
                 self._json_resp(400, {"error": "无效的授权请求"})
                 return
 
@@ -316,8 +319,6 @@ class OAuthHandler(BaseStaticHandler):
                 expires_at=time.time() + SESSION_TIMEOUT,
             )
 
-            del state_map[state]
-
             self.send_response(302)
             _set_cookie(self, "zszm_sid", session_id, max_age=SESSION_TIMEOUT)
             self.send_header("Location", "/")
@@ -374,8 +375,8 @@ class OAuthHandler(BaseStaticHandler):
 
         elif path == "/api/logout":
             sid, session = _get_session(self)
-            if sid and sid in sessions:
-                del sessions[sid]
+            if sid:
+                sessions.pop(sid, None)
             self.send_response(302)
             _set_cookie(self, "zszm_sid", "", max_age=0)
             self.send_header("Location", "/")
