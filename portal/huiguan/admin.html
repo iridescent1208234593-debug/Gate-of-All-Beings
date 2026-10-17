@@ -124,6 +124,8 @@
   </div>
   <h2 style="margin:30px 0 12px;font-size:16px;letter-spacing:2px;">长老申请</h2>
   <div id="reqBox"><div class="state-box" style="margin-top:0;">加载中…</div></div>
+  <h2 style="margin:30px 0 12px;font-size:16px;letter-spacing:2px;">妖王申请（自述不足 50 字）</h2>
+  <div id="honorBox"><div class="state-box" style="margin-top:0;">加载中…</div></div>
   <h2 style="margin:30px 0 12px;font-size:16px;letter-spacing:2px;">补充审核</h2>
   <div id="suppBox"><div class="state-box" style="margin-top:0;">加载中…</div></div>
   <h2 style="margin:30px 0 12px;font-size:16px;letter-spacing:2px;">编辑申请</h2>
@@ -162,6 +164,7 @@ async function init() {
     selfInfo = { kind: u.kind, uid: String(u.user_id) };
     await loadUsers();
     loadRequests();
+    loadHonorRequests();
     loadSupplements();
     loadScribeRequests();
     loadExemptRequests();
@@ -198,7 +201,7 @@ function ownerChars(u) {
   return charMap[key] || [];
 }
 function onSearch(v) { searchTerm = (v || '').trim().toLowerCase(); renderUsers(); }
-function refresh() { loadUsers(); loadRequests(); loadSupplements(); loadScribeRequests(); loadExemptRequests(); }
+function refresh() { loadUsers(); loadRequests(); loadHonorRequests(); loadSupplements(); loadScribeRequests(); loadExemptRequests(); }
 
 function renderUsers() {
   const content = document.getElementById('content');
@@ -276,6 +279,31 @@ async function decideReq(id, approve) {
   const verb = approve ? '同意' : '驳回';
   if (!confirm(`确定要${verb}该长老申请吗？`)) return;
   if (await adminPost('/api/admin/elder/decide', { id, approve })) { loadRequests(); loadUsers(); }
+}
+
+async function loadHonorRequests() {
+  const box = document.getElementById('honorBox');
+  if (!box) return;
+  try {
+    const r = await fetch('/api/admin/honor-requests');
+    const d = await r.json();
+    if (!r.ok) { box.innerHTML = ''; return; }
+    const reqs = d.requests || [];
+    if (!reqs.length) { box.innerHTML = '<div class="state-box" style="margin-top:0;">暂无待审的妖王申请。</div>'; return; }
+    box.innerHTML = reqs.map(q => `
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:8px;">
+        <strong>${escapeHtml(q.name || q.uid)}</strong>
+        <span class="dim">${q.kind === 'local' ? '站内' : 'USSO'} · ${fmtTime(q.created_at)}</span>
+        <span class="tag local">别称：${escapeHtml(q.alias || '妖王（默认）')}</span>
+        <span class="dim" style="flex:1;min-width:200px;">${escapeHtml(q.reason || '')}</span>
+        <button class="op" onclick="decideHonor(${q.id},true)">加冕</button>
+        <button class="op danger" onclick="decideHonor(${q.id},false)">驳回</button>
+      </div>`).join('');
+  } catch(e) { box.innerHTML = ''; }
+}
+async function decideHonor(id, approve) {
+  if (!confirm(`确定要${approve ? '加冕' : '驳回'}该妖王申请吗？`)) return;
+  if (await adminPost('/api/admin/honor/decide', { id, approve })) loadHonorRequests();
 }
 
 async function loadSupplements() {

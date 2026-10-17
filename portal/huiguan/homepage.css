@@ -290,3 +290,31 @@ body.huiguan-homepage #qc-nav .fan-corner-btn:hover { color: #f4eedf; filter: no
   .home-boot { display: none; }
   .archive-room[aria-hidden="true"] { visibility: visible; pointer-events: auto; }
 }
+
+/* 角色配色折叠条：外框保持原样，只有调色板图标摇一摇、「展开选色」按钮微光；展开过一次后全部静止 */
+#registrationPalette > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+#registrationPalette > summary::after { display: none; }
+#registrationPalette > summary .pal-icon { font-size: 24px; line-height: 1; flex: none; color: inherit; }
+#registrationPalette:not([open]):not(.pal-seen) > summary .pal-icon { animation: palWiggle 3.6s ease-in-out infinite; transform-origin: 50% 80%; }
+#registrationPalette > summary .pal-text.pal-text { flex: 1 1 200px; min-width: 0; display: flex; flex-direction: column; gap: 2px; color: var(--text); font-size: 16px; font-weight: 700; letter-spacing: .1em; line-height: 1.4; }
+#registrationPalette > summary .pal-text em { font-style: normal; font-size: 12px; font-weight: 400; letter-spacing: 0; color: var(--text-dim); }
+#registrationPalette > summary .pal-now.pal-now { flex: none; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 400; letter-spacing: 0; color: var(--text-dim); }
+#registrationPalette > summary .pal-now i { display: inline-flex; width: 38px; height: 16px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+#registrationPalette > summary .pal-now i b { flex: 1; }
+#registrationPalette > summary .pal-cta.pal-cta { flex: none; padding: 7px 16px; border-radius: 999px; background: var(--gold); color: #1f1a0a; font-size: 13px; font-weight: 600; letter-spacing: .06em; transition: filter .15s, transform .15s; }
+#registrationPalette:not([open]):not(.pal-seen) > summary .pal-cta.pal-cta { animation: palGlow 2.8s ease-in-out infinite; }
+#registrationPalette > summary:hover .pal-cta.pal-cta { filter: brightness(1.08); transform: translateY(-1px); }
+#registrationPalette > summary .pal-cta b { font-weight: 600; }
+#registrationPalette.pal-seen:not([open]) > summary .pal-cta.pal-cta, #registrationPalette[open] > summary .pal-cta.pal-cta { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+#registrationPalette:not([open]) .c-open, #registrationPalette[open] .c-closed { display: none; }
+@keyframes palGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(212,168,64,0); } 50% { box-shadow: 0 0 12px 3px rgba(240,216,120,.55); } }
+@keyframes palWiggle { 0%, 82%, 100% { transform: rotate(0); } 86% { transform: rotate(-14deg) scale(1.12); } 91% { transform: rotate(10deg) scale(1.12); } 95% { transform: rotate(-6deg); } }
+
+/* 能力详解：提示文字始终保持金色微光，展开后也不变回去 */
+#charForm .ability-explanations > summary span { color: var(--gold); animation: adGlow 2.8s ease-in-out infinite; }
+@keyframes adGlow { 0%, 100% { text-shadow: 0 0 0 rgba(240,216,120,0); } 50% { text-shadow: 0 0 10px rgba(240,216,120,.8); } }
+@media (prefers-reduced-motion: reduce) { #registrationPalette .pal-icon, #registrationPalette .pal-cta, #charForm .ability-explanations > summary span { animation: none !important; } }
+@media (max-width: 700px) { #registrationPalette > summary .pal-now.pal-now { order: 3; flex-basis: 100%; } #registrationPalette > summary .pal-cta.pal-cta { margin-left: auto; } }
+
+/* 浅金/浅色强调色上的按钮文字（共用弹窗读取） */
+:root { --on-accent: #1f1a0a; }

@@ -95,5 +95,5 @@
     // Mobile browsers may consume the download asynchronously.
     setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
-  window.HuiguanImages = { request, upload, character, canvasBlob, download, limit: LIMIT };
+  window.HuiguanImages = { request, upload, character, canvasBlob, download, shrink, limit: LIMIT };
 })();

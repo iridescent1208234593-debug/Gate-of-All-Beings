@@ -153,6 +153,7 @@ h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
   </div>
 </div>
 
+<script src="reactions-fx.js?v=20261018"></script>
 <script>
 const PAGE=12;
 let curType='', curQ='', timer=null;
@@ -162,35 +163,6 @@ let myChars=[], publishedNames=new Set(), publishedIds={};
 let selectedCodes=new Set();
 
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-
-function rxBarHTML(cid){
-  const f=RX.fav[cid]||0, u=RX.up[cid]||0, dd=RX.down[cid]||0;
-  const myFav=RX.my.fav===cid, myV=RX.my.votes[String(cid)];
-  return `<div class="rx-bar" style="display:flex;gap:6px;margin-top:8px;">
-    <button type="button" onclick="doReact(event,${cid},'fav')" title="喜欢（可取消/重选）" style="flex:1;font-size:12px;padding:3px 0;border-radius:4px;cursor:pointer;border:1px solid ${myFav?'var(--danger)':'var(--border)'};background:${myFav?'rgba(179,84,63,.12)':'var(--panel)'};color:${myFav?'var(--danger)':'var(--dim)'};">❤ ${f}</button>
-    <button type="button" onclick="doReact(event,${cid},'up')" title="点赞（可取消/改踩）" style="flex:1;font-size:12px;padding:3px 0;border-radius:4px;cursor:pointer;border:1px solid ${myV===1?'var(--accent)':'var(--border)'};background:${myV===1?'rgba(90,158,143,.12)':'var(--panel)'};color:${myV===1?'var(--accent)':'var(--dim)'};">👍 ${u}</button>
-    <button type="button" onclick="doReact(event,${cid},'down')" title="踩（可取消/改赞）" style="flex:1;font-size:12px;padding:3px 0;border-radius:4px;cursor:pointer;border:1px solid ${myV===-1?'var(--gold)':'var(--border)'};background:${myV===-1?'rgba(212,168,64,.12)':'var(--panel)'};color:${myV===-1?'var(--gold)':'var(--dim)'};">👎 ${dd}</button>
-  </div>`;
-}
-let RX={fav:{},up:{},down:{},my:{fav:null,votes:{}}};
-async function loadReactions(){
-  try{ const r=await fetch('/api/fan/reactions'); RX=await r.json(); }catch(e){}
-}
-function updateCardRx(cid){
-  const bar=document.querySelector(`.card[data-cid="${cid}"] .rx-bar`);
-  if(bar) bar.outerHTML=rxBarHTML(cid);
-}
-async function doReact(e,cid,type){
-  e.preventDefault(); e.stopPropagation();
-  try{
-    const u=await (await fetch('/api/user')).json();
-    if(!u.logged_in){ if(confirm('喜欢/点赞/踩需要登录，现在去登录？')) location.href='/?openauth=1'; return; }
-    const r=await fetch('/api/fan/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character_id:cid,type:type})});
-    const d=await r.json();
-    if(!d.ok){ alert('⚠ '+(d.error||'操作失败')); return; }
-    await loadReactions(); updateCardRx(cid);
-  }catch(err){ alert('⚠ 网络错误'); }
-}
 
 // ====== 公开角色卡片（画廊列表）======
 function cardHTML(c){
@@ -210,7 +182,7 @@ function cardHTML(c){
     <div class="card-body">
       <div class="card-name">${esc(c.name)}</div>
       <div class="card-author">— ${esc(c.user_name||'匿名')}${isPoster?' · <a href="/haibao/" style="color:var(--gold)" onclick="event.stopPropagation()">去制作</a>':''}</div>
-      ${rxBarHTML(c.id)}
+      ${RFX.bar('fan',c.id)}
     </div>
   </div>`;
 }
@@ -409,8 +381,8 @@ async function init(){
     document.getElementById('myGrid').innerHTML='<div class="login-prompt">请先<a href="/?openauth=1">登录 / 注册</a>后查看和公开你的已登记人设</div>';
     document.getElementById('myCount').textContent='';
   }
+  await RFX.load('fan');
   loadPub(true);
-  loadReactions();
 }
 init();
 </script>

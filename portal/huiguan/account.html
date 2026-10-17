@@ -198,8 +198,9 @@ async function sendEmailVerification(){
 }
 function elderBtn(u){
   if(u.role==='elder'||u.is_admin) return '<span class="tag green">已是长老/管理员</span>';
-  if(u.elder_pending) return '<span class="tag">审核中</span>';
-  return '<button class="btn" onclick="applyElder()">申请长老</button>';
+  if(u.honor_kind) return '<span class="tag green">'+(u.honor_kind==='elder_honor'?'荣誉长老':(u.honor_alias||'妖王'))+'</span>';
+  if(u.elder_pending||u.honor_pending) return '<span class="tag">审核中</span>';
+  return '<button class="btn" onclick="applyElder()">申请长老</button> <a class="btn" href="/#charForm" style="text-decoration:none">荣誉长老 / 妖王</a>';
 }
 function scribeBtn(u){
   if(u.edit_role==='scribe'||u.is_admin) return '<span class="tag green">已有编辑权限</span>';

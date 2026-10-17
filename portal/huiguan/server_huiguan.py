@@ -33,7 +33,7 @@ import hx_sso
 from account_security import init_schema as init_security_schema, handle_security
 from account_email import init_schema as init_email_schema, handle_email
 from account_recovery import init_schema as init_recovery_schema, handle_recovery
-from account_profile import init_schema as init_profile_schema, get_profile, set_account_avatar, store_avatar_image as normalize_avatar_image
+from account_profile import init_schema as init_profile_schema, get_profile, set_account_avatar, valid_asset_url, store_avatar_image as normalize_avatar_image
 import game_saves
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 
@@ -60,6 +60,12 @@ SSO_USERINFO = "https://sso.umrc.cn/userinfo.php"
 
 # 站长 USSO ID：永远拥有管理员权限
 ADMIN_USSO_IDS = {"7"}
+
+# 编辑码：知道编辑码的用户可免申请直接成为编辑（仅服务端校验，不下发前端）；可用环境变量覆盖
+EDITOR_CODE = os.environ.get("HUIGUAN_EDITOR_CODE", "20142010")
+GROUP_QQ = "878029597"
+# 妖王自述超过该字数自动通过，否则进入人工审核
+YAOWANG_AUTO_MIN_CHARS = 50
 
 # 会话有效期（天）
 SESSION_DAYS = 30
@@ -363,6 +369,61 @@ def init_user_db():
                 updated_at TEXT
             )
         """)
+        # 荣誉头衔：荣誉长老 / 妖王（不含编辑与成员管理权限）
+        for tbl in ("local_users", "user_flags"):
+            for col in ("honor_kind", "honor_alias", "honor_reason"):
+                try:
+                    conn.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} TEXT DEFAULT ''")
+                except Exception:
+                    pass
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS honor_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                kind TEXT NOT NULL,
+                uid TEXT NOT NULL,
+                name TEXT DEFAULT '',
+                honor_kind TEXT NOT NULL,
+                alias TEXT DEFAULT '',
+                reason TEXT DEFAULT '',
+                status TEXT DEFAULT 'pending',
+                created_at TEXT
+            )
+        """)
+        # 官方角色同人图廊（公开）：图 / 点赞 / 评论
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS official_fanart (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                character_id INTEGER NOT NULL,
+                user_kind TEXT NOT NULL,
+                user_uid TEXT NOT NULL,
+                user_name TEXT DEFAULT '',
+                image_url TEXT NOT NULL,
+                caption TEXT DEFAULT '',
+                created_at TEXT
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_fanart_char ON official_fanart(character_id, id)")
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS official_fanart_likes (
+                fanart_id INTEGER NOT NULL,
+                user_kind TEXT NOT NULL,
+                user_uid TEXT NOT NULL,
+                created_at TEXT,
+                PRIMARY KEY (fanart_id, user_kind, user_uid)
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS official_fanart_comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fanart_id INTEGER NOT NULL,
+                user_kind TEXT NOT NULL,
+                user_uid TEXT NOT NULL,
+                user_name TEXT DEFAULT '',
+                content TEXT NOT NULL,
+                created_at TEXT
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_fanart_cmt ON official_fanart_comments(fanart_id, id)")
         game_saves.init_schema(conn)
         game_saves.import_legacy(conn, GAME_SAVE_FILE)
         conn.commit()
@@ -862,6 +923,12 @@ class Handler(BaseStaticHandler):
             return self._api_official_reactions()
         if path == "/api/official/stickers":
             return self._api_official_stickers()
+        if path == "/api/official/fanart":
+            return self._api_fanart_list(qs)
+        if path == "/api/official/fanart/comments":
+            return self._api_fanart_comments(qs)
+        if path == "/api/admin/honor-requests":
+            return self._api_admin_honor_requests()
         # ---- 素材库公开接口（供 game 等子域小游戏复用，免登录只读） ----
         if path == "/api/assets/manifest":
             return self._api_assets_manifest()
@@ -983,6 +1050,22 @@ class Handler(BaseStaticHandler):
             return self._api_official_image_type()
         if path == "/api/official/react":
             return self._api_official_react()
+        if path == "/api/editor/code":
+            return self._api_editor_code()
+        if path == "/api/honor/claim":
+            return self._api_honor_claim()
+        if path == "/api/admin/honor/decide":
+            return self._api_admin_honor_decide()
+        if path == "/api/official/fanart/upload":
+            return self._api_fanart_upload()
+        if path == "/api/official/fanart/delete":
+            return self._api_fanart_delete()
+        if path == "/api/official/fanart/like":
+            return self._api_fanart_like()
+        if path == "/api/official/fanart/comment":
+            return self._api_fanart_comment()
+        if path == "/api/official/fanart/comment/delete":
+            return self._api_fanart_comment_delete()
         if path == "/api/fan/submit":
             return self._api_fan_submit()
         if path == "/api/fan/toggle":
@@ -1483,8 +1566,10 @@ class Handler(BaseStaticHandler):
         account_avatar = get_profile(conn, ident["kind"], ident["uid"])["account_avatar_url"]
         conn.close()
         ex = self._get_exempts(ident)
+        honor = self._get_honor(ident)
         self._json(200, {
             "logged_in": True,
+            **honor,
             "kind": ident["kind"],
             "user_id": ident["uid"],
             "username": ident.get("username", ""),
@@ -2491,6 +2576,308 @@ class Handler(BaseStaticHandler):
         destroy_user_sessions(row["kind"], row["uid"]) if approve else None
         self._json(200, {"ok": True})
 
+    # ---------- 编辑码 / 荣誉头衔 ----------
+    def _set_user_cols(self, ident, **cols):
+        """给 local_users / user_flags 写若干列（USSO 用户走 upsert）。列名由代码给定，不接受外部输入。"""
+        names = list(cols)
+        vals = [cols[n] for n in names]
+        with DB_LOCK:
+            conn = db()
+            if ident["kind"] == "local":
+                conn.execute("UPDATE local_users SET " + ",".join(f"{n}=?" for n in names) + " WHERE uid=?",
+                             vals + [ident["uid"]])
+            else:
+                conn.execute(
+                    "INSERT INTO user_flags (kind, uid, " + ",".join(names) + ") VALUES ('usso',?," + ",".join("?" * len(names)) + ") "
+                    "ON CONFLICT(kind, uid) DO UPDATE SET " + ",".join(f"{n}=excluded.{n}" for n in names),
+                    [ident["uid"]] + vals)
+            conn.commit()
+            conn.close()
+
+    def _get_honor(self, ident):
+        with DB_LOCK:
+            conn = db()
+            if ident["kind"] == "local":
+                row = conn.execute("SELECT honor_kind, honor_alias FROM local_users WHERE uid=?", (ident["uid"],)).fetchone()
+            else:
+                row = conn.execute("SELECT honor_kind, honor_alias FROM user_flags WHERE kind='usso' AND uid=?", (ident["uid"],)).fetchone()
+            pend = conn.execute("SELECT 1 FROM honor_requests WHERE kind=? AND uid=? AND status='pending' LIMIT 1",
+                                (ident["kind"], ident["uid"])).fetchone()
+            conn.close()
+        return {"honor_kind": (row["honor_kind"] if row else "") or "",
+                "honor_alias": (row["honor_alias"] if row else "") or "",
+                "honor_pending": bool(pend)}
+
+    def _api_editor_code(self):
+        ident = self._require_ident()
+        if not ident:
+            return
+        body = self._read_json() or {}
+        code = str(body.get("code") or "").strip()
+        ukey, ikey = f"edcode:u:{ident['kind']}:{ident['uid']}", f"edcode:ip:{self._client_ip()}"
+        if rate_blocked(ukey, 6, 600) or rate_blocked(ikey, 12, 600):
+            self._json(429, {"error": "尝试次数有点多啦，请十分钟后再试～"}); return
+        if self._get_edit_role(ident) in ("scribe", "admin"):
+            self._json(200, {"ok": True, "already": True, "group_qq": GROUP_QQ,
+                             "msg": "你已经是编辑啦，无需再输入编辑码。"}); return
+        if not EDITOR_CODE or not hmac.compare_digest(code.encode("utf-8"), EDITOR_CODE.encode("utf-8")):
+            rate_add(ukey); rate_add(ikey)
+            self._json(400, {"error": "编辑码不太对哦，请再核对一下～"}); return
+        self._set_user_cols(ident, edit_role="scribe")
+        self._json(200, {"ok": True, "group_qq": GROUP_QQ, "msg": "验证成功，你已成为编辑！"})
+
+    def _api_honor_claim(self):
+        ident = self._require_ident()
+        if not ident:
+            return
+        if ident["role"] in ("elder", "admin"):
+            self._json(400, {"error": "你已是长老/管理员，无需再选择荣誉头衔"}); return
+        body = self._read_json() or {}
+        honor = body.get("honor")
+        if honor not in ("elder_honor", "yaowang"):
+            self._json(400, {"error": "参数错误"}); return
+        cur = self._get_honor(ident)
+        if cur["honor_pending"]:
+            self._json(409, {"error": "你已有一份待审核的妖王申请，请耐心等待"}); return
+        if honor == "elder_honor":
+            self._set_user_cols(ident, honor_kind="elder_honor", honor_alias="", honor_reason="")
+            self._json(200, {"ok": True, "status": "approved", "honor": honor, "remind_group": True,
+                             "group_qq": GROUP_QQ, "msg": "已成为荣誉长老"}); return
+        reason = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", str(body.get("reason") or "")).strip()[:300]
+        alias = re.sub(r"[\x00-\x1f<>\"'&]", "", str(body.get("alias") or "")).strip()[:8]
+        if not reason:
+            self._json(400, {"error": "请写下你为什么是妖王～"}); return
+        if len(reason) > YAOWANG_AUTO_MIN_CHARS:
+            self._set_user_cols(ident, honor_kind="yaowang", honor_alias=alias, honor_reason=reason)
+            self._json(200, {"ok": True, "status": "approved", "honor": honor, "alias": alias, "remind_group": True,
+                             "group_qq": GROUP_QQ, "msg": "妖王加冕成功"}); return
+        with DB_LOCK:
+            conn = db()
+            conn.execute("INSERT INTO honor_requests (kind, uid, name, honor_kind, alias, reason, status, created_at) "
+                         "VALUES (?,?,?,?,?,?, 'pending', ?)",
+                         (ident["kind"], ident["uid"], ident["nickname"], "yaowang", alias, reason, now_iso()))
+            conn.commit()
+            conn.close()
+        self._json(200, {"ok": True, "status": "pending", "honor": honor, "remind_group": False,
+                         "msg": "自述不足 50 字，已提交馆长审核"})
+
+    def _api_admin_honor_requests(self):
+        if not self._require_admin():
+            return
+        conn = db()
+        rows = [dict(r) for r in conn.execute(
+            "SELECT id, kind, uid, name, honor_kind, alias, reason, created_at FROM honor_requests "
+            "WHERE status='pending' ORDER BY id")]
+        conn.close()
+        self._json(200, {"requests": rows})
+
+    def _api_admin_honor_decide(self):
+        if not self._require_admin():
+            return
+        body = self._read_json()
+        if body is None:
+            return
+        approve = bool(body.get("approve"))
+        with DB_LOCK:
+            conn = db()
+            row = conn.execute("SELECT * FROM honor_requests WHERE id=? AND status='pending'", (body.get("id"),)).fetchone()
+            conn.close()
+        if not row:
+            self._json(404, {"error": "申请不存在或已处理"}); return
+        if approve:
+            self._set_user_cols({"kind": row["kind"], "uid": row["uid"]}, honor_kind=row["honor_kind"],
+                                honor_alias=row["alias"] or "", honor_reason=row["reason"] or "")
+        with DB_LOCK:
+            conn = db()
+            conn.execute("UPDATE honor_requests SET status=? WHERE id=?", ("approved" if approve else "rejected", row["id"]))
+            conn.commit()
+            conn.close()
+        self._json(200, {"ok": True})
+
+    # ---------- 官方角色同人图廊 ----------
+    FANART_MAX_PER_USER_CHAR = 20
+
+    def _can_moderate(self, ident):
+        return bool(ident) and self._get_edit_role(ident) in ("scribe", "admin")
+
+    def _fanart_item(self, r, ident, moderator):
+        mine = bool(ident) and r["user_kind"] == ident["kind"] and r["user_uid"] == str(ident["uid"])
+        return {"id": r["id"], "image_url": r["image_url"], "caption": r["caption"] or "",
+                "user_name": r["user_name"] or "匿名", "created_at": r["created_at"],
+                "likes": r["likes"], "comments": r["comments"], "liked": bool(r["liked"]),
+                "mine": mine, "can_delete": mine or moderator}
+
+    def _api_fanart_list(self, qs):
+        try:
+            cid = int((qs.get("cid") or ["0"])[0])
+            limit = max(1, min(30, int((qs.get("limit") or ["12"])[0])))
+            offset = max(0, int((qs.get("offset") or ["0"])[0]))
+        except ValueError:
+            self._json(400, {"error": "参数错误"}); return
+        ident = self._require_ident_optional()
+        k, u = (ident["kind"], str(ident["uid"])) if ident else ("", "")
+        moderator = self._can_moderate(ident)
+        conn = db()
+        total = conn.execute("SELECT COUNT(*) c FROM official_fanart WHERE character_id=?", (cid,)).fetchone()["c"]
+        rows = conn.execute("""
+            SELECT f.*,
+              (SELECT COUNT(*) FROM official_fanart_likes l WHERE l.fanart_id=f.id) AS likes,
+              (SELECT COUNT(*) FROM official_fanart_comments c WHERE c.fanart_id=f.id) AS comments,
+              (SELECT COUNT(*) FROM official_fanart_likes l WHERE l.fanart_id=f.id AND l.user_kind=? AND l.user_uid=?) AS liked
+            FROM official_fanart f WHERE f.character_id=? ORDER BY f.id DESC LIMIT ? OFFSET ?""",
+            (k, u, cid, limit, offset)).fetchall()
+        conn.close()
+        self._json(200, {"total": total, "items": [self._fanart_item(r, ident, moderator) for r in rows]})
+
+    def _api_fanart_upload(self):
+        body = self._read_image_form()
+        if body is None:
+            return
+        ident = self._require_ident()
+        if not ident:
+            return
+        image = body.pop("_image_file", None)
+        try:
+            cid = int(body.get("character_id"))
+        except (TypeError, ValueError):
+            cid = 0
+        if not image or cid <= 0:
+            self._json(400, {"error": "缺少图片或角色参数"}); return
+        rkey = f"fanart:{ident['kind']}:{ident['uid']}"
+        if rate_blocked(rkey, 10, 3600):
+            self._json(429, {"error": "一小时内最多投稿 10 张图，稍后再来吧～"}); return
+        vconn = wv()
+        ch = vconn.execute("SELECT id FROM characters WHERE id=? AND (merged_to IS NULL OR merged_to='')", (cid,)).fetchone()
+        vconn.close()
+        if not ch:
+            self._json(400, {"error": "角色不存在或已合并"}); return
+        caption = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", str(body.get("caption") or "")).strip()[:100]
+        with DB_LOCK:
+            conn = db()
+            n = conn.execute("SELECT COUNT(*) c FROM official_fanart WHERE character_id=? AND user_kind=? AND user_uid=?",
+                             (cid, ident["kind"], str(ident["uid"]))).fetchone()["c"]
+            if n >= self.FANART_MAX_PER_USER_CHAR:
+                conn.close()
+                self._json(400, {"error": f"同一角色最多投稿 {self.FANART_MAX_PER_USER_CHAR} 张图"}); return
+            url = store_image(*image)
+            cur = conn.execute("INSERT INTO official_fanart (character_id, user_kind, user_uid, user_name, image_url, caption, created_at) "
+                               "VALUES (?,?,?,?,?,?,?)",
+                               (cid, ident["kind"], str(ident["uid"]), ident.get("nickname") or ident.get("username") or "", url, caption, now_iso()))
+            fid = cur.lastrowid
+            conn.commit()
+            conn.close()
+        rate_add(rkey)
+        self._json(200, {"ok": True, "id": fid, "image_url": url})
+
+    def _api_fanart_delete(self):
+        ident = self._require_ident()
+        if not ident:
+            return
+        body = self._read_json() or {}
+        moderator = self._can_moderate(ident)  # 内部会取 DB_LOCK（非可重入），必须在持锁前算好
+        with DB_LOCK:
+            conn = db()
+            row = conn.execute("SELECT * FROM official_fanart WHERE id=?", (body.get("id"),)).fetchone()
+            if not row:
+                conn.close(); self._json(404, {"error": "图片不存在"}); return
+            mine = row["user_kind"] == ident["kind"] and row["user_uid"] == str(ident["uid"])
+            if not (mine or moderator):
+                conn.close(); self._json(403, {"error": "只能删除自己的投稿"}); return
+            conn.execute("DELETE FROM official_fanart_comments WHERE fanart_id=?", (row["id"],))
+            conn.execute("DELETE FROM official_fanart_likes WHERE fanart_id=?", (row["id"],))
+            conn.execute("DELETE FROM official_fanart WHERE id=?", (row["id"],))
+            conn.commit()
+            conn.close()
+        self._json(200, {"ok": True})
+
+    def _api_fanart_like(self):
+        ident = self._require_ident()
+        if not ident:
+            return
+        rkey = f"react:{ident['kind']}:{ident['uid']}"
+        if rate_blocked(rkey, 60, 60):
+            self._json(429, {"error": "操作太快了，歇一会儿再点吧"}); return
+        rate_add(rkey)
+        body = self._read_json() or {}
+        k, u = ident["kind"], str(ident["uid"])
+        with DB_LOCK:
+            conn = db()
+            row = conn.execute("SELECT id FROM official_fanart WHERE id=?", (body.get("id"),)).fetchone()
+            if not row:
+                conn.close(); self._json(404, {"error": "图片不存在"}); return
+            fid = row["id"]
+            had = conn.execute("SELECT 1 FROM official_fanart_likes WHERE fanart_id=? AND user_kind=? AND user_uid=?", (fid, k, u)).fetchone()
+            if had:
+                conn.execute("DELETE FROM official_fanart_likes WHERE fanart_id=? AND user_kind=? AND user_uid=?", (fid, k, u))
+            else:
+                conn.execute("INSERT INTO official_fanart_likes (fanart_id, user_kind, user_uid, created_at) VALUES (?,?,?,?)", (fid, k, u, now_iso()))
+            conn.commit()
+            likes = conn.execute("SELECT COUNT(*) c FROM official_fanart_likes WHERE fanart_id=?", (fid,)).fetchone()["c"]
+            conn.close()
+        self._json(200, {"ok": True, "liked": not had, "likes": likes})
+
+    def _api_fanart_comments(self, qs):
+        try:
+            fid = int((qs.get("id") or ["0"])[0])
+        except ValueError:
+            self._json(400, {"error": "参数错误"}); return
+        ident = self._require_ident_optional()
+        moderator = self._can_moderate(ident)
+        conn = db()
+        rows = conn.execute("SELECT * FROM official_fanart_comments WHERE fanart_id=? ORDER BY id DESC LIMIT 100", (fid,)).fetchall()
+        conn.close()
+        out = []
+        for r in rows:
+            mine = bool(ident) and r["user_kind"] == ident["kind"] and r["user_uid"] == str(ident["uid"])
+            out.append({"id": r["id"], "user_name": r["user_name"] or "匿名", "content": r["content"],
+                        "created_at": r["created_at"], "mine": mine, "can_delete": mine or moderator})
+        self._json(200, {"comments": out})
+
+    def _api_fanart_comment(self):
+        ident = self._require_ident()
+        if not ident:
+            return
+        body = self._read_json() or {}
+        content = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", str(body.get("content") or "")).strip()
+        if not content or len(content) > 300:
+            self._json(400, {"error": "评论需为 1–300 字"}); return
+        rkey = f"fcmt:{ident['kind']}:{ident['uid']}"
+        if rate_blocked(rkey, 15, 600):
+            self._json(429, {"error": "评论太频繁啦，稍后再来～"}); return
+        with DB_LOCK:
+            conn = db()
+            row = conn.execute("SELECT id FROM official_fanart WHERE id=?", (body.get("id"),)).fetchone()
+            if not row:
+                conn.close(); self._json(404, {"error": "图片不存在"}); return
+            cur = conn.execute("INSERT INTO official_fanart_comments (fanart_id, user_kind, user_uid, user_name, content, created_at) VALUES (?,?,?,?,?,?)",
+                               (row["id"], ident["kind"], str(ident["uid"]), ident.get("nickname") or ident.get("username") or "", content, now_iso()))
+            cid_new = cur.lastrowid
+            count = conn.execute("SELECT COUNT(*) c FROM official_fanart_comments WHERE fanart_id=?", (row["id"],)).fetchone()["c"]
+            conn.commit()
+            conn.close()
+        rate_add(rkey)
+        self._json(200, {"ok": True, "id": cid_new, "count": count})
+
+    def _api_fanart_comment_delete(self):
+        ident = self._require_ident()
+        if not ident:
+            return
+        body = self._read_json() or {}
+        moderator = self._can_moderate(ident)  # 同上：先算再持锁
+        with DB_LOCK:
+            conn = db()
+            row = conn.execute("SELECT * FROM official_fanart_comments WHERE id=?", (body.get("id"),)).fetchone()
+            if not row:
+                conn.close(); self._json(404, {"error": "评论不存在"}); return
+            mine = row["user_kind"] == ident["kind"] and row["user_uid"] == str(ident["uid"])
+            if not (mine or moderator):
+                conn.close(); self._json(403, {"error": "只能删除自己的评论"}); return
+            conn.execute("DELETE FROM official_fanart_comments WHERE id=?", (row["id"],))
+            count = conn.execute("SELECT COUNT(*) c FROM official_fanart_comments WHERE fanart_id=?", (row["fanart_id"],)).fetchone()["c"]
+            conn.commit()
+            conn.close()
+        self._json(200, {"ok": True, "count": count})
+
     # ---------- 维基编辑系统 ----------
     def _get_edit_role(self, ident):
         """返回 edit_role: 'none' / 'scribe'(编辑) / 'admin'。管理员/长老默认有编辑权。"""
@@ -3090,46 +3477,73 @@ class Handler(BaseStaticHandler):
         w.close()
         self._json(200, {"fav": fav, "up": up, "down": down, "my": my})
 
+    def _reaction_state(self, w, fav_t, vote_t, cid, ident):
+        """单角色的最新计数 + 当前用户状态，前端据此就地更新，无需重拉全表。"""
+        fav = w.execute(f"SELECT COUNT(*) c FROM {fav_t} WHERE character_id=?", (cid,)).fetchone()["c"]
+        up = w.execute(f"SELECT COUNT(*) c FROM {vote_t} WHERE character_id=? AND vote=1", (cid,)).fetchone()["c"]
+        down = w.execute(f"SELECT COUNT(*) c FROM {vote_t} WHERE character_id=? AND vote=-1", (cid,)).fetchone()["c"]
+        myfav = w.execute(f"SELECT character_id FROM {fav_t} WHERE user_kind=? AND user_uid=?",
+                          (ident["kind"], ident["uid"])).fetchone()
+        myvote = w.execute(f"SELECT vote FROM {vote_t} WHERE user_kind=? AND user_uid=? AND character_id=?",
+                           (ident["kind"], ident["uid"], cid)).fetchone()
+        return {"cid": cid, "fav": fav, "up": up, "down": down,
+                "my_fav": bool(myfav and myfav["character_id"] == cid),
+                "my_vote": myvote["vote"] if myvote else 0}
+
+    def _do_react(self, w, fav_t, vote_t, ident):
+        """喜欢（每人仅 1 个，可转移/取消）与赞踩（可取消/互换）的统一实现。"""
+        body = self._read_json() or {}
+        try:
+            cid = int(body.get("character_id"))
+        except (TypeError, ValueError):
+            cid = 0
+        rtype = body.get("type")
+        if cid <= 0 or rtype not in ("fav", "up", "down"):
+            w.close(); self._json(400, {"error": "参数错误"}); return
+        now = int(time.time())
+        k, u = ident["kind"], ident["uid"]
+        prev_fav = None
+        if rtype == "fav":
+            row = w.execute(f"SELECT character_id FROM {fav_t} WHERE user_kind=? AND user_uid=?", (k, u)).fetchone()
+            if row and row["character_id"] == cid:
+                w.execute(f"DELETE FROM {fav_t} WHERE user_kind=? AND user_uid=?", (k, u))
+                msg = "已取消喜欢"
+            elif row:
+                prev_fav = row["character_id"]
+                w.execute(f"UPDATE {fav_t} SET character_id=?, created_at=? WHERE user_kind=? AND user_uid=?", (cid, now, k, u))
+                msg = "已转为喜欢该角色"
+            else:
+                w.execute(f"INSERT INTO {fav_t} (user_kind, user_uid, character_id, created_at) VALUES (?,?,?,?)", (k, u, cid, now))
+                msg = "已喜欢该角色"
+        else:
+            vote = 1 if rtype == "up" else -1
+            name = "点赞" if vote == 1 else "踩"
+            ex = w.execute(f"SELECT vote FROM {vote_t} WHERE user_kind=? AND user_uid=? AND character_id=?", (k, u, cid)).fetchone()
+            if ex and ex["vote"] == vote:
+                w.execute(f"DELETE FROM {vote_t} WHERE user_kind=? AND user_uid=? AND character_id=?", (k, u, cid))
+                msg = "已取消" + name
+            elif ex:
+                w.execute(f"UPDATE {vote_t} SET vote=?, created_at=? WHERE user_kind=? AND user_uid=? AND character_id=?", (vote, now, k, u, cid))
+                msg = "已改为" + name
+            else:
+                w.execute(f"INSERT INTO {vote_t} (user_kind, user_uid, character_id, vote, created_at) VALUES (?,?,?,?,?)", (k, u, cid, vote, now))
+                msg = "已" + name
+        w.commit()
+        state = self._reaction_state(w, fav_t, vote_t, cid, ident)
+        prev_state = self._reaction_state(w, fav_t, vote_t, prev_fav, ident) if prev_fav else None
+        w.close()
+        self._json(200, {"ok": True, "msg": msg, "state": state, "prev_state": prev_state})
+
     def _api_official_react(self):
         ident = self._require_ident()
         if not ident:
             return
-        body = self._read_json() or {}
-        cid = body.get("character_id"); rtype = body.get("type")
-        if not cid or rtype not in ("fav", "up", "down"):
-            self._json(400, {"error": "参数错误"}); return
-        import time as _t
-        now = int(_t.time())
+        if rate_blocked(f"react:{ident['kind']}:{ident['uid']}", 60, 60):
+            self._json(429, {"error": "操作太快了，歇一会儿再点吧"}); return
+        rate_add(f"react:{ident['kind']}:{ident['uid']}")
         w = sqlite3.connect(WV_DB, timeout=10); w.row_factory = sqlite3.Row
         self._ensure_reaction_tables(w)
-        k, u = ident["kind"], ident["uid"]
-        if rtype == "fav":
-            row = w.execute("SELECT character_id, created_at FROM char_favorites WHERE user_kind=? AND user_uid=?", (k, u)).fetchone()
-            if row and row['character_id'] == cid:
-                w.execute("DELETE FROM char_favorites WHERE user_kind=? AND user_uid=?", (k, u))
-                w.commit(); w.close()
-                self._json(200, {"ok": True, "msg": "已取消喜欢"})
-                return
-            if row:
-                w.execute("UPDATE char_favorites SET character_id=?, created_at=? WHERE user_kind=? AND user_uid=?", (cid, now, k, u))
-            else:
-                w.execute("INSERT INTO char_favorites (user_kind, user_uid, character_id, created_at) VALUES (?,?,?,?)", (k, u, cid, now))
-            w.commit(); w.close()
-            self._json(200, {"ok": True, "msg": "已喜欢该角色"})
-        else:
-            vote = 1 if rtype == "up" else -1
-            existing = w.execute("SELECT vote FROM char_votes WHERE user_kind=? AND user_uid=? AND character_id=?", (k, u, cid)).fetchone()
-            if existing and existing['vote'] == vote:
-                w.execute("DELETE FROM char_votes WHERE user_kind=? AND user_uid=? AND character_id=?", (k, u, cid))
-                w.commit(); w.close()
-                self._json(200, {"ok": True, "msg": "已取消" + ("点赞" if vote == 1 else "踩")})
-                return
-            if existing:
-                w.execute("UPDATE char_votes SET vote=?, created_at=? WHERE user_kind=? AND user_uid=? AND character_id=?", (vote, now, k, u, cid))
-            else:
-                w.execute("INSERT INTO char_votes (user_kind, user_uid, character_id, vote, created_at) VALUES (?,?,?,?,?)", (k, u, cid, vote, now))
-            w.commit(); w.close()
-            self._json(200, {"ok": True, "msg": "已" + ("点赞" if vote == 1 else "踩")})
+        self._do_react(w, "char_favorites", "char_votes", ident)
 
     def _api_admin_supplements(self):
         admin = self._require_admin()
@@ -3897,42 +4311,12 @@ class Handler(BaseStaticHandler):
         ident = self._require_ident()
         if not ident:
             return
-        body = self._read_json() or {}
-        cid = body.get("character_id"); rtype = body.get("type")
-        if not cid or rtype not in ("fav", "up", "down"):
-            self._json(400, {"error": "参数错误"}); return
-        import time as _t
-        now = int(_t.time())
-        w = db(); w.row_factory = sqlite3.Row
+        if rate_blocked(f"react:{ident['kind']}:{ident['uid']}", 60, 60):
+            self._json(429, {"error": "操作太快了，歇一会儿再点吧"}); return
+        rate_add(f"react:{ident['kind']}:{ident['uid']}")
+        w = db()
         self._ensure_fan_reaction_tables(w)
-        k, u = ident["kind"], ident["uid"]
-        if rtype == "fav":
-            row = w.execute("SELECT character_id, created_at FROM fan_char_favorites WHERE user_kind=? AND user_uid=?", (k, u)).fetchone()
-            if row and row['character_id'] == cid:
-                w.execute("DELETE FROM fan_char_favorites WHERE user_kind=? AND user_uid=?", (k, u))
-                w.commit(); w.close()
-                self._json(200, {"ok": True, "msg": "已取消喜欢"})
-                return
-            if row:
-                w.execute("UPDATE fan_char_favorites SET character_id=?, created_at=? WHERE user_kind=? AND user_uid=?", (cid, now, k, u))
-            else:
-                w.execute("INSERT INTO fan_char_favorites (user_kind, user_uid, character_id, created_at) VALUES (?,?,?,?)", (k, u, cid, now))
-            w.commit(); w.close()
-            self._json(200, {"ok": True, "msg": "已喜欢该角色"})
-        else:
-            vote = 1 if rtype == "up" else -1
-            existing = w.execute("SELECT vote FROM fan_char_votes WHERE user_kind=? AND user_uid=? AND character_id=?", (k, u, cid)).fetchone()
-            if existing and existing['vote'] == vote:
-                w.execute("DELETE FROM fan_char_votes WHERE user_kind=? AND user_uid=? AND character_id=?", (k, u, cid))
-                w.commit(); w.close()
-                self._json(200, {"ok": True, "msg": "已取消" + ("点赞" if vote == 1 else "踩")})
-                return
-            if existing:
-                w.execute("UPDATE fan_char_votes SET vote=?, created_at=? WHERE user_kind=? AND user_uid=? AND character_id=?", (vote, now, k, u, cid))
-            else:
-                w.execute("INSERT INTO fan_char_votes (user_kind, user_uid, character_id, vote, created_at) VALUES (?,?,?,?,?)", (k, u, cid, vote, now))
-            w.commit(); w.close()
-            self._json(200, {"ok": True, "msg": "已" + ("点赞" if vote == 1 else "踩")})
+        self._do_react(w, "fan_char_favorites", "fan_char_votes", ident)
 
     # ---------- 辅助 ----------
     def _get_session(self):

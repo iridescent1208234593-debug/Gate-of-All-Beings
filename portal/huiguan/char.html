@@ -38,6 +38,42 @@ section h2{font-size:16px;letter-spacing:2px;border-bottom:2px solid var(--accen
 .c-high{background:rgba(90,158,143,.15);color:var(--accent)}
 .c-mid{background:rgba(212,168,64,.12);color:var(--gold)}
 .c-low{background:rgba(179,84,63,.10);color:var(--danger)}
+.fa-note{font-size:13px;line-height:1.8;color:var(--text);background:rgba(212,168,64,.10);border:1px dashed rgba(212,168,64,.6);border-radius:10px;padding:10px 14px;margin-bottom:12px}
+.fa-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.fa-bar .fa-count{font-size:12px;color:var(--dim)}
+.fa-btn{font-family:inherit;font-size:13px;cursor:pointer;padding:7px 18px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:#fff;transition:filter .15s,transform .12s}
+.fa-btn:hover{filter:brightness(1.07)}.fa-btn:active{transform:scale(.96)}
+.fa-btn.ghost{background:var(--panel);color:var(--accent)}
+.fa-btn:disabled{opacity:.55;cursor:default}
+.fa-form{display:none;border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:14px;margin-bottom:14px}
+.fa-form.show{display:block}
+.fa-form input[type=text]{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;margin:8px 0;background:#fff;color:var(--text)}
+.fa-form label.ack{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.7;color:var(--text);margin:4px 0 10px;cursor:pointer}
+.fa-msg{font-size:12px;margin-left:10px}
+.fa-grid{columns:3 180px;column-gap:12px}
+.fa-card{break-inside:avoid;margin-bottom:12px;border:1px solid var(--border);border-radius:12px;background:var(--panel);overflow:hidden}
+.fa-card img.fa-img{width:100%;display:block;cursor:zoom-in;background:#ece4d6}
+.fa-card .fa-body{padding:8px 10px 10px}
+.fa-cap{font-size:13px;line-height:1.6;word-break:break-word}
+.fa-meta{font-size:11px;color:var(--dim);margin-top:2px;display:flex;justify-content:space-between;gap:6px}
+.fa-acts{display:flex;gap:6px;align-items:center;margin-top:6px}
+.fa-acts .rfx-bar{margin-top:0;flex:1}
+.fa-acts .rfx-bar .rfx-btn{padding:5px 12px}
+.fa-cbtn,.fa-del{font-family:inherit;font-size:12px;cursor:pointer;padding:5px 12px;border-radius:999px;border:1px solid var(--border);background:var(--panel);color:var(--dim)}
+.fa-cbtn:hover{border-color:var(--accent);color:var(--accent)}
+.fa-del:hover{border-color:var(--danger);color:var(--danger)}
+.fa-cmts{display:none;border-top:1px dashed var(--border);margin-top:8px;padding-top:8px}
+.fa-cmts.show{display:block}
+.fa-cmt{font-size:12px;line-height:1.7;padding:4px 0;border-bottom:1px solid rgba(212,207,190,.45);word-break:break-word}
+.fa-cmt b{color:var(--accent);font-weight:600}
+.fa-cmt .t{color:var(--dim);font-size:11px;margin-left:6px}
+.fa-cmt button{float:right;border:none;background:none;color:var(--dim);cursor:pointer;font-size:12px}
+.fa-cform{display:flex;gap:6px;margin-top:8px}
+.fa-cform input{flex:1;min-width:0;padding:6px 10px;border:1px solid var(--border);border-radius:999px;font-family:inherit;font-size:12px;background:#fff;color:var(--text)}
+.hero .hero-rx{max-width:260px;margin:12px auto 0}
+.hero .hero-rx .rfx-bar{margin-top:0}
+.hero .hero-rx .rfx-btn{padding:7px 0;font-size:13px}
+.hero .hero-rx .rfx-btn svg{width:17px;height:17px}
 #lightbox{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(10,14,12,.88);cursor:zoom-out;padding:24px}
 #lightbox.show{display:flex}
 #lightbox img{max-width:94vw;max-height:92vh;object-fit:contain;border-radius:8px;box-shadow:0 10px 50px rgba(0,0,0,.6)}
@@ -48,7 +84,8 @@ section h2{font-size:16px;letter-spacing:2px;border-bottom:2px solid var(--accen
 <body>
 <div class="wrap" id="app"><div class="loading">加载中…</div></div>
 <div id="lightbox" onclick="this.classList.remove('show')"><img id="lbImg" alt=""></div>
-<script src="/image-upload.js?v=20261013"></script>
+<script src="/image-upload.js?v=20261018"></script>
+<script src="reactions-fx.js?v=20261018"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function escAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -152,6 +189,7 @@ async function init(){
       <div class="hero">
         <h1>${esc(c.name)}${badge(completeness)}</h1>
         <div class="sub">${esc(c.type||'')}${c.species?' · '+esc(c.species):''}${c.aliases?' · '+esc(c.aliases):''}${c.is_elder?' · 会馆长老':''}</div>
+        <div class="hero-rx">${RFX.bar('official',c.id)}</div>
       </div>
       ${gal}
       <section>
@@ -173,6 +211,24 @@ async function init(){
       ${evtHTML?`<section><h2>关键事件</h2>${evtHTML}</section>`:''}
       ${c.notes?`<section><h2>备注</h2><p style="line-height:1.9;font-size:14px">${esc(c.notes)}</p></section>`:''}
       ${c.source_url?`<section><h2>来源</h2><p style="font-size:13px"><a href="${esc(c.source_url)}" target="_blank" style="color:var(--gold)">${esc(c.source_url)}</a></p></section>`:''}
+      <section id="fanart">
+        <h2>同人图廊 <span id="faCount" style="font-size:12px;font-weight:400;color:var(--dim)"></span></h2>
+        <div class="fa-note">🌱 温馨提示：这里是<strong>公开的档案图廊</strong>。官方档案目前只有角色简介、没有配图——欢迎大家用自己的同人图把它补上！上传的图片所有访客都能看到，请不要上传隐私信息、他人肖像或违规内容哦。</div>
+        <div class="fa-bar">
+          <button type="button" class="fa-btn" id="faToggle" onclick="faToggleForm()">＋ 上传同人图</button>
+          <span class="fa-count">喜欢就点个爱心，也可以留下评论～</span>
+        </div>
+        <form class="fa-form" id="faForm" onsubmit="return faSubmit(event)">
+          <input type="file" id="faFile" accept="image/jpeg,image/png,image/webp,image/gif" required>
+          <input type="text" id="faCaption" maxlength="100" placeholder="给图配一句话（选填，100 字内）">
+          <label class="ack"><input type="checkbox" id="faAck" required><span>我明白这是<strong>公开的档案图</strong>，所有人都能看到；图片为我自己创作，或已获得作者同意转载。</span></label>
+          <button type="submit" class="fa-btn" id="faSubmitBtn">发布到图廊</button>
+          <button type="button" class="fa-btn ghost" onclick="faToggleForm(false)">取消</button>
+          <span class="fa-msg" id="faMsg" role="status"></span>
+        </form>
+        <div class="fa-grid" id="faGrid"></div>
+        <div style="text-align:center;margin-top:6px"><button type="button" class="gal-more" id="faMore" style="display:none" onclick="faLoad(false)">加载更多</button></div>
+      </section>
       <button id="editFab" type="button" style="display:none;position:fixed;right:22px;bottom:26px;z-index:9990;padding:12px 22px;border-radius:999px;border:none;background:var(--accent);color:#fff;font-size:14px;font-family:inherit;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.28);" onclick="openEditModal()">✎ 补充 / 编辑设定</button>
       <div id="editModal" style="display:none;position:fixed;inset:0;z-index:9995;background:rgba(20,26,22,.55);align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeEditModal()">
         <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:20px;">
@@ -250,11 +306,129 @@ async function init(){
     document.title=(c.name||'角色')+' · 西木会馆';
     _editCharName=c.name||'';
     initGallery(images, c.id, c.name);
+    RFX.load('official').then(()=>RFX.paint('official',c.id));
+    initFanart(c.id);
     // 检查登录状态 + 编辑权限
     checkEditAccess(id);
   }catch(e){
     document.getElementById('app').innerHTML='<div class="error-box">加载失败，请刷新重试。</div>';
   }
+}
+// ---- 官方角色同人图廊 ----
+let _faCid=null, _faOffset=0, _faTotal=0, _faLoading=false, _faUser=null;
+const FA_PAGE=12;
+async function faUser(){
+  if(_faUser&&Date.now()-_faUser.t<30000) return _faUser.u;
+  let u={logged_in:false}; try{u=await (await fetch('/api/user')).json();}catch(e){}
+  _faUser={u,t:Date.now()}; return u;
+}
+function faLoginToast(t){ RFX.toast(t,{label:'去登录',run:()=>{location.href='/?openauth=1';}}); }
+function faMsg(t,ok){const m=document.getElementById('faMsg'); if(m){m.textContent=t||''; m.style.color=ok?'var(--accent)':'var(--danger)';}}
+function faDate(s){return String(s||'').slice(0,10);}
+function faCardHTML(it){
+  RFX.seed(it.id,it.likes,it.liked);
+  return `<div class="fa-card" data-id="${it.id}">
+    <img class="fa-img" src="${escAttr(it.image_url)}" alt="${escAttr(it.caption||'同人图')}" loading="lazy" decoding="async" onclick="zoom(this.src)" onerror="this.closest('.fa-card').style.display='none'">
+    <div class="fa-body">
+      ${it.caption?`<div class="fa-cap">${esc(it.caption)}</div>`:''}
+      <div class="fa-meta"><span>by ${esc(it.user_name)}</span><span>${esc(faDate(it.created_at))}</span></div>
+      <div class="fa-acts">
+        ${RFX.bar('fanart',it.id)}
+        <button type="button" class="fa-cbtn" onclick="faToggleCmts(${it.id})">💬 <span class="fa-cn">${it.comments}</span></button>
+        ${it.can_delete?`<button type="button" class="fa-del" onclick="faDelete(${it.id})" title="${it.mine?'删除我的投稿':'管理删除'}">删除</button>`:''}
+      </div>
+      <div class="fa-cmts" id="faC${it.id}"></div>
+    </div>
+  </div>`;
+}
+async function initFanart(cid){ _faCid=cid; await faLoad(true); }
+async function faLoad(reset){
+  if(_faLoading) return; _faLoading=true;
+  if(reset){_faOffset=0; document.getElementById('faGrid').innerHTML='';}
+  try{
+    const r=await fetch(`/api/official/fanart?cid=${encodeURIComponent(_faCid)}&limit=${FA_PAGE}&offset=${_faOffset}&_=${Date.now()}`);
+    const d=await r.json(); _faTotal=d.total||0;
+    const items=d.items||[];
+    document.getElementById('faGrid').insertAdjacentHTML('beforeend', items.map(faCardHTML).join(''));
+    _faOffset+=items.length;
+    document.getElementById('faCount').textContent=_faTotal?`· ${_faTotal} 张`:'';
+    if(reset && !items.length) document.getElementById('faGrid').innerHTML='<div style="column-span:all;text-align:center;color:var(--dim);font-size:13px;padding:24px 0">还没有同人图，来做第一个投稿的人吧 ✨</div>';
+    const more=document.getElementById('faMore'); more.style.display=_faOffset<_faTotal?'inline-block':'none';
+    more.textContent=`加载更多 · 还有 ${_faTotal-_faOffset} 张`;
+  }catch(e){ faMsg('图廊加载失败，请刷新重试',false); }
+  _faLoading=false;
+}
+async function faToggleForm(force){
+  const f=document.getElementById('faForm');
+  const show=typeof force==='boolean'?force:!f.classList.contains('show');
+  if(show){
+    const u=await faUser();
+    if(!u.logged_in){ faLoginToast('登录后才能上传同人图哦～'); return; }
+  }
+  f.classList.toggle('show',show); faMsg('');
+}
+async function faSubmit(e){
+  e.preventDefault();
+  const file=document.getElementById('faFile').files[0];
+  if(!file) return false;
+  if(!document.getElementById('faAck').checked){ faMsg('请先勾选「公开档案图」确认',false); return false; }
+  const btn=document.getElementById('faSubmitBtn'); btn.disabled=true; faMsg('上传中…',true);
+  try{
+    const blob=await HuiguanImages.shrink(file);
+    const up=blob===file?file:new File([blob],file.name.replace(/\.[^.]+$/,'')+(blob.type==='image/webp'?'.webp':'.jpg'),{type:blob.type});
+    const d=await HuiguanImages.request('/api/official/fanart/upload',{character_id:Number(_faCid),caption:document.getElementById('faCaption').value.trim()},up);
+    if(d.ok){
+      document.getElementById('faForm').reset(); document.getElementById('faForm').classList.remove('show'); faMsg('');
+      RFX.toast('投稿成功，已发布到图廊 🎉'); await faLoad(true);
+    }
+  }catch(err){ faMsg(err.message||'上传失败，请重试',false); }
+  finally{ btn.disabled=false; }
+  return false;
+}
+async function faDelete(id){
+  if(!confirm('确定删除这张图吗？图下的评论也会一起删除。')) return;
+  try{
+    const r=await fetch('/api/official/fanart/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
+    const d=await r.json();
+    if(d.ok){ const el=document.querySelector(`.fa-card[data-id="${id}"]`); if(el) el.remove(); _faTotal--; _faOffset=Math.max(0,_faOffset-1); document.getElementById('faCount').textContent=_faTotal?`· ${_faTotal} 张`:''; }
+    else RFX.toast('⚠ '+(d.error||'删除失败'));
+  }catch(e){ RFX.toast('⚠ 网络错误'); }
+}
+async function faToggleCmts(id){
+  const box=document.getElementById('faC'+id);
+  if(box.classList.toggle('show')){
+    box.innerHTML='<div style="font-size:12px;color:var(--dim)">加载中…</div>';
+    await faRenderCmts(id);
+  }
+}
+function faSetCount(id,n){const el=document.querySelector(`.fa-card[data-id="${id}"] .fa-cn`); if(el) el.textContent=n;}
+async function faRenderCmts(id){
+  const box=document.getElementById('faC'+id); if(!box) return;
+  let list=[]; try{ list=(await (await fetch('/api/official/fanart/comments?id='+id+'&_='+Date.now())).json()).comments||[]; }catch(e){}
+  box.innerHTML=(list.length?list.map(c=>`<div class="fa-cmt">${c.can_delete?`<button type="button" title="删除评论" onclick="faDelCmt(${c.id},${id})">×</button>`:''}<b>${esc(c.user_name)}</b><span class="t">${esc(faDate(c.created_at))}</span><div>${esc(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--dim)">还没有评论，来说点什么吧～</div>')
+    +`<form class="fa-cform" onsubmit="return faPostCmt(event,${id})"><input type="text" maxlength="300" placeholder="写下你的评论…" aria-label="评论"><button type="submit" class="fa-btn" style="padding:5px 14px">发送</button></form>`;
+}
+async function faPostCmt(e,id){
+  e.preventDefault();
+  const inp=e.target.querySelector('input'), content=inp.value.trim(); if(!content) return false;
+  const u=await faUser();
+  if(!u.logged_in){ faLoginToast('登录后才能评论哦～'); return false; }
+  const btn=e.target.querySelector('button'); btn.disabled=true;
+  try{
+    const r=await fetch('/api/official/fanart/comment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,content})});
+    const d=await r.json();
+    if(d.ok){ faSetCount(id,d.count); await faRenderCmts(id); }
+    else RFX.toast('⚠ '+(d.error||'评论失败'));
+  }catch(err){ RFX.toast('⚠ 网络错误'); }
+  btn.disabled=false; return false;
+}
+async function faDelCmt(cid,id){
+  if(!confirm('删除这条评论？')) return;
+  try{
+    const r=await fetch('/api/official/fanart/comment/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:cid})});
+    const d=await r.json();
+    if(d.ok){ faSetCount(id,d.count); await faRenderCmts(id); } else RFX.toast('⚠ '+(d.error||'删除失败'));
+  }catch(e){ RFX.toast('⚠ 网络错误'); }
 }
 let _editCharId=null, _canEdit=false, _editCharName='', _mergeTarget=null;
 let _charData=null,_charCid=null,_charImages=[];

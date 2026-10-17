@@ -221,6 +221,25 @@
   }
   .custom-branch-entry input { font-size: 12px !important; padding: 5px 8px !important; }
 
+  /* 长老三选一 */
+  #elderChooser { position: fixed; inset: 0; z-index: 99990; background: rgba(20,26,22,.6); display: none; align-items: center; justify-content: center; padding: 20px; }
+  #elderChooser.show { display: flex; }
+  #elderChooser .ec-box { background: var(--surface, #fff); color: var(--text); border: 1px solid var(--border, #d4cfbe); border-radius: 14px; max-width: 520px; width: 100%; max-height: 90vh; overflow: auto; padding: 22px; box-shadow: 0 18px 50px rgba(0,0,0,.3); }
+  #elderChooser h3 { font-size: 17px; letter-spacing: 1px; margin-bottom: 4px; }
+  #elderChooser .ec-sub { font-size: 12px; color: var(--text-dim); line-height: 1.7; margin-bottom: 14px; }
+  #elderChooser .ec-opt { display: block; width: 100%; text-align: left; font: inherit; cursor: pointer; border: 1px solid var(--border, #d4cfbe); border-radius: 10px; background: transparent; color: var(--text); padding: 12px 14px; margin-bottom: 10px; transition: border-color .15s, background .15s, transform .12s; }
+  #elderChooser .ec-opt:hover { border-color: var(--gold, #d4a840); background: rgba(212,168,64,.08); transform: translateY(-1px); }
+  #elderChooser .ec-opt strong { display: block; font-size: 14px; margin-bottom: 3px; }
+  #elderChooser .ec-opt span { font-size: 12px; line-height: 1.7; color: var(--text-dim); }
+  #elderChooser .ec-form { display: none; border: 1px dashed var(--gold, #d4a840); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: rgba(212,168,64,.06); }
+  #elderChooser .ec-form.show { display: block; }
+  #elderChooser textarea, #elderChooser input[type=text] { width: 100%; font: inherit; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border, #d4cfbe); border-radius: 8px; background: var(--paper, #fff); color: var(--text); margin-top: 6px; }
+  #elderChooser .ec-count { font-size: 12px; margin-top: 4px; color: var(--text-dim); }
+  #elderChooser .ec-count.ok { color: var(--accent, #5a9e8f); }
+  #elderChooser .ec-row { display: flex; gap: 8px; margin-top: 10px; }
+  #elderChooser .ec-row button { flex: 1; font: inherit; font-size: 13px; padding: 9px; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text); }
+  #elderChooser .ec-row button.primary { background: var(--gold, #d4a840); border-color: var(--gold, #d4a840); color: #1f1a0a; font-weight: 600; }
+  #elderChooser .ec-row button:disabled { opacity: .6; cursor: default; }
   /* 长老选项 */
   .elder-option {
     margin-top: 8px; padding: 8px 12px;
@@ -625,7 +644,7 @@
   .auth-legacy .auth-hint { margin: 6px 0 0; }
 </style>
 <link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261015-1">
-<link rel="stylesheet" href="/homepage.css?v=20261017-nav">
+<link rel="stylesheet" href="/homepage.css?v=20261018-pal4">
 <link rel="preload" as="script" href="/design-system/ui/lxh-intro.js?v=20261015-1">
 <link rel="preload" as="script" href="/assets/gate/gate-scene.js?v=20261009-6">
 <link rel="preload" as="script" href="/homepage.js?v=20261016-1">
@@ -948,7 +967,12 @@
 
     <!-- ══════ 角色配色 ══════ -->
     <details class="section registration-palette" id="registrationPalette">
-      <summary>角色配色 <span>点击展开 · 别忘了为角色选一组配色</span></summary>
+      <summary>
+        <span class="pal-icon" aria-hidden="true">🎨</span>
+        <span class="pal-text">角色配色<em>别忘了为角色选一组配色 · 点击展开</em></span>
+        <span class="pal-now" id="palNow" aria-live="polite"></span>
+        <span class="pal-cta"><b class="c-closed">展开选色 ▾</b><b class="c-open">收起 ▴</b></span>
+      </summary>
       <div class="registration-palette-body">
       <div class="palette-section-heading"><h3>快速搭配</h3><p>选一组现成配色，或在下方分别挑选主色与辅色。</p></div>
       <div class="color-grid" id="formColorGrid"></div>
@@ -1052,13 +1076,13 @@
     <!-- ══════ 身体信息 ══════ -->
     <div class="section">
       <h2>身体信息
-        <span style="margin-left:auto;display:flex;gap:8px;"><button type="button" class="btn-elder-apply limit-apply" onclick="applyElder()">申请长老 · 突破年龄限制</button></span>
+        <span style="margin-left:auto;display:flex;gap:8px;"><button type="button" class="btn-elder-apply limit-apply" onclick="openElderChooser()">申请长老 · 突破年龄限制</button></span>
       </h2>
       <div class="form-row" id="row-age">
         <label>年龄 <span class="req">*</span></label>
         <input type="number" name="age" id="ageInput" placeholder="普通上限450岁" min="0">
         <label id="breakAgeWrap" style="display:none;margin-top:6px;"><input type="checkbox" id="breakAge" onchange="applyLimits()"> 突破年龄限制（已获批）</label>
-        <div class="hint">年龄上限 450 岁；申请成为会馆长老后方可突破至 1500 岁</div>
+        <div class="hint">年龄上限 450 岁；成为长老（需审核）或选择荣誉长老 / 妖王后可突破至 1500 岁</div>
         <div class="err"></div>
       </div>
       <div class="form-row">
@@ -1125,12 +1149,12 @@
     <div class="section ability-section">
       <h2>能力 <span style="color:var(--text-dim);font-size:11px">（可选）</span>
         <span style="margin-left:auto;display:flex;gap:8px;align-items:center;">
-          <button type="button" class="btn-elder-apply limit-apply" onclick="applyElder()">申请长老 · 突破限制</button>
+          <button type="button" class="btn-elder-apply limit-apply" onclick="openElderChooser()">申请长老 · 突破限制</button>
           <a class="ability-detail-link" href="#ability-detail-section" onclick="document.getElementById('ability-detail-section').open = true" title="展开本栏能力详解">能力详解 ↓</a>
         </span>
       </h2>
       <div class="ability-guidance hint">
-        <p><strong>基础与身份</strong>妖精默认具备御灵基础，系别特化可选。未登录御灵系最多选 1 系，年龄上限 450 岁；注册后默认成为执行者，御灵系可选 2 系。长老在执行者基础上，年龄上限提升至 1500 岁，需申请并经馆长批准。</p>
+        <p><strong>基础与身份</strong>妖精默认具备御灵基础，系别特化可选。未登录御灵系最多选 1 系，年龄上限 450 岁；注册后默认成为执行者，御灵系可选 2 系。长老在执行者基础上，年龄上限提升至 1500 岁，需申请并经馆长批准；也可免申请成为荣誉长老，或写下理由成为妖王，同样可达 1500 岁。</p>
         <p><strong>系别与技能</strong>最多可再选两个大系。空间系只能选一个特殊能力，其他系别最多选两个能力。双系合璧技能（如画灵＝造物×生灵）占用两个大系、计 2 个分支名额。</p>
         <p><strong>特殊限制</strong>治愈系与空间系互斥。选治愈系后，生灵系还可再选 1 个分支，其他大系分支不可选；名额受限时会自动取消治愈系。选择治愈系或空间系后会弹出限定提示。</p>
       </div>
@@ -1149,7 +1173,7 @@
           <label id="breakSkillWrap" style="display:none;margin-top:8px;"><input type="checkbox" id="breakSkill" onchange="applyLimits()"> 突破选择限制（已获批：解除御灵系/大系/分支数量、空间系限1、治愈与空间互斥等所有限制，可自由选择）</label>
           <div class="elder-option">
             <div class="role-line" id="roleLine">身份加载中…</div>
-            <div class="hint">执行者御灵系可选 2 系；长老在执行者基础上年龄上限提升至 1500 岁，需申请并经馆长批准，或由管理员直接设置。</div>
+            <div class="hint">执行者御灵系可选 2 系；长老在执行者基础上年龄上限提升至 1500 岁，需申请并经馆长批准，或由管理员直接设置；荣誉长老 / 妖王可在页面中直接选择。</div>
           </div>
           <!-- 御灵系自定义分支 -->
           <div class="branch-custom-row" id="royalCustomRow" style="margin-top:10px;display:none;">
@@ -1319,7 +1343,9 @@
   </div>
 </div>
 
-<script src="/image-upload.js?v=20261017"></script>
+<script src="/image-upload.js?v=20261018"></script>
+<script src="/reactions-fx.js?v=20261018"></script>
+<script src="/group-reminder.js?v=20261018-2"></script>
 <link rel="stylesheet" href="/avatar-cropper.css">
 <script src="/avatar-cropper.js?v=20261017"></script>
 <script src="/character-colors.js?v=20261013"></script>
@@ -1781,7 +1807,7 @@ function rolePriv() {
   const r = (window.currentUser && currentUser.role) || '';
   if (r === 'admin') return { royal: 2, age: Infinity };
   if (r === 'elder') return { royal: 2, age: 1500 };
-  if (r === 'executor' || r === 'user') return { royal: 2, age: 450 };
+  if (r === 'executor' || r === 'user') return { royal: 2, age: (currentUser.honor_kind ? 1500 : 450) };
   return { royal: 1, age: 450 };
 }
 // 豁免突破：获批且勾选才生效
@@ -1818,16 +1844,95 @@ function renderRoleLine() {
     return;
   }
   const r = currentUser.role;
-  setApply(!(r === 'elder' || r === 'admin'));
+  const hl = honorLabel(currentUser);
+  setApply(!(r === 'elder' || r === 'admin' || hl));
   if (r === 'admin') {
     el.innerHTML = '当前身份：<strong>管理员</strong>（御灵系可选 2 系 · 年龄不限）';
   } else if (r === 'elder') {
     el.innerHTML = '当前身份：<strong>长老</strong>（御灵系可选 2 系 · 年龄上限 1500 岁）';
+  } else if (hl) {
+    el.innerHTML = '当前身份：<strong>' + escapeHtml(hl) + '</strong>（御灵系可选 2 系 · 年龄上限 1500 岁）';
+  } else if (currentUser.honor_pending) {
+    el.innerHTML = '当前身份：<strong>执行者</strong>（御灵系可选 2 系 · 年龄上限 450 岁）· 妖王申请审核中';
   } else if (currentUser.elder_pending) {
     el.innerHTML = '当前身份：<strong>执行者</strong>（御灵系可选 2 系 · 年龄上限 450 岁）· 长老申请审核中';
   } else {
-    el.innerHTML = '当前身份：<strong>执行者</strong>（御灵系可选 2 系 · 年龄上限 450 岁） <button type="button" class="btn-elder-apply" onclick="applyElder()">申请长老</button>';
+    el.innerHTML = '当前身份：<strong>执行者</strong>（御灵系可选 2 系 · 年龄上限 450 岁） <button type="button" class="btn-elder-apply" onclick="openElderChooser()">申请长老 / 荣誉头衔</button>';
   }
+}
+// 荣誉头衔：荣誉长老 / 妖王（不含编辑与成员管理权限，年龄上限与长老一致）
+function honorLabel(u) {
+  if (!u) return '';
+  if (u.honor_kind === 'elder_honor') return '荣誉长老';
+  if (u.honor_kind === 'yaowang') return u.honor_alias || '妖王';
+  return '';
+}
+function ensureElderChooser() {
+  let m = document.getElementById('elderChooser');
+  if (m) return m;
+  m = document.createElement('div');
+  m.id = 'elderChooser'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true');
+  m.innerHTML = `<div class="ec-box">
+    <h3>突破年龄限制 · 选一条路</h3>
+    <div class="ec-sub">三条路都能把年龄上限提升到 1500 岁。想要修改设定、管理成员的完整「长老」权限，需要馆长审核；其余两条路可以直接加冕～</div>
+    <button type="button" class="ec-opt" data-opt="elder"><strong>📜 申请长老 · 馆长审核</strong><span>拥有编辑 / 管理权限（可修改、删除官方设定），需经馆长批准。</span></button>
+    <button type="button" class="ec-opt" data-opt="honor"><strong>🌿 成为荣誉长老 · 免申请</strong><span>只需记得加入交流群，立刻生效。仅荣誉头衔与 1500 岁年龄上限，不含编辑权限。</span></button>
+    <button type="button" class="ec-opt" data-opt="yaowang"><strong>👑 成为妖王 · 写下你的理由</strong><span>自述超过 50 字直接加冕；不足 50 字将交由馆长审核。还可以自定义妖王别称。</span></button>
+    <div class="ec-form" id="ecYaowang">
+      <label style="font-size:13px;">为什么你是妖王？<textarea id="ecReason" rows="4" maxlength="300" placeholder="写写你的威名、领地、传说……（超过 50 字直接加冕）"></textarea></label>
+      <div class="ec-count" id="ecCount">已写 0 字 · 还差 51 字可直接加冕，否则需审核</div>
+      <label style="font-size:13px;display:block;margin-top:8px;">自定义妖王别称（选填，8 字内）<input type="text" id="ecAlias" maxlength="8" placeholder="例如：北境妖王"></label>
+      <div class="ec-row"><button type="button" id="ecBack">返回</button><button type="button" class="primary" id="ecSubmit">加冕 / 提交</button></div>
+    </div>
+    <div class="ec-row"><button type="button" id="ecClose">先不用了</button></div>
+  </div>`;
+  document.body.appendChild(m);
+  const close = () => m.classList.remove('show');
+  m.addEventListener('click', e => { if (e.target === m) close(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+  m.querySelector('#ecClose').onclick = close;
+  const form = m.querySelector('#ecYaowang'), opts = m.querySelectorAll('.ec-opt');
+  const showForm = on => { form.classList.toggle('show', on); opts.forEach(o => o.style.display = on ? 'none' : ''); m.querySelector('#ecClose').parentElement.style.display = on ? 'none' : ''; };
+  m.querySelector('#ecBack').onclick = () => showForm(false);
+  const reason = m.querySelector('#ecReason'), count = m.querySelector('#ecCount');
+  reason.oninput = () => {
+    const n = reason.value.trim().length;
+    count.className = 'ec-count' + (n > 50 ? ' ok' : '');
+    count.textContent = n > 50 ? `已写 ${n} 字 · 达标，提交后直接加冕 ✨` : `已写 ${n} 字 · 还差 ${51 - n} 字可直接加冕，否则需审核`;
+  };
+  m.querySelector('[data-opt="elder"]').onclick = () => { close(); applyElder(); };
+  m.querySelector('[data-opt="honor"]').onclick = () => claimHonor('elder_honor', {}, close);
+  m.querySelector('[data-opt="yaowang"]').onclick = () => { showForm(true); reason.focus(); };
+  m.querySelector('#ecSubmit').onclick = async function () {
+    const text = reason.value.trim();
+    if (!text) { showToast('error', '请先写下你为什么是妖王～', 3500); return; }
+    this.disabled = true;
+    await claimHonor('yaowang', { reason: text, alias: m.querySelector('#ecAlias').value.trim() }, () => { close(); showForm(false); });
+    this.disabled = false;
+  };
+  return m;
+}
+function openElderChooser() {
+  if (!window.currentUser || !currentUser.logged_in) { showToast('error', '请先登录后再选择～', 3500); openAuthModal(); return; }
+  ensureElderChooser().classList.add('show');
+}
+async function claimHonor(honor, extra, done) {
+  try {
+    const r = await fetch('/api/honor/claim', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ honor, ...extra }) });
+    const d = await r.json();
+    if (!d.ok) { showToast('error', '⚠ ' + (d.error || '操作失败'), 5000); return; }
+    if (done) done();
+    if (d.status === 'pending') {
+      currentUser.honor_pending = true;
+      showToast('success', '✔ 妖王申请已提交，等待馆长审核。通过后会为你加冕～', 6000);
+    } else {
+      currentUser.honor_kind = honor; currentUser.honor_alias = d.alias || '';
+      showToast('success', honor === 'yaowang' ? '👑 妖王加冕成功！' : '🌿 你已成为荣誉长老！', 4500);
+      if (window.RFX) RFX.confetti(innerWidth / 2, innerHeight / 2);
+      if (d.remind_group) HuiguanGroup.show({ title: honor === 'yaowang' ? '恭喜加冕，妖王大人～' : '欢迎你，荣誉长老～', lead: '你的新头衔已经生效啦。' });
+    }
+    applyLimits();
+  } catch (e) { showToast('error', '⚠ 网络错误，请稍后再试', 5000); }
 }
 async function applyElder() {
   if (!confirm('申请【长老】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 长老/编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。\n确认继续申请？')) return;
@@ -1844,6 +1949,19 @@ async function applyElder() {
     }
   } catch (e) { showToast('error', '⚠ 网络错误，申请未提交', 5000); }
 }
+// 配色折叠条右侧：显示当前配色，折叠时也能看到「已经选了什么」
+function updatePaletteChip() {
+  const el = document.getElementById('palNow'); if (!el) return;
+  const c = (typeof selectedColor !== 'undefined' && selectedColor) || ((typeof COLOR_SCHEMES !== 'undefined' && typeof selectedColorIdx !== 'undefined' && selectedColorIdx >= 0) ? COLOR_SCHEMES[selectedColorIdx] : null);
+  el.innerHTML = c ? `当前：<i><b style="background:${escapeHtml(c.primary)}"></b><b style="background:${escapeHtml(c.accent)}"></b></i>${escapeHtml(c.name || '自选')}` : '当前：默认配色';
+}
+(function () {
+  const pal = document.getElementById('registrationPalette'); if (!pal) return;
+  const upd = () => setTimeout(updatePaletteChip, 0);
+  pal.addEventListener('toggle', () => { if (pal.open) pal.classList.add('pal-seen'); });
+  pal.addEventListener('click', upd); pal.addEventListener('toggle', upd); pal.addEventListener('input', upd);
+  document.addEventListener('DOMContentLoaded', upd); setTimeout(updatePaletteChip, 600); setTimeout(updatePaletteChip, 2000);
+})();
 function checkRoyalLimit() {
   const priv = rolePriv();
   const cbs = document.querySelectorAll('input[name="ability_royal"]:checked');
@@ -1859,7 +1977,7 @@ function checkRoyalLimit() {
     ageInput.placeholder = breakAgeActive() ? '已突破年龄限制' : '管理员年龄不限';
   } else if (priv.age >= 1500) {
     ageInput.max = priv.age;
-    ageInput.placeholder = '长老上限1500岁';
+    ageInput.placeholder = '上限1500岁';
   } else {
     ageInput.max = priv.age;
     ageInput.placeholder = '普通上限450岁';
@@ -2352,7 +2470,7 @@ function validate() {
   const ageLimit = breakAgeActive() ? Infinity : rolePriv().age;
   if (!f.age.value) err('age', '请输入年龄');
   else if (isNaN(age) || age < 0) err('age', '年龄无效');
-  else if (age > ageLimit) err('age', ageLimit >= 1500 ? '长老年龄上限为1500岁' : '年龄上限为450岁，成为会馆长老后可突破至1500岁');
+  else if (age > ageLimit) err('age', ageLimit >= 1500 ? '年龄上限为1500岁' : '年龄上限为450岁，成为长老 / 荣誉长老 / 妖王后可突破至1500岁');
   else clr('age');
 
   if (!f.appearance.value.trim() && !imageList.length) err('appearance', '请填写外貌描述或上传人设图');

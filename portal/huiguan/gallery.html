@@ -34,6 +34,14 @@ h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
 .scribe-banner .sb-text span{font-size:13px;color:var(--text);line-height:1.7}
 .scribe-banner .sb-btn{font-family:inherit;font-size:13px;cursor:pointer;padding:8px 20px;border-radius:8px;border:1px solid var(--gold);background:var(--gold);color:#fff;transition:all .15s;white-space:nowrap}
 .scribe-banner .sb-btn:hover{filter:brightness(1.08)}
+.scribe-banner .sb-ghost{background:transparent;color:var(--gold)}
+.scribe-banner .sb-ghost:hover{background:rgba(212,168,64,.12)}
+.code-row{flex-basis:100%;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px}
+.code-row[hidden]{display:none}
+.code-row input{font-family:inherit;font-size:14px;letter-spacing:3px;width:190px;padding:8px 12px;border:1px solid rgba(212,168,64,.55);border-radius:8px;background:var(--panel);color:var(--text);outline:none}
+.code-row input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,168,64,.18)}
+.code-row .code-msg{font-size:12px;color:var(--dim);flex:1;min-width:180px}
+.code-row .code-msg.err{color:var(--danger)}
 .relation-card{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 18px;padding:16px 18px;border:1px solid rgba(90,158,143,.45);border-radius:10px;background:linear-gradient(120deg,rgba(90,158,143,.10),rgba(212,168,64,.08));box-shadow:0 2px 8px rgba(30,40,34,.10);text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s,border-color .15s}
 .relation-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(30,40,34,.14);border-color:rgba(212,168,64,.6)}
 .relation-card .rc-icon{width:46px;height:46px;flex:none}
@@ -81,6 +89,12 @@ h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
       <span>熟悉《罗小黑战记》的你，可以申请成为编辑：审查他人提交的角色补充、修订与勘误官方设定，让数据库更准确、更完整。</span>
     </div>
     <button class="sb-btn" onclick="applyScribe()">申请成为编辑</button>
+    <button class="sb-btn sb-ghost" type="button" id="codeToggle" onclick="toggleCode()">我有编辑码</button>
+    <form class="code-row" id="codeRow" hidden onsubmit="return submitCode(event)">
+      <input id="codeInput" type="text" inputmode="numeric" autocomplete="off" maxlength="32" placeholder="输入编辑码" aria-label="编辑码">
+      <button class="sb-btn" type="submit" id="codeBtn">验证</button>
+      <span class="code-msg" id="codeMsg">有编辑码的话，无需申请即可直接成为编辑。</span>
+    </form>
   </div>
   <a class="scribe-banner" href="stickers.html" style="text-decoration:none;display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 18px;padding:14px 18px;border:1px solid rgba(90,158,143,.4);border-radius:10px;background:rgba(90,158,143,.07);">
     <div class="sb-text">
@@ -106,6 +120,8 @@ h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
     <div id="unclassBox" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
   </div>
 </div>
+<script src="reactions-fx.js?v=20261018"></script>
+<script src="group-reminder.js?v=20261018-2"></script>
 <script>
 let curMin=0, curMax=8, curQ='', timer=null;
 const PAGE=30;
@@ -113,15 +129,6 @@ let curPage=1, loaded=0, total=0, loading=false;
 const badgeCls = c => c>=6?'high':c>=4?'mid':'low';
 const badgeText = c => c>=6?'设定完整':c>=4?'部分设定':'待补充';
 
-function rxBarHTML(cid){
-  const f=RX.fav[cid]||0, u=RX.up[cid]||0, dd=RX.down[cid]||0;
-  const myFav=RX.my.fav===cid, myV=RX.my.votes[String(cid)];
-  return `<div class="rx-bar" style="display:flex;gap:6px;margin-top:8px;">
-    <button type="button" onclick="doReact(event,${cid},'fav')" title="喜欢（可取消/重选）" style="flex:1;font-size:12px;padding:3px 0;border-radius:4px;cursor:pointer;border:1px solid ${myFav?'var(--danger)':'var(--border)'};background:${myFav?'rgba(179,84,63,.12)':'var(--panel)'};color:${myFav?'var(--danger)':'var(--dim)'};">❤ ${f}</button>
-    <button type="button" onclick="doReact(event,${cid},'up')" title="点赞（可取消/改踩）" style="flex:1;font-size:12px;padding:3px 0;border-radius:4px;cursor:pointer;border:1px solid ${myV===1?'var(--accent)':'var(--border)'};background:${myV===1?'rgba(90,158,143,.12)':'var(--panel)'};color:${myV===1?'var(--accent)':'var(--dim)'};">👍 ${u}</button>
-    <button type="button" onclick="doReact(event,${cid},'down')" title="踩（可取消/改赞）" style="flex:1;font-size:12px;padding:3px 0;border-radius:4px;cursor:pointer;border:1px solid ${myV===-1?'var(--gold)':'var(--border)'};background:${myV===-1?'rgba(212,168,64,.12)':'var(--panel)'};color:${myV===-1?'var(--gold)':'var(--dim)'};">👎 ${dd}</button>
-  </div>`;
-}
 function cardHTML(c){
   const imgSrc = c.thumb_path ? `/api/official/img?cid=${c.id}&n=0&t=1` : '';
   const img = imgSrc
@@ -133,32 +140,10 @@ function cardHTML(c){
       <div class="card-name">${esc(c.name)}</div>
       <div class="card-meta">${esc(c.type||'')}${c.species?' · '+esc(c.species):''}</div>
       <span class="badge ${badgeCls(c.completeness)}">${c.completeness}/8 · ${badgeText(c.completeness)}</span>
-      ${rxBarHTML(c.id)}
+      ${RFX.bar('official',c.id)}
     </div>
   </a>`;
 }
-let RX={fav:{},up:{},down:{},my:{fav:null,votes:{}}};
-async function loadReactions(){
-  try{ const r=await fetch('/api/official/reactions'); RX=await r.json(); }catch(e){}
-}
-function updateCardRx(cid){
-  const card=document.querySelector(`a.card[data-cid="${cid}"]`);
-  if(!card) return;
-  const bar=card.querySelector('.rx-bar');
-  if(bar) bar.outerHTML=rxBarHTML(cid);
-}
-async function doReact(e,cid,type){
-  e.preventDefault(); e.stopPropagation();
-  try{
-    const u=await (await fetch('/api/user')).json();
-    if(!u.logged_in){ if(confirm('喜欢/点赞/踩需要登录，现在去登录？')) location.href='/?openauth=1'; return; }
-    const r=await fetch('/api/official/react',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({character_id:cid,type:type})});
-    const d=await r.json();
-    if(!d.ok){ alert('⚠ '+(d.error||'操作失败')); return; }
-    await loadReactions(); updateCardRx(cid);
-  }catch(err){ alert('⚠ 网络错误'); }
-}
-
 async function load(reset=true){
   if(loading) return;
   const grid=document.getElementById('grid');
@@ -211,15 +196,40 @@ async function applyScribe(){
     alert(d.ok? '✔ '+(d.msg||'申请已提交，等待审核') : '⚠ '+(d.error||'申请失败'));
   }catch(e){ alert('⚠ 网络错误，请稍后再试'); }
 }
+function toggleCode(){
+  const row=document.getElementById('codeRow'); row.hidden=!row.hidden;
+  if(!row.hidden) document.getElementById('codeInput').focus();
+}
+async function submitCode(e){
+  e.preventDefault();
+  const input=document.getElementById('codeInput'), msg=document.getElementById('codeMsg'), btn=document.getElementById('codeBtn');
+  const code=input.value.trim();
+  if(!code){ msg.className='code-msg err'; msg.textContent='请先输入编辑码～'; return false; }
+  btn.disabled=true; msg.className='code-msg'; msg.textContent='验证中…';
+  try{
+    const u=await (await fetch('/api/user')).json();
+    if(!u.logged_in){ msg.textContent='需要先登录哦，正在带你去登录页…'; setTimeout(()=>location.href='/?openauth=1',900); return false; }
+    const r=await fetch('/api/editor/code',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+    const d=await r.json();
+    if(d.ok){
+      input.value=''; document.getElementById('codeRow').hidden=true;
+      markScribe(true);
+      if(window.RFX) RFX.toast(d.already?'你已经是编辑啦 ✨':'验证成功，欢迎成为编辑 ✨');
+      HuiguanGroup.show({title:'验证成功，欢迎你，编辑！',lead:'编辑可以修改、补充官方设定。'});
+    }else{ msg.className='code-msg err'; msg.textContent=d.error||'验证失败，请稍后再试'; }
+  }catch(err){ msg.className='code-msg err'; msg.textContent='网络不太顺，请稍后再试～'; }
+  finally{ btn.disabled=false; }
+  return false;
+}
+function markScribe(scribeOnly){
+  const b=document.getElementById('scribeBanner'); if(!b) return;
+  b.querySelector('.sb-text strong').textContent = scribeOnly ? '你已是编辑，感谢你维护官方设定' : '你已是管理员，可直接修订官方设定';
+  b.querySelectorAll('.sb-btn,.code-row').forEach(el=>el.style.display='none');
+}
 async function initScribe(){
   try{
     const u=await (await fetch('/api/user')).json();
-    const b=document.getElementById('scribeBanner');
-    if(!b) return;
-    if(u.logged_in && (u.is_admin || u.edit_role==='scribe')){
-      b.querySelector('.sb-text strong').textContent = u.is_admin ? '你已是管理员，可直接修订官方设定' : '你已是编辑，感谢你维护官方设定';
-      b.querySelector('.sb-btn').style.display='none';
-    }
+    if(u.logged_in && (u.is_admin || u.edit_role==='scribe')) markScribe(!u.is_admin);
   }catch(e){}
 }
 initScribe();
@@ -235,7 +245,7 @@ async function loadUnclassified(){
   }catch(e){}
 }
 loadUnclassified();
-loadReactions().then(()=>load(true));
+RFX.load('official').then(()=>load(true));
 </script>
 <script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017"></script>
 </body>
