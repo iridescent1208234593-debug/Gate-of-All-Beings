@@ -1,7 +1,8 @@
 /* Iridescently site navigation — the one global bar shared by 节气画廊, 西木会馆 and 众生之门.
  *
  * Classic <script src=".../shared/shared-ui/site-nav.js"> mounts it immediately.
- *   data-variant="overlay"  transparent bar over an immersive first screen (gallery, hero)
+ *   data-variant="overlay"  lighter glass over an immersive first screen (gallery, hero)
+ *   data-tone="light"       cream glass with ink text for light pages (connections)
  *   data-manual             do not mount; call IridescentlyNav.mount() yourself
  * Imported as a module (React / Vite) nothing mounts until IridescentlyNav.mount({...}).
  *
@@ -33,27 +34,31 @@
 
   var CSS = [
     ':root{--qc-nav-h:48px;--qc-nav-ink:#13241e;--qc-nav-paper:#f4eedf;--qc-nav-gold:#e6c06a}',
-    '#qc-nav{position:fixed;top:0;left:0;right:0;z-index:9999;box-sizing:border-box;height:var(--qc-nav-h);display:flex;align-items:center;gap:clamp(10px,2vw,22px);padding:0 clamp(12px,3vw,32px);background:var(--qc-nav-ink);border-bottom:1px solid #e6c06a33;color:var(--qc-nav-paper);font:14px/1.2 "LXGW WenKai","Noto Serif SC","Source Han Serif SC",serif;letter-spacing:.03em}',
-    '#qc-nav[data-variant="overlay"]{background:linear-gradient(#0a1712cc,#0a171200);border-bottom-color:transparent}',
+    // Frosted glass, the same recipe as the gallery's corner controls: translucent tint, blur, hairline edge, soft top highlight.
+    '#qc-nav{--qc-fg:var(--qc-nav-paper);--qc-fg-soft:#f4eedfcc;--qc-sub:#c3d2bf;--qc-mark:var(--qc-nav-gold);--qc-glass:rgba(18,34,28,.58);--qc-edge:rgba(246,248,248,.16);--qc-hi:rgba(255,255,255,.07);--qc-panel:rgba(20,36,30,.86);--qc-hover:rgba(246,248,248,.08)}',
+    '#qc-nav[data-variant="overlay"]{--qc-glass:rgba(12,19,26,.3);--qc-panel:rgba(14,22,28,.84)}',
+    '#qc-nav[data-tone="light"]{--qc-fg:#17372e;--qc-fg-soft:#17372ec4;--qc-sub:#5d6a70;--qc-mark:#b07a22;--qc-glass:rgba(250,246,237,.6);--qc-edge:rgba(34,49,58,.12);--qc-hi:rgba(255,255,255,.7);--qc-panel:rgba(251,248,241,.92);--qc-hover:rgba(34,49,58,.06)}',
+    '#qc-nav{position:fixed;top:0;left:0;right:0;z-index:9999;box-sizing:border-box;height:var(--qc-nav-h);display:flex;align-items:center;gap:clamp(10px,2vw,22px);padding:0 clamp(12px,3vw,32px);background:linear-gradient(180deg,var(--qc-hi),transparent 70%),var(--qc-glass);border-bottom:1px solid var(--qc-edge);box-shadow:inset 0 1px 0 var(--qc-hi),0 6px 22px rgba(6,14,12,.08);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);color:var(--qc-fg);font:14px/1.2 "LXGW WenKai","Noto Serif SC","Source Han Serif SC",serif;letter-spacing:.03em}',
+    '@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){#qc-nav{--qc-glass:rgba(18,34,28,.92)}#qc-nav[data-tone="light"]{--qc-glass:rgba(250,246,237,.96)}}',
     '#qc-nav *{box-sizing:border-box}',
     '#qc-nav a,#qc-nav summary,#qc-nav button{color:inherit;text-decoration:none;font:inherit}',
     '#qc-nav .qc-brand{display:inline-flex;align-items:center;gap:9px;flex:none;white-space:nowrap;font-weight:600}',
     '#qc-nav .qc-brand img{width:28px;height:28px;padding:3px;border-radius:6px;background:var(--qc-nav-paper);image-rendering:pixelated}',
     '#qc-nav .qc-links{display:flex;align-items:stretch;align-self:stretch;gap:2px;min-width:0}',
-    '#qc-nav .qc-links>a,#qc-nav .qc-more>summary{position:relative;display:inline-flex;align-items:center;height:100%;padding:0 10px;white-space:nowrap;color:#f4eedfcc;transition:color .15s}',
-    '#qc-nav .qc-links>a:hover,#qc-nav .qc-more>summary:hover{color:var(--qc-nav-paper)}',
-    '#qc-nav .qc-links>a.is-site{color:var(--qc-nav-paper)}',
-    '#qc-nav .qc-links>a.is-site::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:2px;border-radius:2px 2px 0 0;background:var(--qc-nav-gold)}',
-    '#qc-nav .qc-beta{margin-left:3px;font:10px/1 system-ui,sans-serif;color:var(--qc-nav-gold);transform:translateY(-6px)}',
+    '#qc-nav .qc-links>a,#qc-nav .qc-more>summary{position:relative;display:inline-flex;align-items:center;height:100%;padding:0 10px;white-space:nowrap;color:var(--qc-fg-soft);transition:color .15s}',
+    '#qc-nav .qc-links>a:hover,#qc-nav .qc-more>summary:hover{color:var(--qc-fg)}',
+    '#qc-nav .qc-links>a.is-site{color:var(--qc-fg)}',
+    '#qc-nav .qc-links>a.is-site::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:2px;border-radius:2px 2px 0 0;background:var(--qc-mark)}',
+    '#qc-nav .qc-beta{margin-left:3px;font:10px/1 system-ui,sans-serif;color:var(--qc-mark);transform:translateY(-6px)}',
     '#qc-nav .qc-more{position:relative;display:flex;align-items:stretch}',
     '#qc-nav details>summary{cursor:pointer;list-style:none}',
     '#qc-nav summary::-webkit-details-marker{display:none}',
     '#qc-nav .qc-more>summary::after{content:"";width:6px;height:6px;margin:-3px 0 0 7px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(45deg);opacity:.7}',
-    '#qc-nav .qc-more-panel{position:absolute;left:0;top:calc(100% + 6px);display:grid;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:72svh;overflow:auto;padding:8px;background:#162b24;border:1px solid #e6c06a40;border-radius:8px;box-shadow:0 14px 34px #04100b66}',
+    '#qc-nav .qc-more-panel{position:absolute;left:0;top:calc(100% + 6px);display:grid;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:72svh;overflow:auto;padding:8px;background:var(--qc-panel);border:1px solid var(--qc-edge);border-radius:12px;box-shadow:inset 0 1px 0 var(--qc-hi),0 14px 34px rgba(4,16,11,.22);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}',
     '#qc-nav .qc-more-panel>a,#qc-nav .qc-more-panel>details>summary{display:flex;align-items:center;gap:8px;padding:10px;border-radius:5px}',
-    '#qc-nav .qc-more-panel>a:hover{background:#e6c06a14}',
-    '#qc-nav .qc-more-panel>small{padding:8px 10px;color:#c3d2bf;font-size:11px}',
-    '#qc-nav .qc-copy{margin:6px 10px 8px;white-space:normal;font-size:12px;line-height:1.8;color:#c3d2bf}',
+    '#qc-nav .qc-more-panel>a:hover{background:var(--qc-hover)}',
+    '#qc-nav .qc-more-panel>small{padding:8px 10px;color:var(--qc-sub);font-size:11px}',
+    '#qc-nav .qc-copy{margin:6px 10px 8px;white-space:normal;font-size:12px;line-height:1.8;color:var(--qc-sub)}',
     '#qc-nav .qc-status{display:inline-block;width:6px;height:6px;margin-left:6px;border-radius:50%;background:#7c8b7f}',
     '#qc-nav .qc-status[data-state="up"]{background:#7fd38a}',
     '#qc-nav .qc-status[data-state="down"],#qc-nav .qc-status[data-state="unpublished"]{background:#e4645e}',
@@ -62,9 +67,9 @@
     '#qc-nav .qc-slot:empty{display:none}',
     '#qc-nav .auth-bar{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}',
     '#qc-nav .auth-bar>a,#qc-nav .auth-bar>button,#qc-nav .auth-bar>span{display:inline-flex;align-items:center;min-height:32px;white-space:nowrap}',
-    '#qc-nav .auth-bar>a:first-child:last-child{padding:0 12px;border:1px solid #e6c06a88;border-radius:999px;color:var(--qc-nav-gold)}',
-    '#qc-nav .site-language-toggle{min-height:30px;padding:0 10px;border:1px solid #f4eedf55;border-radius:999px;background:transparent;color:inherit;font:12px/1 system-ui,sans-serif;cursor:pointer}',
-    '#qc-nav :where(a,button,summary):focus-visible{outline:2px solid var(--qc-nav-gold);outline-offset:2px;border-radius:4px}',
+    '#qc-nav .auth-bar>a:first-child:last-child{padding:0 12px;border:1px solid var(--qc-edge);border-radius:999px;background:var(--qc-hover);color:var(--qc-mark)}',
+    '#qc-nav .site-language-toggle{min-height:30px;padding:0 10px;border:1px solid var(--qc-edge);border-radius:999px;background:transparent;color:inherit;font:12px/1 system-ui,sans-serif;cursor:pointer}',
+    '#qc-nav :where(a,button,summary):focus-visible{outline:2px solid var(--qc-mark);outline-offset:2px;border-radius:4px}',
     '@media(max-width:720px){',
     '#qc-nav{gap:4px;padding:0 8px;font-size:13px}',
     '#qc-nav .qc-brand span{display:none}',
@@ -113,6 +118,7 @@
     document.querySelectorAll('.topnav, .ip-footer').forEach(function (node) { node.remove(); });
     var nav = el('nav'); nav.id = 'qc-nav'; nav.setAttribute('aria-label', '站点导航');
     if (options.variant === 'overlay') nav.dataset.variant = 'overlay';
+    if (options.tone === 'light') nav.dataset.tone = 'light';
     var brand = el('a', 'qc-brand'); brand.href = ORIGIN + '/'; brand.setAttribute('aria-label', 'Iridescently 节气画廊');
     brand.innerHTML = '<img src="' + MARK + '" width="26" height="26" alt=""><span>Iridescently</span>';
     nav.appendChild(brand);
@@ -228,7 +234,7 @@
   };
   var script = document.currentScript;
   if (script && !('manual' in script.dataset)) {
-    var start = function () { mount({ variant: script.dataset.variant }); };
+    var start = function () { mount({ variant: script.dataset.variant, tone: script.dataset.tone }); };
     if (document.body) start(); else document.addEventListener('DOMContentLoaded', start, { once: true });
   }
 })();

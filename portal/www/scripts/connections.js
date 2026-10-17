@@ -1,5 +1,6 @@
 import "./brand-interaction.js";
 import "./site-navigation.js";
+import "./companions.js";
 
 const neighbors = document.querySelector("[data-connections-neighbors]");
 const thanks = document.querySelector("[data-connections-thanks]");
