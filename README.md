@@ -46,7 +46,7 @@ API 上游：5174 Cards OAuth、5178 数值配置、5177 聚灵、4173 灵体 We
 npm ci
 npm run build:modules       # 七模块和首页只写候选
 npm run build:cards         # 只构建众生之门前端候选
-npm run test:portal         # 使用独立未占用端口检查
+npm run test:portal         # 默认 PORT=8080 被占用即拒绝；用 $env:PORT=18081 指定；数据根为临时副本
 npm run publish:modules    # 显式提升模块和首页
 npm run publish:cards      # 只更新众生之门前端模块
 npm run build:site          # 从 Git HEAD 导出源码快照，排除密钥/数据
