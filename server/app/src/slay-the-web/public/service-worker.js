@@ -12,17 +12,21 @@ if (workbox) {
 	console.log(`Boo! Workbox didn't load 棣冩█`)
 }
 
+// 新版 service worker 立即接管，避免旧缓存的 index.html / 脚本继续生效。
+self.addEventListener('install', () => self.skipWaiting())
+workbox.core.clientsClaim()
+
 // Make sure index.html is cached.
-precacheAndRoute([{url: './index.html', revision: '166'}])
+precacheAndRoute([{url: './index.html', revision: '167-text-cards'}])
 
 // Cache script resources, i.e. JS files.
-registerRoute(({request}) => request.destination === 'script', new NetworkFirst())
+registerRoute(({request}) => request.destination === 'script', new NetworkFirst({fetchOptions: {cache: 'no-cache'}}))
 
 // Cache style resources, i.e. CSS files.
 registerRoute(
 	({request}) => request.destination === 'style',
 	// Use cache but update in the background.
-	new StaleWhileRevalidate()
+	new NetworkFirst({fetchOptions: {cache: 'no-cache'}})
 )
 
 // Also cache images.
