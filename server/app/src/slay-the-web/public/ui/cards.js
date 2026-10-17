@@ -1,44 +1,7 @@
 import {html, Component} from '../web_modules/htm/preact/standalone.module.js'
 import {canPlay} from '../game/conditions.js'
 import {cardResonanceInfo} from '../content/element-mastery.js'
-// —— 罗小黑世界观卡牌图标（可选美术 ui/images/cards/*.svg，来源见 server/app/module-assets.json）——
-// 路径相对模块基址，独立访问与统一壳挂载都能解析；缺图时由 index.html 的守卫隐藏。
-// 优先按卡牌原图 slug 匹配专属图标，否则按五行/系别映射元素印章。
-const ELEMENT_ICONS = {
-	金: 'metal',
-	木: 'wood',
-	水: 'water',
-	火: 'fire',
-	土: 'earth',
-	生灵: 'spirit',
-	空间: 'space',
-	心灵: 'mind',
-	造物: 'artifact',
-	锁御: 'lock',
-	通用: 'common',
-}
-const CARD_ICONS = {
-	'the-angel-of-death.jpg': 'sword',
-	't.jpg': 'black-cat',
-	'a-line-of-composed-type.jpg': 'fire-spear',
-	'2.jpg': 'jade-disk',
-	'6.jpg': 'ice-fire',
-	'codices.jpg': 'seven-star',
-	'alice-holds-the-white-king.jpg': 'devour',
-	'vernal-equinox.jpg': 'domain',
-	'mask-of-the-faceless.png': 'mirror',
-	'bare-feet-of-god.jpg': 'white-tiger',
-	'h-sperling-horrified.jpg': 'purple-flame',
-}
-
-export function cardIcon(card) {
-	const specific = CARD_ICONS[card.image]
-	if (specific) return `ui/images/cards/${specific}.svg`
-	const key = ELEMENT_ICONS[card.element]
-	if (key) return `ui/images/cards/${key}.svg`
-	return 'ui/images/cards/common.svg'
-}
-
+// 卡面只显示文字：原卡图为无关的外部素材，已移除；元素印章仅重复类型文字，不再恢复。
 
 export default class Cards extends Component {
 	// props = {gameState: {}, type ''}
@@ -50,7 +13,6 @@ export default class Cards extends Component {
 
 export function Card(card, gameState) {
 	const isDisabled = !canPlay(card, gameState)
-	const image = cardIcon(card)
 	// 五行共鸣徽标：显示该卡与玩家本命系的关系（同系/相生/本命克制/被克）
 	const resonance = cardResonanceInfo(card.element, gameState?.player?.element)
 
@@ -68,9 +30,6 @@ export function Card(card, gameState) {
 				<p class="Card-energy EnergyBadge">
 					<span>${card.energy}</span>
 				</p>
-				<figure class="Card-media">
-					<img src=${image} alt=${card.name} />
-				</figure>
 				<p class="Card-type">
 					${card.type} · ${card.element}
 					${resonance
