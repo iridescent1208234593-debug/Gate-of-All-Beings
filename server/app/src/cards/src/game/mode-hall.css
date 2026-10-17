@@ -18,9 +18,6 @@
 .mode-hall__avatar svg { display: block; width: 100%; height: 100%; }
 
 /* Rows open the hovered door wide; its siblings make room. */
-.mode-hall__group { margin-bottom: 14px; }
-.mode-hall__group-label { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; font-size: 12px; color: #6a775f; }
-.mode-hall__group-label span { padding: 3px 10px; border: 1px solid #b58b43; border-radius: 999px; color: #8a6932; font-size: 11px; letter-spacing: .12em; }
 .mode-hall__row { display: flex; gap: 14px; height: 330px; margin-bottom: 14px; }
 .mode-hall__row--feature { height: 400px; }
 .mode-hall__row--compact { height: 280px; }
@@ -36,6 +33,24 @@
 .game-card.is-active::after { background: linear-gradient(180deg, #0a1a1f00 22%, #0a1d22c4 55%, #081a1ef7 100%); }
 .game-card--management .game-card__shots img, .game-card--ecology .game-card__shots img, .game-card--softie .game-card__shots img { object-position: center; }
 
+/* 入世历练: the hero's forest scene is the door; gameplay floats in a window on hover. */
+.mode-hall__row--feature { position: relative; }
+.game-card__scene { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; transition: transform 6s linear; }
+.game-card--scene { background: #2c5745; }
+.game-card--scene::after { background: linear-gradient(90deg, #0d2a22e6 0%, #10302699 34%, #10302600 62%), linear-gradient(180deg, #0000 55%, #0b231cb3 100%); }
+.game-card--scene.is-active::after { background: linear-gradient(90deg, #0d2a22f0 0%, #103026b3 40%, #10302610 70%), linear-gradient(180deg, #0000 50%, #0b231cc4 100%); }
+.game-card--scene.is-active .game-card__scene { transform: scale(1.05); }
+.game-card--scene .game-card__body { right: auto; max-width: min(520px, 56%); }
+.game-card__window { position: absolute; top: 22px; right: 22px; width: min(36%, 400px); aspect-ratio: 16 / 10; overflow: hidden; border: 1px solid #f5efcf66; border-radius: 12px; background: #0b1c1e; box-shadow: 0 18px 40px #061410a0; opacity: 0; transform: translateY(10px) scale(.96); transition: opacity 420ms ease, transform 520ms var(--hall-ease); pointer-events: none; }
+.game-card__window img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; opacity: 0; transition: opacity 600ms ease; }
+.game-card__window img.is-shown { opacity: 1; }
+.game-card--scene.is-active .game-card__window { opacity: 1; transform: none; }
+.game-card--scene .game-card__dots { top: auto; bottom: 24px; right: auto; left: 22px; display: none; }
+.mode-hall__chapter { position: absolute; right: 22px; bottom: 22px; z-index: 2; display: grid; gap: 3px; min-width: 200px; padding: 12px 16px; border: 1px solid #f5efcf55; border-radius: 12px; background: #0e2620b8; backdrop-filter: blur(8px); color: #f5efcf!important; text-decoration: none; transition: border-color 220ms ease, background 220ms ease, transform 220ms ease; }
+.mode-hall__chapter small { color: #ebc77a; font-size: 10px; letter-spacing: .14em; }
+.mode-hall__chapter strong { color: #f5efcf; font-size: 18px; font-weight: 400; letter-spacing: .08em; }
+.mode-hall__chapter span { display: inline-flex; align-items: center; gap: 4px; color: #e9eddfbd; font-size: 11px; }
+.mode-hall__chapter:hover { border-color: var(--hall-gold); background: #0e2620e0; transform: translateY(-2px); }
 .game-card__number { position: absolute; top: 14px; left: 16px; padding: 3px 9px; border-radius: 999px; background: #0b1c1e99; backdrop-filter: blur(6px); font-size: 10px; letter-spacing: .14em; color: #f6edcfd0; }
 .game-card__dots { position: absolute; top: 18px; right: 18px; display: flex; gap: 5px; opacity: 0; transition: opacity 300ms ease; }
 .game-card.is-active .game-card__dots { opacity: 1; }
@@ -69,6 +84,7 @@
 
 /* Without hover (touch) every card shows its introduction; there is nothing to expand. */
 @media (hover: none) {
+  .game-card__window { display: none; }
   .game-card__more { max-height: none; opacity: 1; transform: none; }
   .game-card__points { display: none; }
   .game-card__desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -81,6 +97,11 @@
   .mode-hall__row>.game-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .game-card__more { max-height: none; opacity: 1; transform: none; }
   .game-card__points { display: none; }
+  .mode-hall__row--feature { grid-template-columns: 1fr; }
+  .game-card__window { display: none; }
+  .game-card--scene .game-card__body { max-width: none; right: 0; }
+  .mode-hall__chapter { position: static; grid-template-columns: auto 1fr; align-items: baseline; gap: 4px 14px; background: #1c3a30; }
+  .mode-hall__chapter span { grid-column: 1 / -1; }
   .mode-hall__desk { align-items: flex-start; gap: 22px; }
   .mode-hall__desk>div { flex-basis: 180px; }
 }
@@ -89,7 +110,6 @@
   .mode-hall__heading h1 { line-height: 1.5; }
   .mode-hall__avatar { width: 52px; height: 53px; }
   .mode-hall__player strong { font-size: 17px; }
-  .mode-hall__group-label { align-items: flex-start; flex-direction: column; gap: 6px; }
   .mode-hall__row, .mode-hall__row--feature, .mode-hall__row--compact { grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px; }
   .game-card, .mode-hall__row--feature .game-card, .mode-hall__row--compact .game-card { height: 230px; border-radius: 16px; }
   .mode-hall__row--feature .game-card { height: 260px; }

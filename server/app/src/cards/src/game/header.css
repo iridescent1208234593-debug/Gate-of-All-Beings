@@ -25,3 +25,14 @@
   .zszm-game .game-header nav button{min-height:40px;padding:0 10px;font-size:12px}
 }
 @media(max-width:420px){.zszm-game .game-header .brand small{display:none}.zszm-game .game-header .help-button{display:none}}
+.zszm-game .game-header .brand-logo{display:block;flex:none;width:40px;height:40px;image-rendering:pixelated}
+@media(max-width:760px){
+  .zszm-game .game-header .brand-logo{width:32px;height:32px}
+  .zszm-game .game-header .brand{min-width:0;gap:8px}
+  .zszm-game .game-header .brand>span{overflow:hidden;text-overflow:ellipsis}
+  .zszm-game .game-header nav{gap:0;scroll-padding-inline:24px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,transparent 0,#000 14px,#000 calc(100% - 28px),transparent)}
+  .zszm-game .game-header nav button{padding:0 11px;min-height:42px}
+  .zszm-game .game-header nav button.active{background:#64795b14;border-radius:999px 999px 0 0}
+}
+@media(max-width:420px){.zszm-game .game-header .site-home-link{display:none}.zszm-game .game-header .brand>span{font-size:17px;letter-spacing:2px}}
+.zszm-game .game-header nav{position:relative}

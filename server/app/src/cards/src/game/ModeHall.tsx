@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { ArrowUpRight, ArrowRight, BookOpen, ScrollText, Sprout, PenLine } from 'lucide-react';
 import portal from '../../../../portal.json';
 import shore from './previews/shore.webp';
@@ -15,11 +15,12 @@ import softie from './previews/softie.webp';
 import aeon from './previews/aeon.webp';
 import { usePlayerProfile } from './PlayerProfile';
 import { PlayerAvatar } from './PlayerAvatar';
+import { Forest } from './Forest';
 import { composeSpecies, speciesParts } from './species';
 import './mode-hall.css';
 
 type Props = { onNavigate: (view: string) => void; onEditIdentity?: () => void };
-type Game = { key: string; title: string; genre: string; desc: string; points: string[]; shots: string[]; view?: string };
+type Game = { key: string; title: string; genre: string; desc: string; points: string[]; shots: string[]; view?: string; scene?: ReactNode };
 const auxiliary = [
   { view: 'hall', title: '会馆日常', caption: '照料同行者，积攒默契', icon: Sprout },
   { view: 'collection', title: '灵卡图鉴', caption: '翻阅已结缘的灵卡', icon: BookOpen },
@@ -27,13 +28,10 @@ const auxiliary = [
   { view: 'world', title: '万灵志', caption: '查阅人物、地点与灵术', icon: BookOpen },
 ];
 
-/** Hall order: the two card games (to be merged) first, then 省省's beach, 聚灵, and the rest. */
-const CARD_GAMES: Game[] = [
-  { key: 'cards', view: 'adventure', title: '入世历练', genre: '卡牌 · 路线冒险', shots: [cardsBattle, cardsMap],
-    desc: '与罗小黑一同踏入山林，在分支路线上遭遇、休憩、交易，用灵术卡牌化解每一场相遇。', points: ['十层分支路线', '回合制灵术卡牌', '会馆养成 · 封灵成卡'] },
-  { key: 'slay', title: '重生之门', genre: '卡牌 · Roguelike 爬塔', shots: [slayMap, slayBattle],
-    desc: '沿灵脉地图一路向上，五行相生相克，构筑只属于你的灵卡牌组。', points: ['五行克制 · 本命共鸣', '三档难度', '灵质修行与图鉴'] },
-];
+/** Hall order: 入世历练 (which 重生之门 is merging into), 省省's beach, 聚灵, then the rest. */
+const ADVENTURE: Game = { key: 'cards', view: 'adventure', title: '入世历练', genre: '卡牌 · 路线冒险 · 爬塔', shots: [cardsBattle, slayBattle, cardsMap, slayMap],
+  scene: <Forest className="game-card__scene"/>,
+  desc: '与罗小黑一同踏入山林，在分支路线上遭遇、休憩、交易，用灵术卡牌化解每一场相遇。重生之门的爬塔篇也正在并进来。', points: ['十层分支路线', '回合制灵术卡牌', '五行克制 · 爬塔', '会馆养成 · 封灵成卡'] };
 const GAMES: Game[] = [
   { key: 'shengsheng-shoot', title: '省省海滩射击', genre: '像素射击 · 省省老师', shots: [shootPlay, shootReady],
     desc: '省省的海滩练习：移动躲开迎面而来的敌人，站定时自动三路开火，冲击更高分。', points: ['WASD / 方向键', '站定自动开火', '一局一两分钟'] },
@@ -62,7 +60,8 @@ function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNa
     return () => window.clearInterval(timer);
   }, [active, game.shots.length]);
   const content = <>
-    <span className="game-card__shots" aria-hidden="true">{game.shots.map((shot, shotIndex) => <img key={shot} src={shot} alt="" loading="lazy" decoding="async" className={shotIndex === frame ? 'is-shown' : ''}/>)}</span>
+    {game.scene}
+    <span className={game.scene ? 'game-card__window' : 'game-card__shots'} aria-hidden="true">{game.shots.map((shot, shotIndex) => <img key={shot} src={shot} alt="" loading="lazy" decoding="async" className={shotIndex === frame ? 'is-shown' : ''}/>)}</span>
     {game.shots.length > 1 && <span className="game-card__dots" aria-hidden="true">{game.shots.map((shot, shotIndex) => <i key={shot} className={shotIndex === frame ? 'is-on' : ''}/>)}</span>}
     <span className="game-card__number">{String(index).padStart(2, '0')}</span>
     <span className="game-card__body">
@@ -76,7 +75,7 @@ function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNa
     </span>
   </>;
   const props = {
-    className: `game-card game-card--${game.key}${active ? ' is-active' : ''}`,
+    className: `game-card game-card--${game.key}${game.scene ? ' game-card--scene' : ''}${active ? ' is-active' : ''}`,
     onMouseEnter: () => setActive(true), onMouseLeave: () => setActive(false),
     onFocus: () => setActive(true), onBlur: () => setActive(false),
   };
@@ -91,7 +90,6 @@ export function ModeHall({ onNavigate, onEditIdentity }: Props) {
   const note = parts.note;
   const speciesLabel = composeSpecies(parts) || identity.species_name;
   const visible = (game: Game) => Boolean(game.view) || published.has(game.key);
-  const cardGames = CARD_GAMES.filter(visible);
   const games = GAMES.filter(visible);
   const firstRow = games.slice(0, 3);
   const secondRow = games.slice(3);
@@ -104,12 +102,12 @@ export function ModeHall({ onNavigate, onEditIdentity }: Props) {
         {onEditIdentity && <PenLine className="mode-hall__edit" size={15} aria-hidden="true"/>}
       </button>
     </header>
-    {cardGames.length > 0 && <div className="mode-hall__group">
-      <p className="mode-hall__group-label"><span>卡牌双门</span>入世历练与重生之门正在合流，不久后会成为同一段卡牌旅途。</p>
-      <div className="mode-hall__row mode-hall__row--feature">{cardGames.map((game, index) => <GameCard key={game.key} game={game} index={index + 1} onNavigate={onNavigate}/>)}</div>
-    </div>}
-    <div className="mode-hall__row">{firstRow.map((game, index) => <GameCard key={game.key} game={game} index={cardGames.length + index + 1} onNavigate={onNavigate}/>)}</div>
-    {secondRow.length > 0 && <div className="mode-hall__row mode-hall__row--compact">{secondRow.map((game, index) => <GameCard key={game.key} game={game} index={cardGames.length + firstRow.length + index + 1} onNavigate={onNavigate}/>)}</div>}
+    <div className="mode-hall__row mode-hall__row--feature">
+      <GameCard game={ADVENTURE} index={1} onNavigate={onNavigate}/>
+      {published.has('slay') && <a className="mode-hall__chapter" href="/app/shell/m/slay"><small>入世历练 · 爬塔篇</small><strong>重生之门</strong><span>五行爬塔，正在并入 <ArrowUpRight size={14}/></span></a>}
+    </div>
+    <div className="mode-hall__row">{firstRow.map((game, index) => <GameCard key={game.key} game={game} index={index + 2} onNavigate={onNavigate}/>)}</div>
+    {secondRow.length > 0 && <div className="mode-hall__row mode-hall__row--compact">{secondRow.map((game, index) => <GameCard key={game.key} game={game} index={firstRow.length + index + 2} onNavigate={onNavigate}/>)}</div>}
     <aside className="mode-hall__desk" aria-label="旅途案头"><div><small>不赶路的时候</small><h2>在门庭歇一会。</h2></div><nav>{auxiliary.map(item => <button key={item.view} onClick={() => onNavigate(item.view)}><item.icon size={19}/><span><strong>{item.title}</strong><small>{item.caption}</small></span><ArrowRight size={15}/></button>)}</nav></aside>
     <p className="mode-hall__save-note">每片天地保留自己的旅途进度，玩家形象由众生之门统一读取。</p>
   </section>;
