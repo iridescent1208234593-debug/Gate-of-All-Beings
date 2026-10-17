@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "component": "site",
+  "builtAt": "2026-10-17T05:12:58.878Z",
+  "sourceHead": "simulation",
+  "sourceDirty": false,
+  "files": {
+    "VERSION.txt": "7aa7a5359173d05b63cfd682e3c38487f3cb4f7f1d60659fe59fab1505977d4c",
+    "server/app/src/cards/server.py": "b50469d8828ca6c4c273859673d82347df56fcd3b2e61f4e551b8c1ef0cbb4ce",
+    "server/portal_server.py": "3dd08b81cf021e6ab3b04a07241292f7c16e130878729d39f01543600e41a015"
+  }
+}
