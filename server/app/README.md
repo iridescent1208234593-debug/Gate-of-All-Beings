@@ -32,6 +32,25 @@ node server/app/scripts/build-modules.mjs
 
 构建只写候选目录，不覆盖运行中的 `modules/`。从根目录运行 `npm run build:modules`，验证后显式 `npm run publish:modules` 才更新生产资源；记录与回滚保护见 [发布流程](../../docs/release-workflow.md)。
 
+## 前端缓存策略与回退
+
+`/app/modules/` 下**未带内容哈希**的 JS / CSS（如 `slay/ui/cards.js`、`slay/service-worker.js`）默认返回
+`Cache-Control: no-cache, max-age=0, must-revalidate`：浏览器和 Cloudflare 每次先向源站验证（`Last-Modified` 命中则 304），
+所以 `publish:modules` 之后用户下次打开即是新版，不必再手动清 CDN。Vite 带哈希的 `/assets/*-xxxxxxxx.js` 仍是一年 `immutable`，图片、字体缓存不变。
+实现：`server/portal_server.py` 的 `MODULE_CODE_MAX_AGE` 与 `server/base_static.py` 的 `code_max_age`。
+
+**回退到旧的 4 小时缓存**（出现带宽/回源压力时）：给门户进程设环境变量后重启，不需要改代码。
+
+```powershell
+$env:IRIDESCENTLY_MODULE_CODE_MAX_AGE = "14400"   # 秒；0 或不设 = 每次验证（默认）
+# 然后按现有方式重启 portal_server.py（8080），不要动 5194 / 5195
+```
+
+回退后每次发布需在 Cloudflare 手动清缓存（Caching → Purge Cache → Custom Purge，前缀 `zszm.iridescently.xyz/app/modules/` 与
+`iridescently.xyz/app/modules/`），或等缓存过期。要完全撤销本策略，删除 `portal_server.py` 里设置 `code_max_age` 的那一行即可。
+
+注意：改动需要重启门户进程后才生效；Cloudflare 的 Browser Cache TTL 若设为"覆盖源站"，仍会把 `no-cache` 改写成固定时长，需在面板里改为 *Respect Existing Headers*。
+
 ## 路由与生命周期
 
 `portal.json` 保存入口数据。统一壳处理快速切换时会取消旧请求，串行执行不可取消的 module import，并让旧 owner 清理自己的 dispose 回调、脚本节点与注入样式；同路由点击不重建模块。加载错误保留可操作的独立入口与导航。
