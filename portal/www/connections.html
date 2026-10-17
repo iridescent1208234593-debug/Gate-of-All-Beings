@@ -103,6 +103,7 @@
           <a href="#with-thanks">特别感谢</a>
           <a href="#community-thanks">一起折腾的大家</a>
           <a href="#contact">联系与讨论</a>
+          <a href="#join-us">一起来折腾</a>
           <a href="#from-iridescently">来自 Iridescently</a>
         </nav>
       </header>
@@ -119,6 +120,7 @@
           <li><span class="history-date">9/15</span><h3>项目整理</h3><p>优化项目文件与目录。</p></li>
           <li><span class="history-date">10/1</span><h3>灵体互动</h3><p>完成灵体互动联机版。</p></li>
           <li><span class="history-date">10/16</span><h3>画廊节奏与可读性</h3><p>调整画廊默认过渡、停留和自动播放速度，并为自定义设置加上轻薄磨砂底层，让节气图背景更鲜艳时也能看清控件。</p></li>
+          <li><span class="history-date">10/17</span><h3>众生之门 · 门庭与形象</h3><p>门庭按卡牌双门（入世历练 × 重生之门，准备合流）、省省海滩射击、聚灵依次重排，每扇门换成游戏实拍画面，悬停展开演示与介绍；玩家形象支持多开与删除，种族分为人类 / 妖精 / 其他 → 种族 → 细分，并可写备注；返回门庭不再重复播放开场动画；电脑与手机的导航和布局一并整理。</p></li>
           <li class="history-next"><span class="history-date">接下来</span><h3>还在继续折腾</h3><p>更多游戏与捏脸系统，继续探索中。</p></li>
         </ol>
       </section>
@@ -131,7 +133,9 @@
             这些项目各自承担了清晰的一部分：绘制空间、读取色彩、组织页面与构建代码。
           </p>
         </header>
-        <ul class="project-list">
+        <details class="credit-group">
+          <summary><span class="credit-group__title">画廊与视觉<small>4 项 · 节气画廊的三维空间、取色与构建</small></span><span class="credit-group__names">Three.js · Color Thief · Atmospheric Depth Gallery · Vite ＋ vite-plugin-glsl</span></summary>
+          <ul class="project-list">
           <li class="project-credit">
             <p class="project-credit__role">三维绘制 · WebGL</p>
             <h3>
@@ -238,23 +242,16 @@
               >
             </p>
           </li>
-          <li class="project-credit">
-            <p class="project-credit__role">关系图谱 · 官方档案</p>
-            <h3><a href="https://echarts.apache.org/" target="_blank" rel="noopener">Apache ECharts</a></h3>
-            <p>会馆的人物关系图以可缩放的节点和连线呈现角色之间的关系。</p>
-            <p class="project-credit__attribution">Apache ECharts contributors · <a href="https://github.com/apache/echarts/blob/5.4.3/LICENSE" target="_blank" rel="noopener">Apache-2.0</a></p>
-          </li>
+          </ul>
+        </details>
+        <details class="credit-group">
+          <summary><span class="credit-group__title">众生之门小游戏<small>5 项 · 卡牌、灵体互动、文明模拟等玩法的底座</small></span><span class="credit-group__names">React ＋ Lucide · softie · 软乎乎 · AEON · Slay the Web · Preact ＋ GSAP ＋ Tone.js</span></summary>
+          <ul class="project-list">
           <li class="project-credit">
             <p class="project-credit__role">众生之门 · 交互与图标</p>
             <h3><a href="https://react.dev/" target="_blank" rel="noopener">React</a> ＋ <a href="https://lucide.dev/" target="_blank" rel="noopener">Lucide</a></h3>
             <p>React 组织众生之门的门庭、卡牌和账户界面；Lucide 为游戏和工具提供一致的轻量图标。</p>
             <p class="project-credit__attribution">React contributors · <a href="https://github.com/react/react/blob/main/LICENSE" target="_blank" rel="noopener">MIT</a> / Lucide contributors · <a href="https://github.com/lucide-icons/lucide/blob/main/LICENSE" target="_blank" rel="noopener">ISC，部分 Feather 图标沿用 MIT</a></p>
-          </li>
-          <li class="project-credit">
-            <p class="project-credit__role">设表 · 图像导出</p>
-            <h3><a href="https://html2canvas.hertzen.com/" target="_blank" rel="noopener">html2canvas</a></h3>
-            <p>将完整人设展示页的文字、图片与配色合成为可保存的图片。配色海报使用原生 Canvas 绘制。</p>
-            <p class="project-credit__attribution">Niklas von Hertzen · <a href="https://github.com/niklasvh/html2canvas/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a></p>
           </li>
           <li class="project-credit">
             <p class="project-credit__role">灵体互动 · 软体底座</p>
@@ -280,7 +277,27 @@
             <p>组织重生之门的界面、手牌拖动与连续动效，并合成随场景变化的音景和交互音效。</p>
             <p class="project-credit__attribution">Preact contributors · <a href="https://github.com/preactjs/preact/blob/main/LICENSE" target="_blank" rel="noopener">MIT</a> / GSAP · <a href="https://gsap.com/standard-license/" target="_blank" rel="noopener">Standard License</a> / Tone.js contributors · <a href="https://github.com/Tonejs/Tone.js/blob/dev/LICENSE.md" target="_blank" rel="noopener">MIT</a></p>
           </li>
-        </ul>
+          </ul>
+        </details>
+        <details class="credit-group">
+          <summary><span class="credit-group__title">图鉴与小工具<small>2 项 · 关系图谱与设表导出</small></span><span class="credit-group__names">Apache ECharts · html2canvas</span></summary>
+          <ul class="project-list">
+          <li class="project-credit">
+            <p class="project-credit__role">关系图谱 · 官方档案</p>
+            <h3><a href="https://echarts.apache.org/" target="_blank" rel="noopener">Apache ECharts</a></h3>
+            <p>会馆的人物关系图以可缩放的节点和连线呈现角色之间的关系。</p>
+            <p class="project-credit__attribution">Apache ECharts contributors · <a href="https://github.com/apache/echarts/blob/5.4.3/LICENSE" target="_blank" rel="noopener">Apache-2.0</a></p>
+          </li>
+          <li class="project-credit">
+            <p class="project-credit__role">设表 · 图像导出</p>
+            <h3><a href="https://html2canvas.hertzen.com/" target="_blank" rel="noopener">html2canvas</a></h3>
+            <p>将完整人设展示页的文字、图片与配色合成为可保存的图片。配色海报使用原生 Canvas 绘制。</p>
+            <p class="project-credit__attribution">Niklas von Hertzen · <a href="https://github.com/niklasvh/html2canvas/blob/master/LICENSE" target="_blank" rel="noopener">MIT</a></p>
+          </li>
+          </ul>
+        </details>
+        <details class="credit-group">
+          <summary><span class="credit-group__title">交互研究参考<small>3 项 · 学习交互模型用的教程</small></span><span class="credit-group__names">Codrops 等教程</span></summary>
         <aside class="reference-note">
           <h3>交互研究参考</h3>
           <p>会馆的滚动、对象聚焦与连续过渡，也借助这些教程研究交互模型：</p>
@@ -291,6 +308,7 @@
           </ul>
           <p>参考项目与实际运行库分别记录；图片和示例素材的使用范围以原项目声明为准。</p>
         </aside>
+        </details>
       </section>
 
       <section class="connections-section" id="neighbors">
@@ -388,6 +406,12 @@
           <p>佳霖 / JiaLinkuo · 私信可通过 QQ 或微信联系。</p>
         </header>
         <div class="contact-copy"><article><h3>佳霖 / JiaLinkuo</h3><p>微信：JiaLinkuo · QQ：1208234593</p><p>私信通过 QQ / 微信联系。</p><p><a href="https://v.douyin.com/1R0tO41ez0A/" target="_blank" rel="noopener">抖音主页 ↗</a><a href="https://xhslink.cn/o/4YgRLjP8m0i" target="_blank" rel="noopener">小红书主页 ↗</a></p></article><article><h3>一起讨论</h3><p>QQ 群：878029597</p><p>聊角色、测网页，或一起折腾新功能。</p></article></div>
+        <div class="project-support" id="join-us">
+          <h3>一起来会馆折腾吧</h3>
+          <p>如果你也喜欢《罗小黑战记》，刚好喜欢画画、做像素、做网页或小游戏，或者只是常常冒出一些奇怪但有趣的点子，都欢迎来一起玩、一起做。这里不是工作室，也没有必须完成的进度，更像一群同好在会馆里慢慢搭一扇「众生之门」。</p>
+          <p>眼下最想遇到会画画的朋友：角色头像、卡面、场景、像素小人、界面图标，哪怕只画一张也很好。不画画也一样欢迎——做 UI 或动效、写网页和小游戏、整理设定和世界观、帮忙试玩找 bug、随口提个想法，都是在一起建这个地方。</p>
+          <p>这是一个长期、慢慢做的同人项目，代码也在一点点开源（主站画廊已经公开）。不用勉强自己，按自己的节奏来就好；被采用的作品和想法会在对应页面联合署名，并一直留在这一页的鸣谢里。想聊聊的话，微信、QQ 私信或者来 QQ 群 878029597 打个招呼就行。</p>
+        </div>
         <details class="contact-codes__details">
           <summary>查看微信二维码（个人微信、群聊与微信赞赏码）</summary>
           <div class="contact-codes">

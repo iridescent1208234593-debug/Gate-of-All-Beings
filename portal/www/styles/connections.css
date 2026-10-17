@@ -902,3 +902,20 @@ a:hover {
 }
 
 .neighbor-card--text-only { grid-template-columns: minmax(0, 1fr) auto; }
+
+/* Open-source credits: folded by category; the summary already names every project. */
+.credit-group { border-top: 1px solid var(--connections-line); }
+.credit-group:last-of-type { border-bottom: 1px solid var(--connections-line); }
+.credit-group > summary { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 24px; padding: 18px 0; cursor: pointer; list-style: none; }
+.credit-group > summary::-webkit-details-marker { display: none; }
+.credit-group > summary::after { content: "展开"; flex: none; color: var(--connections-accent); font-size: 12px; }
+.credit-group[open] > summary::after { content: "收起"; }
+.credit-group__title { display: grid; gap: 4px; color: var(--connections-ink); font-size: 16px; font-weight: 520; }
+.credit-group__title small { color: var(--connections-muted); font-size: 12px; font-weight: 400; }
+.credit-group__names { flex: 1; min-width: 0; color: var(--connections-muted); font-size: 12px; text-align: right; }
+.credit-group > .project-list { border-top: 0; margin-bottom: 8px; }
+.credit-group > .reference-note { margin: 0 0 20px; }
+.credit-group > summary:focus-visible { outline: 2px solid var(--connections-accent); outline-offset: 3px; }
+@media (max-width: 720px) {
+  .credit-group__names { flex-basis: 100%; text-align: left; order: 3; }
+}
