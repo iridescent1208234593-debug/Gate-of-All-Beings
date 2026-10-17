@@ -76,6 +76,14 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
         """子类覆写：当前 path 是 API 路由时返回 True，跳过静态防护。"""
         return False
 
+    def _observe_public_response(self):
+        try:
+            from scraping_observer import observe
+            observe(self)
+        except Exception:
+            # Observation must never alter the response path.
+            pass
+
     # ---- 安全响应头 + 缓存策略（在 end_headers 时统一注入） ----
     def end_headers(self):
         # 安全头
@@ -102,6 +110,7 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
             max_age = CACHE_MAX_AGE.get(ext)
             if max_age:
                 super().send_header("Cache-Control", f"public, max-age={max_age}")
+        self._observe_public_response()
         super().end_headers()
 
     # ---- 静态文件防护 ----

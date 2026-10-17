@@ -1,6 +1,2 @@
 User-agent: *
 Allow: /
-Disallow: /.git/
-Disallow: /__pycache__/
-Disallow: /assets/store/
-Disallow: /assets/uploads/
