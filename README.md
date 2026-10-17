@@ -19,7 +19,7 @@
 | `.releases/production/site` | 已发布静态/Python 源码快照（Git 忽略） |
 | `server/app/modules` / `portal/www/assets/homepage` | 已显式发布的构建产物（Git 忽略） |
 
-研发与参考位于工作区外 `E:\External Projects\Iridescently Labs`，桌面壁纸工具位于 `E:\External Projects\url-wallpaper`；都不参与生产部署。Gallery 上游核心已经迁入生产目录，不再把参考区当构建链路。研究的冻结测试结果保留历史路径，不伪造重新验证。
+研发与参考位于工作区外 `E:\External Projects\Iridescently Labs`，桌面壁纸工具位于 `E:\External Projects\url-wallpaper`；都不参与生产部署。例外：线上 `/ozmtree/` 直接读取 `E:\External Projects` 下的 OZtree 静态目录（见下文入口表）。Gallery 上游核心已经迁入生产目录，不再把参考区当构建链路。研究的冻结测试结果保留历史路径，不伪造重新验证。
 
 ## 运行与正式入口
 
@@ -34,6 +34,9 @@
 | https://spirit.iridescently.xyz/games/spirit-playground?room=forest | 灵体互动 |
 | `game.*` / `lingjing.*` / `juling.*` | 308 到众生之门对应模块；旧独立前端停止运行 |
 | `psyche.*` | 未正式并入，导航红点；不由此工作区启动 |
+| `*/ozmtree/` | 生物树可视化试用（OneZoom 改造，鳞翅目导入）；任意站点 Host 均可访问 |
+
+`/ozmtree/` 由 `server/portal_server.py` 的 `OZTREE_STATIC` 直接提供工作区外的静态目录 `E:\External Projects\众生之门生物树可视化前端\OZtree\static`，不经构建、候选或 `publish:site`，也不在源码快照内；换机部署需单独提供该目录，或改为显式发布。OZtree 自身源码、数据与许可见其仓库 README。
 
 API 上游：5174 Cards OAuth、5178 数值配置、5177 聚灵、4173 灵体 WebSocket/API。5178/4173 预览明确读取已发布模块；不是直接把源码 `dist` 上线。5173 的 Ecology 本地开发服务不属于生产，不能因端口存在就判为废弃。具体清单见网站管家 `SITES`。
 
