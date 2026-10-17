@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, ImagePlus, Import, LoaderCircle, Plus, Save, Trash2, X } from 'lucide-react';
+import { Check, Clapperboard, ImagePlus, Import, LoaderCircle, PenLine, Plus, Save, Trash2, X } from 'lucide-react';
 import { PlayerAvatar } from './PlayerAvatar';
 import { usePlayerProfile, identityAssetUrl, IDENTITY_LIMIT, type Account, type GateIdentity } from './PlayerProfile';
 import { FAMILY_SUGGESTIONS, HUMAN, composeSpecies, SUB_SUGGESTIONS, YAOJING, speciesFields, speciesFromOC, speciesParts, type SpeciesParts } from './species';
@@ -11,7 +11,7 @@ const apiAsset = identityAssetUrl;
 const KINDS = [{ value: HUMAN, label: '人类' }, { value: YAOJING, label: '妖精' }, { value: '', label: '其他' }];
 const kindChoice = (kind: string) => !kind || kind === HUMAN || kind === YAOJING ? kind || HUMAN : '';
 
-export function PlayerIdentity({ account, onClose }: { account: Account; onClose: () => void }) {
+export function PlayerIdentity({ account, onClose, onCreateWithOpening }: { account: Account; onClose: () => void; onCreateWithOpening?: () => void }) {
   const profile = usePlayerProfile();
   const [identity, setIdentity] = useState<Identity>(profile.identity);
   const [species, setSpecies] = useState<SpeciesParts>(() => speciesParts(profile.identity));
@@ -22,6 +22,7 @@ export function PlayerIdentity({ account, onClose }: { account: Account; onClose
   const [error, setError] = useState('');
   const [saved, setSaved] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [choosingNew, setChoosingNew] = useState(false);
   const [avatarDraft, setAvatarDraft] = useState<Blob|null>(null);
   const [previewDraftUrl, setPreviewDraftUrl] = useState('');
   const [selectedOC, setSelectedOC] = useState('');
@@ -120,8 +121,12 @@ export function PlayerIdentity({ account, onClose }: { account: Account; onClose
           <PlayerAvatar identity={item}/><span><strong>{item.display_name || '未命名'}</strong><small>{composeSpecies(speciesParts(item)) || '种族未填写'}</small></span>{item.id === profile.identity.id && <em><Check size={11}/>当前</em>}
         </button>)}
         {creating && <span className="identity-roster__item is-editing is-draft"><span className="identity-roster__plus"><Plus size={18}/></span><span><strong>{identity.display_name || '新形象'}</strong><small>尚未保存</small></span></span>}
-        {!creating && profile.identities.length < IDENTITY_LIMIT && <button type="button" className="identity-roster__add" onClick={startNew} disabled={busy}><Plus size={16}/>新形象</button>}
+        {!creating && profile.identities.length < IDENTITY_LIMIT && <button type="button" className="identity-roster__add" aria-expanded={choosingNew} onClick={() => onCreateWithOpening ? setChoosingNew(open => !open) : startNew()} disabled={busy}><Plus size={16}/>新形象</button>}
       </nav>
+      {choosingNew && !creating && <div className="identity-new-choice" role="group" aria-label="怎样创建新形象">
+        <button type="button" onClick={() => { setChoosingNew(false); onCreateWithOpening?.(); }}><Clapperboard size={18}/><span><strong>从开场走一遍</strong><small>像第一次进门那样：开场 → 取名 → 选种族 → 选形象</small></span></button>
+        <button type="button" onClick={() => { setChoosingNew(false); startNew(); }}><PenLine size={18}/><span><strong>直接填写</strong><small>跳过剧情，在这里改名字、种族和头像</small></span></button>
+      </div>}
       {!loaded ? <div className="identity-loading"><LoaderCircle size={18}/>正在读取形象…</div> : <>
         {ocs.length > 0 && <section className="identity-import"><div><strong>从自己的 OC 导入初始资料</strong><small>只复制名称、种族和你选定的头像；后续修改不会同步回 OC。</small></div>
           {ocs.length === 1 ? <button type="button" className="secondary" onClick={() => importOC(ocs[0])}><Import size={15}/>导入「{ocs[0].name}」</button> : <div className="identity-oc-picker"><select aria-label="选择要导入的 OC" value={selectedOC} onChange={event => setSelectedOC(event.target.value)}><option value="">选择一个 OC…</option>{ocs.map(oc => <option key={oc.id} value={oc.id}>{oc.name} · {oc.species_type}{oc.species_detail ? ` · ${oc.species_detail}` : ''}</option>)}</select><button type="button" className="secondary" disabled={!selectedOC} onClick={() => { const oc=ocs.find(item=>item.id===selectedOC); if(oc)importOC(oc); }}><Import size={15}/>导入所选 OC</button></div>}

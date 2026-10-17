@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { EntryGate } from './EntryGate';
-import { PlayerProfileProvider, accountScope, identityComplete, usePlayerProfile } from '../game/PlayerProfile';
+import { EMPTY_IDENTITY, PlayerProfileProvider, accountScope, identityComplete, usePlayerProfile, type GateIdentity } from '../game/PlayerProfile';
 const GameApp = lazy(() => import('../game/GameApp'));
 const PlayerOnboarding = lazy(() => import('../onboarding/PlayerOnboarding').then(module => ({ default: module.PlayerOnboarding })));
 const EXIT_MS = 760;
@@ -19,6 +19,8 @@ function GateFlow() {
   const [entered, setEntered] = useState(skipIntro);
   const [gateVisible, setGateVisible] = useState(!skipIntro);
   const [leaving, setLeaving] = useState(false);
+  // An extra identity made through the full opening: gate → onboarding, then back to the hall.
+  const [creatingNew, setCreatingNew] = useState(false);
   const timer = useRef<number | null>(null);
   const profile = usePlayerProfile();
   useEffect(() => () => { if (timer.current !== null) window.clearTimeout(timer.current); }, []);
@@ -34,12 +36,22 @@ function GateFlow() {
     window.scrollTo({ top: 0 });
     setLeaving(false); setGateVisible(true);
   }
+  function createWithOpening() {
+    setCreatingNew(true);
+    returnToGate();
+  }
+  async function finishNew(identity: GateIdentity, image?: Blob | null) {
+    await profile.saveIdentity({ ...identity, id: '' }, image);
+    setCreatingNew(false);
+  }
   return <>
     {entered && <Suspense fallback={<div className="gate-profile-loading" role="status">正在展开众生之门…</div>}>
       {profile.loading || (!profile.resolved && profile.error) ? <div className="gate-profile-loading" role="status">
         <h1>众生之门</h1><p>{profile.error || '正在读取你的玩家资料…'}</p>
         {profile.error && <button type="button" onClick={() => void profile.refresh()}>重新读取</button>}
-      </div> : identityComplete(profile.identity) ? <GameApp onReturnGate={returnToGate} /> :
+      </div> : creatingNew ? gateVisible && !leaving ? null : <PlayerOnboarding key={`new:${accountScope(profile.account)}`} initialIdentity={{ ...EMPTY_IDENTITY }}
+          onComplete={finishNew} onCancel={() => setCreatingNew(false)} />
+      : identityComplete(profile.identity) ? <GameApp onReturnGate={returnToGate} onCreateIdentity={createWithOpening} /> :
         <PlayerOnboarding key={accountScope(profile.account)} initialIdentity={profile.identity}
           onComplete={profile.saveIdentity} onCancel={returnToGate} />}
     </Suspense>}
