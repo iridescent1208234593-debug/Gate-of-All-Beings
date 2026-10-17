@@ -23,9 +23,9 @@ RUNTIME_DIR = os.path.join(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", os.path.d
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "server"))
 import hx_sso
 from base_static import BaseStaticHandler
+# 管理员：完整 (kind, uid) 站长账户 + 账户库状态复核，见 server/site_admin.py
+from site_admin import is_site_owner
 
-# 管理员：跨站 SSO uid 白名单（与 huiguan ADMIN_USSO_IDS 保持一致）
-ADMIN_USSO_IDS = {"7"}
 # 允许发起写操作的来源主机（域名后缀命中 .iridescently.xyz 亦放行）
 ALLOWED_HOSTS = {"iridescently.xyz", "localhost", "127.0.0.1"}
 
@@ -179,9 +179,7 @@ class Handler(BaseStaticHandler):
         self.wfile.write(body)
 
     def _is_admin(self, user):
-        if not user:
-            return False
-        return str(user.get("uid")) in ADMIN_USSO_IDS or user.get("kind") == "admin"
+        return is_site_owner(user)
 
     def _read_json(self):
         try:
