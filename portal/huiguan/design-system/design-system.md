@@ -64,6 +64,10 @@
 
 - 组件 ↔ 代码：所有页面引用 `design-system/design-system.css`，类名即契约。
 - 样式指南/演示：`design-system/index.html`（可视化全部 token 与组件）。
+- 会馆世界观 UI：`/design-system/assets-library.html` 展示共享 `shared/shared-ui/lxh-ui.css`、`lxh-ui.js` 组件；`shared/shared-ui/lxh/ui/` 是这些组件的界面参考素材，不是第二套页面实现。
+- 开场进度与跳过控件：`shared/shared-ui/intro-controls.css` 和 `lxh-intro.js`；样式指南中的 Intro Controls 示例展示实际共享样式。会馆与众生之门各自保留场景状态，仅复用控件契约。
+- 管理入口：管理员通过审核中心顶部“设计系统”进入样式指南。入口仅在 `/api/user` 确认管理员后显示。
+
 ## 六、布局约束
 
 - 同一屏幕边缘的操作控件必须归属同一 flex 控件组，并用 `gap` 留出间距；不得让多个独立的 `position: fixed` 控件占用同一角落。全屏开场已有控件组时，新增切换按钮挂入该组的预留挂载点，并由容器统一控制边距、换行与窄屏排布。

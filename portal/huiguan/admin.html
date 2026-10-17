@@ -113,6 +113,7 @@
   </header>
   <div class="toolbar">
     <span style="flex:1"></span>
+    <a class="btn" id="designSystemLink" href="/design-system/index.html" hidden>设计系统</a>
     <a class="btn" href="/">← 返回会馆</a>
     <a class="btn" href="/member.html">成员管理</a>
     <button class="btn primary" onclick="refresh()">刷新</button>
@@ -157,6 +158,7 @@ async function init() {
       content.innerHTML = '<div class="state-box">需要管理员权限。<br>如果你认为这是误判，请联系站长。</div>';
       return;
     }
+    document.getElementById('designSystemLink').hidden = false;
     selfInfo = { kind: u.kind, uid: String(u.user_id) };
     await loadUsers();
     loadRequests();

@@ -6,6 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>西木会馆 · 设计系统样式指南</title>
 <link rel="stylesheet" href="design-system.css?v=3">
+<link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261015-1">
 <style>
   body{padding:48px 16px 80px;}
   .wrap{max-width:960px;margin:0 auto;}
@@ -174,6 +175,15 @@
   <section>
     <h2 class="qc-h2">上传区 Upload</h2>
     <div class="qc-upload">点击或拖拽上传角色图像（JPG / PNG，≤ 8MB）</div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">开场控制 Intro Controls</h2>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">会馆与众生之门共用的细进度条和轻量跳过按钮；动画场景仍由各自页面控制。</p>
+    <div style="display:flex;align-items:center;gap:16px;max-width:440px;padding:12px 16px;background:#142b25;border-radius:8px;color:#fdf9e4;">
+      <input class="lxh-intro-range" type="range" min="0" max="100" value="38" aria-label="开场动画进度" style="flex:1;">
+      <button class="lxh-intro-skip" type="button">跳过 ↘</button>
+    </div>
   </section>
 
 </div>
