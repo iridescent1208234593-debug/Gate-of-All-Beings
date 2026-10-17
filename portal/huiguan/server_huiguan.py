@@ -1757,10 +1757,21 @@ class Handler(BaseStaticHandler):
     # ---------- 官方角色（直查世界观库） ----------
     def _api_official_characters(self, qs):
         q = (qs.get("q", [""])[0] or "").strip()
-        min_c = int(qs.get("min", ["0"])[0] or 0)
-        max_c = int(qs.get("max", ["8"])[0] or 8)
-        limit = min(int(qs.get("limit", ["300"])[0] or 300), 500)
-        page = max(int(qs.get("page", ["1"])[0] or 1), 1)
+        try:
+            min_c = int(qs.get("min", ["0"])[0] or 0)
+            max_c = int(qs.get("max", ["8"])[0] or 8)
+            limit = int(qs.get("limit", ["30"])[0] or 30)
+            page = int(qs.get("page", ["1"])[0] or 1)
+        except (TypeError, ValueError):
+            self._json(400, {"error": "分页参数无效"})
+            return
+        min_c = max(0, min(min_c, 8))
+        max_c = max(0, min(max_c, 8))
+        limit = max(1, min(limit, 60))
+        page = max(page, 1)
+        if page > 100000:
+            self._json(400, {"error": "分页超出范围"})
+            return
         offset = (page - 1) * limit
         dup = (qs.get("dup", ["0"])[0] or "0") == "1"
         dup_clause = "AND name IN (SELECT name FROM characters GROUP BY name HAVING COUNT(*)>1) " if dup else ""
@@ -2801,7 +2812,7 @@ class Handler(BaseStaticHandler):
     def _api_official_unclassified(self):
         w = sqlite3.connect(WV_DB, timeout=10); w.row_factory = sqlite3.Row
         try:
-            rows = [dict(r) for r in w.execute("SELECT id, image_path, from_character_id, reason, created_at FROM unclassified_images ORDER BY id DESC")]
+            rows = [dict(r) for r in w.execute("SELECT id, reason FROM unclassified_images ORDER BY id DESC")]
         except Exception:
             rows = []
         w.close()
@@ -3548,8 +3559,17 @@ class Handler(BaseStaticHandler):
 
     # ---------- 同人角色 API ----------
     def _api_fan_list(self, qs):
-        page = max(int(qs.get("page", ["1"])[0] or 1), 1)
-        limit = min(int(qs.get("limit", ["12"])[0] or 12), 60)
+        try:
+            page = int(qs.get("page", ["1"])[0] or 1)
+            limit = int(qs.get("limit", ["12"])[0] or 12)
+        except (TypeError, ValueError):
+            self._json(400, {"error": "分页参数无效"})
+            return
+        page = max(page, 1)
+        if page > 100000:
+            self._json(400, {"error": "分页超出范围"})
+            return
+        limit = max(1, min(limit, 60))
         q = (qs.get("q", [""])[0] or "").strip()
         ft = (qs.get("type", [""])[0] or "").strip()
         offset = (page - 1) * limit
@@ -3564,7 +3584,7 @@ class Handler(BaseStaticHandler):
             params.append(ft)
         wc = " AND ".join(where)
         rows = conn.execute(
-            f"SELECT * FROM fan_characters WHERE {wc} ORDER BY created_at DESC LIMIT ? OFFSET ?",
+            f"SELECT id, '' AS user_kind, '' AS user_uid, user_name, name, type, species, gender, faction, ability, appearance, story, image_data, is_public, code, created_at, updated_at FROM fan_characters WHERE {wc} ORDER BY created_at DESC LIMIT ? OFFSET ?",
             params + [limit, offset]
         ).fetchall()
         total = conn.execute(
