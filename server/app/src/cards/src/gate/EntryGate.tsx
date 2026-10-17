@@ -23,6 +23,13 @@ const THEMES: { id: ThemeMode; label: string; color: string }[] = [
   { id: 'golden', label: 'Golden Dusk', color: '#F3C248' },
   { id: 'cyber', label: 'Cyber Neon', color: '#FD79A8' },
 ];
+const FIRST_FRAME_MARK = 'gate:first-frame';
+
+// The single first-frame measure for ops/perf/zszm-startup.mjs: the first drawn scene frame
+// (3D render or 2D fallback). The 2D placeholder shown while the runtime loads is empty at t=0.
+function markFirstFrame() {
+  if (!performance.getEntriesByName(FIRST_FRAME_MARK, 'mark').length) performance.mark(FIRST_FRAME_MARK);
+}
 
 export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEnter: () => void; onSkip: () => void }) {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -81,6 +88,7 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
 
     const startFallback = () => {
       if (cancelled) return;
+      markFirstFrame();
       setSceneReady(true);
       setUsing3D(false);
       if (reducedMotion.matches) {
@@ -137,6 +145,7 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
           scrollFriendly: false,
           pixelRatio: 1.5,
           onFrame: ({ t }) => {
+            markFirstFrame();
             const now = performance.now();
             if (t >= DURATION || now - lastUiUpdate.current >= 1000 * FRAME_CAP) {
               lastUiUpdate.current = now;
