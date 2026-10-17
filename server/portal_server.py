@@ -19,6 +19,8 @@ import re
 import select
 import socket
 import sys
+import threading
+import time
 from urllib.parse import parse_qs, urlsplit
 from pathlib import Path
 
@@ -270,6 +272,20 @@ class Dispatcher(www.Handler):
             super().handle_one_request()
         finally:
             self.__class__ = Dispatcher
+            # Defensive guard. Root cause of the earlier CPU spin (a swallowed ConnectionResetError that
+            # left close_connection False, see test_connection_reset_loop.py) is fixed in base_static.py;
+            # this stays as a safety net: a connection looping >100 times/s is closed and logged.
+            now = time.monotonic()
+            window = getattr(self, "_loop_window", None)
+            if window is None or now - window[0] > 1.0:
+                self._loop_window = window = [now, 0]
+            window[1] += 1
+            if window[1] > 100:
+                raw = getattr(self, "raw_requestline", b"")
+                print("[spin-guard] closing %s loops=%d/s last=%r close_connection_was=%s thread=%d fd=%s" % (
+                    self.client_address, window[1], raw[:80], self.close_connection,
+                    threading.get_ident(), getattr(self.request, "fileno", lambda: None)()), flush=True)
+                self.close_connection = True
 
     def parse_request(self):
         ok = super().parse_request()
@@ -314,4 +330,16 @@ class Dispatcher(www.Handler):
 
 if __name__ == "__main__":
     print(f"portal 统一入口启动: http://127.0.0.1:{PORT}", flush=True)
-    http.server.ThreadingHTTPServer((HOST, PORT), Dispatcher).serve_forever()
+    class _Server(http.server.ThreadingHTTPServer):
+        daemon_threads = True
+        request_queue_size = 1024  # default backlog of 5 drops connections under a signup burst
+
+        def get_request(self):
+            # Idle keep-alive sockets (cloudflared holds many) otherwise pin one thread each forever.
+            conn, addr = super().get_request()
+            idle = float(os.environ.get("IRIDESCENTLY_IDLE_TIMEOUT", "30"))
+            if idle > 0:
+                conn.settimeout(idle)
+            return conn, addr
+
+    _Server((HOST, PORT), Dispatcher).serve_forever()

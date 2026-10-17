@@ -6,6 +6,7 @@ from logging.handlers import RotatingFileHandler
 import os
 from pathlib import Path
 import re
+import sys
 import threading
 import time
 from urllib.parse import parse_qs, urlsplit
@@ -22,6 +23,21 @@ _PRODUCTION_HOSTS = frozenset({
 })
 
 
+class _SafeRotatingHandler(RotatingFileHandler):
+    """Observation must never cost the response path: a failed rollover is skipped quietly."""
+
+    def doRollover(self):
+        try:
+            super().doRollover()
+        except OSError:
+            if self.stream is None:
+                self.stream = self._open()
+            self.maxBytes = self.stream.tell() + 5 * 1024 * 1024  # retry after another 5 MiB
+
+    def handleError(self, record):
+        pass
+
+
 def _log():
     global _logger
     if _logger is None:
@@ -32,8 +48,11 @@ def _log():
         _logger.setLevel(logging.INFO)
         _logger.propagate = False
         if not _logger.handlers:
-            _logger.addHandler(RotatingFileHandler(directory / "scraping.log", maxBytes=5 * 1024 * 1024,
-                                                   backupCount=5, encoding="utf-8"))
+            # One file per server process: Windows cannot rename a log another process holds open,
+            # so a shared file made every request retry a failing rollover and dump a traceback.
+            name = "scraping-%s.log" % (Path(sys.argv[0]).stem or "app")
+            _logger.addHandler(_SafeRotatingHandler(directory / name, maxBytes=5 * 1024 * 1024,
+                                                    backupCount=5, encoding="utf-8"))
     return _logger
 
 
