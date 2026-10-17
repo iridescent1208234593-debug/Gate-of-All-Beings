@@ -86,8 +86,8 @@ def handle_security(handler, action, api):
         answer_hash = api['hash_password'](answer)
     else:
         password = body.get('new_password', '')
-        if not 6 <= len(password) <= 64:
-            return reply(400, {'error': '新密码长度需在 6–64 位之间'})
+        if not 12 <= len(password) <= 128:
+            return reply(400, {'error': '新密码长度需在 12–128 位之间'})
         if password != body.get('confirm_password', ''):
             return reply(400, {'error': '两次输入的新密码不一致'})
         password_hash = api['hash_password'](password)

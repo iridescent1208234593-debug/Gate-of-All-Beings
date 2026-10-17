@@ -27,6 +27,9 @@ SCOPES = "openid basic email profile"
 # ===========================================
 
 SESSION_TIMEOUT = 3600
+COOKIE_SECURE = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip().lower() != "development"
+HOST = "127.0.0.1"
+PORT = int(os.environ.get("PORT", "5174"))
 
 USER_DB = os.path.join(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", str(__import__("pathlib").Path(__file__).resolve().parents[4])), "server", "app", "src", "cards", "users.db")
 
@@ -91,6 +94,8 @@ def _set_cookie(handler, name, value, path="/", max_age=None):
     cookie[name]["path"] = path
     cookie[name]["httponly"] = True
     cookie[name]["samesite"] = "Lax"
+    if COOKIE_SECURE:
+        cookie[name]["secure"] = True
     if max_age is not None:
         cookie[name]["max-age"] = max_age
     handler.send_header("Set-Cookie", cookie[name].OutputString())
@@ -263,7 +268,6 @@ class OAuthHandler(BaseStaticHandler):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -273,9 +277,8 @@ class OAuthHandler(BaseStaticHandler):
 
 
 if __name__ == "__main__":
-    PORT = 5174
-    server = http.server.HTTPServer(("0.0.0.0", PORT), OAuthHandler)
-    print(f"众生之门 OAuth 代理已启动: http://localhost:{PORT}", flush=True)
+    server = http.server.HTTPServer((HOST, PORT), OAuthHandler)
+    print(f"众生之门 OAuth 代理已启动: http://127.0.0.1:{PORT}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

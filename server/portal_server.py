@@ -12,6 +12,7 @@
 """
 import http.client
 import http.server
+import ipaddress
 import importlib.util
 import os
 import re
@@ -22,6 +23,13 @@ from urllib.parse import parse_qs, urlsplit
 from pathlib import Path
 
 PORT = int(os.environ.get("PORT", "8080"))
+HOST = "127.0.0.1"
+ENVIRONMENT = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip().lower()
+PRODUCTION_HOSTS = frozenset({
+    "iridescently.xyz", "www.iridescently.xyz", "huiguan.iridescently.xyz",
+    "oc.iridescently.xyz", "spirit.iridescently.xyz", "zszm.iridescently.xyz",
+    "game.iridescently.xyz", "juling.iridescently.xyz", "lingjing.iridescently.xyz",
+})
 CODE_ROOT = Path(__file__).resolve().parents[1]
 ROOT = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", CODE_ROOT)).resolve()
 
@@ -63,6 +71,7 @@ class RedirectHandler(www.Handler):
         self.end_headers()
 
     do_GET = do_HEAD = _redirect
+    do_POST = do_PUT = do_PATCH = do_DELETE = _redirect
 
     def log_message(self, fmt, *args):
         print("[redirect] %s" % args[0], flush=True)
@@ -259,7 +268,20 @@ class Dispatcher(www.Handler):
         ok = super().parse_request()
         if not ok:
             return ok
-        target, cfg = route(self.headers.get("Host"), self.path or "")
+        host = (self.headers.get("Host") or "").split(":", 1)[0].lower()
+        peer_is_loopback = False
+        try:
+            peer_is_loopback = ipaddress.ip_address(self.client_address[0]).is_loopback
+        except ValueError:
+            pass
+        trusted_https = peer_is_loopback and self.headers.get("X-Forwarded-Proto", "").strip().lower() == "https"
+        if ENVIRONMENT != "development" and host in PRODUCTION_HOSTS and not trusted_https:
+            target_url = "https://" + host + (self.path if (self.path or "").startswith("/") else "/")
+            self.__class__ = RedirectHandler
+            self.redirect_to = target_url
+            return ok
+
+        target, cfg = route(host, self.path or "")
         if target is not type(self):
             self.__class__ = target
         if issubclass(target, BaseStaticHandler):
@@ -284,5 +306,5 @@ class Dispatcher(www.Handler):
 
 
 if __name__ == "__main__":
-    print(f"portal 统一入口启动: http://localhost:{PORT}", flush=True)
-    http.server.ThreadingHTTPServer(("0.0.0.0", PORT), Dispatcher).serve_forever()
+    print(f"portal 统一入口启动: http://127.0.0.1:{PORT}", flush=True)
+    http.server.ThreadingHTTPServer((HOST, PORT), Dispatcher).serve_forever()

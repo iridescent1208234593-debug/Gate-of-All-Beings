@@ -61,6 +61,7 @@ ADMIN_USSO_IDS = {"7"}
 
 # 会话有效期（天）
 SESSION_DAYS = 30
+COOKIE_SECURE = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip().lower() != "development"
 
 # 角色卡保存
 DATA_FILE = os.path.join(RUNTIME_DIR, "characters.json")
@@ -1235,8 +1236,8 @@ class Handler(BaseStaticHandler):
         if not USERNAME_RE.match(username):
             self._json(400, {"error": "用户名需为 2-16 位中英文、数字或下划线"})
             return
-        if len(password) < 6 or len(password) > 64:
-            self._json(400, {"error": "密码长度需在 6-64 位之间"})
+        if len(password) < 12 or len(password) > 128:
+            self._json(400, {"error": "密码长度需在 12-128 位之间"})
             return
         if get_local_user_by_name(username):
             self._json(409, {"error": "该用户名已被注册"})
@@ -1339,8 +1340,8 @@ class Handler(BaseStaticHandler):
         if not USERNAME_RE.match(username):
             self._json(400, {"error": "用户名需为 2-16 位中英文、数字或下划线"})
             return
-        if len(password) < 6 or len(password) > 64:
-            self._json(400, {"error": "密码长度需在 6-64 位之间"})
+        if len(password) < 12 or len(password) > 128:
+            self._json(400, {"error": "密码长度需在 12-128 位之间"})
             return
         rate_add(f"reg:{ip}")
 
@@ -1463,7 +1464,7 @@ class Handler(BaseStaticHandler):
         for k, v in self._cors_headers():
             self.send_header(k, v)
         self.send_header("Location", "/")
-        self.send_header("Set-Cookie", "session=; Path=/; Domain=.iridescently.xyz; Max-Age=0; HttpOnly; SameSite=Lax")
+        self.send_header("Set-Cookie", "session=; Path=/; Domain=.iridescently.xyz; Max-Age=0; HttpOnly; Secure; SameSite=Lax")
         self.send_header("Set-Cookie", self._sso_clear_cookie())
         self.send_header("Content-Length", "0")
         self.end_headers()
@@ -3808,10 +3809,8 @@ class Handler(BaseStaticHandler):
         return self.headers.get("CF-Connecting-IP") or self.client_address[0]
 
     def _session_cookie(self, sid):
-        c = f"session={sid}; Path=/; Domain=.iridescently.xyz; Max-Age={SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax"
-        if self.headers.get("X-Forwarded-Proto") == "https":
-            c += "; Secure"
-        return c
+        secure = "; Secure" if COOKIE_SECURE else ""
+        return f"session={sid}; Path=/; Domain=.iridescently.xyz; Max-Age={SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax{secure}"
 
     def _sso_cookie(self, uid, kind, name):
         color = None
@@ -3830,13 +3829,12 @@ class Handler(BaseStaticHandler):
         except Exception:
             color = None
         token = hx_sso.make_token(uid, kind, name, color)
-        c = f"{hx_sso.COOKIE_NAME}={token}; Path=/; Domain={hx_sso.COOKIE_DOMAIN}; Max-Age={hx_sso.MAX_AGE}; HttpOnly; SameSite=Lax"
-        if self.headers.get("X-Forwarded-Proto") == "https":
-            c += "; Secure"
-        return c
+        secure = "; Secure" if COOKIE_SECURE else ""
+        return f"{hx_sso.COOKIE_NAME}={token}; Path=/; Domain={hx_sso.COOKIE_DOMAIN}; Max-Age={hx_sso.MAX_AGE}; HttpOnly; SameSite=Lax{secure}"
 
     def _sso_clear_cookie(self):
-        return f"{hx_sso.COOKIE_NAME}=; Path=/; Domain={hx_sso.COOKIE_DOMAIN}; Max-Age=0; HttpOnly; SameSite=Lax"
+        secure = "; Secure" if COOKIE_SECURE else ""
+        return f"{hx_sso.COOKIE_NAME}=; Path=/; Domain={hx_sso.COOKIE_DOMAIN}; Max-Age=0; HttpOnly; SameSite=Lax{secure}"
 
     def _read_image_form(self):
         content_type = self.headers.get("Content-Type", "")

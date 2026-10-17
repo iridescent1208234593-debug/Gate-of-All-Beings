@@ -79,7 +79,7 @@ def wait(port, timeout=25):
 def req(host, path):
     c = http.client.HTTPConnection("127.0.0.1", PORT, timeout=10)
     try:
-        c.request("GET", path, headers={"Host": host})
+        c.request("GET", path, headers={"Host": host, "X-Forwarded-Proto": "https"})
         r = c.getresponse()
         body = r.read()
         return r.status, body

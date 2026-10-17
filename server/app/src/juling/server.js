@@ -9,6 +9,7 @@ const path = require('path');
 const engine = require('./engine');
 
 const PORT = process.env.PORT || 8080;
+const HOST = process.env.HOST || '127.0.0.1';
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 
 // ---------- 持久化层 ----------
@@ -109,7 +110,7 @@ const server = http.createServer(async (req, res) => {
   send(res, 404, { ok: false, msg: 'Not Found' });
 });
 
-server.listen(PORT, () => {
-  console.log(`[众生之门·轮回肉鸽] http://localhost:${PORT}`);
+server.listen(PORT, HOST, () => {
+  console.log(`[众生之门·轮回肉鸽] http://${HOST}:${PORT}`);
   console.log(`[众生之门] 累计魂灵 ${globalSoul} · 当前境界 ${engine.getRealmStage(globalSoul).name}`);
 });

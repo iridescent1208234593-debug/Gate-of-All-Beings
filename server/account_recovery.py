@@ -110,8 +110,8 @@ def handle_recovery(handler, action, api):
     password = body.get("new_password", "")
     if not 32 <= len(token) <= 128:
         return reply(400, {"error": "找回链接无效或已过期"})
-    if not 6 <= len(password) <= 64 or password != body.get("confirm_password", ""):
-        return reply(400, {"error": "请确认两次密码一致，且长度为 6–64 位"})
+    if not 12 <= len(password) <= 128 or password != body.get("confirm_password", ""):
+        return reply(400, {"error": "请确认两次密码一致，且长度为 12–128 位"})
     token_hash = hashlib.sha256(token.encode()).hexdigest()
     conn = api["db"]()
     try:
