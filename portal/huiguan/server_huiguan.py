@@ -34,6 +34,7 @@ from account_security import init_schema as init_security_schema, handle_securit
 from account_email import init_schema as init_email_schema, handle_email
 from account_recovery import init_schema as init_recovery_schema, handle_recovery
 from account_profile import init_schema as init_profile_schema, get_profile, set_account_avatar, store_avatar_image as normalize_avatar_image
+import game_saves
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 
 # ========== 配置 ==========
@@ -68,9 +69,9 @@ COOKIE_SECURE = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip()
 DATA_FILE = os.path.join(RUNTIME_DIR, "characters.json")
 DATA_LOCK = threading.Lock()
 
-# 灵境会馆云存档（按用户 uid 隔离，独立文件避免污染 characters.json）
+# 云存档：users.db 的 game_saves 表，按 (kind, uid, scope) 隔离，见 server/game_saves.py。
+# 旧 game_saves.json（裸 uid）只在启动时按内容哈希导入一次，不再写入，保留作回滚来源。
 GAME_SAVE_FILE = os.path.join(RUNTIME_DIR, "game_saves.json")
-GAME_SAVE_LOCK = threading.Lock()
 
 # 用户信息本地数据库（SQLite）
 USER_DB = os.path.join(RUNTIME_DIR, "users.db")
@@ -362,6 +363,8 @@ def init_user_db():
                 updated_at TEXT
             )
         """)
+        game_saves.init_schema(conn)
+        game_saves.import_legacy(conn, GAME_SAVE_FILE)
         conn.commit()
         conn.close()
 
@@ -609,26 +612,6 @@ def save_data(data_dict):
             f.flush()
             os.fsync(f.fileno())
         os.replace(temporary, DATA_FILE)
-
-
-# ---------- 灵境会馆云存档 ----------
-def load_game_saves():
-    if not os.path.exists(GAME_SAVE_FILE):
-        return {}
-    with GAME_SAVE_LOCK:
-        try:
-            with open(GAME_SAVE_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (OSError, ValueError):
-            return {}
-
-
-def save_game_saves(data_dict):
-    with GAME_SAVE_LOCK:
-        tmp = GAME_SAVE_FILE + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            json.dump(data_dict, f, ensure_ascii=False)
-        os.replace(tmp, GAME_SAVE_FILE)
 
 
 # ---------- 外置存储（展示页 HTML / 上传图），给 characters.json 瘦身 ----------
@@ -1139,8 +1122,8 @@ class Handler(BaseStaticHandler):
         ident = self._require_ident()
         if not ident:
             return
-        scope = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("scope", [None])[0]
-        if scope not in (None, "softie"):
+        scope = game_saves.normalize_scope(urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("scope", [None])[0])
+        if scope is None:
             self._json(400, {"error": "存档范围无效"}); return
         body = self._read_json()
         if body is None:
@@ -1148,40 +1131,34 @@ class Handler(BaseStaticHandler):
         state = body.get("state")
         if not state:
             self._json(400, {"error": "缺少存档内容"}); return
-        uid = str(ident["uid"])
-        saves = load_game_saves()
-        record = saves.get(uid) or {}
-        saved = {
-            "savedAt": now_iso(),
-            "userName": ident.get("nickname") or ident.get("username") or "",
-        }
-        if scope == "softie":
-            games = record.get("games") if isinstance(record.get("games"), dict) else {}
-            games[scope] = {"savedAt": saved["savedAt"], "state": state}
-            saved["games"] = games
-        else:
-            saved["state"] = state
-        saves[uid] = {**record, **saved}
-        save_game_saves(saves)
-        self._json(200, {"ok": True, "savedAt": saved["savedAt"]})
+        with DB_LOCK:
+            conn = db()
+            try:
+                saved_at = game_saves.put_save(conn, ident["kind"], ident["uid"], scope, state,
+                                               ident.get("nickname") or ident.get("username") or "", now_iso())
+                conn.commit()
+            except ValueError:
+                self._json(413, {"error": "存档过大"}); return
+            finally:
+                conn.close()
+        self._json(200, {"ok": True, "savedAt": saved_at})
 
     def _api_game_load(self):
         ident = self._require_ident()
         if not ident:
             return
-        scope = urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("scope", [None])[0]
-        if scope not in (None, "softie"):
+        scope = game_saves.normalize_scope(urllib.parse.parse_qs(urllib.parse.urlparse(self.path).query).get("scope", [None])[0])
+        if scope is None:
             self._json(400, {"error": "存档范围无效"}); return
-        uid = str(ident["uid"])
-        saves = load_game_saves()
-        rec = saves.get(uid)
-        games = rec.get("games") if isinstance(rec, dict) else None
-        scoped = games.get(scope) if scope and isinstance(games, dict) else None
-        state = scoped.get("state") if isinstance(scoped, dict) else rec.get("state") if isinstance(rec, dict) else None
-        if not state:
+        conn = db()
+        try:
+            saved = game_saves.get_save(conn, ident["kind"], ident["uid"], scope)
+        finally:
+            conn.close()
+        if not saved:
             self._json(404, {"error": "暂无云存档"})
             return
-        self._json(200, {"ok": True, "savedAt": scoped.get("savedAt") if scoped else rec.get("savedAt"), "state": state})
+        self._json(200, {"ok": True, "savedAt": saved["savedAt"], "state": saved["state"]})
 
     # ---------- USSO 登录 ----------
     def _api_sso_login(self):

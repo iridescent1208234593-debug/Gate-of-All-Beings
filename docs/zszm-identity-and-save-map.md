@@ -74,8 +74,8 @@ PlayerProfileProvider
 | 卡牌摘要 | `localStorage['iridescently.save.v1']` 内 `m:cards:summary` | 用于模块/壳读取摘要，不是完整卡牌存档；无账户和跨设备保证 |
 | 雾隐浅滩（本轮由原型场景接入） | `sessionStorage['zszm.shore.v1:<kind>:<user_id>']`；匿名为 `zszm.shore.v1:anonymous`；`ShoreMode.tsx` | 按 scope 创建/销毁模式实例，玩家显示实时读取 Context；探索节点、灵息、日志仍仅会话本地，不云同步 |
 | 灵境会馆经营本地 | 统一 namespace 内 `m:management:lingjing-huiguan-save-<uid>` / `...-guest`；本地账户缓存 `m:management:lingjing-huiguan-account` | `saveGame.js` / `account.js` 仍只用裸 uid 选择本地档；缓存恢复失败会保留旧值；非本轮 scope 保护覆盖范围 |
-| 灵境会馆经营云端 | 会馆 `/api/game/save`、`/api/game/load` → `game_saves.json` 的裸 uid → `state` | 有会馆认证才可读写，具备服务器持久化；owner key 缺少 kind，见风险 |
-| Softie 云存档（未修改主体） | 同一个 `game_saves.json` owner 记录的 `games.softie`；API `?scope=softie` | 避免覆盖经营 `state`，但仍继承裸 uid owner 风险；本轮不改 Softie |
+| 灵境会馆经营云端 | 会馆 `/api/game/save`、`/api/game/load` → `users.db.game_saves`，主键 `(kind, uid, 'management')` | 2026-10-17 源码已迁移（未发布）；旧 `game_saves.json` 只读导入，见 [game-save-ownership.md](game-save-ownership.md) |
+| Softie 云存档（客户端未改） | `users.db.game_saves` 的 `(kind, uid, 'softie')`；API `?scope=softie` | 与经营槽独立，不再回退读取经营存档；源码已迁移，未发布 |
 | 灵境生态 | namespace 内 `m:ecology:zszm-ecology-v2`；`ecology/src/core/persistence.js` | 同源 localStorage；无账户 scope、无云同步；生态交换包和卡牌收获队列有自己的校验，不等于账户存档 |
 | 聚灵 | `juling/server.js` 的 `globalSoul` / `currentRun`；`data/save.db` 的 `save_state` 或 JSON fallback 的 `soul` | 当前是服务进程的全局玩法状态，不是每个账户的私人存档；统一入口未改变这一点 |
 | 统一壳 / 其他 localStorage 模块 | `shared/shared-session/save.js` / `kv.js` → `iridescently.save.v1`，模块前缀 `m:<module>:` | 标准化本地命名空间和旧 key 迁移；不自动带 owner，不自动云同步 |
@@ -89,7 +89,8 @@ PlayerProfileProvider
 
 1. **主站管理员判定混用身份种类与权限。** `portal/www/server.py::_is_admin` 当前将裸 uid 与 USSO 白名单比较，未先要求 `kind == 'usso'`，并接受 `kind == 'admin'`。而真实身份种类为 local / usso，管理员是 role。若本地 uid 与白名单文本碰撞，可能发生错误授权；没有证据表明真实账户已经发生碰撞。下一轮应由统一、经数据库复核的 `(kind, uid)` 身份解析获取角色，至少先补齐种类约束并加本地/USSO 同号回归；不要直接凭同一数字或前端 `admin` 字段授权。
 
-2. **历史经营 / Softie 云存档 owner 是 raw uid。** `_api_game_save/_load` 在通过会馆会话验证后使用 `str(ident['uid'])` 访问 `game_saves.json`，缺少 kind。不同身份源的同号用户可能读写同一档；客户端经营本地档也有同类键名问题。下一轮应先做只读 owner 冲突清点、制定可回滚迁移表，再改为复合 owner；不能直接把所有旧档重新归给当前登录者，也不能靠清空旧档解决。本轮只记录，未迁移或删除任何存档。
+2. **（2026-10-17 源码已处理，未发布）历史经营 / Softie 云存档 owner 是 raw uid。** 已改为 `(kind, uid, scope)`，旧档按正面证据归属、不确定者隔离、可导出回滚，见 [game-save-ownership.md](game-save-ownership.md)。以下为原始记录：
+   `_api_game_save/_load` 在通过会馆会话验证后使用 `str(ident['uid'])` 访问 `game_saves.json`，缺少 kind。不同身份源的同号用户可能读写同一档；客户端经营本地档也有同类键名问题。下一轮应先做只读 owner 冲突清点、制定可回滚迁移表，再改为复合 owner；不能直接把所有旧档重新归给当前登录者，也不能靠清空旧档解决。本轮只记录，未迁移或删除任何存档。
 
 3. **玩法进度还没有统一账户归属。** 卡牌 IndexedDB `current`、生态 localStorage 为浏览器级，聚灵为服务级全局状态；Gate Identity 已按账户保存不代表这些玩法自动随账户同步。后续先为每一种档明确“私人 / 访客 / 共享世界”产品语义，再设计存档 owner、迁移、冲突和导出流程。
 
