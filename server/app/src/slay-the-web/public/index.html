@@ -13,6 +13,13 @@
 		<link rel="shortcut icon" href="/ui/images/spoder.png">
 		<link rel="apple-touch-icon" href="/ui/images/spoder.png" />
 		<link rel="stylesheet" href="ui/index.css" />
+		<script>
+			// ui/images 是可选美术（见 server/app/module-assets.json）；缺失时隐藏图片而不是显示破图标。
+			addEventListener('error', function (event) {
+				var target = event.target
+				if (target && target.tagName === 'IMG' && /\/ui\/images\//.test(target.src)) target.style.display = 'none'
+			}, true)
+		</script>
 	  <script src="https://huiguan.iridescently.xyz/design-system/game-nav.js" defer></script>
 </head>
 	<body>

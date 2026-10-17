@@ -37,7 +37,7 @@
 
 - Vite 模块：源码须能 `vite build --base /app/modules/<名>/`，产物落 `server/app/modules/<名>`。
 - 静态模块：放 `src/<名>/public`（或整目录），必要时在脚本里修正根绝对路径。
-- 目录联接：`slay/ui/images` → `shared/shared-ui/AI image/images`（脚本重建）。
+- `slay/ui/images`：可选美术，`build-modules.mjs` 按 `server/app/module-assets.json`（`slay.images`）或 `IRIDESCENTLY_SLAY_IMAGES_DIR` 复制真实文件；未配置时跳过，配置了但路径不存在则构建失败。旧来源 `shared/shared-ui/AI image` 已按复审删除。
 - 后端共享：`sys.path` 指向 `server/` 以导入 `base_static`/`hx_sso`/`account_security`。
 
 ## 5. shared-session 钩子

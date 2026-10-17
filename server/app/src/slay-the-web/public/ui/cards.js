@@ -1,7 +1,8 @@
 import {html, Component} from '../web_modules/htm/preact/standalone.module.js'
 import {canPlay} from '../game/conditions.js'
 import {cardResonanceInfo} from '../content/element-mastery.js'
-// —— 罗小黑世界观卡牌图标（public/assets/cards/*.svg）——
+// —— 罗小黑世界观卡牌图标（可选美术 ui/images/cards/*.svg，来源见 server/app/module-assets.json）——
+// 路径相对模块基址，独立访问与统一壳挂载都能解析；缺图时由 index.html 的守卫隐藏。
 // 优先按卡牌原图 slug 匹配专属图标，否则按五行/系别映射元素印章。
 const ELEMENT_ICONS = {
 	金: 'metal',
@@ -32,10 +33,10 @@ const CARD_ICONS = {
 
 export function cardIcon(card) {
 	const specific = CARD_ICONS[card.image]
-	if (specific) return `/assets/cards/${specific}.svg`
+	if (specific) return `ui/images/cards/${specific}.svg`
 	const key = ELEMENT_ICONS[card.element]
-	if (key) return `/assets/cards/${key}.svg`
-	return '/assets/cards/common.svg'
+	if (key) return `ui/images/cards/${key}.svg`
+	return 'ui/images/cards/common.svg'
 }
 
 

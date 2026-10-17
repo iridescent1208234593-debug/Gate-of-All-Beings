@@ -49,7 +49,7 @@
 | 模块 | 方式 |
 | --- | --- |
 | management / ecology / cards / softie | Vite `--base /app/modules/<名>/` |
-| juling / slay / aeon | 静态拷贝；slay 额外修正根绝对 `/ui/` 图标并把 `ui/images` 联接到 `shared/shared-ui/AI image/images` |
+| juling / slay / aeon | 静态拷贝；slay 额外修正根绝对 `/ui/` 图标；`ui/images`（场景图 / 光标 / 小图标）为可选美术，来源由 `server/app/module-assets.json` 的 `slay.images` 或 `IRIDESCENTLY_SLAY_IMAGES_DIR` 指定，未配置时不带美术构建，缺图在页面中隐藏 |
 
 `server/app/modules/` 为产物（gitignore），运行所需。
 

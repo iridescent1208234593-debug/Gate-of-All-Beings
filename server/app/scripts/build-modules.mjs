@@ -3,7 +3,7 @@
 // - 其余游戏从 games/ 构建或拷贝；静态站必要时修正根绝对链接
 // 用法：node server/app/scripts/build-modules.mjs
 import { spawnSync } from 'node:child_process';
-import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { candidateRoot, recordCandidate } from '../../../ops/release-artifacts.mjs';
@@ -39,6 +39,18 @@ function copyModule(srcDir, destName, filter) {
   console.log(`[copy] ${destName}`);
 }
 
+function moduleAssets() {
+  return JSON.parse(readFileSync(path.join(appDir, 'module-assets.json'), 'utf8'));
+}
+
+function resolveOptionalAsset(override, configured) {
+  const value = override || configured;
+  if (!value) return null;
+  const resolved = path.resolve(appDir, '..', '..', value);
+  if (!existsSync(resolved)) throw new Error(`Configured module asset source does not exist: ${resolved}`);
+  return resolved;
+}
+
 function walk(dir, fn) {
   for (const e of readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
@@ -65,12 +77,18 @@ walk(path.join(outRoot, 'slay'), (p) => {
 });
 console.log('[fix] slay root-absolute /ui/');
 
-// 候选产物包含真实素材，避免发布后仍依赖候选目录或源码 junction。
+// 重生之门的场景图、光标与小图标是可选素材（卡面来自模块自带的 assets/cards/*.svg）。
+// 来源由 server/app/module-assets.json 的 slay.images 或 IRIDESCENTLY_SLAY_IMAGES_DIR 指定；
+// 未配置时不带这些素材构建，配置了却不存在则报错。候选产物复制真实文件，不依赖 junction。
 const slayImages = path.join(outRoot, 'slay', 'ui', 'images');
-const sharedImages = path.join(appDir, '..', '..', 'shared', 'shared-ui', 'AI image', 'images');
 rmSync(slayImages, { recursive: true, force: true });
-cpSync(sharedImages, slayImages, { recursive: true, dereference: true });
-console.log('[copy] slay shared images');
+const slayImageSource = resolveOptionalAsset(process.env.IRIDESCENTLY_SLAY_IMAGES_DIR, moduleAssets().slay?.images);
+if (slayImageSource) {
+  cpSync(slayImageSource, slayImages, { recursive: true, dereference: true });
+  console.log(`[copy] slay images from ${slayImageSource}`);
+} else {
+  console.log('[skip] slay images: no source configured (server/app/module-assets.json); building without optional art');
+}
 
 // 同时生成首页候选，不改动生产入口或资源。
 const homepageBuild = spawnSync(process.execPath,
