@@ -1343,7 +1343,12 @@ function makeSpiritChoice(state, {side, space}) {
 	}
 	// 概念词条·灵质空间洞悉：每次探索灵质空间，随机悟得一条尚未收集的世界法则词条
 	const insight = unlockRandomConceptArticle()
-	if (insight) pushLog(next, `灵识洞悉：悟得「${insight}」`, 'event')
+	// next 已被 immer 自动冻结，不能直接 pushLog(next)；洞悉日志需再经一次 produce 写入
+	if (insight) {
+		return produce(next, (draft) => {
+			pushLog(draft, `灵识洞悉：悟得「${insight}」`, 'event')
+		})
+	}
 
 	return next
 }
