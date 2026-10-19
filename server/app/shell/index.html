@@ -42,6 +42,7 @@
   @media (max-width: 640px) { .shell-topbar a { padding: 0 9px; font-size: 13px; } .shell-topbar a.active::after { left: 9px; right: 9px; } }
 </style>
 <script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017"></script>
+<script defer src="/shared/shared-ui/server-recovery.js"></script>
 </head>
 <body>
 <header class="shell-topbar" id="iridescently-shell-chrome" aria-label="众生之门模块">
@@ -58,7 +59,7 @@ import { get, set } from '/shared/shared-session/save.js';
 const view = document.getElementById('iridescently-shell-view');
 const navlinks = document.getElementById('iridescently-shell-navlinks');
 const BASE_PATH = '/app/shell/';
-if (['zszm.iridescently.xyz', '127.0.0.1', 'localhost'].includes(location.hostname)) {
+if (['zszm.iridescently.xyz', 'pc-zszm.iridescently.xyz', '127.0.0.1', 'localhost'].includes(location.hostname)) {
   document.getElementById('iridescently-shell-return').href = '/#home';
 }
 let portal = { links: [] };
@@ -105,13 +106,20 @@ function renderHome() {
 
 function renderModule(key) {
   const l = portal.links.find(x => x.key === key && isInternal(x.url));
-  if (!l) return renderHome();
+  if (!l) { IridescentlyRecovery.render(view, {message:'这个玩法入口不存在，请返回门庭选择其他玩法。'}); return; }
   if (l.embed) { mountEmbed(l); return; }
   setBase(BASE_PATH);
-  const f = document.createElement('iframe');
-  f.className = 'view'; f.src = l.url; f.title = l.name;
-  f.setAttribute('allow', 'fullscreen; clipboard-write');
-  view.replaceChildren(f);
+  const version = mountVersion;
+  const box = document.createElement('div');box.className = 'module-state';box.textContent = '正在打开 ' + l.name + '…';view.replaceChildren(box);
+  fetch(l.url, {method:'HEAD',signal:AbortSignal.timeout(10000)}).then(response => {
+    if (!response.ok || !response.headers.get('content-type')?.includes('text/html')) throw Error('玩法入口不可用');
+    if (version !== mountVersion) return;
+    const f = document.createElement('iframe');
+    f.className = 'view'; f.src = l.url; f.title = l.name;
+    f.setAttribute('allow', 'fullscreen; clipboard-write');
+    f.onerror = () => { if (version === mountVersion) IridescentlyRecovery.render(view); };
+    view.replaceChildren(f);
+  }).catch(() => { if (version === mountVersion) IridescentlyRecovery.render(view, {message:'这个玩法的入口暂时不可用，请换服务器或重新加载。'}); });
 }
 
 // A module owns its scripts, injected styles and disposal callbacks. Only one
@@ -224,7 +232,7 @@ function mountEmbed(link) {
       if (current() && error.name !== 'AbortError') {
         context.failed = true;
         releaseMount(context);
-        box.innerHTML = '<p class="module-state" role="alert">模块暂时无法载入。<a href="' + link.url + '">单独打开 ' + escapeText(link.name) + '</a>，或选择其他入口。</p>';
+        IridescentlyRecovery.render(box, {message:'这个玩法的程序或资源暂时无法加载，请换服务器或重新加载。'});
         box.setAttribute('aria-busy', 'false');
         view.replaceChildren(box);
         console.error('模块加载失败', error);
@@ -272,7 +280,11 @@ document.addEventListener('click', (event) => {
 addEventListener('popstate', render);
 
 (async () => {
-  try { portal = await (await fetch('/app/portal.json')).json(); } catch {}
+  try {
+    const response = await fetch('/app/portal.json');
+    if (!response.ok) throw Error('玩法清单不可用');
+    portal = await response.json();
+  } catch { IridescentlyRecovery.render(view, {message:'暂时无法读取玩法清单，请重试。'}); return; }
   renderNav();
   const r = route();
   const last = get('lastRoute');
@@ -280,7 +292,7 @@ addEventListener('popstate', render);
     history.replaceState({}, '', last);
   }
   render();
-  const s = await refreshSession();
+  const s = await refreshSession().catch(() => null);
   document.getElementById('iridescently-shell-user').textContent = s && s.logged_in ? (s.name || '已登录') : '';
 })();
 </script>

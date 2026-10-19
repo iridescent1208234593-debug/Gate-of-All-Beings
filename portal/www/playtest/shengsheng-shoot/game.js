@@ -286,8 +286,8 @@ function readyDialog() {
   showDialog('站定开火，移动躲避。', '停止移动时自动发射三路子弹；碰到敌人即结束。', '开始游戏', start);
 }
 async function preload() {
-  const sources = { beach: 'beach.webp', player: 'player.webp', enemy: 'enemy.webp', bullet: 'bullet.webp', burst: 'burst.webp',
-    victory: 'victory.jpg', defeat: 'defeat.jpg' };
+  // Settlement artwork loads only when that outcome is shown; it never blocks play.
+  const sources = { beach: 'beach.webp', player: 'player.webp', enemy: 'enemy.webp', bullet: 'bullet.webp', burst: 'burst.webp' };
   let loaded = 0;
   try {
     await Promise.all(Object.entries(sources).map(async ([name, file]) => {
@@ -300,6 +300,10 @@ async function preload() {
     ready = true; $('load-progress').hidden = true; $('load-status').hidden = true;
     $('restart').disabled = false; readyDialog();
   } catch {
+    if (window.IridescentlyRecovery) {
+      window.IridescentlyRecovery.render($('overlay'), {title:'海滩素材暂时无法读取',message:'部分游戏素材未能加载，可以换服务器重试。'});
+      return;
+    }
     $('dialog-title').textContent = '海滩还没准备好';
     $('load-status').textContent = '部分素材加载失败，请检查网络后重试。';
     $('load-progress').hidden = true; $('primary').disabled = false; $('primary').textContent = '重新加载';

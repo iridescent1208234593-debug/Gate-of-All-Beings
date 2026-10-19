@@ -497,7 +497,16 @@ class OAuthHandler(BaseStaticHandler):
 
 
 if __name__ == "__main__":
-    server = http.server.HTTPServer((HOST, PORT), OAuthHandler)
+    class _Server(http.server.ThreadingHTTPServer):
+        daemon_threads = True
+        request_queue_size = 512
+
+        def get_request(self):
+            conn, addr = super().get_request()
+            conn.settimeout(60)
+            return conn, addr
+
+    server = _Server((HOST, PORT), OAuthHandler)
     print(f"众生之门 OAuth 代理已启动: http://127.0.0.1:{PORT}", flush=True)
     try:
         server.serve_forever()

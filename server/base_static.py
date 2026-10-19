@@ -42,9 +42,9 @@ SECURITY_HEADERS = {
 CACHE_MAX_AGE = {
     ".js": 3600, ".css": 3600,
     ".png": 86400, ".jpg": 86400, ".jpeg": 86400,
-    ".gif": 86400, ".webp": 86400, ".svg": 86400, ".ico": 86400,
+    ".gif": 86400, ".webp": 86400, ".avif": 86400, ".svg": 86400, ".ico": 86400,
     ".woff": 604800, ".woff2": 604800, ".mp4": 604800,
-    ".ttf": 604800, ".otf": 604800,
+    ".ttf": 604800, ".otf": 604800, ".webm": 604800, ".ogg": 604800, ".wasm": 604800,
 }
 # The 8-char hash segment must contain a digit, uppercase letter or underscore: a plain lowercase word of
 # 8 letters ("site-language.js") is a mutable file name, not a content hash, and must not become immutable.
@@ -72,6 +72,11 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
     code_max_age = None
     """带安全头 + 静态防护 + 错误静默的通用 Handler 基类。"""
     _static_dir = None  # 子类覆写
+
+    def send_error(self, code, message=None, explain=None):
+        from access_recovery import send_recovery
+        if not send_recovery(self, code):
+            super().send_error(code, message, explain)
 
     def __init__(self, *args, **kwargs):
         # 子类若在 super().__init__ 里显式传 directory，交由调用方值优先，

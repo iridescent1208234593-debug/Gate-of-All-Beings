@@ -89,6 +89,11 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
     upstream_port = 0
     strip = ""
 
+    def send_error(self, code, message=None, explain=None):
+        from access_recovery import send_recovery
+        if not send_recovery(self, code):
+            super().send_error(code, message, explain)
+
     def _proxy(self, method):
         path = self.path
         if self.strip and path.startswith(self.strip):
@@ -201,14 +206,33 @@ class WebSocketProxyHandler(ProxyHandler):
                 upstream.close()
 
 
+class PublicStatusHandler(BaseStaticHandler):
+    def do_GET(self):
+        body = b'{"node":"hk-stable","portal":"ready"}'
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Cache-Control', 'no-store')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        if self.command != 'HEAD':
+            self.wfile.write(body)
+
+    do_HEAD = do_GET
+
+
 def route(host, path):
     """-> (处理类, 配置 dict)。"""
     h = (host or "").split(":")[0].lower()
+    p = (path or "").split("?")[0]
+    if p == '/__server/status':
+        return PublicStatusHandler, {}
+    if p.startswith('/shared/'):
+        return StaticHandler, {"root": str(CODE_ROOT / "shared"), "strip": "/shared"}
     if h == "huiguan.iridescently.xyz" or h.endswith(".huiguan.iridescently.xyz"):
         return huiguan.Handler, {}
     if h == "oc.iridescently.xyz" or h.endswith(".oc.iridescently.xyz"):
         return oc.Handler, {}
-    p = (path or "").split("?")[0]
     legacy_destinations = {
         "game.iridescently.xyz": "https://zszm.iridescently.xyz/#home",
         "lingjing.iridescently.xyz": "https://zszm.iridescently.xyz/#management",

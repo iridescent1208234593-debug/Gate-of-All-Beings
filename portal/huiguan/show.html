@@ -36,6 +36,7 @@ body{background:var(--bg);font-family:"Noto Serif SC","Source Han Serif SC",seri
 <script src="/image-upload.js?v=20261013"></script>
 <script src="/character-colors.js?v=20261013"></script>
 <script src="/showcase-export.js?v=20261014"></script>
+<script src="/design-system/ui/server-recovery.js"></script>
 <script>
 (function(){
 var params=new URLSearchParams(location.search);
@@ -57,8 +58,11 @@ fetch(apiBase+'/get-character?code='+encodeURIComponent(code))
   w.innerHTML='';
   w.appendChild(iframe);
 })
-.catch(function(){
-  document.getElementById('wrap').innerHTML='<div class="error-text">展示页不存在，请返回<a href="/">登记页</a>重新生成。</div>';
+.catch(function(error){
+  IridescentlyRecovery.render(document.getElementById('wrap'), {
+    title: error.status === 404 ? '未找到这份公开展示资料' : '展示服务暂时无法读取',
+    message: error.status === 404 ? '该链接可能已撤回公开或不存在；已保存的资料不会因此被清除。' : '暂时无法连接资料服务，请重试。无需重新生成或覆盖你的设表。'
+  });
 });
 })();
 </script>
