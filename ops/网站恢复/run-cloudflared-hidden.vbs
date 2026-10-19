@@ -1,24 +1,32 @@
-' run-cloudflared-hidden.vbs
-' 用途：以完全隐藏窗口的方式启动 cloudflared 隧道（供计划任务 marvis-cloudflared 调用）
-' 日志改为落盘到 %USERPROFILE%\.cloudflared\cloudflared.log，不再输出到控制台窗口
-' 维护：如需改隧道名/日志路径，改下面 exePath / cmdLine 两行
-
+' Hidden main-tunnel launcher used by the marvis-cloudflared logon task.
 Option Explicit
 
-Dim sh, q, exePath, logPath, cmdLine
-
-exePath = sh.ExpandEnvironmentStrings("%ProgramFiles(x86)%") & "\cloudflared\cloudflared.exe"
-logPath = sh.ExpandEnvironmentStrings("%USERPROFILE%") & "\.cloudflared\cloudflared.log"
-
-q = Chr(34)
-' --logfile 参数在"隐藏窗口启动"场景下会导致 cloudflared 启动失败（已实测），
-' 因此改为调用 run-cloudflared.cmd，由 cmd 重定向把日志写入文件
-cmdLine = q & scriptDir & "\run-cloudflared.cmd" & q
-
+Dim sh, fso, scriptDir, configPath, q, cmdLine
+Dim process, processCommand, runPattern
 Set sh = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
 scriptDir = fso.GetParentFolderName(WScript.ScriptFullName)
-' 第二参数 0 = SW_HIDE（窗口完全隐藏），第三参数 False = 不等待退出
-sh.Run cmdLine, 0, False
+If fso.FileExists("E:\Projects\.releases\hk-production.json") Then WScript.Quit 0
+configPath = LCase(sh.ExpandEnvironmentStrings("%USERPROFILE%") & "\.cloudflared\config.yml")
 
-Set sh = Nothing
+' Do not duplicate the current canonical-config connector or the legacy launcher.
+Set runPattern = New RegExp
+runPattern.Pattern = "\btunnel\b.*\brun\b"
+runPattern.IgnoreCase = True
+For Each process In GetObject("winmgmts:\\.\root\cimv2").ExecQuery("SELECT CommandLine FROM Win32_Process WHERE Name='cloudflared.exe'")
+  If Not IsNull(process.CommandLine) Then
+    processCommand = LCase(process.CommandLine)
+    If runPattern.Test(processCommand) Then
+      If InStr(processCommand, configPath) > 0 Or InStr(processCommand, "tunnel run main") > 0 Then
+        WScript.Quit 0
+      End If
+    End If
+  End If
+Next
+
+q = Chr(34)
+cmdLine = q & scriptDir & "\run-cloudflared.cmd" & q
+sh.CurrentDirectory = scriptDir
+sh.Run cmdLine, 0, False
+' The CMD launcher uses the default canonical config and appends its existing log.
+' Window style 0 keeps the connector hidden; False leaves it running after logon.

@@ -1,0 +1,14 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>选择服务器 · Iridescently</title>
+<style>body{margin:0;background:#f5f0e8;color:#294237;font:16px/1.8 system-ui}main{max-width:760px;margin:8vh auto;padding:24px}h1{font-size:30px}section{background:#fbf8f2;border:1px solid #d4cfbe;border-radius:16px;padding:24px;margin:20px 0}a{display:inline-block;background:#4c8979;color:white;padding:10px 20px;border-radius:8px;text-decoration:none}.hint{color:#68796d}button{font:inherit}</style>
+<main><h1>选择服务器</h1><p>两边共用香港账户、存档和资产接口。切换版本不会复制或覆盖玩家数据。</p>
+<section><h2>服务器 2 · 香港稳定版</h2><p>默认入口，独立持续运行。由站长手动发布，更新可能晚一些。</p><a id="stable">进入稳定版</a></section>
+<section><h2>服务器 1 · 本机新版</h2><p>由站长电脑提供更新的页面和游戏代码。电脑关机、休眠或网络不稳时可能无法访问；需要新增后台接口的功能，要等香港接口更新后才能使用。</p><p id="pc-state" class="hint">正在检查本机入口…</p><a id="preview">进入本机新版</a></section>
+<p class="hint">本机入口不可用时，请返回这里选择香港稳定版。此切换是页面版本切换，账户、云存档和房间后台仍在香港。浏览器本地草稿不自动跨域迁移，切换前请保存到云端。</p></main>
+<script>
+var names=['iridescently.xyz','www.iridescently.xyz','huiguan.iridescently.xyz','oc.iridescently.xyz','spirit.iridescently.xyz','zszm.iridescently.xyz','game.iridescently.xyz','juling.iridescently.xyz','lingjing.iridescently.xyz'];
+function pcHost(h){return h==='iridescently.xyz'?'pc.iridescently.xyz':'pc-'+h.split('.')[0]+'.iridescently.xyz'}
+var canonical=names.find(h=>h===location.hostname||pcHost(h)===location.hostname)||'zszm.iridescently.xyz';
+var dest=new URLSearchParams(location.search).get('return')||'/';if(!dest.startsWith('/')||dest.startsWith('//')||dest.includes('\\'))dest='/';
+document.getElementById('stable').href='https://'+canonical+dest;document.getElementById('preview').href='https://'+pcHost(canonical)+dest;
+fetch('https://'+pcHost(canonical)+'/__server/status',{signal:AbortSignal.timeout(6000),cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json()}).then(d=>{if(d.node!=='pc-latest')throw Error();document.getElementById('pc-state').textContent='本机入口在线 · 账户和存档由香港提供';}).catch(()=>{document.getElementById('pc-state').textContent='本机入口暂时离线或网络不可达；建议选择香港稳定版。';});
+</script></html>

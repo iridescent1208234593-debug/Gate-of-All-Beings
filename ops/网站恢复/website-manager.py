@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """网站管家 · Website Manager（西木会馆风格）
 
-统一托管本机全部站点与 Cloudflare 隧道：
+管理香港正式站发布与本机预览：
 
-  · 「一键恢复全部」按站点清单逐个启动未运行的站点，并一并拉起主站与公网隧道
+  · 「发布到香港 / 回滚版本」手动切换程序版本，正式数据持续保存在香港
+  · 「启动本机预览」按清单启动本机服务；香港正式站模式不启动旧隧道
   · 端口被占用但页面不健康时只报告，绝不强制结束进程
   · 站点清单与 cloudflared config.yml 合并展示，清单未收录的域名标注「未配置启动方式」
   · 界面沿用「西木会馆 · Design System」的 --qc-* 设计 token（乳白宣纸 / 松绿 / 描金）
@@ -15,6 +16,7 @@
 
 import concurrent.futures
 import datetime
+import json
 import os
 from pathlib import Path
 import queue
@@ -36,6 +38,7 @@ import webbrowser
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 LOGS = HERE / 'logs'
+RUNTIME_CWD = ROOT / '.releases' / 'runtime'  # 受管服务的稳定 cwd，位于 production/site 之外
 PYTHON = Path.home() / 'AppData/Local/Python/pythoncore-3.14-64/python.exe'
 NODE = Path(r'C:\Program Files\nodejs\node.exe')
 NPX_CMD = Path(r'C:\Program Files\nodejs\npx.cmd')
@@ -46,6 +49,18 @@ CLOUDFLARED = Path(r'C:\Program Files (x86)\cloudflared\cloudflared.exe')
 CONFIG = Path.home() / '.cloudflared' / 'config.yml'
 PUBLIC_MAIN = 'https://iridescently.xyz/'
 TUNNEL_NAME = 'main'
+HK_ACTIVE = ROOT / '.releases' / 'hk-production.json'
+HK_RELEASE = ROOT / 'ops' / 'hk-release.py'
+
+
+def hk_command(action):
+    result = subprocess.run([str(PYTHON), '-X', 'utf8', str(HK_RELEASE), action],
+                            capture_output=True, encoding='utf-8', errors='replace',
+                            timeout=600 if action == 'publish' else 120,
+                            creationflags=subprocess.CREATE_NO_WINDOW)
+    if result.returncode:
+        raise RuntimeError(result.stderr.strip() or result.stdout.strip())
+    return json.loads(result.stdout)
 
 
 class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
@@ -317,18 +332,24 @@ def launch(site):
     target = log_path(site)
     handle = target.open('ab')
     try:
-        header = ('\n--- ' + now_text() + '  启动：' + ' '.join(build_command(site)) + ' ---\n')
-        handle.write(header.encode('utf-8'))
-        handle.flush()
         env = os.environ.copy()
         env.update(site.get('env') or {})
         cwd = site.get('cwd') or str(HERE)
         if site.get('key') in ('portal', 'zszm-oauth'):
+            # 发布器会整体 rename .releases/production/site；运行中服务的 cwd 若在其内会触发 EPERM。
+            # 因此 cwd 固定为树外的运行目录，入口脚本改用绝对路径（两个服务都按 __file__ / 环境变量解析资源）。
             published = ROOT / '.releases/production/site'
             if not published.is_dir():
                 raise RuntimeError('缺少已发布源码；请先 build:site / publish:site')
-            cwd = str(published / Path(cwd).relative_to(ROOT))
+            script = published / Path(cwd).relative_to(ROOT) / site['args'][-1]
+            site = dict(site, args=list(site['args'][:-1]) + [str(script)])
+            runtime = RUNTIME_CWD / site['key']
+            runtime.mkdir(parents=True, exist_ok=True)
+            cwd = str(runtime)
             env['IRIDESCENTLY_PROJECT_ROOT'] = str(ROOT)
+        header = ('\n--- ' + now_text() + '  启动：' + ' '.join(build_command(site)) + '  cwd=' + cwd + ' ---\n')
+        handle.write(header.encode('utf-8'))
+        handle.flush()
         return subprocess.Popen(build_command(site), cwd=cwd, env=env,
                                 stdin=subprocess.DEVNULL, stdout=handle, stderr=handle,
                                 creationflags=subprocess.CREATE_NO_WINDOW)
@@ -349,6 +370,8 @@ def entry_missing(site):
 def evaluate(site):
     """只读检测单个站点，返回 (level, 文本)。不启动、不结束任何进程。"""
     if site.get('kind') == 'process':
+        if HK_ACTIVE.exists():
+            return 'good', '正式站使用香港隧道，本机无需连接'
         pids = tunnel_process_ids()
         if pids is None:
             return 'warn', '无法确认进程状态'
@@ -364,6 +387,8 @@ def evaluate(site):
         return 'warn', '未部署 · 本机暂无对应项目'
     port = site['port']
     if not port_listening(port):
+        if HK_ACTIVE.exists():
+            return 'idle', '预览未启动 · 不影响正式站'
         return 'bad', '未监听 · 未启动'
     code = http_status(local_url(site))
     if healthy(code):
@@ -385,6 +410,11 @@ def inspect_all(include_public=True):
             result[key] = value
     if include_public:
         result['public'] = public_probe(PUBLIC_MAIN, timeout=6)
+        if (ROOT / '.releases/hk-full-migration/deploy_ed25519').exists():
+            try:
+                result['hk'] = hk_command('status')
+            except Exception as error:
+                result['hk'] = {'error': str(error)}
     return result
 
 
@@ -392,6 +422,10 @@ def inspect_all(include_public=True):
 
 def recover_site(site, report, quiet=False):
     """启动单个站点。返回 True（可用）/ False（异常）/ None（跳过）。"""
+    if HK_ACTIVE.exists() and (quiet or site.get('kind') == 'process'):
+        if not quiet:
+            report('正式站由香港服务器运行，本机旧隧道无需启动。', 'good')
+        return None
     if site.get('kind') == 'process':
         pids = tunnel_process_ids()
         if pids is None:
@@ -705,7 +739,7 @@ class App:
                  font=(HAND_FONT, QC['fs_xl'], 'bold')).pack(side='left')
         tk.Label(header, text='西木会馆 · Design System', bg=QC['bg'], fg=QC['gold'],
                  font=(TEXT_FONT, QC['fs_sm'])).pack(side='left', padx=(10, 0), pady=(8, 0))
-        tk.Label(header, text='本机 %d 个站点  →  公网隧道  →  你的域名' % len(SITES),
+        tk.Label(header, text='本机开发 / 预览  →  手动发布  →  香港正式站',
                  bg=QC['bg'], fg=QC['dim'], font=(TEXT_FONT, QC['fs_sm'])).pack(side='right', pady=(8, 0))
 
         # 概览行
@@ -721,16 +755,23 @@ class App:
         # 工具条
         toolbar = tk.Frame(outer, bg=QC['bg'])
         toolbar.pack(fill='x', pady=(12, 14))
-        QcButton(toolbar, '一键恢复全部', self.recover_all, variant='primary', small=False).pack(side='left', padx=(0, 8))
+        QcButton(toolbar, '启动本机预览', self.recover_all, variant='primary', small=False).pack(side='left', padx=(0, 8))
         QcButton(toolbar, '刷新状态', self.refresh, variant='ghost', small=False).pack(side='left', padx=(0, 8))
         QcButton(toolbar, '打开主站', lambda: webbrowser.open(PUBLIC_MAIN), variant='ghost', small=False).pack(side='left', padx=(0, 8))
         QcButton(toolbar, '打开日志目录', self.open_logs_dir, variant='ghost', small=False).pack(side='left')
         self.watch = tk.BooleanVar(value=False)
-        tk.Checkbutton(toolbar, text='窗口开启时自动照看（每 30 秒；仅启动端口空闲的站点，不结束任何进程）',
+        tk.Checkbutton(toolbar, text='自动照看本机（香港正式站模式下停用）', state='disabled' if HK_ACTIVE.exists() else 'normal',
                        variable=self.watch, bg=QC['bg'], fg=QC['text'], activebackground=QC['bg'],
                        activeforeground=QC['text'], selectcolor=QC['panel'], bd=0,
                        highlightthickness=0, font=(TEXT_FONT, QC['fs_sm']),
                        cursor='hand2').pack(side='right')
+
+        hk_bar = tk.Frame(outer, bg=QC['panel'])
+        hk_bar.pack(fill='x', pady=(0, 12))
+        self.hk_status = tk.StringVar(value='香港服务器：正在检查；发布和回滚仅更新程序版本')
+        tk.Label(hk_bar, textvariable=self.hk_status, bg=QC['panel'], fg=QC['text'],
+                 font=(TEXT_FONT, QC['fs_sm']), anchor='w').pack(side='left', padx=10, pady=10)
+        QcButton(hk_bar, '打开服务器管家', self.open_server_manager, variant='primary').pack(side='right', padx=8)
 
         # 表头
         head = tk.Frame(outer, bg=QC['bg'])
@@ -763,7 +804,7 @@ class App:
 
         # 未纳入清单的域名
         covered = {domain for site in SITES for domain in site.get('domains', [])}
-        extras = [host for host, _ in tunnel_routes() if host not in covered]
+        extras = [] if HK_ACTIVE.exists() else [host for host, _ in tunnel_routes() if host not in covered]
         if extras:
             tk.Label(self.list_frame, text='未配置启动方式（cloudflared 配置中存在，但不在站点清单中）',
                      bg=QC['bg'], fg=QC['gold'], anchor='w',
@@ -793,11 +834,11 @@ class App:
         tk.Label(tips, text='安全策略：端口被占用但页面不健康时只报告，绝不强制结束进程；'
                             '关闭窗口不会关闭任何网站。',
                  bg=QC['bg'], fg=QC['dim'], font=(TEXT_FONT, QC['fs_xs'])).pack(anchor='w')
-        tk.Label(tips, text='电脑关机、休眠或断网将导致域名无法访问；重启后回到本窗口点「一键恢复全部」即可。',
+        tk.Label(tips, text='正式站由香港独立运行；双服入口、代码发布与独立资产更新请打开「服务器管家」。',
                  bg=QC['bg'], fg=QC['dim'], font=(TEXT_FONT, QC['fs_xs'])).pack(anchor='w', pady=(2, 0))
 
         self.write('站点清单已加载：%d 个站点 + 公网隧道；日志目录 %s' % (len(SITES), LOGS))
-        self.write('「一键恢复全部」会按顺序启动未运行的站点；已在运行的站点不会重复启动。')
+        self.write('此窗口保留本机开发服务；双服和发布操作已移至「服务器管家」。')
         root.after(100, self.drain)
         root.after(200, self.refresh)
         root.after(30000, self.tick)
@@ -861,6 +902,20 @@ class App:
     def refresh(self):
         self.work(lambda: inspect_all(True), 'status')
 
+    def open_server_manager(self):
+        subprocess.Popen([str(PYTHON.with_name('pythonw.exe')), str(ROOT/'ops/server-manager.py')],
+                         cwd=ROOT/'ops', creationflags=subprocess.CREATE_NO_WINDOW)
+
+    def apply_hk(self, value):
+        if value.get('error'):
+            self.hk_status.set('香港状态检查失败，公网状态请见上方；详见运行记录')
+            self.write(value['error'], 'warn')
+            return
+        services = value.get('services', {})
+        healthy = sum(x == 'active' for x in services.values())
+        self.hk_status.set('香港正式站：%s  ·  服务 %d/%d  ·  可回滚 %s' %
+                           (value.get('current', '未知'), healthy, len(services), value.get('previous') or '暂无'))
+
     def recover_all(self):
         if self.busy:
             self.write('上一次检查尚未结束，请稍候。', 'warn')
@@ -873,7 +928,7 @@ class App:
             return recover_all(report)
 
         self.busy = True
-        self.write('开始一键恢复全部……')
+        self.write('开始启动本机预览……')
 
         def run():
             try:
@@ -926,6 +981,9 @@ class App:
                 kind, value = self.events.get_nowait()
                 if kind == 'status':
                     self.apply_states(value)
+                elif kind == 'hkstatus':
+                    self.apply_hk(value)
+                    self.write('香港操作完成，当前版本：' + value.get('current', '未知'), 'good')
                 elif kind == 'log':
                     message, level = value
                     self.write(message, level)
@@ -944,6 +1002,8 @@ class App:
 
     def apply_states(self, states):
         self.states = states
+        if 'hk' in states:
+            self.apply_hk(states['hk'])
         for row in self.rows:
             key = row.site['key']
             if key in states:
@@ -969,8 +1029,10 @@ class App:
             public_text = '公网主站：HTTP %s' % public['status']
         else:
             public_text = '公网主站：%s' % public['state']
-        summary = ('站点 %d：正常 %d · 异常 %d · 未部署 %d    隧道：%s    %s'
+        summary = ('本机预览 %d：运行 %d · 未运行 %d · 未部署 %d    本机旧隧道：%s    %s'
                    % (total, good, bad, pending, tunnel_text, public_text))
+        if HK_ACTIVE.exists():
+            summary = '香港正式站独立运行    本机预览已启动 %d/%d    %s' % (good, sum(site.get('deployed', True) for site in SITES), public_text)
         if self.extra_rows:
             summary += '    未配置域名 %d' % len(self.extra_rows)
         self.summary.set(summary)
