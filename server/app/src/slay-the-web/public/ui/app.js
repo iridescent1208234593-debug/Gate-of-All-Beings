@@ -2,7 +2,7 @@
 import {html, Component} from '../web_modules/htm/preact/standalone.module.js'
 import gsap from './animations.js'
 // @ts-ignore
-import Flip from 'https://slaytheweb-assets.netlify.app/gsap/Flip.js'
+import Flip from '../web_modules/gsap/Flip.js'
 
 // Game logic
 import createNewGame from '../game/new-game.js'
