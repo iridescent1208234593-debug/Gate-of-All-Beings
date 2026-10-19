@@ -10,7 +10,7 @@ Git 保存源码、Design System、配置、文档、SVG/icons，以及目前被
 
 ## 未来 R2/CDN
 
-适合后续迁移到 Cloudflare R2 并通过 CDN 提供的内容：图库高清原图、视频、音频、GLB/3D 模型和大型纹理。迁移时先核对应用运行时路径、对象键、部署缓存和回滚方式，再复制资源并验证线上访问；本仓库不自动上传或移动这些文件。
+适合通过 Cloudflare R2 / CDN 公开提供的内容：图库 WebP 预览、视频、音频、GLB/3D 模型和大型纹理。图库高清原图只放私有持久资产库，通过主站管理员鉴权接口读取；不得放入公开 CDN。迁移时先核对应用运行时路径、对象键、部署缓存和回滚方式，再复制资源并验证线上访问；本仓库不自动上传或移动这些文件。
 
 可继续留在 Git 的资源：SVG/icons、小型 UI 图片、组件示例和必须与代码版本同步的文件。Design System 中当前使用的图片即使超过 1 MB，也先保留在 Git，待有明确替代 URL 和完整性验证后再单独迁移。
 
@@ -45,3 +45,7 @@ const modelUrl = asset("models/example.glb");
 ## Gallery 清单工具
 
 `npm run assets:manifest` 将 JPG/JPEG/PNG/WebP 的对象键、SHA-256、字节数和 MIME 写入 `ops/assets/gallery-manifest.json`；GIF 明确排除。沿用 Gallery 的 `discoverGallery()`，支持 `GALLERY_DIR`。这是本地清单，生成过程不上传或移动原件。命令安全边界见 [update-system.md](update-system.md)。
+
+## 首页图库展示图
+
+香港源站 nginx 日志在 2026-10-18 18:50 至 2026-10-19 18:50（香港时间）的滚动 24 小时内记录约 2.27 GB 出站，其中图片约 865 MB（38.2%）；首页图库原图约 686 MB，占图片流量约 79%。这是抵达源站的响应字节估算，不包括 Cloudflare 边缘直接命中的流量，也不代表网卡峰值利用率。首页构建把原图转换成最大边长 1536、WebP quality 88 的独立预览，原件继续留在香港持久资产库，不进入公开构建或 CDN。普通访客不能调用管理员原图 API，也不能从旧 `gallery-files/` 路径直接读取；服务端使用主站签名 SSO 和站长账户复核授权原图请求。生成器输出到 `.releases/.work/gallery-previews/`，不修改源图。CDN 模式下发布前仍需单独上传 `gallery-previews/` 对象，并核对对象数量与总字节；不得把仅有 8 张对象的 Pilot 当作整库已同步。

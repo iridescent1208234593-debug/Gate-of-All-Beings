@@ -30,7 +30,7 @@ $env:GALLERY_DIR = 'E:/another/gallery'
 npm run dev
 ```
 
-JPG, JPEG, PNG and WebP are discovered recursively and naturally sorted. Development serves originals directly and reloads on changes. Builds copy them automatically to `dist/gallery-files`; deploy the entire `dist` folder. Originals are never renamed or modified.
+JPG, JPEG, PNG and WebP are discovered recursively and naturally sorted. The homepage build generates separate WebP previews (maximum dimension 1536, quality 88) under `.releases/.work/gallery-previews` using an `ffmpeg` build with `libwebp`; it never overwrites source images. Public builds and CDN URLs contain previews only. Original files stay in the persistent `asset-library/homepage-gallery` store and are served by `/api/gallery/original` only after the main site's server-side owner check. Image taps/clicks like; double-clicks/double-taps express love. `gallery-interactions.mjs` shares the fan gallery's reaction effects and the same backend action path for image and nearby buttons. The small interaction dock uses the projected image bounds to stay outside its left/right edge, or moves below/above when narrow; per-account like+love interaction count gradually wakes its visuals and unlocks one 25-character comment at 66 confirmed actions. Other comments are shown as up to three hover/tap fragments at a time. When `VITE_ASSET_BASE_URL` is set, preview objects must be uploaded separately before publishing; originals must never be copied to the public CDN.
 
 `npm test` runs discovery, sorting, encoding, palette mapping and alpha regression checks. Press **D** for runtime palette diagnostics; `?inspect` additionally exposes `window.galleryDebug` for console inspection.
 

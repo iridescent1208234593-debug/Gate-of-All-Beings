@@ -19,7 +19,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src",
-    "test": "node tests/gallery.mjs",
+    "test": "node tests/gallery.mjs && node tests/gestures.mjs && node tests/placement.mjs",
     "format": "prettier . --write",
     "format:check": "prettier . --check"
   },

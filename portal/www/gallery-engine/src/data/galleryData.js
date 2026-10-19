@@ -5,7 +5,7 @@ import { fallbackMood } from './palette.js'
 const positions = [-0.9, 0.8, -0.7, 1, -0.7]
 export const galleryPlaneData = files.map((file, index) => ({
   ...file,
-  textureSrc: file.url,
+  textureSrc: file.previewUrl || file.url,
   position: { x: positions[index % positions.length], y: 0 },
   fallbackColor: fallbackMood.accent,
   accentColor: fallbackMood.accent,

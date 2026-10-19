@@ -15,6 +15,9 @@ import time
 import urllib.error
 import urllib.request
 import urllib.parse
+import mimetypes
+import sqlite3
+from pathlib import Path
 from urllib.parse import urlparse
 
 PORT = 8088
@@ -25,6 +28,7 @@ import hx_sso
 from base_static import BaseStaticHandler
 # 管理员：完整 (kind, uid) 站长账户 + 账户库状态复核，见 server/site_admin.py
 from site_admin import is_site_owner
+import gallery_interactions
 
 # 允许发起写操作的来源主机（域名后缀命中 .iridescently.xyz 亦放行）
 ALLOWED_HOSTS = {"iridescently.xyz", "localhost", "127.0.0.1"}
@@ -166,7 +170,10 @@ class Handler(BaseStaticHandler):
         return super().translate_path(path)
 
     def _is_api_path(self):
-        return self.path.split("?")[0] in ("/api/sso-user", "/api/site-status")
+        return self.path.split("?")[0] in (
+            "/api/sso-user", "/api/site-status", "/api/gallery/state",
+            "/api/gallery/action", "/api/gallery/comment", "/api/gallery/comments", "/api/gallery/original",
+        )
 
     # ---- 通用 JSON 响应 ----
     def _json(self, code, obj):
@@ -213,13 +220,53 @@ class Handler(BaseStaticHandler):
         return False
 
     def do_HEAD(self):
-        if not self._legacy_redirect():
-            super().do_HEAD()
+        if self._legacy_redirect():
+            return
+        path = urllib.parse.unquote(urllib.parse.urlsplit(self.path).path)
+        if path.startswith("/assets/homepage/gallery-files/"):
+            self.send_error(404)
+            return
+        if path == "/api/gallery/original":
+            self._send_gallery_original(head=True)
+            return
+        super().do_HEAD()
 
     def do_GET(self):
         if self._legacy_redirect():
             return
         path = self.path.split("?")[0]
+        if path == "/api/gallery/state":
+            image = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query).get("image", [""])[0]
+            if gallery_interactions.find_original(self._gallery_root(), RUNTIME_DIR, image) is None:
+                self._json(404, {"error": "图片不存在"})
+                return
+            with gallery_interactions.session(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[2])) as db:
+                self._json(200, gallery_interactions.snapshot(db, image, hx_sso.read_cookie(self.headers)))
+            return
+        if path == "/api/gallery/comments":
+            query = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
+            image = query.get("image", [""])[0]
+            if gallery_interactions.find_original(self._gallery_root(), RUNTIME_DIR, image) is None:
+                self._json(404, {"error": "图片不存在"})
+                return
+            try:
+                offset = int(query.get("offset", ["0"])[0])
+                if not 0 <= offset <= 100000:
+                    raise ValueError
+            except ValueError:
+                self._json(400, {"error": "评论位置无效"})
+                return
+            with gallery_interactions.session(self._gallery_root()) as db:
+                self._json(200, {"comments": gallery_interactions.comments_page(db, image, offset),
+                                 "total": gallery_interactions.comment_count(db, image)})
+            return
+        if path == "/api/gallery/original":
+            self._send_gallery_original()
+            return
+        decoded_path = urllib.parse.unquote(urllib.parse.urlsplit(self.path).path)
+        if decoded_path.startswith("/assets/homepage/gallery-files/"):
+            self.send_error(404)
+            return
         if path == "/api/sso-user":
             u = hx_sso.read_cookie(self.headers)
             if u:
@@ -236,6 +283,9 @@ class Handler(BaseStaticHandler):
 
     def do_POST(self):
         path = self.path.split("?")[0]
+        if path in ("/api/gallery/action", "/api/gallery/comment"):
+            self._post_gallery_interaction(path)
+            return
         if path not in EDIT_TARGETS:
             self._json(404, {"error": "接口不存在"})
             return
@@ -276,6 +326,116 @@ class Handler(BaseStaticHandler):
             self._json(500, {"error": "写入失败：%s" % e})
             return
         self._json(200, {"ok": True, "file": name, "count": count})
+
+    def _gallery_root(self):
+        return Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[2]))
+
+    def _send_gallery_original(self, head=False):
+        fetch_site = (self.headers.get("Sec-Fetch-Site") or "").lower()
+        origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
+        origin_host = (urlparse(origin).hostname or "").lower() if origin else ""
+        if fetch_site == "cross-site" or (origin_host and origin_host not in ALLOWED_HOSTS and not origin_host.endswith(".iridescently.xyz")):
+            if head:
+                self.send_response(403)
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+            else:
+                self._json(403, {"error": "原图请求来源不被允许"})
+            return
+        user = hx_sso.read_cookie(self.headers)
+        if not self._is_admin(user):
+            if head:
+                self.send_response(403)
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+            self._json(403, {"error": "原图仅限站长登录后查看"})
+            return
+        image = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query).get("image", [""])[0]
+        target = gallery_interactions.find_original(self._gallery_root(), RUNTIME_DIR, image)
+        if target is None:
+            if head:
+                self.send_response(404)
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
+            self._json(404, {"error": "原图暂不可用"})
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", mimetypes.guess_type(target.name)[0] or "application/octet-stream")
+        self.send_header("Content-Length", str(target.stat().st_size))
+        self.send_header("Cache-Control", "private, no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Access-Control-Allow-Origin", "https://iridescently.xyz")
+        self.send_header("Vary", "Origin")
+        self.end_headers()
+        if not head:
+            with target.open("rb") as stream:
+                shutil.copyfileobj(stream, self.wfile)
+
+    def _post_gallery_interaction(self, path):
+        origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
+        if origin:
+            host = (urlparse(origin).hostname or "").lower()
+            if host not in ALLOWED_HOSTS and not host.endswith(".iridescently.xyz"):
+                self._json(403, {"error": "来源不被允许"})
+                return
+        user = hx_sso.read_cookie(self.headers)
+        if not user or not user.get("uid") or not user.get("kind"):
+            self._json(401, {"error": "登录后即可参与互动"})
+            return
+        payload = self._read_json()
+        if payload is None:
+            return
+        image = payload.get("image") if isinstance(payload, dict) else None
+        if not gallery_interactions.valid_image_name(image):
+            self._json(400, {"error": "图片地址无效"})
+            return
+        root = self._gallery_root()
+        if gallery_interactions.find_original(root, RUNTIME_DIR, image) is None:
+            self._json(404, {"error": "图片不存在"})
+            return
+        identity = (str(user["kind"]), str(user["uid"]))
+        try:
+            with gallery_interactions.session(root) as db:
+                db.execute("BEGIN IMMEDIATE")
+                if path == "/api/gallery/action":
+                    action = payload.get("action")
+                    request_id = payload.get("request_id")
+                    if action not in ("like", "love") or not isinstance(request_id, str) or not request_id.strip() or len(request_id) > 80:
+                        self._json(400, {"error": "互动内容无效"})
+                        return
+                    db.execute("INSERT OR IGNORE INTO gallery_actions(kind,uid,image,action,request_id) VALUES(?,?,?,?,?)",
+                               (*identity, image, action, request_id))
+                else:
+                    comment = payload.get("comment")
+                    if not isinstance(comment, str):
+                        self._json(400, {"error": "评论内容无效"})
+                        return
+                    comment = comment.strip()
+                    if not comment or len(comment) > 25:
+                        self._json(400, {"error": "评论需为 1 至 25 个字"})
+                        return
+                    existing = db.execute("SELECT image FROM gallery_comments WHERE kind=? AND uid=?", identity).fetchone()
+                    if existing:
+                        self._json(409, {"error": "每位用户只能选择一张图片留言", "image": existing["image"]})
+                        return
+                    interactions = db.execute("SELECT COUNT(*) FROM gallery_actions WHERE kind=? AND uid=? AND image=?",
+                                              (*identity, image)).fetchone()[0]
+                    if interactions < 66:
+                        self._json(403, {"error": "同一张图片累计互动 66 次后才能留言"})
+                        return
+                    db.execute("INSERT INTO gallery_comments(kind,uid,name,image,comment) VALUES(?,?,?,?,?)",
+                               (*identity, str(user.get("name", "访客"))[:40], image, comment))
+                result = gallery_interactions.snapshot(db, image, user)
+            self._json(200, result)
+        except sqlite3.IntegrityError:
+            self._json(409, {"error": "留言已提交，每位用户只能留一条"})
+        except sqlite3.Error:
+            self._json(500, {"error": "图廊互动暂时不可用"})
 
     def log_message(self, fmt, *args):
         print(f"[www-8088] {args[0]}", flush=True)

@@ -127,6 +127,13 @@
     height: 26px;
   }
 
+  .gallery-capacity-note {
+    right: max(14px, env(safe-area-inset-right));
+    bottom: max(67px, calc(env(safe-area-inset-bottom) + 60px));
+    max-width: min(300px, calc(100vw - 28px));
+    font-size: 9px;
+  }
+
   .gallery-controls__hint {
     min-width: 82px;
     font-size: 9px;

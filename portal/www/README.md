@@ -2,7 +2,7 @@
 
 主域 `/` 由 `portal/www/index.html` 提供。页面结构源文件是 `homepage.html`；首页构建只生成 `.releases/candidate/homepage/index.html` 及 `assets/homepage/` 候选资源。检查后执行 `npm run publish:homepage` 才更新当前目录中的正式 `index.html` 与 `assets/homepage/`。入口会按脚本与样式内容附加版本号，更新后不会继续命中旧缓存。候选与生产版本记录见 [发布流程](../../docs/release-workflow.md)。
 
-首页直接接入已完成的 Atmospheric Gallery 源码与 `assets/罗小黑战记数据库/罗小黑节气贺图（gallery素材）`。图库插件递归发现图片并生成清单；生产构建会校验所有发布图片与图库源文件 SHA-256 一致。首页构建不修改 Gallery 项目。
+首页直接接入已完成的 Atmospheric Gallery 源码与 `assets/罗小黑战记数据库/罗小黑节气贺图（gallery素材）`。图库插件递归发现图片并生成清单；生产构建只放入 WebP 预览，原图仍由持久资产库保存，不进入公开构建。首页构建不修改 Gallery 项目。
 
 从项目根目录运行：
 
@@ -13,7 +13,7 @@ npm run build:modules
 npm run publish:homepage # 检查首页候选后显式发布
 ```
 
-开发预览地址：`http://127.0.0.1:5173/assets/homepage/homepage.html`。
+开发预览地址：`http://127.0.0.1:5173/assets/homepage/homepage.html`。图廊互动 API 由 Vite 转发到本机主站服务；需要同时运行 `python -X utf8 portal/www/server.py`（8088）。互动和管理员原图使用现有签名 SSO，未登录的 localhost 预览只显示访客态；可用 `python -m unittest server.test_gallery_interactions` 验证完整权限、66 次解锁和并发限制。
 `build:modules` 会在构建模块时一并生成首页候选；显式 `publish:modules` 才将模块与首页一起发布。若 Gallery 项目的依赖目录尚未安装，先运行：
 
 ```powershell
@@ -27,6 +27,7 @@ npm ci --prefix "portal/www/gallery-engine"
 - 首页标题、说明文字、图库状态：`homepage.html`。站点导航不在本目录维护：首页与 Connections 都只引入 `/shared/shared-ui/site-nav.js`（首页用 `data-variant="overlay"` 叠在图库上），条目、样式与账户见 `shared/shared-ui/README.md`。`styles/chrome.css` 里旧 `.site-chrome` 规则已无对应元素，待下一次样式清理移除。
 - 站点标志：像素直角坐标系品牌标，源文件 `shared/shared-ui/brand/iridescently-mark.svg`；`assets/iridescently-mark.png` 是供旧页面与众生之门开场角标使用的 PNG 副本。站名字样在桌面悬停或键盘聚焦时随机切换七种颜文字，手机点按可切换、再次点按还原：`scripts/brand-interaction.js` 与 `styles/chrome.css`（Connections 页使用 `styles/connections.css`）。
 - Gallery 启动、桌面画面居中、节气图标题、单张步进、键盘控制、autoplay、启动反馈和资源生命周期：`scripts/gallery.js`。生产与开发默认使用本地图库；只有显式设置 `VITE_ASSET_BASE_URL` 才覆盖为 CDN 根地址，不把已有 Pilot 当作整库上线。自动播放默认关闭，默认约每 4.5 秒一张；自定义设置中的速度滑块可调 1–10 秒，右侧实时显示当前“X 秒/张”，并沿用 Appearance 偏好存储。开启后立即开始浏览，播放间隔包含图片移动时间，到达两端会折返。左右按钮短按移动一张，长按约 250 ms 后以约 380 ms 的节奏连续浏览，松开即停止且不补发单击；手动滚动和导航会延后下一轮自动播放。系统减少动态效果时不会自动启动，用户可明确点按开启；运行中切换到减少动态效果会暂停。新用户与“恢复默认”的过渡、停留分别设为 0 和 100；已有个人偏好继续优先。
+- 首页图库默认加载构建生成的 WebP 预览（最长边 1536、质量 88）；原图留在持久资产库，不进入公开构建或 CDN。只有主站站长通过签名 SSO 登录后，服务端 `/api/gallery/original` 才允许查看；直连旧 `gallery-files` 路径和 Vite 开发服务的原图源文件路径也会被拦截。原图入口只在底部容量说明旁显示给管理员。图片单击点赞、双击喜欢，和图片旁的两个按钮使用同一提交函数；动画直接调用会馆 `reactions-fx.js` 的点赞/喜欢反馈，并收敛到当前图廊的低干扰亮度。`scripts/gallery-interactions.mjs` 负责互动状态和评论碎片，`scripts/gallery-placement.mjs` 根据图片投影选择左、右或上下安全位置；图廊引擎、移动、切图和取色逻辑仍在 `scripts/gallery.js` 与 gallery-engine 中。互动绑定登录账户并写入 `data/homepage-gallery.sqlite3`；同一图片累计 66 次有效点赞或喜欢后，每位账户可在全图廊一张图片旁留一条不超过 25 字的评论。其他人的评论默认只留下微弱碎片，靠近或轻触后每次浮现最多 3 条，点击“还有几句”轮换更多。底部容量说明的“不再显示”保存在本机浏览器；管理员关闭说明后仍可使用同位置的轻量原图入口。修改预览参数或资源发布方式时，需同步维护 `gallery-engine/README.md` 与 `docs/assets.md`。
 - 同页音乐控制带与三首本地曲目：`scripts/music-player.js`、`assets/music/`。音符入口位于画廊上方；页面载入时优先尝试播放《早安喵》，浏览器禁止有声自动播放时会在首次用户操作后重试。单曲结束后停留，不自动切歌；用户仍可在控制带手动切歌、暂停/播放和拖动进度，操作不会触发 Gallery 手势。《不再流浪》的源文件实际是 AAC/M4A 容器，因此项目内以 `.m4a` 保存。第三首当前附件无法按标准 FLAC 解码，浏览器会显示格式错误；提供普通 FLAC/MP3 文件后可直接替换。
 - 可调观感控制带及偏好：`scripts/appearance-controls.js`。右侧设置按钮横向展开六项滑块，默认收起且不占布局空间。六项观感与 autoplay 开关通过 `shared/shared-session/save.js` 保存在 `localStorage['iridescently.save.v1']`，使用 `homepage.appearance.v1:account:<kind>:<uid>` 区分账户，匿名设置单独使用 `homepage.appearance.v1:anonymous`。旧首页 v1/v2 本地值只在首次账户没有 Appearance 值时迁移一次；已有账户值优先。当前 shared-session save 没有云端通用偏好接口，因此按账户分区只在本浏览器持久化，不提供跨设备同步。连续拖动即时预览，滑块松开后本地保存；系统减少动态效果仍优先于账户中的微动值。
 - 站点状态点：全局栏在主域上读取 `/api/site-status`（45 秒缓存的可达性由 `server.py` 探测），在西木会馆、众生之门旁显示绿/红点；`scripts/site-navigation.js` 仍保留给页面内旧状态点使用。心理档案云按“未并入本站”显示红点，即使直达域名当前可访问。

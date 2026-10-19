@@ -47,9 +47,13 @@ export default ({ command }) => ({
     ...(command === "serve" ? [homepageDevRoute] : []),
   ],
   resolve: {
-    alias: {
-      "@": path.join(galleryRoot, "src"),
-    },
+    alias: [
+      {
+        find: /^three$/,
+        replacement: path.join(galleryRoot, "node_modules/three/build/three.module.js"),
+      },
+      { find: "@", replacement: path.join(galleryRoot, "src") },
+    ],
   },
   build: {
     outDir: path.join(projectRoot, ".releases/.work/homepage"),
@@ -72,5 +76,17 @@ export default ({ command }) => ({
     host: "127.0.0.1",
     port: 5173,
     strictPort: true,
+    fs: {
+      deny: [
+        ".env", ".env.*", "*.{crt,pem}", "**/.git/**",
+        "**/罗小黑节气贺图（gallery素材）/**",
+        "**/asset-library/homepage-gallery/**",
+        "**/gallery-files/**",
+      ],
+    },
+    proxy: {
+      "/api/gallery": "http://127.0.0.1:8088",
+      "/api/sso-user": "http://127.0.0.1:8088",
+    },
   },
 });

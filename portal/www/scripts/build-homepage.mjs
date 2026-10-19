@@ -1,5 +1,4 @@
 import { createHash } from "node:crypto";
-import { createReadStream } from "node:fs";
 import {
   cpSync,
   existsSync,
@@ -7,7 +6,6 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
-  statSync,
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
@@ -40,6 +38,7 @@ const viteNodeModule = path.join(
   "node_modules/vite/dist/node/index.js",
 );
 const galleryPluginModule = path.join(galleryRoot, "gallery-plugin.js");
+const previewDir = path.join(releaseRoot, ".work", "gallery-previews");
 const [{ loadEnv }, { resolveGalleryAssetBase, discoverGallery }] =
   await Promise.all([
     import(pathToFileURL(viteNodeModule)),
@@ -64,16 +63,6 @@ function ensureInside(parent, candidate) {
   }
 }
 
-function hashFile(file) {
-  return new Promise((resolve, reject) => {
-    const hash = createHash("sha256");
-    const stream = createReadStream(file);
-    stream.on("data", (chunk) => hash.update(chunk));
-    stream.on("error", reject);
-    stream.on("end", () => resolve(hash.digest("hex")));
-  });
-}
-
 function runVite(args) {
   if (!existsSync(viteBin)) {
     throw new Error(
@@ -85,12 +74,20 @@ function runVite(args) {
     [viteBin, ...args, "--config", viteConfig],
     {
       cwd: homepageRoot,
+      env: { ...process.env, GALLERY_PREVIEW_DIR: previewDir },
       stdio: "inherit",
     },
   );
 }
 
 if (process.argv.includes("--dev")) {
+  const previews = spawnSync(
+    process.execPath,
+    [path.join(projectRoot, "ops/build-gallery-previews.mjs")],
+    { cwd: projectRoot, stdio: "inherit", env: { ...process.env, GALLERY_PREVIEW_DIR: previewDir } },
+  );
+  if (previews.error) throw previews.error;
+  if (previews.status !== 0) process.exit(previews.status ?? 1);
   const dev = runVite(["--host", "127.0.0.1"]);
   if (dev.error) throw dev.error;
   process.exit(dev.status ?? 1);
@@ -100,6 +97,14 @@ ensureInside(releaseRoot, stageDir);
 ensureInside(candidateRoot, homepageCandidate);
 ensureInside(homepageCandidate, publicDir);
 rmSync(path.join(candidateRoot, "homepage.json"), { force: true });
+
+const previews = spawnSync(
+  process.execPath,
+  [path.join(projectRoot, "ops/build-gallery-previews.mjs")],
+  { cwd: projectRoot, stdio: "inherit", env: { ...process.env, GALLERY_PREVIEW_DIR: previewDir } },
+);
+if (previews.error) throw previews.error;
+if (previews.status !== 0) process.exit(previews.status ?? 1);
 
 const build = runVite(["build"]);
 if (build.error) throw build.error;
@@ -133,35 +138,6 @@ const versionedHomepage = [
   builtHomepage,
 );
 
-const stagedGalleryDir = path.join(stageDir, "gallery-files");
-const stagedGalleryFiles = [];
-if (!galleryUsesCdn) {
-  for (const file of manifest) {
-    const source = path.resolve(galleryDir, ...file.name.split("/"));
-    const staged = path.resolve(stagedGalleryDir, ...file.name.split("/"));
-    ensureInside(galleryDir, source);
-    ensureInside(stagedGalleryDir, staged);
-    if (!existsSync(staged))
-      throw new Error(`Gallery build output is missing ${file.name}`);
-    if (statSync(source).size !== statSync(staged).size) {
-      throw new Error(`Gallery build size changed for ${file.name}`);
-    }
-    stagedGalleryFiles.push({ source, staged, name: file.name });
-  }
-
-  if (stagedGalleryFiles.length !== manifest.length) {
-    throw new Error(
-      `Expected ${manifest.length} Gallery files; staged ${stagedGalleryFiles.length}`,
-    );
-  }
-
-  for (const file of stagedGalleryFiles) {
-    if ((await hashFile(file.source)) !== (await hashFile(file.staged))) {
-      throw new Error(`Gallery build SHA-256 mismatch: ${file.name}`);
-    }
-  }
-}
-
 rmSync(homepageCandidate, { recursive: true, force: true });
 mkdirSync(publicDir, { recursive: true });
 for (const entry of readdirSync(stageDir, { withFileTypes: true })) {
@@ -175,7 +151,7 @@ await recordCandidate("homepage");
 
 console.log(
   galleryUsesCdn
-    ? `[homepage] Candidate: ${manifest.length} Gallery CDN references; source images were not copied.`
-    : `[homepage] Candidate: ${manifest.length} Gallery assets with matching SHA-256 hashes.`,
+    ? `[homepage] Candidate: ${manifest.length} Gallery preview CDN references; originals stay in the persistent server asset library behind the authenticated API. Upload gallery-previews before publishing.`
+    : `[homepage] Candidate: ${manifest.length} locally served WebP previews; original images stay in the persistent server asset library behind the authenticated API.`,
 );
 console.log(`[homepage] ${homepageCandidate} — run npm run publish:homepage only after review.`);

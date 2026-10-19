@@ -2,6 +2,7 @@ import "../gallery-engine/src/css/base.css";
 import "../gallery-engine/src/css/canvas.css";
 import { Engine } from "../gallery-engine/src/Experience/Engine.js";
 import { createAppearanceControls } from "./appearance-controls.js";
+import { createGalleryInteractions } from "./gallery-interactions.mjs";
 
 const loading = document.querySelector("#gallery-status");
 const loadingMessage = loading.querySelector(".gallery-loading__message");
@@ -35,6 +36,8 @@ const showError = (message) => {
 };
 
 retry.addEventListener("click", () => window.location.reload());
+
+const capacityNote = document.querySelector(".gallery-capacity-note");
 
 let engine;
 
@@ -84,6 +87,14 @@ try {
     const blend = gallery.getPlaneBlendData(engine.camera.position.z);
     if (!blend) return -1;
     return blend.blend >= 0.5 ? blend.nextPlaneIndex : blend.currentPlaneIndex;
+  };
+  const interactions = createGalleryInteractions({
+    engine, gallery, canvas, getCurrentIndex, capacityNote,
+  });
+  const updateExperience = engine.experience.update.bind(engine.experience);
+  engine.experience.update = (...args) => {
+    updateExperience(...args);
+    interactions.update();
   };
   let hasImage = false;
   let pendingScroll = 0;
@@ -529,7 +540,7 @@ try {
     if (
       event.target instanceof Element &&
       event.target.closest(
-        "#qc-nav, .gallery-customizer, .gallery-settings, .gallery-music",
+        "#qc-nav, .gallery-customizer, .gallery-settings, .gallery-music, .gallery-interaction-panel",
       )
     ) {
       event.stopImmediatePropagation();
@@ -592,6 +603,7 @@ try {
   window.addEventListener("pagehide", (event) => {
     if (event.persisted) return;
     appearance.dispose();
+    interactions.dispose();
     clearAutoplay();
     window.clearTimeout(scrollInputTimer);
     window.clearTimeout(releaseDetentTimer);
