@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import '@lxh/shared-ui/site-nav.js';
 import { EntryGate } from './EntryGate';
+import { AccountLinkReminder } from './AccountLinkReminder';
+import { needsAccountAfterOnboarding } from './accountReminder';
 import { LoadBoundary } from '../components/LoadBoundary';
 import { EMPTY_IDENTITY, PlayerProfileProvider, accountScope, identityComplete, usePlayerProfile, type GateIdentity } from '../game/PlayerProfile';
 const GameApp = lazy(() => import('../game/GameApp'));
@@ -25,8 +27,10 @@ function GateFlow() {
   const [leaving, setLeaving] = useState(false);
   // An extra identity made through the full opening: gate → onboarding, then back to the hall.
   const [creatingNew, setCreatingNew] = useState(false);
+  const [accountReminder, setAccountReminder] = useState(false);
   const timer = useRef<number | null>(null);
   const profile = usePlayerProfile();
+  useEffect(() => { if (profile.account.logged_in) setAccountReminder(false); }, [profile.account.logged_in]);
   useEffect(() => () => { if (timer.current !== null) window.clearTimeout(timer.current); }, []);
   // Fetch the app while the intro plays, so entering never stops on a loading page.
   useEffect(() => {
@@ -54,8 +58,13 @@ function GateFlow() {
     setCreatingNew(true);
     returnToGate();
   }
+  async function finishIdentity(identity: GateIdentity, image?: Blob | null) {
+    await profile.saveIdentity(identity, image);
+    // Completing a guest profile alone does not create a Huiguan account.
+    setAccountReminder(await needsAccountAfterOnboarding(profile.account.logged_in));
+  }
   async function finishNew(identity: GateIdentity, image?: Blob | null) {
-    await profile.saveIdentity({ ...identity, id: '' }, image);
+    await finishIdentity({ ...identity, id: '' }, image);
     setCreatingNew(false);
   }
   return <>
@@ -67,8 +76,9 @@ function GateFlow() {
           onComplete={finishNew} onCancel={() => setCreatingNew(false)} />
       : identityComplete(profile.identity) ? <GameApp onReturnGate={returnToGate} onCreateIdentity={createWithOpening} /> :
         <PlayerOnboarding key={accountScope(profile.account)} initialIdentity={profile.identity}
-          onComplete={profile.saveIdentity} onCancel={returnToGate} />}
+          onComplete={finishIdentity} onCancel={returnToGate} />}
     </Suspense></LoadBoundary>}
+    {accountReminder && !profile.account.logged_in && <AccountLinkReminder onContinue={() => setAccountReminder(false)} />}
     {entered && profile.resolved && profile.error && <div className="gate-profile-status" role="status">{profile.error}<button type="button" onClick={() => void profile.refresh()}>重试</button></div>}
     {gateVisible && <EntryGate leaving={leaving} onEnter={enter} onSkip={enter} />}
   </>;

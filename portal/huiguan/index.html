@@ -371,25 +371,25 @@
   .toast.error { border-color: var(--error, #b3543f); color: var(--error, #b3543f); }
   .toast a { color: var(--gold, #d4a840); }
 
-  /* 未登录注册提醒 */
-  .reg-notice {
-    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    margin: 0 0 16px; padding: 10px 14px;
-    border: 1px solid rgba(212,168,64,0.5); border-radius: 8px;
-    background: rgba(212,168,64,0.08); color: var(--text); font-size: 13px;
-  }
-  .reg-notice[hidden] { display: none; }
-  .reg-notice strong { color: var(--gold, #d4a840); }
-  .reg-notice .reg-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
-  .reg-notice .btn-reg {
-    font-family: inherit; font-size: 12px; cursor: pointer;
-    background: var(--gold, #d4a840); border: 1px solid var(--gold, #d4a840);
-    color: #fff; border-radius: 4px; padding: 4px 12px;
-  }
-  .reg-notice .btn-reg:hover { filter: brightness(1.08); }
-  .reg-notice .reg-close {
-    background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 16px; line-height: 1;
-  }
+  /* 游客数据提醒：每次未登录进入都展示，不写入浏览器持久化状态。 */
+  .guest-save-mask { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; padding: 20px; background: rgba(31,43,35,.48); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
+  .guest-save-mask[hidden] { display: none; }
+  .guest-save-dialog { position: relative; width: min(440px, 100%); max-height: min(680px, calc(100dvh - 40px)); overflow-y: auto; padding: clamp(24px, 5vw, 34px); border: 1px solid rgba(255,255,255,.58); border-radius: 18px; background: rgba(249,246,235,.92); -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px); box-shadow: 0 18px 60px rgba(25,36,27,.22), inset 0 1px rgba(255,255,255,.7); color: #2f4235; }
+  .guest-save-dialog h2 { margin: 0 0 14px; color: #2f4235; font-size: clamp(19px, 4vw, 23px); font-weight: 500; letter-spacing: .09em; }
+  .guest-save-dialog p { margin: 0 0 12px; font-size: 14px; line-height: 1.85; }
+  .guest-save-dialog .guest-save-kicker { margin-bottom: 8px; color: var(--gold, #9a7836); font-size: 11px; letter-spacing: .2em; }
+  .guest-save-dialog .guest-save-detail { color: #5a6c60; font-size: 12px; }
+  .guest-save-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 21px; }
+  .guest-save-actions button { min-height: 43px; padding: 9px 16px; border: 1px solid rgba(70,93,72,.28); border-radius: 999px; background: rgba(255,255,255,.2); color: #2f4235; font: inherit; font-size: 13px; cursor: pointer; transition: background .2s, border-color .2s, transform .2s; }
+  .guest-save-actions button:hover { background: rgba(255,255,255,.48); border-color: var(--accent); transform: translateY(-1px); }
+  .guest-save-actions button:focus-visible, .guest-save-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .guest-save-actions .guest-save-primary { color: #2f4235; border-color: rgba(158,119,49,.42); background: rgba(210,178,106,.28); }
+  .guest-save-close { position: absolute; top: 12px; right: 14px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: #5a6c60; font-size: 22px; cursor: pointer; }
+  .guest-save-confirm { padding-left: 13px; border-left: 2px solid rgba(169,116,55,.55); }
+  .guest-save-dialog[data-step="intro"] .guest-save-confirm, .guest-save-dialog[data-step="intro"] .guest-save-confirm-action { display: none; }
+  .guest-save-dialog[data-step="confirm"] .guest-save-intro-action { display: none; }
+  @media (max-width: 480px) { .guest-save-actions { flex-direction: column; } .guest-save-actions button { width: 100%; } }
+  @media (prefers-reduced-motion: reduce) { .guest-save-actions button { transition: none; } }
 
   /* 颜色选择弹窗 */
   .modal-overlay {
@@ -581,7 +581,7 @@
 
   /* 登录/注册弹窗 */
   .auth-mask {
-    position: fixed; inset: 0; z-index: 10000;
+    position: fixed; inset: 0; z-index: 10002;
     background: rgba(58,74,62,0.35); backdrop-filter: blur(2px);
     display: flex; align-items: center; justify-content: center;
   }
@@ -846,6 +846,23 @@
 })();
 </script>
 
+<!-- 未登录数据提醒：关闭须先阅读风险、再确认继续。 -->
+<div class="guest-save-mask" id="guestSaveMask" hidden>
+  <section class="guest-save-dialog" id="guestSaveDialog" data-step="intro" role="dialog" aria-modal="true" aria-labelledby="guestSaveTitle" aria-describedby="guestSaveDescription">
+    <button type="button" class="guest-save-close" onclick="continueGuestReminder()" aria-label="关闭账号提醒">×</button>
+    <p class="guest-save-kicker">西木会馆 · 数据保存</p>
+    <h2 id="guestSaveTitle">先给你的创作留个归处</h2>
+    <p id="guestSaveDescription">不登录也能继续，但数据可能只留在当前浏览器。想长期保存、跨设备使用，或减少丢档风险，请注册或登录会馆账号。</p>
+    <p class="guest-save-detail">登录后，提交到服务器的角色与设定才能更可靠地关联到你的账号。</p>
+    <p class="guest-save-confirm" id="guestSaveConfirm" aria-live="polite">未登录的数据主要保存在当前浏览器，本机缓存被清除、换设备或浏览器后可能无法找回。确认后仍可作为游客继续。</p>
+    <div class="guest-save-actions">
+      <button type="button" class="guest-save-primary" id="guestSaveLogin" onclick="openAuthModal('登录账号后再保存，能减少丢档风险。')">注册 / 登录并永久保存</button>
+      <button type="button" class="guest-save-intro-action" id="guestSaveContinue" onclick="continueGuestReminder()">暂不登录，继续使用</button>
+      <button type="button" class="guest-save-confirm-action" id="guestSaveConfirmAction" onclick="continueGuestReminder()">确认以游客身份继续</button>
+    </div>
+  </section>
+</div>
+
 <!-- 登录/注册弹窗 -->
 <div class="auth-mask" id="authMask" hidden onclick="if(event.target===this)closeAuthModal()">
   <div class="auth-modal">
@@ -954,13 +971,6 @@
   <form id="charForm" novalidate>
     <div class="edit-tip" id="editTip" style="display:none;margin-bottom:14px;padding:10px 14px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-glow);color:var(--accent);font-size:13px;"></div>
 
-    <div class="reg-notice" id="regNotice" hidden>
-      <span>💡 还没账户？<strong>注册/登录</strong>后提交的人设才会收录进会馆名册并永久保存，否则只存在你本机浏览器。</span>
-      <span class="reg-actions">
-        <button type="button" class="btn-reg" onclick="openAuthModal()">登录 / 注册</button>
-        <button type="button" class="reg-close" onclick="dismissRegNotice()" aria-label="关闭提醒">×</button>
-      </span>
-    </div>
     <div class="reg-notice" id="exemptNotice" hidden style="border-color:rgba(90,158,143,.5);background:rgba(90,158,143,.08);">
       <span id="exemptNoticeText"></span>
     </div>
@@ -1355,16 +1365,27 @@ const STORAGE_KEY = 'luoxiaohei_characters';
 // ========== 登录与数据同步 ==========
 var currentUser = null;
 let pendingSave = null;      // 未登录时暂存待提交的人设，登录后自动补交
-let regDismissed = false;    // 本次会话是否已关闭注册提醒
-
-function dismissRegNotice() {
-  regDismissed = true;
-  const rn = document.getElementById('regNotice');
-  if (rn) rn.hidden = true;
+let guestReminderDismissed = false; // 仅当前页面，刷新后必须重新提醒
+function showGuestReminder() {
+  if (currentUser || guestReminderDismissed) return;
+  const mask = document.getElementById('guestSaveMask');
+  if (!mask || !mask.hidden) return;
+  document.getElementById('guestSaveDialog').dataset.step = 'intro';
+  mask.hidden = false;
+  document.getElementById('guestSaveLogin').focus();
 }
-function updateRegNotice() {
-  const rn = document.getElementById('regNotice');
-  if (rn) rn.hidden = !!currentUser || regDismissed;
+function hideGuestReminder() {
+  document.getElementById('guestSaveMask').hidden = true;
+}
+function continueGuestReminder() {
+  const dialog = document.getElementById('guestSaveDialog');
+  if (dialog.dataset.step !== 'confirm') {
+    dialog.dataset.step = 'confirm';
+    document.getElementById('guestSaveConfirmAction').focus();
+    return;
+  }
+  guestReminderDismissed = true;
+  hideGuestReminder();
 }
 
 // 长老/编辑登录后进群确认：填群昵称才永久不提醒
@@ -1431,6 +1452,8 @@ async function checkLogin() {
     const u = await r.json();
     if (u.logged_in) {
       currentUser = u;
+      guestReminderDismissed = false;
+      hideGuestReminder();
       renderAuthBar(u);
       await syncFromServer();
       fixBrokenShowcase();
@@ -1439,6 +1462,7 @@ async function checkLogin() {
     } else {
       currentUser = null;
       renderAuthBar(null);
+      showGuestReminder();
     }
   } catch(e) {
     currentUser = null;
@@ -1496,7 +1520,6 @@ function renderAuthBar(user) {
   }
   renderRoleLine();
   checkRoyalLimit();
-  updateRegNotice();
   updateBreakBoxes();
   document.dispatchEvent(new CustomEvent('huiguan:auth-change', { detail: user }));
 }
@@ -1520,6 +1543,7 @@ async function renameUser() {
 
 // ---- 登录/注册弹窗（统一入口） ----
 function openAuthModal(notice) {
+  hideGuestReminder();
   const m = document.getElementById('authMsg');
   if (notice) { m.className = 'auth-msg ok'; m.textContent = notice; }
   else { m.className = 'auth-msg'; m.textContent = ''; }
@@ -1529,6 +1553,7 @@ function openAuthModal(notice) {
 }
 function closeAuthModal() {
   document.getElementById('authMask').hidden = true;
+  showGuestReminder();
 }
 async function submitAuth() {
   const username = document.getElementById('authUsername').value.trim();
@@ -1546,6 +1571,7 @@ async function submitAuth() {
     });
     const d = await r.json();
     if (d.ok) {
+      hideGuestReminder();
       msg.className = 'auth-msg ok';
       msg.textContent = d.registered ? '已自动注册并登录' : '登录成功';
       document.getElementById('authPassword').value = '';
@@ -1554,7 +1580,7 @@ async function submitAuth() {
         setTimeout(() => { location.href = window.__AUTH_NEXT; }, 400);
         return;
       }
-      setTimeout(async () => { closeAuthModal(); await checkLogin(); flushPending(); }, 500);
+      setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 300);
     } else {
       msg.textContent = d.error || '操作失败，请重试';
     }
@@ -3815,8 +3841,6 @@ function generateAndSave(data, colors) {
   } else {
     // 未登录：暂存并强制登录，登录后自动补交
     pendingSave = { data, html };
-    regDismissed = false;
-    updateRegNotice();
     showToast('success', '✔ 展示页已生成！登录 / 注册后即可收录进会馆名册。', 5000);
     openAuthModal('登录 / 注册后，你的人设将自动保存并绑定到你的账户。');
   }
@@ -4177,9 +4201,11 @@ loadUserSchemes();
 applyFormTheme(COLOR_SCHEMES[selectedColorIdx]);
 renderList();
 window.__HUIGUAN_OWN_AUTH = true;
-checkLogin();
+const initialLoginCheck = checkLogin();
 window.__AUTH_NEXT = new URLSearchParams(location.search).get('next') || '';
-if (new URLSearchParams(location.search).get('openauth')) setTimeout(() => openAuthModal('登录后即可申请编辑 / 登记人设'), 400);
+if (new URLSearchParams(location.search).get('openauth')) initialLoginCheck.then(() => {
+  if (!currentUser) openAuthModal('登录会馆账号后，保存的数据才能更可靠地关联到你。');
+});
 </script>
 
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"6fa5e24ac49f4de687c113b64d110992","r":1}' crossorigin="anonymous"></script>

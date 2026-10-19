@@ -63,8 +63,8 @@
     '#qc-nav .qc-status[data-state="up"]{background:#7fd38a}',
     '#qc-nav .qc-status[data-state="down"],#qc-nav .qc-status[data-state="unpublished"]{background:#e4645e}',
     '#qc-nav .qc-right{margin-left:auto;display:flex;align-items:center;gap:10px;min-width:0;white-space:nowrap}',
-    '#qc-nav .qc-slot{display:flex;align-items:center;gap:8px}',
-    '#qc-nav .qc-slot:empty{display:none}',
+    '#qc-nav .qc-nav-slot{display:flex;align-items:center;gap:8px}',
+    '#qc-nav .qc-nav-slot:empty{display:none}',
     '#qc-nav .auth-bar{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}',
     '#qc-nav .auth-bar>a,#qc-nav .auth-bar>button,#qc-nav .auth-bar>span{display:inline-flex;align-items:center;min-height:32px;white-space:nowrap}',
     '#qc-nav .auth-bar>a:first-child:last-child{padding:0 12px;border:1px solid var(--qc-edge);border-radius:999px;background:var(--qc-hover);color:var(--qc-mark)}',
@@ -146,7 +146,7 @@
     menu.appendChild(panel); links.appendChild(menu); nav.appendChild(links);
 
     var right = el('div', 'qc-right');
-    var slot = el('div', 'qc-slot'); right.appendChild(slot);
+    var slot = el('div', 'qc-nav-slot'); right.appendChild(slot);
     var auth = document.getElementById('authBar');
     if (!auth) { auth = el('div', 'auth-bar'); auth.id = 'authBar'; }
     else auth.classList.add('auth-bar');
