@@ -1,5 +1,6 @@
 import legacyCards from '../data/legacy-cards.json';
 import { HERO_CHARACTER_IDS, CHARACTER_AFFINITIES } from '@lxh/shared-types/world';
+import { identityById } from '@lxh/shared-data/identities.js';
 import { cardText } from './cardText';
 import { ecologyCard } from './ecologyCards';
 import {applyBalance, type CardOverrides} from './cardBalance';
@@ -10,6 +11,12 @@ export const HEROES: Record<HeroId, Character> = {
   wuxian: { id: 'wuxian', characterId:HERO_CHARACTER_IDS.wuxian, element:CHARACTER_AFFINITIES[HERO_CHARACTER_IDS.wuxian].element, abilitySystems:CHARACTER_AFFINITIES[HERO_CHARACTER_IDS.wuxian].systems, name: '无限', subtitle: '御灵 · 金', description: '凝金为刃，收放自如。以格挡稳住阵脚，积蓄力量，打出一击制胜的锋芒。', quote: '别急，慢慢来。', hp: 80, relic: '执行者的信物', relicText: '每场战斗开始获得 1 点力量。', starter: ['blade','blade','blade','guard','guard','guard','iron','focus','pierce','blade'] },
   fengxi: { id: 'fengxi', characterId:HERO_CHARACTER_IDS.fengxi, element:CHARACTER_AFFINITIES[HERO_CHARACTER_IDS.fengxi].element, abilitySystems:CHARACTER_AFFINITIES[HERO_CHARACTER_IDS.fengxi].systems, name: '风息', subtitle: '御灵 · 木', description: '让藤蔓生长，让森林回应。召唤木灵与展开领域，在持续的守护中积累优势。', quote: '这里，是我们的家。', hp: 76, relic: '故林的种子', relicText: '每场战斗胜利恢复 4 点生命。', starter: ['vine','vine','vine','guard','guard','guard','seed','grove','bind','vine'] },
 };
+for(const hero of Object.values(HEROES)){
+  const identity=identityById(hero.characterId);
+  if(!identity)throw new Error('同行者缺少共享角色记录：'+hero.characterId);
+  hero.characterId=identity.id;
+  hero.name=identity.name;
+}
 const cards: Card[] = [
   {id:'guard',name:'凝灵',owner:'all',cost:1,type:'技能',glyph:'守',text:'获得 6 点格挡。',effect:{block:6}},
   {id:'claw',name:'利爪',owner:'xiaohei',cost:1,type:'攻击',glyph:'爪',text:'造成 7 点伤害。',effect:{damage:7}},

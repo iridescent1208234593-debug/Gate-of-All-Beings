@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import '@lxh/shared-ui/site-nav.js';
 import { EntryGate } from './EntryGate';
+import { LoadBoundary } from '../components/LoadBoundary';
 import { EMPTY_IDENTITY, PlayerProfileProvider, accountScope, identityComplete, usePlayerProfile, type GateIdentity } from '../game/PlayerProfile';
 const GameApp = lazy(() => import('../game/GameApp'));
 const PlayerOnboarding = lazy(() => import('../onboarding/PlayerOnboarding').then(module => ({ default: module.PlayerOnboarding })));
@@ -58,7 +59,7 @@ function GateFlow() {
     setCreatingNew(false);
   }
   return <>
-    {entered && <Suspense fallback={<div className="qc-loading qc-loading--page" role="status">正在打开众生之门…</div>}>
+    {entered && <LoadBoundary page><Suspense fallback={<div className="qc-loading qc-loading--page" role="status">正在打开众生之门…</div>}>
       {profile.loading || (!profile.resolved && profile.error) ? <div className="qc-loading qc-loading--page" role={profile.error ? 'alert' : 'status'}>
         {profile.error || '正在读取玩家资料…'}
         {profile.error && <button type="button" onClick={() => void profile.refresh()}>重新读取</button>}
@@ -67,7 +68,7 @@ function GateFlow() {
       : identityComplete(profile.identity) ? <GameApp onReturnGate={returnToGate} onCreateIdentity={createWithOpening} /> :
         <PlayerOnboarding key={accountScope(profile.account)} initialIdentity={profile.identity}
           onComplete={profile.saveIdentity} onCancel={returnToGate} />}
-    </Suspense>}
+    </Suspense></LoadBoundary>}
     {entered && profile.resolved && profile.error && <div className="gate-profile-status" role="status">{profile.error}<button type="button" onClick={() => void profile.refresh()}>重试</button></div>}
     {gateVisible && <EntryGate leaving={leaving} onEnter={enter} onSkip={enter} />}
   </>;

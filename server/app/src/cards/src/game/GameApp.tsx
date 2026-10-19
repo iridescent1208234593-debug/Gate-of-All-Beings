@@ -23,14 +23,17 @@ import {FeatureGuide,FullGuide} from './FeatureGuide';
 import { PlayerIdentity } from './PlayerIdentity';
 import { usePlayerProfile } from './PlayerProfile';
 import { PlayerAvatar } from './PlayerAvatar';
+import { LoadBoundary } from '../components/LoadBoundary';
 const WorldGuide=lazy(()=>import('./WorldGuide').then(m=>({default:m.WorldGuide})));
 const EcosystemPanel=lazy(()=>import('./WorldGuide').then(m=>({default:m.EcosystemPanel})));
 const ManagementPanel=lazy(()=>import('./ManagementPanel'));
 const ModeHall=lazy(()=>import('./ModeHall'));
 const ShoreMode=lazy(()=>import('./ShoreMode'));
-type View = 'shore'|'management'|'home'|'adventure'|'hall'|'timeline'|'collection'|'world'|'ecosystem';
+const UnifiedJourney=lazy(()=>import('./UnifiedJourney').then(m=>({default:m.UnifiedJourney})));
+type View = 'shore'|'management'|'home'|'adventure'|'hall'|'timeline'|'collection'|'world'|'ecosystem'|'journey';
 const navs: {id:View;label:string;icon:typeof Home;hidden?:boolean}[]=[{id:'shore',label:'雾隐浅滩',icon:MapIcon,hidden:true},{id:'home',label:'门庭',icon:Home},{id:'adventure',label:'入世历练',icon:Swords},{id:'management',label:'灵境会馆',icon:Home},{id:'hall',label:'会馆日常',icon:Sprout},{id:'collection',label:'灵卡图鉴',icon:BookOpen},{id:'timeline',label:'旅途手札',icon:ScrollText},{id:'world',label:'万灵志',icon:BookOpen},{id:'ecosystem',label:'灵境生态',icon:Sprout}];
 const nodeIcons={battle:Swords,elite:Flame,event:Sparkles,rest:Moon,shop:ShoppingBag,boss:Gem};
+navs.push({id:'journey',label:'共同旅途',icon:BookOpen});
 function readView():View {const id=location.hash.slice(1);return navs.some(n=>n.id===id)?id as View:'home';}
 function Portrait({name,className=''}:{name:string;className?:string}) {const [failed,setFailed]=useState(false);return failed?<span className={`portrait-fallback ${className}`}>{name.slice(-1)}</span>:<img className={className} src={portrait(name)} alt={name} onError={()=>setFailed(true)}/>;}
 function CardTile({card,onClick,disabled=false,label,small=false}:{card:CardInstance;onClick?:()=>void;disabled?:boolean;label?:string;small?:boolean}) {const c=CARDS[card.card];const e=effectOf(card);const details=effectText(e);return <button className={`spirit-card ${small?'small':''} card-${c.owner}`} onClick={onClick} disabled={disabled} aria-label={label??`${c.name}${card.upgraded?'，已精进':''}，${details}`}><span className="card-top"><b>{c.cost}</b><span>{c.school?ABILITY_SYSTEMS[c.school]:c.type}{c.element?' · '+ELEMENTS[c.element]:''}</span></span><div className="card-art"><span>{c.glyph}</span><i/><i/></div><strong>{c.name}{card.upgraded&&<sup>＋</sup>}</strong><p>{card.upgraded?details:c.text}</p><span className="card-foot">{c.exhaust?'消耗 · 本场仅用一次':c.source|| (c.owner==='all'?'通用灵术':HEROES[c.owner].name)}</span>{label&&<em>{label}</em>}</button>;}
@@ -43,6 +46,7 @@ export default function GameApp({ onReturnGate, onCreateIdentity }: { onReturnGa
   const [durableSave,setDurableSave]=useState<SaveData|null>(null);
   const pendingSave=useRef(Promise.resolve());const revision=useRef(0);
   useEffect(()=>{let active=true;readSave().then(s=>{if(active){setSave(s);setDurableSave(s);setReady(true);}}).catch(()=>{if(active){setStorageOK(false);setSaveStatus('存档不可用 · 可导出备份');setReady(true);setError('本地存档无法读取，已进入临时游玩模式；原存档不会被覆盖。');}});return()=>{active=false;};},[]);
+  useEffect(()=>{if(!storageOK)return;let active=true;const refresh=()=>{if(!revision.current)return;setReady(false);pendingSave.current.then(()=>readSave()).then(s=>{if(active){setSave(s);setDurableSave(s);setReady(true);}}).catch(e=>{if(active){setReady(true);setError(e.message);}});};window.addEventListener('focus',refresh);return()=>{active=false;window.removeEventListener('focus',refresh);};},[storageOK]);
   useEffect(()=>{if(!ready||!storageOK)return;const rev=++revision.current;setSaveStatus('正在保存');pendingSave.current=pendingSave.current.catch(()=>{}).then(()=>writeSave(save)).then(()=>{setDurableSave(save);if(revision.current===rev)setSaveStatus('已自动保存');}).catch(()=>{setSaveStatus('保存失败 · 请导出备份');});},[save,ready,storageOK]);
   // 全员阵亡后五小时复活：读档时与之后每 30 秒检查一次。
   const [now,setNow]=useState(Date.now);
@@ -66,7 +70,7 @@ export default function GameApp({ onReturnGate, onCreateIdentity }: { onReturnGa
   const h=HEROES[hero];const b=run?.battle;const selectedTarget=b?.enemies.find(e=>e.id===target&&e.hp>0)?.id??b?.enemies.find(e=>e.hp>0)?.id??'';
   if(!ready)return <div className="qc-loading qc-loading--page" role="status">正在读取旅途存档…</div>;
   return <div className="zszm-game"><header className="game-header"><nav aria-label="游戏导航">{navs.filter(n=>!n.hidden).map(n=><button key={n.id} className={view===n.id?'active':''} aria-current={view===n.id?'page':undefined} onClick={()=>go(n.id)}><n.icon size={15}/>{n.label}</button>)}</nav><div className="game-header__links">{onReturnGate&&<button type="button" className="gate-return" onClick={onReturnGate} title="重看开场动画" aria-label="重看开场动画"><Clapperboard size={15}/><span>开场</span></button>}<button className="help-button" aria-label="玩法说明" title="玩法说明" onClick={()=>setModal('help')}><CircleHelp size={19}/></button><button type="button" className="identity-entry" aria-label={`玩家形象：${playerIdentity.display_name || '旅人'}`} onClick={()=>setModal('identity')}><PlayerAvatar identity={playerIdentity}/><span>{playerIdentity.display_name || '形象'}</span></button></div></header>
-    <main className={`game-main view-${view}`}>
+    <main className={`game-main view-${view}`}><LoadBoundary resetKey={view}>
     {balance.error&&<div className="balance-warning" role="alert">{balance.error} 已暂停历练操作。<button className="secondary" disabled={balance.busy} onClick={()=>void balance.reload()}>重试连接</button></div>}
     <FeatureGuide view={view}/>
     {view==='home'&&<Suspense fallback={<p className="qc-loading" role="status">正在展开门庭…</p>}><ModeHall onNavigate={value=>go(value as View)} onEditIdentity={()=>setModal('identity')}/></Suspense>}
@@ -88,8 +92,9 @@ export default function GameApp({ onReturnGate, onCreateIdentity }: { onReturnGa
     {view==='collection'&&<CardCollection service={balance} individuals={save.meta.ecoIndividuals||[]} renderCard={(c,open)=><CardTile card={{card:c.id,uid:c.id,upgraded:false}} onClick={open}/>}/>}
     {view==='management'&&<Suspense fallback={<p className="qc-loading" role="status">正在打开据点…</p>}><ManagementPanel packets={durableSave?.ecoDeliveries||[]} onDelivered={(world,sequence)=>setSave(s=>acknowledgeDelivery(s,world,sequence))}/></Suspense>}
     {view==='world'&&<Suspense fallback={<p className="qc-loading" role="status">正在翻开万灵志…</p>}><WorldGuide/></Suspense>}
+    {view==='journey'&&<Suspense fallback={<p className="qc-loading" role="status">正在翻开共同旅途…</p>}><UnifiedJourney/></Suspense>}
     {view==='ecosystem'&&<Suspense fallback={<p className="qc-loading" role="status">正在打开灵境…</p>}><EcosystemPanel meta={save.meta} receipts={durableSave?.meta.ecoReceipts||{}} pendingCount={save.ecoDeliveries?.length||0} onImport={importEcology} onError={setError}/></Suspense>}
-    </main><footer className="game-footer"><div><span className="footer-mark">众生有灵 · 山水有期</span><small>罗小黑战记非商业同人项目 · IP 版权归原权利方所有</small></div><div className="footer-links"><span className="save-status" role="status"><i/>{saveStatus}</span><button onClick={()=>downloadJSON(save,'众生之门-旅途备份.json')} aria-label="导出完整存档"><Download size={16}/></button></div></footer>
+    </LoadBoundary></main><footer className="game-footer"><div><span className="footer-mark">众生有灵 · 山水有期</span><small>罗小黑战记非商业同人项目 · IP 版权归原权利方所有</small></div><div className="footer-links"><span className="save-status" role="status"><i/>{saveStatus}</span><button onClick={()=>downloadJSON(save,'众生之门-旅途备份.json')} aria-label="导出完整存档"><Download size={16}/></button></div></footer>
     {error&&<div className="toast" role="alert">{error}<button aria-label="关闭提示" onClick={()=>setError('')}><X size={15}/></button></div>}
     {modal==='help'&&<Modal title="众生之门 · 功能手册" onClose={()=>setModal(null)}><FullGuide/><button className="primary" onClick={()=>setModal(null)}>明白了，出发吧 <ArrowRight size={17}/></button></Modal>}
     {modal==='deck'&&run&&<Modal title={`旅途牌组 · ${run.deck.length} 张`} onClose={()=>setModal(null)}><div className="collection-grid">{run.deck.map(c=><CardTile key={c.uid} card={c} small/>)}</div><p className="subtle">{run.relics.join(' · ')}</p></Modal>}

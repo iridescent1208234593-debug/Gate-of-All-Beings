@@ -8,6 +8,10 @@
     "shared/shared-session"
   ],
   "scripts": {
+    "data:world": "python shared/shared-data/export_worldview.py",
+    "data:cards": "node --import ./server/app/src/cards/node_modules/tsx/dist/loader.mjs shared/shared-data/export_cards.mjs",
+    "verify:game-data": "node shared/shared-session/verify-game.mjs",
+    "verify:game-ui": "node shared/shared-session/verify-game-ui.mjs",
     "build:homepage": "node portal/www/scripts/build-homepage.mjs",
     "dev:homepage": "node portal/www/scripts/build-homepage.mjs --dev",
     "build:cards": "node ops/build-cards.mjs",

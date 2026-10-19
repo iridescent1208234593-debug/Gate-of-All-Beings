@@ -7,38 +7,32 @@ const NS = 'iridescently.save.v1';
 const mem = new Map();
 
 function ls() {
-  try {
-    return typeof localStorage !== 'undefined' ? localStorage : null;
-  } catch {
-    return null;
-  }
+  return typeof localStorage !== 'undefined' ? localStorage : null;
 }
 
-function readAll() {
+export function readNamespace() {
   const store = ls();
   if (!store) return Object.fromEntries(mem);
   try {
     const raw = JSON.parse(store.getItem(NS) || '{}');
-    return raw && typeof raw === 'object' ? raw : {};
-  } catch {
-    return {};
-  }
+    if(!raw||typeof raw!=='object'||Array.isArray(raw))throw new Error('Invalid save namespace');
+    return raw;
+  } catch (error) { throw new Error('统一存档损坏，原数据已保留。', {cause:error}); }
 }
 
-function writeAll(all) {
+export function writeNamespace(all) {
   const store = ls();
   if (!store) {
     mem.clear();
     for (const k of Object.keys(all)) mem.set(k, all[k]);
     return;
   }
-  try {
-    store.setItem(NS, JSON.stringify(all));
-  } catch { /* 配额/隐私模式：静默失败 */ }
+  store.setItem(NS, JSON.stringify(all));
 }
 
 /** 返回某模块专属的 localStorage 同形存储。 */
 export function unifiedStorage(module) {
+  const readAll=readNamespace,writeAll=writeNamespace;
   const prefix = 'm:' + module + ':';
   return {
     getItem(key) {
@@ -46,14 +40,13 @@ export function unifiedStorage(module) {
       if (prefix + key in all) return all[prefix + key];
       const store = ls();
       if (store) {
-        try {
-          const legacy = store.getItem(key);
-          if (legacy !== null) {
-            all[prefix + key] = legacy;
-            writeAll(all);
-            return legacy;
-          }
-        } catch { /* ignore */ }
+        const legacy = store.getItem(key);
+        if (legacy !== null) {
+          all[prefix + key] = legacy;
+          writeAll(all);
+          publish('save', {key:prefix+key,value:legacy});
+          return legacy;
+        }
       }
       return null;
     },
@@ -66,16 +59,17 @@ export function unifiedStorage(module) {
     },
     removeItem(key) {
       const all = readAll();
-      delete all[prefix + key];
+      all[prefix + key] = null; // Tombstone: a cleared slot must not resurrect its legacy key.
       writeAll(all);
       publish('save', { key: prefix + key });
     },
     clear() {
       const all = readAll();
-      for (const k of Object.keys(all)) if (k.startsWith(prefix)) delete all[k];
+      for (const k of Object.keys(all)) if (k.startsWith(prefix)) all[k] = null;
       writeAll(all);
+      publish('save', { key: prefix });
     },
-    key() { return null; },
-    get length() { return 0; },
+    key(index) { const all=readAll();return Object.keys(all).filter(k=>k.startsWith(prefix)&&all[k]!==null)[index]?.slice(prefix.length) ?? null; },
+    get length() { const all=readAll();return Object.keys(all).filter(k=>k.startsWith(prefix)&&all[k]!==null).length; },
   };
 }

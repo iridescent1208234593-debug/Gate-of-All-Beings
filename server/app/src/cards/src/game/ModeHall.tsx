@@ -18,6 +18,7 @@ import { PlayerAvatar } from './PlayerAvatar';
 import { Forest } from './Forest';
 import { composeSpecies, speciesParts } from './species';
 import './mode-hall.css';
+import {SharedResources} from './SharedResources';
 
 type Props = { onNavigate: (view: string) => void; onEditIdentity?: () => void };
 type Game = { key: string; title: string; genre: string; desc: string; points: string[]; shots: string[]; view?: string; scene?: ReactNode };
@@ -102,6 +103,7 @@ export function ModeHall({ onNavigate, onEditIdentity }: Props) {
         {onEditIdentity && <PenLine className="mode-hall__edit" size={15} aria-hidden="true"/>}
       </button>
     </header>
+    <SharedResources onOpen={()=>onNavigate('journey')}/>
     <div className="mode-hall__row mode-hall__row--feature">
       <GameCard game={ADVENTURE} index={1} onNavigate={onNavigate}/>
       {published.has('slay') && <a className="mode-hall__chapter" href="/app/shell/m/slay"><small>入世历练 · 爬塔篇</small><strong>重生之门</strong><span>五行爬塔，正在并入 <ArrowUpRight size={14}/></span></a>}
@@ -109,7 +111,7 @@ export function ModeHall({ onNavigate, onEditIdentity }: Props) {
     <div className="mode-hall__row">{firstRow.map((game, index) => <GameCard key={game.key} game={game} index={index + 2} onNavigate={onNavigate}/>)}</div>
     {secondRow.length > 0 && <div className="mode-hall__row mode-hall__row--compact">{secondRow.map((game, index) => <GameCard key={game.key} game={game} index={firstRow.length + index + 2} onNavigate={onNavigate}/>)}</div>}
     <aside className="mode-hall__desk" aria-label="旅途案头"><div><small>不赶路的时候</small><h2>在门庭歇一会。</h2></div><nav>{auxiliary.map(item => <button key={item.view} onClick={() => onNavigate(item.view)}><item.icon size={19}/><span><strong>{item.title}</strong><small>{item.caption}</small></span><ArrowRight size={15}/></button>)}</nav></aside>
-    <p className="mode-hall__save-note">每片天地保留自己的旅途进度，玩家形象由众生之门统一读取。</p>
+    <p className="mode-hall__save-note">入世历练与重生之门共享同行名册和旅途资源；各段旅途保留自己的局内进度。</p>
   </section>;
 }
 

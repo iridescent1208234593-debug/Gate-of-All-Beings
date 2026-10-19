@@ -1,0 +1,5700 @@
+{
+  "schemaVersion": 1,
+  "source": "mode-native-card-definitions",
+  "cards": [
+    {
+      "id": "cards:guard",
+      "mode": "cards",
+      "sourceId": "guard",
+      "name": "凝灵",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "获得 6 点格挡。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "guard",
+        "name": "凝灵",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "守",
+        "text": "获得 6 点格挡。",
+        "effect": {
+          "block": 6
+        }
+      }
+    },
+    {
+      "id": "cards:claw",
+      "mode": "cards",
+      "sourceId": "claw",
+      "name": "利爪",
+      "characterId": 1,
+      "cost": 1,
+      "type": "攻击",
+      "text": "造成 7 点伤害。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "claw",
+        "name": "利爪",
+        "owner": "xiaohei",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "爪",
+        "text": "造成 7 点伤害。",
+        "effect": {
+          "damage": 7
+        }
+      }
+    },
+    {
+      "id": "cards:blink",
+      "mode": "cards",
+      "sourceId": "blink",
+      "name": "遁空",
+      "characterId": 1,
+      "cost": 0,
+      "type": "技能",
+      "text": "抽 1 张牌，获得 3 点格挡。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "blink",
+        "name": "遁空",
+        "owner": "xiaohei",
+        "cost": 0,
+        "type": "技能",
+        "glyph": "隙",
+        "text": "抽 1 张牌，获得 3 点格挡。",
+        "effect": {
+          "draw": 1,
+          "block": 3
+        }
+      }
+    },
+    {
+      "id": "cards:metal",
+      "mode": "cards",
+      "sourceId": "metal",
+      "name": "御金",
+      "characterId": 1,
+      "cost": 1,
+      "type": "攻击",
+      "text": "造成 9 点伤害，抽 1 张牌。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "metal",
+        "name": "御金",
+        "owner": "xiaohei",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "金",
+        "text": "造成 9 点伤害，抽 1 张牌。",
+        "effect": {
+          "damage": 9,
+          "draw": 1
+        }
+      }
+    },
+    {
+      "id": "cards:devour",
+      "mode": "cards",
+      "sourceId": "devour",
+      "name": "灵隙回流",
+      "characterId": 1,
+      "cost": 1,
+      "type": "能力",
+      "text": "获得 2 点能量。消耗。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "devour",
+        "name": "灵隙回流",
+        "owner": "xiaohei",
+        "cost": 1,
+        "type": "能力",
+        "glyph": "隙",
+        "text": "获得 2 点能量。消耗。",
+        "effect": {
+          "energy": 2
+        },
+        "exhaust": true
+      }
+    },
+    {
+      "id": "cards:rift",
+      "mode": "cards",
+      "sourceId": "rift",
+      "name": "空间裂隙",
+      "characterId": 1,
+      "cost": 2,
+      "type": "攻击",
+      "text": "造成 18 点伤害。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "rift",
+        "name": "空间裂隙",
+        "owner": "xiaohei",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "裂",
+        "text": "造成 18 点伤害。",
+        "effect": {
+          "damage": 18
+        }
+      }
+    },
+    {
+      "id": "cards:shadow",
+      "mode": "cards",
+      "sourceId": "shadow",
+      "name": "黑影",
+      "characterId": 1,
+      "cost": 1,
+      "type": "技能",
+      "text": "获得 9 点格挡，抽 1 张牌。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "shadow",
+        "name": "黑影",
+        "owner": "xiaohei",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "影",
+        "text": "获得 9 点格挡，抽 1 张牌。",
+        "effect": {
+          "block": 9,
+          "draw": 1
+        }
+      }
+    },
+    {
+      "id": "cards:dance",
+      "mode": "cards",
+      "sourceId": "dance",
+      "name": "游身",
+      "characterId": 1,
+      "cost": 0,
+      "type": "攻击",
+      "text": "造成 4 点伤害。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "dance",
+        "name": "游身",
+        "owner": "xiaohei",
+        "cost": 0,
+        "type": "攻击",
+        "glyph": "游",
+        "text": "造成 4 点伤害。",
+        "effect": {
+          "damage": 4
+        }
+      }
+    },
+    {
+      "id": "cards:blade",
+      "mode": "cards",
+      "sourceId": "blade",
+      "name": "飞刃",
+      "characterId": 2,
+      "cost": 1,
+      "type": "攻击",
+      "text": "造成 8 点伤害。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "blade",
+        "name": "飞刃",
+        "owner": "wuxian",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "刃",
+        "text": "造成 8 点伤害。",
+        "effect": {
+          "damage": 8
+        }
+      }
+    },
+    {
+      "id": "cards:iron",
+      "mode": "cards",
+      "sourceId": "iron",
+      "name": "铁御",
+      "characterId": 2,
+      "cost": 1,
+      "type": "技能",
+      "text": "获得 10 点格挡。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "iron",
+        "name": "铁御",
+        "owner": "wuxian",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "御",
+        "text": "获得 10 点格挡。",
+        "effect": {
+          "block": 10
+        }
+      }
+    },
+    {
+      "id": "cards:focus",
+      "mode": "cards",
+      "sourceId": "focus",
+      "name": "凝神",
+      "characterId": 2,
+      "cost": 1,
+      "type": "能力",
+      "text": "本场战斗获得 2 点力量。消耗。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "focus",
+        "name": "凝神",
+        "owner": "wuxian",
+        "cost": 1,
+        "type": "能力",
+        "glyph": "定",
+        "text": "本场战斗获得 2 点力量。消耗。",
+        "effect": {
+          "strength": 2
+        },
+        "exhaust": true
+      }
+    },
+    {
+      "id": "cards:pierce",
+      "mode": "cards",
+      "sourceId": "pierce",
+      "name": "破阵",
+      "characterId": 2,
+      "cost": 2,
+      "type": "攻击",
+      "text": "造成 16 点伤害，施加 1 回合虚弱。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "pierce",
+        "name": "破阵",
+        "owner": "wuxian",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "破",
+        "text": "造成 16 点伤害，施加 1 回合虚弱。",
+        "effect": {
+          "damage": 16,
+          "weak": 1
+        }
+      }
+    },
+    {
+      "id": "cards:swords",
+      "mode": "cards",
+      "sourceId": "swords",
+      "name": "万剑归一",
+      "characterId": 2,
+      "cost": 3,
+      "type": "攻击",
+      "text": "造成 30 点伤害。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "swords",
+        "name": "万剑归一",
+        "owner": "wuxian",
+        "cost": 3,
+        "type": "攻击",
+        "glyph": "剑",
+        "text": "造成 30 点伤害。",
+        "effect": {
+          "damage": 30
+        }
+      }
+    },
+    {
+      "id": "cards:resolve",
+      "mode": "cards",
+      "sourceId": "resolve",
+      "name": "从容",
+      "characterId": 2,
+      "cost": 0,
+      "type": "技能",
+      "text": "抽 2 张牌。消耗。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "resolve",
+        "name": "从容",
+        "owner": "wuxian",
+        "cost": 0,
+        "type": "技能",
+        "glyph": "静",
+        "text": "抽 2 张牌。消耗。",
+        "effect": {
+          "draw": 2
+        },
+        "exhaust": true
+      }
+    },
+    {
+      "id": "cards:edge",
+      "mode": "cards",
+      "sourceId": "edge",
+      "name": "锋芒",
+      "characterId": 2,
+      "cost": 1,
+      "type": "攻击",
+      "text": "造成 10 点伤害，获得 4 点格挡。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "edge",
+        "name": "锋芒",
+        "owner": "wuxian",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "锋",
+        "text": "造成 10 点伤害，获得 4 点格挡。",
+        "effect": {
+          "damage": 10,
+          "block": 4
+        }
+      }
+    },
+    {
+      "id": "cards:vine",
+      "mode": "cards",
+      "sourceId": "vine",
+      "name": "藤击",
+      "characterId": 3,
+      "cost": 1,
+      "type": "攻击",
+      "text": "造成 7 点伤害。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "vine",
+        "name": "藤击",
+        "owner": "fengxi",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "藤",
+        "text": "造成 7 点伤害。",
+        "effect": {
+          "damage": 7
+        }
+      }
+    },
+    {
+      "id": "cards:seed",
+      "mode": "cards",
+      "sourceId": "seed",
+      "name": "唤木",
+      "characterId": 3,
+      "cost": 1,
+      "type": "能力",
+      "text": "召唤木灵：每次回合结束造成 3 点伤害。消耗。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "seed",
+        "name": "唤木",
+        "owner": "fengxi",
+        "cost": 1,
+        "type": "能力",
+        "glyph": "芽",
+        "text": "召唤木灵：每次回合结束造成 3 点伤害。消耗。",
+        "effect": {
+          "summon": 3
+        },
+        "exhaust": true
+      }
+    },
+    {
+      "id": "cards:grove",
+      "mode": "cards",
+      "sourceId": "grove",
+      "name": "林间领域",
+      "characterId": 3,
+      "cost": 1,
+      "type": "能力",
+      "text": "领域：每次回合开始获得 4 点格挡。消耗。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "grove",
+        "name": "林间领域",
+        "owner": "fengxi",
+        "cost": 1,
+        "type": "能力",
+        "glyph": "林",
+        "text": "领域：每次回合开始获得 4 点格挡。消耗。",
+        "effect": {
+          "domain": 4
+        },
+        "exhaust": true
+      }
+    },
+    {
+      "id": "cards:bind",
+      "mode": "cards",
+      "sourceId": "bind",
+      "name": "缚根",
+      "characterId": 3,
+      "cost": 1,
+      "type": "攻击",
+      "text": "造成 5 点伤害，施加 2 回合虚弱。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "bind",
+        "name": "缚根",
+        "owner": "fengxi",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "缚",
+        "text": "造成 5 点伤害，施加 2 回合虚弱。",
+        "effect": {
+          "damage": 5,
+          "weak": 2
+        }
+      }
+    },
+    {
+      "id": "cards:bloom",
+      "mode": "cards",
+      "sourceId": "bloom",
+      "name": "繁生",
+      "characterId": 3,
+      "cost": 2,
+      "type": "能力",
+      "text": "召唤木灵 5，恢复 3 点生命。消耗。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "bloom",
+        "name": "繁生",
+        "owner": "fengxi",
+        "cost": 2,
+        "type": "能力",
+        "glyph": "生",
+        "text": "召唤木灵 5，恢复 3 点生命。消耗。",
+        "effect": {
+          "summon": 5,
+          "heal": 3
+        },
+        "exhaust": true
+      }
+    },
+    {
+      "id": "cards:thorn",
+      "mode": "cards",
+      "sourceId": "thorn",
+      "name": "荆棘",
+      "characterId": 3,
+      "cost": 1,
+      "type": "攻击",
+      "text": "造成 6 点伤害，施加 4 层侵蚀。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "thorn",
+        "name": "荆棘",
+        "owner": "fengxi",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "棘",
+        "text": "造成 6 点伤害，施加 4 层侵蚀。",
+        "effect": {
+          "damage": 6,
+          "poison": 4
+        }
+      }
+    },
+    {
+      "id": "cards:canopy",
+      "mode": "cards",
+      "sourceId": "canopy",
+      "name": "树冠",
+      "characterId": 3,
+      "cost": 1,
+      "type": "技能",
+      "text": "获得 8 点格挡，抽 1 张牌。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "canopy",
+        "name": "树冠",
+        "owner": "fengxi",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "叶",
+        "text": "获得 8 点格挡，抽 1 张牌。",
+        "effect": {
+          "block": 8,
+          "draw": 1
+        }
+      }
+    },
+    {
+      "id": "cards:tea",
+      "mode": "cards",
+      "sourceId": "tea",
+      "name": "一盏清茶",
+      "characterId": null,
+      "cost": 0,
+      "type": "技能",
+      "text": "恢复 5 点生命。消耗。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "tea",
+        "name": "一盏清茶",
+        "owner": "all",
+        "cost": 0,
+        "type": "技能",
+        "glyph": "茶",
+        "text": "恢复 5 点生命。消耗。",
+        "effect": {
+          "heal": 5
+        },
+        "exhaust": true
+      }
+    },
+    {
+      "id": "cards:flow",
+      "mode": "cards",
+      "sourceId": "flow",
+      "name": "灵流",
+      "characterId": null,
+      "cost": 0,
+      "type": "技能",
+      "text": "获得 1 点能量，抽 1 张牌。消耗。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "flow",
+        "name": "灵流",
+        "owner": "all",
+        "cost": 0,
+        "type": "技能",
+        "glyph": "流",
+        "text": "获得 1 点能量，抽 1 张牌。消耗。",
+        "effect": {
+          "energy": 1,
+          "draw": 1
+        },
+        "exhaust": true
+      }
+    },
+    {
+      "id": "cards:seal",
+      "mode": "cards",
+      "sourceId": "seal",
+      "name": "封灵之契",
+      "characterId": null,
+      "cost": 1,
+      "type": "能力",
+      "text": "获得 1 点力量和 5 点格挡。消耗。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "seal",
+        "name": "封灵之契",
+        "owner": "all",
+        "cost": 1,
+        "type": "能力",
+        "glyph": "契",
+        "text": "获得 1 点力量和 5 点格挡。消耗。",
+        "effect": {
+          "strength": 1,
+          "block": 5
+        },
+        "exhaust": true
+      }
+    },
+    {
+      "id": "cards:legacy-01",
+      "mode": "cards",
+      "sourceId": "legacy-01",
+      "name": "金刃",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 6。",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-01",
+        "name": "金刃",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "金",
+        "effect": {
+          "damage": 6
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "jin",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "金刃",
+        "text": "伤害 6。"
+      }
+    },
+    {
+      "id": "cards:legacy-02",
+      "mode": "cards",
+      "sourceId": "legacy-02",
+      "name": "土盾",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 5。",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-02",
+        "name": "土盾",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "土",
+        "effect": {
+          "block": 5
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "tu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "土盾",
+        "text": "格挡 5。"
+      }
+    },
+    {
+      "id": "cards:legacy-03",
+      "mode": "cards",
+      "sourceId": "legacy-03",
+      "name": "御金击",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 8 · 易伤 2。",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-03",
+        "name": "御金击",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "金",
+        "effect": {
+          "damage": 8,
+          "vulnerable": 2
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "jin",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "御金击",
+        "text": "伤害 8 · 易伤 2。"
+      }
+    },
+    {
+      "id": "cards:legacy-04",
+      "mode": "cards",
+      "sourceId": "legacy-04",
+      "name": "雷灵闪",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "作用于所有敌人。伤害 4 · 易伤 1。",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-04",
+        "name": "雷灵闪",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "金",
+        "effect": {
+          "damage": 4,
+          "vulnerable": 1
+        },
+        "target": "all",
+        "school": "yuling",
+        "element": "jin",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "雷灵闪",
+        "text": "作用于所有敌人。伤害 4 · 易伤 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-05",
+      "mode": "cards",
+      "sourceId": "legacy-05",
+      "name": "追毫",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "易伤 2 · 抽牌 1。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-05",
+        "name": "追毫",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "生",
+        "effect": {
+          "vulnerable": 2,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "追毫",
+        "text": "易伤 2 · 抽牌 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-06",
+      "mode": "cards",
+      "sourceId": "legacy-06",
+      "name": "木缠暗击",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 7 · 虚弱 1。",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-06",
+        "name": "木缠暗击",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "木",
+        "effect": {
+          "damage": 7,
+          "weak": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "mu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "木缠暗击",
+        "text": "伤害 7 · 虚弱 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-07",
+      "mode": "cards",
+      "sourceId": "legacy-07",
+      "name": "木愈回春",
+      "characterId": null,
+      "cost": 2,
+      "type": "技能",
+      "text": "生命低于一半可用。回灵 5。消耗。",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-07",
+        "name": "木愈回春",
+        "owner": "all",
+        "cost": 2,
+        "type": "技能",
+        "glyph": "木",
+        "effect": {
+          "regen": 5
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "mu",
+        "condition": "belowHalf",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "木愈回春",
+        "text": "生命低于一半可用。回灵 5。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-08",
+      "mode": "cards",
+      "sourceId": "legacy-08",
+      "name": "木缚藤蔓",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 5 · 虚弱 1。",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-08",
+        "name": "木缚藤蔓",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "木",
+        "effect": {
+          "damage": 5,
+          "weak": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "mu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "木缚藤蔓",
+        "text": "伤害 5 · 虚弱 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-09",
+      "mode": "cards",
+      "sourceId": "legacy-09",
+      "name": "铁浪",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 5 · 格挡 5。",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-09",
+        "name": "铁浪",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "水",
+        "effect": {
+          "damage": 5,
+          "block": 5
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "shui",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "铁浪",
+        "text": "伤害 5 · 格挡 5。"
+      }
+    },
+    {
+      "id": "cards:legacy-10",
+      "mode": "cards",
+      "sourceId": "legacy-10",
+      "name": "冰封千里",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 8 · 虚弱 2。",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-10",
+        "name": "冰封千里",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "水",
+        "effect": {
+          "damage": 8,
+          "weak": 2
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "shui",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "冰封千里",
+        "text": "伤害 8 · 虚弱 2。"
+      }
+    },
+    {
+      "id": "cards:legacy-11",
+      "mode": "cards",
+      "sourceId": "legacy-11",
+      "name": "水御·寒潮",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 5 · 抽牌 1。",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-11",
+        "name": "水御·寒潮",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "水",
+        "effect": {
+          "block": 5,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "shui",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "水御·寒潮",
+        "text": "格挡 5 · 抽牌 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-12",
+      "mode": "cards",
+      "sourceId": "legacy-12",
+      "name": "紫云焰",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 11 · 虚弱 1。",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-12",
+        "name": "紫云焰",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "火",
+        "effect": {
+          "damage": 11,
+          "weak": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "huo",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "紫云焰",
+        "text": "伤害 11 · 虚弱 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-13",
+      "mode": "cards",
+      "sourceId": "legacy-13",
+      "name": "玄离·炽焰",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 5 · 易伤 1。",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-13",
+        "name": "玄离·炽焰",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "火",
+        "effect": {
+          "damage": 5,
+          "vulnerable": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "huo",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "玄离·炽焰",
+        "text": "伤害 5 · 易伤 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-14",
+      "mode": "cards",
+      "sourceId": "legacy-14",
+      "name": "炎爆术",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 14。",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-14",
+        "name": "炎爆术",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "火",
+        "effect": {
+          "damage": 14
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "huo",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "炎爆术",
+        "text": "伤害 14。"
+      }
+    },
+    {
+      "id": "cards:legacy-15",
+      "mode": "cards",
+      "sourceId": "legacy-15",
+      "name": "金刚撞",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "造成等同当前格挡的伤害。",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-15",
+        "name": "金刚撞",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "土",
+        "effect": {
+          "damageFromBlock": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "tu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "金刚撞",
+        "text": "造成等同当前格挡的伤害。"
+      }
+    },
+    {
+      "id": "cards:legacy-16",
+      "mode": "cards",
+      "sourceId": "legacy-16",
+      "name": "土灵护体",
+      "characterId": null,
+      "cost": 2,
+      "type": "技能",
+      "text": "格挡 12。",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-16",
+        "name": "土灵护体",
+        "owner": "all",
+        "cost": 2,
+        "type": "技能",
+        "glyph": "土",
+        "effect": {
+          "block": 12
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "tu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "土灵护体",
+        "text": "格挡 12。"
+      }
+    },
+    {
+      "id": "cards:legacy-17",
+      "mode": "cards",
+      "sourceId": "legacy-17",
+      "name": "御金·锋锐",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 6 · 易伤 1。",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-17",
+        "name": "御金·锋锐",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "金",
+        "effect": {
+          "damage": 6,
+          "vulnerable": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "jin",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "御金·锋锐",
+        "text": "伤害 6 · 易伤 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-18",
+      "mode": "cards",
+      "sourceId": "legacy-18",
+      "name": "御木·生长",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 4 · 回灵 2。消耗。",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-18",
+        "name": "御木·生长",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "木",
+        "effect": {
+          "block": 4,
+          "regen": 2
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "mu",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "御木·生长",
+        "text": "格挡 4 · 回灵 2。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-19",
+      "mode": "cards",
+      "sourceId": "legacy-19",
+      "name": "御水·流转",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 4 · 格挡 4。",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-19",
+        "name": "御水·流转",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "水",
+        "effect": {
+          "damage": 4,
+          "block": 4
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "shui",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "御水·流转",
+        "text": "伤害 4 · 格挡 4。"
+      }
+    },
+    {
+      "id": "cards:legacy-20",
+      "mode": "cards",
+      "sourceId": "legacy-20",
+      "name": "御火·爆发",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 13 · 易伤 1。",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-20",
+        "name": "御火·爆发",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "火",
+        "effect": {
+          "damage": 13,
+          "vulnerable": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "huo",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "御火·爆发",
+        "text": "伤害 13 · 易伤 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-21",
+      "mode": "cards",
+      "sourceId": "legacy-21",
+      "name": "御土·厚德",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 7 · 回灵 1。消耗。",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-21",
+        "name": "御土·厚德",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "土",
+        "effect": {
+          "block": 7,
+          "regen": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "tu",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "御土·厚德",
+        "text": "格挡 7 · 回灵 1。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-22",
+      "mode": "cards",
+      "sourceId": "legacy-22",
+      "name": "全攻突进",
+      "characterId": null,
+      "cost": 0,
+      "type": "攻击",
+      "text": "手牌全为攻击牌时可用。伤害 14。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "legacy-22",
+        "name": "全攻突进",
+        "owner": "all",
+        "cost": 0,
+        "type": "攻击",
+        "glyph": "灵",
+        "effect": {
+          "damage": 14
+        },
+        "target": "single",
+        "condition": "attacksOnly",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "全攻突进",
+        "text": "手牌全为攻击牌时可用。伤害 14。"
+      }
+    },
+    {
+      "id": "cards:legacy-23",
+      "mode": "cards",
+      "sourceId": "legacy-23",
+      "name": "横扫",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "作用于所有敌人。伤害 8。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "legacy-23",
+        "name": "横扫",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "灵",
+        "effect": {
+          "damage": 8
+        },
+        "target": "all",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "横扫",
+        "text": "作用于所有敌人。伤害 8。"
+      }
+    },
+    {
+      "id": "cards:legacy-24",
+      "mode": "cards",
+      "sourceId": "legacy-24",
+      "name": "回春术",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "恢复 1 · 半血以下额外抽牌 2。消耗。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-24",
+        "name": "回春术",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "生",
+        "effect": {
+          "heal": 1,
+          "drawBelowHalf": 2
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "回春术",
+        "text": "恢复 1 · 半血以下额外抽牌 2。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-25",
+      "mode": "cards",
+      "sourceId": "legacy-25",
+      "name": "治愈灵光",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 3 · 恢复 4。消耗。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-25",
+        "name": "治愈灵光",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "生",
+        "effect": {
+          "block": 3,
+          "heal": 4
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "治愈灵光",
+        "text": "格挡 3 · 恢复 4。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-26",
+      "mode": "cards",
+      "sourceId": "legacy-26",
+      "name": "眷灵",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "回灵 2 · 抽牌 1。消耗。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-26",
+        "name": "眷灵",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "生",
+        "effect": {
+          "regen": 2,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "眷灵",
+        "text": "回灵 2 · 抽牌 1。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-27",
+      "mode": "cards",
+      "sourceId": "legacy-27",
+      "name": "噬灵术",
+      "characterId": null,
+      "cost": 3,
+      "type": "攻击",
+      "text": "作用于所有敌人。伤害 8 · 恢复 4。消耗。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-27",
+        "name": "噬灵术",
+        "owner": "all",
+        "cost": 3,
+        "type": "攻击",
+        "glyph": "生",
+        "effect": {
+          "damage": 8,
+          "heal": 4
+        },
+        "target": "all",
+        "school": "shengling",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "噬灵术",
+        "text": "作用于所有敌人。伤害 8 · 恢复 4。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-28",
+      "mode": "cards",
+      "sourceId": "legacy-28",
+      "name": "净灵之雨",
+      "characterId": null,
+      "cost": 2,
+      "type": "技能",
+      "text": "格挡 10 · 恢复 3。消耗。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-28",
+        "name": "净灵之雨",
+        "owner": "all",
+        "cost": 2,
+        "type": "技能",
+        "glyph": "生",
+        "effect": {
+          "block": 10,
+          "heal": 3
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "净灵之雨",
+        "text": "格挡 10 · 恢复 3。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-29",
+      "mode": "cards",
+      "sourceId": "legacy-29",
+      "name": "豪夺",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 8 · 回灵 2。消耗。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-29",
+        "name": "豪夺",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "生",
+        "effect": {
+          "damage": 8,
+          "regen": 2
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "豪夺",
+        "text": "伤害 8 · 回灵 2。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-30",
+      "mode": "cards",
+      "sourceId": "legacy-30",
+      "name": "散灵诀",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 5 · 虚弱 1 · 降低敌方攻击 2。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-30",
+        "name": "散灵诀",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "生",
+        "effect": {
+          "damage": 5,
+          "weak": 1,
+          "reduceAttack": 2
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "散灵诀",
+        "text": "伤害 5 · 虚弱 1 · 降低敌方攻击 2。"
+      }
+    },
+    {
+      "id": "cards:legacy-31",
+      "mode": "cards",
+      "sourceId": "legacy-31",
+      "name": "巨力",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 5 · 力量 2。消耗。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-31",
+        "name": "巨力",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "生",
+        "effect": {
+          "damage": 5,
+          "strength": 2
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "巨力",
+        "text": "伤害 5 · 力量 2。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-32",
+      "mode": "cards",
+      "sourceId": "legacy-32",
+      "name": "摄魂术",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "作用于所有敌人。虚弱 3 · 易伤 3 · 消耗生命 3。",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "id": "legacy-32",
+        "name": "摄魂术",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "心",
+        "effect": {
+          "weak": 3,
+          "vulnerable": 3,
+          "healthCost": 3
+        },
+        "target": "all",
+        "school": "xinling",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "摄魂术",
+        "text": "作用于所有敌人。虚弱 3 · 易伤 3 · 消耗生命 3。"
+      }
+    },
+    {
+      "id": "cards:legacy-33",
+      "mode": "cards",
+      "sourceId": "legacy-33",
+      "name": "咒术化解",
+      "characterId": null,
+      "cost": 0,
+      "type": "攻击",
+      "text": "每层虚弱与易伤造成 2 伤害 · 清除目标虚弱与易伤。",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "id": "legacy-33",
+        "name": "咒术化解",
+        "owner": "all",
+        "cost": 0,
+        "type": "攻击",
+        "glyph": "心",
+        "effect": {
+          "damageFromDebuffs": 2,
+          "clearTargetDebuffs": 1
+        },
+        "target": "single",
+        "school": "xinling",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "咒术化解",
+        "text": "每层虚弱与易伤造成 2 伤害 · 清除目标虚弱与易伤。"
+      }
+    },
+    {
+      "id": "cards:legacy-34",
+      "mode": "cards",
+      "sourceId": "legacy-34",
+      "name": "灵誓",
+      "characterId": null,
+      "cost": 2,
+      "type": "技能",
+      "text": "虚弱 3 · 易伤 3。",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "id": "legacy-34",
+        "name": "灵誓",
+        "owner": "all",
+        "cost": 2,
+        "type": "技能",
+        "glyph": "心",
+        "effect": {
+          "weak": 3,
+          "vulnerable": 3
+        },
+        "target": "single",
+        "school": "xinling",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "灵誓",
+        "text": "虚弱 3 · 易伤 3。"
+      }
+    },
+    {
+      "id": "cards:legacy-35",
+      "mode": "cards",
+      "sourceId": "legacy-35",
+      "name": "无相面具",
+      "characterId": null,
+      "cost": 0,
+      "type": "技能",
+      "text": "灵力 1。消耗。",
+      "element": null,
+      "school": "zaowu",
+      "native": {
+        "id": "legacy-35",
+        "name": "无相面具",
+        "owner": "all",
+        "cost": 0,
+        "type": "技能",
+        "glyph": "造",
+        "effect": {
+          "energy": 1
+        },
+        "target": "single",
+        "school": "zaowu",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "无相面具",
+        "text": "灵力 1。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-36",
+      "mode": "cards",
+      "sourceId": "legacy-36",
+      "name": "画灵",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 6 · 格挡 3。",
+      "element": null,
+      "school": "zaowu",
+      "native": {
+        "id": "legacy-36",
+        "name": "画灵",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "造",
+        "effect": {
+          "damage": 6,
+          "block": 3
+        },
+        "target": "single",
+        "school": "zaowu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "画灵",
+        "text": "伤害 6 · 格挡 3。"
+      }
+    },
+    {
+      "id": "cards:legacy-37",
+      "mode": "cards",
+      "sourceId": "legacy-37",
+      "name": "瞬移",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "抽牌 2。",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "id": "legacy-37",
+        "name": "瞬移",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "空",
+        "effect": {
+          "draw": 2
+        },
+        "target": "single",
+        "school": "kongjian",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "瞬移",
+        "text": "抽牌 2。"
+      }
+    },
+    {
+      "id": "cards:legacy-38",
+      "mode": "cards",
+      "sourceId": "legacy-38",
+      "name": "吞噬之域",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 5 · 格挡 5。",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "id": "legacy-38",
+        "name": "吞噬之域",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "空",
+        "effect": {
+          "damage": 5,
+          "block": 5
+        },
+        "target": "single",
+        "school": "kongjian",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "吞噬之域",
+        "text": "伤害 5 · 格挡 5。"
+      }
+    },
+    {
+      "id": "cards:legacy-39",
+      "mode": "cards",
+      "sourceId": "legacy-39",
+      "name": "领域·展开",
+      "characterId": null,
+      "cost": 3,
+      "type": "技能",
+      "text": "格挡 8 · 回灵 3。消耗。",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "id": "legacy-39",
+        "name": "领域·展开",
+        "owner": "all",
+        "cost": 3,
+        "type": "技能",
+        "glyph": "空",
+        "effect": {
+          "block": 8,
+          "regen": 3
+        },
+        "target": "single",
+        "school": "kongjian",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "领域·展开",
+        "text": "格挡 8 · 回灵 3。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-40",
+      "mode": "cards",
+      "sourceId": "legacy-40",
+      "name": "定心镜",
+      "characterId": null,
+      "cost": 0,
+      "type": "技能",
+      "text": "格挡 4 · 抽牌 1。",
+      "element": null,
+      "school": "suoyu",
+      "native": {
+        "id": "legacy-40",
+        "name": "定心镜",
+        "owner": "all",
+        "cost": 0,
+        "type": "技能",
+        "glyph": "锁",
+        "effect": {
+          "block": 4,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "suoyu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "定心镜",
+        "text": "格挡 4 · 抽牌 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-41",
+      "mode": "cards",
+      "sourceId": "legacy-41",
+      "name": "蓝玉盘",
+      "characterId": null,
+      "cost": 2,
+      "type": "技能",
+      "text": "格挡 8 · 抽牌 1。",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "id": "legacy-41",
+        "name": "蓝玉盘",
+        "owner": "all",
+        "cost": 2,
+        "type": "技能",
+        "glyph": "空",
+        "effect": {
+          "block": 8,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "kongjian",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "蓝玉盘",
+        "text": "格挡 8 · 抽牌 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-42",
+      "mode": "cards",
+      "sourceId": "legacy-42",
+      "name": "黑咻·分身",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 4 · 抽牌 1。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-42",
+        "name": "黑咻·分身",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "生",
+        "effect": {
+          "block": 4,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "黑咻·分身",
+        "text": "格挡 4 · 抽牌 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-43",
+      "mode": "cards",
+      "sourceId": "legacy-43",
+      "name": "剑域·斩",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 7。",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-43",
+        "name": "剑域·斩",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "金",
+        "effect": {
+          "damage": 7
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "jin",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "剑域·斩",
+        "text": "伤害 7。"
+      }
+    },
+    {
+      "id": "cards:legacy-44",
+      "mode": "cards",
+      "sourceId": "legacy-44",
+      "name": "风息·木缚",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 9 · 易伤 2。",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-44",
+        "name": "风息·木缚",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "金",
+        "effect": {
+          "damage": 9,
+          "vulnerable": 2
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "mu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "风息·金缚",
+        "text": "伤害 9 · 易伤 2。"
+      }
+    },
+    {
+      "id": "cards:legacy-45",
+      "mode": "cards",
+      "sourceId": "legacy-45",
+      "name": "火尖枪·破",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 8。",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-45",
+        "name": "火尖枪·破",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "火",
+        "effect": {
+          "damage": 8
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "huo",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "火尖枪·破",
+        "text": "伤害 8。"
+      }
+    },
+    {
+      "id": "cards:legacy-46",
+      "mode": "cards",
+      "sourceId": "legacy-46",
+      "name": "冰火双域",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 8 · 虚弱 1。",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-46",
+        "name": "冰火双域",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "火",
+        "effect": {
+          "damage": 8,
+          "weak": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "huo",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "冰火双域",
+        "text": "伤害 8 · 虚弱 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-47",
+      "mode": "cards",
+      "sourceId": "legacy-47",
+      "name": "清凝仙术",
+      "characterId": null,
+      "cost": 2,
+      "type": "技能",
+      "text": "恢复 12。消耗。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-47",
+        "name": "清凝仙术",
+        "owner": "all",
+        "cost": 2,
+        "type": "技能",
+        "glyph": "生",
+        "effect": {
+          "heal": 12
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "清凝仙术",
+        "text": "恢复 12。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-48",
+      "mode": "cards",
+      "sourceId": "legacy-48",
+      "name": "团鼠·吞灵",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 6 · 格挡 3。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-48",
+        "name": "团鼠·吞灵",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "生",
+        "effect": {
+          "damage": 6,
+          "block": 3
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "团鼠·吞灵",
+        "text": "伤害 6 · 格挡 3。"
+      }
+    },
+    {
+      "id": "cards:legacy-49",
+      "mode": "cards",
+      "sourceId": "legacy-49",
+      "name": "七星锁",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "虚弱 2。",
+      "element": null,
+      "school": "suoyu",
+      "native": {
+        "id": "legacy-49",
+        "name": "七星锁",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "锁",
+        "effect": {
+          "weak": 2
+        },
+        "target": "single",
+        "school": "suoyu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "七星锁",
+        "text": "虚弱 2。"
+      }
+    },
+    {
+      "id": "cards:legacy-50",
+      "mode": "cards",
+      "sourceId": "legacy-50",
+      "name": "时滞·加速",
+      "characterId": null,
+      "cost": 2,
+      "type": "技能",
+      "text": "灵力 1 · 抽牌 1。消耗。",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "id": "legacy-50",
+        "name": "时滞·加速",
+        "owner": "all",
+        "cost": 2,
+        "type": "技能",
+        "glyph": "空",
+        "effect": {
+          "energy": 1,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "kongjian",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "时滞·加速",
+        "text": "灵力 1 · 抽牌 1。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-51",
+      "mode": "cards",
+      "sourceId": "legacy-51",
+      "name": "白虎·啸",
+      "characterId": null,
+      "cost": 3,
+      "type": "攻击",
+      "text": "伤害 20。",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-51",
+        "name": "白虎·啸",
+        "owner": "all",
+        "cost": 3,
+        "type": "攻击",
+        "glyph": "金",
+        "effect": {
+          "damage": 20
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "jin",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "白虎·啸",
+        "text": "伤害 20。"
+      }
+    },
+    {
+      "id": "cards:legacy-52",
+      "mode": "cards",
+      "sourceId": "legacy-52",
+      "name": "木灵愈生",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "回灵 3 · 抽牌 1。消耗。",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-52",
+        "name": "木灵愈生",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "木",
+        "effect": {
+          "regen": 3,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "mu",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "木灵愈生",
+        "text": "回灵 3 · 抽牌 1。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-53",
+      "mode": "cards",
+      "sourceId": "legacy-53",
+      "name": "古树盘根",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 5 · 虚弱 1。",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-53",
+        "name": "古树盘根",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "木",
+        "effect": {
+          "block": 5,
+          "weak": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "mu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "古树盘根",
+        "text": "格挡 5 · 虚弱 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-54",
+      "mode": "cards",
+      "sourceId": "legacy-54",
+      "name": "冰晶·玄离",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 6 · 虚弱 1。",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-54",
+        "name": "冰晶·玄离",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "水",
+        "effect": {
+          "damage": 6,
+          "weak": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "shui",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "冰晶·玄离",
+        "text": "伤害 6 · 虚弱 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-55",
+      "mode": "cards",
+      "sourceId": "legacy-55",
+      "name": "清泉·双刃",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 5 · 抽牌 1。",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-55",
+        "name": "清泉·双刃",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "水",
+        "effect": {
+          "damage": 5,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "shui",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "清泉·双刃",
+        "text": "伤害 5 · 抽牌 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-56",
+      "mode": "cards",
+      "sourceId": "legacy-56",
+      "name": "芷清·土壁",
+      "characterId": null,
+      "cost": 2,
+      "type": "技能",
+      "text": "格挡 14。",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-56",
+        "name": "芷清·土壁",
+        "owner": "all",
+        "cost": 2,
+        "type": "技能",
+        "glyph": "土",
+        "effect": {
+          "block": 14
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "tu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "芷清·土壁",
+        "text": "格挡 14。"
+      }
+    },
+    {
+      "id": "cards:legacy-57",
+      "mode": "cards",
+      "sourceId": "legacy-57",
+      "name": "叶子·地刺",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 7 · 易伤 1。",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-57",
+        "name": "叶子·地刺",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "土",
+        "effect": {
+          "damage": 7,
+          "vulnerable": 1
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "tu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "叶子·地刺",
+        "text": "伤害 7 · 易伤 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-58",
+      "mode": "cards",
+      "sourceId": "legacy-58",
+      "name": "池年·重塑",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 4 · 回灵 2。消耗。",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-58",
+        "name": "池年·重塑",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "土",
+        "effect": {
+          "block": 4,
+          "regen": 2
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "tu",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "池年·重塑",
+        "text": "格挡 4 · 回灵 2。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-59",
+      "mode": "cards",
+      "sourceId": "legacy-59",
+      "name": "龙岩·岩崩",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 13。",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-59",
+        "name": "龙岩·岩崩",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "土",
+        "effect": {
+          "damage": 13
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "tu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "龙岩·岩崩",
+        "text": "伤害 13。"
+      }
+    },
+    {
+      "id": "cards:legacy-60",
+      "mode": "cards",
+      "sourceId": "legacy-60",
+      "name": "读心",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "虚弱 2 · 抽牌 1。",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "id": "legacy-60",
+        "name": "读心",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "心",
+        "effect": {
+          "weak": 2,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "xinling",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "读心",
+        "text": "虚弱 2 · 抽牌 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-61",
+      "mode": "cards",
+      "sourceId": "legacy-61",
+      "name": "傀儡术",
+      "characterId": null,
+      "cost": 1,
+      "type": "攻击",
+      "text": "伤害 5 · 虚弱 2。",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "id": "legacy-61",
+        "name": "傀儡术",
+        "owner": "all",
+        "cost": 1,
+        "type": "攻击",
+        "glyph": "心",
+        "effect": {
+          "damage": 5,
+          "weak": 2
+        },
+        "target": "single",
+        "school": "xinling",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "傀儡术",
+        "text": "伤害 5 · 虚弱 2。"
+      }
+    },
+    {
+      "id": "cards:legacy-62",
+      "mode": "cards",
+      "sourceId": "legacy-62",
+      "name": "戏梦",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "易伤 2 · 虚弱 2。",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "id": "legacy-62",
+        "name": "戏梦",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "心",
+        "effect": {
+          "vulnerable": 2,
+          "weak": 2
+        },
+        "target": "single",
+        "school": "xinling",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "戏梦",
+        "text": "易伤 2 · 虚弱 2。"
+      }
+    },
+    {
+      "id": "cards:legacy-63",
+      "mode": "cards",
+      "sourceId": "legacy-63",
+      "name": "重构",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 6 · 抽牌 1。",
+      "element": null,
+      "school": "zaowu",
+      "native": {
+        "id": "legacy-63",
+        "name": "重构",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "造",
+        "effect": {
+          "block": 6,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "zaowu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "重构",
+        "text": "格挡 6 · 抽牌 1。"
+      }
+    },
+    {
+      "id": "cards:legacy-64",
+      "mode": "cards",
+      "sourceId": "legacy-64",
+      "name": "无中生有",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "灵力 1 · 抽牌 1。消耗。",
+      "element": null,
+      "school": "zaowu",
+      "native": {
+        "id": "legacy-64",
+        "name": "无中生有",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "造",
+        "effect": {
+          "energy": 1,
+          "draw": 1
+        },
+        "target": "single",
+        "school": "zaowu",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "无中生有",
+        "text": "灵力 1 · 抽牌 1。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-65",
+      "mode": "cards",
+      "sourceId": "legacy-65",
+      "name": "封灵阵",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "作用于所有敌人。虚弱 2 · 易伤 2。",
+      "element": null,
+      "school": "suoyu",
+      "native": {
+        "id": "legacy-65",
+        "name": "封灵阵",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "锁",
+        "effect": {
+          "weak": 2,
+          "vulnerable": 2
+        },
+        "target": "all",
+        "school": "suoyu",
+        "exhaust": false,
+        "source": "旧版灵术改编",
+        "originalName": "封灵阵",
+        "text": "作用于所有敌人。虚弱 2 · 易伤 2。"
+      }
+    },
+    {
+      "id": "cards:legacy-66",
+      "mode": "cards",
+      "sourceId": "legacy-66",
+      "name": "御灵环",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 7 · 回灵 1。消耗。",
+      "element": null,
+      "school": "suoyu",
+      "native": {
+        "id": "legacy-66",
+        "name": "御灵环",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "锁",
+        "effect": {
+          "block": 7,
+          "regen": 1
+        },
+        "target": "single",
+        "school": "suoyu",
+        "exhaust": true,
+        "source": "旧版灵术改编",
+        "originalName": "御灵环",
+        "text": "格挡 7 · 回灵 1。消耗。"
+      }
+    },
+    {
+      "id": "cards:legacy-67",
+      "mode": "cards",
+      "sourceId": "legacy-67",
+      "name": "拾遗",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "格挡 6。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-67",
+        "name": "拾遗",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "生",
+        "effect": {
+          "block": 6
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": false,
+        "source": "同人角色灵术",
+        "originalName": "拾遗",
+        "text": "格挡 6。"
+      }
+    },
+    {
+      "id": "cards:legacy-68",
+      "mode": "cards",
+      "sourceId": "legacy-68",
+      "name": "衔光",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "虚弱 2。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "id": "legacy-68",
+        "name": "衔光",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "生",
+        "effect": {
+          "weak": 2
+        },
+        "target": "single",
+        "school": "shengling",
+        "exhaust": false,
+        "source": "同人角色灵术",
+        "originalName": "衔光",
+        "text": "虚弱 2。"
+      }
+    },
+    {
+      "id": "cards:legacy-69",
+      "mode": "cards",
+      "sourceId": "legacy-69",
+      "name": "金乌展翅",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "伤害 12。",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "id": "legacy-69",
+        "name": "金乌展翅",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "火",
+        "effect": {
+          "damage": 12
+        },
+        "target": "single",
+        "school": "yuling",
+        "element": "huo",
+        "exhaust": false,
+        "source": "同人角色灵术",
+        "originalName": "金乌展翅",
+        "text": "伤害 12。"
+      }
+    },
+    {
+      "id": "cards:legacy-70",
+      "mode": "cards",
+      "sourceId": "legacy-70",
+      "name": "虹间安魂",
+      "characterId": null,
+      "cost": 2,
+      "type": "技能",
+      "text": "格挡 12。",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "id": "legacy-70",
+        "name": "虹间安魂",
+        "owner": "all",
+        "cost": 2,
+        "type": "技能",
+        "glyph": "空",
+        "effect": {
+          "block": 12
+        },
+        "target": "single",
+        "school": "kongjian",
+        "exhaust": false,
+        "source": "同人角色灵术",
+        "originalName": "虹间安魂",
+        "text": "格挡 12。"
+      }
+    },
+    {
+      "id": "cards:eco-producer",
+      "mode": "cards",
+      "sourceId": "eco-producer",
+      "name": "灵芽的馈赠",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "获得 7 点格挡，抽 1 张牌。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "eco-producer",
+        "name": "灵芽的馈赠",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "芽",
+        "text": "获得 7 点格挡，抽 1 张牌。",
+        "effect": {
+          "block": 7,
+          "draw": 1
+        },
+        "source": "生态观测"
+      }
+    },
+    {
+      "id": "cards:eco-herbivore",
+      "mode": "cards",
+      "sourceId": "eco-herbivore",
+      "name": "林间同行",
+      "characterId": null,
+      "cost": 1,
+      "type": "技能",
+      "text": "获得 5 点格挡和 1 点力量。消耗。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "eco-herbivore",
+        "name": "林间同行",
+        "owner": "all",
+        "cost": 1,
+        "type": "技能",
+        "glyph": "伴",
+        "text": "获得 5 点格挡和 1 点力量。消耗。",
+        "effect": {
+          "block": 5,
+          "strength": 1
+        },
+        "exhaust": true,
+        "source": "生态观测"
+      }
+    },
+    {
+      "id": "cards:eco-carnivore",
+      "mode": "cards",
+      "sourceId": "eco-carnivore",
+      "name": "巡林之势",
+      "characterId": null,
+      "cost": 2,
+      "type": "攻击",
+      "text": "造成 14 点伤害，施加 2 回合虚弱。",
+      "element": null,
+      "school": null,
+      "native": {
+        "id": "eco-carnivore",
+        "name": "巡林之势",
+        "owner": "all",
+        "cost": 2,
+        "type": "攻击",
+        "glyph": "巡",
+        "text": "造成 14 点伤害，施加 2 回合虚弱。",
+        "effect": {
+          "damage": 14,
+          "weak": 2
+        },
+        "source": "生态观测"
+      }
+    },
+    {
+      "id": "slay:金刃",
+      "mode": "slay",
+      "sourceId": "金刃",
+      "name": "金刃",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "造成 6 点伤害。",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "name": "金刃",
+        "element": "金",
+        "type": "attack",
+        "energy": 1,
+        "target": "enemy",
+        "damage": 6,
+        "description": "造成 6 点伤害。",
+        "image": "the-angel-of-death.jpg"
+      },
+      "upgrade": {
+        "name": "金刃+",
+        "element": "金",
+        "type": "attack",
+        "energy": 1,
+        "target": "enemy",
+        "damage": 9,
+        "description": "造成 9 点伤害。",
+        "image": "the-angel-of-death.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:土盾",
+      "mode": "slay",
+      "sourceId": "土盾",
+      "name": "土盾",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "获得 5 点格挡。",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "name": "土盾",
+        "element": "土",
+        "type": "skill",
+        "energy": 1,
+        "block": 5,
+        "target": "player",
+        "image": "angel-messenger.jpg",
+        "description": "获得 5 点格挡。"
+      },
+      "upgrade": {
+        "name": "土盾+",
+        "element": "土",
+        "type": "skill",
+        "energy": 1,
+        "block": 8,
+        "target": "player",
+        "image": "angel-messenger.jpg",
+        "description": "获得 8 点格挡。",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:御金击",
+      "mode": "slay",
+      "sourceId": "御金击",
+      "name": "御金击",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "造成 8 点伤害。施加 2 层易伤。",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "name": "御金击",
+        "element": "金",
+        "type": "attack",
+        "energy": 2,
+        "damage": 8,
+        "target": "enemy",
+        "image": "apteryx-mantelli.jpg",
+        "powers": {
+          "vulnerable": 2
+        },
+        "description": "造成 8 点伤害。施加 2 层易伤。"
+      },
+      "upgrade": {
+        "name": "御金击+",
+        "element": "金",
+        "type": "attack",
+        "energy": 2,
+        "damage": 10,
+        "target": "enemy",
+        "image": "apteryx-mantelli.jpg",
+        "powers": {
+          "vulnerable": 3
+        },
+        "description": "造成 10 点伤害。施加 3 层易伤。",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:雷灵闪",
+      "mode": "slay",
+      "sourceId": "雷灵闪",
+      "name": "雷灵闪",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "对所有敌人造成 4 点伤害并施加 1 层易伤。",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "name": "雷灵闪",
+        "element": "金",
+        "type": "attack",
+        "energy": 1,
+        "damage": 4,
+        "target": "allEnemies",
+        "powers": {
+          "vulnerable": 1
+        },
+        "description": "对所有敌人造成 4 点伤害并施加 1 层易伤。",
+        "image": "4.jpg"
+      },
+      "upgrade": {
+        "name": "雷灵闪+",
+        "element": "金",
+        "type": "attack",
+        "energy": 1,
+        "damage": 6,
+        "target": "allEnemies",
+        "powers": {
+          "vulnerable": 1
+        },
+        "description": "对所有敌人造成 6 点伤害并施加 1 层易伤。",
+        "image": "4.jpg"
+      }
+    },
+    {
+      "id": "slay:追毫",
+      "mode": "slay",
+      "sourceId": "追毫",
+      "name": "追毫",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "施加 2 层易伤并抽 1 张牌。（鹿野·感知组追迹秘术）",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "追毫",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "enemy",
+        "image": "serpentine-dancer.jpg",
+        "powers": {
+          "vulnerable": 2
+        },
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ],
+        "description": "施加 2 层易伤并抽 1 张牌。（鹿野·感知组追迹秘术）"
+      },
+      "upgrade": {
+        "name": "追毫+",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "enemy",
+        "image": "serpentine-dancer.jpg",
+        "powers": {
+          "vulnerable": 3
+        },
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ],
+        "description": "施加 3 层易伤并抽 1 张牌。（鹿野·感知组追迹秘术）"
+      }
+    },
+    {
+      "id": "slay:木缠暗击",
+      "mode": "slay",
+      "sourceId": "木缠暗击",
+      "name": "木缠暗击",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "造成 7 点伤害。施加 1 层虚弱。",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "name": "木缠暗击",
+        "element": "木",
+        "type": "attack",
+        "energy": 1,
+        "damage": 7,
+        "target": "enemy",
+        "powers": {
+          "weak": 1
+        },
+        "description": "造成 7 点伤害。施加 1 层虚弱。",
+        "image": "manicule.jpg"
+      },
+      "upgrade": {
+        "name": "木缠暗击+",
+        "element": "木",
+        "type": "attack",
+        "energy": 1,
+        "damage": 8,
+        "target": "enemy",
+        "powers": {
+          "weak": 2
+        },
+        "description": "造成 8 点伤害。施加 2 层虚弱。",
+        "image": "manicule.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:木愈回春",
+      "mode": "slay",
+      "sourceId": "木愈回春",
+      "name": "木愈回春",
+      "characterId": null,
+      "cost": 2,
+      "type": "skill",
+      "text": "获得 5 层回灵。仅当生命值低于 50% 时才能打出。",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "name": "木愈回春",
+        "element": "木",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "description": "获得 5 层回灵。仅当生命值低于 50% 时才能打出。",
+        "image": "5.jpg",
+        "powers": {
+          "regen": 5
+        },
+        "conditions": [
+          {
+            "type": "healthPercentageBelow",
+            "percentage": 50
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "木愈回春+",
+        "element": "木",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "description": "获得 5 层回灵。仅当生命值低于 75% 时才能打出。",
+        "image": "5.jpg",
+        "powers": {
+          "regen": 5
+        },
+        "conditions": [
+          {
+            "type": "healthPercentageBelow",
+            "percentage": 75
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:木缚藤蔓",
+      "mode": "slay",
+      "sourceId": "木缚藤蔓",
+      "name": "木缚藤蔓",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "造成 5 点伤害。施加 1 层虚弱。（风息·操纵植物藤蔓）",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "name": "木缚藤蔓",
+        "element": "木",
+        "type": "attack",
+        "energy": 1,
+        "damage": 5,
+        "target": "enemy",
+        "powers": {
+          "weak": 1
+        },
+        "description": "造成 5 点伤害。施加 1 层虚弱。（风息·操纵植物藤蔓）",
+        "image": "vernal-equinox.jpg"
+      },
+      "upgrade": {
+        "name": "木缚藤蔓+",
+        "element": "木",
+        "type": "attack",
+        "energy": 1,
+        "damage": 7,
+        "target": "enemy",
+        "powers": {
+          "weak": 2
+        },
+        "description": "造成 7 点伤害。施加 2 层虚弱。（风息·操纵植物藤蔓）",
+        "image": "vernal-equinox.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:铁浪",
+      "mode": "slay",
+      "sourceId": "铁浪",
+      "name": "铁浪",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "造成 5 点伤害。获得 5 点格挡。",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "name": "铁浪",
+        "element": "水",
+        "type": "attack",
+        "energy": 1,
+        "damage": 5,
+        "block": 5,
+        "target": "enemy",
+        "description": "造成 5 点伤害。获得 5 点格挡。",
+        "image": "henry-stares-back.jpg"
+      },
+      "upgrade": {
+        "name": "铁浪+",
+        "element": "水",
+        "type": "attack",
+        "energy": 1,
+        "damage": 7,
+        "block": 7,
+        "target": "enemy",
+        "description": "造成 7 点伤害。获得 7 点格挡。",
+        "image": "henry-stares-back.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:冰封千里",
+      "mode": "slay",
+      "sourceId": "冰封千里",
+      "name": "冰封千里",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "造成 8 点伤害。施加 2 层虚弱。（阿根·操纵水与冰）",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "name": "冰封千里",
+        "element": "水",
+        "type": "attack",
+        "energy": 2,
+        "damage": 8,
+        "target": "enemy",
+        "powers": {
+          "weak": 2
+        },
+        "description": "造成 8 点伤害。施加 2 层虚弱。（阿根·操纵水与冰）",
+        "image": "railway-trains-in-space.jpg"
+      },
+      "upgrade": {
+        "name": "冰封千里+",
+        "element": "水",
+        "type": "attack",
+        "energy": 2,
+        "damage": 11,
+        "target": "enemy",
+        "powers": {
+          "weak": 2
+        },
+        "description": "造成 11 点伤害。施加 2 层虚弱。（阿根·操纵水与冰）",
+        "image": "railway-trains-in-space.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:水御·寒潮",
+      "mode": "slay",
+      "sourceId": "水御·寒潮",
+      "name": "水御·寒潮",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "获得 5 点格挡并抽 1 张牌。（水系·柔韧绵长）",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "name": "水御·寒潮",
+        "element": "水",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 5,
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ],
+        "description": "获得 5 点格挡并抽 1 张牌。（水系·柔韧绵长）",
+        "image": "railway-trains-in-space.jpg"
+      },
+      "upgrade": {
+        "name": "水御·寒潮+",
+        "element": "水",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 8,
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ],
+        "description": "获得 8 点格挡并抽 1 张牌。（水系·柔韧绵长）",
+        "image": "railway-trains-in-space.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:紫云焰",
+      "mode": "slay",
+      "sourceId": "紫云焰",
+      "name": "紫云焰",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "造成 11 点伤害。施加 1 层虚弱。（谛听·紫云焰）",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "name": "紫云焰",
+        "element": "火",
+        "type": "attack",
+        "energy": 2,
+        "damage": 11,
+        "target": "enemy",
+        "powers": {
+          "weak": 1
+        },
+        "description": "造成 11 点伤害。施加 1 层虚弱。（谛听·紫云焰）",
+        "image": "h-sperling-horrified.jpg"
+      },
+      "upgrade": {
+        "name": "紫云焰+",
+        "element": "火",
+        "type": "attack",
+        "energy": 2,
+        "damage": 14,
+        "target": "enemy",
+        "powers": {
+          "weak": 1
+        },
+        "description": "造成 14 点伤害。施加 1 层虚弱。（谛听·紫云焰）",
+        "image": "h-sperling-horrified.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:玄离·炽焰",
+      "mode": "slay",
+      "sourceId": "玄离·炽焰",
+      "name": "玄离·炽焰",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "造成 5 点伤害。施加 1 层易伤。（玄离·炎帝之徒，炽焰灼敌）",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "name": "玄离·炽焰",
+        "element": "火",
+        "type": "attack",
+        "energy": 1,
+        "damage": 5,
+        "target": "enemy",
+        "powers": {
+          "vulnerable": 1
+        },
+        "description": "造成 5 点伤害。施加 1 层易伤。（玄离·炎帝之徒，炽焰灼敌）",
+        "image": "4.jpg"
+      },
+      "upgrade": {
+        "name": "玄离·炽焰+",
+        "element": "火",
+        "type": "attack",
+        "energy": 1,
+        "damage": 7,
+        "target": "enemy",
+        "powers": {
+          "vulnerable": 2
+        },
+        "description": "造成 7 点伤害。施加 2 层易伤。（玄离·炎帝之徒，炽焰灼敌）",
+        "image": "4.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:炎爆术",
+      "mode": "slay",
+      "sourceId": "炎爆术",
+      "name": "炎爆术",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "引爆烈焰，造成 14 点伤害。（火系·爆发之术，一鼓作气）",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "name": "炎爆术",
+        "element": "火",
+        "type": "attack",
+        "energy": 2,
+        "damage": 14,
+        "target": "enemy",
+        "description": "引爆烈焰，造成 14 点伤害。（火系·爆发之术，一鼓作气）",
+        "image": "h-sperling-horrified.jpg"
+      },
+      "upgrade": {
+        "name": "炎爆术+",
+        "element": "火",
+        "type": "attack",
+        "energy": 2,
+        "damage": 17,
+        "target": "enemy",
+        "description": "引爆烈焰，造成 17 点伤害。（火系·爆发之术，一鼓作气）",
+        "image": "h-sperling-horrified.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:金刚撞",
+      "mode": "slay",
+      "sourceId": "金刚撞",
+      "name": "金刚撞",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "造成等同于你格挡值的伤害。",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "name": "金刚撞",
+        "element": "土",
+        "energy": 1,
+        "type": "attack",
+        "target": "enemy",
+        "description": "造成等同于你格挡值的伤害。",
+        "image": "fallback.jpg",
+        "actions": [
+          {
+            "type": "dealDamageEqualToBlock"
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "金刚撞+",
+        "element": "土",
+        "energy": 0,
+        "type": "attack",
+        "target": "enemy",
+        "description": "造成等同于你格挡值的伤害。",
+        "image": "fallback.jpg",
+        "actions": [
+          {
+            "type": "dealDamageEqualToBlock"
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:土灵护体",
+      "mode": "slay",
+      "sourceId": "土灵护体",
+      "name": "土灵护体",
+      "characterId": null,
+      "cost": 2,
+      "type": "skill",
+      "text": "大地厚载，获得 12 点格挡。（土系·厚重防御）",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "name": "土灵护体",
+        "element": "土",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "block": 12,
+        "description": "大地厚载，获得 12 点格挡。（土系·厚重防御）",
+        "image": "angel-messenger.jpg"
+      },
+      "upgrade": {
+        "name": "土灵护体+",
+        "element": "土",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "block": 16,
+        "description": "大地厚载，获得 16 点格挡。（土系·厚重防御）",
+        "image": "angel-messenger.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:御金·锋锐",
+      "mode": "slay",
+      "sourceId": "御金·锋锐",
+      "name": "御金·锋锐",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "御金之锋，造成 6 点伤害并施加 1 层易伤。（御灵系·金之分支）",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "name": "御金·锋锐",
+        "element": "金",
+        "type": "attack",
+        "energy": 1,
+        "damage": 6,
+        "target": "enemy",
+        "powers": {
+          "vulnerable": 1
+        },
+        "description": "御金之锋，造成 6 点伤害并施加 1 层易伤。（御灵系·金之分支）",
+        "image": "4.jpg"
+      },
+      "upgrade": {
+        "name": "御金·锋锐+",
+        "element": "金",
+        "type": "attack",
+        "energy": 1,
+        "damage": 8,
+        "target": "enemy",
+        "powers": {
+          "vulnerable": 2
+        },
+        "description": "御金之锋，造成 8 点伤害并施加 2 层易伤。（御灵系·金之分支）",
+        "image": "4.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:御木·生长",
+      "mode": "slay",
+      "sourceId": "御木·生长",
+      "name": "御木·生长",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "御木生发，获得 4 点格挡与 2 层回灵。（御灵系·木之分支）",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "name": "御木·生长",
+        "element": "木",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 4,
+        "powers": {
+          "regen": 2
+        },
+        "description": "御木生发，获得 4 点格挡与 2 层回灵。（御灵系·木之分支）",
+        "image": "vernal-equinox.jpg"
+      },
+      "upgrade": {
+        "name": "御木·生长+",
+        "element": "木",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 6,
+        "powers": {
+          "regen": 3
+        },
+        "description": "御木生发，获得 6 点格挡与 3 层回灵。（御灵系·木之分支）",
+        "image": "vernal-equinox.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:御水·流转",
+      "mode": "slay",
+      "sourceId": "御水·流转",
+      "name": "御水·流转",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "御水流转，造成 4 点伤害并获得 4 点格挡。（御灵系·水之分支）",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "name": "御水·流转",
+        "element": "水",
+        "type": "attack",
+        "energy": 1,
+        "damage": 4,
+        "block": 4,
+        "target": "enemy",
+        "description": "御水流转，造成 4 点伤害并获得 4 点格挡。（御灵系·水之分支）",
+        "image": "railway-trains-in-space.jpg"
+      },
+      "upgrade": {
+        "name": "御水·流转+",
+        "element": "水",
+        "type": "attack",
+        "energy": 1,
+        "damage": 6,
+        "block": 6,
+        "target": "enemy",
+        "description": "御水流转，造成 6 点伤害并获得 6 点格挡。（御灵系·水之分支）",
+        "image": "railway-trains-in-space.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:御火·爆发",
+      "mode": "slay",
+      "sourceId": "御火·爆发",
+      "name": "御火·爆发",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "御火引爆，造成 13 点伤害并施加 1 层易伤。（御灵系·火之分支）",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "name": "御火·爆发",
+        "element": "火",
+        "type": "attack",
+        "energy": 2,
+        "damage": 13,
+        "target": "enemy",
+        "powers": {
+          "vulnerable": 1
+        },
+        "description": "御火引爆，造成 13 点伤害并施加 1 层易伤。（御灵系·火之分支）",
+        "image": "h-sperling-horrified.jpg"
+      },
+      "upgrade": {
+        "name": "御火·爆发+",
+        "element": "火",
+        "type": "attack",
+        "energy": 2,
+        "damage": 16,
+        "target": "enemy",
+        "powers": {
+          "vulnerable": 2
+        },
+        "description": "御火引爆，造成 16 点伤害并施加 2 层易伤。（御灵系·火之分支）",
+        "image": "h-sperling-horrified.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:御土·厚德",
+      "mode": "slay",
+      "sourceId": "御土·厚德",
+      "name": "御土·厚德",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "御土厚载，获得 7 点格挡与 1 层回灵。（御灵系·土之分支）",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "name": "御土·厚德",
+        "element": "土",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 7,
+        "powers": {
+          "regen": 1
+        },
+        "description": "御土厚载，获得 7 点格挡与 1 层回灵。（御灵系·土之分支）",
+        "image": "angel-messenger.jpg"
+      },
+      "upgrade": {
+        "name": "御土·厚德+",
+        "element": "土",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 10,
+        "powers": {
+          "regen": 2
+        },
+        "description": "御土厚载，获得 10 点格挡与 2 层回灵。（御灵系·土之分支）",
+        "image": "angel-messenger.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:全攻突进",
+      "mode": "slay",
+      "sourceId": "全攻突进",
+      "name": "全攻突进",
+      "characterId": null,
+      "cost": 0,
+      "type": "attack",
+      "text": "仅当手牌全为攻击牌时才能打出。造成 14 点伤害。",
+      "element": null,
+      "school": null,
+      "native": {
+        "name": "全攻突进",
+        "element": "通用",
+        "type": "attack",
+        "energy": 0,
+        "damage": 14,
+        "target": "enemy",
+        "conditions": [
+          {
+            "type": "onlyType",
+            "cardType": "attack"
+          }
+        ],
+        "description": "仅当手牌全为攻击牌时才能打出。造成 14 点伤害。",
+        "image": "h-sperling-horrified.jpg"
+      },
+      "upgrade": {
+        "name": "全攻突进+",
+        "element": "通用",
+        "type": "attack",
+        "energy": 0,
+        "damage": 17,
+        "target": "enemy",
+        "conditions": [
+          {
+            "type": "onlyType",
+            "cardType": "attack"
+          }
+        ],
+        "description": "仅当手牌全为攻击牌时才能打出。造成 17 点伤害。",
+        "image": "h-sperling-horrified.jpg"
+      }
+    },
+    {
+      "id": "slay:横扫",
+      "mode": "slay",
+      "sourceId": "横扫",
+      "name": "横扫",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "对所有敌人造成 8 点伤害。",
+      "element": null,
+      "school": null,
+      "native": {
+        "name": "横扫",
+        "element": "通用",
+        "type": "attack",
+        "energy": 1,
+        "damage": 8,
+        "target": "allEnemies",
+        "description": "对所有敌人造成 8 点伤害。",
+        "image": "vernal-equinox.jpg"
+      },
+      "upgrade": {
+        "name": "横扫+",
+        "element": "通用",
+        "type": "attack",
+        "energy": 1,
+        "damage": 11,
+        "target": "allEnemies",
+        "description": "对所有敌人造成 11 点伤害。",
+        "image": "vernal-equinox.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:回春术",
+      "mode": "slay",
+      "sourceId": "回春术",
+      "name": "回春术",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "恢复 1 点生命。若生命值低于 50%，抽 2 张牌。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "回春术",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "恢复 1 点生命。若生命值低于 50%，抽 2 张牌。",
+        "image": "bare-feet-of-god.jpg",
+        "actions": [
+          {
+            "type": "addHealth",
+            "parameter": {
+              "amount": 1
+            }
+          },
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 2
+            },
+            "conditions": [
+              {
+                "type": "healthPercentageBelow",
+                "percentage": 50
+              }
+            ]
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "回春术+",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "恢复 2 点生命。若生命值低于 50%，抽 2 张牌。",
+        "image": "bare-feet-of-god.jpg",
+        "actions": [
+          {
+            "type": "addHealth",
+            "parameter": {
+              "amount": 2
+            }
+          },
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 2
+            },
+            "conditions": [
+              {
+                "type": "healthPercentageBelow",
+                "percentage": 50
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:治愈灵光",
+      "mode": "slay",
+      "sourceId": "治愈灵光",
+      "name": "治愈灵光",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "恢复 4 点生命并获得 3 点格挡。（清凝·极致治愈）",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "治愈灵光",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "恢复 4 点生命并获得 3 点格挡。（清凝·极致治愈）",
+        "image": "ritual-rain.png",
+        "block": 3,
+        "actions": [
+          {
+            "type": "addHealth",
+            "parameter": {
+              "amount": 4
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "治愈灵光+",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "恢复 4 点生命并获得 5 点格挡。（清凝·极致治愈）",
+        "image": "ritual-rain.png",
+        "block": 5,
+        "actions": [
+          {
+            "type": "addHealth",
+            "parameter": {
+              "amount": 4
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:眷灵",
+      "mode": "slay",
+      "sourceId": "眷灵",
+      "name": "眷灵",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "获得 2 层回灵并抽 1 张牌。（老君·吸收空间逸散之灵）",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "眷灵",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "获得 2 层回灵并抽 1 张牌。（老君·吸收空间逸散之灵）",
+        "image": "soul-drain.png",
+        "powers": {
+          "regen": 2
+        },
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "眷灵+",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "获得 3 层回灵并抽 1 张牌。（老君·吸收空间逸散之灵）",
+        "image": "soul-drain.png",
+        "powers": {
+          "regen": 3
+        },
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:噬灵术",
+      "mode": "slay",
+      "sourceId": "噬灵术",
+      "name": "噬灵术",
+      "characterId": null,
+      "cost": 3,
+      "type": "attack",
+      "text": "对所有敌人造成 2 点伤害，并将其转化为生命。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "噬灵术",
+        "element": "生灵",
+        "type": "attack",
+        "energy": 3,
+        "target": "allEnemies",
+        "description": "对所有敌人造成 2 点伤害，并将其转化为生命。",
+        "image": "succube.png",
+        "damage": 2,
+        "actions": [
+          {
+            "type": "addRegenEqualToAllDamage"
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "高等噬灵术",
+        "element": "生灵",
+        "type": "attack",
+        "energy": 3,
+        "target": "allEnemies",
+        "description": "对所有敌人造成 3 点伤害，并将其转化为生命。",
+        "image": "succube.png",
+        "damage": 3,
+        "actions": [
+          {
+            "type": "addRegenEqualToAllDamage"
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:净灵之雨",
+      "mode": "slay",
+      "sourceId": "净灵之雨",
+      "name": "净灵之雨",
+      "characterId": null,
+      "cost": 2,
+      "type": "skill",
+      "text": "移除自身的虚弱与易伤。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "净灵之雨",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "description": "移除自身的虚弱与易伤。",
+        "image": "ritual-rain.png",
+        "damage": 0,
+        "actions": [
+          {
+            "type": "removePlayerDebuffs"
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "终焉净雨",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "description": "移除自身的虚弱与易伤。获得 10 点格挡。",
+        "image": "ritual-rain.png",
+        "damage": 0,
+        "actions": [
+          {
+            "type": "removePlayerDebuffs"
+          }
+        ],
+        "block": 10
+      }
+    },
+    {
+      "id": "slay:豪夺",
+      "mode": "slay",
+      "sourceId": "豪夺",
+      "name": "豪夺",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "造成 8 点伤害并获得 2 层回灵。（风息·掠夺性最强之术）",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "豪夺",
+        "element": "生灵",
+        "type": "attack",
+        "energy": 2,
+        "damage": 8,
+        "target": "enemy",
+        "description": "造成 8 点伤害并获得 2 层回灵。（风息·掠夺性最强之术）",
+        "image": "succube.png",
+        "powers": {
+          "regen": 2
+        }
+      },
+      "upgrade": {
+        "name": "豪夺+",
+        "element": "生灵",
+        "type": "attack",
+        "energy": 2,
+        "damage": 10,
+        "target": "enemy",
+        "description": "造成 10 点伤害并获得 3 层回灵。（风息·掠夺性最强之术）",
+        "image": "succube.png",
+        "powers": {
+          "regen": 3
+        },
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:散灵诀",
+      "mode": "slay",
+      "sourceId": "散灵诀",
+      "name": "散灵诀",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "造成 5 点伤害，削减目标 3 层回灵与 2 层力量。（虹·散灵秘术，克制吐纳回灵之敌）",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "散灵诀",
+        "element": "生灵",
+        "type": "attack",
+        "energy": 1,
+        "damage": 5,
+        "target": "enemy",
+        "description": "造成 5 点伤害，削减目标 3 层回灵与 2 层力量。（虹·散灵秘术，克制吐纳回灵之敌）",
+        "image": "succube.png",
+        "actions": [
+          {
+            "type": "reducePower",
+            "parameter": {
+              "power": "monsterRegen",
+              "amount": 3
+            }
+          },
+          {
+            "type": "reducePower",
+            "parameter": {
+              "power": "strength",
+              "amount": 2
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "散灵诀+",
+        "element": "生灵",
+        "type": "attack",
+        "energy": 1,
+        "damage": 7,
+        "target": "enemy",
+        "description": "造成 7 点伤害，削减目标 4 层回灵与 3 层力量。（虹·散灵秘术，克制吐纳回灵之敌）",
+        "image": "succube.png",
+        "actions": [
+          {
+            "type": "reducePower",
+            "parameter": {
+              "power": "monsterRegen",
+              "amount": 4
+            }
+          },
+          {
+            "type": "reducePower",
+            "parameter": {
+              "power": "strength",
+              "amount": 3
+            }
+          }
+        ],
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:巨力",
+      "mode": "slay",
+      "sourceId": "巨力",
+      "name": "巨力",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "造成 5 点伤害并获得 2 层力量。（强化系·巨力，越战越强）",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "巨力",
+        "element": "生灵",
+        "type": "attack",
+        "energy": 1,
+        "target": "enemy",
+        "description": "造成 5 点伤害并获得 2 层力量。（强化系·巨力，越战越强）",
+        "image": "succube.png",
+        "damage": 5,
+        "powers": {
+          "strength": 2
+        }
+      },
+      "upgrade": {
+        "name": "巨力+",
+        "element": "生灵",
+        "type": "attack",
+        "energy": 1,
+        "target": "enemy",
+        "description": "造成 7 点伤害并获得 3 层力量。（强化系·巨力，越战越强）",
+        "image": "succube.png",
+        "damage": 7,
+        "powers": {
+          "strength": 3
+        }
+      }
+    },
+    {
+      "id": "slay:摄魂术",
+      "mode": "slay",
+      "sourceId": "摄魂术",
+      "name": "摄魂术",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "消耗自身 3 点生命，对所有敌人施加虚弱与易伤。",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "name": "摄魂术",
+        "element": "心灵",
+        "type": "attack",
+        "energy": 1,
+        "target": "allEnemies",
+        "description": "消耗自身 3 点生命，对所有敌人施加虚弱与易伤。",
+        "image": "soul-drain.png",
+        "damage": 0,
+        "powers": {
+          "weak": 3,
+          "vulnerable": 3
+        },
+        "actions": [
+          {
+            "type": "removeHealth",
+            "parameter": {
+              "amount": 3,
+              "target": "player"
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "深层摄魂术",
+        "element": "心灵",
+        "type": "attack",
+        "energy": 1,
+        "target": "allEnemies",
+        "description": "消耗自身 4 点生命，对所有敌人施加虚弱与易伤。",
+        "image": "soul-drain.png",
+        "damage": 0,
+        "powers": {
+          "weak": 4,
+          "vulnerable": 4
+        },
+        "actions": [
+          {
+            "type": "removeHealth",
+            "parameter": {
+              "amount": 4,
+              "target": "player"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:咒术化解",
+      "mode": "slay",
+      "sourceId": "咒术化解",
+      "name": "咒术化解",
+      "characterId": null,
+      "cost": 0,
+      "type": "attack",
+      "text": "造成等同于目标易伤与虚弱层数的伤害，随后移除这些减益。",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "name": "咒术化解",
+        "element": "心灵",
+        "energy": 0,
+        "type": "attack",
+        "target": "enemy",
+        "description": "造成等同于目标易伤与虚弱层数的伤害，随后移除这些减益。",
+        "image": "voodoo-education.png",
+        "actions": [
+          {
+            "type": "dealDamageEqualToWeak"
+          },
+          {
+            "type": "dealDamageEqualToVulnerable"
+          },
+          {
+            "type": "setPower",
+            "parameter": {
+              "power": "weak",
+              "amount": 0
+            }
+          },
+          {
+            "type": "setPower",
+            "parameter": {
+              "power": "vulnerable",
+              "amount": 0
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "咒术馈赠",
+        "element": "心灵",
+        "energy": 0,
+        "type": "attack",
+        "target": "enemy",
+        "description": "造成等同于目标易伤与虚弱层数的伤害，且不移除减益。",
+        "image": "voodoo-education.png",
+        "actions": [
+          {
+            "type": "dealDamageEqualToWeak"
+          },
+          {
+            "type": "dealDamageEqualToVulnerable"
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:灵誓",
+      "mode": "slay",
+      "sourceId": "灵誓",
+      "name": "灵誓",
+      "characterId": null,
+      "cost": 2,
+      "type": "skill",
+      "text": "宣读灵誓束缚敌人：施加 3 层虚弱与 3 层易伤。接誓者必须遵从。（老君·双系合技）",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "name": "灵誓",
+        "element": "心灵",
+        "type": "skill",
+        "energy": 2,
+        "target": "enemy",
+        "description": "宣读灵誓束缚敌人：施加 3 层虚弱与 3 层易伤。接誓者必须遵从。（老君·双系合技）",
+        "image": "mask-of-the-faceless.png",
+        "powers": {
+          "weak": 3,
+          "vulnerable": 3
+        }
+      },
+      "upgrade": {
+        "name": "灵誓+",
+        "element": "心灵",
+        "type": "skill",
+        "energy": 2,
+        "target": "enemy",
+        "description": "宣读灵誓束缚敌人：施加 4 层虚弱与 4 层易伤。接誓者必须遵从。（老君·双系合技）",
+        "image": "mask-of-the-faceless.png",
+        "powers": {
+          "weak": 4,
+          "vulnerable": 4
+        }
+      }
+    },
+    {
+      "id": "slay:无相面具",
+      "mode": "slay",
+      "sourceId": "无相面具",
+      "name": "无相面具",
+      "characterId": null,
+      "cost": 0,
+      "type": "skill",
+      "text": "获得 1 点能量。",
+      "element": null,
+      "school": "zaowu",
+      "native": {
+        "name": "无相面具",
+        "element": "造物",
+        "type": "skill",
+        "energy": 0,
+        "target": "player",
+        "description": "获得 1 点能量。",
+        "image": "mask-of-the-faceless.png",
+        "damage": 0,
+        "actions": [
+          {
+            "type": "addEnergyToPlayer"
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "无相双面",
+        "element": "造物",
+        "type": "skill",
+        "energy": 0,
+        "target": "player",
+        "description": "获得 1 点能量和 5 点格挡。",
+        "image": "mask-of-the-faceless.png",
+        "damage": 0,
+        "actions": [
+          {
+            "type": "addEnergyToPlayer"
+          }
+        ],
+        "block": 5
+      }
+    },
+    {
+      "id": "slay:画灵",
+      "mode": "slay",
+      "sourceId": "画灵",
+      "name": "画灵",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "以灵造物：造成 6 点伤害并获得 3 点格挡。（生灵系+造物系·双系合技）",
+      "element": null,
+      "school": "zaowu",
+      "native": {
+        "name": "画灵",
+        "element": "造物",
+        "type": "attack",
+        "energy": 1,
+        "damage": 6,
+        "block": 3,
+        "target": "enemy",
+        "description": "以灵造物：造成 6 点伤害并获得 3 点格挡。（生灵系+造物系·双系合技）",
+        "image": "manicule.jpg"
+      },
+      "upgrade": {
+        "name": "画灵+",
+        "element": "造物",
+        "type": "attack",
+        "energy": 1,
+        "damage": 8,
+        "block": 4,
+        "target": "enemy",
+        "description": "以灵造物：造成 8 点伤害并获得 4 点格挡。（生灵系+造物系·双系合技）",
+        "image": "manicule.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:瞬移",
+      "mode": "slay",
+      "sourceId": "瞬移",
+      "name": "瞬移",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "空间传送：抽 2 张牌。（小黑·传送）",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "name": "瞬移",
+        "element": "空间",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "空间传送：抽 2 张牌。（小黑·传送）",
+        "image": "codices.jpg",
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 2
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "瞬移+",
+        "element": "空间",
+        "type": "skill",
+        "energy": 0,
+        "target": "player",
+        "description": "空间传送：抽 2 张牌。（小黑·传送）",
+        "image": "codices.jpg",
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:吞噬之域",
+      "mode": "slay",
+      "sourceId": "吞噬之域",
+      "name": "吞噬之域",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "展开吞噬：造成 5 点伤害并获得 5 点格挡。（无限·空间系吞噬）",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "name": "吞噬之域",
+        "element": "空间",
+        "type": "attack",
+        "energy": 2,
+        "damage": 5,
+        "block": 5,
+        "target": "enemy",
+        "description": "展开吞噬：造成 5 点伤害并获得 5 点格挡。（无限·空间系吞噬）",
+        "image": "alice-holds-the-white-king.jpg"
+      },
+      "upgrade": {
+        "name": "吞噬之域+",
+        "element": "空间",
+        "type": "attack",
+        "energy": 2,
+        "damage": 7,
+        "block": 7,
+        "target": "enemy",
+        "description": "展开吞噬：造成 7 点伤害并获得 7 点格挡。（无限·空间系吞噬）",
+        "image": "alice-holds-the-white-king.jpg",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:领域·展开",
+      "mode": "slay",
+      "sourceId": "领域·展开",
+      "name": "领域·展开",
+      "characterId": null,
+      "cost": 3,
+      "type": "skill",
+      "text": "展开灵质领域：获得 8 点格挡与 3 层回灵。（领域·灵质空间庇护）",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "name": "领域·展开",
+        "element": "空间",
+        "type": "skill",
+        "energy": 3,
+        "target": "player",
+        "description": "展开灵质领域：获得 8 点格挡与 3 层回灵。（领域·灵质空间庇护）",
+        "image": "vernal-equinox.jpg",
+        "block": 8,
+        "powers": {
+          "regen": 3
+        }
+      },
+      "upgrade": {
+        "name": "领域·固守",
+        "element": "空间",
+        "type": "skill",
+        "energy": 3,
+        "target": "player",
+        "description": "展开灵质领域：获得 12 点格挡与 3 层回灵。（领域·灵质空间庇护）",
+        "image": "vernal-equinox.jpg",
+        "block": 12,
+        "powers": {
+          "regen": 3
+        }
+      }
+    },
+    {
+      "id": "slay:定心镜",
+      "mode": "slay",
+      "sourceId": "定心镜",
+      "name": "定心镜",
+      "characterId": null,
+      "cost": 0,
+      "type": "skill",
+      "text": "法宝定心：获得 4 点格挡，并移除自身的虚弱与易伤。（谛听·老君所赐）",
+      "element": null,
+      "school": "suoyu",
+      "native": {
+        "name": "定心镜",
+        "element": "锁御",
+        "type": "skill",
+        "energy": 0,
+        "target": "player",
+        "description": "法宝定心：获得 4 点格挡，并移除自身的虚弱与易伤。（谛听·老君所赐）",
+        "image": "mask-of-the-faceless.png",
+        "block": 4,
+        "actions": [
+          {
+            "type": "removePlayerDebuffs"
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "定心镜·守",
+        "element": "锁御",
+        "type": "skill",
+        "energy": 0,
+        "target": "player",
+        "description": "法宝定心：获得 7 点格挡，并移除自身的虚弱与易伤。（谛听·老君所赐）",
+        "image": "mask-of-the-faceless.png",
+        "block": 7,
+        "actions": [
+          {
+            "type": "removePlayerDebuffs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:蓝玉盘",
+      "mode": "slay",
+      "sourceId": "蓝玉盘",
+      "name": "蓝玉盘",
+      "characterId": null,
+      "cost": 2,
+      "type": "skill",
+      "text": "法宝位移：获得 8 点格挡并抽 1 张牌。（罗小白·老君所赠空间系法宝）",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "name": "蓝玉盘",
+        "element": "空间",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "description": "法宝位移：获得 8 点格挡并抽 1 张牌。（罗小白·老君所赠空间系法宝）",
+        "image": "2.jpg",
+        "block": 8,
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "蓝玉盘+",
+        "element": "空间",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "description": "法宝位移：获得 10 点格挡并抽 1 张牌。（罗小白·老君所赠空间系法宝）",
+        "image": "2.jpg",
+        "block": 10,
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:黑咻·分身",
+      "mode": "slay",
+      "sourceId": "黑咻·分身",
+      "name": "黑咻·分身",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "尾巴化作黑咻护主：获得 4 点格挡并抽 1 张牌。（罗小黑·分身黑咻）",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "黑咻·分身",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "尾巴化作黑咻护主：获得 4 点格挡并抽 1 张牌。（罗小黑·分身黑咻）",
+        "image": "t.jpg",
+        "block": 4,
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "黑咻·分身+",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "尾巴化作黑咻护主：获得 6 点格挡并抽 1 张牌。（罗小黑·分身黑咻）",
+        "image": "t.jpg",
+        "block": 6,
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:剑域·斩",
+      "mode": "slay",
+      "sourceId": "剑域·斩",
+      "name": "剑域·斩",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "金系剑光一闪，造成 7 点伤害。（执行者·无限）",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "name": "剑域·斩",
+        "element": "金",
+        "type": "attack",
+        "energy": 1,
+        "damage": 7,
+        "target": "enemy",
+        "description": "金系剑光一闪，造成 7 点伤害。（执行者·无限）",
+        "image": "the-angel-of-death.jpg"
+      },
+      "upgrade": {
+        "name": "剑域·斩+",
+        "element": "金",
+        "type": "attack",
+        "energy": 1,
+        "damage": 10,
+        "target": "enemy",
+        "description": "金系剑光一闪，造成 10 点伤害。（执行者·无限）",
+        "image": "the-angel-of-death.jpg"
+      }
+    },
+    {
+      "id": "slay:风息·金缚",
+      "mode": "slay",
+      "sourceId": "风息·金缚",
+      "name": "风息·金缚",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "金系缚阵困敌，造成 9 点伤害并施加 2 层易伤。（风息）",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "name": "风息·金缚",
+        "element": "金",
+        "type": "attack",
+        "energy": 2,
+        "damage": 9,
+        "target": "enemy",
+        "powers": {
+          "vulnerable": 2
+        },
+        "description": "金系缚阵困敌，造成 9 点伤害并施加 2 层易伤。（风息）",
+        "image": "serpentine-dancer.jpg"
+      },
+      "upgrade": {
+        "name": "风息·金缚+",
+        "element": "金",
+        "type": "attack",
+        "energy": 2,
+        "damage": 11,
+        "target": "enemy",
+        "powers": {
+          "vulnerable": 3
+        },
+        "description": "金系缚阵困敌，造成 11 点伤害并施加 3 层易伤。（风息）",
+        "image": "serpentine-dancer.jpg"
+      }
+    },
+    {
+      "id": "slay:火尖枪·破",
+      "mode": "slay",
+      "sourceId": "火尖枪·破",
+      "name": "火尖枪·破",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "火尖枪直刺，造成 8 点伤害。（哪吒）",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "name": "火尖枪·破",
+        "element": "火",
+        "type": "attack",
+        "energy": 1,
+        "damage": 8,
+        "target": "enemy",
+        "description": "火尖枪直刺，造成 8 点伤害。（哪吒）",
+        "image": "a-line-of-composed-type.jpg"
+      },
+      "upgrade": {
+        "name": "火尖枪·破+",
+        "element": "火",
+        "type": "attack",
+        "energy": 1,
+        "damage": 11,
+        "target": "enemy",
+        "description": "火尖枪直刺，造成 11 点伤害。（哪吒）",
+        "image": "a-line-of-composed-type.jpg"
+      }
+    },
+    {
+      "id": "slay:冰火双域",
+      "mode": "slay",
+      "sourceId": "冰火双域",
+      "name": "冰火双域",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "冰火双域交替压制，造成 8 点伤害并施加 1 层虚弱。（玄离）",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "name": "冰火双域",
+        "element": "火",
+        "type": "attack",
+        "energy": 2,
+        "damage": 8,
+        "target": "enemy",
+        "powers": {
+          "weak": 1
+        },
+        "description": "冰火双域交替压制，造成 8 点伤害并施加 1 层虚弱。（玄离）",
+        "image": "6.jpg"
+      },
+      "upgrade": {
+        "name": "冰火双域+",
+        "element": "火",
+        "type": "attack",
+        "energy": 2,
+        "damage": 10,
+        "target": "enemy",
+        "powers": {
+          "weak": 2
+        },
+        "description": "冰火双域交替压制，造成 10 点伤害并施加 2 层虚弱。（玄离）",
+        "image": "6.jpg"
+      }
+    },
+    {
+      "id": "slay:清凝仙术",
+      "mode": "slay",
+      "sourceId": "清凝仙术",
+      "name": "清凝仙术",
+      "characterId": null,
+      "cost": 2,
+      "type": "skill",
+      "text": "仙家医术温养，回复 12 点生命。（李清凝·治愈系）",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "清凝仙术",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "description": "仙家医术温养，回复 12 点生命。（李清凝·治愈系）",
+        "image": "ritual-rain.png",
+        "actions": [
+          {
+            "type": "addHealth",
+            "parameter": {
+              "amount": 12
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "清凝仙术+",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "description": "仙家医术温养，回复 16 点生命。（李清凝·治愈系）",
+        "image": "ritual-rain.png",
+        "actions": [
+          {
+            "type": "addHealth",
+            "parameter": {
+              "amount": 16
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:团鼠·吞灵",
+      "mode": "slay",
+      "sourceId": "团鼠·吞灵",
+      "name": "团鼠·吞灵",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "团鼠吞下灵质：造成 6 点伤害并护住自身 3 点格挡。（比丢）",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "团鼠·吞灵",
+        "element": "生灵",
+        "type": "attack",
+        "energy": 1,
+        "damage": 6,
+        "target": "enemy",
+        "description": "团鼠吞下灵质：造成 6 点伤害并护住自身 3 点格挡。（比丢）",
+        "image": "5.jpg",
+        "block": 3
+      },
+      "upgrade": {
+        "name": "团鼠·吞灵+",
+        "element": "生灵",
+        "type": "attack",
+        "energy": 1,
+        "damage": 8,
+        "target": "enemy",
+        "description": "团鼠吞下灵质：造成 8 点伤害并护住自身 4 点格挡。（比丢）",
+        "image": "5.jpg",
+        "block": 4
+      }
+    },
+    {
+      "id": "slay:七星锁",
+      "mode": "slay",
+      "sourceId": "七星锁",
+      "name": "七星锁",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "锁御七星封印敌妖，施加 2 层虚弱。（七臂·锁御系）",
+      "element": null,
+      "school": "suoyu",
+      "native": {
+        "name": "七星锁",
+        "element": "锁御",
+        "type": "skill",
+        "energy": 1,
+        "target": "enemy",
+        "powers": {
+          "weak": 2
+        },
+        "description": "锁御七星封印敌妖，施加 2 层虚弱。（七臂·锁御系）",
+        "image": "codices.jpg"
+      },
+      "upgrade": {
+        "name": "七星锁+",
+        "element": "锁御",
+        "type": "skill",
+        "energy": 1,
+        "target": "enemy",
+        "powers": {
+          "weak": 3
+        },
+        "description": "锁御七星封印敌妖，施加 3 层虚弱。（七臂·锁御系）",
+        "image": "codices.jpg"
+      }
+    },
+    {
+      "id": "slay:时滞·加速",
+      "mode": "slay",
+      "sourceId": "时滞·加速",
+      "name": "时滞·加速",
+      "characterId": null,
+      "cost": 2,
+      "type": "skill",
+      "text": "加快自身时间流速：回复 1 点能量并抽 1 张牌。（东东·空间时滞）",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "name": "时滞·加速",
+        "element": "空间",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "description": "加快自身时间流速：回复 1 点能量并抽 1 张牌。（东东·空间时滞）",
+        "image": "railway-trains-in-space.jpg",
+        "actions": [
+          {
+            "type": "addEnergyToPlayer"
+          },
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "时滞·加速+",
+        "element": "空间",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "description": "加快自身时间流速：回复 1 点能量并抽 2 张牌。（东东·空间时滞）",
+        "image": "railway-trains-in-space.jpg",
+        "actions": [
+          {
+            "type": "addEnergyToPlayer"
+          },
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 2
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:白虎·啸",
+      "mode": "slay",
+      "sourceId": "白虎·啸",
+      "name": "白虎·啸",
+      "characterId": null,
+      "cost": 3,
+      "type": "attack",
+      "text": "上古神兽咆哮，造成 20 点伤害。（白虎·创世级神兽）",
+      "element": "jin",
+      "school": "yuling",
+      "native": {
+        "name": "白虎·啸",
+        "element": "金",
+        "type": "attack",
+        "energy": 3,
+        "damage": 20,
+        "target": "enemy",
+        "description": "上古神兽咆哮，造成 20 点伤害。（白虎·创世级神兽）",
+        "image": "bare-feet-of-god.jpg"
+      },
+      "upgrade": {
+        "name": "白虎·啸+",
+        "element": "金",
+        "type": "attack",
+        "energy": 3,
+        "damage": 26,
+        "target": "enemy",
+        "description": "上古神兽咆哮，造成 26 点伤害。（白虎·创世级神兽）",
+        "image": "bare-feet-of-god.jpg"
+      }
+    },
+    {
+      "id": "slay:木灵愈生",
+      "mode": "slay",
+      "sourceId": "木灵愈生",
+      "name": "木灵愈生",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "催生木灵滋养自身：获得 3 层回灵并抽 1 张牌。（木系·生机生长）",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "name": "木灵愈生",
+        "element": "木",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "催生木灵滋养自身：获得 3 层回灵并抽 1 张牌。（木系·生机生长）",
+        "image": "vernal-equinox.jpg",
+        "powers": {
+          "regen": 3
+        },
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "木灵愈生+",
+        "element": "木",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "description": "催生木灵滋养自身：获得 4 层回灵并抽 1 张牌。（木系·生机生长）",
+        "image": "vernal-equinox.jpg",
+        "powers": {
+          "regen": 4
+        },
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:古树盘根",
+      "mode": "slay",
+      "sourceId": "古树盘根",
+      "name": "古树盘根",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "古树根须破土缠敌：获得 5 点格挡并施加 1 层虚弱。（风息·操纵植物藤蔓）",
+      "element": "mu",
+      "school": "yuling",
+      "native": {
+        "name": "古树盘根",
+        "element": "木",
+        "type": "skill",
+        "energy": 1,
+        "target": "enemy",
+        "block": 5,
+        "powers": {
+          "weak": 1
+        },
+        "description": "古树根须破土缠敌：获得 5 点格挡并施加 1 层虚弱。（风息·操纵植物藤蔓）",
+        "image": "manicule.jpg"
+      },
+      "upgrade": {
+        "name": "古树盘根+",
+        "element": "木",
+        "type": "skill",
+        "energy": 1,
+        "target": "enemy",
+        "block": 8,
+        "powers": {
+          "weak": 2
+        },
+        "description": "古树根须破土缠敌：获得 8 点格挡并施加 2 层虚弱。（风息·操纵植物藤蔓）",
+        "image": "manicule.jpg"
+      }
+    },
+    {
+      "id": "slay:冰晶·玄离",
+      "mode": "slay",
+      "sourceId": "冰晶·玄离",
+      "name": "冰晶·玄离",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "凝水成冰掷向敌人，造成 6 点伤害并施加 1 层虚弱。（玄离·御灵系冰）",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "name": "冰晶·玄离",
+        "element": "水",
+        "type": "attack",
+        "energy": 1,
+        "damage": 6,
+        "target": "enemy",
+        "description": "凝水成冰掷向敌人，造成 6 点伤害并施加 1 层虚弱。（玄离·御灵系冰）",
+        "image": "railway-trains-in-space.jpg",
+        "powers": {
+          "weak": 1
+        }
+      },
+      "upgrade": {
+        "name": "冰晶·玄离+",
+        "element": "水",
+        "type": "attack",
+        "energy": 1,
+        "damage": 8,
+        "target": "enemy",
+        "description": "凝水成冰掷向敌人，造成 8 点伤害并施加 2 层虚弱。（玄离·御灵系冰）",
+        "image": "railway-trains-in-space.jpg",
+        "powers": {
+          "weak": 2
+        }
+      }
+    },
+    {
+      "id": "slay:清泉·双刃",
+      "mode": "slay",
+      "sourceId": "清泉·双刃",
+      "name": "清泉·双刃",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "双刀如水流连绵，造成 5 点伤害并抽 1 张牌。（清泉·御灵系水·双刀）",
+      "element": "shui",
+      "school": "yuling",
+      "native": {
+        "name": "清泉·双刃",
+        "element": "水",
+        "type": "attack",
+        "energy": 1,
+        "damage": 5,
+        "target": "enemy",
+        "description": "双刀如水流连绵，造成 5 点伤害并抽 1 张牌。（清泉·御灵系水·双刀）",
+        "image": "serpentine-dancer.jpg",
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      },
+      "upgrade": {
+        "name": "清泉·双刃+",
+        "element": "水",
+        "type": "attack",
+        "energy": 1,
+        "damage": 7,
+        "target": "enemy",
+        "description": "双刀如水流连绵，造成 7 点伤害并抽 1 张牌。（清泉·御灵系水·双刀）",
+        "image": "serpentine-dancer.jpg",
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "slay:芷清·土壁",
+      "mode": "slay",
+      "sourceId": "芷清·土壁",
+      "name": "芷清·土壁",
+      "characterId": null,
+      "cost": 2,
+      "type": "skill",
+      "text": "引大地厚土筑起壁垒，获得 14 点格挡。（芷清·御灵系土）",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "name": "芷清·土壁",
+        "element": "土",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "block": 14,
+        "description": "引大地厚土筑起壁垒，获得 14 点格挡。（芷清·御灵系土）",
+        "image": "angel-messenger.jpg"
+      },
+      "upgrade": {
+        "name": "芷清·土壁+",
+        "element": "土",
+        "type": "skill",
+        "energy": 2,
+        "target": "player",
+        "block": 18,
+        "description": "引大地厚土筑起壁垒，获得 18 点格挡。（芷清·御灵系土）",
+        "image": "angel-messenger.jpg"
+      }
+    },
+    {
+      "id": "slay:叶子·地刺",
+      "mode": "slay",
+      "sourceId": "叶子·地刺",
+      "name": "叶子·地刺",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "大地裂开刺出岩锥，造成 7 点伤害并施加 1 层易伤。（叶子·御灵系土）",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "name": "叶子·地刺",
+        "element": "土",
+        "type": "attack",
+        "energy": 1,
+        "damage": 7,
+        "target": "enemy",
+        "description": "大地裂开刺出岩锥，造成 7 点伤害并施加 1 层易伤。（叶子·御灵系土）",
+        "image": "fallback.jpg",
+        "powers": {
+          "vulnerable": 1
+        }
+      },
+      "upgrade": {
+        "name": "叶子·地刺+",
+        "element": "土",
+        "type": "attack",
+        "energy": 1,
+        "damage": 9,
+        "target": "enemy",
+        "description": "大地裂开刺出岩锥，造成 9 点伤害并施加 2 层易伤。（叶子·御灵系土）",
+        "image": "fallback.jpg",
+        "powers": {
+          "vulnerable": 2
+        }
+      }
+    },
+    {
+      "id": "slay:池年·重塑",
+      "mode": "slay",
+      "sourceId": "池年·重塑",
+      "name": "池年·重塑",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "大地之力重塑躯体，获得 4 点格挡与 2 层回灵。（池年·御灵系土·自我修复）",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "name": "池年·重塑",
+        "element": "土",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 4,
+        "powers": {
+          "regen": 2
+        },
+        "description": "大地之力重塑躯体，获得 4 点格挡与 2 层回灵。（池年·御灵系土·自我修复）",
+        "image": "ritual-rain.png"
+      },
+      "upgrade": {
+        "name": "池年·重塑+",
+        "element": "土",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 6,
+        "powers": {
+          "regen": 3
+        },
+        "description": "大地之力重塑躯体，获得 6 点格挡与 3 层回灵。（池年·御灵系土·自我修复）",
+        "image": "ritual-rain.png"
+      }
+    },
+    {
+      "id": "slay:龙岩·岩崩",
+      "mode": "slay",
+      "sourceId": "龙岩·岩崩",
+      "name": "龙岩·岩崩",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "兽形态引动岩崩，造成 13 点伤害。（龙岩·土/岩系能力）",
+      "element": "tu",
+      "school": "yuling",
+      "native": {
+        "name": "龙岩·岩崩",
+        "element": "土",
+        "type": "attack",
+        "energy": 2,
+        "damage": 13,
+        "target": "enemy",
+        "description": "兽形态引动岩崩，造成 13 点伤害。（龙岩·土/岩系能力）",
+        "image": "a-line-of-composed-type.jpg"
+      },
+      "upgrade": {
+        "name": "龙岩·岩崩+",
+        "element": "土",
+        "type": "attack",
+        "energy": 2,
+        "damage": 17,
+        "target": "enemy",
+        "description": "兽形态引动岩崩，造成 17 点伤害。（龙岩·土/岩系能力）",
+        "image": "a-line-of-composed-type.jpg"
+      }
+    },
+    {
+      "id": "slay:读心",
+      "mode": "slay",
+      "sourceId": "读心",
+      "name": "读心",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "窥探敌人心思，施加 2 层虚弱并抽 1 张牌。（心灵系·读心）",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "name": "读心",
+        "element": "心灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "enemy",
+        "powers": {
+          "weak": 2
+        },
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ],
+        "description": "窥探敌人心思，施加 2 层虚弱并抽 1 张牌。（心灵系·读心）",
+        "image": "soul-drain.png"
+      },
+      "upgrade": {
+        "name": "读心+",
+        "element": "心灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "enemy",
+        "powers": {
+          "weak": 3
+        },
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ],
+        "description": "窥探敌人心思，施加 3 层虚弱并抽 1 张牌。（心灵系·读心）",
+        "image": "soul-drain.png"
+      }
+    },
+    {
+      "id": "slay:傀儡术",
+      "mode": "slay",
+      "sourceId": "傀儡术",
+      "name": "傀儡术",
+      "characterId": null,
+      "cost": 1,
+      "type": "attack",
+      "text": "以丝线牵制敌人，造成 5 点伤害并施加 2 层虚弱。（心灵系·傀儡）",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "name": "傀儡术",
+        "element": "心灵",
+        "type": "attack",
+        "energy": 1,
+        "damage": 5,
+        "target": "enemy",
+        "powers": {
+          "weak": 2
+        },
+        "description": "以丝线牵制敌人，造成 5 点伤害并施加 2 层虚弱。（心灵系·傀儡）",
+        "image": "voodoo-education.png"
+      },
+      "upgrade": {
+        "name": "傀儡术+",
+        "element": "心灵",
+        "type": "attack",
+        "energy": 1,
+        "damage": 7,
+        "target": "enemy",
+        "powers": {
+          "weak": 3
+        },
+        "description": "以丝线牵制敌人，造成 7 点伤害并施加 3 层虚弱。（心灵系·傀儡）",
+        "image": "voodoo-education.png"
+      }
+    },
+    {
+      "id": "slay:戏梦",
+      "mode": "slay",
+      "sourceId": "戏梦",
+      "name": "戏梦",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "以幻梦惑敌，施加 2 层易伤与 2 层虚弱。（心灵系·戏梦）",
+      "element": null,
+      "school": "xinling",
+      "native": {
+        "name": "戏梦",
+        "element": "心灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "enemy",
+        "powers": {
+          "vulnerable": 2,
+          "weak": 2
+        },
+        "description": "以幻梦惑敌，施加 2 层易伤与 2 层虚弱。（心灵系·戏梦）",
+        "image": "succube.png"
+      },
+      "upgrade": {
+        "name": "戏梦+",
+        "element": "心灵",
+        "type": "skill",
+        "energy": 1,
+        "target": "enemy",
+        "powers": {
+          "vulnerable": 3,
+          "weak": 3
+        },
+        "description": "以幻梦惑敌，施加 3 层易伤与 3 层虚弱。（心灵系·戏梦）",
+        "image": "succube.png"
+      }
+    },
+    {
+      "id": "slay:重构",
+      "mode": "slay",
+      "sourceId": "重构",
+      "name": "重构",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "重构物质化守为攻，获得 6 点格挡并抽 1 张牌。（造物系·重构）",
+      "element": null,
+      "school": "zaowu",
+      "native": {
+        "name": "重构",
+        "element": "造物",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 6,
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ],
+        "description": "重构物质化守为攻，获得 6 点格挡并抽 1 张牌。（造物系·重构）",
+        "image": "manicule.jpg"
+      },
+      "upgrade": {
+        "name": "重构+",
+        "element": "造物",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 9,
+        "actions": [
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ],
+        "description": "重构物质化守为攻，获得 9 点格挡并抽 1 张牌。（造物系·重构）",
+        "image": "manicule.jpg"
+      }
+    },
+    {
+      "id": "slay:无中生有",
+      "mode": "slay",
+      "sourceId": "无中生有",
+      "name": "无中生有",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "以物质灵凭空造物，获得 1 点能量并抽 1 张牌。（造物系·无中生有）",
+      "element": null,
+      "school": "zaowu",
+      "native": {
+        "name": "无中生有",
+        "element": "造物",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "actions": [
+          {
+            "type": "addEnergyToPlayer"
+          },
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 1
+            }
+          }
+        ],
+        "description": "以物质灵凭空造物，获得 1 点能量并抽 1 张牌。（造物系·无中生有）",
+        "image": "mask-of-the-faceless.png"
+      },
+      "upgrade": {
+        "name": "无中生有+",
+        "element": "造物",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "actions": [
+          {
+            "type": "addEnergyToPlayer"
+          },
+          {
+            "type": "drawCards",
+            "parameter": {
+              "amount": 2
+            }
+          }
+        ],
+        "description": "以物质灵凭空造物，获得 1 点能量并抽 2 张牌。（造物系·无中生有）",
+        "image": "mask-of-the-faceless.png"
+      }
+    },
+    {
+      "id": "slay:封灵阵",
+      "mode": "slay",
+      "sourceId": "封灵阵",
+      "name": "封灵阵",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "以阵法压制全场敌人，施加 2 层虚弱与 2 层易伤。（锁御系·阵法）",
+      "element": null,
+      "school": "suoyu",
+      "native": {
+        "name": "封灵阵",
+        "element": "锁御",
+        "type": "skill",
+        "energy": 1,
+        "target": "allEnemies",
+        "powers": {
+          "weak": 2,
+          "vulnerable": 2
+        },
+        "description": "以阵法压制全场敌人，施加 2 层虚弱与 2 层易伤。（锁御系·阵法）",
+        "image": "ritual-rain.png"
+      },
+      "upgrade": {
+        "name": "封灵阵+",
+        "element": "锁御",
+        "type": "skill",
+        "energy": 1,
+        "target": "allEnemies",
+        "powers": {
+          "weak": 3,
+          "vulnerable": 3
+        },
+        "description": "以阵法压制全场敌人，施加 3 层虚弱与 3 层易伤。（锁御系·阵法）",
+        "image": "ritual-rain.png"
+      }
+    },
+    {
+      "id": "slay:御灵环",
+      "mode": "slay",
+      "sourceId": "御灵环",
+      "name": "御灵环",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "以御灵法器护体，获得 7 点格挡与 1 层回灵。（锁御系·灵御）",
+      "element": null,
+      "school": "suoyu",
+      "native": {
+        "name": "御灵环",
+        "element": "锁御",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 7,
+        "powers": {
+          "regen": 1
+        },
+        "description": "以御灵法器护体，获得 7 点格挡与 1 层回灵。（锁御系·灵御）",
+        "image": "angel-messenger.jpg"
+      },
+      "upgrade": {
+        "name": "御灵环+",
+        "element": "锁御",
+        "type": "skill",
+        "energy": 1,
+        "target": "player",
+        "block": 10,
+        "powers": {
+          "regen": 1
+        },
+        "description": "以御灵法器护体，获得 10 点格挡与 1 层回灵。（锁御系·灵御）",
+        "image": "angel-messenger.jpg"
+      }
+    },
+    {
+      "id": "slay:拾遗",
+      "mode": "slay",
+      "sourceId": "拾遗",
+      "name": "拾遗",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "吸收散灵余韵。获得 6 点格挡。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "拾遗",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "block": 6,
+        "target": "player",
+        "image": "apteryx-mantelli.jpg",
+        "description": "吸收散灵余韵。获得 6 点格挡。"
+      },
+      "upgrade": {
+        "name": "拾遗+",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "block": 9,
+        "target": "player",
+        "image": "apteryx-mantelli.jpg",
+        "description": "吸收散灵余韵。获得 9 点格挡。",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:衔光",
+      "mode": "slay",
+      "sourceId": "衔光",
+      "name": "衔光",
+      "characterId": null,
+      "cost": 1,
+      "type": "skill",
+      "text": "牵起一缕光丝，令敌人虚弱 2 层。",
+      "element": null,
+      "school": "shengling",
+      "native": {
+        "name": "衔光",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "powers": {
+          "weak": 2
+        },
+        "target": "enemy",
+        "image": "angel-messenger.jpg",
+        "description": "牵起一缕光丝，令敌人虚弱 2 层。"
+      },
+      "upgrade": {
+        "name": "衔光+",
+        "element": "生灵",
+        "type": "skill",
+        "energy": 1,
+        "powers": {
+          "weak": 3
+        },
+        "target": "enemy",
+        "image": "angel-messenger.jpg",
+        "description": "牵起一缕光丝，令敌人虚弱 3 层。",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:金乌展翅",
+      "mode": "slay",
+      "sourceId": "金乌展翅",
+      "name": "金乌展翅",
+      "characterId": null,
+      "cost": 2,
+      "type": "attack",
+      "text": "展翅时翅缘淌虹光。造成 12 点伤害。",
+      "element": "huo",
+      "school": "yuling",
+      "native": {
+        "name": "金乌展翅",
+        "element": "火",
+        "type": "attack",
+        "energy": 2,
+        "damage": 12,
+        "target": "enemy",
+        "image": "the-angel-of-death.jpg",
+        "description": "展翅时翅缘淌虹光。造成 12 点伤害。"
+      },
+      "upgrade": {
+        "name": "金乌展翅+",
+        "element": "火",
+        "type": "attack",
+        "energy": 2,
+        "damage": 16,
+        "target": "enemy",
+        "image": "the-angel-of-death.jpg",
+        "description": "展翅时翅缘淌虹光。造成 16 点伤害。",
+        "upgraded": true
+      }
+    },
+    {
+      "id": "slay:虹间安魂",
+      "mode": "slay",
+      "sourceId": "虹间安魂",
+      "name": "虹间安魂",
+      "characterId": null,
+      "cost": 2,
+      "type": "skill",
+      "text": "展开「虹之间」收容残魂。获得 12 点格挡。",
+      "element": null,
+      "school": "kongjian",
+      "native": {
+        "name": "虹间安魂",
+        "element": "空间",
+        "type": "skill",
+        "energy": 2,
+        "block": 12,
+        "target": "player",
+        "image": "angel-messenger.jpg",
+        "description": "展开「虹之间」收容残魂。获得 12 点格挡。"
+      },
+      "upgrade": {
+        "name": "虹间安魂+",
+        "element": "空间",
+        "type": "skill",
+        "energy": 2,
+        "block": 16,
+        "target": "player",
+        "image": "angel-messenger.jpg",
+        "description": "展开「虹之间」收容残魂。获得 16 点格挡。",
+        "upgraded": true
+      }
+    }
+  ]
+}

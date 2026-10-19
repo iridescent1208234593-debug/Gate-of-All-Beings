@@ -20,7 +20,7 @@ function chan() {
 export function publish(type, payload) {
   const c = chan();
   if (c) c.postMessage({ type, payload });
-  else if (hasWindow()) window.dispatchEvent(new CustomEvent('iridescently:' + type, { detail: payload }));
+  if (hasWindow()) window.dispatchEvent(new CustomEvent('iridescently:' + type, { detail: payload }));
 }
 
 /** 订阅指定类型消息，返回取消函数。 */
@@ -29,7 +29,9 @@ export function subscribe(type, handler) {
   if (c) {
     const onMsg = (e) => { if (e.data && e.data.type === type) handler(e.data.payload); };
     c.addEventListener('message', onMsg);
-    return () => c.removeEventListener('message', onMsg);
+    const local = e => handler(e.detail);
+    if (hasWindow()) window.addEventListener('iridescently:' + type, local);
+    return () => {c.removeEventListener('message', onMsg);if(hasWindow())window.removeEventListener('iridescently:' + type,local);};
   }
   if (!hasWindow()) return () => {};
   const onEv = (e) => handler(e.detail);

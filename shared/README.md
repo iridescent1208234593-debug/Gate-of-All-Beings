@@ -4,7 +4,7 @@
 | --- | --- | --- |
 | `shared-ui` | 设计系统 lxh-ui（真身；`portal/huiguan/design-system/ui` 反向 junction 指向它） | 本仓库 |
 | `shared-types` | 三系统 JSON 契约（world / exchange / models），`npm run verify` 28 项 | 本仓库（历史独立仓库已并入） |
-| `shared-data` | 世界观只读事实导出（`worldview.json` + `export_worldview.py`） | 本仓库 |
+| `shared-data` | 世界观角色、旧 ID 跳转、演武模型、跨模式卡牌目录；详见其 README | 本仓库 |
 | `shared-session` | 统一会话 / 统一存档 / 事件总线 | 本仓库 |
 
 根 `package.json` 声明 workspaces（`shared/*`），导入用包名：

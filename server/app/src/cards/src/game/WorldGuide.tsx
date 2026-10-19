@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import facts from '@lxh/shared-data/worldview.json';
+import { facts } from '@lxh/shared-data/catalog.js';
 import { ABILITY_SYSTEMS, ELEMENTS } from '@lxh/shared-types/world';
 import type { MetaState } from './core/types';
 import { CARDS } from './core/content';
