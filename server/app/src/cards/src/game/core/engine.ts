@@ -1,13 +1,13 @@
 import { CARDS, HEROES, pool } from './content';
-import type { Action, Battle, CardInstance, Enemy, HeroId, NodeKind, RunState, TimelineAnchor } from './types';
+import type { Action, Battle, WoundCarry, CardInstance, Enemy, HeroId, NodeKind, RunState, TimelineAnchor } from './types';
 function random(s: RunState) { s.rng = (Math.imul(s.rng,1664525)+1013904223)>>>0; return s.rng/4294967296; }
 function shuffle<T>(s: RunState, a: T[]) { for(let i=a.length-1;i>0;i--){const j=Math.floor(random(s)*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
 function instance(s: RunState, card: string): CardInstance { return {uid:`c${s.nextId++}`,card,upgraded:false}; }
 function note(s: RunState, text: string) { s.messages=[...s.messages.slice(-11),text]; }
 function draw(s: RunState, count: number) { const b=s.battle!; for(let i=0;i<count && b.hand.length<10;i++){ if(!b.draw.length) b.draw=shuffle(s,b.discard.splice(0)); const c=b.draw.pop(); if(c)b.hand.push(c); } }
 function offers(s: RunState) { return shuffle(s,pool(s.hero,s.ecoCards).map(c=>c.id)).slice(0,3); }
-export function createRun(hero: HeroId, seed: number, sealed=false, ecoCards: string[] = []): RunState {
-  const hp=HEROES[hero].hp;
+export function createRun(hero: HeroId, seed: number, sealed=false, ecoCards: string[] = [], wound?: WoundCarry): RunState {
+  const hp=wound?Math.max(1,Math.floor(HEROES[hero].hp/2)):HEROES[hero].hp;
   const s: RunState={ecoCards:ecoCards.filter(id=>id.startsWith("eco-")&&CARDS[id]),version:1,seed:seed>>>0,rng:seed>>>0,hero,phase:'map',hp,maxHp:hp,gold:65,floor:-1,lane:1,nodes:[],visited:[],deck:[],relics:[HEROES[hero].relic],battle:null,offers:[],removed:false,log:[],messages:['穿过众生之门，新的旅途开始了。'],nextId:1};
   for(let f=0;f<10;f++)for(let l=0;l<3;l++){
     const choices: NodeKind[]=['battle','battle','event','shop','rest','elite'];
@@ -15,7 +15,12 @@ export function createRun(hero: HeroId, seed: number, sealed=false, ecoCards: st
     if(f===9 && l!==1)continue;
     s.nodes.push({id:`${f}-${l}`,floor:f,lane:l,kind});
   }
-  s.deck=HEROES[hero].starter.map(c=>instance(s,c)); if(sealed)s.deck.push(instance(s,'seal'));
+  if(wound){
+    // 重伤：原牌组与遗物保留，生命上限减半。
+    s.deck=structuredClone(wound.deck);s.relics=[...wound.relics];
+    s.nextId=Math.max(s.nextId,...s.deck.map(c=>Number(c.uid.slice(1))+1||0));
+    s.messages=['带着旧伤再次启程，生命上限减半。'];
+  } else {s.deck=HEROES[hero].starter.map(c=>instance(s,c)); if(sealed)s.deck.push(instance(s,'seal'));}
   return s;
 }
 export function availableNodes(s: RunState) { return s.nodes.filter(n=>n.floor===s.floor+1 && (s.floor<0 || n.kind==='boss' || Math.abs(n.lane-s.lane)<=1)); }

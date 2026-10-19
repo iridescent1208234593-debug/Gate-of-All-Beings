@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { availableNodes, createRun, reduceRun, replay, canPlayCard } from './engine';
 import { CARDS, HEROES } from './content';
-import { advanceDay, claimRun, createMeta, sealCharacter, validateTimeline, claimEcology } from './meta';
+import { advanceDay, claimRun, createMeta, sealCharacter, validateTimeline, claimEcology, heroState, allHeroesDead, reviveIfDue, REVIVE_MS } from './meta';
 import type { HeroId, RunState } from './types';
 const battle=(hero:HeroId='xiaohei')=>reduceRun(createRun(hero,1234),{type:'enter',node:'0-1'});
 test('all heroes produce reproducible, connected ten-floor maps',()=>{
@@ -72,4 +72,18 @@ test('ecology unlocks enter rewards only after receipt and cannot be claimed twi
   const m=claimEcology(createMeta(),p);assert.equal(m.food,5);assert.equal(m.herbs,8);
   assert.deepEqual(m.ecoCards,['eco-producer']);assert.throws(()=>claimEcology(m,p));
   assert.equal(HEROES.xiaohei.characterId,1);assert.equal(HEROES.xiaohei.element,'jin');
+});
+
+test('defeat wounds a hero once, kills on the second defeat, and all-dead revives after five hours',()=>{
+  let m=createMeta();m.spirit=40;m.herbs=8;
+  const lose=(seed:number,wound?:{deck:any[];relics:string[]})=>{const r=createRun('xiaohei',seed,false,[],wound);r.phase='defeat';return r;};
+  let r=lose(1);m=claimRun(m,r,1000);
+  assert.equal(heroState(m,'xiaohei'),'wounded');assert.equal(m.spirit,30);assert.equal(m.herbs,6);
+  const c=m.characters.xiaohei;const w=createRun('xiaohei',2,false,[],{deck:c.woundDeck!,relics:c.woundRelics!});
+  assert.equal(w.maxHp,Math.floor(HEROES.xiaohei.hp/2));assert.deepEqual(w.deck.map(x=>x.card),r.deck.map(x=>x.card));
+  m=claimRun(m,lose(2),1000);assert.equal(heroState(m,'xiaohei'),'dead');assert.ok(!allHeroesDead(m));
+  for(const h of ['wuxian','fengxi'] as const){for(const seed of [3,4]){const x=createRun(h,seed);x.phase='defeat';m=claimRun(m,x,2000);}}
+  assert.ok(allHeroesDead(m));assert.equal(m.allDeadAt,2000);
+  assert.equal(reviveIfDue(m,2000+REVIVE_MS-1),m);
+  const back=reviveIfDue(m,2000+REVIVE_MS);assert.equal(heroState(back,'xiaohei'),'healthy');assert.equal(back.allDeadAt,undefined);
 });

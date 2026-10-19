@@ -14,6 +14,7 @@ export interface GameAction { sequence: number; action: Action; }
 export interface RunState { ecoCards?: string[]; version: 1; seed: number; rng: number; hero: HeroId; phase: Phase; hp: number; maxHp: number; gold: number; floor: number; lane: number; nodes: MapNode[]; visited: string[]; deck: CardInstance[]; relics: string[]; battle: Battle | null; offers: string[]; removed: boolean; log: GameAction[]; messages: string[]; nextId: number; }
 export interface TimelineEvent { id: string; title: string; floor: number; effect: 'heal' | 'gold' | 'growth'; amount: number; }
 export interface TimelineAnchor { id: string; revision: number; events: TimelineEvent[]; }
-export interface CompanionBond { bond: number; sealed: boolean; assignment: 'garden' | 'practice' | 'rest'; }
-export interface MetaState { ecoIndividuals?: EcoIndividual[]; food?: number; ecoReceipts?: Record<string,number>; ecoCards?: string[]; version: 1; day: number; spirit: number; herbs: number; garden: number; characters: Record<HeroId, CompanionBond>; timeline: TimelineAnchor; claimedRuns: string[]; }
+export interface CompanionBond { bond: number; sealed: boolean; assignment: 'garden' | 'practice' | 'rest'; deaths?: number; woundDeck?: CardInstance[]; woundRelics?: string[]; }
+export interface WoundCarry { deck: CardInstance[]; relics: string[]; }
+export interface MetaState { ecoIndividuals?: EcoIndividual[]; food?: number; ecoReceipts?: Record<string,number>; ecoCards?: string[]; version: 1; day: number; spirit: number; herbs: number; garden: number; characters: Record<HeroId, CompanionBond>; timeline: TimelineAnchor; claimedRuns: string[]; allDeadAt?: number; }
 export interface SaveData { ecoDeliveries?: EcoExchange[]; version: 1; run: RunState | null; meta: MetaState; runTimeline: TimelineAnchor; }
