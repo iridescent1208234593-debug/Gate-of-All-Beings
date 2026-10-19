@@ -44,8 +44,8 @@ def prepare():
             files[dest] = file
     published = ROOT / '.releases/production/site'
     for name in ('server', 'portal', 'shared'): collect(published / name, name)
-    for name in ('cards', 'softie-webgpu', 'juling'): collect(ROOT / 'server/app/src' / name, 'server/app/src/' + name)
-    files['server/app/src/cards/server.py'] = published / 'server/app/src/cards/server.py'
+    # Source files come only from the reviewed site snapshot. The working tree
+    # can contain another editor's unpublished changes during a release.
     collect(ROOT / 'server/app/modules', 'server/app/modules')
     collect(ROOT / 'portal/www/index.html', 'portal/www')
     collect(ROOT / 'portal/www/assets/homepage', 'portal/www/assets/homepage')
