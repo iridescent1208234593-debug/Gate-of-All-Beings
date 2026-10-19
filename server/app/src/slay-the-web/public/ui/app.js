@@ -9,7 +9,7 @@ import createNewGame from '../game/new-game.js'
 import {locationForFloor} from '../game/dungeon.js'
 import {createCard, getCardRewards} from '../game/cards.js'
 import {getCurrRoom, isCurrRoomCompleted, isDungeonCompleted} from '../game/utils-state.js'
-import {saveRun, clearRun} from '../game/save-system.js'
+import {saveRun, clearRun, beginRun} from '../game/save-system.js'
 import {realms} from '../content/cultivation.js'
 import {settleRun, awardSoul} from '../content/soul-legacy.js'
 // 灵质修行双向联动：主爬塔结算 → 修行进度「轮回感悟」反哺（content/lingzhi-bonus.js）
@@ -133,6 +133,7 @@ export default class App extends Component {
 		}
 
 		// 开局落盘一次自动存档（之后每次 update 都会刷新）
+		beginRun(this.game.state)
 		saveRun(this.game.state)
 
 		// 开局按当前房间播放场景 BGM（后续状态变更由 update 同步切换）

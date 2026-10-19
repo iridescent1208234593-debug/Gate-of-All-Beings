@@ -7,6 +7,7 @@ import {guildBranches} from '../content/guild-branches.js'
 import {DIFFICULTIES} from '../content/difficulty.js'
 import {todayDaily, formatDailyPassive} from '../content/daily.js'
 import {hasRun} from '../game/save-system.js'
+import {readGame,onGameChange} from '/shared/shared-session/game.js'
 import {loadProgress, collectionSummary} from '../game/lingzhi-progress.js'
 import {computeLingzhiBonus, lingzhiBonusLine, getLingzhiSettlement, lingzhiSettlementLine} from '../content/lingzhi-bonus.js'
 
@@ -16,6 +17,8 @@ export default class SplashScreen extends Component {
 		this.state = {element: null, branch: null, difficulty: 'normal', guild: null, showTutorial: false}
 	}
 	componentDidMount() {
+		const refresh=()=>readGame().then(profile=>this.setState({sharedResources:profile.resources})).catch(console.error)
+		refresh();this.stopSharedProgress=onGameChange(refresh)
 		gsap.from('.Splash--fadein', {duration: 0.5, autoAlpha: 0, scale: 0.95})
 		gsap.from('.Splash--fadein .Options', {
 			delay: 0.2,
@@ -26,6 +29,7 @@ export default class SplashScreen extends Component {
 		})
 		gsap.to('.Splash-spoder', {delay: 5, x: 420, y: 60, duration: 3})
 	}
+	componentWillUnmount(){this.stopSharedProgress?.()}
 	render(props, state) {
 		const legacy = getLegacy()
 		const panel = legacyPanel(legacy)
@@ -47,6 +51,7 @@ export default class SplashScreen extends Component {
 			<article class="Splash Splash--fadein">
 				<h1 style="margin-top:8vh">罗小黑战记·重生之门</h1>
 				<h2>一场属于你和浏览器的爬塔冒险</h2>
+				<p>共同旅途 · 灵质 ${state.sharedResources?.spirit??'—'} · 草药 ${state.sharedResources?.herb??'—'}　<a href="/app/modules/cards/#journey">查看同行名册与灵卡</a></p>
 				<img class="Splash-spoder" src="ui/images/spoder.png" title="嘿，你好呀" />
 				<div class="Splash-element">
 					<p class="Splash-elementTitle">本命御灵系 · 五行共鸣（可跳过随机觉醒）</p>
@@ -138,7 +143,7 @@ export default class SplashScreen extends Component {
 				`
 							: html`<li><button autofocus onClick=${startGame}>开始</a></li>`}
 					<li><button onClick=${props.onLingzhiXiuxing}>灵质修行</button></li>
-					<li><a class="Button" href="/collection.html">世界观图鉴</a></li>
+					<li><a class="Button" href="collection.html">世界观图鉴</a></li>
 					<li><button onClick=${() => this.setState({showTutorial: !state.showTutorial})}>新手教程</a></li>
 				</ul>
 				<div class="Splash-details Article">

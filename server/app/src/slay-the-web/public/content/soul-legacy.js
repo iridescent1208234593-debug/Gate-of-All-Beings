@@ -11,6 +11,8 @@ const localStorage = unifiedStorage('slay');
 // 数据存储：localStorage['luoxiaohei-rebirth-soul-legacy']
 
 import {treasures} from './cultivation.js'
+import {runIdentity} from '../game/save-system.js'
+import {recordRebirthRun} from '../game/shared-progress.js'
 
 const LEGACY_KEY = 'luoxiaohei-rebirth-soul-legacy'
 
@@ -99,9 +101,15 @@ export function calcSoulGained(state, won) {
  */
 export function settleRun(state, won) {
 	const legacy = getLegacy() || {}
+	const runId=runIdentity(state)
+	if((legacy.settledRuns||[]).includes(runId)){
+		recordRebirthRun(runId,won)
+		return {...legacy,gainedSoul:0,totalSoul:legacy.soul||0,level:legacyLevel(legacy.soul||0)}
+	}
 	const gainedSoul = calcSoulGained(state, won)
 	const totalSoul = (legacy.soul || 0) + gainedSoul
 	const newLegacy = {
+		settledRuns:[...(legacy.settledRuns||[]),runId],
 		soul: totalSoul,
 		runs: (legacy.runs || 0) + 1,
 		wins: (legacy.wins || 0) + (won ? 1 : 0),
@@ -111,6 +119,7 @@ export function settleRun(state, won) {
 		updatedAt: Date.now(),
 	}
 	saveLegacy(newLegacy)
+	recordRebirthRun(runId,won)
 	const level = legacyLevel(totalSoul)
 	return {gainedSoul, totalSoul, level, soulSeed: state.player?.soulSeed || 0, ...newLegacy}
 }

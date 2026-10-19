@@ -55,6 +55,8 @@
 	<body style="overflow: auto">
 		<div id="root"></div>
 		<script type="module">
+import {initializeSharedProgress} from './game/shared-progress.js';
+await initializeSharedProgress();
 			import {html, render} from './web_modules/htm/preact/standalone.module.js'
 			import {getRuns} from './game/backend.js'
 			import {getLegacy, legacyLevel, SOUL_REALMS} from './content/soul-legacy.js'
@@ -204,22 +206,11 @@
 					<div class="Stats-card">
 						<h3>历次对局 <small style="color:#8aa198;font-weight:400">最近 100 局</small></h3>
 						${props.runs.length ? html`<table class="StatsTable">
-							<thead><tr><th>日期</th><th>名称</th><th>状态</th><th>御灵师生命</th><th>历史步数</th></tr></thead>
-							<tbody>${props.runs.map((run) => {
-								try {
-									const game = JSON.parse(run.fields.state)
-									const date = new Intl.DateTimeFormat('zh-CN').format(new Date(run.createdTime))
-									return html`<tr>
-										<td>${date}</td>
-										<td>${run.fields.name}</td>
-										<td>${run.fields.status}</td>
-										<td>${game.state.player.currentHealth}</td>
-										<td>${game.past.list.length}</td>
-									</tr>`
-								} catch (e) {
-									return null
-								}
-							})}</tbody>
+							<thead><tr><th>日期</th><th>旅途</th><th>灵质</th><th>草药</th></tr></thead>
+<tbody>${props.runs.map(run => html`<tr>
+<td>${new Intl.DateTimeFormat('zh-CN').format(new Date(run.at))}</td>
+<td>${run.summary}</td><td>+${run.resources.spirit||0}</td><td>+${run.resources.herb||0}</td>
+</tr>`)}</tbody>
 						</table>` : html`<p style="color:#5b6b64;font-size:13px">暂无对局记录，去爬塔吧。</p>`}
 					</div>
 				</div>

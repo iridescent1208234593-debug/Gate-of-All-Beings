@@ -267,6 +267,8 @@
 <body>
 	<div id="Collection"></div>
 	<script type="module">
+import {initializeSharedProgress} from './game/shared-progress.js';
+await initializeSharedProgress();
 		import {html, render, Component} from './web_modules/htm/preact/standalone.module.js'
 		import cards from './content/cards.js'
 		import {Card} from './ui/cards.js'

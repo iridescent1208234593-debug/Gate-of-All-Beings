@@ -3,6 +3,11 @@
 // 与 menu.js 的 URL hash 保存互为补充：hash 用于分享整局；本模块用于本机中途退出后继续冒险。
 // 玩家档案（profile）：跨会话保留的"修行/传承"总档案——灵质修行进度快照写入此档案，
 // 主界面入口据此展示状态摘要，结算界面据此计算联动奖励（详见 content/lingzhi-bonus.js）。
+import {unifiedStorage} from '/shared/shared-session/kv.js'
+const defaultStorage=unifiedStorage('slay')
+let activeRunId
+export function beginRun(state) { activeRunId=state?.sharedRunId||crypto.randomUUID();return activeRunId }
+export function runIdentity(state) { return state?.sharedRunId||activeRunId||beginRun(state) }
 const SAVE_KEY = 'lxz-rebirth-run-v1'
 const PROFILE_KEY = 'lxz-rebirth-profile-v1'
 
@@ -13,8 +18,7 @@ export function setStorage(s) {
 }
 function getStorage() {
 	if (injectedStorage) return injectedStorage
-	if (typeof localStorage !== 'undefined') return localStorage
-	return null
+	return defaultStorage
 }
 
 // 快照合法性校验：必须包含可继续游玩的核心字段
@@ -83,7 +87,7 @@ export function saveRun(state) {
 			savedAt: Date.now(),
 			floor: state.dungeon.y,
 			roomType: node?.room?.type || null,
-			state: JSON.parse(serializeRun(state)),
+			state: {...JSON.parse(serializeRun(state)),sharedRunId:runIdentity(state)},
 		}
 		storage.setItem(SAVE_KEY, JSON.stringify(payload))
 		return true

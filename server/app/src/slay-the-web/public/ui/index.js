@@ -9,6 +9,7 @@ import {loadRun} from '../game/save-system.js'
 import {mountAccountBar} from './account-bar.js'
 import bgm from './bgm.js'
 import {disposeAnimations} from './animations.js'
+import {initializeSharedProgress,flushSharedProgress,disposeSharedProgress} from '../game/shared-progress.js'
 
 /** @enum {string} */
 const GameModes = {
@@ -91,6 +92,7 @@ class SlayTheWeb extends Component {
 }
 
 const mount = document.querySelector('#SlayTheWeb')
+await initializeSharedProgress()
 render(html` <${SlayTheWeb} /> `, mount)
 const disposeAccountBar = mountAccountBar()
 let disposed = false
@@ -101,4 +103,5 @@ window.__iridescentlyDispose = () => {
 	bgm.stop()
 	render(null, mount)
 	disposeAccountBar()
+	flushSharedProgress().then(disposeSharedProgress).catch(console.error)
 }

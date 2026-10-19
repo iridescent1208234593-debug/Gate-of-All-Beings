@@ -1,27 +1,10 @@
-const apiUrl = 'https://api.slaytheweb.cards/api/runs'
-
-/**
- * Saves a "game" object into a remote database.
- * @param {object} game
- * @returns {Promise}
- */
-export function postRun(game) {
-	return fetch(apiUrl, {
-		method: 'POST',
-		headers: {
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify(game),
-	})
+// Project-local history. This module never contacts the upstream game's server.
+import {readGame,transact} from '/shared/shared-session/game.js'
+import {runIdentity} from './save-system.js'
+export async function postRun(game) {
+	if(!game?.state?.player)throw new Error('缺少有效的对局记录。')
+	return transact('slay',{id:'manual-history:'+runIdentity(game.state),summary:'重生之门 · 对局记录'})
 }
-
-/**
- * Fetches a list of maximum 100 runs from the remote database.
- * @returns {Promise<[]>} list of game runs
- */
 export async function getRuns() {
-	const res = await fetch(apiUrl)
-	const {runs} = await res.json()
-	return runs.records
+	return (await readGame()).recent.filter(run=>run.mode==='slay')
 }

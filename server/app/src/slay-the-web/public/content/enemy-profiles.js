@@ -1,3 +1,4 @@
+import {characterByName} from '/shared/shared-data/catalog.js';
 // 罗小黑战记·重生之门 —— 敌人世界观档案
 // 来源：assets\罗小黑战记数据库\worldview_luoxiaohei_v4.db
 //   characters（角色表） / spirit_lifecycle（灵质与聚灵概念） / locations（地点表）
@@ -352,7 +353,11 @@ export const enemyProfiles = {
  * @param {string|undefined} name
  * @returns {object|null}
  */
-export const enemyProfileByName = (name) => (name && enemyProfiles[name]) || null
+export const enemyProfileByName = name => {
+ const native=(name&&enemyProfiles[name])||null;
+ const character=characterByName(name);
+ return character?{...native,characterId:character.id,formal:character.name,species:character.species,affiliation:character.affiliation,desc:character.summary,source:character.sourceUrl}:native;
+}
 
 /**
  * 档案总数（供验证脚本断言）。
