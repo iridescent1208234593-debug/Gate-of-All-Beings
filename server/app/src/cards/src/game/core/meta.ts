@@ -19,6 +19,7 @@ export function reviveIfDue(meta: MetaState, now=Date.now()): MetaState {
 }
 export function reviveRemaining(meta: MetaState, now=Date.now()): number {return meta.allDeadAt===undefined?REVIVE_MS:Math.max(0,meta.allDeadAt+REVIVE_MS-now);}
 export function claimRun(meta: MetaState, run: RunState, now=Date.now()): MetaState {
+  if(run.mode==='rebirth'||run.hero==='seeker')return meta;
   const key=`${run.hero}:${run.seed}`;if(!['victory','defeat'].includes(run.phase)||meta.claimedRuns.includes(key))return meta;
   const m=structuredClone(meta);m.claimedRuns.push(key);const c=m.characters[run.hero];
   if(run.phase==='victory'){m.spirit+=20;c.bond+=6;return m;}

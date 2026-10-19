@@ -10,7 +10,8 @@ import {BASE_CARDS} from '../src/game/core/content';
 import {balanceOf,validateBalance} from '../src/game/core/cardBalance';
 
 test('every shipped card has a valid editable numeric definition',()=>{
-  for(const card of Object.values(BASE_CARDS))assert.doesNotThrow(()=>validateBalance(balanceOf(card)),card.id);
+  // 重生之门卡（rebirth:）不在数值编辑器范围内：图鉴不列出，后台的编号校验也不接受它们。
+  for(const card of Object.values(BASE_CARDS).filter(c=>!c.id.startsWith('rebirth:')))assert.doesNotThrow(()=>validateBalance(balanceOf(card)),card.id);
 });
 test('saved configuration survives backend recreation, backs up and resets a single card',async()=>{
   const directory=await mkdtemp(path.join(os.tmpdir(),'zszm-balance-'));

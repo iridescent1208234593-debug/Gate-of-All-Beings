@@ -11,7 +11,7 @@ import './card-admin.css';
 
 export function CardCollection({service,individuals,renderCard}:{service:CardBalanceService;individuals:EcoIndividual[];renderCard:(card:Card,open:()=>void)=>ReactNode}){
   const [search,setSearch]=useState(''),[owner,setOwner]=useState('全部'),[selected,setSelected]=useState<string|null>(null),[notice,setNotice]=useState('');
-  const cards=Object.values(CARDS).filter(c=>(owner==='全部'||(c.owner==='all'?'通用':HEROES[c.owner].name)===owner)&&`${c.name} ${c.id} ${c.text}`.toLowerCase().includes(search.toLowerCase()));
+  const cards=Object.values(CARDS).filter(c=>!c.id.startsWith('rebirth:')&&(owner==='全部'||(c.owner==='all'?'通用':HEROES[c.owner].name)===owner)&&`${c.name} ${c.id} ${c.text}`.toLowerCase().includes(search.toLowerCase()));
   const card=selected?CARDS[selected]:undefined,individual=individuals.find(i=>i.id===selected);
   return <section className="card-library"><div className="section-heading"><div><span className="eyebrow">SPIRIT CARD COLLECTION</span><h1>灵卡图鉴</h1><p className="subtle">收录 {Object.keys(CARDS).length} 张灵卡 · 点击卡牌查看效果、调整数值。</p></div><button className="secondary" onClick={()=>void service.reload()} disabled={service.busy}>重新加载配置</button></div>
     <div className="balance-status"><span role="status">{service.busy?'正在连接数值后台…':service.error||`数值配置已连接 · 版本 ${service.snapshot?.revision??0} · ${Object.keys(service.snapshot?.overrides||{}).length} 张已调整`}</span><span>{service.snapshot?.editable?'本机可编辑':'只读模式 · 本机打开后可调整'}</span>{service.snapshot?.backup&&<button className="text-button" onClick={()=>downloadJSON(service.snapshot!.backup,'card-balance-export.json')}>导出数值备份</button>}</div>

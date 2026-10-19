@@ -1,4 +1,5 @@
 import legacyCards from '../data/legacy-cards.json';
+import rebirthData from '../data/rebirth.json';
 import { HERO_CHARACTER_IDS, CHARACTER_AFFINITIES } from '@lxh/shared-types/world';
 import { identityById } from '@lxh/shared-data/identities.js';
 import { cardText } from './cardText';
@@ -50,7 +51,9 @@ const ecoCards: Card[] = [
   {id:'eco-herbivore',name:'林间同行',owner:'all',cost:1,type:'技能',glyph:'伴',text:'获得 5 点格挡和 1 点力量。消耗。',effect:{block:5,strength:1},exhaust:true,source:'生态观测'},
   {id:'eco-carnivore',name:'巡林之势',owner:'all',cost:2,type:'攻击',glyph:'巡',text:'造成 14 点伤害，施加 2 回合虚弱。',effect:{damage:14,weak:2},source:'生态观测'},
 ];
-const allCards=[...cards,...inherited,...ecoCards];
+/** 重生之门（轮回玩法）卡牌：由 scripts/export-rebirth.mjs 从原始内容导出，保留原卡面文字与显式升级。 */
+export const REBIRTH_CARDS = rebirthData.cards as unknown as Card[];
+const allCards=[...cards,...inherited,...ecoCards,...REBIRTH_CARDS];
 export const BASE_CARDS = Object.fromEntries(allCards.map(c => [c.id,structuredClone(c)])) as Record<string, Card>;
 let overrides:CardOverrides={};
 export const CARDS = Object.fromEntries(allCards.map(c => [c.id,c])) as Record<string, Card>;
@@ -63,8 +66,15 @@ export function registerEcoCards(individuals: EcoIndividual[] = []) {
   for(const i of individuals)CARDS[i.id]=applyBalance(ecologyCard(i),overrides[i.id]);
 }
 export const pool = (hero: HeroId, unlocked: string[] = []) => Object.values(CARDS).filter(c => {
+  if(c.id.startsWith('rebirth:'))return false;
   if(c.id.startsWith('eco-'))return unlocked.includes(c.id);
   if(c.id.startsWith('legacy-'))return !c.school || (c.school==='yuling'?c.element===HEROES[hero].element:HEROES[hero].abilitySystems.includes(c.school));
   return (c.owner===hero||c.owner==='all') && c.id!=='seal' && c.id!=='guard';
 });
-export const NODE_NAMES = {battle:'遭遇',elite:'精英',event:'奇遇',rest:'休憩',shop:'行商',boss:'守门者'};
+/** 轮回玩法的奖励与商店卡池：全部重生之门卡。 */
+export const rebirthPool = () => Object.values(CARDS).filter(c => c.id.startsWith('rebirth:'));
+/** 轮回玩法的主角：玩家自己的修行者（不是官方角色，不承受同行者伤势）。 */
+export const SEEKER = { name: '修行者', hp: 72, relic: '魂灵印记', relicText: '轮回中的修行者，前世见闻化作今生的灵卡。' } as const;
+/** 局内主角的显示名：同行者用官方角色名，轮回用修行者。 */
+export const protagonistName = (hero: string) => hero === 'seeker' ? SEEKER.name : HEROES[hero as HeroId]?.name ?? hero;
+export const NODE_NAMES: Record<import('./types').NodeKind, string> = {battle:'遭遇',elite:'精英',event:'奇遇',rest:'休憩',shop:'行商',boss:'守门者',space:'灵质空间',guardian:'区域守门者'};

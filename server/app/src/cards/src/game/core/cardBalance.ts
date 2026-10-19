@@ -23,7 +23,8 @@ export const EFFECT_FIELDS: {key:keyof Effect; label:string; max:number; help:st
 ];
 export interface CardBalance {cost:number; effect:Effect; exhaust:boolean; target:'single'|'all'; condition:'none'|'belowHalf'|'attacksOnly'}
 export type CardOverrides=Record<string,CardBalance>;
-export function balanceOf(card:Card):CardBalance {return {cost:card.cost,effect:{...card.effect},exhaust:!!card.exhaust,target:card.target||'single',condition:card.condition||'none'};}
+/** 轮回卡的自身目标与生命百分比条件不在此编辑器的字段范围内，图鉴不提供它们的数值编辑。 */
+export function balanceOf(card:Card):CardBalance {return {cost:card.cost,effect:{...card.effect},exhaust:!!card.exhaust,target:card.target==='all'?'all':'single',condition:card.condition==='belowHalf'||card.condition==='attacksOnly'?card.condition:'none'};}
 export function validateBalance(value:unknown):CardBalance {
   if(!value||typeof value!=='object'||Array.isArray(value))throw new Error('卡牌配置必须是对象。');
   const v=value as Record<string,unknown>;

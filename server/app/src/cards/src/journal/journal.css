@@ -1,0 +1,77 @@
+/* 手记在入世历练原有界面上新增的几块，只用原有的颜色与字体变量。 */
+.journal-delta { font-style: normal; font-size: 11px; margin-left: 6px; color: var(--jade); }
+.journal-delta.is-loss { color: var(--rust); }
+.hall-overlay .journal-delta { color: #e8f0c8; }
+.hall-overlay .journal-delta.is-loss { color: #f6c7ad; }
+
+.journal-return { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; margin: 26px 0 0; padding: 22px 24px; border: 1px solid var(--line); border-radius: 5px; background: var(--panel); }
+.journal-return .round-emblem { margin: 0; }
+.journal-return h2 { font-family: var(--serif); font-weight: 500; margin: 0 0 6px; }
+.journal-return p { margin: 0 0 12px; color: var(--muted); line-height: 1.9; }
+.journal-return .offer-cards { justify-content: flex-start; margin: 4px 0 8px; }
+
+.journal-chips { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0 0 10px; padding: 0; }
+.journal-chips.is-compact { margin: 6px 0 0; }
+.journal-chips li { font-size: 12px; padding: 3px 10px; border-radius: 99px; border: 1px solid var(--line); background: #fff; color: var(--ink); }
+.journal-chips li.is-gain { color: var(--jade); border-color: color-mix(in srgb, var(--jade) 30%, var(--line)); }
+.journal-chips li.is-loss { color: var(--rust); border-color: color-mix(in srgb, var(--rust) 35%, var(--line)); }
+.journal-chips li.is-world { color: var(--gold); border-color: color-mix(in srgb, var(--gold) 40%, var(--line)); }
+
+.journal-resident.is-changed { border-color: color-mix(in srgb, var(--gold) 55%, var(--line)); }
+.journal-resident.is-fallen .resident-head img { filter: grayscale(.85); }
+.journal-flag { margin: 10px 0 0; font-size: 12px; color: var(--rust); }
+
+.journal-columns { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 32px; margin-top: 36px; }
+.journal-entries { list-style: none; margin: 0; padding: 0; }
+.journal-entries > li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); }
+.journal-entries > li:first-child { border-top: 0; padding-top: 0; }
+.journal-entries strong { font-family: var(--serif); font-weight: 500; }
+.journal-entries p { margin: 2px 0 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.journal-entries > li.is-night { opacity: .8; }
+.journal-when { font-size: 12px; color: var(--muted); padding-top: 2px; }
+.journal-entries > li.is-fresh .journal-when { color: var(--gold); }
+.journal-entries > li.is-fresh .journal-when::after { content: " · 新"; }
+
+.journal-side { display: grid; gap: 26px; align-content: start; }
+.journal-side h3 { display: flex; align-items: center; gap: 8px; font-family: var(--serif); font-weight: 500; margin: 0 0 8px; }
+.journal-side p { margin: 0 0 6px; color: var(--muted); }
+.journal-side b { color: var(--ink); font-size: 18px; font-weight: 500; }
+.journal-places { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.journal-places li { display: flex; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 5px; background: #faf9f1; }
+.journal-places li small { color: var(--muted); }
+.journal-places li.is-hidden { opacity: .55; }
+.journal-places li.is-fresh { border-color: var(--gold); }
+.journal-places li.is-fresh span::after { content: " · 新"; color: var(--gold); font-size: 12px; }
+
+.journal-setup .hero-detail { display: grid; gap: 14px; }
+.journal-option, .journal-slots { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.journal-option > span, .journal-slots > span { font-size: 12px; color: var(--muted); min-width: 36px; }
+.journal-option button { padding: 7px 14px; border: 1px solid var(--line); border-radius: 99px; background: #fff; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+.journal-option button.selected { border-color: var(--jade); color: var(--jade); }
+.journal-option button:disabled { opacity: .5; cursor: not-allowed; }
+.journal-slots i { font-style: normal; font-size: 12px; color: var(--muted); padding: 7px 14px; border: 1px dashed var(--line); border-radius: 99px; }
+.journal-slots small { color: var(--muted); font-size: 11px; }
+.journal-warn { color: var(--rust); }
+
+.journal-actions .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.journal-actions .hero-actions button { white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .journal-actions .hero-actions { width: 100%; }
+  .journal-actions .hero-actions button { flex: 1 1 auto; justify-content: center; }
+  .journal-columns { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .journal-return { grid-template-columns: minmax(0, 1fr); padding: 18px; }
+  .journal-entries > li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+}
+
+/* 拖拽出牌：竖向拖动出牌，横向仍可滑动手牌。 */
+.hand-card { touch-action: pan-x; position: relative; transition: transform .18s ease; }
+.hand-card-placeholder { flex: 0 0 auto; }
+.hand-card.is-dragging { z-index: 60; transition: none; pointer-events: none; filter: drop-shadow(0 14px 24px rgb(38 63 53 / 25%)); }
+.battle-stage.drop-ready { outline: 2px dashed color-mix(in srgb, var(--jade) 55%, transparent); outline-offset: -8px; }
+.journal-tag { font-size: 11px; margin-left: 8px; padding: 1px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--jade); font-weight: 400; }
+.journal-skill { display: block; font-size: 11px; color: var(--gold); margin-top: -2px; }
+.journal-element { font-family: var(--serif); font-size: 20px; }
+
+.journal-choice-note { margin-top: -6px; line-height: 1.7; }
+.journal-shop-goods { display: grid; gap: 10px; width: min(560px, 100%); margin: 6px auto 14px; }
