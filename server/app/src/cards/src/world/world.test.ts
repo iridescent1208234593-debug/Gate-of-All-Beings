@@ -124,7 +124,7 @@ test('the return summary groups unseen entries, and marking seen clears it', () 
 
 test('rebirth gate settlements become journal entries once, without re-crediting the shared ledger', () => {
   let l = ledger(), snap = fresh(l);
-  const recent = [{ id: 'run-1', mode: 'slay', resources: { spirit: 20, herb: 2 }, summary: '重生之门通关', at: 1 }, { id: 'x', mode: 'cards', resources: {}, summary: '', at: 2 }];
+  const recent = [{ id: 'rebirth-run:run-1', mode: 'slay', resources: { spirit: 20, herb: 2 }, summary: '重生之门 · 通关', at: 1 }, { id: 'manual-history:run-1', mode: 'slay', resources: {}, summary: '重生之门 · 对局记录', at: 2 }, { id: 'x', mode: 'cards', resources: {}, summary: '', at: 3 }];
   const results = rebirthResults(snap.world, recent);
   assert.equal(results.length, 1);
   const out = commitResult(snap, l, results[0]);

@@ -92,7 +92,8 @@ export interface LedgerRecord { id: string; mode: string; resources: Partial<Rec
 
 /** 重生之门是同一个世界里的特殊活动：它在账本里的结算回执被翻译成见闻（资源已结算，只记录不重复入账）。 */
 export function rebirthResults(world: WorldState, recent: LedgerRecord[]): ActivityResult[] {
-  const fresh = recent.filter(r => r.mode === 'slay' && !world.imported.includes(r.id)).sort((a, b) => a.at - b.at);
+  // 只有结算回执（rebirth-run:）是一段旅途；旧页调试接口写的对局记录等其他条目不进手记。
+  const fresh = recent.filter(r => r.mode === 'slay' && r.id.startsWith('rebirth-run:') && !world.imported.includes(r.id)).sort((a, b) => a.at - b.at);
   let daytime = world.daypart === 'morning';
   return fresh.map(r => {
     const time = daytime ? 'day' as const : 'none' as const;
