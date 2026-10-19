@@ -3,7 +3,7 @@
  * 所有玩法都从这里出发，结束后把 ActivityResult 提交回同一本手记；回来时直接在手记上看到变化。
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, BookOpen, Check, DoorOpen, Gem, Heart, Home, Map as MapIcon, Moon, ScrollText, Sparkles, Sprout, X } from 'lucide-react';
+import { ArrowRight, BookOpen, Check, DoorOpen, Gem, Heart, Home, Map as MapIcon, Moon, Orbit, ScrollText, Sparkles, Sprout, X } from 'lucide-react';
 import { CARDS, HEROES } from '../game/core/content';
 import { reduceRun } from '../game/core/engine';
 import { REBIRTH_ELEMENTS, REBIRTH_STYLE } from '../game/core/rebirth';
@@ -21,9 +21,13 @@ import type { ActivityResult, ActivitySession, Assignment, Change, ExpeditionLoa
 import { ExpeditionView } from './ExpeditionView';
 import './journal.css';
 import { LoadError } from '../components/LoadBoundary';
+import { lingzhiResult, startLingzhi, type LingzhiSession } from '../activities/lingzhi/adapter';
+import { reduceLingzhi } from '../activities/lingzhi/engine';
+import type { LingzhiAction, LingzhiLoadout } from '../activities/lingzhi/types';
+import { LingzhiSetup, LingzhiView } from '../activities/lingzhi/LingzhiView';
 
 const nameOf = (id: number) => Object.values(HEROES).find(h => h.characterId === id)?.name ?? `同行者 ${id}`;
-const PLACE_NAMES: Record<PlaceId, string> = { lodge: '林间小馆', 'forest-path': '林间小径', 'deep-forest': '深林', 'rebirth-gate': '重生之门' };
+const PLACE_NAMES: Record<PlaceId, string> = { lodge: '林间小馆', 'forest-path': '林间小径', 'deep-forest': '深林', 'rebirth-gate': '重生之门', 'lingzhi-circuit': '灵质回路' };
 const CONDITION_LABEL = { healthy: '', wounded: ' · 重伤', fallen: ' · 已陨落' } as const;
 
 export function changeText(c: Change): string {
@@ -45,7 +49,7 @@ const tone = (c: Change) => c.kind === 'resource' ? (c.amount < 0 ? 'loss' : 'ga
 export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void }) {
   const balance = useCardBalance();
   const [store, setStore] = useState<WorldStore | null>(null);
-  const [screen, setScreen] = useState<'home' | 'setup' | 'rebirth'>('home');
+  const [screen, setScreen] = useState<'home' | 'setup' | 'rebirth' | 'lingzhi'>('home');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -114,6 +118,22 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
     try { session = startRebirth(store!.snapshot.world, loadout, seed); } catch (e) { setError((e as Error).message); return; }
     void persist(snap => ({ ...markSeen(snap), activity: session })).then(() => { setScreen('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); });
   }
+  function beginLingzhi(loadout: LingzhiLoadout) {
+    const seed = crypto.getRandomValues(new Uint32Array(1))[0];
+    let session: LingzhiSession;
+    try { session = startLingzhi(store!.snapshot.world, loadout, seed); } catch (e) { setError((e as Error).message); return; }
+    void persist(snap => ({ ...markSeen(snap), activity: session })).then(() => { setScreen('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+  }
+  /** 灵质修行：局内规则在 activities/lingzhi，结束时同样交给适配器生成结果提交进手记。 */
+  function actLingzhi(action: LingzhiAction) {
+    const session = store!.snapshot.activity as LingzhiSession | null;
+    if (!session) return;
+    let next: LingzhiSession['state'];
+    try { next = reduceLingzhi(session.state, action); } catch (e) { setError((e as Error).message); return; }
+    const updated = { ...session, state: next };
+    if (next.phase === 'victory' || next.phase === 'defeat') void commit(lingzhiResult(updated)).then(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    else void persist(snap => ({ ...snap, activity: updated }));
+  }
   /** 一局结束（或中途折返）：交给对应玩法的适配器生成结果，再提交进手记。 */
   function finish(session: ActivitySession<RunState, unknown>, early: boolean) {
     void commit(s => session.activity === 'rebirth-gate'
@@ -134,8 +154,10 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
     if (session) finish(session, true);
   }
 
+  if (activity?.activity === 'lingzhi') return <><LingzhiView session={activity as LingzhiSession} busy={busy} onAction={actLingzhi} onReturn={() => void commit(lingzhiResult(activity as LingzhiSession, true)).then(() => window.scrollTo({ top: 0, behavior: 'smooth' }))} />{toast}</>;
   if (activity && (activity.activity === 'expedition' || activity.activity === 'rebirth-gate')) return <><ExpeditionView session={activity as ActivitySession<RunState, unknown>} busy={busy} onAction={act} onReturn={returnEarly} onError={setError} />{toast}</>;
   if (screen === 'rebirth') return <><RebirthSetup busy={busy} day={world.day} dailyKey={rebirthDailyKey(world)} onCancel={() => setScreen('home')} onStart={beginRebirth} />{toast}</>;
+  if (screen === 'lingzhi') return <><LingzhiSetup busy={busy} onCancel={() => setScreen('home')} onStart={beginLingzhi} />{toast}</>;
   if (screen === 'setup') return <><ExpeditionSetup store={store} busy={busy} onCancel={() => setScreen('home')} onStart={begin} balanceError={balance.error} />{toast}</>;
 
   const unseen = unseenEntries(journal);
@@ -159,6 +181,7 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
       <div className="hero-actions">{morning ? <>
         <button className="primary" disabled={busy || !canGo.ok} onClick={() => setScreen('setup')}>出行 <ArrowRight size={17} /></button>
         <button className="secondary" disabled={busy} onClick={() => { void persist(markSeen); setScreen('rebirth'); }}><DoorOpen size={16} />去重生之门</button>
+        <button className="secondary" disabled={busy} onClick={() => { void persist(markSeen); setScreen('lingzhi'); }}><Orbit size={16} />去灵质回路</button>
         <button className="secondary" disabled={busy} onClick={() => void commit(s => stayResult(s.snapshot.world))}><Home size={16} />在会馆过一天</button>
       </> : <button className="primary" disabled={busy} onClick={() => void commit(s => nightResult(s.snapshot.world, s.ledger, nameOf))}><Moon size={16} />歇下，等明天</button>}</div>
     </div>

@@ -21,7 +21,7 @@ export const RULES = {
   journalLimit: 200,
 } as const;
 
-const PLACES: PlaceId[] = ['lodge', 'forest-path', 'deep-forest', 'rebirth-gate'];
+const PLACES: PlaceId[] = ['lodge', 'forest-path', 'deep-forest', 'rebirth-gate', 'lingzhi-circuit'];
 const place = (discovered: boolean): PlaceState => ({ discovered, visits: 0, cleared: 0 });
 
 export function conditionOf(deaths = 0): Condition { return deaths >= 2 ? 'fallen' : deaths === 1 ? 'wounded' : 'healthy'; }

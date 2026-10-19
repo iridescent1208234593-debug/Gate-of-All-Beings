@@ -12,7 +12,7 @@ export type { ResourceKey };
 /** 共享数据库中的有效角色 ID。 */
 export type CharacterId = number;
 export type Daypart = 'morning' | 'evening';
-export type PlaceId = 'lodge' | 'forest-path' | 'deep-forest' | 'rebirth-gate';
+export type PlaceId = 'lodge' | 'forest-path' | 'deep-forest' | 'rebirth-gate' | 'lingzhi-circuit';
 export type Assignment = 'garden' | 'practice' | 'rest';
 export type Condition = 'healthy' | 'wounded' | 'fallen';
 
@@ -51,7 +51,7 @@ export type Change =
   | { kind: 'place'; place: PlaceId; state: 'discovered' | 'cleared' }
   | { kind: 'world-event'; id: string; text: string };
 
-export type ActivityKind = 'expedition' | 'rebirth-gate' | 'stay' | 'night' | 'seal';
+export type ActivityKind = 'expedition' | 'rebirth-gate' | 'lingzhi' | 'stay' | 'night' | 'seal';
 export type Outcome = 'victory' | 'defeat' | 'returned' | 'completed';
 
 /** 任一玩法结束时交给手记的统一结果；战斗遭遇的结算（Encounter Resolution）也是它。 */
@@ -95,6 +95,9 @@ export interface ExpeditionLoadout {
 
 /** 重生之门的开局配置：本命五行、难度、灵质天赋（可不选）、出身分馆。 */
 export interface RebirthLoadout { element: RebirthElement; difficulty: 'trial' | 'normal' | 'rebirth'; branch?: string | null; guild?: string | null }
+
+/** 灵质修行的开局配置：选一位修行者（规则与局内状态在 src/activities/lingzhi）。 */
+export interface LingzhiLoadout { character: string }
 
 export interface ActivitySession<S = unknown, L = ExpeditionLoadout | RebirthLoadout> {
   id: string;
