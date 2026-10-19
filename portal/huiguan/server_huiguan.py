@@ -35,6 +35,7 @@ from account_email import init_schema as init_email_schema, handle_email
 from account_recovery import init_schema as init_recovery_schema, handle_recovery
 from account_profile import init_schema as init_profile_schema, get_profile, set_account_avatar, valid_asset_url, store_avatar_image as normalize_avatar_image
 import game_saves
+from showcase_document import published_document
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 
 # ========== 配置 ==========
@@ -184,14 +185,16 @@ def now_iso():
 
 
 def db():
-    conn = sqlite3.connect(USER_DB)
+    conn = sqlite3.connect(USER_DB, timeout=30)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA synchronous=NORMAL")
     return conn
 
 
 def init_user_db():
     with DB_LOCK:
         conn = db()
+        conn.execute("PRAGMA journal_mode=WAL")  # readers no longer block on the writer; persists in the file
         init_security_schema(conn)
         init_email_schema(conn)
         init_recovery_schema(conn)
@@ -1358,12 +1361,13 @@ class Handler(BaseStaticHandler):
         has_admin = bool(ADMIN_USSO_IDS) or n_local > 0
         role = "executor" if has_admin else "admin"
 
+        pass_hash = hash_password(password)  # scrypt is slow: never hold DB_LOCK while hashing
         with DB_LOCK:
             conn = db()
             try:
                 cur = conn.execute(
                     "INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES (?,?,?,?,?,?,?)",
-                    (username, hash_password(password), nickname, role, "active", now_iso(), now_iso()))
+                    (username, pass_hash, nickname, role, "active", now_iso(), now_iso()))
                 uid = cur.lastrowid
             except sqlite3.IntegrityError:
                 conn.close()
@@ -1714,6 +1718,14 @@ class Handler(BaseStaticHandler):
                             html = html.replace("</head>", injection + "</head>", 1)
                         self._send_html(html)
                         return
+        conn = db()
+        try:
+            published = published_document(conn, code, self._require_ident_optional())
+        finally:
+            conn.close()
+        if published:
+            self._send_html(published)
+            return
         body = "角色不存在".encode("utf-8")
         self.send_response(404)
         self.send_header("Content-Type", "text/plain; charset=utf-8")
@@ -3477,20 +3489,23 @@ class Handler(BaseStaticHandler):
         w.close()
         self._json(200, {"fav": fav, "up": up, "down": down, "my": my})
 
-    def _reaction_state(self, w, fav_t, vote_t, cid, ident):
+    def _reaction_state(self, w, fav_t, vote_t, cid, ident, multi_fav=False):
         """单角色的最新计数 + 当前用户状态，前端据此就地更新，无需重拉全表。"""
         fav = w.execute(f"SELECT COUNT(*) c FROM {fav_t} WHERE character_id=?", (cid,)).fetchone()["c"]
         up = w.execute(f"SELECT COUNT(*) c FROM {vote_t} WHERE character_id=? AND vote=1", (cid,)).fetchone()["c"]
         down = w.execute(f"SELECT COUNT(*) c FROM {vote_t} WHERE character_id=? AND vote=-1", (cid,)).fetchone()["c"]
-        myfav = w.execute(f"SELECT character_id FROM {fav_t} WHERE user_kind=? AND user_uid=?",
-                          (ident["kind"], ident["uid"])).fetchone()
+        myfav = w.execute(
+            f"SELECT 1 FROM {fav_t} WHERE user_kind=? AND user_uid=? AND character_id=?" if multi_fav
+            else f"SELECT character_id FROM {fav_t} WHERE user_kind=? AND user_uid=?",
+            (ident["kind"], ident["uid"], cid) if multi_fav else (ident["kind"], ident["uid"])
+        ).fetchone()
         myvote = w.execute(f"SELECT vote FROM {vote_t} WHERE user_kind=? AND user_uid=? AND character_id=?",
                            (ident["kind"], ident["uid"], cid)).fetchone()
         return {"cid": cid, "fav": fav, "up": up, "down": down,
-                "my_fav": bool(myfav and myfav["character_id"] == cid),
+                "my_fav": bool(myfav and (multi_fav or myfav["character_id"] == cid)),
                 "my_vote": myvote["vote"] if myvote else 0}
 
-    def _do_react(self, w, fav_t, vote_t, ident):
+    def _do_react(self, w, fav_t, vote_t, ident, allow_multiple_favorites=False):
         """喜欢（每人仅 1 个，可转移/取消）与赞踩（可取消/互换）的统一实现。"""
         body = self._read_json() or {}
         try:
@@ -3504,17 +3519,26 @@ class Handler(BaseStaticHandler):
         k, u = ident["kind"], ident["uid"]
         prev_fav = None
         if rtype == "fav":
-            row = w.execute(f"SELECT character_id FROM {fav_t} WHERE user_kind=? AND user_uid=?", (k, u)).fetchone()
-            if row and row["character_id"] == cid:
-                w.execute(f"DELETE FROM {fav_t} WHERE user_kind=? AND user_uid=?", (k, u))
-                msg = "已取消喜欢"
-            elif row:
-                prev_fav = row["character_id"]
-                w.execute(f"UPDATE {fav_t} SET character_id=?, created_at=? WHERE user_kind=? AND user_uid=?", (cid, now, k, u))
-                msg = "已转为喜欢该角色"
+            if allow_multiple_favorites:
+                row = w.execute(f"SELECT 1 FROM {fav_t} WHERE user_kind=? AND user_uid=? AND character_id=?", (k, u, cid)).fetchone()
+                if row:
+                    w.execute(f"DELETE FROM {fav_t} WHERE user_kind=? AND user_uid=? AND character_id=?", (k, u, cid))
+                    msg = "已取消喜欢"
+                else:
+                    w.execute(f"INSERT INTO {fav_t} (user_kind, user_uid, character_id, created_at) VALUES (?,?,?,?)", (k, u, cid, now))
+                    msg = "已喜欢该角色"
             else:
-                w.execute(f"INSERT INTO {fav_t} (user_kind, user_uid, character_id, created_at) VALUES (?,?,?,?)", (k, u, cid, now))
-                msg = "已喜欢该角色"
+                row = w.execute(f"SELECT character_id FROM {fav_t} WHERE user_kind=? AND user_uid=?", (k, u)).fetchone()
+                if row and row["character_id"] == cid:
+                    w.execute(f"DELETE FROM {fav_t} WHERE user_kind=? AND user_uid=?", (k, u))
+                    msg = "已取消喜欢"
+                elif row:
+                    prev_fav = row["character_id"]
+                    w.execute(f"UPDATE {fav_t} SET character_id=?, created_at=? WHERE user_kind=? AND user_uid=?", (cid, now, k, u))
+                    msg = "已转为喜欢该角色"
+                else:
+                    w.execute(f"INSERT INTO {fav_t} (user_kind, user_uid, character_id, created_at) VALUES (?,?,?,?)", (k, u, cid, now))
+                    msg = "已喜欢该角色"
         else:
             vote = 1 if rtype == "up" else -1
             name = "点赞" if vote == 1 else "踩"
@@ -3529,7 +3553,7 @@ class Handler(BaseStaticHandler):
                 w.execute(f"INSERT INTO {vote_t} (user_kind, user_uid, character_id, vote, created_at) VALUES (?,?,?,?,?)", (k, u, cid, vote, now))
                 msg = "已" + name
         w.commit()
-        state = self._reaction_state(w, fav_t, vote_t, cid, ident)
+        state = self._reaction_state(w, fav_t, vote_t, cid, ident, allow_multiple_favorites)
         prev_state = self._reaction_state(w, fav_t, vote_t, prev_fav, ident) if prev_fav else None
         w.close()
         self._json(200, {"ok": True, "msg": msg, "state": state, "prev_state": prev_state})
@@ -4112,8 +4136,14 @@ class Handler(BaseStaticHandler):
             where.append("type=?")
             params.append(ft)
         wc = " AND ".join(where)
+        self._ensure_fan_reaction_tables(conn)
         rows = conn.execute(
-            f"SELECT id, '' AS user_kind, '' AS user_uid, user_name, name, type, species, gender, faction, ability, appearance, story, image_data, is_public, code, created_at, updated_at FROM fan_characters WHERE {wc} ORDER BY created_at DESC LIMIT ? OFFSET ?",
+            f"""SELECT id, '' AS user_kind, '' AS user_uid, user_name, name, type, species, gender, faction, ability, appearance, story, image_data, is_public, code, created_at, updated_at,
+                      (SELECT COUNT(*) FROM fan_char_favorites fav WHERE fav.character_id=fan_characters.id)
+                      + (SELECT COUNT(*) FROM fan_char_votes vote WHERE vote.character_id=fan_characters.id AND vote.vote=1)
+                      - 2 * (SELECT COUNT(*) FROM fan_char_votes vote WHERE vote.character_id=fan_characters.id AND vote.vote=-1) AS reaction_score
+               FROM fan_characters WHERE {wc}
+               ORDER BY reaction_score DESC, created_at DESC, id DESC LIMIT ? OFFSET ?""",
             params + [limit, offset]
         ).fetchall()
         total = conn.execute(
@@ -4288,8 +4318,20 @@ class Handler(BaseStaticHandler):
             self._json(500, {"error": f"发布失败: {e}"})
 
     def _ensure_fan_reaction_tables(self, w):
-        w.execute("CREATE TABLE IF NOT EXISTS fan_char_favorites (id INTEGER PRIMARY KEY AUTOINCREMENT, user_kind TEXT, user_uid TEXT, character_id INTEGER, created_at INTEGER, UNIQUE(user_kind, user_uid))")
+        w.execute("CREATE TABLE IF NOT EXISTS fan_char_favorites (id INTEGER PRIMARY KEY AUTOINCREMENT, user_kind TEXT, user_uid TEXT, character_id INTEGER, created_at INTEGER, UNIQUE(user_kind, user_uid, character_id))")
         w.execute("CREATE TABLE IF NOT EXISTS fan_char_votes (id INTEGER PRIMARY KEY AUTOINCREMENT, user_kind TEXT, user_uid TEXT, character_id INTEGER, vote INTEGER, created_at INTEGER, UNIQUE(user_kind, user_uid, character_id))")
+        unique_indexes = w.execute("PRAGMA index_list(fan_char_favorites)").fetchall()
+        for index in unique_indexes:
+            if not index["unique"]:
+                continue
+            columns = [row["name"] for row in w.execute(f"PRAGMA index_info('{index['name']}')")]
+            if columns == ["user_kind", "user_uid"]:
+                w.execute("CREATE TABLE fan_char_favorites_new (id INTEGER PRIMARY KEY AUTOINCREMENT, user_kind TEXT, user_uid TEXT, character_id INTEGER, created_at INTEGER, UNIQUE(user_kind, user_uid, character_id))")
+                w.execute("INSERT INTO fan_char_favorites_new SELECT id, user_kind, user_uid, character_id, created_at FROM fan_char_favorites")
+                w.execute("DROP TABLE fan_char_favorites")
+                w.execute("ALTER TABLE fan_char_favorites_new RENAME TO fan_char_favorites")
+                w.commit()
+                break
 
     def _api_fan_reactions(self):
         w = db(); w.row_factory = sqlite3.Row
@@ -4297,11 +4339,13 @@ class Handler(BaseStaticHandler):
         fav = {r['character_id']: r['c'] for r in w.execute("SELECT character_id, COUNT(*) c FROM fan_char_favorites GROUP BY character_id")}
         up = {r['character_id']: r['c'] for r in w.execute("SELECT character_id, COUNT(*) c FROM fan_char_votes WHERE vote=1 GROUP BY character_id")}
         down = {r['character_id']: r['c'] for r in w.execute("SELECT character_id, COUNT(*) c FROM fan_char_votes WHERE vote=-1 GROUP BY character_id")}
-        my = {"fav": None, "votes": {}}
+        my = {"fav": None, "favs": [], "multiple_fav": False, "votes": {}}
         ident = self._require_ident_optional()
         if ident:
-            f = w.execute("SELECT character_id FROM fan_char_favorites WHERE user_kind=? AND user_uid=?", (ident["kind"], ident["uid"])).fetchone()
-            if f: my["fav"] = f['character_id']
+            favs = [r["character_id"] for r in w.execute("SELECT character_id FROM fan_char_favorites WHERE user_kind=? AND user_uid=?", (ident["kind"], ident["uid"]))]
+            my["fav"] = favs[0] if favs else None
+            my["favs"] = favs
+            my["multiple_fav"] = bool(ident.get("is_admin"))
             for r in w.execute("SELECT character_id, vote FROM fan_char_votes WHERE user_kind=? AND user_uid=?", (ident["kind"], ident["uid"])):
                 my["votes"][str(r['character_id'])] = r['vote']
         w.close()
@@ -4316,7 +4360,7 @@ class Handler(BaseStaticHandler):
         rate_add(f"react:{ident['kind']}:{ident['uid']}")
         w = db()
         self._ensure_fan_reaction_tables(w)
-        self._do_react(w, "fan_char_favorites", "fan_char_votes", ident)
+        self._do_react(w, "fan_char_favorites", "fan_char_votes", ident, allow_multiple_favorites=bool(ident.get("is_admin")))
 
     # ---------- 辅助 ----------
     def _get_session(self):

@@ -99,15 +99,15 @@
 
   // ---------- 动效 ----------
   const FX = {
-    favOn(btn, n) {
+    favOn(btn, n, energy = 1) {
       wiggle(iconOf(btn), [{ transform: 'scale(1)' }, { transform: 'scale(1.6)', offset: .22 }, { transform: 'scale(.9)', offset: .45 }, { transform: 'scale(1.3)', offset: .65 }, { transform: 'scale(1)' }], 620);
       if (reduced()) return;
       const { x, y } = center(btn);
       ring(x, y, '#e2475d');
       const colors = ['#e2475d', '#ff7b8f', '#f2a0b0', '#ff9a5a', '#d4a840'];
-      const count = 14;
+      const count = Math.max(3, Math.round(14 * energy));
       for (let i = 0; i < count; i++) {
-        const ang = (-90 + rnd(-62, 62)) * Math.PI / 180, dist = rnd(46, 118), size = rnd(9, 19);
+        const ang = (-90 + rnd(-62, 62)) * Math.PI / 180, dist = rnd(46, 118) * energy, size = rnd(9, 19) * (.6 + .4 * energy);
         const dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist, sway = rnd(-14, 14), rot = rnd(-40, 40);
         particle(ICON.fav, x, y, colors[i % colors.length], size, [
           { transform: 'translate(0,0) scale(.2) rotate(0)', opacity: 0 },
@@ -132,15 +132,15 @@
       });
       wiggle(svg, [{ transform: 'translateX(0)' }, { transform: 'translateX(-3px)' }, { transform: 'translateX(3px)' }, { transform: 'translateX(-2px)' }, { transform: 'translateX(0)' }], 360);
     },
-    upOn(btn, n) {
+    upOn(btn, n, energy = 1) {
       wiggle(iconOf(btn), [{ transform: 'rotate(0) scale(1)' }, { transform: 'rotate(-28deg) scale(1.45)', offset: .3 }, { transform: 'rotate(8deg) scale(.95)', offset: .6 }, { transform: 'rotate(0) scale(1)' }], 520);
       if (reduced()) return;
       const { x, y } = center(btn);
       ring(x, y, 'var(--accent,#5a9e8f)');
       const colors = ['#5a9e8f', '#7fc8b8', '#d4a840', '#f2d98a'];
-      for (let i = 0; i < 9; i++) {
-        const ang = rnd(0, Math.PI * 2), dist = rnd(24, 62);
-        particle('<svg viewBox="0 0 24 24"><path d="M12 0l2.6 8.4L23 12l-8.4 3.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg>', x, y, colors[i % colors.length], rnd(6, 12), [
+      for (let i = 0; i < Math.max(2, Math.round(9 * energy)); i++) {
+        const ang = rnd(0, Math.PI * 2), dist = rnd(24, 62) * energy;
+        particle('<svg viewBox="0 0 24 24"><path d="M12 0l2.6 8.4L23 12l-8.4 3.6L12 24l-2.6-8.4L1 12l8.4-3.6z"/></svg>', x, y, colors[i % colors.length], rnd(6, 12) * (.6 + .4 * energy), [
           { transform: 'translate(0,0) scale(.2) rotate(0)', opacity: 0 },
           { transform: `translate(${Math.cos(ang) * dist}px,${Math.sin(ang) * dist - 10}px) scale(1) rotate(90deg)`, opacity: 1, offset: .4 },
           { transform: `translate(${Math.cos(ang) * dist * 1.3}px,${Math.sin(ang) * dist * 1.3 + 14}px) scale(.2) rotate(200deg)`, opacity: 0 }
@@ -192,17 +192,23 @@
   const loginToast = () => toast('登录后才能表达喜欢哦～', { label: '去登录', run: () => { location.href = '/?openauth=1'; } });
 
   // ---------- 状态 ----------
-  const empty = () => ({ fav: {}, up: {}, down: {}, my: { fav: null, votes: {} } });
+  const empty = () => ({ fav: {}, up: {}, down: {}, my: { fav: null, favs: [], multiple_fav: false, votes: {} } });
   function get(scope, id) {
     if (!SCOPES[scope].trio) { const a = ART[id] || { fav: 0, myFav: false }; return { fav: a.fav, up: 0, down: 0, myFav: a.myFav, myVote: 0 }; }
     const r = RX[scope] || empty();
-    return { fav: r.fav[id] || 0, up: r.up[id] || 0, down: r.down[id] || 0, myFav: r.my.fav === id, myVote: r.my.votes[String(id)] || 0 };
+    return { fav: r.fav[id] || 0, up: r.up[id] || 0, down: r.down[id] || 0,
+      myFav: r.my.multiple_fav ? r.my.favs.includes(id) : r.my.fav === id,
+      myVote: r.my.votes[String(id)] || 0 };
   }
   function put(scope, id, s) {
     if (!SCOPES[scope].trio) { ART[id] = { fav: s.fav, myFav: s.myFav }; return; }
     const r = RX[scope] || (RX[scope] = empty());
     r.fav[id] = s.fav; r.up[id] = s.up; r.down[id] = s.down;
-    if (s.myFav) r.my.fav = id; else if (r.my.fav === id) r.my.fav = null;
+    if (r.my.multiple_fav) {
+      const favs = new Set(r.my.favs);
+      if (s.myFav) favs.add(id); else favs.delete(id);
+      r.my.favs = [...favs];
+    } else if (s.myFav) r.my.fav = id; else if (r.my.fav === id) r.my.fav = null;
     if (s.myVote) r.my.votes[String(id)] = s.myVote; else delete r.my.votes[String(id)];
   }
   function fromServer(st) { return { fav: st.fav, up: st.up, down: st.down, myFav: !!st.my_fav, myVote: st.my_vote || 0 }; }
@@ -238,7 +244,7 @@
   async function load(scope) {
     const cfg = SCOPES[scope];
     if (!cfg.trio) return;
-    try { const r = await fetch(cfg.list); const d = await r.json(); RX[scope] = Object.assign(empty(), d, { my: Object.assign({ fav: null, votes: {} }, d.my) }); } catch (e) { RX[scope] = RX[scope] || empty(); }
+    try { const r = await fetch(cfg.list); const d = await r.json(); RX[scope] = Object.assign(empty(), d, { my: Object.assign({ fav: null, favs: [], multiple_fav: false, votes: {} }, d.my) }); } catch (e) { RX[scope] = RX[scope] || empty(); }
   }
 
   // ---------- 点击 ----------
@@ -248,7 +254,7 @@
     if (type === 'fav') {
       if (s.myFav) { s.myFav = false; s.fav = Math.max(0, s.fav - 1); }
       else {
-        if (SCOPES[scope].trio) {
+        if (SCOPES[scope].trio && !(RX[scope] || empty()).my.multiple_fav) {
           const cur = (RX[scope] || empty()).my.fav;
           if (cur != null && cur !== id) { prevId = cur; prevS = get(scope, cur); prevS.myFav = false; prevS.fav = Math.max(0, prevS.fav - 1); put(scope, cur, prevS); }
         }
@@ -312,5 +318,5 @@
   }
 
   document.addEventListener('click', onClick, true);
-  window.RFX = { bar: barHTML, paint, load, seed: (id, likes, liked) => { ART[id] = { fav: likes, myFav: !!liked }; }, toast, fx: FX, confetti: FX.confetti };
+  window.RFX = { bar: barHTML, paint, load, seed: (id, likes, liked) => { ART[id] = { fav: likes, myFav: !!liked }; }, toast, fx: FX, icons: { like: ICON.up, love: ICON.fav }, confetti: FX.confetti };
 })();
