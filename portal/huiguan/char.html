@@ -85,7 +85,7 @@ section h2{font-size:16px;letter-spacing:2px;border-bottom:2px solid var(--accen
 <div class="wrap" id="app"><div class="loading">加载中…</div></div>
 <div id="lightbox" onclick="this.classList.remove('show')"><img id="lbImg" alt=""></div>
 <script src="/image-upload.js?v=20261018"></script>
-<script src="reactions-fx.js?v=20261018"></script>
+<script src="reactions-fx.js?v=20261021-fanart3"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function escAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -106,7 +106,7 @@ let _galImgs=[], _galCid=null, _galName='', _galShown=0;
 function _galImg(i){
   const im=_galImgs[i]; if(!im) return '';
   const fullUrl='/api/official/img-id?id='+im.id;
-  return `<img src="${fullUrl}&t=1" data-full="${fullUrl}" alt="${esc(_galName)}" loading="lazy" decoding="async" onerror="this.style.display='none'" onclick="zoom(this.dataset.full)">`;
+  return `<img data-original-image src="${fullUrl}&t=1" data-full="${fullUrl}" alt="${esc(_galName)}" loading="lazy" decoding="async" onerror="this.style.display='none'" onclick="zoom(this.dataset.full)">`;
 }
 function initGallery(imgs,cid,name){
   _galImgs=imgs||[]; _galCid=cid; _galName=name||''; _galShown=0;
@@ -212,7 +212,7 @@ async function init(){
       ${c.notes?`<section><h2>备注</h2><p style="line-height:1.9;font-size:14px">${esc(c.notes)}</p></section>`:''}
       ${c.source_url?`<section><h2>来源</h2><p style="font-size:13px"><a href="${esc(c.source_url)}" target="_blank" style="color:var(--gold)">${esc(c.source_url)}</a></p></section>`:''}
       <section id="fanart">
-        <h2>同人图廊 <span id="faCount" style="font-size:12px;font-weight:400;color:var(--dim)"></span></h2>
+        <h2>官方角色同人画廊 <span id="faCount" style="font-size:12px;font-weight:400;color:var(--dim)"></span></h2>
         <div class="fa-note">🌱 温馨提示：这里是<strong>公开的档案图廊</strong>。官方档案目前只有角色简介、没有配图——欢迎大家用自己的同人图把它补上！上传的图片所有访客都能看到，请不要上传隐私信息、他人肖像或违规内容哦。</div>
         <div class="fa-bar">
           <button type="button" class="fa-btn" id="faToggle" onclick="faToggleForm()">＋ 上传同人图</button>
@@ -326,9 +326,9 @@ function faLoginToast(t){ RFX.toast(t,{label:'去登录',run:()=>{location.href=
 function faMsg(t,ok){const m=document.getElementById('faMsg'); if(m){m.textContent=t||''; m.style.color=ok?'var(--accent)':'var(--danger)';}}
 function faDate(s){return String(s||'').slice(0,10);}
 function faCardHTML(it){
-  RFX.seed(it.id,it.likes,it.liked);
+  RFX.seed(it.id,it);  // 喜欢 / 点赞 / 踩 与副册共用同一份数据
   return `<div class="fa-card" data-id="${it.id}">
-    <img class="fa-img" src="${escAttr(it.image_url)}" alt="${escAttr(it.caption||'同人图')}" loading="lazy" decoding="async" onclick="zoom(this.src)" onerror="this.closest('.fa-card').style.display='none'">
+    <img class="fa-img" data-original-image src="${escAttr(it.image_url)}" alt="${escAttr(it.caption||'同人图')}" loading="lazy" decoding="async" onclick="zoom(this.src)" onerror="this.closest('.fa-card').style.display='none'">
     <div class="fa-body">
       ${it.caption?`<div class="fa-cap">${esc(it.caption)}</div>`:''}
       <div class="fa-meta"><span>by ${esc(it.user_name)}</span><span>${esc(faDate(it.created_at))}</span></div>
@@ -376,7 +376,7 @@ async function faSubmit(e){
   try{
     const blob=await HuiguanImages.shrink(file);
     const up=blob===file?file:new File([blob],file.name.replace(/\.[^.]+$/,'')+(blob.type==='image/webp'?'.webp':'.jpg'),{type:blob.type});
-    const d=await HuiguanImages.request('/api/official/fanart/upload',{character_id:Number(_faCid),caption:document.getElementById('faCaption').value.trim()},up);
+    const d=await HuiguanImages.request('/api/official/fanart/upload',{character_id:Number(_faCid),caption:document.getElementById('faCaption').value.trim()},up,{gifLimit:8*1024*1024});
     if(d.ok){
       document.getElementById('faForm').reset(); document.getElementById('faForm').classList.remove('show'); faMsg('');
       RFX.toast('投稿成功，已发布到图廊 🎉'); await faLoad(true);
@@ -386,7 +386,7 @@ async function faSubmit(e){
   return false;
 }
 async function faDelete(id){
-  if(!confirm('确定删除这张图吗？图下的评论也会一起删除。')) return;
+  if(!confirm('确定删除这张图吗？它在主册和副册的评论，以及点赞 / 喜欢 / 踩都会一起删除。')) return;
   try{
     const r=await fetch('/api/official/fanart/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
     const d=await r.json();
@@ -645,5 +645,6 @@ async function submitEdit(charId, direct){
 init();
 </script>
 <script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017"></script>
+<script src="/original-image-viewer.js?v=20261019-2"></script>
 </body>
 </html>

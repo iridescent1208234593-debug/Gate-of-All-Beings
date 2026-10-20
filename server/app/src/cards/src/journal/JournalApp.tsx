@@ -1,6 +1,6 @@
 /**
- * 手记：众生之门的主界面和长期状态中心，沿用入世历练原有的会馆与选同行者界面。
- * 所有玩法都从这里出发，结束后把 ActivityResult 提交回同一本手记；回来时直接在手记上看到变化。
+ * 众生牌录：众生之门的主界面和长期状态中心，沿用入世历练原有的会馆与选同行者界面。
+ * 所有玩法都从这里出发，结束后把 ActivityResult 提交回同一本众生牌录；回来时直接在众生牌录上看到变化。
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, BookOpen, Check, DoorOpen, Gem, Heart, Home, Map as MapIcon, Moon, Orbit, ScrollText, Sparkles, Sprout, X } from 'lucide-react';
@@ -22,6 +22,7 @@ import { ExpeditionView } from './ExpeditionView';
 import './journal.css';
 import { LoadError } from '../components/LoadBoundary';
 import { lingzhiResult, startLingzhi, type LingzhiSession } from '../activities/lingzhi/adapter';
+import { reportActivity } from '../world/progressReport';
 import { reduceLingzhi } from '../activities/lingzhi/engine';
 import type { LingzhiAction, LingzhiLoadout } from '../activities/lingzhi/types';
 import { LingzhiSetup, LingzhiView } from '../activities/lingzhi/LingzhiView';
@@ -74,12 +75,15 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
   const commit = useCallback((result: ActivityResult | ((s: WorldStore) => ActivityResult)) => enqueue(async s => {
     const r = typeof result === 'function' ? result(s) : result;
     const out = commitResult(s.snapshot, s.ledger, r);
-    return out.duplicate ? s : saveWorld(s, out.snapshot, { resources: out.resources, roster: out.roster, operationId: r.id });
+    if (out.duplicate) return s;
+    const next = await saveWorld(s, out.snapshot, { resources: out.resources, roster: out.roster, operationId: r.id });
+    reportActivity(r);
+    return next;
   }), [enqueue]);
 
   const persist = useCallback((edit: (snap: WorldSnapshot) => WorldSnapshot) => enqueue(s => saveWorld(s, edit(s.snapshot))), [enqueue]);
 
-  /** 重新打开世界并把其他玩法（重生之门）的结算写进手记。 */
+  /** 重新打开世界并把其他玩法（重生之门）的结算写进众生牌录。 */
   const sync = useCallback(() => enqueue(async () => {
     let s = await openWorld();
     for (const r of rebirthResults(s.snapshot.world, s.recent)) {
@@ -97,11 +101,11 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
     window.addEventListener('focus', focus);
     return () => { alive = false; off(); window.removeEventListener('focus', focus); };
   }, [sync, attempt]);
-  // 手记未打开时错误要一直留着（带重试），不能 7 秒后退回加载线。
+  // 众生牌录未打开时错误要一直留着（带重试），不能 7 秒后退回加载线。
   useEffect(() => { if (!error || !store) return; const t = setTimeout(() => setError(''), 7000); return () => clearTimeout(t); }, [error, store]);
 
-  if (!store) return error ? <LoadError page message={`手记没能打开：${error}`} onRetry={() => { setError(''); setAttempt(n => n + 1); }} />
-    : <p className="qc-loading qc-loading--page" role="status">正在翻开手记…</p>;
+  if (!store) return error ? <LoadError page message={`众生牌录没能打开：${error}`} onRetry={() => { setError(''); setAttempt(n => n + 1); }} />
+    : <p className="qc-loading qc-loading--page" role="status">正在翻开众生牌录…</p>;
   const { world, journal, activity } = store.snapshot;
   const toast = error && <div className="toast" role="alert">{error}<button aria-label="关闭提示" onClick={() => setError('')}><X size={15} /></button></div>;
 
@@ -124,7 +128,7 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
     try { session = startLingzhi(store!.snapshot.world, loadout, seed); } catch (e) { setError((e as Error).message); return; }
     void persist(snap => ({ ...markSeen(snap), activity: session })).then(() => { setScreen('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); });
   }
-  /** 灵质修行：局内规则在 activities/lingzhi，结束时同样交给适配器生成结果提交进手记。 */
+  /** 灵质修行：局内规则在 activities/lingzhi，结束时同样交给适配器生成结果提交进众生牌录。 */
   function actLingzhi(action: LingzhiAction) {
     const session = store!.snapshot.activity as LingzhiSession | null;
     if (!session) return;
@@ -134,7 +138,7 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
     if (next.phase === 'victory' || next.phase === 'defeat') void commit(lingzhiResult(updated)).then(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
     else void persist(snap => ({ ...snap, activity: updated }));
   }
-  /** 一局结束（或中途折返）：交给对应玩法的适配器生成结果，再提交进手记。 */
+  /** 一局结束（或中途折返）：交给对应玩法的适配器生成结果，再提交进众生牌录。 */
   function finish(session: ActivitySession<RunState, unknown>, early: boolean) {
     void commit(s => session.activity === 'rebirth-gate'
       ? rebirthResult(session as RebirthSession, s.snapshot.world, early)
@@ -166,7 +170,7 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
   const latest = journal.entries.at(-1);
   const morning = world.daypart === 'morning';
   return <>
-    <div className="section-heading"><div><span className="eyebrow">YOUR JOURNAL</span><h1>手记</h1><p className="subtle">每一次出行、每一夜，都记在这里。</p></div><span className="day-label">第 {world.day} 日 · {morning ? '清晨' : '傍晚'}</span></div>
+    <div className="section-heading"><div><span className="eyebrow">YOUR JOURNAL</span><h1>众生牌录</h1><p className="subtle">每一次出行、每一夜，都记在这里。</p></div><span className="day-label">第 {world.day} 日 · {morning ? '清晨' : '傍晚'}</span></div>
     <div className="hall-scene"><Forest village /><div className="hall-overlay"><span>林间小馆</span><h2>{latest?.note ?? '山有木兮，灵有所栖。'}</h2>
       <div className="resource-bar">{RESOURCE_KEYS_LIST.filter(k => k === 'spirit' || k === 'herb' || store.ledger.resources[k] > 0).map(k => {
         const d = summary.resources[k];
@@ -205,7 +209,7 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
 
     <div className="journal-columns">
       <section aria-labelledby="journal-entries-title"><div className="section-heading"><div><span className="eyebrow">ENTRIES</span><h2 id="journal-entries-title">见闻</h2></div><span className="subtle">{journal.entries.length} 条</span></div>
-        {journal.entries.length === 0 ? <p className="subtle">手记还是空的。第一次出行之后，这里会记下遇见的人、走过的路和带回来的东西。</p>
+        {journal.entries.length === 0 ? <p className="subtle">众生牌录还是空的。第一次出行之后，这里会记下遇见的人、走过的路和带回来的东西。</p>
           : <ol className="journal-entries">{[...journal.entries].reverse().slice(0, 12).map(e => <EntryItem key={e.id} entry={e} fresh={unseen.includes(e)} />)}</ol>}
       </section>
       <aside className="journal-side">
@@ -280,7 +284,7 @@ function ExpeditionSetup({ store, busy, onCancel, onStart, balanceError }: { sto
         {(balanceError || !ok.ok) && <small className="sealed-note journal-warn">{balanceError || (!ok.ok && ok.reason)}</small>}
         <button className="primary wide" disabled={busy || !ok.ok || !!balanceError} onClick={() => onStart(loadout)}>以{h.name}启程 <ArrowRight size={17} /></button>
         {sealed && <small className="sealed-note">封灵之契已生效 · 初始牌组增加一张灵卡</small>}
-        <button className="text-button" onClick={onCancel}>回手记</button>
+        <button className="text-button" onClick={onCancel}>回众生牌录</button>
       </div>}
     </div>
   </section>;
@@ -325,7 +329,7 @@ function RebirthSetup({ busy, day, dailyKey, onCancel, onStart }: { busy: boolea
         <div className="offer-cards compact">{deck.map((id, i) => <CardTile key={i} small card={{ uid: `s${i}`, card: id, upgraded: false }} />)}</div>
         <button className="primary wide" disabled={busy} onClick={() => onStart({ element, branch, guild, difficulty })}>以本命{element}行推开重生之门 <ArrowRight size={17} /></button>
         <small className="sealed-note">走通带回灵质 +{REBIRTH_REWARD.victory.spirit}、草药 +{REBIRTH_REWARD.victory.herb}；散灵带回灵质 +{REBIRTH_REWARD.defeat.spirit}。修行事件与结局还在迁移中。</small>
-        <button className="text-button" onClick={onCancel}>回手记</button>
+        <button className="text-button" onClick={onCancel}>回众生牌录</button>
       </div>
     </div>
   </section>;

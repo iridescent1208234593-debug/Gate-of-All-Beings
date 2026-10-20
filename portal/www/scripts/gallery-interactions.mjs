@@ -1,5 +1,6 @@
 import { Raycaster, Vector2, Vector3 } from "three";
 import "../../huiguan/reactions-fx.js";
+import { loadSsoUser } from "../../../shared/shared-session/session.js";
 import { bindGalleryGestures } from "./gallery-gestures.mjs";
 import { placeGalleryControls } from "./gallery-placement.mjs";
 
@@ -101,10 +102,8 @@ export function createGalleryInteractions({ engine, gallery, canvas, getCurrentI
     try { localStorage.setItem(noteKey, "1"); } catch {}
     syncNote();
   });
-  fetch("/api/sso-user", { credentials: "same-origin" })
-    .then((response) => response.ok ? response.json() : null)
-    .then((user) => { isAdmin = user?.admin === true; syncNote(); })
-    .catch(() => {});
+  loadSsoUser()
+    .then((user) => { isAdmin = user?.admin === true; syncNote(); });
 
   const showMessage = (text) => {
     message.textContent = text;

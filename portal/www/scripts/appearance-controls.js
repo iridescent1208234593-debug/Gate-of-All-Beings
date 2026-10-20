@@ -284,6 +284,10 @@ export function createAppearanceControls({
   const onVisibilityChange = () => {
     if (document.visibilityState === "visible") void syncSession();
   };
+  // The first pageshow fires on load, right after the initial syncSession; only bfcache restores need a refresh.
+  const onPageShow = (event) => {
+    if (event.persisted) void syncSession();
+  };
 
   inputs.forEach((input) => {
     input.addEventListener("input", onInput);
@@ -297,7 +301,7 @@ export function createAppearanceControls({
     ?.addEventListener("click", onReset);
   reducedMotion.addEventListener("change", apply);
   window.addEventListener("focus", syncSession);
-  window.addEventListener("pageshow", syncSession);
+  window.addEventListener("pageshow", onPageShow);
   document.addEventListener("visibilitychange", onVisibilityChange);
   apply();
   void syncSession();
@@ -316,7 +320,7 @@ export function createAppearanceControls({
         ?.removeEventListener("click", onReset);
       reducedMotion.removeEventListener("change", apply);
       window.removeEventListener("focus", syncSession);
-      window.removeEventListener("pageshow", syncSession);
+      window.removeEventListener("pageshow", onPageShow);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     },
     get pauseDurationMs() {

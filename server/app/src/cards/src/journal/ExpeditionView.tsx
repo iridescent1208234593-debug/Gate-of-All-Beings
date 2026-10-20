@@ -1,6 +1,6 @@
 /**
  * 卡牌玩法的局内画面（入世历练出行与重生之门共用），沿用入世历练原有的界面与样式。
- * 只读写 RunState；结束时由手记把结果写回世界，不单独弹胜负页。
+ * 只读写 RunState；结束时由众生牌录把结果写回世界，不单独弹胜负页。
  */
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, BookOpen, Crown, Flame, Gem, Heart, Moon, Orbit, Shield, ShoppingBag, Sparkles, Sprout, Swords, Undo2, X } from 'lucide-react';
@@ -63,7 +63,7 @@ export function ExpeditionView({ session, busy, onAction, onReturn, onError }: {
       : <><span className="eyebrow">TODAY'S PATH</span><h1>林间小径</h1><p>山风穿过枝叶，<br />远处传来若有若无的铃声。<br />选择下一处亮起的节点。</p></>}
       <div className="map-legend">{Object.entries(NODE_NAMES).filter(([k]) => rebirth || (k !== 'space' && k !== 'guardian')).map(([k, v]) => { const Icon = nodeIcons[k as NodeKind]; return <span key={k}><Icon size={16} />{v}</span>; })}</div>
       {run.relics.length > 0 && <div className="relic-list"><small>随身灵物</small>{run.relics.map(r => <span key={r}><Gem size={14} />{r}</span>)}</div>}
-      <small className="subtle">{rebirth ? '第 5–9 层各有一位区域守门者，击败第 11 层的守门者推开重生之门。' : '走到守门者就算走通。'}<br />两段路之间可以随时{rebirth ? '离开' : '折返'}，回会馆写进手记。</small></aside>
+      <small className="subtle">{rebirth ? '第 5–9 层各有一位区域守门者，击败第 11 层的守门者推开重生之门。' : '走到守门者就算走通。'}<br />两段路之间可以随时{rebirth ? '离开' : '折返'}，回会馆写进众生牌录。</small></aside>
       <div className="route-scroll"><div className="route-map"><svg viewBox={`0 0 400 ${floors * 100}`} preserveAspectRatio="none" aria-hidden="true">{run.nodes.filter(n => n.floor < floors - 1).flatMap(n => run.nodes.filter(m => m.floor === n.floor + 1 && (m.kind === 'boss' || Math.abs(m.lane - n.lane) <= 1)).map(m => <line key={n.id + m.id} x1={65 + n.lane * 135} y1={50 + n.floor * 100} x2={65 + m.lane * 135} y2={50 + m.floor * 100} className={run.visited.includes(n.id) && run.visited.includes(m.id) ? 'walked' : ''} />))}</svg>
         {run.nodes.map(n => { const Icon = nodeIcons[n.kind]; const enabled = availableNodes(run).some(a => a.id === n.id); return <button key={n.id} style={{ left: `${(65 + n.lane * 135) / 4}%`, top: `${(50 + n.floor * 100) / floors}%` }} disabled={!enabled || busy} className={`map-node ${enabled ? 'available' : ''} ${run.visited.includes(n.id) ? 'visited' : ''} ${n.kind === 'boss' || n.kind === 'guardian' ? 'boss' : ''}`} onClick={() => { send({ type: 'enter', node: n.id }); setTarget('e1'); }} aria-label={`第${n.floor + 1}层 ${NODE_NAMES[n.kind]} 路线${n.lane + 1}`}><Icon size={22} /><span>{n.floor + 1} · {NODE_NAMES[n.kind]}</span></button>; })}</div></div>
     </section>}
@@ -109,7 +109,7 @@ export function ExpeditionView({ session, busy, onAction, onReturn, onError }: {
       <button className="primary" onClick={() => send({ type: 'leave' })}>告别 <ArrowRight size={17} /></button></section>}
 
     {modal === 'deck' && <Modal title={`${rebirth ? '这一世的牌组' : '旅途牌组'} · ${run.deck.length} 张`} onClose={() => setModal(null)}><div className="collection-grid">{run.deck.map(c => <CardTile key={c.uid} card={c} small />)}</div>{run.relics.length > 0 && <p className="subtle">{run.relics.join(' · ')}</p>}</Modal>}
-    {modal === 'return' && <Modal title={rebirth ? '现在离开重生之门？' : '现在折返？'} onClose={() => setModal(null)}><p>{rebirth ? '这一世见到的灵卡会记进手记，不带回奖励。今天就这样过去了。' : '这一趟见到的灵卡会记进手记，默契 +1；不会受伤，也没有走通的奖励。今天就这样过去了。'}</p>
+    {modal === 'return' && <Modal title={rebirth ? '现在离开重生之门？' : '现在折返？'} onClose={() => setModal(null)}><p>{rebirth ? '这一世见到的灵卡会记进众生牌录，不带回奖励。今天就这样过去了。' : '这一趟见到的灵卡会记进众生牌录，默契 +1；不会受伤，也没有走通的奖励。今天就这样过去了。'}</p>
       <div className="hero-actions"><button className="secondary" onClick={() => setModal(null)}>继续走</button><button className="primary" disabled={busy} onClick={() => { setModal(null); onReturn(); }}>回会馆 <ArrowRight size={17} /></button></div></Modal>}
   </>;
 }

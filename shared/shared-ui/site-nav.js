@@ -216,9 +216,11 @@
   function loadAccount(auth) {
     function node(tag, text, target) { var element = el(tag, '', text); if (target) element.href = target; return element; }
     function login() { auth.replaceChildren(node('a', '登录', 'https://huiguan.iridescently.xyz/?openauth=1')); }
-    fetch('/api/sso-user', { credentials: 'same-origin' }).then(function (response) {
-      if (!response.ok) throw new Error('session unavailable'); return response.json();
-    }).then(function (user) {
+    // One /api/sso-user per page: shared-session/session.js reuses this same promise (user JSON or null).
+    var request = window.__iridescentlySsoUser || (window.__iridescentlySsoUser = fetch('/api/sso-user', { credentials: 'same-origin' }).then(function (response) {
+      return response.ok ? response.json() : null;
+    }).catch(function () { return null; }));
+    request.then(function (user) {
       if (!user || !user.logged_in) return login();
       auth.replaceChildren(node('span', user.name || user.nickname || user.username || '用户'), node('a', '账户', 'https://huiguan.iridescently.xyz/account.html'));
       if (user.is_admin || user.role === 'elder') auth.appendChild(node('a', '成员管理', 'https://huiguan.iridescently.xyz/member.html'));

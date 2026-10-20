@@ -5,6 +5,7 @@ export interface Session {
   kind?: string;
   admin?: boolean;
 }
-export function fetchSession(): Promise<Session>;
+export function loadSsoUser(options?: { fresh?: boolean }): Promise<Session | null>;
+export function fetchSession(options?: { fresh?: boolean }): Promise<Session>;
 export function getSession(): Session | null;
 export function refreshSession(): Promise<Session>;

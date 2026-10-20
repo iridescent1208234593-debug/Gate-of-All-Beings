@@ -73,3 +73,12 @@
 相关接口：`GET /api/user` 和 `/api/sso-user` 返回 `account_avatar_url`；`POST /api/account/avatar` 更新 / 清除账户头像；`POST /api/avatars/upload` 供已登录用户上传 OC 头像；`GET /api/user/ocs` 返回本人 OC 候选。众生之门使用 Cards 服务的 `GET /api/gate/identity`、`POST /api/gate/identity`、`GET /api/gate/ocs`，登录态只认共享 `hx_sso`；Cards 自己的旧 OAuth `/api/login` 返回 410，不创建第二个账户状态。
 
 `node portal/huiguan/tests/poster-color-flow.cjs` 在临时账户、临时图片目录与临时数据库中执行 Chrome 390px / 1440px 回归：6 MiB 图片上传、海报生成 / 保存 / PNG 下载 / 重新打开、旧展示快照的颜色恢复、HEX / 实际 RGB 像素比对、MIME 冒充、大小限制和账户权限。展示 iframe 保留脚本和下载能力，但使用不透明来源，不能读取父页账户 DOM；导出另外验证该安全隔离不影响 PNG 下载。只读取现有账户数据库的表结构，不复制用户记录。需要现有 Playwright 与 Sharp 运行时；可以用 `IRIDESCENT_SCHEMA_ROOT` 指定提供数据库结构的工作区，用 `IRIDESCENT_EVIDENCE_DIR` 保存截图和 JSON 结果。
+
+## 公开展示入口解析（2026-10-19）
+
+`show.html?code=...` 复用原有 `/api/get-character`（`/api/huiguan/get-character` 为合法别名）。OC 优先读取原始展示 HTML；`poster-<id>` 属于 SQLite 海报实体，不能当成 OC 的 `char_code`。海报按自己的 ID、公开状态和完整所有者身份读取，图片保持原始上传引用。原始 OC 已不存在但公开画廊保留的资料可作为明确标注的公开快照显示，不创建或覆盖用户设表。实现位于 `server/showcase_document.py`。
+
+读取失败须区分资料不存在与服务不可用，提供重试和节点选择，不能一律要求玩家重新生成、覆盖已有资料。本轮候选与线上状态见 [访问与带宽报告](../../docs/access-and-bandwidth-20261019.md)。
+# Images
+
+Artwork and material thumbnails marked with `data-original-image` share one interaction: hover a specific image to see an overlay on the image with “查看原图” and “不再提示”; the first opens that image's full source, while the second remembers the choice in this browser. Clicking the image itself also opens its original. The viewer handles dynamically inserted gallery cards and removes the thumbnail-only `t=1` parameter from the official image endpoints. Keep the marker on the image itself so the action remains tied to the asset under the pointer.

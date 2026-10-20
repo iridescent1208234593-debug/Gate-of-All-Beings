@@ -16,6 +16,7 @@ import { publish, subscribe } from '@lxh/shared-session/bus.js';
 | `kv.js` | `unifiedStorage(<模块>)`：与 localStorage 同形，写入统一命名空间并自动迁移旧键；Node 下退回内存 |
 | `bus.js` | `BroadcastChannel('iridescently')` 跨模块广播，`publish/subscribe`（Node 下 `unref` 不阻塞） |
 | `game.js` / `game.d.ts` | 共同旅途：IndexedDB 事务、模式快照、角色进度、公共资源和稳定事件回执；通用 `openMode/commitMode/transact` |
+| `progress.js` / `progress.d.ts` | 账户积分与排行榜上报：`reportResult`（一局结束）/ `reportProgress`（持续型，自带节流）/ `fetchLeaderboard`；走同源 `/api/progress/*`，访客不上榜。规则见 [account-progress-and-leaderboards.md](../../docs/account-progress-and-leaderboards.md) |
 
 ## 各模块接入
 

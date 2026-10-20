@@ -27,7 +27,7 @@ const place = (discovered: boolean): PlaceState => ({ discovered, visits: 0, cle
 export function conditionOf(deaths = 0): Condition { return deaths >= 2 ? 'fallen' : deaths === 1 ? 'wounded' : 'healthy'; }
 export function deathsOf(condition: Condition) { return condition === 'fallen' ? 2 : condition === 'wounded' ? 1 : 0; }
 
-/** 首次进入手记时，从共享账本（伤亡计数）和同行者名单建立世界。 */
+/** 首次进入众生牌录时，从共享账本（伤亡计数）和同行者名单建立世界。 */
 export function createWorld(companions: { id: CharacterId; assignment?: Assignment }[], ledger: Ledger): WorldState {
   return {
     version: 1, day: 1, daypart: 'morning',
@@ -67,7 +67,7 @@ export function applyChanges(world: WorldState, ledger: Ledger, changes: Change[
       case 'bond': touch(c.character).bond = Math.max(0, bondOf(c.character) + c.amount); break;
       case 'wound': case 'fall': case 'recover': {
         const care = w.companions[c.character];
-        if (!care) throw new Error('手记里没有这位同行者：' + c.character);
+        if (!care) throw new Error('众生牌录里没有这位同行者：' + c.character);
         care.condition = c.kind === 'wound' ? 'wounded' : c.kind === 'fall' ? 'fallen' : 'healthy';
         care.nights = 0;
         if (c.kind === 'recover') delete care.carry;
@@ -153,7 +153,7 @@ export interface CommitOutcome {
   duplicate: boolean;
 }
 
-/** Journal Commit：把结果写进手记并更新世界。重复提交同一结果 ID 不会再次生效。 */
+/** Journal Commit：把结果写进众生牌录并更新世界。重复提交同一结果 ID 不会再次生效。 */
 export function commitResult(snapshot: WorldSnapshot, ledger: Ledger, result: ActivityResult, now = Date.now()): CommitOutcome {
   const existing = snapshot.journal.entries.find(e => e.id === result.id);
   if (existing) return { snapshot, entry: existing, resources: {}, roster: {}, duplicate: true };
@@ -181,7 +181,7 @@ export function markSeen(snapshot: WorldSnapshot): WorldSnapshot {
   return last ? { ...snapshot, journal: { ...snapshot.journal, seenThrough: last.id } } : snapshot;
 }
 
-/** 回到手记时的变化摘要：把多条见闻合并成玩家一眼能看到的几类变化。 */
+/** 回到众生牌录时的变化摘要：把多条见闻合并成玩家一眼能看到的几类变化。 */
 export interface ReturnSummary {
   resources: Partial<Record<ResourceKey, number>>;
   bonds: Record<string, number>;

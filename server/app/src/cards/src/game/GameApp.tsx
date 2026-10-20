@@ -33,10 +33,10 @@ const ShoreMode=lazy(()=>import('./ShoreMode'));
 const UnifiedJourney=lazy(()=>import('./UnifiedJourney').then(m=>({default:m.UnifiedJourney})));
 const JournalApp=lazy(()=>import('../journal/JournalApp').then(m=>({default:m.JournalApp})));
 type View = 'shore'|'management'|'home'|'adventure'|'hall'|'timeline'|'collection'|'world'|'ecosystem'|'journey'|'journal';
-const navs: {id:View;label:string;icon:typeof Home;hidden?:boolean}[]=[{id:'shore',label:'雾隐浅滩',icon:MapIcon,hidden:true},{id:'home',label:'门庭',icon:Home},{id:'adventure',label:'入世历练',icon:Swords},{id:'management',label:'灵境会馆',icon:Home},{id:'hall',label:'会馆日常',icon:Sprout},{id:'collection',label:'灵卡图鉴',icon:BookOpen},{id:'timeline',label:'旅途手札',icon:ScrollText},{id:'world',label:'万灵志',icon:BookOpen},{id:'ecosystem',label:'灵境生态',icon:Sprout}];
+const navs: {id:View;label:string;icon:typeof Home;hidden?:boolean}[]=[{id:'shore',label:'雾隐浅滩',icon:MapIcon,hidden:true},{id:'home',label:'门庭',icon:Home},{id:'adventure',label:'入世历练',icon:Swords,hidden:true},{id:'management',label:'灵境会馆',icon:Home},{id:'hall',label:'会馆日常',icon:Sprout},{id:'collection',label:'灵卡图鉴',icon:BookOpen},{id:'timeline',label:'旅途手札',icon:ScrollText},{id:'world',label:'万灵志',icon:BookOpen},{id:'ecosystem',label:'灵境生态',icon:Sprout}];
 const nodeIcons={battle:Swords,elite:Flame,event:Sparkles,rest:Moon,shop:ShoppingBag,boss:Gem,space:Sparkles,guardian:Gem};
 navs.push({id:'journey',label:'共同旅途',icon:BookOpen});
-navs.splice(1,0,{id:'journal',label:'手记',icon:ScrollText});
+navs.splice(1,0,{id:'journal',label:'众生牌录',icon:ScrollText});
 function readView():View {const id=location.hash.slice(1);return navs.some(n=>n.id===id)?id as View:'home';}
 function Modal({title,children,onClose}:{title:string;children:React.ReactNode;onClose:()=>void}) {const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{const el=ref.current;el?.showModal();return()=>el?.close();},[]);return <dialog ref={ref} className="game-modal" onCancel={onClose}><div className="modal-head"><h2>{title}</h2><button aria-label="关闭" onClick={onClose}><X size={20}/></button></div>{children}</dialog>;}
 export default function GameApp({ onReturnGate, onCreateIdentity }: { onReturnGate?: () => void; onCreateIdentity?: () => void } = {}) {
@@ -93,7 +93,7 @@ export default function GameApp({ onReturnGate, onCreateIdentity }: { onReturnGa
     {view==='collection'&&<CardCollection service={balance} individuals={save.meta.ecoIndividuals||[]} renderCard={(c,open)=><CardTile card={{card:c.id,uid:c.id,upgraded:false}} onClick={open}/>}/>}
     {view==='management'&&<Suspense fallback={<p className="qc-loading" role="status">正在打开据点…</p>}><ManagementPanel packets={durableSave?.ecoDeliveries||[]} onDelivered={(world,sequence)=>setSave(s=>acknowledgeDelivery(s,world,sequence))}/></Suspense>}
     {view==='world'&&<Suspense fallback={<p className="qc-loading" role="status">正在翻开万灵志…</p>}><WorldGuide/></Suspense>}
-    {view==='journal'&&<Suspense fallback={<p className="qc-loading" role="status">正在翻开手记…</p>}><JournalApp onOpenCollection={()=>go('collection')}/></Suspense>}
+    {view==='journal'&&<Suspense fallback={<p className="qc-loading" role="status">正在翻开众生牌录…</p>}><JournalApp onOpenCollection={()=>go('collection')}/></Suspense>}
     {view==='journey'&&<Suspense fallback={<p className="qc-loading" role="status">正在翻开共同旅途…</p>}><UnifiedJourney/></Suspense>}
     {view==='ecosystem'&&<Suspense fallback={<p className="qc-loading" role="status">正在打开灵境…</p>}><EcosystemPanel meta={save.meta} receipts={durableSave?.meta.ecoReceipts||{}} pendingCount={save.ecoDeliveries?.length||0} onImport={importEcology} onError={setError}/></Suspense>}
     </LoadBoundary></main><footer className="game-footer"><div><span className="footer-mark">众生有灵 · 山水有期</span><small>罗小黑战记非商业同人项目 · IP 版权归原权利方所有</small></div><div className="footer-links"><span className="save-status" role="status"><i/>{saveStatus}</span><button onClick={()=>downloadJSON(save,'众生之门-旅途备份.json')} aria-label="导出完整存档"><Download size={16}/></button></div></footer>

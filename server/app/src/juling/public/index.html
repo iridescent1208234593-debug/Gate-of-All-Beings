@@ -206,9 +206,16 @@ function act(action,element){
   if(action==='gather') triggerGatherPulse();
   fetch('api/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,element})})
     .then(r=>r.json()).then(s=>{
-      if(s.status!=='running'){render(s);showEnd(s);}
+      if(s.status!=='running'){render(s);showEnd(s);reportJuling(s);}
       else render(s);
     });
+}
+// 账户积分 / 排行榜：一世结束时按「境界 × 难度」评分上报（聚灵的魂灵是全服共享状态，不用作个人分数）
+function reportJuling(s){
+  const ranks=['精灵','妖精','仙','神'];const stage=(s.summary&&s.summary.stage)||(s.player&&s.player.stage)||'';
+  const rank=Math.max(1,ranks.findIndex(n=>stage.includes(n))+1);const diff=Number(s.difficulty)||3;
+  const score=(s.status==='won'?100:20*rank)*diff;
+  import('/shared/shared-session/progress.js').then(m=>m.reportResult('juling',{score,won:s.status==='won',ref:'juling:'+s.run+':'+s.tick+':'+Date.now()})).catch(()=>{});
 }
 function render(s){
   latestState=s;

@@ -1,5 +1,7 @@
 import { ELEMENTS } from '@lxh/shared-types/world';
 import { saveWorld, encodeWorld } from '../core/persistence.js';
+import { computeEcoMetrics } from '../core/eco.js';
+import { reportProgress } from '@lxh/shared-session/progress.js';
 import './unified.css';
 import '@lxh/shared-ui/lxh-ui.js';
 
@@ -36,6 +38,8 @@ export function mountSpacePanel(getState,dispatch,initialError='') {
     if(performance.now()-lastSend>3000)sendPending();
     panel.querySelector('#ling-metrics').textContent=`物质灵 ${v.materialLing.toFixed(1)} · 生灵 ${v.lifeLing.toFixed(1)}\n分解者 ${v.decomposers.toFixed(1)} · 待分解 ${v.detritus.toFixed(1)}\n可收获：食物 ${Math.floor(h.food)} / 草药 ${Math.floor(h.herb)} / 灵质 ${Math.floor(h.spirit)}`;
     panel.querySelector('#eco-reseed').textContent=`自动补种：${s.settings.reseed?'开（演示辅助）':'关'}`;
-    if(!saveDisabled&&performance.now()-lastSave>5000){try{saveWorld(s);lastSave=performance.now();}catch(e){saveDisabled=true;report(new Error('自动保存不可用，请导出生态存档。'));}}
+    if(!saveDisabled&&performance.now()-lastSave>5000){try{saveWorld(s);lastSave=performance.now();}catch(e){saveDisabled=true;report(new Error('自动保存不可用，请导出生态存档。'));}
+      // 账户积分 / 排行榜：同存物种数（progress.js 自带节流，分数不变时最多 5 分钟一次）
+      try{void reportProgress('ecology',computeEcoMetrics(s).species);}catch{/* 统计失败不影响生态 */}}
   },dispose(){events.abort();panel.remove();document.body.classList.remove('show-observations');}};
 }

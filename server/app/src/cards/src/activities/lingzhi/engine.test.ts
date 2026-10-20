@@ -169,18 +169,17 @@ test('休整：回复 30% 生命上限（向下取整）或舍去一张牌；事
   assert.deepEqual([back.phase, back.hp, back.deck.length], ['map', 30, s.deck.length]);
 });
 
-test('结算：通关残片 +30、魂灵 +30 并记地点；散灵魂灵 +5；中途离开不给奖励；只能清晨开始', () => {
+test('结算：通关灵质 +30 并记地点；散灵灵质 +5；中途离开不给奖励；只能清晨开始', () => {
   const world = { day: 3, daypart: 'morning' } as WorldState;
   const session = startLingzhi(world, { character: 'walker' }, 11);
   assert.equal(session.activity, 'lingzhi');
   const win: LingzhiSession = { ...session, state: { ...session.state, phase: 'victory', floor: 6 } };
   assert.deepEqual(lingzhiResult(win).changes, [
-    { kind: 'resource', key: 'shards', amount: LINGZHI_REWARD.victory.shards },
-    { kind: 'resource', key: 'soul', amount: LINGZHI_REWARD.victory.soul },
+    { kind: 'resource', key: 'spirit', amount: LINGZHI_REWARD.victory.spirit },
     { kind: 'place', place: 'lingzhi-circuit', state: 'cleared' },
   ]);
   const lose: LingzhiSession = { ...session, state: { ...session.state, phase: 'defeat', floor: 3 } };
-  assert.deepEqual(lingzhiResult(lose).changes, [{ kind: 'resource', key: 'soul', amount: 5 }]);
+  assert.deepEqual(lingzhiResult(lose).changes, [{ kind: 'resource', key: 'spirit', amount: 5 }]);
   assert.deepEqual(lingzhiResult(session, true).changes, []);
   assert.equal(lingzhiResult(win).id, lingzhiResult(win).id, '同一局结算 ID 稳定，提交可去重');
   assert.throws(() => lingzhiResult(session), /还没有结束/);

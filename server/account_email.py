@@ -112,12 +112,12 @@ def handle_email(handler, action, api):
         return
     if not isinstance(body, dict) or any(not isinstance(value, str) for value in body.values()):
         return reply(400, {"error": "输入格式不正确"})
-    session = api["read_session"](handler._get_session())
-    ident = api["resolve_identity"](session["kind"], session["uid"]) if session else None
-    if not ident:
-        return reply(401, {"error": "登录已失效，请重新登录"})
-    kind, uid = ident["kind"], str(ident["uid"])
     if action == "send":
+        session = api["read_session"](handler._get_session())
+        ident = api["resolve_identity"](session["kind"], session["uid"]) if session else None
+        if not ident:
+            return reply(401, {"error": "登录已失效，请重新登录"})
+        kind, uid = ident["kind"], str(ident["uid"])
         email = body.get("email", "").strip()
         normalized = email.casefold()
         if len(email) > 254 or not EMAIL_RE.fullmatch(email):
@@ -160,17 +160,23 @@ def handle_email(handler, action, api):
         conn = api["db"]()
         try:
             conn.execute("BEGIN IMMEDIATE")
-            challenge = conn.execute("SELECT * FROM account_email_challenges WHERE kind=? AND uid=? AND token_hash=? AND expires_at>?", (kind, uid, token_hash, time.time())).fetchone()
+            # The one-time link is scoped to the account that requested it; the
+            # mailbox token itself is sufficient proof when the user opens it.
+            challenge = conn.execute("SELECT * FROM account_email_challenges WHERE token_hash=? AND expires_at>?", (token_hash, time.time())).fetchone()
             if not challenge:
                 conn.rollback()
                 return reply(400, {"error": "验证链接无效或已过期"})
+            if not api["resolve_identity"](challenge["kind"], challenge["uid"]):
+                conn.execute("DELETE FROM account_email_challenges WHERE kind=? AND uid=?", (challenge["kind"], challenge["uid"]))
+                conn.commit()
+                return reply(400, {"error": "对应账户已不可用，请重新登录后发送验证邮件"})
             owner = conn.execute("SELECT kind,uid FROM account_emails WHERE email_norm=?", (challenge["email_norm"],)).fetchone()
-            if owner and (owner["kind"], owner["uid"]) != (kind, uid):
+            if owner and (owner["kind"], owner["uid"]) != (challenge["kind"], challenge["uid"]):
                 conn.rollback()
                 return reply(409, {"error": "该邮箱已绑定其他账户"})
             verified_at = datetime.now(timezone.utc).isoformat()
-            conn.execute("INSERT INTO account_emails VALUES (?,?,?,?,?) ON CONFLICT(kind,uid) DO UPDATE SET email=excluded.email,email_norm=excluded.email_norm,verified_at=excluded.verified_at", (kind, uid, challenge["email"], challenge["email_norm"], verified_at))
-            conn.execute("DELETE FROM account_email_challenges WHERE kind=? AND uid=?", (kind, uid))
+            conn.execute("INSERT INTO account_emails VALUES (?,?,?,?,?) ON CONFLICT(kind,uid) DO UPDATE SET email=excluded.email,email_norm=excluded.email_norm,verified_at=excluded.verified_at", (challenge["kind"], challenge["uid"], challenge["email"], challenge["email_norm"], verified_at))
+            conn.execute("DELETE FROM account_email_challenges WHERE kind=? AND uid=?", (challenge["kind"], challenge["uid"]))
             conn.commit()
         except Exception:
             conn.rollback()

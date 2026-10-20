@@ -1,4 +1,4 @@
-/* 手记在入世历练原有界面上新增的几块，只用原有的颜色与字体变量。 */
+/* 众生牌录在入世历练原有界面上新增的几块，只用原有的颜色与字体变量。 */
 .journal-delta { font-style: normal; font-size: 11px; margin-left: 6px; color: var(--jade); }
 .journal-delta.is-loss { color: var(--rust); }
 .hall-overlay .journal-delta { color: #e8f0c8; }

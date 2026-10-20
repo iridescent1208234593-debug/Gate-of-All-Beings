@@ -995,3 +995,46 @@ a:hover {
 @media (max-width: 720px) {
   .credit-group__names { flex-basis: 100%; text-align: left; order: 3; }
 }
+
+.join-feature { margin: 8px 0 0; }
+.project-support--feature { margin: 0; padding: 40px 0 32px; }
+.project-support--feature h3 { margin: 0 0 18px; font-size: clamp(24px, 3.4vw, 34px); font-weight: 520; line-height: 1.3; }
+.project-support--feature > p { margin: 0 0 18px; color: var(--connections-ink); font-size: clamp(16px, 1.7vw, 19px); line-height: 2; }
+
+/* Special thanks: grouped credit cards (人物按贡献类型分组；头像为姓名首字，链接为胶囊按钮). */
+.connections-section--thanks .thanks-groups { display: grid; gap: 40px; margin-top: 36px; }
+.thanks-group__head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px solid var(--connections-line); }
+.thanks-group__head h3 { margin: 0; font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: 19px; font-weight: 560; letter-spacing: .04em; }
+.thanks-group__head p { margin: 0; color: var(--connections-muted); font-size: 12px; }
+.connections-section--thanks .thanks-group .special-thanks { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; border-top: 0; }
+.connections-section--thanks .thanks-group .special-thanks__item {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 14px; align-content: start;
+  padding: 18px 18px 16px; border: 1px solid var(--connections-line); border-radius: 14px; background: rgba(255, 255, 255, .38);
+  transition: border-color .2s, background .2s, transform .2s;
+}
+.connections-section--thanks .thanks-group .special-thanks__item:hover,
+.connections-section--thanks .thanks-group .special-thanks__item:target { border-color: rgba(169, 74, 37, .45); background: rgba(255, 255, 255, .6); }
+.connections-section--thanks .thanks-group .special-thanks__item:target { box-shadow: 0 0 0 2px rgba(169, 74, 37, .18); }
+.thanks-group .special-thanks__item::before {
+  content: attr(data-initial); grid-row: 1 / span 6; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: var(--connections-ink); color: var(--connections-canvas); font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: 18px; text-transform: uppercase;
+}
+.thanks-group .special-thanks__item > * { grid-column: 2; }
+.connections-section--thanks .thanks-group .special-thanks__item .project-credit__role {
+  justify-self: start; margin: 0 0 7px; padding: 2px 9px; border: 1px solid rgba(169, 74, 37, .35); border-radius: 999px; font-size: 11px; letter-spacing: .04em; line-height: 1.6;
+}
+.thanks-group .special-thanks__item h4 { margin: 0 0 4px; font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: 19px; font-weight: 560; line-height: 1.35; }
+.thanks-group .special-thanks__item p { margin: 6px 0 0; }
+.thanks-group .special-thanks__item a {
+  display: inline-block; margin: 2px 8px 2px 0; padding: 3px 12px; border: 1px solid rgba(169, 74, 37, .32); border-radius: 999px;
+  font-size: 12px; line-height: 1.7; transition: background .2s, border-color .2s;
+}
+.thanks-group .special-thanks__item a:hover { background: rgba(169, 74, 37, .09); border-color: var(--connections-accent); text-decoration: none; }
+.thanks-group .special-thanks__item a:focus-visible { outline: 2px solid var(--connections-focus); outline-offset: 2px; }
+@media (max-width: 560px) {
+  .connections-section--thanks .thanks-groups { gap: 32px; }
+  .connections-section--thanks .thanks-group .special-thanks { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .connections-section--thanks .thanks-group .special-thanks__item, .thanks-group .special-thanks__item a { transition: none; }
+}

@@ -26,6 +26,7 @@ import {LingzhiGame, createLingzhiGame, createLingzhiCard, getLingzhiCardRewards
 import {setLingzhiScene, stop as stopBgm} from './bgm.js'
 import {awardSoul} from '../content/soul-legacy.js'
 import {saveLingzhiSettlement} from '../content/lingzhi-bonus.js'
+import {reportResult} from '/shared/shared-session/progress.js'
 import {todayDaily} from '../content/daily.js'
 import {dailyBattleBonus} from '../game/lingzhi-engine.js'
 import {characterImages} from '../content/character-images.js'
@@ -606,6 +607,8 @@ class LingzhiBattle extends Component {
 		const settlementReward = saveLingzhiSettlement(next)
 		saveProgress(next)
 		this.props.onProgress(next)
+		// 账户积分 / 排行榜：灵质回路按本次到达层数上榜（访客不上榜）
+		void reportResult('lingzhi', {score: state.dungeon.y + 1, won, ref: 'lingzhi:' + state.runStartedAt + ':' + (state.player.characterId || '')})
 		this.setState({result: {won, elapsedMs, awardShards, soulGained: next.soulGained, floor: next.bestFloor, settlementReward}})
 		setLingzhiScene(won ? 'victory' : 'defeat')
 	}

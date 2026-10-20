@@ -1,5 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { ArrowUpRight, ArrowRight, BookOpen, ScrollText, Sprout, PenLine } from 'lucide-react';
+import { ThumbsDown, ThumbsUp } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, BookOpen, ScrollText, Sprout, PenLine, Trophy } from 'lucide-react';
+import { leaderboardUrl } from '@lxh/shared-session/progress.js';
 import portal from '../../../../portal.json';
 import shore from './previews/shore.webp';
 import cardsBattle from './previews/cards-battle.webp';
@@ -29,10 +31,10 @@ const auxiliary = [
   { view: 'world', title: '万灵志', caption: '查阅人物、地点与灵术', icon: BookOpen },
 ];
 
-/** Hall order: 入世历练 (which 重生之门 is merging into), 省省's beach, 聚灵, then the rest. */
-const ADVENTURE: Game = { key: 'cards', view: 'adventure', title: '入世历练', genre: '卡牌 · 路线冒险 · 爬塔', shots: [cardsBattle, slayBattle, cardsMap, slayMap],
+/** Hall order: 门庭 (the 众生牌录, which replaced 入世历练 and 重生之门), 省省's beach, 聚灵, then the rest. */
+const ADVENTURE: Game = { key: 'cards', view: 'journal', title: '门庭', genre: '众生牌录 · 卡牌版众生之门', shots: [cardsBattle, slayBattle, cardsMap, slayMap],
   scene: <Forest className="game-card__scene"/>,
-  desc: '与罗小黑一同踏入山林，在分支路线上遭遇、休憩、交易，用灵术卡牌化解每一场相遇。重生之门的爬塔篇也正在并进来。', points: ['十层分支路线', '回合制灵术卡牌', '五行克制 · 爬塔', '会馆养成 · 封灵成卡'] };
+  desc: '入世历练与重生之门已并入众生牌录：与同行者出行、照料会馆、推开重生之门，每一次旅途都记在同一本牌录里。', points: ['出行 · 灵质修行', '同行者与会馆', '重生之门', '旅途见闻'] };
 const GAMES: Game[] = [
   { key: 'shengsheng-shoot', title: '省省海滩射击', genre: '像素射击 · 省省老师', shots: [shootPlay, shootReady],
     desc: '省省的海滩练习：移动躲开迎面而来的敌人，站定时自动三路开火，冲击更高分。', points: ['WASD / 方向键', '站定自动开火', '一局一两分钟'] },
@@ -49,6 +51,30 @@ const GAMES: Game[] = [
   { key: 'aeon', title: 'AEON', genre: '模拟 · 神经演化', shots: [aeon],
     desc: '每个生灵都用真实的神经网络思考：领导一个民族，或以神之手塑造世界，看文明兴衰。', points: ['生存 / 创造双模式', '神经网络生灵'] },
 ];
+const VOTE_KEY = 'zszm.journal-update-vote';
+type Vote = 'up' | 'down' | null;
+function readVote(): Vote { try { const v = localStorage.getItem(VOTE_KEY); return v === 'up' || v === 'down' ? v : null; } catch { return null; } }
+function writeVote(v: Vote) { try { if (v) localStorage.setItem(VOTE_KEY, v); else localStorage.removeItem(VOTE_KEY); } catch { /* storage unavailable */ } }
+
+/** The retired 入世历练 entry: greyed out but still reachable behind a second confirmation, with a thumbs vote on this update. */
+function LegacyAdventure({ onEnter }: { onEnter: () => void }) {
+  const [confirming, setConfirming] = useState(false);
+  const [vote, setVote] = useState<Vote>(readVote);
+  const cast = (next: 'up' | 'down') => { const v = vote === next ? null : next; setVote(v); writeVote(v); };
+  return <div className="mode-hall__chapter mode-hall__chapter--legacy">
+    <button type="button" className="mode-hall__legacy-entry" onClick={() => setConfirming(true)}><small>旧版 · 即将下线</small><strong>入世历练</strong><span>已并入众生牌录，仍可进入 <ArrowUpRight size={14}/></span></button>
+    <div className="mode-hall__vote" role="group" aria-label="这次更新你觉得如何">
+      <em>这次更新</em>
+      <button type="button" aria-pressed={vote === 'up'} aria-label="赞" onClick={() => cast('up')}><ThumbsUp size={14}/></button>
+      <button type="button" aria-pressed={vote === 'down'} aria-label="踩" onClick={() => cast('down')}><ThumbsDown size={14}/></button>
+    </div>
+    {confirming && <div className="mode-hall__confirm" role="dialog" aria-modal="true" aria-label="确认进入入世历练" onClick={() => setConfirming(false)}>
+      <div onClick={event => event.stopPropagation()}><strong>进入入世历练？</strong><p>这个玩法即将下线，仍要进入吗？</p>
+        <div><button type="button" onClick={() => setConfirming(false)}>再想想</button><button type="button" className="is-primary" onClick={() => { setConfirming(false); onEnter(); }}>仍要进入</button></div></div>
+    </div>}
+  </div>;
+}
+
 const published = new Set(portal.links.filter(link => link.group === '游戏').map(link => link.key));
 
 function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNavigate: (view: string) => void }) {
@@ -106,12 +132,12 @@ export function ModeHall({ onNavigate, onEditIdentity }: Props) {
     <SharedResources onOpen={()=>onNavigate('journey')}/>
     <div className="mode-hall__row mode-hall__row--feature">
       <GameCard game={ADVENTURE} index={1} onNavigate={onNavigate}/>
-      {published.has('slay') && <a className="mode-hall__chapter" href="/app/shell/m/slay"><small>入世历练 · 爬塔篇</small><strong>重生之门</strong><span>五行爬塔，正在并入 <ArrowUpRight size={14}/></span></a>}
+      <LegacyAdventure onEnter={() => onNavigate('adventure')}/>
     </div>
     <div className="mode-hall__row">{firstRow.map((game, index) => <GameCard key={game.key} game={game} index={index + 2} onNavigate={onNavigate}/>)}</div>
     {secondRow.length > 0 && <div className="mode-hall__row mode-hall__row--compact">{secondRow.map((game, index) => <GameCard key={game.key} game={game} index={firstRow.length + index + 2} onNavigate={onNavigate}/>)}</div>}
-    <aside className="mode-hall__desk" aria-label="旅途案头"><div><small>不赶路的时候</small><h2>在门庭歇一会。</h2></div><nav>{auxiliary.map(item => <button key={item.view} onClick={() => onNavigate(item.view)}><item.icon size={19}/><span><strong>{item.title}</strong><small>{item.caption}</small></span><ArrowRight size={15}/></button>)}</nav></aside>
-    <p className="mode-hall__save-note">入世历练与重生之门共享同行名册和旅途资源；各段旅途保留自己的局内进度。</p>
+    <aside className="mode-hall__desk" aria-label="旅途案头"><div><small>不赶路的时候</small><h2>在门庭歇一会。</h2></div><nav>{auxiliary.map(item => <button key={item.view} onClick={() => onNavigate(item.view)}><item.icon size={19}/><span><strong>{item.title}</strong><small>{item.caption}</small></span><ArrowRight size={15}/></button>)}<a href={leaderboardUrl('cards')}><Trophy size={19}/><span><strong>排行榜</strong><small>看看各段旅途的榜单与等级</small></span><ArrowRight size={15}/></a></nav></aside>
+    <p className="mode-hall__save-note">众生牌录里的各段旅途共享同行名册和旅途资源，各自保留局内进度。</p>
   </section>;
 }
 

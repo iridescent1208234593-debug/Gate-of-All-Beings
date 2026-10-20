@@ -155,7 +155,7 @@ test('重生之门 is a journal activity: open when everyone has fallen, rewards
   assert.throws(() => rebirthResult(lose, fresh(l).world), /还没有结束/);
 });
 
-test('重生之门开局选择从手记传入：天赋卡与开局法宝、分馆与难度的生命上限、按游戏日的今日灵机', async () => {
+test('重生之门开局选择从众生牌录传入：天赋卡与开局法宝、分馆与难度的生命上限、按游戏日的今日灵机', async () => {
   const { dailyFor } = await import('../game/core/rebirthBonus');
   const l = ledger(), snap = fresh(l);
   const session = startRebirth(snap.world, { element: '金', branch: 'suoyu', guild: 'longyou', difficulty: 'trial' }, 5);

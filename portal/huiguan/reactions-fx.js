@@ -12,10 +12,11 @@
   const SCOPES = {
     official: { react: '/api/official/react', list: '/api/official/reactions', trio: true },
     fan: { react: '/api/fan/react', list: '/api/fan/reactions', trio: true },
-    fanart: { trio: false, like: '/api/official/fanart/like' }
+    // 同人图：三种反应，状态随列表数据 seed 进来（主册角色页与副册共用同一份数据）
+    fanart: { trio: false, react: '/api/official/fanart/react', favTitle: '喜欢（每张图各可点一次，可取消）' }
   };
   const RX = {};          // trio 作用域：{fav:{}, up:{}, down:{}, my:{fav, votes}}
-  const ART = {};         // fanart：id -> {fav, myFav}
+  const ART = {};         // fanart：id -> {fav, up, down, myFav, myVote}
   const pending = {}, chains = {};
   const reduced = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -194,14 +195,14 @@
   // ---------- 状态 ----------
   const empty = () => ({ fav: {}, up: {}, down: {}, my: { fav: null, favs: [], multiple_fav: false, votes: {} } });
   function get(scope, id) {
-    if (!SCOPES[scope].trio) { const a = ART[id] || { fav: 0, myFav: false }; return { fav: a.fav, up: 0, down: 0, myFav: a.myFav, myVote: 0 }; }
+    if (!SCOPES[scope].trio) return { fav: 0, up: 0, down: 0, myFav: false, myVote: 0, ...ART[id] };
     const r = RX[scope] || empty();
     return { fav: r.fav[id] || 0, up: r.up[id] || 0, down: r.down[id] || 0,
       myFav: r.my.multiple_fav ? r.my.favs.includes(id) : r.my.fav === id,
       myVote: r.my.votes[String(id)] || 0 };
   }
   function put(scope, id, s) {
-    if (!SCOPES[scope].trio) { ART[id] = { fav: s.fav, myFav: s.myFav }; return; }
+    if (!SCOPES[scope].trio) { ART[id] = { fav: s.fav, up: s.up, down: s.down, myFav: s.myFav, myVote: s.myVote }; return; }
     const r = RX[scope] || (RX[scope] = empty());
     r.fav[id] = s.fav; r.up[id] = s.up; r.down[id] = s.down;
     if (r.my.multiple_fav) {
@@ -211,18 +212,21 @@
     } else if (s.myFav) r.my.fav = id; else if (r.my.fav === id) r.my.fav = null;
     if (s.myVote) r.my.votes[String(id)] = s.myVote; else delete r.my.votes[String(id)];
   }
+  // 同人图列表项 / 反应接口返回的状态 → 本地状态
+  function fromArt(it) { return { fav: it.likes || 0, up: it.up || 0, down: it.down || 0, myFav: !!it.liked, myVote: it.my_vote || 0 }; }
   function fromServer(st) { return { fav: st.fav, up: st.up, down: st.down, myFav: !!st.my_fav, myVote: st.my_vote || 0 }; }
 
   // ---------- 渲染 ----------
-  function btnHTML(type, s) {
+  function btnHTML(type, s, scope) {
     const on = type === 'fav' ? s.myFav : type === 'up' ? s.myVote === 1 : s.myVote === -1;
     const n = s[type];
-    return `<button type="button" class="rfx-btn rfx-${type}${on ? ' on' : ''}" data-type="${type}" aria-pressed="${on}" title="${TITLE[type][0]}" aria-label="${TITLE[type][1]}">${ICON[type]}<span class="rfx-n">${n}</span></button>`;
+    const title = (type === 'fav' && SCOPES[scope].favTitle) || TITLE[type][0];
+    return `<button type="button" class="rfx-btn rfx-${type}${on ? ' on' : ''}" data-type="${type}" aria-pressed="${on}" title="${title}" aria-label="${TITLE[type][1]}">${ICON[type]}<span class="rfx-n">${n}</span></button>`;
   }
   function barHTML(scope, id, opts) {
-    const s = get(scope, id), only = (opts && opts.only) || (SCOPES[scope].trio ? null : 'fav');
+    const s = get(scope, id), only = opts && opts.only;
     const types = only ? [only] : ['fav', 'up', 'down'];
-    return `<div class="rfx-bar" data-k="${scope}:${id}">${types.map(t => btnHTML(t, s)).join('')}</div>`;
+    return `<div class="rfx-bar" data-k="${scope}:${id}">${types.map(t => btnHTML(t, s, scope)).join('')}</div>`;
   }
   function paint(scope, id, animateTypes) {
     const s = get(scope, id);
@@ -296,9 +300,9 @@
   function send(scope, id, type) {
     const key = scope + ':' + id; pending[key] = (pending[key] || 0) + 1;
     const cfg = SCOPES[scope];
-    const call = () => fetch(cfg.react || cfg.like, {
+    const call = () => fetch(cfg.react, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cfg.trio ? { character_id: id, type } : { id })
+      body: JSON.stringify(cfg.trio ? { character_id: id, type } : { id, type })
     }).then(async r => ({ status: r.status, d: await r.json().catch(() => ({})) }));
     chains[key] = (chains[key] || Promise.resolve()).then(call).then(async res => {
       pending[key]--;
@@ -308,7 +312,7 @@
         if (cfg.trio && res.d.state) {
           put(scope, id, fromServer(res.d.state)); paint(scope, id);
           if (res.d.prev_state) { put(scope, res.d.prev_state.cid, fromServer(res.d.prev_state)); paint(scope, res.d.prev_state.cid); }
-        } else if (!cfg.trio) { put(scope, id, { fav: res.d.likes, up: 0, down: 0, myFav: !!res.d.liked, myVote: 0 }); paint(scope, id); }
+        } else if (!cfg.trio && res.d.state) { put(scope, id, fromArt(res.d.state)); paint(scope, id); }
       }
     }).catch(async () => { pending[key]--; await resync(scope, id); toast('⚠ 网络不太顺，已恢复原状'); });
   }
@@ -318,5 +322,5 @@
   }
 
   document.addEventListener('click', onClick, true);
-  window.RFX = { bar: barHTML, paint, load, seed: (id, likes, liked) => { ART[id] = { fav: likes, myFav: !!liked }; }, toast, fx: FX, icons: { like: ICON.up, love: ICON.fav }, confetti: FX.confetti };
+  window.RFX = { bar: barHTML, paint, load, seed: (id, item, liked) => { ART[id] = typeof item === 'object' ? fromArt(item) : fromArt({ likes: item, liked }); }, toast, fx: FX, icons: { like: ICON.up, love: ICON.fav }, confetti: FX.confetti };
 })();

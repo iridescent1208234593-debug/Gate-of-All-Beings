@@ -23,7 +23,7 @@ export interface WorldStore {
 function check(value: unknown, ledger: Ledger): WorldSnapshot {
   const s = structuredClone(value) as WorldSnapshot;
   if (!s || s.version !== 1 || !s.world || s.world.version !== 1 || !Array.isArray(s.journal?.entries) || !Number.isSafeInteger(s.world.day))
-    throw new Error('手记存档格式不兼容，原数据已保留。');
+    throw new Error('众生牌录存档格式不兼容，原数据已保留。');
   // 新加入的同行者补进照料名单，不改动已有状态。
   const base = createWorld(companionIds().map(id => ({ id })), ledger);
   for (const [id, care] of Object.entries(base.companions)) s.world.companions[id] ??= care;

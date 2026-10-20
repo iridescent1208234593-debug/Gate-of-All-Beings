@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>西木会馆 · 设计系统样式指南</title>
-<link rel="stylesheet" href="design-system.css?v=3">
+<link rel="stylesheet" href="design-system.css?v=4">
 <link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261015-1">
-<link rel="stylesheet" href="https://iridescently.xyz/shared/shared-ui/lxh-ui.css?v=20261017">
+<link rel="stylesheet" href="/design-system/ui/lxh-ui.css?v=20261020">
 <style>
   body{padding:48px 16px 80px;}
   .wrap{max-width:960px;margin:0 auto;}
@@ -54,7 +54,10 @@
       <button class="qc-btn qc-btn--danger">危险按钮</button>
       <button class="qc-btn qc-btn--sm">小按钮</button>
       <button class="qc-btn" disabled>禁用</button>
+      <button class="qc-btn" aria-busy="true">正在保存…</button>
+      <a class="qc-btn qc-btn--ghost" href="#">链接按钮</a>
     </div>
+    <p style="color:var(--qc-dim);font-size:13px;">按 Tab 查看键盘焦点环；鼠标点击不显示。可点高度最小 36px，触屏 44px（小按钮 28 / 36px）。提交中设 <code>aria-busy="true"</code>，不只是 disabled。</p>
   </section>
 
   <section>
@@ -88,6 +91,16 @@
         <select class="qc-select"><option>男</option><option>女</option></select>
         <div class="qc-err">错误提示</div>
       </div>
+      <div>
+        <label class="qc-label" for="demoInvalid">再次输入新密码</label>
+        <input class="qc-input" id="demoInvalid" value="两次不一致" aria-invalid="true" aria-describedby="demoInvalidErr">
+        <div class="qc-err" id="demoInvalidErr">两次输入的新密码不一致</div>
+      </div>
+      <div>
+        <label class="qc-label" for="demoDisabled">站内账号（不可改）</label>
+        <input class="qc-input" id="demoDisabled" value="jialin" disabled>
+        <div class="qc-hint">禁用：宣纸底 + 次级字色</div>
+      </div>
     </div>
     <textarea class="qc-textarea" rows="3" placeholder="多行输入" style="margin-top:12px;"></textarea>
   </section>
@@ -111,12 +124,14 @@
 
   <section>
     <h2 class="qc-h2">弹窗 Modal</h2>
-    <button class="qc-btn" onclick="document.getElementById('demoModal').classList.add('is-open')">打开弹窗</button>
-    <div class="qc-modal" id="demoModal" onclick="if(event.target===this)this.classList.remove('is-open')">
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">行为脚本 <code>qc-modal.js</code>：打开后焦点进入弹窗，Tab 只在弹窗内循环，Esc 或点遮罩关闭，关闭后焦点回到触发按钮，背景不滚动。用 <code>data-qc-modal-open</code> / <code>data-qc-modal-close</code> 接线，或脚本调用 <code>QcModal.open()</code>。</p>
+    <button class="qc-btn" data-qc-modal-open="demoModal">打开弹窗</button>
+    <div class="qc-modal" id="demoModal">
       <div class="qc-modal__panel">
-        <div class="qc-modal__title">确认操作</div>
+        <h3 class="qc-modal__title">确认操作</h3>
         <p style="color:var(--qc-dim);font-size:13px;margin:12px 0;">弹窗用于确认/编辑/删除等覆盖式交互。</p>
-        <div class="row" style="justify-content:flex-end;"><button class="qc-btn qc-btn--ghost" onclick="document.getElementById('demoModal').classList.remove('is-open')">取消</button><button class="qc-btn" onclick="document.getElementById('demoModal').classList.remove('is-open')">确认</button></div>
+        <label class="qc-label" for="demoModalNote">备注</label><input class="qc-input" id="demoModalNote" placeholder="可选">
+        <div class="row" style="justify-content:flex-end;"><button class="qc-btn qc-btn--ghost" data-qc-modal-close>取消</button><button class="qc-btn" data-qc-modal-close>确认</button></div>
       </div>
     </div>
   </section>
@@ -197,10 +212,10 @@
 
   <section>
     <h2 class="qc-h2">加载状态 Loading</h2>
-    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">内容还没到时，在内容将出现的位置显示一条细进度线和一句说明；不要另起一个全屏加载页。出错时改 role="alert" 并给出重试。代码：<code>lxh-ui.css</code> 的 <code>.qc-loading</code>。</p>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">内容还没到时，在内容将出现的位置显示一条细进度线和一句说明；不要另起一个全屏加载页。出错时改 role="alert" 并给出重试。代码：<code>lxh-ui.css</code> 的 <code>.qc-loading</code>；恢复按钮放进 <code>.qc-loading__actions</code>，可以并排多个。真实页面：会馆「账户安全」。</p>
     <div class="grid2">
       <div class="qc-card"><div class="qc-loading" role="status" style="min-height:140px">正在读取旅途存档…</div></div>
-      <div class="qc-card"><div class="qc-loading" role="alert" style="min-height:140px">暂时无法读取玩家资料。<button type="button">重新读取</button></div></div>
+      <div class="qc-card"><div class="qc-loading" role="alert" style="min-height:140px">请先登录后再设置账户安全。<div class="qc-loading__actions"><a href="#">去登录</a><a href="#">忘记密码</a></div></div></div>
     </div>
   </section>
 
@@ -224,6 +239,7 @@
   </section>
 
 </div>
+<script src="qc-modal.js?v=20261019"></script>
 <script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017"></script>
 </body>
 </html>

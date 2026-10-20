@@ -42,7 +42,7 @@ React / Vite 模块用 `import '@lxh/shared-ui/lxh-ui.css'` 和 `import '@lxh/sh
 <script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017" data-variant="overlay"></script>
 ```
 
-- 页面自己的按钮放进 `IridescentlyNav.slot()`，不要再用 `position: fixed` 占右上角。
+- 页面自己的按钮放进 `IridescentlyNav.slot()`（元素类名 `.qc-nav-slot`，不要用 `.qc-slot` 选它，那是配色选色槽），不要再用 `position: fixed` 占右上角。
 - 自带账户界面的页面先设 `window.__HUIGUAN_OWN_AUTH = true`，再往 `#authBar` 渲染；其他页面由导航读取 `/api/sso-user`。
 - 站内子导航（众生之门页签、模块壳）是一条米白本地栏，`position: sticky; top: var(--qc-nav-h)`，放在全局栏下面。一页只有一条深色栏。
 - 在众生之门模块壳里（`window.__iridescentlyEmbed`）导航不重复挂载；单独打开的模块由 `design-system/game-nav.js` 挂上全局栏和「回门庭」。
@@ -51,6 +51,8 @@ React / Vite 模块用 `import '@lxh/shared-ui/lxh-ui.css'` 和 `import '@lxh/sh
 ## 加载状态
 
 内容未到时，在内容将出现的位置显示 `.qc-loading`（细进度线 + 一句话），不要另起全屏加载页；页面级等待加 `.qc-loading--page`，出错改 `role="alert"` 并给重试按钮。
+
+恢复入口放进 `.qc-loading__actions`（可多个 `<button>` / `<a>`，已带 36/44px 触控高度和键盘焦点环）。颜色全走 `--lxh-*` / `--qc-*` token。会馆页面引入 `/design-system/ui/lxh-ui.css` 即可使用，示例见 `portal/huiguan/security.html`；状态写法见设计系统第八节。
 
 ## `lxh/` 只放运行时素材
 

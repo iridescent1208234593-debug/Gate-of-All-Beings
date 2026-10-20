@@ -35,6 +35,7 @@ from account_email import init_schema as init_email_schema, handle_email
 from account_recovery import init_schema as init_recovery_schema, handle_recovery
 from account_profile import init_schema as init_profile_schema, get_profile, set_account_avatar, valid_asset_url, store_avatar_image as normalize_avatar_image
 import game_saves
+import account_progress
 from showcase_document import published_document
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 
@@ -184,6 +185,33 @@ def now_iso():
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
 
 
+# 会馆档案体系（唯一来源）：「官方角色档案」分主册 / 副册两册；「同人角色档案」是独立的一套档案。
+# 页面分册条、作品详情与投稿都从这里取分册 key 和名称。
+ARCHIVES = (
+    {"key": "official", "title": "官方角色档案", "volumes": (
+        {"key": "official_main", "label": "主册", "title": "官方角色档案", "page": "/gallery.html",
+         "desc": "《罗小黑战记》原作已有角色的官方设定与官方素材。"},
+        {"key": "official_fanart", "label": "副册", "title": "官方角色同人画廊", "page": "/works.html",
+         "desc": "与主册同步的官方角色，由爱好者自行上传同人图（如小黑、无限、风息的二创），并非官方出品或官方认证。"},
+    )},
+    {"key": "fan", "title": "同人角色档案", "volumes": (
+        {"key": "fan_characters", "label": "", "title": "同人角色档案", "page": "/fan.html",
+         "desc": "罗小黑战记 · 同人创作角色 · 由爱好者提交与分享"},
+    )},
+)
+
+
+# 同人图评论按语境分两套：main = 主册角色页，sub = 副册（官方角色同人画廊）
+FANART_COMMENT_TABLES = {"main": "official_fanart_comments", "sub": "official_fanart_sub_comments"}
+
+
+def fanart_score_sql(alias):
+    """同人图得分 = 点赞 + 喜欢 - 2 × 踩（与同人画廊同一公式）；同分时由调用方按新上传在前。"""
+    return (f"((SELECT COUNT(*) FROM official_fanart_likes l WHERE l.fanart_id={alias}.id)"
+            f" + (SELECT COUNT(*) FROM official_fanart_votes v WHERE v.fanart_id={alias}.id AND v.vote=1)"
+            f" - 2 * (SELECT COUNT(*) FROM official_fanart_votes v WHERE v.fanart_id={alias}.id AND v.vote=-1))")
+
+
 def db():
     conn = sqlite3.connect(USER_DB, timeout=30)
     conn.row_factory = sqlite3.Row
@@ -271,6 +299,10 @@ def init_user_db():
                     conn.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} TEXT DEFAULT ''")
                 except Exception:
                     pass
+        # 编辑权限（none / scribe / admin）：线上库早年手工加过，这里补齐新库，否则新库查编辑权限会报错
+        for tbl in ("local_users", "user_flags"):
+            if "edit_role" not in {r[1] for r in conn.execute(f"PRAGMA table_info({tbl})")}:
+                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN edit_role TEXT DEFAULT 'none'")
         # 豁免权限字段（突破年龄 / 突破技能选择），批准后置 1
         for tbl in ("local_users", "user_flags"):
             for col in ("exempt_age", "exempt_skill"):
@@ -278,7 +310,8 @@ def init_user_db():
                     conn.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} INTEGER DEFAULT 0")
                 except Exception:
                     pass
-        # 等级系统：积分字段
+        # 旧等级积分字段：已停用，现由 account_progress 的 account_points 表记账（见 server/account_progress.py）；
+        # 列保留供 reset-legacy 迁移归档与回滚。
         for tbl in ("local_users", "user_flags"):
             try:
                 conn.execute(f"ALTER TABLE {tbl} ADD COLUMN points INTEGER DEFAULT 0")
@@ -427,7 +460,32 @@ def init_user_db():
             )
         """)
         conn.execute("CREATE INDEX IF NOT EXISTS idx_fanart_cmt ON official_fanart_comments(fanart_id, id)")
+        # 同人图的 点赞 / 踩（喜欢沿用 official_fanart_likes）：主册角色页与副册共用同一份反应数据
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS official_fanart_votes (
+                fanart_id INTEGER NOT NULL,
+                user_kind TEXT NOT NULL,
+                user_uid TEXT NOT NULL,
+                vote INTEGER NOT NULL CHECK (vote IN (1, -1)),
+                created_at TEXT,
+                PRIMARY KEY (fanart_id, user_kind, user_uid)
+            )
+        """)
+        # 副册（官方角色同人画廊）自己的评论线程；主册角色页评论仍是 official_fanart_comments，两边不共用
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS official_fanart_sub_comments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fanart_id INTEGER NOT NULL,
+                user_kind TEXT NOT NULL,
+                user_uid TEXT NOT NULL,
+                user_name TEXT DEFAULT '',
+                content TEXT NOT NULL,
+                created_at TEXT
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_fanart_sub_cmt ON official_fanart_sub_comments(fanart_id, id)")
         game_saves.init_schema(conn)
+        account_progress.init_schema(conn)
         game_saves.import_legacy(conn, GAME_SAVE_FILE)
         conn.commit()
         conn.close()
@@ -689,7 +747,10 @@ IMAGE_LIMIT = 8 * 1024 * 1024
 UPLOAD_METADATA_LIMIT = 256 * 1024
 UPLOAD_REQUEST_LIMIT = IMAGE_LIMIT + UPLOAD_METADATA_LIMIT + 64 * 1024
 
-def validate_image(raw, mime):
+GIF_LIMIT = 5 * 1024 * 1024
+
+
+def validate_image(raw, mime, gif_limit=GIF_LIMIT):
     """Check the declared type, file signature and bounded size before storage."""
     mime = (mime or "").lower()
     detected = None
@@ -703,9 +764,9 @@ def validate_image(raw, mime):
         detected = "image/webp"
     if mime != detected or mime not in _DATAURI_EXT:
         raise ValueError("图片格式或文件内容无效，仅支持 JPG / PNG / WebP / GIF")
-    limit = 5 * 1024 * 1024 if mime == "image/gif" else IMAGE_LIMIT
+    limit = gif_limit if mime == "image/gif" else IMAGE_LIMIT
     if not raw or len(raw) > limit:
-        raise ValueError("动图需≤5MB" if mime == "image/gif" else "图片需≤8MB")
+        raise ValueError(f"动图需≤{gif_limit // (1024 * 1024)}MB" if mime == "image/gif" else "图片需≤8MB")
     from PIL import Image
     try:
         with Image.open(BytesIO(raw)) as image:
@@ -930,6 +991,10 @@ class Handler(BaseStaticHandler):
             return self._api_fanart_list(qs)
         if path == "/api/official/fanart/comments":
             return self._api_fanart_comments(qs)
+        if path == "/api/archives":
+            return self._json(200, {"archives": ARCHIVES})
+        if path == "/api/official/fanart/summary":
+            return self._api_fanart_summary(qs)
         if path == "/api/admin/honor-requests":
             return self._api_admin_honor_requests()
         # ---- 素材库公开接口（供 game 等子域小游戏复用，免登录只读） ----
@@ -1065,6 +1130,8 @@ class Handler(BaseStaticHandler):
             return self._api_fanart_delete()
         if path == "/api/official/fanart/like":
             return self._api_fanart_like()
+        if path == "/api/official/fanart/react":
+            return self._api_fanart_react()
         if path == "/api/official/fanart/comment":
             return self._api_fanart_comment()
         if path == "/api/official/fanart/comment/delete":
@@ -1592,8 +1659,7 @@ class Handler(BaseStaticHandler):
             "exempt_skill": ex["exempt_skill"],
             "exempt_age_pending": epend["age"],
             "exempt_skill_pending": epend["skill"],
-            "points": self._get_points(ident),
-            "level": self.compute_level(self._get_points(ident)),
+            **self._level_fields(ident),
             "theme_primary": (theme["theme_primary"] if theme else "") or "",
             "theme_accent": (theme["theme_accent"] if theme else "") or "",
         }, cookie=self._sso_cookie(ident["uid"], ident["kind"], ident.get("nickname") or ident.get("username") or ""))
@@ -1861,14 +1927,19 @@ class Handler(BaseStaticHandler):
         data[key] = chars
         save_data(data)
 
-        # 等级积分：成功设表 +20；自定义配色额外 +10
-        earned = self.POINTS_SUBMIT
-        if isinstance(data_field, dict) and data_field.get("colorPrimary") and (data_field.get("colorIndex") in (None, "", -1)):
-            earned += self.POINTS_CUSTOM_COLOR
-        self._add_points(ident, earned)
-        pts = self._get_points(ident)
+        # 等级积分：只有新登记的设表计分（修改已有设表不计），每日有上限，规则见 account_progress.RULES
+        awarded = []
+        if not found:
+            custom = isinstance(data_field, dict) and bool(data_field.get("colorPrimary")) and (data_field.get("colorIndex") in (None, "", -1))
+            conn = account_progress.open_db(PROJECT_ROOT)
+            try:
+                awarded = account_progress.award_sheet(conn, ident["kind"], ident["uid"],
+                                                       ident.get("nickname") or ident.get("username") or "", code, custom)
+            finally:
+                conn.close()
         self._json(200, {"ok": True, "url": f"/show.html?code={urllib.parse.quote(code)}",
-                         "earned": earned, "points": pts, "level": self.compute_level(pts)})
+                         "earned": round(sum(a["amount"] for a in awarded), 1), "awarded": awarded,
+                         **self._level_fields(ident)})
 
     def _api_save_all(self):
         ident = self._require_ident()
@@ -2027,7 +2098,9 @@ class Handler(BaseStaticHandler):
             else:
                 c["thumb_path"] = None; c["thumb_id"] = None
         fix.close()
-        out = {"total": total, "characters": chars}
+        for c in chars:
+            c["volume"] = "official_main"
+        out = {"total": total, "volume": "official_main", "characters": chars}
         _wv_set(ckey, out)
         self._json(200, out)
 
@@ -2052,7 +2125,7 @@ class Handler(BaseStaticHandler):
         images = [dict(r) for r in conn.execute("SELECT id,image_path,image_type,description FROM character_images WHERE character_id=? ORDER BY COALESCE(sort_order,id), id", (cid,))]
         events = [dict(r) for r in conn.execute("SELECT event FROM character_events WHERE character_id=? ORDER BY id", (cid,))]
         conn.close()
-        out = {"character": dict(ch), "abilities": abilities, "relations": relations, "images": images, "events": events}
+        out = {"volume": "official_main", "character": dict(ch), "abilities": abilities, "relations": relations, "images": images, "events": events}
         _wv_set(("char", cid), out)
         self._json(200, out)
 
@@ -2714,9 +2787,11 @@ class Handler(BaseStaticHandler):
 
     def _fanart_item(self, r, ident, moderator):
         mine = bool(ident) and r["user_kind"] == ident["kind"] and r["user_uid"] == str(ident["uid"])
-        return {"id": r["id"], "image_url": r["image_url"], "caption": r["caption"] or "",
+        return {"id": r["id"], "volume": "official_fanart", "image_url": r["image_url"], "caption": r["caption"] or "",
                 "user_name": r["user_name"] or "匿名", "created_at": r["created_at"],
-                "likes": r["likes"], "comments": r["comments"], "liked": bool(r["liked"]),
+                "likes": r["likes"], "liked": bool(r["liked"]), "up": r["up"], "down": r["down"],
+                "my_vote": r["my_vote"] or 0, "score": r["score"],
+                "comments": r["comments"], "sub_comments": r["sub_comments"],
                 "mine": mine, "can_delete": mine or moderator}
 
     def _api_fanart_list(self, qs):
@@ -2726,23 +2801,49 @@ class Handler(BaseStaticHandler):
             offset = max(0, int((qs.get("offset") or ["0"])[0]))
         except ValueError:
             self._json(400, {"error": "参数错误"}); return
+        # 默认最新在前（主册角色页）；sort=popular 时按 点赞+喜欢-踩×2、同分新上传在前（副册）
+        order = "score DESC, f.id DESC" if (qs.get("sort") or [""])[0] == "popular" else "f.id DESC"
         ident = self._require_ident_optional()
         k, u = (ident["kind"], str(ident["uid"])) if ident else ("", "")
         moderator = self._can_moderate(ident)
         conn = db()
         total = conn.execute("SELECT COUNT(*) c FROM official_fanart WHERE character_id=?", (cid,)).fetchone()["c"]
-        rows = conn.execute("""
+        rows = conn.execute(f"""
             SELECT f.*,
               (SELECT COUNT(*) FROM official_fanart_likes l WHERE l.fanart_id=f.id) AS likes,
+              (SELECT COUNT(*) FROM official_fanart_votes v WHERE v.fanart_id=f.id AND v.vote=1) AS up,
+              (SELECT COUNT(*) FROM official_fanart_votes v WHERE v.fanart_id=f.id AND v.vote=-1) AS down,
+              {fanart_score_sql("f")} AS score,
               (SELECT COUNT(*) FROM official_fanart_comments c WHERE c.fanart_id=f.id) AS comments,
-              (SELECT COUNT(*) FROM official_fanart_likes l WHERE l.fanart_id=f.id AND l.user_kind=? AND l.user_uid=?) AS liked
-            FROM official_fanart f WHERE f.character_id=? ORDER BY f.id DESC LIMIT ? OFFSET ?""",
-            (k, u, cid, limit, offset)).fetchall()
+              (SELECT COUNT(*) FROM official_fanart_sub_comments c WHERE c.fanart_id=f.id) AS sub_comments,
+              (SELECT COUNT(*) FROM official_fanart_likes l WHERE l.fanart_id=f.id AND l.user_kind=? AND l.user_uid=?) AS liked,
+              (SELECT vote FROM official_fanart_votes v WHERE v.fanart_id=f.id AND v.user_kind=? AND v.user_uid=?) AS my_vote
+            FROM official_fanart f WHERE f.character_id=? ORDER BY {order} LIMIT ? OFFSET ?""",
+            (k, u, k, u, cid, limit, offset)).fetchall()
         conn.close()
         self._json(200, {"total": total, "items": [self._fanart_item(r, ident, moderator) for r in rows]})
 
+    def _api_fanart_summary(self, qs):
+        """副册角色格：每个官方角色的同人图张数 + 封面（得分最高、同分最新的一张）。"""
+        try:
+            cids = [int(x) for x in (qs.get("cids") or [""])[0].split(",") if x.strip()][:60]
+        except ValueError:
+            self._json(400, {"error": "参数错误"}); return
+        out = {}
+        if cids:
+            marks = ",".join("?" * len(cids))
+            conn = db()
+            for r in conn.execute(f"""
+                SELECT character_id, COUNT(*) AS n,
+                  (SELECT f2.image_url FROM official_fanart f2 WHERE f2.character_id=f.character_id
+                   ORDER BY {fanart_score_sql("f2")} DESC, f2.id DESC LIMIT 1) AS cover
+                FROM official_fanart f WHERE character_id IN ({marks}) GROUP BY character_id""", cids):
+                out[str(r["character_id"])] = {"count": r["n"], "cover": r["cover"]}
+            conn.close()
+        self._json(200, {"summary": out})
+
     def _api_fanart_upload(self):
-        body = self._read_image_form()
+        body = self._read_image_form(gif_limit=IMAGE_LIMIT)  # 同人图（含动图）统一 ≤8MB
         if body is None:
             return
         ident = self._require_ident()
@@ -2795,8 +2896,8 @@ class Handler(BaseStaticHandler):
             mine = row["user_kind"] == ident["kind"] and row["user_uid"] == str(ident["uid"])
             if not (mine or moderator):
                 conn.close(); self._json(403, {"error": "只能删除自己的投稿"}); return
-            conn.execute("DELETE FROM official_fanart_comments WHERE fanart_id=?", (row["id"],))
-            conn.execute("DELETE FROM official_fanart_likes WHERE fanart_id=?", (row["id"],))
+            for table in (*FANART_COMMENT_TABLES.values(), "official_fanart_likes", "official_fanart_votes"):
+                conn.execute(f"DELETE FROM {table} WHERE fanart_id=?", (row["id"],))
             conn.execute("DELETE FROM official_fanart WHERE id=?", (row["id"],))
             conn.commit()
             conn.close()
@@ -2828,15 +2929,71 @@ class Handler(BaseStaticHandler):
             conn.close()
         self._json(200, {"ok": True, "liked": not had, "likes": likes})
 
+    @staticmethod
+    def _fanart_state(conn, fid, k, u):
+        likes = conn.execute("SELECT COUNT(*) c FROM official_fanart_likes WHERE fanart_id=?", (fid,)).fetchone()["c"]
+        up = conn.execute("SELECT COUNT(*) c FROM official_fanart_votes WHERE fanart_id=? AND vote=1", (fid,)).fetchone()["c"]
+        down = conn.execute("SELECT COUNT(*) c FROM official_fanart_votes WHERE fanart_id=? AND vote=-1", (fid,)).fetchone()["c"]
+        liked = conn.execute("SELECT 1 FROM official_fanart_likes WHERE fanart_id=? AND user_kind=? AND user_uid=?", (fid, k, u)).fetchone()
+        mine = conn.execute("SELECT vote FROM official_fanart_votes WHERE fanart_id=? AND user_kind=? AND user_uid=?", (fid, k, u)).fetchone()
+        return {"id": fid, "likes": likes, "liked": bool(liked), "up": up, "down": down,
+                "my_vote": mine["vote"] if mine else 0, "score": likes + up - 2 * down}
+
+    def _api_fanart_react(self):
+        """喜欢（每张图可各点一次，可取消）与 点赞 / 踩（可取消 / 互换）。"""
+        ident = self._require_ident()
+        if not ident:
+            return
+        rkey = f"react:{ident['kind']}:{ident['uid']}"
+        if rate_blocked(rkey, 60, 60):
+            self._json(429, {"error": "操作太快了，歇一会儿再点吧"}); return
+        rate_add(rkey)
+        body = self._read_json() or {}
+        rtype = body.get("type")
+        if rtype not in ("fav", "up", "down"):
+            self._json(400, {"error": "参数错误"}); return
+        k, u = ident["kind"], str(ident["uid"])
+        with DB_LOCK:
+            conn = db()
+            row = conn.execute("SELECT id FROM official_fanart WHERE id=?", (body.get("id"),)).fetchone()
+            if not row:
+                conn.close(); self._json(404, {"error": "图片不存在"}); return
+            fid = row["id"]
+            if rtype == "fav":
+                if conn.execute("SELECT 1 FROM official_fanart_likes WHERE fanart_id=? AND user_kind=? AND user_uid=?", (fid, k, u)).fetchone():
+                    conn.execute("DELETE FROM official_fanart_likes WHERE fanart_id=? AND user_kind=? AND user_uid=?", (fid, k, u))
+                else:
+                    conn.execute("INSERT INTO official_fanart_likes (fanart_id, user_kind, user_uid, created_at) VALUES (?,?,?,?)", (fid, k, u, now_iso()))
+            else:
+                vote = 1 if rtype == "up" else -1
+                ex = conn.execute("SELECT vote FROM official_fanart_votes WHERE fanart_id=? AND user_kind=? AND user_uid=?", (fid, k, u)).fetchone()
+                if ex and ex["vote"] == vote:
+                    conn.execute("DELETE FROM official_fanart_votes WHERE fanart_id=? AND user_kind=? AND user_uid=?", (fid, k, u))
+                else:
+                    conn.execute("INSERT INTO official_fanart_votes (fanart_id, user_kind, user_uid, vote, created_at) VALUES (?,?,?,?,?) "
+                                 "ON CONFLICT(fanart_id, user_kind, user_uid) DO UPDATE SET vote=excluded.vote, created_at=excluded.created_at",
+                                 (fid, k, u, vote, now_iso()))
+            conn.commit()
+            state = self._fanart_state(conn, fid, k, u)
+            conn.close()
+        self._json(200, {"ok": True, "state": state})
+
+    def _fanart_thread(self, value):
+        """评论语境：main（主册角色页，默认）/ sub（副册）。未知值返回 None。"""
+        return FANART_COMMENT_TABLES.get(value or "main")
+
     def _api_fanart_comments(self, qs):
         try:
             fid = int((qs.get("id") or ["0"])[0])
         except ValueError:
             self._json(400, {"error": "参数错误"}); return
+        table = self._fanart_thread((qs.get("thread") or ["main"])[0])
+        if not table:
+            self._json(400, {"error": "参数错误"}); return
         ident = self._require_ident_optional()
         moderator = self._can_moderate(ident)
         conn = db()
-        rows = conn.execute("SELECT * FROM official_fanart_comments WHERE fanart_id=? ORDER BY id DESC LIMIT 100", (fid,)).fetchall()
+        rows = conn.execute(f"SELECT * FROM {table} WHERE fanart_id=? ORDER BY id DESC LIMIT 100", (fid,)).fetchall()
         conn.close()
         out = []
         for r in rows:
@@ -2853,6 +3010,9 @@ class Handler(BaseStaticHandler):
         content = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", str(body.get("content") or "")).strip()
         if not content or len(content) > 300:
             self._json(400, {"error": "评论需为 1–300 字"}); return
+        table = self._fanart_thread(body.get("thread"))
+        if not table:
+            self._json(400, {"error": "参数错误"}); return
         rkey = f"fcmt:{ident['kind']}:{ident['uid']}"
         if rate_blocked(rkey, 15, 600):
             self._json(429, {"error": "评论太频繁啦，稍后再来～"}); return
@@ -2861,10 +3021,10 @@ class Handler(BaseStaticHandler):
             row = conn.execute("SELECT id FROM official_fanart WHERE id=?", (body.get("id"),)).fetchone()
             if not row:
                 conn.close(); self._json(404, {"error": "图片不存在"}); return
-            cur = conn.execute("INSERT INTO official_fanart_comments (fanart_id, user_kind, user_uid, user_name, content, created_at) VALUES (?,?,?,?,?,?)",
+            cur = conn.execute(f"INSERT INTO {table} (fanart_id, user_kind, user_uid, user_name, content, created_at) VALUES (?,?,?,?,?,?)",
                                (row["id"], ident["kind"], str(ident["uid"]), ident.get("nickname") or ident.get("username") or "", content, now_iso()))
             cid_new = cur.lastrowid
-            count = conn.execute("SELECT COUNT(*) c FROM official_fanart_comments WHERE fanart_id=?", (row["id"],)).fetchone()["c"]
+            count = conn.execute(f"SELECT COUNT(*) c FROM {table} WHERE fanart_id=?", (row["id"],)).fetchone()["c"]
             conn.commit()
             conn.close()
         rate_add(rkey)
@@ -2875,17 +3035,20 @@ class Handler(BaseStaticHandler):
         if not ident:
             return
         body = self._read_json() or {}
+        table = self._fanart_thread(body.get("thread"))
+        if not table:
+            self._json(400, {"error": "参数错误"}); return
         moderator = self._can_moderate(ident)  # 同上：先算再持锁
         with DB_LOCK:
             conn = db()
-            row = conn.execute("SELECT * FROM official_fanart_comments WHERE id=?", (body.get("id"),)).fetchone()
+            row = conn.execute(f"SELECT * FROM {table} WHERE id=?", (body.get("id"),)).fetchone()
             if not row:
                 conn.close(); self._json(404, {"error": "评论不存在"}); return
             mine = row["user_kind"] == ident["kind"] and row["user_uid"] == str(ident["uid"])
             if not (mine or moderator):
                 conn.close(); self._json(403, {"error": "只能删除自己的评论"}); return
-            conn.execute("DELETE FROM official_fanart_comments WHERE id=?", (row["id"],))
-            count = conn.execute("SELECT COUNT(*) c FROM official_fanart_comments WHERE fanart_id=?", (row["fanart_id"],)).fetchone()["c"]
+            conn.execute(f"DELETE FROM {table} WHERE id=?", (row["id"],))
+            count = conn.execute(f"SELECT COUNT(*) c FROM {table} WHERE fanart_id=?", (row["fanart_id"],)).fetchone()["c"]
             conn.commit()
             conn.close()
         self._json(200, {"ok": True, "count": count})
@@ -2921,37 +3084,15 @@ class Handler(BaseStaticHandler):
             return {"exempt_age": 0, "exempt_skill": 0}
         return {"exempt_age": row["exempt_age"] or 0, "exempt_skill": row["exempt_skill"] or 0}
 
-    # ---------- 等级系统（雏形） ----------
-    POINTS_SUBMIT = 20        # 成功提交设表
-    POINTS_CUSTOM_COLOR = 10  # 使用自定义配色
-
-    @staticmethod
-    def compute_level(points):
-        return min(100, 1 + (points or 0) // 10)
-
-    def _get_points(self, ident):
-        with DB_LOCK:
-            conn = db()
-            if ident["kind"] == "local":
-                row = conn.execute("SELECT points FROM local_users WHERE uid=?", (ident["uid"],)).fetchone()
-            else:
-                row = conn.execute("SELECT points FROM user_flags WHERE kind='usso' AND uid=?", (ident["uid"],)).fetchone()
+    # ---------- 账户等级：account_progress（积分按 0.1 记账；第 n 级累计 n(n+1)/2 分） ----------
+    def _level_fields(self, ident):
+        conn = account_progress.open_db(PROJECT_ROOT)
+        try:
+            info = account_progress.level_info(account_progress.get_points_x10(conn, ident["kind"], ident["uid"]))
+        finally:
             conn.close()
-        return (row["points"] or 0) if row else 0
-
-    def _add_points(self, ident, n):
-        if not n:
-            return
-        with DB_LOCK:
-            conn = db()
-            if ident["kind"] == "local":
-                conn.execute("UPDATE local_users SET points=COALESCE(points,0)+? WHERE uid=?", (n, ident["uid"]))
-            else:
-                conn.execute("""INSERT INTO user_flags (kind, uid, points) VALUES ('usso', ?, ?)
-                                ON CONFLICT(kind, uid) DO UPDATE SET points=COALESCE(points,0)+?""",
-                             (ident["uid"], n, n))
-            conn.commit()
-            conn.close()
+        return {"points": info["points"], "level": info["level"],
+                "level_floor": info["level_floor"], "next_level_at": info["next_level_at"]}
 
     def _api_submit_supplement(self):
         ident = self._require_ident()
@@ -4399,7 +4540,7 @@ class Handler(BaseStaticHandler):
         secure = "; Secure" if COOKIE_SECURE else ""
         return f"{hx_sso.COOKIE_NAME}=; Path=/; Domain={hx_sso.COOKIE_DOMAIN}; Max-Age=0; HttpOnly; SameSite=Lax{secure}"
 
-    def _read_image_form(self):
+    def _read_image_form(self, gif_limit=GIF_LIMIT):
         content_type = self.headers.get("Content-Type", "")
         if not content_type.lower().startswith("multipart/form-data"):
             return self._read_json()
@@ -4430,7 +4571,7 @@ class Handler(BaseStaticHandler):
             for key in ("filename", "description", "image_type", "data"):
                 if key in body and not isinstance(body[key], str):
                     raise ValueError("上传文字字段格式错误")
-            body["_image_file"] = validate_image(fields["image"].get_payload(decode=True), fields["image"].get_content_type())
+            body["_image_file"] = validate_image(fields["image"].get_payload(decode=True), fields["image"].get_content_type(), gif_limit)
             return body
         except (ValueError, TypeError, UnicodeError):
             self._json(400, {"error": "图片或上传格式无效，图片≤8MB / 动图≤5MB"})

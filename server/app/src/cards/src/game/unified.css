@@ -11,6 +11,14 @@
 .zszm-game .spirit-card .card-art{border-radius:8px;background:#e7e8ce;background-image:none}
 .zszm-game .spirit-card .card-top b{background:var(--lxh-yes);color:var(--lxh-paper);border:2px solid var(--lxh-ink)}
 .zszm-game .spirit-card:hover:not(:disabled){box-shadow:4px 5px 0 var(--lxh-paper-line)}
+/* 类型印章：沿用重生之门卡面的五行 / 系别底色（slay-the-web ui/styles/card.css），有五行时按五行，否则按系别。 */
+.spirit-card{--card-tint:#3e4a52}
+.spirit-card[data-school='shengling']{--card-tint:#057748}.spirit-card[data-school='kongjian']{--card-tint:#3b2e7e}.spirit-card[data-school='xinling']{--card-tint:#8e7e9e}.spirit-card[data-school='zaowu']{--card-tint:#6e8e8e}.spirit-card[data-school='suoyu']{--card-tint:#4a4448}
+.spirit-card[data-element='jin']{--card-tint:#b89e4e}.spirit-card[data-element='mu']{--card-tint:#4e7e5e}.spirit-card[data-element='shui']{--card-tint:#424c50}.spirit-card[data-element='huo']{--card-tint:#c3272b}.spirit-card[data-element='tu']{--card-tint:#c89b40}
+.spirit-card .card-type{padding:2px 7px 3px;border-radius:.4em;border-bottom:2px solid rgb(0 0 0 / .18);background:var(--card-tint);color:#faf6e8;letter-spacing:1px;white-space:nowrap}
+.zszm-game .spirit-card .card-art{background:radial-gradient(ellipse,color-mix(in srgb,var(--card-tint) 22%,#f3f1dc),#e7e8ce 72%)}
+.zszm-game .spirit-card .card-art>span{color:var(--card-tint)}
+.zszm-game .spirit-card .card-art i{border-color:color-mix(in srgb,var(--card-tint) 45%,transparent)}
 .guide-count{font-size:12px;color:var(--lxh-text)}
 .world-vocabulary{display:flex;flex-wrap:wrap;gap:20px;padding:22px;border:2px solid var(--lxh-ink);border-radius:16px;background:#e6ead9}
 .world-vocabulary>div{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.world-vocabulary small{margin-right:8px}.world-vocabulary span{padding:5px 11px;border:1px solid var(--lxh-ink);border-radius:20px;font-size:12px;background:var(--lxh-paper)}

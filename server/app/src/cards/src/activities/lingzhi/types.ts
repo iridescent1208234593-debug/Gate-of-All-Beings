@@ -1,6 +1,6 @@
 /**
  * 灵质修行（灵质回路试炼）的局内类型。与入世历练、重生之门的 RunState 互不依赖：
- * 规则、状态机与数值都在本模块里，手记只经由 adapter 拿到 ActivityResult。
+ * 规则、状态机与数值都在本模块里，众生牌录只经由 adapter 拿到 ActivityResult。
  */
 export type LingzhiTarget = 'enemy' | 'allEnemies' | 'player';
 

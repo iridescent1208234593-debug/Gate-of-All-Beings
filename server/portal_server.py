@@ -221,12 +221,25 @@ class PublicStatusHandler(BaseStaticHandler):
     do_HEAD = do_GET
 
 
+class ProgressHandler(BaseStaticHandler):
+    """/api/progress/*: account points, daily tasks and leaderboards (server/account_progress.py)."""
+
+    def _serve(self):
+        import account_progress
+        account_progress.handle(self, self.command, self.path, str(ROOT))
+
+    do_GET = do_HEAD = do_POST = _serve
+
+
 def route(host, path):
     """-> (处理类, 配置 dict)。"""
     h = (host or "").split(":")[0].lower()
     p = (path or "").split("?")[0]
     if p == '/__server/status':
         return PublicStatusHandler, {}
+    # Same-origin on every host, so each game (zszm, spirit, huiguan, main site) can reach it.
+    if p.startswith('/api/progress/'):
+        return ProgressHandler, {}
     if p.startswith('/shared/'):
         return StaticHandler, {"root": str(CODE_ROOT / "shared"), "strip": "/shared"}
     if h == "huiguan.iridescently.xyz" or h.endswith(".huiguan.iridescently.xyz"):

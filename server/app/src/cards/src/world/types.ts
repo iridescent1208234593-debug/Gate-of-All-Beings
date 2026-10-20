@@ -34,7 +34,7 @@ export interface WorldState {
   companions: Record<string, CompanionCare>;
   places: Record<PlaceId, PlaceState>;
   codex: { cards: string[]; characters: CharacterId[] };
-  /** 已经结算进手记的外部玩法结果（例如重生之门的账本回执），用于去重。 */
+  /** 已经结算进众生牌录的外部玩法结果（例如重生之门的账本回执），用于去重。 */
   imported: string[];
 }
 
@@ -54,7 +54,7 @@ export type Change =
 export type ActivityKind = 'expedition' | 'rebirth-gate' | 'lingzhi' | 'stay' | 'night' | 'seal';
 export type Outcome = 'victory' | 'defeat' | 'returned' | 'completed';
 
-/** 任一玩法结束时交给手记的统一结果；战斗遭遇的结算（Encounter Resolution）也是它。 */
+/** 任一玩法结束时交给众生牌录的统一结果；战斗遭遇的结算（Encounter Resolution）也是它。 */
 export interface ActivityResult {
   /** 稳定 ID：同一次结算重试必须相同，提交据此去重。 */
   id: string;

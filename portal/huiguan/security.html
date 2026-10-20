@@ -6,20 +6,22 @@
 <title>账户安全 · 西木会馆</title>
 <link rel="icon" href="favicon.png">
 <link rel="stylesheet" href="/design-system/design-system.css">
+<link rel="stylesheet" href="/design-system/ui/lxh-ui.css">
 <style>
 *{box-sizing:border-box}body{margin:0;padding:var(--qc-sp-6) var(--qc-sp-4);line-height:1.7}
-main{max-width:640px;margin:auto}header{margin:var(--qc-sp-6) 0}h1{font-size:var(--qc-fs-xl);margin:0}
+main{max-width:640px;margin:auto;padding-top:var(--qc-sp-2)}header{margin:var(--qc-sp-6) 0}h1{font-size:var(--qc-fs-xl);margin:0}
 a{color:var(--qc-accent)}.qc-card{margin-bottom:var(--qc-sp-4)}.qc-h2{margin-top:0}
 label{display:block;margin-top:var(--qc-sp-3)}.qc-input{margin-top:var(--qc-sp-1)}
-.actions{display:flex;gap:var(--qc-sp-2);flex-wrap:wrap;margin-top:var(--qc-sp-4)}
-.message{min-height:1.7em;margin-top:var(--qc-sp-3);color:var(--qc-danger)}.message.success{color:var(--qc-accent)}
+.actions{display:flex;align-items:center;gap:var(--qc-sp-2) var(--qc-sp-4);flex-wrap:wrap;margin-top:var(--qc-sp-4)}
+.message{min-height:1.7em;margin-top:var(--qc-sp-3);color:var(--qc-danger)}.message.success{color:var(--qc-accent)}.message.pending{color:var(--qc-dim)}
+#loading{min-height:200px}summary{cursor:pointer;min-height:var(--qc-tap);display:flex;align-items:center;color:var(--qc-text)}
 [hidden]{display:none!important}.question{overflow-wrap:anywhere;color:var(--qc-text)}
 </style>
 </head>
 <body class="qc-body"><main>
 <a href="/account.html">← 返回个人账户</a>
 <header><h1 id="title">账户安全</h1><p class="qc-hint">西木会馆 · 站内账号</p></header>
-<p id="loading" role="status">正在读取账户状态…</p>
+<div id="loading" class="qc-loading" role="status">正在读取账户状态…</div>
 <section id="manage" hidden>
 <div class="qc-banner"><span id="identity"></span><br><span class="qc-hint">自动登录是浏览器保存的登录状态，更换浏览器时仍需输入当前密码。</span></div>
 <form id="setupForm" class="qc-card">
@@ -90,26 +92,34 @@ async function recoveryApi(action,body){
   if(!r.ok||!d.ok)throw new Error(d.error||'操作失败，请重试');
   return d;
 }
-function message(form,text,ok=false){const m=form.querySelector('.message');m.textContent=text;m.classList.toggle('success',ok);}
+function message(form,text,ok=false,pending=false){const m=form.querySelector('.message');m.textContent=text;m.classList.toggle('success',ok);m.classList.toggle('pending',pending);}
+// Page-level state in the shared .qc-loading slot: what happened, plus the way forward.
+function pageState(text,actions,isError){
+ const box=$('loading');box.hidden=false;box.setAttribute('role',isError?'alert':'status');box.textContent=text;
+ if(!actions||!actions.length)return;
+ const row=document.createElement('div');row.className='qc-loading__actions';
+ actions.forEach(a=>{const el=document.createElement(a.href?'a':'button');el.textContent=a.label;if(a.href)el.href=a.href;else{el.type='button';el.addEventListener('click',a.onClick);}row.appendChild(el);});
+ box.appendChild(row);
+}
 function bind(id,action,prepare,onSuccess){
  const form=$(id);
  form.addEventListener('submit',async event=>{
-  event.preventDefault();const button=form.querySelector('button');button.disabled=true;message(form,'正在处理…');
+  event.preventDefault();const button=form.querySelector('button');button.disabled=true;button.setAttribute('aria-busy','true');message(form,'正在处理…',false,true);
   try{const body=Object.fromEntries(new FormData(form));if(prepare)prepare(body);
    const d=await api(action,body);message(form,d.message||'操作成功',true);if(onSuccess)onSuccess(d,body);
   }catch(error){message(form,error instanceof TypeError?'网络连接失败，请检查网络后重试。':error.message);}
-  finally{button.disabled=false;}
+  finally{button.disabled=false;button.removeAttribute('aria-busy');}
  });
 }
 function confirmPassword(body){if(body.new_password!==body.confirm_password)throw new Error('两次输入的新密码不一致');}
 function bindRecovery(id,action,prepare,onSuccess){
  const form=$(id);
  form.addEventListener('submit',async event=>{
-  event.preventDefault();const button=form.querySelector('button');button.disabled=true;message(form,'正在处理…');
+  event.preventDefault();const button=form.querySelector('button');button.disabled=true;button.setAttribute('aria-busy','true');message(form,'正在处理…',false,true);
   try{const body=Object.fromEntries(new FormData(form));if(prepare)prepare(body);
    const d=await recoveryApi(action,body);message(form,d.message||'操作成功',true);if(onSuccess)onSuccess(d,body);
   }catch(error){message(form,error instanceof TypeError?'网络连接失败，请检查网络后重试。':error.message);}
-  finally{button.disabled=false;}
+  finally{button.disabled=false;button.removeAttribute('aria-busy');}
  });
 }
 bindRecovery('emailRecoverForm','send',null,(d)=>{$('emailRecoverForm').reset();});
@@ -120,7 +130,7 @@ bindRecovery('emailResetForm','reset',body=>{
 },done);
 function done(d){
  $('manage').hidden=true;$('recover').hidden=true;$('recoverLink').hidden=true;
- $('loading').hidden=false;$('loading').textContent=d.message+' 点击下方“返回登录”。';
+ pageState(d.message,[{label:'返回登录',href:'/?openauth=1'}]);
  document.querySelectorAll('input').forEach(input=>input.value='');
 }
 bind('setupForm','setup',body=>{
@@ -134,7 +144,8 @@ bind('questionForm','question',()=>{$('resetForm').hidden=true;recoveryUsername=
 });
 $('questionForm').elements.username.addEventListener('input',()=>{recoveryUsername='';$('resetForm').hidden=true;});
 bind('resetForm','reset',body=>{confirmPassword(body);if(!recoveryUsername)throw new Error('请先查看提示问题');body.username=recoveryUsername;},done);
-(async()=>{
+async function load(){
+ pageState('正在读取账户状态…');
  if(new URLSearchParams(location.search).get('mode')==='recover'){
   $('title').textContent='找回账号 / 密码';$('recover').hidden=false;$('recoverLink').hidden=true;$('loading').hidden=true;
   const match=location.hash.match(/^#email-recovery=([A-Za-z0-9_-]{32,128})$/);
@@ -143,13 +154,17 @@ bind('resetForm','reset',body=>{confirmPassword(body);if(!recoveryUsername)throw
  }
  try{
   const r=await fetch('/api/user');const u=await r.json();
-  if(!u.logged_in)throw new Error('请先登录后设置账户安全，或点击下方“忘记密码”。');
-  if(u.kind!=='local')throw new Error('你正在使用 USSO 账号，请前往 USSO 管理密码。');
+  if(!u.logged_in)return pageState('请先登录后再设置账户安全。',[{label:'去登录',href:'/?openauth=1'},{label:'忘记密码',href:'?mode=recover'}],true);
+  if(u.kind!=='local')return pageState('你正在使用 USSO 账号，密码与找回方式请在 USSO 管理。',[{label:'返回个人账户',href:'/account.html'}],true);
   const d=await api('settings',{});$('identity').textContent='当前账号：'+u.username;
   $('configured').textContent=d.configured?'已设置：'+d.question:'尚未设置找回问题';
   if(d.configured)$('setupForm').elements.question.value=d.question;
   $('manage').hidden=false;$('loading').hidden=true;
- }catch(e){$('loading').textContent=e.message;}
-})();
+ }catch(e){
+  pageState(e instanceof TypeError?'网络连接失败，暂时无法读取账户状态。':e instanceof SyntaxError?'服务暂时不可用，请稍后再试。':e.message||'暂时无法读取账户状态。',[{label:'重新读取',onClick:load}],true);
+ }
+}
+load();
 </script>
+<script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017"></script>
 </body></html>

@@ -111,6 +111,70 @@
 
 像素直角坐标系：三条墨色坐标轴从原点伸出，+Y 端红球、+X 端绿球、+Z（左下斜）端蓝球，对应 RGB ↔ XYZ。16×16 网格，只能整数倍缩放并加 `image-rendering: pixelated`；放在深色底上时垫宣纸色圆角方块。源文件 `shared/shared-ui/brand/iridescently-mark.svg`，PNG 副本 `portal/www/assets/iridescently-mark.png`（开场角标、旧页面）。
 
+## 八、交互状态基线（2026-10-19）
+
+所有 `qc-` 可点控件和输入框共用一套状态，页面不要再各自写 `:focus` / `:disabled` / 触控高度。
+
+| 状态 | 规则 | 代码 |
+| --- | --- | --- |
+| 键盘焦点 | `:focus-visible` 时 2px 描边 + 2px 间隙，颜色 `--qc-focus`（松绿）；描金/危险按钮跟随自身色。鼠标点击不出现 | `.qc-btn` `.qc-tab` `.qc-swatch` `.qc-slot` `.qc-upload` |
+| 输入聚焦 | 松绿边 + 3px `--qc-accent-ring` 外晕 | `.qc-input` `.qc-select` `.qc-textarea` |
+| 触控高度 | 最小 `--qc-tap`：36px，触屏（`pointer: coarse`）44px；小按钮/页签 `--qc-tap-sm` 28 / 36px。触屏输入框字号 16px，避免 iOS 聚焦放大 | 按钮、页签、输入框 |
+| 禁用 | 按钮 `:disabled` 或链接 `aria-disabled="true"`：40% 透明 + 不可点光标；输入框宣纸底 + 次级字色 | — |
+| 提交中 | 按钮加 `aria-busy="true"`（可同时 disabled）：70% 透明 + 等待光标；结束后移除 | 账户安全页各表单 |
+| 校验失败 | 脚本设 `aria-invalid="true"`，或浏览器 `:user-invalid`：赭红边；错误文字用 `.qc-err` 并以 `aria-describedby` 关联 | — |
+| 减少动态 | `prefers-reduced-motion: reduce` 时取消过渡和悬浮上浮 | — |
+
+- 过渡只写具体属性（`background-color` / `border-color` / `color`），时长 `--qc-dur`；不要用 `transition: all`。
+- 新增派生色 token：`--qc-accent-ring`、`--qc-accent-line`、`--qc-gold-line`、`--qc-on-accent`（实心按钮上的字）、`--qc-scrim`（弹窗遮罩）。横幅、弹窗、选中页签已改用它们。
+- `.qc-btn` 改为 `inline-flex`：图标与文字垂直居中，`<a class="qc-btn">` 与 `<button>` 等高。
+- 弹窗在 ≤480px 收窄外边距，面板高度用 `86dvh`，滚动不穿透到页面。
+
+### 页面级状态：加载 → 出错 → 恢复
+
+页面级的等待和失败共用同一个 `.qc-loading` 位置（第七节）：
+
+```html
+<div id="loading" class="qc-loading" role="status">正在读取账户状态…</div>
+<!-- 失败：同一元素改 role="alert"，写清原因，并给出能做的事 -->
+<div class="qc-loading" role="alert">请先登录后再设置账户安全。
+  <div class="qc-loading__actions"><a href="/?openauth=1">去登录</a><a href="?mode=recover">忘记密码</a></div>
+</div>
+```
+
+- 原因要具体：未登录、账号类型不支持、网络失败、服务返回异常分开写，不显示 JSON 解析错误等原始报错。
+- 至少一个恢复入口：网络/服务失败给「重新读取」（重新执行加载，不刷新整页）；权限类给去登录或返回。
+- 表单内的提交反馈仍在表单下方的消息行：处理中用次级字色，成功松绿，失败赭红；不要把「正在处理…」显示成红字。
+- 首个落地页面：`portal/huiguan/security.html`（账户安全 / 找回密码）。
+
+### 命名边界
+
+- 全局栏里的页面插槽类名为 `.qc-nav-slot`（`IridescentlyNav.slot()` 返回它）；`.qc-slot` 只指配色页的主色/辅色选色槽。此前两者同名，引入 `design-system.css` 的页面往栏里放按钮时会套上一块米白选色槽底。
+
+## 九、弹窗行为 · 众生之门加载出错（2026-10-19）
+
+### `.qc-modal` 行为脚本 `design-system/qc-modal.js`
+
+`design-system.css` 只管样子；用弹窗的页面同时引入 `<script src="/design-system/qc-modal.js"></script>`。
+
+| 行为 | 说明 |
+| --- | --- |
+| 打开 | `data-qc-modal-open="<弹窗 id>"` 的按钮，或 `QcModal.open(el \| id, trigger?)`。焦点进入第一个可聚焦元素（有 `autofocus` 优先），背景页面不滚动 |
+| 焦点圈定 | Tab / Shift+Tab 只在面板内循环；焦点被移出时拉回 |
+| 关闭 | Esc、点遮罩、`data-qc-modal-close` 按钮，或 `QcModal.close()`；关闭后焦点回到触发元素，并在弹窗上派发 `qc-modal-close` 事件 |
+| 必须选择 | 弹窗加 `data-qc-modal-static`：Esc 和点遮罩不关闭 |
+| 读屏 | 面板自动补 `role="dialog"`、`aria-modal="true"`，并用 `.qc-modal__title` 作 `aria-labelledby` |
+
+- 兼容旧写法：直接切换 `.is-open` 的页面，引入脚本后自动获得同样的行为。
+- 多层弹窗按打开顺序叠放，Esc 只关最上层。
+- 众生之门 React 里的弹窗用原生 `<dialog>.showModal()`，浏览器已提供圈定、Esc 和焦点返回，不需要本脚本。
+
+### 众生之门：加载出错要能恢复
+
+- 视图都包在 `LoadBoundary`（`server/app/src/cards/src/components/LoadBoundary.tsx`）里：分包没取到时显示「这部分页面没能加载…」+「重新加载页面」；渲染出错时多一个「重试」。切换页签自动清除错误，不会把整个门庭卡死。
+- 自己处理的读取失败用同文件的 `LoadError`（`.qc-loading[role=alert]` + 重试 + 重新加载页面），例如手记打不开世界存档时。错误不能自动消失后退回加载线。
+- 开发环境（`vite` dev）里，`index.html` 引用的线上 `design-system.css` 会被替换成工作区源码；构建产物仍引用 `https://huiguan.iridescently.xyz/design-system/design-system.css`，随会馆发布更新。
+
 ## 十、游戏界面组件库 lxh-ui（2026-10-20）
 
 众生之门、各游戏模块和会馆页面共用的游戏画面组件，与本文件的 `qc-` 站点组件并列。真身在 `shared/shared-ui/lxh-ui.css` / `lxh-ui.js`，组件库页面 `design-system/components.html`（样式指南首页有入口）。接法见 `shared/shared-ui/README.md`。

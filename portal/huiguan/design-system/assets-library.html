@@ -121,7 +121,7 @@ const badgeText = c => c >= 6 ? '设定完整' : c >= 4 ? '部分设定' : '待�
 function cardHTML(c){
   const ch = (c.name || '?').slice(0, 1);
   const img = c.thumb_path
-    ? `<img src="/api/official/img?cid=${c.id}&n=0&t=1" alt="${esc(c.name)}" loading="lazy" decoding="async" data-ch="${esc(ch)}" onerror="imgFail(this)">`
+    ? `<img data-original-image src="/api/official/img?cid=${c.id}&n=0&t=1" alt="${esc(c.name)}" loading="lazy" decoding="async" data-ch="${esc(ch)}" onerror="imgFail(this)">`
     : `<div class="ph">${esc(ch)}</div>`;
   const sub = [c.type, c.species].filter(Boolean).join(' · ');
   return `<div class="acard" data-cid="${c.id}" role="button" tabindex="0" title="查看素材明细"
@@ -200,7 +200,7 @@ async function openDetail(cid){
       const view = `${BASE}/api/official/img-id?id=${im.id}&t=1`;
       const full = `${BASE}/api/official/img-id?id=${im.id}`;
       return `<figure>
-      <img src="${view}" loading="lazy" decoding="async" data-full="${esc(full)}" data-ch="${esc((c.name || '?').slice(0, 1))}" title="点击查看原图" style="cursor:zoom-in;" onerror="imgFail(this)" onclick="window.open(this.dataset.full,'_blank')">
+      <img data-original-image src="${view}" loading="lazy" decoding="async" data-full="${esc(full)}" data-ch="${esc((c.name || '?').slice(0, 1))}" title="点击查看原图" style="cursor:zoom-in;" onerror="imgFail(this)" onclick="window.open(this.dataset.full,'_blank')">
       <figcaption><span>#${im.id} ${esc(im.image_type || '')}</span>${copyBtn(full, '复制URL')}</figcaption>
     </figure>`;
     }).join('') : '<div class="msg">该角色暂无图片。</div>';
@@ -235,7 +235,7 @@ const AVA_KEYS = ['beast-heicat','beast-fox','beast-rabbit','beast-dog',
   'divine-phoenix','divine-dragon','divine-qilin'];
 const AVA_BASE = BASE + '/design-system/ui/lxh/avatars/';
 document.getElementById('avaGrid').innerHTML = AVA_KEYS.map(k =>
-  `<div class="avacard" onclick="copyURL('${AVA_BASE}${k}.png?v=2')"><img src="${AVA_BASE}${k}.png?v=2" loading="lazy" decoding="async" onerror="imgFail(this)"><div class="nm">${k}</div></div>`).join('');
+  `<div class="avacard" onclick="copyURL('${AVA_BASE}${k}.png?v=2')"><img data-original-image src="${AVA_BASE}${k}.png?v=2" loading="lazy" decoding="async" onerror="imgFail(this)"><div class="nm">${k}</div></div>`).join('');
 
 // ---- lxh-ui 组件精选 ----
 window.addEventListener('load', function () {
@@ -282,5 +282,6 @@ function confirmTrigger(){
 
 // 角色库数据加载已在上方 load(true) 启动（/api/official/characters）
 </script>
+<script src="/original-image-viewer.js?v=20261019-2"></script>
 </body>
 </html>

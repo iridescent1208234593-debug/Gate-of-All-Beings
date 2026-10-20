@@ -1,4 +1,5 @@
 import { createGame, step, clamp } from './core.js?v=4';
+import { reportResult } from '/shared/shared-session/progress.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('game'), ctx = canvas.getContext('2d', { alpha: false });
@@ -8,7 +9,7 @@ const pen = scene.getContext('2d', { alpha: false });
 let game = createGame(), mode = 'loading', ready = false, accumulator = 0, last = 0;
 let previousMode = 'ready', drag = null, stickPointer = null, stickInput = { x: 0, y: 0 };
 let audioContext, master, runningSource, soundEnabled = false, volume = 0.35;
-let best = 0;
+let best = 0, runId = 0, reportedVictory = false;
 try {
   best = Math.max(0, Number(localStorage.getItem('shengsheng-shoot.best.v1')) || 0);
   volume = clamp(Number(localStorage.getItem('shengsheng-shoot.volume.v1') ?? 0.35), 0, 1);
@@ -87,6 +88,7 @@ function showDialog(title, description, primary, action, { help = false, seconda
 function start() {
   if (!ready) return;
   stopAudio(); resetInput(); game = createGame(); music.currentTime = 0;
+  runId = Date.now(); reportedVictory = false;
   resume();
 }
 function resume() {
@@ -112,6 +114,8 @@ function finish() {
   if (game.score > best) { best = game.score; save('best', best); }
   $('best').textContent = best; $('pause').disabled = true;
   $('status').textContent = '本局结束 · 投降';
+  // 账户积分 / 排行榜：一局一个编号；胜利后继续再结束时用同一编号更新最高分
+  void reportResult('shengsheng-shoot', { score: game.score, won: reportedVictory, ref: 'shoot:' + runId });
   showDialog('本局结束', `得分 ${game.score} · 最佳 ${best}`, '再来一局', start,
     { art: 'assets/defeat.jpg', artAlt: '省省举起白旗投降' });
 }
@@ -120,6 +124,8 @@ function victory() {
   if (game.score > best) { best = game.score; save('best', best); }
   $('best').textContent = best; $('pause').disabled = true;
   $('status').textContent = '达到 1000 分 · 胜利';
+  reportedVictory = true;
+  void reportResult('shengsheng-shoot', { score: game.score, won: true, ref: 'shoot:' + runId });
   showDialog('耶！1000 分！', `得分 ${game.score} · 最佳 ${best}`, '继续游戏', resume,
     { art: 'assets/victory.jpg', artAlt: '省省开心庆祝胜利' });
 }

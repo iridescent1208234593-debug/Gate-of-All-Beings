@@ -13,10 +13,11 @@ from account_email import handle_email, init_schema
 class Handler:
     headers = {"Content-Type": "application/json"}
 
-    def __init__(self, body=None, uid="1", ip="127.0.0.1"):
+    def __init__(self, body=None, uid="1", ip="127.0.0.1", authenticated=True):
         self.body = json.dumps(body or {}).encode()
         self.uid = uid
         self.ip = ip
+        self.authenticated = authenticated
         self.response = None
 
     def _json(self, status, body, **kwargs):
@@ -27,7 +28,7 @@ class Handler:
         return json.loads(self.body)
 
     def _get_session(self):
-        return {"kind": "local", "uid": self.uid}
+        return {"kind": "local", "uid": self.uid} if self.authenticated else None
 
     def _client_ip(self):
         return self.ip
@@ -58,7 +59,9 @@ with tempfile.TemporaryDirectory() as directory:
     send = Handler({"email": "User@Example.com"})
     assert handle_email(send, "send", api) == (200, {"ok": True, "message": "验证链接已发送，30 分钟内有效"})
     assert sent and sent[0][0] == "User@Example.com"
-    verify = Handler({"token": sent[0][1]})
+    unauthenticated_send = Handler({"email": "other@example.com"}, authenticated=False)
+    assert handle_email(unauthenticated_send, "send", api)[0] == 401
+    verify = Handler({"token": sent[0][1]}, authenticated=False)
     assert handle_email(verify, "verify", api)[0] == 200
     status = Handler()
     assert handle_email(status, "status", api)[1] == {"ok": True, "email": "User@Example.com", "verified": True, "pending": False}

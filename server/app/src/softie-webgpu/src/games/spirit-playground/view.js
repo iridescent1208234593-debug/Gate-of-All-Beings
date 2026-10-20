@@ -5,6 +5,7 @@ import { createSpiritPointerInteraction } from './pointer-interaction.js';
 import { SpiritRoomClient, interpolateSpiritState } from '../../multiplayer/client.js';
 import { DEFAULT_SPIRIT_SETTINGS, normalizeSpiritSettings, validateSpiritSettings, SPIRIT_SETTINGS_API, SPIRIT_WORLD_SCALE, spiritRadius } from './settings.js';
 import { refreshSession } from '@lxh/shared-session/session.js';
+import { reportResult } from '@lxh/shared-session/progress.js';
 import { extractLargestContour } from './body-shape.js';
 
 const BASE = import.meta.env.BASE_URL;
@@ -78,6 +79,13 @@ export function mountSpiritPlayground(root) {
   const accountStatus = $('.spirit-account-status');
   const events = new AbortController();
   const listen = (target, type, fn) => target.addEventListener(type, fn, { signal: events.signal });
+  // 账户积分 / 排行榜：页面可见时每满 5 分钟记一次「相处 5 分钟」（服务器每天最多计 120 分钟；访客不上榜）
+  let visibleMinutes = 0;
+  const companionTimer = setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    if (++visibleMinutes % 5 === 0) void reportResult('softie', { score: 5, finished: false, toast: false });
+  }, 60_000);
+  events.signal.addEventListener('abort', () => clearInterval(companionTimer));
   const drawCanvas = $('.spirit-draw-canvas'), drawContext = drawCanvas.getContext('2d');
   let drawMode = 'outline', drawing = false, drawPoints = [];
   const defaultBodyShape = { points: Array.from({ length: 40 }, (_, i) => ({

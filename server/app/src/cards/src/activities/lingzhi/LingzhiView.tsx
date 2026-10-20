@@ -1,6 +1,6 @@
 /**
- * 灵质修行的开局与局内画面。沿用手记 / 入世历练已有的版式与样式类（run-toolbar、map-layout、battle-screen、encounter、spirit-card），
- * 不引入新视觉；只读写 LingzhiRun，结束时由手记把结果写回世界。
+ * 灵质修行的开局与局内画面。沿用众生牌录 / 入世历练已有的版式与样式类（run-toolbar、map-layout、battle-screen、encounter、spirit-card），
+ * 不引入新视觉；只读写 LingzhiRun，结束时由众生牌录把结果写回世界。
  */
 import { useState } from 'react';
 import { ArrowRight, BookOpen, Flame, Gem, Heart, Moon, Orbit, Shield, Sparkles, Sprout, Swords, Undo2 } from 'lucide-react';
@@ -26,10 +26,10 @@ export function LingzhiCardTile({ card, onClick, disabled = false, label, small 
 export function LingzhiSetup({ busy, onCancel, onStart }: { busy: boolean; onCancel: () => void; onStart: (l: LingzhiLoadout) => void }) {
   const [character, setCharacter] = useState(OPEN_CHARACTERS[0]);
   return <section className="encounter"><span className="round-emblem"><Orbit /></span><span className="eyebrow">灵质修行</span><h1>步入灵质回路</h1>
-    <p>七层回路，层层试炼，击败第七层的守门者即算贯通。<br />贯通带回残片 {LINGZHI_REWARD.victory.shards}、魂灵 {LINGZHI_REWARD.victory.soul}；散灵带回魂灵 {LINGZHI_REWARD.defeat.soul}。占用今天的白天。</p>
+    <p>七层回路，层层试炼，击败第七层的守门者即算贯通。<br />贯通带回灵质 {LINGZHI_REWARD.victory.spirit}；散灵带回灵质 {LINGZHI_REWARD.defeat.spirit}。占用今天的白天。</p>
     {LINGZHI.characters.map(c => { const open = OPEN_CHARACTERS.includes(c.id); return <button key={c.id} className="choice" disabled={!open || busy} aria-pressed={character === c.id} onClick={() => setCharacter(c.id)}>
       <strong>{c.name}{character === c.id ? ' · 已选' : ''}</strong><span>{open ? `${c.passive.name}：${c.passive.desc}` : `需要 ${c.cost} 残片解锁（尚未开放）`}</span><ArrowRight size={17} /></button>; })}
-    <div className="hero-actions"><button className="secondary" disabled={busy} onClick={onCancel}>回手记</button><button className="primary" disabled={busy} onClick={() => onStart({ character })}>进入灵质回路 <ArrowRight size={17} /></button></div></section>;
+    <div className="hero-actions"><button className="secondary" disabled={busy} onClick={onCancel}>回众生牌录</button><button className="primary" disabled={busy} onClick={() => onStart({ character })}>进入灵质回路 <ArrowRight size={17} /></button></div></section>;
 }
 
 export function LingzhiView({ session, busy, onAction, onReturn }: { session: LingzhiSession; busy: boolean; onAction: (a: LingzhiAction) => void; onReturn: () => void }) {
@@ -50,7 +50,7 @@ export function LingzhiView({ session, busy, onAction, onReturn }: { session: Li
 
     {run.phase === 'map' && <section className="map-layout"><aside><span className="eyebrow">SPIRIT CIRCUIT</span><h1>灵质回路</h1><p>{who.passive.name}：{who.passive.desc}<br />选择下一处亮起的节点。</p>
       <div className="map-legend">{(['battle', 'elite', 'rest', 'event', 'space', 'boss'] as const).map(k => { const Icon = nodeIcons[k]; return <span key={k}><Icon size={16} />{NODE_NAMES[k]}</span>; })}</div>
-      <small className="subtle">每一层都可以走到下一层任一节点。事件与灵质空间这一版只停留、不结算。<br />两段路之间可以随时离开，回会馆写进手记。</small></aside>
+      <small className="subtle">每一层都可以走到下一层任一节点。事件与灵质空间这一版只停留、不结算。<br />两段路之间可以随时离开，回会馆写进众生牌录。</small></aside>
       <div className="route-scroll"><div className="route-map"><svg viewBox={`0 0 400 ${floors * 100}`} preserveAspectRatio="none" aria-hidden="true">{run.nodes.filter(n => n.floor < floors - 1).flatMap(n => run.nodes.filter(m => m.floor === n.floor + 1).map(m => <line key={n.id + m.id} x1={65 + n.lane * 135} y1={50 + n.floor * 100} x2={65 + m.lane * 135} y2={50 + m.floor * 100} className={run.visited.includes(n.id) && run.visited.includes(m.id) ? 'walked' : ''} />))}</svg>
         {run.nodes.map(n => { const Icon = nodeIcons[n.kind]; const enabled = open.has(n.id); return <button key={n.id} style={{ left: `${(65 + n.lane * 135) / 4}%`, top: `${(50 + n.floor * 100) / floors}%` }} disabled={!enabled || busy} className={`map-node ${enabled ? 'available' : ''} ${run.visited.includes(n.id) ? 'visited' : ''} ${n.kind === 'boss' ? 'boss' : ''}`} onClick={() => { send({ type: 'enter', node: n.id }); setTarget('enemy0'); }} aria-label={`第${n.floor}层 ${NODE_NAMES[n.kind]} 路线${n.lane + 1}`}><Icon size={22} /><span>{n.floor} · {NODE_NAMES[n.kind]}</span></button>; })}</div></div>
     </section>}
@@ -81,7 +81,7 @@ export function LingzhiView({ session, busy, onAction, onReturn }: { session: Li
       <button className="primary" disabled={busy} onClick={() => send({ type: 'continue' })}>继续前行 <ArrowRight size={17} /></button></section>}
 
     {modal === 'deck' && <Modal title={`灵质修行牌组 · ${run.deck.length} 张`} onClose={() => setModal(null)}><div className="collection-grid">{run.deck.map(c => <LingzhiCardTile key={c.uid} card={c.card} small />)}</div></Modal>}
-    {modal === 'return' && <Modal title="现在离开灵质回路？" onClose={() => setModal(null)}><p>这次不带回残片和魂灵，今天就这样过去了。</p>
+    {modal === 'return' && <Modal title="现在离开灵质回路？" onClose={() => setModal(null)}><p>这次不带回灵质，今天就这样过去了。</p>
       <div className="hero-actions"><button className="secondary" onClick={() => setModal(null)}>继续修行</button><button className="primary" disabled={busy} onClick={() => { setModal(null); onReturn(); }}>回会馆 <ArrowRight size={17} /></button></div></Modal>}
   </>;
 }

@@ -24,6 +24,17 @@
   --qc-accent-glow: rgba(90, 158, 143, 0.10);
   --qc-gold-glow: rgba(212, 168, 64, 0.10);
   --qc-danger-glow: rgba(179, 84, 63, 0.10);
+  --qc-accent-ring: rgba(90, 158, 143, 0.24);  /* 输入框聚焦外晕 */
+  --qc-accent-line: rgba(90, 158, 143, 0.40);  /* 横幅描边 */
+  --qc-gold-line: rgba(212, 168, 64, 0.40);
+  --qc-on-accent: #fff;                        /* 实心按钮/选中页签上的字 */
+  --qc-scrim: rgba(20, 26, 22, 0.55);          /* 弹窗遮罩 */
+
+  /* 交互（见 design-system.md 第八节） */
+  --qc-focus: var(--qc-accent);                /* 键盘焦点环颜色 */
+  --qc-tap: 36px;                              /* 可点控件最小高度；触屏放大到 44px */
+  --qc-tap-sm: 28px;
+  --qc-dur: .18s;
 
   /* 字体 */
   --qc-font-body: "Noto Serif SC", "Source Han Serif SC", serif;
@@ -56,26 +67,39 @@
   --qc-shadow-md: 0 6px 20px rgba(30, 40, 34, 0.14);
   --qc-shadow-lg: 0 10px 40px rgba(20, 26, 22, 0.30);
 }
+@media (pointer: coarse) {
+  :root { --qc-tap: 44px; --qc-tap-sm: 36px; }
+}
 
 /* ---------- 基础 ---------- */
 .qc-body { background: var(--qc-bg); color: var(--qc-text); font-family: var(--qc-font-body); }
 
 /* ---------- 按钮 ---------- */
 .qc-btn {
-  display: inline-block; font-family: inherit; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--qc-sp-2);
+  min-height: var(--qc-tap); box-sizing: border-box; font-family: inherit; cursor: pointer;
   font-size: var(--qc-fs-md); letter-spacing: 1px; line-height: 1.4;
-  padding: 7px 18px; border-radius: var(--qc-r-md);
-  border: 1px solid var(--qc-accent); background: var(--qc-accent); color: #fff;
-  transition: all 0.2s; text-decoration: none;
+  padding: 6px 18px; border-radius: var(--qc-r-md);
+  border: 1px solid var(--qc-accent); background: var(--qc-accent); color: var(--qc-on-accent);
+  transition: background-color var(--qc-dur), border-color var(--qc-dur), color var(--qc-dur), filter var(--qc-dur);
+  text-decoration: none; -webkit-tap-highlight-color: transparent;
 }
-.qc-btn:hover { filter: brightness(1.08); }
-.qc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.qc-btn:hover:not(:disabled, [aria-disabled="true"], [aria-busy="true"]) { filter: brightness(1.08); }
+.qc-btn:disabled, .qc-btn[aria-disabled="true"] { opacity: 0.4; cursor: not-allowed; }
+.qc-btn[aria-busy="true"] { opacity: 0.7; cursor: progress; }
 .qc-btn--ghost { background: transparent; color: var(--qc-accent); }
-.qc-btn--ghost:hover { background: var(--qc-accent-glow); }
+.qc-btn--ghost:hover:not(:disabled, [aria-disabled="true"]) { background: var(--qc-accent-glow); filter: none; }
 .qc-btn--gold { border-color: var(--qc-gold); background: var(--qc-gold); }
 .qc-btn--gold-ghost { background: transparent; color: var(--qc-gold); border-color: var(--qc-gold); }
 .qc-btn--danger { border-color: var(--qc-danger); background: var(--qc-danger); }
-.qc-btn--sm { font-size: var(--qc-fs-sm); padding: 3px 10px; border-radius: var(--qc-r-sm); }
+.qc-btn--sm { min-height: var(--qc-tap-sm); font-size: var(--qc-fs-sm); padding: 2px 10px; border-radius: var(--qc-r-sm); }
+
+/* 键盘焦点：只在键盘操作时出现，鼠标点击不出现；描边色跟随按钮语义 */
+:where(.qc-btn, .qc-tab, .qc-swatch, .qc-slot, .qc-upload):focus-visible {
+  outline: 2px solid var(--qc-focus); outline-offset: 2px;
+}
+:where(.qc-btn--gold, .qc-btn--gold-ghost):focus-visible { outline-color: var(--qc-gold); }
+.qc-btn--danger:focus-visible { outline-color: var(--qc-danger); }
 
 /* ---------- 卡片 ---------- */
 .qc-card {
@@ -98,11 +122,22 @@
 
 /* ---------- 表单 ---------- */
 .qc-input, .qc-select, .qc-textarea {
-  width: 100%; font-family: inherit; font-size: var(--qc-fs-base);
-  padding: 8px 10px; border: 1px solid var(--qc-border); border-radius: var(--qc-r-md);
+  width: 100%; box-sizing: border-box; min-height: var(--qc-tap); font-family: inherit; font-size: var(--qc-fs-base);
+  padding: 7px 10px; border: 1px solid var(--qc-border); border-radius: var(--qc-r-md);
   background: var(--qc-panel); color: var(--qc-text); outline: none;
+  transition: border-color var(--qc-dur), box-shadow var(--qc-dur);
 }
-.qc-input:focus, .qc-select:focus, .qc-textarea:focus { border-color: var(--qc-accent); }
+.qc-input::placeholder, .qc-textarea::placeholder { color: var(--qc-dim); opacity: .8; }
+.qc-input:focus, .qc-select:focus, .qc-textarea:focus { border-color: var(--qc-accent); box-shadow: 0 0 0 3px var(--qc-accent-ring); }
+.qc-input:disabled, .qc-select:disabled, .qc-textarea:disabled { background: var(--qc-bg); color: var(--qc-dim); cursor: not-allowed; }
+/* 校验失败：脚本设 aria-invalid="true"，或浏览器在用户改过后判定无效（:user-invalid） */
+:where(.qc-input, .qc-select, .qc-textarea)[aria-invalid="true"] { border-color: var(--qc-danger); }
+:where(.qc-input, .qc-select, .qc-textarea):user-invalid { border-color: var(--qc-danger); }
+:where(.qc-input, .qc-select, .qc-textarea)[aria-invalid="true"]:focus { box-shadow: 0 0 0 3px var(--qc-danger-glow); }
+@media (pointer: coarse) {
+  /* 触屏输入框 16px 起，避免 iOS 聚焦时整页放大 */
+  .qc-input, .qc-select, .qc-textarea { font-size: var(--qc-fs-lg); }
+}
 .qc-textarea { resize: vertical; }
 .qc-label { display: block; font-size: var(--qc-fs-md); color: var(--qc-gold); margin-bottom: 5px; letter-spacing: .5px; }
 .qc-hint { font-size: var(--qc-fs-xs); color: var(--qc-dim); margin-top: 3px; }
@@ -115,15 +150,16 @@
 .qc-table tr:last-child td { border-bottom: none; }
 
 /* ---------- 弹窗 ---------- */
-.qc-modal { position: fixed; inset: 0; z-index: 9995; background: rgba(20,26,22,.55); display: none; align-items: center; justify-content: center; padding: 20px; }
+.qc-modal { position: fixed; inset: 0; z-index: 10000; /* 盖住全局栏（9999） */ background: var(--qc-scrim); display: none; align-items: center; justify-content: center; padding: var(--qc-sp-5); }
 .qc-modal.is-open { display: flex; }
-.qc-modal__panel { background: var(--qc-panel); border: 1px solid var(--qc-border); border-radius: var(--qc-r-xl); max-width: 560px; width: 100%; max-height: 86vh; overflow: auto; padding: var(--qc-sp-5); box-shadow: var(--qc-shadow-lg); }
-.qc-modal__title { font-size: var(--qc-fs-lg); letter-spacing: 1px; }
+.qc-modal__panel { box-sizing: border-box; background: var(--qc-panel); border: 1px solid var(--qc-border); border-radius: var(--qc-r-xl); max-width: 560px; width: 100%; max-height: 86vh; max-height: 86dvh; overflow: auto; overscroll-behavior: contain; padding: var(--qc-sp-5); box-shadow: var(--qc-shadow-lg); }
+@media (max-width: 480px) { .qc-modal { padding: var(--qc-sp-3); } .qc-modal__panel { padding: var(--qc-sp-4); } }
+.qc-modal__title { margin: 0; font-size: var(--qc-fs-lg); letter-spacing: 1px; }
 
 /* ---------- 横幅 ---------- */
 .qc-banner { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 18px; border-radius: var(--qc-r-lg); margin-bottom: 18px; }
-.qc-banner--gold { border: 1px solid rgba(212,168,64,.4); background: var(--qc-gold-glow); }
-.qc-banner--accent { border: 1px solid rgba(90,158,143,.4); background: var(--qc-accent-glow); }
+.qc-banner--gold { border: 1px solid var(--qc-gold-line); background: var(--qc-gold-glow); }
+.qc-banner--accent { border: 1px solid var(--qc-accent-line); background: var(--qc-accent-glow); }
 
 /* ---------- 标题 ---------- */
 .qc-h2 { font-size: var(--qc-fs-lg); letter-spacing: 2px; border-bottom: 2px solid var(--qc-accent); padding-bottom: 8px; margin-bottom: 14px; }
@@ -139,7 +175,7 @@
 .qc-swatch {
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   padding: 5px 2px; border: 1px solid transparent; border-radius: var(--qc-r-md);
-  cursor: pointer; transition: all .15s; background: none; font-family: inherit;
+  cursor: pointer; transition: border-color var(--qc-dur), background-color var(--qc-dur); background: none; font-family: inherit;
 }
 .qc-swatch:hover { border-color: var(--qc-accent); background: var(--qc-accent-glow); }
 .qc-swatch.is-picked { border-color: var(--qc-gold); background: var(--qc-gold-glow); }
@@ -149,19 +185,19 @@
 /* ---------- 页签 Tabs ---------- */
 .qc-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: var(--qc-sp-3); }
 .qc-tab {
-  padding: 3px 12px; font-size: var(--qc-fs-sm); letter-spacing: 1px; cursor: pointer;
+  min-height: var(--qc-tap-sm); padding: 3px 12px; font-size: var(--qc-fs-sm); letter-spacing: 1px; cursor: pointer;
   border: 1px solid var(--qc-border); border-radius: 999px; background: transparent;
-  color: var(--qc-dim); font-family: inherit; transition: all .15s;
+  color: var(--qc-dim); font-family: inherit; transition: border-color var(--qc-dur), background-color var(--qc-dur), color var(--qc-dur);
 }
 .qc-tab:hover { border-color: var(--qc-accent); color: var(--qc-accent); }
-.qc-tab.is-active { background: var(--qc-accent); border-color: var(--qc-accent); color: #fff; }
+.qc-tab.is-active, .qc-tab[aria-selected="true"] { background: var(--qc-accent); border-color: var(--qc-accent); color: var(--qc-on-accent); }
 
 /* ---------- 选色槽 Pick Slot（主色/辅色） ---------- */
 .qc-slots { display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap; }
 .qc-slot {
   display: flex; align-items: center; gap: 8px; padding: 7px 12px;
   background: var(--qc-bg); border: 1px solid var(--qc-border); border-radius: var(--qc-r-md);
-  cursor: pointer; transition: all .2s; min-width: 128px; font-family: inherit;
+  cursor: pointer; transition: border-color var(--qc-dur), background-color var(--qc-dur); min-width: 128px; font-family: inherit;
 }
 .qc-slot:hover { border-color: var(--qc-accent); }
 .qc-slot.is-active { border-color: var(--qc-gold); background: var(--qc-gold-glow); }
@@ -174,9 +210,15 @@
 .qc-upload {
   border: 1px dashed var(--qc-border); border-radius: var(--qc-r-lg);
   padding: var(--qc-sp-5) var(--qc-sp-4); text-align: center; cursor: pointer;
-  color: var(--qc-dim); font-size: var(--qc-fs-sm); transition: all .2s; line-height: 1.7;
+  color: var(--qc-dim); font-size: var(--qc-fs-sm); transition: border-color var(--qc-dur), background-color var(--qc-dur), color var(--qc-dur); line-height: 1.7;
 }
 .qc-upload:hover, .qc-upload.is-drag { border-color: var(--qc-accent); background: var(--qc-accent-glow); color: var(--qc-accent); }
 
 /* ---------- 范围滑块 Range ---------- */
 .qc-range { width: 100%; accent-color: var(--qc-accent); }
+
+/* ---------- 减少动态效果 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  :where(.qc-btn, .qc-input, .qc-select, .qc-textarea, .qc-card--hover, .qc-tab, .qc-swatch, .qc-slot, .qc-upload) { transition: none; }
+  .qc-card--hover:hover { transform: none; }
+}

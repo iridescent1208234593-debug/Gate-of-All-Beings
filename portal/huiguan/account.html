@@ -7,50 +7,45 @@
 <title>个人账户 · 西木会馆</title>
 <link rel="icon" href="favicon.png">
 <link rel="stylesheet" href="/design-system/design-system.css">
+<link rel="stylesheet" href="/design-system/ui/lxh-ui.css">
 <link rel="stylesheet" href="/avatar-cropper.css">
 <style>
-:root{--bg:#f5f0e8;--panel:#fbf8f2;--border:#d4cfbe;--text:#3a4a3e;--dim:#7a8a7e;--accent:#5a9e8f;--gold:#d4a840;--danger:#b3543f}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--text);font-family:"Noto Serif SC","Source Han Serif SC",serif;min-height:100vh;padding:48px 16px 60px}
+body{min-height:100vh;padding:48px var(--qc-sp-4) 60px}
 .wrap{max-width:640px;margin:0 auto}
-h1{font-size:22px;letter-spacing:3px}
-h1 small{font-size:12px;color:var(--dim);margin-left:10px;letter-spacing:1px}
-.back{display:inline-block;margin-bottom:14px;color:var(--dim);font-size:13px;text-decoration:none}
-.back:hover{color:var(--accent)}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:16px}
-.card h2{font-size:15px;letter-spacing:2px;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px}
-.row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:14px}
-.row .k{color:var(--dim)}
-.tag{display:inline-block;padding:1px 10px;border-radius:4px;font-size:12px;border:1px solid var(--border);color:var(--dim)}
-.tag.gold{background:rgba(212,168,64,.15);border-color:var(--gold);color:var(--gold)}
-.tag.green{background:rgba(90,158,143,.12);border-color:var(--accent);color:var(--accent)}
-.btn{font-family:inherit;font-size:13px;cursor:pointer;padding:7px 18px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:#fff;transition:all .15s}
-.btn:hover{filter:brightness(1.08)}
-.btn.ghost{background:transparent;color:var(--accent)}
-.btn:disabled{opacity:.4;cursor:not-allowed}
-.hint{font-size:12px;color:var(--dim);margin-top:6px;line-height:1.6}
-.err{color:var(--danger);font-size:13px;margin-top:8px;min-height:18px}
-.state-box{text-align:center;padding:60px;color:var(--dim)}
-.schemes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.chip{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;color:var(--text);background:transparent;transition:all .15s}
-.chip:hover{border-color:var(--accent)}
-.chip .dot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.12);flex-shrink:0}
+h1{font-size:var(--qc-fs-xl);letter-spacing:3px;margin-bottom:var(--qc-sp-4)}
+h1 small{font-size:var(--qc-fs-sm);color:var(--qc-dim);margin-left:10px;letter-spacing:1px}
+.back{display:inline-block;margin-bottom:14px;color:var(--qc-dim);font-size:var(--qc-fs-md);text-decoration:none}
+.back:hover{color:var(--qc-accent)}
+.qc-card{margin-bottom:var(--qc-sp-4)}
+.qc-hint{line-height:1.6;margin-top:6px}
+.qc-err{min-height:18px;margin-top:var(--qc-sp-2)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:var(--qc-sp-2);padding:6px 0;font-size:var(--qc-fs-base)}
+.row .k{color:var(--qc-dim)}
+.field-row{display:flex;gap:var(--qc-sp-2);margin-top:10px}.field-row .qc-input{flex:1;min-width:0}
+.actions{display:flex;flex-wrap:wrap;gap:var(--qc-sp-2);margin-top:var(--qc-sp-3)}
+.schemes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.chip{display:flex;align-items:center;gap:6px;min-height:var(--qc-tap);padding:6px 8px;border:1px solid var(--qc-border);border-radius:var(--qc-r-md);cursor:pointer;font-family:inherit;font-size:var(--qc-fs-sm);color:var(--qc-text);background:transparent;transition:border-color var(--qc-dur),box-shadow var(--qc-dur)}
+.chip:hover{border-color:var(--qc-accent)}
+.chip:focus-visible{outline:2px solid var(--qc-focus);outline-offset:2px}
+.chip .dot{width:16px;height:16px;border-radius:50%;border:1px solid var(--qc-border);flex-shrink:0}
 .chip .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.chip.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
-input[type=color]{width:42px;height:32px;border:1px solid var(--border);border-radius:6px;background:transparent;padding:2px;cursor:pointer}
-.hex-in{width:92px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;color:var(--text);background:var(--bg)}
-.theme-prev{border:1px solid var(--border);border-radius:8px;padding:12px;margin-top:12px;background:var(--bg);min-height:52px}
-.theme-prev .btn{pointer-events:none}
-.account-avatar-row{display:flex;align-items:center;gap:14px}.account-avatar-row>img{width:76px;height:76px;flex:none;border-radius:50%;object-fit:cover;background:#e6e1d5;border:1px solid var(--border)}
-.account-avatar-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.account-avatar-actions .btn{min-height:40px}
-@media(max-width:480px){.account-avatar-actions .btn{flex:1 1 auto}}
+.chip.on{border-color:var(--qc-accent);box-shadow:0 0 0 1px var(--qc-accent)}
+input[type=color]{width:42px;height:var(--qc-tap);border:1px solid var(--qc-border);border-radius:var(--qc-r-md);background:transparent;padding:2px;cursor:pointer}
+.row .hex-in{width:96px;flex:none}
+.theme-prev{border:1px solid var(--qc-border);border-radius:var(--qc-r-md);padding:12px;margin-top:12px;background:var(--qc-bg);min-height:52px}
+.theme-prev .qc-btn{pointer-events:none}
+#content>.qc-loading{min-height:240px}
+.account-avatar-row{display:flex;align-items:center;gap:14px}.account-avatar-row>img{width:76px;height:76px;flex:none;border-radius:50%;object-fit:cover;background:var(--qc-bg);border:1px solid var(--qc-border)}
+.account-avatar-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+@media(max-width:480px){.account-avatar-actions .qc-btn{flex:1 1 auto}.schemes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
-<body>
+<body class="qc-body">
 <div class="wrap">
   <a class="back" href="/">← 返回会馆</a>
   <h1>个人账户<small>西木会馆 · iridescently.xyz</small></h1>
-  <div id="content"><div class="state-box">加载中…</div></div>
+  <div id="content"><div class="qc-loading" role="status">正在读取账户信息…</div></div>
 </div>
 <script src="/image-upload.js"></script>
 <script src="/avatar-cropper.js?v=20261017"></script>
@@ -58,106 +53,121 @@ input[type=color]{width:42px;height:32px;border:1px solid var(--border);border-r
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 const roleName={executor:'执行者',elder:'长老',admin:'管理员'};
 let accountAvatarDraft=null, accountAvatarPreviewUrl='';
+// Page-level state in the shared .qc-loading slot: what happened, plus the way forward.
+function pageState(text,actions,isError){
+  const box=document.createElement('div');box.className='qc-loading';box.setAttribute('role',isError?'alert':'status');box.textContent=text;
+  if(actions&&actions.length){
+    const row=document.createElement('div');row.className='qc-loading__actions';
+    actions.forEach(a=>{const el=document.createElement(a.href?'a':'button');el.textContent=a.label;if(a.href)el.href=a.href;else{el.type='button';el.addEventListener('click',a.onClick);}row.appendChild(el);});
+    box.appendChild(row);
+  }
+  document.getElementById('content').replaceChildren(box);
+}
+function reload(){pageState('正在读取账户信息…');init();}
 async function init(){
   try{
+    const token=new URLSearchParams(location.hash.slice(1)).get('verify-email');
+    if(token){
+      try{
+        const result=await fetch('/api/account/email/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+        const data=await result.json();
+        if(data.ok) history.replaceState(null,'',location.pathname+location.search);
+        alert(data.ok?'邮箱验证成功：'+data.email:(data.error||'邮箱验证失败'));
+      }catch(e){alert('验证请求暂时失败，请检查网络后刷新重试。');}
+    }
     const r=await fetch('/api/user'); const u=await r.json();
-    if(!u.logged_in){document.getElementById('content').innerHTML='<div class="state-box">请先登录后管理账户。<br><a href="/" style="color:var(--gold)">去登录 / 注册</a></div>';return;}
+    if(!u.logged_in)return pageState('请先登录后管理账户。',[{label:'去登录',href:'/?openauth=1'}],true);
     const emailRes=await fetch('/api/account/email');
     const emailState=emailRes.ok?await emailRes.json():{email:'',verified:false,pending:false};
     render(u,emailState);
-    const token=new URLSearchParams(location.hash.slice(1)).get('verify-email');
-    if(token){
-      history.replaceState(null,'',location.pathname+location.search);
-      const result=await fetch('/api/account/email/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
-      const data=await result.json();
-      alert(data.ok?'邮箱验证成功：'+data.email:(data.error||'邮箱验证失败'));
-      if(data.ok)init();
-    }
-  }catch(e){document.getElementById('content').innerHTML='<div class="state-box">加载失败，请刷新。</div>';}
+  }catch(e){
+    pageState(e instanceof TypeError?'网络连接失败，暂时无法读取账户信息。':e instanceof SyntaxError?'服务暂时不可用，请稍后再试。':'暂时无法读取账户信息。',[{label:'重新读取',onClick:reload},{label:'去登录',href:'/?openauth=1'}],true);
+  }
 }
 function render(u,emailState){
   const isElder=u.role==='elder', isAdmin=u.is_admin, isScribe=u.edit_role==='scribe';
   const curP=((u.theme_primary||'#f5f0e8').match(/^#[0-9a-fA-F]{6}$/)?u.theme_primary:'#f5f0e8').toLowerCase();
   const curA=((u.theme_accent||'#5a9e8f').match(/^#[0-9a-fA-F]{6}$/)?u.theme_accent:'#5a9e8f').toLowerCase();
   document.getElementById('content').innerHTML=`
-    <div class="card">
-      <h2>账户头像</h2>
-      <div class="account-avatar-row"><img id="accountAvatarPreview" src="${esc(u.account_avatar_url||u.picture||'')}" alt="账户头像" onerror="this.hidden=true"><div><strong>${esc(u.nickname||u.username||'账户')}</strong><div class="hint">这是账户本人在网站中的通用头像，不会更改 OC 或众生之门形象。</div></div></div>
+    <div class="qc-card">
+      <h2 class="qc-h2">账户头像</h2>
+      <div class="account-avatar-row"><img id="accountAvatarPreview" src="${esc(u.account_avatar_url||u.picture||'')}" alt="账户头像" onerror="this.hidden=true"><div><strong>${esc(u.nickname||u.username||'账户')}</strong><div class="qc-hint">这是账户本人在网站中的通用头像，不会更改 OC 或众生之门形象。</div></div></div>
       <input id="accountAvatarFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
-      <div class="account-avatar-actions"><button class="btn ghost" id="accountAvatarChoose" type="button">选择并裁切</button><button class="btn" id="accountAvatarSave" type="button" disabled>保存头像</button><button class="btn ghost" id="accountAvatarRemove" type="button">移除自定义头像</button></div>
-      <div class="hint" id="accountAvatarHint">支持 JPG、PNG、WebP、GIF；保存为去除元数据的 1:1 头像。</div>
+      <div class="account-avatar-actions"><button class="qc-btn qc-btn--ghost" id="accountAvatarChoose" type="button">选择并裁切</button><button class="qc-btn" id="accountAvatarSave" type="button" disabled>保存头像</button><button class="qc-btn qc-btn--ghost" id="accountAvatarRemove" type="button">移除自定义头像</button></div>
+      <div class="qc-hint" id="accountAvatarHint">支持 JPG、PNG、WebP、GIF；保存为去除元数据的 1:1 头像。</div>
     </div>
-    <div class="qc-card" style="margin-bottom:var(--qc-sp-4)">
+    <div class="qc-card">
       <h2 class="qc-h2">账户安全</h2>
       <p class="qc-hint">设置找回问题、修改密码，或检查你的站内登录账号。</p>
       <a class="qc-btn" href="/security.html" style="margin-top:var(--qc-sp-3)">管理账户安全</a>
     </div>
-    <div class="card" id="email-binding">
-      <h2>邮箱验证</h2>
-      ${emailState.verified?`<div class="row"><span class="k">已验证邮箱</span><span>${esc(emailState.email)} <span class="tag green">可用于账号找回</span></span></div>`:'<div class="hint">绑定并验证一个常用邮箱，可用于找回站内账号名和重置密码。旧资料中的邮箱不会自动视为已验证。</div>'}
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <input id="accountEmail" type="email" maxlength="254" autocomplete="email" placeholder="${emailState.verified?'输入新邮箱以更换':'你的邮箱地址'}" value="" style="flex:1;min-width:0;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:14px;">
-        <button class="btn" id="emailSend" onclick="sendEmailVerification()">发送验证链接</button>
+    <div class="qc-card" id="email-binding">
+      <h2 class="qc-h2">邮箱验证</h2>
+      ${emailState.verified?`<div class="row"><span class="k">已验证邮箱</span><span>${esc(emailState.email)} <span class="qc-tag qc-tag--accent">可用于账号找回</span></span></div>`:'<div class="qc-hint">绑定并验证一个常用邮箱，可用于找回站内账号名和重置密码。旧资料中的邮箱不会自动视为已验证。</div>'}
+      <div class="field-row">
+        <input id="accountEmail" type="email" maxlength="254" autocomplete="email" placeholder="${emailState.verified?'输入新邮箱以更换':'你的邮箱地址'}" value="" class="qc-input">
+        <button class="qc-btn" id="emailSend" onclick="sendEmailVerification()">发送验证链接</button>
       </div>
-      <div class="hint">验证链接 30 分钟有效；旧邮箱在新邮箱验证成功前保持绑定。</div>
-      <div class="hint" id="emailHint">${emailState.pending?'已有一封待验证邮件，请检查收件箱。':''}</div>
-      <div class="err" id="emailErr"></div>
+      <div class="qc-hint">验证链接 30 分钟有效；旧邮箱在新邮箱验证成功前保持绑定。</div>
+      <div class="qc-hint" id="emailHint">${emailState.pending?'已有一封待验证邮件，请检查收件箱。':''}</div>
+      <div class="qc-err" id="emailErr"></div>
     </div>
-    <div class="card">
-      <h2>身份信息</h2>
+    <div class="qc-card">
+      <h2 class="qc-h2">身份信息</h2>
       <div class="row"><span class="k">昵称</span><span>${esc(u.nickname||u.username)}</span></div>
       <div class="row"><span class="k">账号类型</span><span>${u.kind==='local'?'站内账号':'USSO 账号'}</span></div>
-      <div class="row"><span class="k">会馆身份</span><span class="tag ${isAdmin?'gold':isElder?'green':''}">${roleName[u.role]||'执行者'}</span></div>
-      <div class="row"><span class="k">编辑权限</span><span class="tag ${isScribe?'green':''}">${isScribe?'编辑（可直接修订设定）':'无'}</span></div>
+      <div class="row"><span class="k">会馆身份</span><span class="qc-tag ${isAdmin?'qc-tag--gold':isElder?'qc-tag--accent':''}">${roleName[u.role]||'执行者'}</span></div>
+      <div class="row"><span class="k">编辑权限</span><span class="qc-tag ${isScribe?'qc-tag--accent':''}">${isScribe?'编辑（可直接修订设定）':'无'}</span></div>
     </div>
-    <div class="card">
-      <h2>等级与积分</h2>
-      <div class="row"><span class="k">当前等级</span><span class="tag gold">Lv.${u.level||1} <span style="color:var(--dim)">/ 100</span></span></div>
-      <div class="row"><span class="k">积分</span><span>${u.points||0}</span></div>
-      <div class="hint">升级方式：成功提交人设表 +20 分；使用自定义配色 +10 分。每 10 分升 1 级，最高 100 级。多探索站点功能可更快升级。</div>
+    <div class="qc-card">
+      <h2 class="qc-h2">等级与积分</h2>
+      <div class="row"><span class="k">当前等级</span><span class="qc-tag qc-tag--gold">Lv.${u.level||0}</span></div>
+      <div class="row"><span class="k">积分</span><span>${u.points||0} <span style="color:var(--qc-dim)">/ 下一级 ${u.next_level_at||1}</span></span></div>
+      <div class="qc-hint">积分来自各个玩法与每日任务：每种玩法每天第一次游玩 +0.5，完成一局 +0.2，胜利再 +0.3，刷新个人最佳 +0.5；每日任务“完成任意一局”“玩三种不同玩法”各 +1；登记新角色设表 +1（每天至多 2 张），自定义配色 +0.5。每天最多 8 分。第 1 级需要 1 分，之后每级比上一级多 1 分。</div>
+      <div class="row"><a class="qc-btn" href="/shared/shared-ui/leaderboard/index.html">查看排行榜</a></div>
     </div>
-    <div class="card">
-      <h2>改名</h2>
+    <div class="qc-card">
+      <h2 class="qc-h2">改名</h2>
       <div class="row"><span class="k">当前昵称</span><span>${esc(u.nickname||u.username)}</span></div>
-      <div style="display:flex;gap:8px;margin-top:10px;">
-        <input id="renameInput" placeholder="输入新昵称" style="flex:1;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:14px;">
-        <button class="btn" onclick="doRename()">改名</button>
+      <div class="field-row">
+        <input id="renameInput" class="qc-input" placeholder="输入新昵称">
+        <button class="qc-btn" onclick="doRename()">改名</button>
       </div>
-      <div class="hint">昵称全站唯一，每 3 天可改一次。</div>
-      <div class="err" id="renameErr"></div>
+      <div class="qc-hint">昵称全站唯一，每 3 天可改一次。</div>
+      <div class="qc-err" id="renameErr"></div>
     </div>
-    <div class="card">
-      <h2>身份申请</h2>
+    <div class="qc-card">
+      <h2 class="qc-h2">身份申请</h2>
       <div class="row"><span class="k">会馆长老</span>${elderBtn(u)}</div>
-      <div class="hint">长老：御灵系可选 2 系、年龄上限 1500 岁；可管理执行者与编辑。需申请并经馆长批准。</div>
+      <div class="qc-hint">长老：御灵系可选 2 系、年龄上限 1500 岁；可管理执行者与编辑。需申请并经馆长批准。</div>
       <div class="row" style="margin-top:10px;"><span class="k">编辑（审查补充世界观）</span>${scribeBtn(u)}</div>
-      <div class="hint">编辑：可直接编辑/补充官方角色设定（所有改动留版本记录）。需申请并经长老/管理员批准。</div>
+      <div class="qc-hint">编辑：可直接编辑/补充官方角色设定（所有改动留版本记录）。需申请并经长老/管理员批准。</div>
       <div class="row" style="margin-top:10px;"><span class="k">突破年龄限制</span>${exemptBtn(u,'age')}</div>
-      <div class="hint">获批后，可在人设登记表"年龄"旁勾选突破年龄限制，解除 450/1500 岁上限。</div>
+      <div class="qc-hint">获批后，可在人设登记表"年龄"旁勾选突破年龄限制，解除 450/1500 岁上限。</div>
       <div class="row" style="margin-top:10px;"><span class="k">突破技能选择限制</span>${exemptBtn(u,'skill')}</div>
-      <div class="hint">获批后，可在人设登记表"能力"旁勾选突破选择限制，解除御灵系/大系数量限制。</div>
-      <div class="err" id="applyErr"></div>
+      <div class="qc-hint">获批后，可在人设登记表"能力"旁勾选突破选择限制，解除御灵系/大系数量限制。</div>
+      <div class="qc-err" id="applyErr"></div>
     </div>
-    <div class="card">
-      <h2>外观配色</h2>
-      <div class="hint" style="margin-bottom:10px;">设置你的专属主题色。psy 题库站等子站登录后将跟随该配色；未设置时默认宣纸乳白（#f5f0e8 × #5a9e8f）。</div>
+    <div class="qc-card">
+      <h2 class="qc-h2">外观配色</h2>
+      <div class="qc-hint" style="margin-bottom:10px;">设置你的专属主题色。psy 题库站等子站登录后将跟随该配色；未设置时默认宣纸乳白（#f5f0e8 × #5a9e8f）。</div>
       <div class="schemes" id="schemeGrid">
         ${COLOR_SCHEMES.map((s,i)=>`<button type="button" class="chip ${curP===s.primary.toLowerCase()&&curA===s.accent.toLowerCase()?'on':''}" data-i="${i}" onclick="pickScheme(${i})" title="${esc(s.name)}"><span class="dot" style="background:${s.primary}"></span><span class="dot" style="background:${s.accent}"></span><span class="nm">${esc(s.name)}</span></button>`).join('')}
       </div>
-      <div class="row" style="margin-top:12px;"><span class="k">主色</span><input type="color" id="tp" value="${curP}" oninput="syncThemeInputs()"><input class="hex-in" id="tpHex" value="${curP}" oninput="syncThemeInputs()"></div>
-      <div class="row"><span class="k">辅色</span><input type="color" id="ta" value="${curA}" oninput="syncThemeInputs()"><input class="hex-in" id="taHex" value="${curA}" oninput="syncThemeInputs()"></div>
+      <div class="row" style="margin-top:12px;"><span class="k">主色</span><input type="color" id="tp" value="${curP}" oninput="syncThemeInputs()"><input class="qc-input hex-in" id="tpHex" value="${curP}" oninput="syncThemeInputs()"></div>
+      <div class="row"><span class="k">辅色</span><input type="color" id="ta" value="${curA}" oninput="syncThemeInputs()"><input class="qc-input hex-in" id="taHex" value="${curA}" oninput="syncThemeInputs()"></div>
       <div class="theme-prev" id="themePrev"></div>
-      <div style="display:flex;gap:8px;margin-top:12px;">
-        <button class="btn" onclick="saveTheme()">保存配色</button>
-        <button class="btn ghost" onclick="resetTheme()">恢复默认宣纸乳白</button>
+      <div class="actions">
+        <button class="qc-btn" onclick="saveTheme()">保存配色</button>
+        <button class="qc-btn qc-btn--ghost" onclick="resetTheme()">恢复默认宣纸乳白</button>
       </div>
-      <div class="hint" id="themeHint"></div>
-      <div class="err" id="themeErr"></div>
+      <div class="qc-hint" id="themeHint"></div>
+      <div class="qc-err" id="themeErr"></div>
     </div>
-    <div class="card">
-      <h2>登录方式</h2>
-      <div class="row"><span class="k">当前账户</span><span>${u.kind==='usso'?'<span class="tag">既有 USSO 账户</span>':'<span class="tag green">会馆站内账号</span>'}</span></div>
-      <div class="hint">USSO 新登录与绑定暂时停用。既有账户资料和角色记录保留；跨站会话仍由共享会话服务处理。</div>
+    <div class="qc-card">
+      <h2 class="qc-h2">登录方式</h2>
+      <div class="row"><span class="k">当前账户</span><span>${u.kind==='usso'?'<span class="qc-tag">既有 USSO 账户</span>':'<span class="qc-tag qc-tag--accent">会馆站内账号</span>'}</span></div>
+      <div class="qc-hint">USSO 新登录与绑定暂时停用。既有账户资料和角色记录保留；跨站会话仍由共享会话服务处理。</div>
     </div>
   `;
   updatePrev();
@@ -197,22 +207,22 @@ async function sendEmailVerification(){
   finally{button.disabled=false;}
 }
 function elderBtn(u){
-  if(u.role==='elder'||u.is_admin) return '<span class="tag green">已是长老/管理员</span>';
-  if(u.honor_kind) return '<span class="tag green">'+(u.honor_kind==='elder_honor'?'荣誉长老':(u.honor_alias||'妖王'))+'</span>';
-  if(u.elder_pending||u.honor_pending) return '<span class="tag">审核中</span>';
-  return '<button class="btn" onclick="applyElder()">申请长老</button> <a class="btn" href="/#charForm" style="text-decoration:none">荣誉长老 / 妖王</a>';
+  if(u.role==='elder'||u.is_admin) return '<span class="qc-tag qc-tag--accent">已是长老/管理员</span>';
+  if(u.honor_kind) return '<span class="qc-tag qc-tag--accent">'+(u.honor_kind==='elder_honor'?'荣誉长老':(u.honor_alias||'妖王'))+'</span>';
+  if(u.elder_pending||u.honor_pending) return '<span class="qc-tag">审核中</span>';
+  return '<button class="qc-btn" onclick="applyElder()">申请长老</button> <a class="qc-btn" href="/#charForm">荣誉长老 / 妖王</a>';
 }
 function scribeBtn(u){
-  if(u.edit_role==='scribe'||u.is_admin) return '<span class="tag green">已有编辑权限</span>';
-  if(u.scribe_pending) return '<span class="tag">审核中</span>';
-  return '<button class="btn" onclick="applyScribe()">申请编辑</button>';
+  if(u.edit_role==='scribe'||u.is_admin) return '<span class="qc-tag qc-tag--accent">已有编辑权限</span>';
+  if(u.scribe_pending) return '<span class="qc-tag">审核中</span>';
+  return '<button class="qc-btn" onclick="applyScribe()">申请编辑</button>';
 }
 function exemptBtn(u,type){
   const has = type==='age' ? u.exempt_age : u.exempt_skill;
   const pend = type==='age' ? u.exempt_age_pending : u.exempt_skill_pending;
-  if(has) return '<span class="tag green">已突破</span>';
-  if(pend) return '<span class="tag">审核中</span>';
-  return `<button class="btn" onclick="applyExempt('${type}')">申请</button>`;
+  if(has) return '<span class="qc-tag qc-tag--accent">已突破</span>';
+  if(pend) return '<span class="qc-tag">审核中</span>';
+  return `<button class="qc-btn" onclick="applyExempt('${type}')">申请</button>`;
 }
 async function applyExempt(type){
   const label = type==='age' ? '突破年龄限制' : '突破技能选择限制';
@@ -296,7 +306,7 @@ function updatePrev(){
   const prev=document.getElementById('themePrev');
   if(!prev) return;
   prev.style.background=p;
-  prev.innerHTML=`<span class="btn" style="background:${a};border-color:${a};color:#fff;">预览按钮</span> <span class="btn ghost" style="border-color:${a};color:${a};background:transparent;">描边</span> <span style="margin-left:8px;font-size:12px;color:${a};">${a}</span>`;
+  prev.innerHTML=`<span class="qc-btn" style="background:${a};border-color:${a};color:var(--qc-on-accent);">预览按钮</span> <span class="qc-btn qc-btn--ghost" style="border-color:${a};color:${a};background:transparent;">描边</span> <span style="margin-left:8px;font-size:12px;color:${a};">${a}</span>`;
   document.querySelectorAll('#schemeGrid .chip').forEach(ch=>{
     const s=COLOR_SCHEMES[+ch.dataset.i];
     if(s) ch.classList.toggle('on', s.primary.toLowerCase()===p && s.accent.toLowerCase()===a);

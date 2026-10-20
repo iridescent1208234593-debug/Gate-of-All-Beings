@@ -644,7 +644,7 @@
   .auth-legacy .auth-hint { margin: 6px 0 0; }
 </style>
 <link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261015-1">
-<link rel="stylesheet" href="/homepage.css?v=20261018-pal4">
+<link rel="stylesheet" href="/homepage.css?v=20261021-sub3">
 <link rel="preload" as="script" href="/design-system/ui/lxh-intro.js?v=20261015-1">
 <link rel="preload" as="script" href="/assets/gate/gate-scene.js?v=20261009-6">
 <link rel="preload" as="script" href="/homepage.js?v=20261016-1">
@@ -916,6 +916,7 @@
       <div class="archive-room-tools"><button id="archiveReset" type="button" hidden>← 三列档案</button><button id="heroReturn" type="button">↑ 返回开场</button></div>
       <div class="archive-door-grid" aria-label="档案室目录">
         <section class="archive-door" data-door="official">
+          <div class="door-head">
           <button class="door-main" type="button" aria-label="官方角色档案" aria-expanded="false" aria-controls="officialContent">
             <span class="door-number">01</span>
             <span class="door-title">官方角色档案</span>
@@ -923,8 +924,18 @@
             <span class="door-description">查阅《罗小黑战记》世界里的角色与官方记录。</span>
             <span class="door-arrow" aria-hidden="true">↗</span>
           </button>
+          <a class="door-sub" href="/works.html" aria-label="官方角色同人画廊（官方角色档案 · 副册）">
+            <span class="door-sub-spine" aria-hidden="true"><span>同人画廊</span></span>
+            <span class="door-sub-face" aria-hidden="true">
+              <span class="door-number">01 · 副册</span>
+              <span class="door-title">官方角色同人画廊</span>
+              <span class="door-english">Official Character Fan Art</span>
+              <span class="door-arrow">↗</span>
+            </span>
+          </a>
+          </div>
           <div class="archive-body" id="officialContent">
-            <div class="archive-links"><a href="/gallery.html">角色画廊 ↗</a><a href="/relation.html">人物关系图 ↗</a><a href="/stickers.html">罗小黑表情包收录 ↗</a><button id="homeScribeApply" type="button">申请成为编辑</button></div>
+            <div class="archive-links"><a href="/gallery.html">角色画廊 · 主册 ↗</a><a href="/works.html">官方角色同人画廊 · 副册 ↗</a><a href="/relation.html">人物关系图 ↗</a><a href="/stickers.html">罗小黑表情包收录 ↗</a><button id="homeScribeApply" type="button">申请成为编辑</button></div>
             <div class="archive-search"><input id="homeOfficialSearch" type="search" placeholder="搜索官方角色" aria-label="搜索官方角色"><span id="homeOfficialCount"></span></div>
             <div id="homeOfficialGrid" class="home-character-grid" aria-live="polite"><p class="archive-note">正在翻开官方档案…</p></div>
             <button id="homeOfficialMore" class="archive-more" type="button" hidden>更多角色 ↓</button>
@@ -3605,7 +3616,7 @@ body.theme-transition, body.theme-transition * { transition: background-color 0.
     const imgs = (data.images && data.images.length) ? data.images : (data.image ? [data.image] : []);
     if (!imgs.length) return '';
     return '<div class="reveal" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin:16px 4px;">' +
-      imgs.map((src, i) => '<img src="' + src + '" alt="" class="lhx-img" onclick="lhxZoom(this)" style="max-width:' + (i === 0 ? 180 : 96) + 'px;max-height:' + (i === 0 ? 180 : 96) + 'px;width:auto;height:auto;object-fit:contain;border-radius:10px;border:1px solid rgba(0,0,0,.15);cursor:zoom-in;">').join('') +
+      imgs.map((src, i) => '<img data-original-image src="' + src + '" alt="" class="lhx-img" onclick="lhxZoom(this)" style="max-width:' + (i === 0 ? 180 : 96) + 'px;max-height:' + (i === 0 ? 180 : 96) + 'px;width:auto;height:auto;object-fit:contain;border-radius:10px;border:1px solid rgba(0,0,0,.15);cursor:zoom-in;">').join('') +
       '</div>';
   })()}
   <div class="content">
@@ -4102,7 +4113,7 @@ function renderList() {
   btn.style.display = all.length ? '' : 'none';
   let html = all.length ? all.map((c, i) => `
     <div class="char-card">
-      ${(c.avatar_asset_id || c.image) ? `<img class="thumb" src="${escapeHtml(c.avatar_asset_id || c.image)}" alt="" data-fallback="${escapeHtml((c.name || c.code || '?')[0])}" onerror="thumbFallback(this)" style="object-fit:cover;${c.avatar_display_shape === 'circle' ? 'border-radius:50%;' : ''}">` : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:22px;">' + escapeHtml((c.name || c.code || '?')[0]) + '</div>'}
+      ${(c.avatar_asset_id || c.image) ? `<img data-original-image class="thumb" src="${escapeHtml(c.avatar_asset_id || c.image)}" alt="" data-fallback="${escapeHtml((c.name || c.code || '?')[0])}" onerror="thumbFallback(this)" style="object-fit:cover;${c.avatar_display_shape === 'circle' ? 'border-radius:50%;' : ''}">` : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:22px;">' + escapeHtml((c.name || c.code || '?')[0]) + '</div>'}
       <div class="info">
         <div class="name">${escapeHtml(c.code)} · ${escapeHtml(c.name)}</div>
         <div class="meta">
@@ -4216,6 +4227,7 @@ if (new URLSearchParams(location.search).get('openauth')) initialLoginCheck.then
 <script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017"></script>
 <script src="/homepage-chrome.js?v=20261017-nav"></script>
 <script src="/homepage-content.js?v=20261009-2"></script>
+<script src="/original-image-viewer.js?v=20261019-2"></script>
 <script src="/homepage-registration.js?v=20261009-1"></script>
 <script>
 /* 链接框（浏览器标签 / 分享链接标题）文字轮播：小猫脸眨眼 → 站点文案打字机 */

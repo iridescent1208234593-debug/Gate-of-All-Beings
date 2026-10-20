@@ -77,8 +77,9 @@
 .mode-hall__desk h2 { margin: 9px 0; font-weight: 400; font-size: 24px; }
 .mode-hall__desk small { font-size: 10px; color: #65785f; }
 .mode-hall__desk nav { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px 28px; flex: 1; }
-.mode-hall__desk button { display: flex; gap: 11px; align-items: center; padding: 10px 0; border: 0; border-bottom: 1px solid #8391764d; background: transparent; color: inherit; text-align: left; font: inherit; cursor: pointer; }
-.mode-hall__desk button>span { display: grid; gap: 5px; flex: 1; }
+.mode-hall__desk button, .mode-hall__desk nav>a { display: flex; gap: 11px; align-items: center; padding: 10px 0; border: 0; border-bottom: 1px solid #8391764d; background: transparent; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.mode-hall__desk button>span, .mode-hall__desk nav>a>span { display: grid; gap: 5px; flex: 1; }
+.mode-hall__desk nav>a { text-decoration: none; min-width: 0; }
 .mode-hall__desk strong { font-weight: 400; font-size: 13px; }
 .mode-hall__save-note { margin: 18px 0 0; color: #66765e; font-size: 10px; line-height: 1.8; }
 
@@ -116,6 +117,23 @@
   .game-card__body, .mode-hall__row--compact .game-card__body { padding: 16px; gap: 6px; }
   .mode-hall__desk { display: block; }
   .mode-hall__desk nav { grid-template-columns: 1fr; margin-top: 18px; gap: 9px; }
-  .mode-hall__desk button { min-height: 58px; }
+  .mode-hall__desk button, .mode-hall__desk nav>a { min-height: 58px; }
 }
 @media (prefers-reduced-motion: reduce) { .game-card, .game-card__shots img, .game-card__more { transition: none; } .game-card.is-active .game-card__shots img.is-shown { transform: scale(1.02); } }
+
+/* 入世历练 retired entry: greyed, still clickable behind a confirmation */
+.mode-hall__chapter--legacy { gap: 8px; }
+.mode-hall__legacy-entry { filter: grayscale(1); opacity: .78; display: grid; gap: 3px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.mode-hall__legacy-entry small { color: #c9c9c9; font-size: 10px; letter-spacing: .14em; }
+.mode-hall__legacy-entry strong { color: #f5efcf; font-size: 18px; font-weight: 400; letter-spacing: .08em; }
+.mode-hall__legacy-entry span { display: inline-flex; align-items: center; gap: 4px; color: #e9eddfbd; font-size: 11px; }
+.mode-hall__vote { display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px solid #f5efcf33; font-size: 11px; color: #e9eddfbd; }
+.mode-hall__vote em { font-style: normal; margin-right: auto; }
+.mode-hall__vote button { display: inline-grid; place-items: center; width: 28px; height: 24px; border: 1px solid #f5efcf55; border-radius: 8px; background: transparent; color: #f5efcf; cursor: pointer; }
+.mode-hall__vote button[aria-pressed="true"] { background: #ebc77a; border-color: #ebc77a; color: #0e2620; }
+.mode-hall__confirm { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: #000a; }
+.mode-hall__confirm > div { display: grid; gap: 10px; min-width: 260px; max-width: 320px; padding: 20px 22px; border: 1px solid #f5efcf55; border-radius: 14px; background: #0e2620; color: #f5efcf; }
+.mode-hall__confirm p { margin: 0; font-size: 13px; color: #e9eddfbd; }
+.mode-hall__confirm > div > div { display: flex; justify-content: flex-end; gap: 8px; }
+.mode-hall__confirm button { padding: 6px 14px; border: 1px solid #f5efcf55; border-radius: 8px; background: transparent; color: #f5efcf; cursor: pointer; }
+.mode-hall__confirm button.is-primary { background: #ebc77a; border-color: #ebc77a; color: #0e2620; }

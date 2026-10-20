@@ -70,7 +70,7 @@ PlayerProfileProvider
 
 | 内容 | 当前 key / 文件 / owner | 跨设备与换号边界 |
 | --- | --- | --- |
-| 众生之门卡牌历练、会馆日常、旅途手札等 | IndexedDB `zszm-adventure-v1` / store `saves` / key `current`；`game/storage.ts` | 同源浏览器本地；目前 key **未按账户 scope 隔离**，换号仍可能看到该浏览器原有进度；不是 Gate Identity 云存档 |
+| Cards 与 Slay 共同旅途（2026-10-19 本地源码，未发布） | IndexedDB `iridescently-game-v1/records` 的 `profile` / `mode:cards` / `mode:slay`；旧 Cards 库只读迁入，Slay 通过原生缓存与持久待写队列迁入 | 明确为设备旅途，不把旧匿名进度归给当前账户；同源共享资源/角色进度，无云同步。见 [合并契约](ai-handoff/README.md) |
 | 卡牌摘要 | `localStorage['iridescently.save.v1']` 内 `m:cards:summary` | 用于模块/壳读取摘要，不是完整卡牌存档；无账户和跨设备保证 |
 | 雾隐浅滩（本轮由原型场景接入） | `sessionStorage['zszm.shore.v1:<kind>:<user_id>']`；匿名为 `zszm.shore.v1:anonymous`；`ShoreMode.tsx` | 按 scope 创建/销毁模式实例，玩家显示实时读取 Context；探索节点、灵息、日志仍仅会话本地，不云同步 |
 | 灵境会馆经营本地 | 统一 namespace 内 `m:management:lingjing-huiguan-save-<uid>` / `...-guest`；本地账户缓存 `m:management:lingjing-huiguan-account` | `saveGame.js` / `account.js` 仍只用裸 uid 选择本地档；缓存恢复失败会保留旧值；非本轮 scope 保护覆盖范围 |

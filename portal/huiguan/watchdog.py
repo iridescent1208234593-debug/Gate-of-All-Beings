@@ -23,6 +23,8 @@ def port_alive():
 
 
 def main():
+    if (ROOT / '.releases/hk-production.json').exists():
+        return 0
     if port_alive():
         return 0
     required = [ROOT / "portal/www/index.html", SERVER_DIR / "portal_server.py"] + [
@@ -33,10 +35,13 @@ def main():
         raise RuntimeError("Published artifacts are incomplete; build and explicitly publish before starting.")
     log = ROOT / "server/portal.log"
     err = ROOT / "server/portal.err.log"
+    # cwd 必须在 production/site 之外，否则发布器 rename 该目录会 EPERM。
+    runtime = ROOT / ".releases/runtime/portal"
+    runtime.mkdir(parents=True, exist_ok=True)
     with open(log, "ab") as out, open(err, "ab") as e:
         subprocess.Popen(
-            [sys.executable, "portal_server.py"],
-            cwd=SERVER_DIR,
+            [sys.executable, str(SERVER_DIR / "portal_server.py")],
+            cwd=runtime,
             env={**os.environ, "PORT": str(PORT), "IRIDESCENTLY_PROJECT_ROOT": str(ROOT)},
             stdout=out,
             stderr=e,

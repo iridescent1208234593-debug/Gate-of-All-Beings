@@ -6,6 +6,7 @@ const localStorage = unifiedStorage('management');
  * version 校验 + JSON 往返。
  */
 import { currentUser, saveCloud, loadCloud } from './account.js';
+import { reportProgress } from '@lxh/shared-session/progress.js';
 
 const STORAGE_PREFIX = 'lingjing-huiguan-save';
 const SAVE_VERSION = '0.2.0';
@@ -28,6 +29,9 @@ export function saveGame(state) {
     console.error('[saveGame] local save failed:', err);
     return false;
   }
+  // 账户积分 / 排行榜：已建成建筑数（progress.js 节流；访客不上榜）
+  const built = (state.buildings || []).filter((b) => b.construction == null || b.construction >= (b.buildTime ?? 0)).length;
+  void reportProgress('management', built);
   const user = currentUser();
   if (user) {
     saveCloud(state).catch((err) => console.warn('[saveGame] cloud save failed:', err.message));

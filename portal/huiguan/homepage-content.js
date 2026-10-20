@@ -38,7 +38,7 @@
     var href = type === 'official' ? '/char.html?id=' + encodeURIComponent(character.id)
       : '/show.html?code=' + encodeURIComponent(character.code || '');
     return '<a class="home-character" href="' + href + '"><figure>' +
-      (source ? '<img src="' + esc(source) + '" alt="' + esc(character.name) + '" loading="lazy" decoding="async">' : '<span class="character-initial">' + esc((character.name || '档')[0]) + '</span>') +
+      (source ? '<img data-original-image src="' + esc(source) + '" alt="' + esc(character.name) + '" loading="lazy" decoding="async">' : '<span class="character-initial">' + esc((character.name || '档')[0]) + '</span>') +
       '</figure><span class="character-name">' + esc(character.name) + '</span><small>' + esc(character.user_name || character.species || character.type || '角色档案') + '</small></a>';
   }
   async function loadOfficial(reset) {

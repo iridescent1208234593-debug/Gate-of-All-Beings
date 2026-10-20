@@ -1,6 +1,6 @@
 /**
  * 玩法适配器：每种 Activity 只负责「开始」和「把结束状态翻译成 ActivityResult」。
- * 卡牌出行是其中一种；重生之门、留在会馆也走同一个出口，结果都交给 commitResult 写进手记。
+ * 卡牌出行是其中一种；重生之门、留在会馆也走同一个出口，结果都交给 commitResult 写进众生牌录。
  */
 import { HEROES } from '../game/core/content';
 import { createRebirthRun, createRun } from '../game/core/engine';
@@ -92,7 +92,7 @@ export interface LedgerRecord { id: string; mode: string; resources: Partial<Rec
 
 /** 重生之门是同一个世界里的特殊活动：它在账本里的结算回执被翻译成见闻（资源已结算，只记录不重复入账）。 */
 export function rebirthResults(world: WorldState, recent: LedgerRecord[]): ActivityResult[] {
-  // 只有结算回执（rebirth-run:）是一段旅途；旧页调试接口写的对局记录等其他条目不进手记。
+  // 只有结算回执（rebirth-run:）是一段旅途；旧页调试接口写的对局记录等其他条目不进众生牌录。
   const fresh = recent.filter(r => r.mode === 'slay' && r.id.startsWith('rebirth-run:') && !world.imported.includes(r.id)).sort((a, b) => a.at - b.at);
   let daytime = world.daypart === 'morning';
   return fresh.map(r => {
@@ -111,7 +111,7 @@ export function rebirthResults(world: WorldState, recent: LedgerRecord[]): Activ
 /** 重生之门的结算（与 Codex 共同进度的规则一致）：走通带回 20 灵质 + 2 草药，散灵带回 5 灵质。 */
 export const REBIRTH_REWARD = { victory: { spirit: 20, herb: 2 }, defeat: { spirit: 5 } } as const;
 
-/** 今日灵机按手记的游戏日轮换（原实现按现实日期；统一到游戏日，不混入现实时间）。 */
+/** 今日灵机按众生牌录的游戏日轮换（原实现按现实日期；统一到游戏日，不混入现实时间）。 */
 export const rebirthDailyKey = (world: WorldState) => `游戏日-${world.day}`;
 
 /** 重生之门是同一个世界里的特殊活动：不需要同行者（全员陨落时也能去），修行者是玩家自己，不会给官方角色施加伤势。 */

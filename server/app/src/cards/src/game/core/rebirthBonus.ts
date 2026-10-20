@@ -101,7 +101,7 @@ export function dailySeed(key: string) {
   for (let i = 0; i < key.length; i++) h = ((h << 5) + h + key.charCodeAt(i)) >>> 0;
   return h;
 }
-/** 原实现以日历日期为种子；这里接受任意键（手记用游戏日），同一个键得到同一份灵机。 */
+/** 原实现以日历日期为种子；这里接受任意键（众生牌录用游戏日），同一个键得到同一份灵机。 */
 export function dailyFor(key: string): Daily {
   const seed = dailySeed(key);
   return { key, seed, element: B.daily.elements[seed % B.daily.elements.length], blessing: B.daily.blessings[Math.floor(seed / 7) % B.daily.blessings.length] };

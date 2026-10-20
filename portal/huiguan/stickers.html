@@ -168,7 +168,7 @@ function render(){
         const who=st.uploader?'<span class="who">@<b>'+esc(st.uploader)+'</b> 上传</span>':'<span class="who"></span>';
         const badge=st.mine?'<span class="badge-mine">我上传的</span>':'';
         return '<div class="card" title="'+esc(st.description||name)+'" onclick="zoom(\''+esc(imgUrl(st.id,false))+'\')">'
-          +'<div class="ph"><img src="'+esc(cardSrc(st))+'" alt="'+esc((st.description||name)+' · 表情包')+'" loading="lazy" decoding="async" onerror="this.closest(\'.card\').style.display=\'none\'"></div>'
+          +'<div class="ph"><img data-original-image src="'+esc(cardSrc(st))+'" alt="'+esc((st.description||name)+' · 表情包')+'" loading="lazy" decoding="async" onerror="this.closest(\'.card\').style.display=\'none\'"></div>'
           +'<div class="meta">'+who+badge+'</div>'
           +'</div>';
       }).join('')+'</div>';
@@ -272,5 +272,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 <script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017"></script>
+<script src="/original-image-viewer.js?v=20261019-2"></script>
 </body>
 </html>

@@ -26,11 +26,12 @@
   - 内容：`elder_requests`、`exempt_requests`、`fan_characters`、`color_schemes`、`posters`、`sticker_uploads`、`char_favorites`、`char_votes` 等。
 - 云存档：`/api/game/save`、`/api/game/load`（management 使用）。
 
-## 3. 卡牌 · 浏览器 IndexedDB
+## 3. 共同旅途 · 浏览器 IndexedDB
 
-- 库名 `zszm-adventure-v1`，对象仓 `saves`，键 `current`（`server/app/src/cards/src/game/storage.ts`）。
-- 含 run、meta（角色羁绊、年表）、生态个体与交换队列（最多 512/100）。
-- 统一存档镜像：每次写档把进度摘要写入 `m:cards:summary`。
+- 统一库 `iridescently-game-v1`，对象仓 `records`：`profile` 存公共余额/角色进度，`mode:<key>` 存各模式完整快照，`receipt:<mode>:<event-id>` 保存结算去重回执。实现为 `shared/shared-session/game.js`。
+- Cards 的 run、meta、生态个体与交换队列（最多 512/100）整体存入 `mode:cards`；Slay 的原生存储通过持久待写队列进入 `mode:slay`。
+- 旧 `zszm-adventure-v1/saves/current` 为只读迁入来源，`m:cards:summary` 为摘要。均不会覆盖统一主档。
+- 当前是同源设备进度，不自动归属于登录账户，也不提供云同步。迁移、资源事务及其他小游戏接入见 [共同旅途](ai-handoff/README.md)。
 
 ## 4. 聚灵 · SQLite / JSON
 
@@ -54,7 +55,7 @@
 | --- | --- | --- |
 | 世界观库 | `assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db` | 只读（会馆） |
 | 会馆用户库 | `portal/huiguan/users.db` | 读写 |
-| 卡牌存档 | 浏览器 IndexedDB `zszm-adventure-v1` | 读写 |
+| 卡牌/共同旅途存档 | 浏览器 IndexedDB `iridescently-game-v1` | 按模式版本和公共资源事务读写；旧 Cards 库只读迁入 |
 | 聚灵存档 | `server/app/src/juling/data/save.db` | 读写 |
 | 软乎乎设置 | `spirit-settings.json`（preview 目录） | 读写 |
 | 统一存档 | `localStorage['iridescently.save.v1']` | 读写 |

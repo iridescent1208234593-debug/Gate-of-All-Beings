@@ -1,6 +1,7 @@
 // Bootstrap: build the world, show the start screen (Survival / Creative),
 // let the player create their people, then run the frame loop.
 import { Game } from './game/game.js';
+import { reportProgress } from '/shared/shared-session/progress.js'; // 原样拷贝发布（无打包），需用站内绝对路径
 import { UI } from './game/ui.js';
 import { bindInput } from './game/input.js';
 import { HERITAGE } from './sim/heritage.js';
@@ -160,7 +161,11 @@ function startRenderLoop() {
     frames++; fpsTimer += dt;
     if (fpsTimer >= 500) { window.__perf.fps = Math.round((frames * 1000) / fpsTimer); frames = 0; fpsTimer = 0; }
     statTimer += dt;
-    if (statTimer > 200) { ui.updateStats(game.sim); statTimer = 0; }
+    if (statTimer > 200) {
+      ui.updateStats(game.sim); statTimer = 0;
+      // 账户积分 / 排行榜：本世界最高演化代数（progress.js 节流；访客不上榜）
+      void reportProgress('aeon', game.sim.maxGen);
+    }
     frameId = requestAnimationFrame(frame);
   }
   frameId = requestAnimationFrame(frame);

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>众生排行榜</title>
+  <link rel="stylesheet" href="/shared/shared-ui/lxh-ui.css">
+  <style>
+    :root {
+      --paper: var(--lxh-paper, #f7f1e1); --paper-dim: var(--lxh-paper-dim, #ece5d0);
+      --line: var(--lxh-paper-line, #d8d2c0); --ink: var(--lxh-ink, #4a4636);
+      --text: var(--lxh-text, #5c6152); --dim: var(--lxh-text-dim, #666d5e);
+      --gold: var(--lxh-yes, #c08b3c); --bar: var(--lxh-bar1, #d29a4a); --hud: var(--lxh-hud-day, #43412f);
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper-dim); color: var(--text); font: 15px/1.55 system-ui, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 20px 16px 48px; }
+    header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    header h1 { margin: 0; font-size: 22px; color: var(--ink); flex: 1; }
+    .back { color: var(--ink); text-decoration: none; border: 1px solid var(--line); background: var(--paper); border-radius: 999px; padding: 6px 14px; font-size: 14px; min-height: 36px; display: inline-flex; align-items: center; }
+    .card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+    .me-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .lv { font-size: 28px; font-weight: 700; color: var(--ink); }
+    .muted { color: var(--dim); font-size: 13px; }
+    .bar { height: 8px; background: var(--paper-dim); border-radius: 99px; overflow: hidden; margin: 10px 0 4px; }
+    .bar > i { display: block; height: 100%; background: var(--bar); border-radius: 99px; }
+    .tasks { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+    .tasks li { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; background: var(--paper-dim); border-radius: 8px; font-size: 14px; }
+    .tasks li.done { color: var(--dim); text-decoration: line-through; }
+    .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; scrollbar-width: thin; }
+    .tabs button { flex: none; border: 1px solid var(--line); background: var(--paper); color: var(--text); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; min-height: 36px; }
+    .tabs button[aria-selected="true"] { background: var(--hud); border-color: var(--hud); color: #f6f1e3; }
+    .board-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .board-head h2 { margin: 0; font-size: 18px; color: var(--ink); }
+    ol.rows { list-style: none; margin: 0; padding: 0; }
+    ol.rows li { display: grid; grid-template-columns: 2.2em 1fr auto; gap: 10px; align-items: center; padding: 9px 4px; border-top: 1px solid var(--line); }
+    ol.rows li:first-child { border-top: 0; }
+    ol.rows li.me { background: rgba(192, 139, 60, .12); border-radius: 8px; }
+    .rank { font-weight: 700; color: var(--ink); text-align: center; }
+    .rank.top { color: var(--gold); }
+    .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .name small { color: var(--dim); margin-left: 6px; }
+    .score { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); white-space: nowrap; }
+    .empty { padding: 20px 0; text-align: center; color: var(--dim); }
+    .rules { font-size: 13px; color: var(--dim); }
+    .rules summary { cursor: pointer; color: var(--text); }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>众生排行榜</h1>
+    <a class="back" id="back" href="/">返回</a>
+  </header>
+
+  <section class="card" id="me" aria-live="polite"><p class="muted">正在读取你的等级……</p></section>
+
+  <section class="card">
+    <div class="tabs" role="tablist" id="tabs" aria-label="选择排行榜"></div>
+    <div class="board-head"><h2 id="board-title">排行榜</h2><span class="muted" id="board-metric"></span></div>
+    <ol class="rows" id="rows"><li class="empty">加载中……</li></ol>
+    <p class="muted" id="mine"></p>
+  </section>
+
+  <details class="card rules">
+    <summary>积分怎么来</summary>
+    <p>每种玩法每天第一次游玩 +0.5；每完成一局 +0.2（每玩法每天至多 5 局）；胜利 / 通关再 +0.3（至多 3 次）；刷新个人最佳 +0.5（每玩法每天 1 次）。</p>
+    <p>每日任务：完成任意一局 +1；今天玩三种不同玩法 +1。会馆登记新角色设表 +1（每天至多 2 张），使用自定义配色 +0.5。</p>
+    <p>每个账户每天最多获得 8 分。第 1 级需要 1 分，之后每一级比上一级多 1 分（第 n 级累计 n(n+1)/2 分）。</p>
+    <p>访客可以照常游玩，但只有登录会馆账号后，成绩才会上榜。</p>
+  </details>
+</main>
+<script type="module">
+  import { fetchBoards, fetchLeaderboard, fetchMyProgress } from '/shared/shared-session/progress.js';
+
+  const $ = id => document.getElementById(id);
+  const params = new URLSearchParams(location.search);
+  let current = params.get('board') || 'level';
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  $('back').addEventListener('click', event => {
+    if (history.length > 1 && document.referrer) { event.preventDefault(); history.back(); }
+  });
+
+  async function loadMe() {
+    try {
+      const me = await fetchMyProgress();
+      if (!me.logged_in) {
+        $('me').innerHTML = '<p>你现在是访客：可以照常游玩，但成绩不会上榜。</p><p class="muted">登录会馆账号后，玩法成绩和每日任务都会记入账户等级。</p>';
+        return;
+      }
+      const pct = Math.round((me.progress || 0) * 100);
+      const tasks = me.today.tasks.map(t => `<li class="${t.done ? 'done' : ''}"><span>${esc(t.label)}（${t.progress}/${t.goal}）</span><span>+${t.reward}</span></li>`).join('');
+      $('me').innerHTML = `<div class="me-top"><span class="lv">Lv.${me.level}</span><span>${esc(me.name || '')}</span>
+        <span class="muted">积分 ${me.points} · 下一级 ${me.next_level_at}</span></div>
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="升级进度"><i style="width:${pct}%"></i></div>
+        <p class="muted">今天已获得 ${me.today.earned} / ${me.today.cap} 分</p><ul class="tasks">${tasks}</ul>`;
+    } catch {
+      $('me').innerHTML = '<p class="muted">暂时读不到你的等级，稍后再试。</p>';
+    }
+  }
+
+  async function loadBoard(board) {
+    current = board;
+    for (const b of $('tabs').children) b.setAttribute('aria-selected', String(b.dataset.board === board));
+    history.replaceState(null, '', '?board=' + encodeURIComponent(board));
+    $('rows').innerHTML = '<li class="empty">加载中……</li>';
+    $('mine').textContent = '';
+    try {
+      const data = await fetchLeaderboard(board);
+      $('board-title').textContent = data.name;
+      $('board-metric').textContent = '按' + data.metric + '排名';
+      if (!data.rows.length) { $('rows').innerHTML = '<li class="empty">还没有人上榜，来做第一个吧。</li>'; }
+      else $('rows').innerHTML = data.rows.map(r => {
+        const score = board === 'level' ? `Lv.${r.score} <small class="muted">${r.points} 分</small>` : `${r.score} ${esc(data.unit)}`;
+        const extra = board === 'level' ? '' : `<small>Lv.${r.level}${r.wins ? ' · 胜 ' + r.wins : ''}</small>`;
+        return `<li class="${r.me ? 'me' : ''}"><span class="rank ${r.rank <= 3 ? 'top' : ''}">${r.rank}</span>
+          <span class="name">${esc(r.name)}${extra}</span><span class="score">${score}</span></li>`;
+      }).join('');
+      if (data.mine) $('mine').textContent = `你的名次：第 ${data.mine.rank} 名 · ${board === 'level' ? 'Lv.' + data.mine.score : data.mine.score + ' ' + data.unit}`;
+      else if (!data.logged_in) $('mine').textContent = '登录会馆账号后可以上榜。';
+      else $('mine').textContent = board === 'level' ? '还没有积分，玩一局就能上榜。' : '你还没有这个玩法的成绩。';
+    } catch (error) {
+      $('rows').innerHTML = `<li class="empty">${esc(error.message || '排行榜暂时打不开')}</li>`;
+    }
+  }
+
+  const boards = await fetchBoards().catch(() => [{ board: 'level', name: '账户等级' }]);
+  if (!boards.some(b => b.board === current)) current = 'level';
+  $('tabs').innerHTML = boards.map(b => `<button type="button" role="tab" data-board="${esc(b.board)}">${esc(b.name)}</button>`).join('');
+  $('tabs').addEventListener('click', event => { const b = event.target.closest('button'); if (b) loadBoard(b.dataset.board); });
+  loadMe();
+  loadBoard(current);
+  $('tabs').querySelector('[aria-selected="true"]')?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+</script>
+</body>
+</html>

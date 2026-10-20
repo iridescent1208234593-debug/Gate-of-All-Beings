@@ -26,6 +26,7 @@ Iridescently / 众生之门 工作区文档。总览见根 [README.md](../README
 - [统一更新流程](update-system.md)
 - [众生之门新版流程集成](zszm-flow-integration.md)：单次开场、玩家初始化、门庭与小游戏入口；本地候选未发布。
 - [身份、头像与存档关系](zszm-identity-and-save-map.md)：Account / OC / Gate 的数据边界、跨站限制和后续风险。
+- [共同旅途数据合并](ai-handoff/README.md)：439 名有效角色、跨模式灵卡目录、公共资源事务、Cards/Slay 迁移与其他小游戏接入。
 - [主站与西木会馆加载审查](zszm-loading-audit.md)：真实测量、开场阻塞根因和源码优化边界。
 - [2026-10-10 目录整理](maintenance/repository-cleanup-2026-10-10.md)
 - [生命模拟研究](../../External%20Projects/Iridescently%20Labs/research/doc/zszm-life-research/00-index.md)：当前研发资料在 `E:/External Projects/Iridescently Labs/research/`，独立于生产工作区；此链接用于本机资料阅读。

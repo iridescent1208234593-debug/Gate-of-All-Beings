@@ -167,7 +167,7 @@ function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 // ====== 公开角色卡片（画廊列表）======
 function cardHTML(c){
   const img=c.image_data
-    ? `<img class="card-img" src="${esc(c.image_data)}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.querySelector('.card-placeholder').style.display='flex';this.style.display='none'">`
+    ? `<img class="card-img" data-original-image src="${esc(c.image_data)}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.querySelector('.card-placeholder').style.display='flex';this.style.display='none'">`
     : '';
   const placeholder=!c.image_data
     ? `<div class="card-placeholder">${esc(c.name?c.name[0]:'?')}</div>`
@@ -229,7 +229,7 @@ function myCardHTML(c,idx){
   const isPublished=publishedNames.has(c.name||'');
   const cls='card checkable'+(selectedCodes.has(c.code)?' selected':'')+(isPublished?' published':'');
   const img=c.image
-    ? `<img class="card-img" src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.querySelector('.card-placeholder').style.display='flex';this.style.display='none'">`
+    ? `<img class="card-img" data-original-image src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.querySelector('.card-placeholder').style.display='flex';this.style.display='none'">`
     : '';
   const placeholder=!c.image
     ? `<div class="card-placeholder">${esc(c.name?c.name[0]:'?')}</div>`
@@ -387,5 +387,6 @@ async function init(){
 init();
 </script>
 <script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017"></script>
+<script src="/original-image-viewer.js?v=20261019-2"></script>
 </body>
 </html>

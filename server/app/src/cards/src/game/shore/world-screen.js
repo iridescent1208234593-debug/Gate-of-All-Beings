@@ -1,5 +1,6 @@
 /** Accepted original-ui shallow-shore exploration, now owned by one mounted mode. */
 import { createPlayerAvatar, resolvePlayerAvatar } from '../../onboarding/player-avatar.js';
+import { reportResult } from '@lxh/shared-session/progress.js';
 
 const MAX_ENERGY = 100;
 export function createWorldScreen({ world, getProfile, storageKey, onReturn }) {
@@ -98,6 +99,10 @@ export function createWorldScreen({ world, getProfile, storageKey, onReturn }) {
     updateHud(); renderLogs(); hotspot.classList.add('is-pulsing');
     later(() => hotspot.classList.remove('is-pulsing'), 700);
     showToast(state.discovered.length === 3 ? '任务完成：雾隐浅滩回应了你。' : `已记录${label}。`);
+    // 账户积分 / 排行榜：本次探索记录的节点数；三处全部记录算完成一次探索（每个会话 / 账户作用域一天一次）
+    const done = state.discovered.length === 3;
+    void reportResult('shore', { score: state.discovered.length, finished: done, won: done, toast: done,
+      ref: done ? `shore:${storageKey}:${new Date().toDateString()}` : undefined });
     return true;
   }
   function openJournal() {

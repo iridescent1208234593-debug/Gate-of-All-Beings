@@ -3,13 +3,14 @@
   'use strict';
   const LIMIT = 8 * 1024 * 1024;
   const TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
-  function check(file) {
+  // gifLimit：动图上限默认 5MB；同人图投稿传 8MB（与服务端 gif_limit 一致）
+  function check(file, gifLimit = 5 * 1024 * 1024) {
     if (!file || !TYPES.includes(file.type)) throw new Error('仅支持 JPG / PNG / WebP / GIF 图片');
-    const limit = file.type === 'image/gif' ? 5 * 1024 * 1024 : LIMIT;
-    if (!file.size || file.size > limit) throw new Error(file.type === 'image/gif' ? '动图需≤5MB' : '图片需≤8MB');
+    const limit = file.type === 'image/gif' ? gifLimit : LIMIT;
+    if (!file.size || file.size > limit) throw new Error(file.type === 'image/gif' ? `动图需≤${Math.round(gifLimit / 1048576)}MB` : '图片需≤8MB');
   }
-  async function request(url, metadata, file) {
-    check(file);
+  async function request(url, metadata, file, opts = {}) {
+    check(file, opts.gifLimit);
     const form = new FormData();
     const text = JSON.stringify(metadata);
     if (new Blob([text]).size > 256 * 1024) throw new Error('编辑内容过大，请减少文字后重试');

@@ -34,6 +34,8 @@ export default defineConfig(() => {
         '/assets': 'http://127.0.0.1:8080',
         '/playtest': 'http://127.0.0.1:8080',
         '/design-system': 'http://127.0.0.1:8080',
+        '/shared': 'http://127.0.0.1:8080',
+        '/api/progress': 'http://127.0.0.1:8080',
         '/api': {
           target: process.env.ZSZM_DEV_API_TARGET || 'http://127.0.0.1:5174',
           changeOrigin: true,

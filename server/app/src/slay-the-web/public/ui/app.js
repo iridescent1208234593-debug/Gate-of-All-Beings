@@ -9,7 +9,8 @@ import createNewGame from '../game/new-game.js'
 import {locationForFloor} from '../game/dungeon.js'
 import {createCard, getCardRewards} from '../game/cards.js'
 import {getCurrRoom, isCurrRoomCompleted, isDungeonCompleted} from '../game/utils-state.js'
-import {saveRun, clearRun, beginRun} from '../game/save-system.js'
+import {saveRun, clearRun, beginRun, runIdentity} from '../game/save-system.js'
+import {reportResult} from '/shared/shared-session/progress.js'
 import {realms} from '../content/cultivation.js'
 import {settleRun, awardSoul} from '../content/soul-legacy.js'
 // 灵质修行双向联动：主爬塔结算 → 修行进度「轮回感悟」反哺（content/lingzhi-bonus.js）
@@ -461,6 +462,8 @@ stw.dealCards()`)
 		if ((isDead || didWinEntireGame) && !this.soulSettled) {
 			this.soulSettled = true
 			this.lastSettlement = settleRun(state, didWinEntireGame)
+			// 账户积分 / 排行榜：按到达层数上榜，同一局重试不重复计分（访客不上榜）
+			void reportResult('slay', {score: state.dungeon.y + 1, won: didWinEntireGame, ref: 'slay:' + runIdentity(state)})
 			// 灵质修行反哺：主爬塔结算折为「轮回感悟」写入修行进度（残片/修行经验），实现爬塔 → 修行联动
 			// （反哺公式与资源规则详见 content/lingzhi-bonus.js：每 100 感悟折 1 残片，单局最多 2 片）
 			this.lingzhiFeedback = feedbackLingzhiFromRun(state, didWinEntireGame)
