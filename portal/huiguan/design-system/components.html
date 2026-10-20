@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lxh-ui 组件库 · 西木会馆设计系统</title>
+<link rel="stylesheet" href="design-system.css?v=4">
+<link rel="stylesheet" href="ui/lxh-ui.css?v=20261020">
+<script src="ui/lxh-ui.js?v=20261020"></script>
+<style>
+  body{padding:40px 16px 96px;}
+  .wrap{max-width:1080px;margin:0 auto;}
+  .crumb{font-size:13px;color:var(--qc-dim);margin-bottom:10px;}
+  .crumb a{color:var(--qc-accent);}
+  h1{font-size:28px;letter-spacing:3px;margin:0 0 8px;font-family:var(--qc-font-hand);font-weight:normal;color:var(--qc-text);}
+  .lede{max-width:720px;color:var(--qc-text);font-size:15px;line-height:1.9;margin:0 0 18px;}
+  .facts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px;padding:0;list-style:none;}
+  .facts li{font-size:12px;letter-spacing:1px;color:var(--qc-text);border:1px solid var(--qc-border);background:var(--qc-panel);border-radius:999px;padding:4px 12px;}
+  .toc{position:sticky;top:var(--qc-nav-h,0px);z-index:5;display:flex;gap:6px;overflow-x:auto;padding:10px 0;margin:0 0 26px;background:var(--qc-bg);border-bottom:1px solid var(--qc-border);scrollbar-width:thin;}
+  .toc a{flex:none;display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;color:var(--qc-text);text-decoration:none;font-size:13px;letter-spacing:1px;}
+  .toc a:hover{background:var(--qc-accent-glow);}
+  .toc a:focus-visible{outline:2px solid var(--qc-focus);outline-offset:2px;}
+  section{margin:0 0 54px;scroll-margin-top:calc(var(--qc-nav-h,0px) + 70px);}
+  section > p.note{color:var(--qc-dim);font-size:13px;line-height:1.8;max-width:760px;margin:-4px 0 14px;}
+  .stage{border-radius:14px;padding:22px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;}
+  .stage--paper{background:var(--lxh-paper);border:1px solid var(--lxh-paper-line);}
+  .stage--dark{background:#20261c;}
+  .stage--grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));align-items:start;}
+  .stage + .code, .stage + .states{margin-top:10px;}
+  .cap{display:block;width:100%;font-size:12px;letter-spacing:2px;color:var(--qc-dim);margin:0 0 -6px;}
+  .stage--dark .cap{color:#c9c2ad;}
+  .demo{display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0;}
+  .demo > small{font-size:11px;letter-spacing:1px;color:var(--qc-dim);}
+  .stage--dark .demo > small{color:#c9c2ad;}
+  /* 代码块 + 复制 */
+  .code{position:relative;border:1px solid var(--qc-border);border-radius:10px;background:#fbf8f2;margin-top:12px;}
+  .code pre{margin:0;padding:14px 16px;overflow-x:auto;font:12.5px/1.7 Consolas,"Cascadia Mono",monospace;color:#33443a;white-space:pre;}
+  .code .copy{position:absolute;top:6px;right:6px;}
+  .code .copy[data-done]{border-color:var(--qc-accent);color:var(--qc-accent);}
+  .tbl{width:100%;border-collapse:collapse;font-size:13px;}
+  .tbl th,.tbl td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--qc-border);vertical-align:top;}
+  .tbl th{font-weight:normal;color:var(--qc-dim);letter-spacing:1px;}
+  .tbl code{font-size:12px;}
+  .tbl-wrap{overflow-x:auto;}
+  .sw{display:inline-block;width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.12);vertical-align:middle;margin-right:8px;}
+  .tok{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;}
+  .tok button{display:flex;align-items:center;gap:10px;text-align:left;min-height:52px;padding:8px 10px;border:1px solid var(--qc-border);border-radius:10px;background:var(--qc-panel);color:var(--qc-text);font:inherit;cursor:pointer;}
+  .tok button:hover{border-color:var(--qc-accent);}
+  .tok button:focus-visible{outline:2px solid var(--qc-focus);outline-offset:2px;}
+  .tok .chip{flex:none;width:34px;height:34px;border-radius:8px;border:1px solid rgba(0,0,0,.12);}
+  .tok .nm{font:12px Consolas,monospace;display:block;}
+  .tok .val{font-size:11px;color:var(--qc-dim);}
+  h3.sub{font-size:14px;letter-spacing:2px;font-weight:normal;color:var(--qc-text);margin:22px 0 10px;}
+  .icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;}
+  .icons button{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:92px;padding:10px 4px;border-radius:10px;border:1px solid #3a4234;background:#2a3125;color:#e6dfc9;font:11px Consolas,monospace;cursor:pointer;}
+  .icons button:hover{border-color:#e6c06a;}
+  .icons button:focus-visible{outline:3px solid #e6c06a;outline-offset:2px;}
+  .icons svg{width:40px;height:40px;}
+  .hud-demo{width:100%;}
+  #selectStage{grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));}
+  .on-paper{background:var(--lxh-paper);border-radius:12px;padding:14px 16px;}
+  .demo > :is(.lxh-hud, .lxh-racegrid, .lxh-racetree, .lxh-charpanel, .lxh-friends, .lxh-expbar, .qc-loading){align-self:stretch;}
+  .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
+  .rules div{background:var(--qc-panel);border:1px solid var(--qc-border);border-radius:10px;padding:14px;font-size:13px;line-height:1.8;}
+  .rules strong{display:block;font-weight:normal;letter-spacing:2px;color:var(--qc-text);margin-bottom:4px;font-size:14px;}
+  #toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--qc-text);color:var(--qc-bg);padding:8px 18px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:99;}
+  @media (max-width:600px){
+    body{padding:24px 16px 80px;}
+    h1{font-size:23px;}
+    .stage{padding:16px;}
+    .stage--grid{grid-template-columns:1fr;}
+    .code pre{padding-top:46px;}
+  }
+</style>
+</head>
+<body class="qc-body">
+<div class="wrap">
+  <p class="crumb"><a href="./">设计系统</a> / 游戏界面组件库</p>
+  <h1>lxh-ui · 游戏界面组件库</h1>
+  <p class="lede">众生之门、各游戏模块和会馆页面共用的游戏画面组件：HUD、面板、气泡、按钮、输入框、加载与出错。乳白圆角卡、赭金与灰绿双色按钮、深橄榄 HUD，配手写体。本页所有示例都由真实的 <code>lxh-ui.css</code> / <code>lxh-ui.js</code> 渲染，改源码后刷新就能看到。</p>
+  <ul class="facts">
+    <li>源码 <code>shared/shared-ui/lxh-ui.css · lxh-ui.js</code></li>
+    <li id="ver">版本 —</li>
+    <li>触控区 ≥ 44px</li>
+    <li>键盘焦点环</li>
+    <li>文字对比 ≥ 4.5:1</li>
+  </ul>
+
+  <nav class="toc" aria-label="本页目录">
+    <a href="#start">接入</a><a href="#tokens">Token</a><a href="#buttons">按钮</a><a href="#fields">输入框</a>
+    <a href="#feedback">加载与出错</a><a href="#dialog">确认框</a><a href="#hud">HUD</a><a href="#panels">面板</a>
+    <a href="#social">社交</a><a href="#data">数值</a><a href="#select">选择</a><a href="#icons">图标</a><a href="#rules">规则</a>
+  </nav>
+
+  <section id="start">
+    <h2 class="qc-h2">接入</h2>
+    <p class="note">会馆页面用相对路径 <code>/design-system/ui/</code>（指向 <code>shared/shared-ui</code> 的 junction）；其他站点用 <code>/shared/shared-ui/</code>；React 模块用工作区包 <code>@lxh/shared-ui</code>。只要样式不要脚本也可以，所有组件都能手写 HTML。</p>
+    <div class="code"><pre>&lt;link rel="stylesheet" href="/design-system/ui/lxh-ui.css?v=20261020"&gt;
+&lt;script src="/design-system/ui/lxh-ui.js?v=20261020"&gt;&lt;/script&gt;
+
+// React / Vite 模块
+import '@lxh/shared-ui/lxh-ui.css';
+import '@lxh/shared-ui/lxh-ui.js';   // 之后使用 window.LXHUI</pre></div>
+  </section>
+
+  <section id="tokens">
+    <h2 class="qc-h2">Token</h2>
+    <p class="note">两层 token：<code>--qc-*</code> 属于会馆和站点页面（<code>design-system.css</code>），<code>--lxh-*</code> 属于游戏画面（<code>lxh-ui.css</code>）。危险色和触控高度两者同源：<code>--lxh-danger</code> 引用 <code>--qc-danger</code>。色值从页面实时读取，点一下复制 <code>var(--…)</code>。</p>
+    <h3 class="sub">画面基色</h3>
+    <div class="tok" data-tokens="paper paper-dim paper-line ink text text-dim hud-day hud-night hud-line yes no node star badge sky forest cream outline bubble"></div>
+    <h3 class="sub">语义与交互（2026-10-20 新增）</h3>
+    <div class="tok" data-tokens="on-fill on-ochre yes-fill no-fill danger ok panel-dark night-card void tile tile-on cell sel sel-bg moss focus focus-on-dark"></div>
+    <h3 class="sub">尺寸</h3>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Token</th><th>值</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>--lxh-tap</code></td><td>44px</td><td>可点区最小边长；游戏界面一律按触屏算</td></tr>
+        <tr><td><code>--lxh-r-sm / md / lg / xl</code></td><td>6 / 10 / 14 / 22px</td><td>角标 · 按钮 · 输入槽 · 弹窗</td></tr>
+        <tr><td><code>--lxh-dur</code></td><td>.15s</td><td>悬停、按下的过渡</td></tr>
+        <tr><td><code>--lxh-z-modal</code></td><td>10000</td><td>确认框盖住全局栏（9999），与 <code>.qc-modal</code> 同层</td></tr>
+        <tr><td><code>--lxh-font</code></td><td>LXGW WenKai → Noto Serif SC</td><td>手写体</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="buttons">
+    <h2 class="qc-h2">按钮 <code>.lxh-btn</code></h2>
+    <p class="note">官方斜切平行四边形按钮，文字放在 <code>&lt;span&gt;</code> 里反向回正。「是」用赭金，「否」用灰绿，破坏性操作用赭红；浅色底上的次要操作用 <code>--ghost</code>。按钮底色比基础色深一档，保证乳白字对比达到 4.5:1。按 Tab 可以看到焦点环。</p>
+    <div class="stage stage--paper" id="btnStage">
+      <span class="cap">变体</span>
+      <button type="button" class="lxh-btn lxh-btn--yes"><span>是</span></button>
+      <button type="button" class="lxh-btn lxh-btn--no"><span>否</span></button>
+      <button type="button" class="lxh-btn lxh-btn--danger"><span>放生</span></button>
+      <button type="button" class="lxh-btn lxh-btn--ghost"><span>稍后</span></button>
+      <button type="button" class="lxh-btn lxh-btn--yes lxh-btn--sm"><span>小号</span></button>
+      <span class="cap">状态</span>
+      <button type="button" class="lxh-btn lxh-btn--yes" disabled><span>禁用</span></button>
+      <button type="button" class="lxh-btn lxh-btn--yes" aria-busy="true" disabled><span>正在保存…</span></button>
+      <button type="button" class="lxh-btn lxh-btn--ghost" aria-busy="true" disabled><span>读取中</span></button>
+      <button type="button" class="lxh-btn lxh-btn--yes" id="busyDemo"><span>点我提交</span></button>
+    </div>
+    <div class="code"><pre>&lt;button type="button" class="lxh-btn lxh-btn--yes"&gt;&lt;span&gt;是&lt;/span&gt;&lt;/button&gt;
+&lt;button type="button" class="lxh-btn lxh-btn--no"&gt;&lt;span&gt;否&lt;/span&gt;&lt;/button&gt;
+&lt;!-- 变体：--yes · --no · --danger · --ghost；尺寸：--sm --&gt;
+&lt;!-- 提交中：aria-busy="true" 并 disabled；文字保留，底部出现扫光 --&gt;
+
+const btn = LXHUI.button({ text: '提交', variant: 'yes', onClick: save });
+LXHUI.setBusy(btn, true, '正在提交…');   // 结束后 LXHUI.setBusy(btn, false)</pre></div>
+  </section>
+
+  <section id="fields">
+    <h2 class="qc-h2">输入框 <code>.lxh-field</code> · <code>.lxh-input</code></h2>
+    <p class="note">乳白槽位，聚焦时青玉描边加淡晕。校验失败设 <code>aria-invalid="true"</code>，错误文字用 <code>.lxh-field__err</code> 并通过 <code>aria-describedby</code> 关联。字号 16px，iOS 聚焦时不会放大页面。深色表面用 <code>--dark</code>。</p>
+    <div class="stage stage--paper stage--grid" id="fieldStage"></div>
+    <div class="stage stage--dark" id="fieldDark" style="margin-top:10px"></div>
+    <div class="code"><pre>&lt;label class="lxh-field" for="nick"&gt;
+  &lt;span class="lxh-field__label"&gt;昵称&lt;/span&gt;
+  &lt;input class="lxh-input" id="nick" aria-invalid="true" aria-describedby="nick-err"&gt;
+  &lt;span class="lxh-field__err" id="nick-err"&gt;最多 12 个字&lt;/span&gt;
+&lt;/label&gt;
+
+const f = LXHUI.field({ label: '昵称', placeholder: '给灵起个名字', hint: '最多 12 个字' });
+f.setError('这个名字已经有灵在用了');   // f.setError('') 清除；f.input 是 &lt;input&gt;</pre></div>
+  </section>
+
+  <section id="feedback">
+    <h2 class="qc-h2">加载与出错 <code>.qc-loading</code></h2>
+    <p class="note">在内容将出现的位置放一条细进度线加一句具体说明，不另起全屏加载页。出错时同一位置改 <code>role="alert"</code>，写清原因，并在 <code>.qc-loading__actions</code> 里给恢复按钮。<code>--page</code> 铺满全局栏以下，<code>--inline</code> 用在卡片和列表尾部，<code>--dark</code> 用在 HUD 等深色表面。</p>
+    <div class="stage stage--paper stage--grid" id="loadStage"></div>
+    <div class="stage stage--dark" id="loadDark" style="margin-top:10px"></div>
+    <div class="code"><pre>&lt;div class="qc-loading" role="status"&gt;正在读取旅途存档…&lt;/div&gt;
+&lt;div class="qc-loading" role="alert"&gt;网络断开了，存档没有读到。
+  &lt;div class="qc-loading__actions"&gt;&lt;button type="button"&gt;重新读取&lt;/button&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+LXHUI.loading({ text: '正在读取…', inline: true });
+LXHUI.loading({ error: true, text: '网络断开了', actions: [{ text: '重新读取', onClick: retry }] });</pre></div>
+  </section>
+
+  <section id="dialog">
+    <h2 class="qc-h2">确认框 <code>LXHUI.confirm</code></h2>
+    <p class="note">是/否对话框。打开后焦点落在「否」，防止误触；Tab 只在框内循环；Esc 或点遮罩等于「否」，关闭后焦点回到原来的按钮。<code>onYes</code> 返回 Promise 时，「是」进入提交中状态，完成后才关闭，失败则保持打开。破坏性操作加 <code>danger: true</code>。</p>
+    <div class="stage stage--paper" id="dlgStage"></div>
+    <div class="code"><pre>LXHUI.confirm({
+  title: '是否确定退出？',
+  hint: '＊角色下次登录将出现在退出地点',   // 可信 HTML，可含 &lt;br&gt;
+  icon: 'door',                            // ICONS 的 key
+  yesText: '退出', noText: '再待会',
+  danger: false,
+  onYes: () =&gt; saveAndLeave(),             // 返回 Promise 时显示提交中
+  onNo: () =&gt; {}
+}).open();</pre></div>
+  </section>
+
+  <section id="hud">
+    <h2 class="qc-h2">主 HUD <code>LXHUI.hud</code></h2>
+    <p class="note">平板式主界面：左上头像、等级和三条状态栏，右列功能钮，底栏三钮加聊天框，中央槽放地图等内容。功能钮都是带中文读屏名的真按钮（52 / 48px），选中态用 <code>.is-on</code> 或 <code>aria-pressed</code>，新消息用 <code>.lxh-fbtn__dot</code>。点下面的功能钮试试。</p>
+    <div class="stage stage--dark stage--grid" id="hudStage"></div>
+    <div class="code"><pre>const hud = LXHUI.hud({
+  night: false, lv: 42, avatar: url,
+  status: [{ icon: 'radar' }, { icon: 'star', big: true, flash: true }],
+  right: ['help', 'exit', 'wrench', 'scroll', 'shop', 'radar'],
+  bottom: ['friend', 'star', 'map'],
+  dots: ['scroll'],                      // 这些功能钮带新消息小点
+  stage: '&lt;div class="qc-loading qc-loading--dark"&gt;正在展开地图…&lt;/div&gt;',
+  onAction: (fn, btn) =&gt; open(fn)        // fn 为 ICONS 的 key
+});</pre></div>
+  </section>
+
+  <section id="panels">
+    <h2 class="qc-h2">面板</h2>
+    <p class="note">角色属性面板 <code>charpanel</code>（御灵面板 + 五行生克星图）、胶片卡 <code>filmcard</code>（纯装饰，读屏跳过）、游戏内手机 <code>phone</code>、邮件图标 <code>mail</code>。五行节点上的字已改为墨色，原先乳白字压在乳白徽章上读不出来。</p>
+    <div class="stage stage--dark" id="panelStage"></div>
+    <div class="code"><pre>LXHUI.charpanel({
+  name: '罗小黑', race: '猫妖', lv: 10,      // 纯文本，自动转义
+  avatar: url, portrait: url,
+  intro: '…',                               // 可信 HTML
+  abilities: ['空间系&lt;br&gt;传送', '御灵系&lt;br&gt;金']
+});
+LXHUI.filmcard({ solid: true });  LXHUI.phone();  LXHUI.mail();</pre></div>
+  </section>
+
+  <section id="social">
+    <h2 class="qc-h2">社交：名牌 · 聊天气泡 · 好友</h2>
+    <p class="note">名字、聊天内容都按纯文本插入，可以直接放玩家输入。好友面板里的搜索框是真输入框，输入就筛选；定位钮视觉 36px，触控区补到 44px。</p>
+    <div class="stage stage--paper stage--grid" id="socialStage"></div>
+    <div class="code"><pre>LXHUI.nameplate({ id: 'ID 10086', name: '罗小黑', editing: true });
+LXHUI.chatbubble({ avatar: url, text: playerMessage });
+LXHUI.friends({
+  rows: [{ name: '阿根', avatar: url }, { name: '小白' }],
+  onLocate: (row, btn) =&gt; flyTo(row),
+  onSearch: q =&gt; query(q)                  // 不传则在本地按名字筛选
+});</pre></div>
+  </section>
+
+  <section id="data">
+    <h2 class="qc-h2">数值：计数器 · 经验条 · 等级图 · 雷达</h2>
+    <p class="note">图形组件都带读屏文字：经验条是 <code>role="progressbar"</code>，计数器和雷达给出数值描述。数值超出 0–100 会被截断。</p>
+    <div class="stage stage--dark stage--grid" id="dataStage"></div>
+    <div class="code"><pre>LXHUI.counter(20261020);
+LXHUI.expbar(66, { label: '本级经验' });
+LXHUI.lvchart([22, 34, 46, 60, 76]);
+LXHUI.radar6({ values: [0.8, 0.5, 0.7, 0.4, 0.55, 0.6] });
+LXHUI.radar5({ values: [0.9, 0.55, 0.75, 0.45, 0.85] });</pre></div>
+  </section>
+
+  <section id="select">
+    <h2 class="qc-h2">选择：种族网格 · 谱系树 · 头像框</h2>
+    <p class="note">种族网格可以直接操作：类别钮和格子都是 <code>aria-pressed</code> 按钮，点击自动切换选中态，并回调 <code>onTab</code> / <code>onSelect</code>。头像框传 <code>onEdit</code> 时，角上的小钮变成真按钮。</p>
+    <div class="stage stage--dark stage--grid" id="selectStage"></div>
+    <div class="code"><pre>LXHUI.racegrid({
+  tab: 0, sel: 0, avatars: urls, names: ['黑猫', '狐', …],
+  search: true,                             // 放真实搜索框
+  onTab: i =&gt; {}, onSelect: (i, cell) =&gt; {}, onBack: () =&gt; {}
+});
+LXHUI.racetree();
+LXHUI.avaframe({ gold: true, avatar: url, onEdit: () =&gt; pickAvatar() });</pre></div>
+  </section>
+
+  <section id="icons">
+    <h2 class="qc-h2">图标 <code>LXHUI.ICONS</code></h2>
+    <p class="note">原始 SVG 字符串，众生之门的 <code>LxhIcon</code>、生态和经营模块直接取用，内容不变。放进按钮时请给按钮写读屏名（中文名表 <code>LXHUI.LABELS</code>），图标本身加 <code>aria-hidden</code>。点一下复制 key。</p>
+    <div class="icons" id="iconGrid"></div>
+  </section>
+
+  <section id="rules">
+    <h2 class="qc-h2">规则</h2>
+    <div class="rules">
+      <div><strong>类名是契约</strong>旧类名和 <code>LXHUI</code> 的旧参数全部保留。要改造型就新增修饰类（<code>--danger</code>），不要改已有选择器的含义。动选择器前先在 <code>server/app/src</code> 与 <code>portal/</code> 里搜一遍消费者。</div>
+      <div><strong>只用 token</strong>组件里不写色值，新颜色先加成 <code>--lxh-*</code> token 再用。实心色块上的字用 <code>--lxh-on-fill</code>，亮橙色块上用 <code>--lxh-on-ochre</code>。</div>
+      <div><strong>五种状态</strong>每个可点控件都要有悬停、按下、键盘焦点（<code>:focus-visible</code>）、禁用和提交中（<code>aria-busy</code>）；输入框要有校验失败（<code>aria-invalid</code>）。</div>
+      <div><strong>44px 与对比度</strong>可点区不小于 44px，视觉更小的钮用 <code>::before</code> 扩大触控区。正文对比 ≥ 4.5:1；浅底焦点环用青玉，深底用描金（容器加 <code>data-lxh-surface="dark"</code>）。</div>
+      <div><strong>文本转义</strong><code>name</code>、<code>text</code>、<code>id</code> 自动转义，可以放玩家输入；<code>title</code>、<code>hint</code>、<code>intro</code>、<code>abilities</code> 接受可信 HTML，不要把用户输入放进去。</div>
+      <div><strong>减少动态</strong>系统开启「减少动态效果」时，闪烁、光标、扫光和过渡都会停掉。新增动画同样放进 <code>prefers-reduced-motion</code> 分支。</div>
+    </div>
+  </section>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var U = window.LXHUI;
+  var AVA = '/design-system/ui/lxh/ai-avatars/';
+  var BASE5 = ['beast-heicat','beast-fox','beast-rabbit','beast-dog','divine-phoenix'];
+  var KEYS = []; for (var q = 0; q < 12; q++) KEYS.push(BASE5[q % 5]);
+  var ava = function (k) { return AVA + k + '.png?v=2'; };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function toast(msg) {
+    var t = $('toast'); t.textContent = msg; t.style.opacity = 1;
+    clearTimeout(t._h); t._h = setTimeout(function () { t.style.opacity = 0; }, 1600);
+  }
+  function copy(text, btn) {
+    var done = function () {
+      toast('已复制');
+      if (btn) { btn.setAttribute('data-done', ''); btn.textContent = '已复制'; setTimeout(function () { btn.removeAttribute('data-done'); btn.textContent = '复制'; }, 1400); }
+    };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () { window.prompt('复制：', text); });
+    else window.prompt('复制：', text);
+  }
+  function demo(parent, caption, nodes) {
+    var d = document.createElement('div'); d.className = 'demo';
+    [].concat(nodes).forEach(function (n) { d.appendChild(n); });
+    if (caption) { var s = document.createElement('small'); s.textContent = caption; d.appendChild(s); }
+    parent.appendChild(d); return d;
+  }
+
+  // 复制按钮
+  document.querySelectorAll('.code').forEach(function (c) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'qc-btn qc-btn--sm qc-btn--ghost copy'; b.textContent = '复制';
+    b.setAttribute('aria-label', '复制这段代码');
+    b.onclick = function () { copy(c.querySelector('pre').textContent, b); };
+    c.appendChild(b);
+  });
+
+  if (!U) { document.querySelector('.lede').insertAdjacentHTML('afterend', '<div class="qc-loading qc-loading--inline" role="alert">lxh-ui.js 没有加载，示例无法渲染。</div>'); return; }
+  $('ver').textContent = '版本 ' + U.version;
+
+  // Token
+  var css = getComputedStyle(document.documentElement);
+  document.querySelectorAll('[data-tokens]').forEach(function (box) {
+    box.getAttribute('data-tokens').split(' ').forEach(function (k) {
+      var name = '--lxh-' + k, val = css.getPropertyValue(name).trim();
+      var b = document.createElement('button'); b.type = 'button';
+      b.innerHTML = '<span class="chip"></span><span><span class="nm"></span><span class="val"></span></span>';
+      b.querySelector('.chip').style.background = 'var(' + name + ')';
+      b.querySelector('.nm').textContent = name;
+      b.querySelector('.val').textContent = val || '—';
+      b.setAttribute('aria-label', '复制 ' + name + '，值 ' + val);
+      b.onclick = function () { copy('var(' + name + ')'); };
+      box.appendChild(b);
+    });
+  });
+
+  // 按钮：提交中演示
+  $('busyDemo').onclick = function () {
+    var b = this; U.setBusy(b, true, '正在提交…');
+    setTimeout(function () { U.setBusy(b, false); toast('已提交'); }, 1600);
+  };
+
+  // 输入框
+  var fs = $('fieldStage');
+  demo(fs, '默认 + 提示', U.field({ label: '灵的名字', placeholder: '给灵起个名字', hint: '最多 12 个字' }));
+  var bad = U.field({ label: '灵的名字', value: '这个名字已经被别的灵用过了呢', error: '最多 12 个字' });
+  demo(fs, '校验失败 aria-invalid', bad);
+  demo(fs, '禁用', U.field({ label: '旅者编号', value: 'ID 10086', disabled: true, hint: '编号不能修改' }));
+  var live = U.field({ label: '试试输入', placeholder: '超过 6 个字会报错' });
+  live.input.addEventListener('input', function () { live.setError(live.input.value.length > 6 ? '最多 6 个字（现在 ' + live.input.value.length + ' 个）' : ''); });
+  demo(fs, '实时校验', live);
+  demo($('fieldDark'), '深色表面 --dark', U.field({ label: '', placeholder: '搜索种族', dark: true }));
+  $('fieldDark').querySelector('.lxh-field').style.minWidth = 'min(320px, 100%)';
+
+  // 加载
+  var ls = $('loadStage');
+  demo(ls, '读取中 · --inline', U.loading({ text: '正在读取旅途存档…', inline: true }));
+  demo(ls, '出错 · role=alert + 恢复', U.loading({ error: true, inline: true, text: '网络断开了，存档没有读到。', actions: [{ text: '重新读取', onClick: function () { toast('重新读取'); } }, { text: '回门庭', href: '#' }] }));
+  demo($('loadDark'), '深色表面 · --dark', U.loading({ text: '正在展开地图…', inline: true, dark: true }));
+  [].forEach.call(document.querySelectorAll('#loadStage .demo, #loadDark .demo'), function (d) { d.style.width = '100%'; d.firstChild.style.width = '100%'; });
+
+  // 确认框
+  var ds = $('dlgStage');
+  ds.appendChild(U.button({ text: '退出确认', variant: 'no', onClick: function () {
+    U.confirm({ title: '是否确定退出？', hint: '＊角色下次登录将出现在退出地点<br>请注意安全', onYes: function () { toast('已退出'); }, onNo: function () { toast('已取消'); } }).open();
+  } }));
+  ds.appendChild(U.button({ text: '转账确认', variant: 'yes', onClick: function () {
+    U.confirm({ icon: 'shop', title: '游戏转账', amount: 2000, hint: '我出 2000 元，你教我学技能怎么样？', onYes: function () { return new Promise(function (r) { setTimeout(r, 1400); }).then(function () { toast('已转账'); }); } }).open();
+  } }));
+  ds.appendChild(U.button({ text: '放生（危险）', variant: 'danger', onClick: function () {
+    U.confirm({ icon: 'exit', title: '放生这只灵？', hint: '放生后无法找回。', danger: true, yesText: '放生', noText: '留下', onYes: function () { toast('已放生'); } }).open();
+  } }));
+
+  // HUD
+  var hs = $('hudStage');
+  var onAction = function (fn, b) {
+    hs.querySelectorAll('.lxh-fbtn[aria-pressed="true"]').forEach(function (x) { if (x !== b) x.setAttribute('aria-pressed', 'false'); });
+    b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    toast('功能：' + (U.LABELS[fn] || fn));
+  };
+  var day = U.hud({ lv: 42, avatar: ava('beast-heicat'), status: [{ icon: 'radar' }, { icon: 'scroll' }], dots: ['scroll'], onAction: onAction,
+    stage: '<div class="qc-loading qc-loading--dark" role="status" style="min-height:100%">正在展开地图…</div>' });
+  var night = U.hud({ night: true, lv: 51, avatar: ava('beast-fox'), status: [{ icon: 'radar' }, { icon: 'star', big: true, flash: true }], onAction: onAction });
+  night.querySelector('[data-fn="shop"]').disabled = true;
+  demo(hs, '日 · 中央槽加载中 · 任务钮带新消息', day).classList.add('hud-demo');
+  demo(hs, '夜 · 商店钮禁用', night).classList.add('hud-demo');
+
+  // 面板
+  var ps = $('panelStage');
+  var cp = U.charpanel({ name: '罗小黑', race: '猫妖', lv: 10, avatar: ava('beast-heicat'), portrait: ava('beast-heicat'),
+    intro: '猫妖。御灵系金，空间系传送。被小白带回家后一同生活，后拜无限为师。', abilities: ['空间系<br>传送', '御灵系<br>金', '生灵系？<br>变化？'] });
+  cp.style.width = '100%';
+  demo(ps, 'charpanel', cp).style.width = '100%';
+  demo(ps, 'filmcard', U.filmcard()).style.width = 'min(300px, 100%)';
+  ps.lastChild.firstChild.style.width = '100%';
+  demo(ps, 'filmcard --solid', U.filmcard({ solid: true })).style.width = 'min(300px, 100%)';
+  ps.lastChild.firstChild.style.width = '100%';
+  demo(ps, 'phone', U.phone());
+  demo(ps, 'mail · wxnode', [U.mail(), (function () { var r = document.createElement('div'); r.style.display = 'flex'; r.style.gap = '8px'; ['金','木','水','火','土'].forEach(function (c) { r.appendChild(U.wxnode(c)); }); return r; })()]);
+
+  // 社交
+  var ss = $('socialStage');
+  demo(ss, 'nameplate · 编辑中 · 名字按纯文本显示', [U.nameplate({ id: 'ID 10086', name: '罗小黑', editing: true }), U.nameplate({ id: '7', name: '<b>原样</b>' })]);
+  demo(ss, 'chatbubble', [U.chatbubble({ avatar: ava('beast-fox'), text: '一起去冒险吧！' }), U.chatbubble({ avatar: ava('beast-rabbit'), text: '好呀，等我把灵石收好。' })]);
+  demo(ss, 'friends · 输入即筛选', U.friends({ rows: [{ name: '阿根', avatar: ava('beast-dog') }, { name: '小白', avatar: ava('beast-rabbit') }, { name: '小黑', avatar: ava('beast-heicat') }],
+    onLocate: function (r) { toast('定位：' + r.name); } })).style.width = '100%';
+  ss.lastChild.firstChild.style.width = '100%';
+
+  // 数值
+  var vs = $('dataStage');
+  demo(vs, 'counter', U.counter(20261020));
+  var ex = U.expbar(66, { label: '本级经验' }); ex.style.width = '100%';
+  var exd = demo(vs, 'expbar（点按钮加经验）', [ex, U.button({ text: '+12', variant: 'no', size: 'sm', onClick: function () {
+    var n = (Number(ex.getAttribute('aria-valuenow')) + 12) % 112; n = Math.min(n, 100);
+    ex.setAttribute('aria-valuenow', n); ex.firstChild.style.width = n + '%';
+  } })]); exd.style.width = '100%';
+  var lv = U.lvchart(); lv.classList.add('on-paper');
+  demo(vs, 'lvchart（浅底组件）', lv);
+  var r6 = U.radar6({ values: [0.9, 0.4, 0.85, 0.3, 0.5, 0.6] }); r6.style.width = 'min(320px, 100%)';
+  demo(vs, 'radar6', r6);
+  var r5 = U.radar5({ values: [0.9, 0.55, 0.75, 0.45, 0.85] }); r5.style.width = 'min(320px, 100%)';
+  demo(vs, 'radar5', r5);
+
+  // 选择
+  var cs = $('selectStage');
+  var names = KEYS.map(function (k, i) { return ({ 'beast-heicat': '黑猫', 'beast-fox': '狐', 'beast-rabbit': '兔', 'beast-dog': '犬', 'divine-phoenix': '凤' })[k] + (i >= 5 ? ' ' + (Math.floor(i / 5) + 1) : ''); });
+  var rg = U.racegrid({ tab: 0, sel: 0, search: true, avatars: KEYS.map(ava), names: names,
+    onSelect: function (i) { toast('选中：' + names[i]); }, onTab: function (i) { toast('类别：' + U.LABELS[['race_human','race_bird','race_fish','race_lizard','race_frog'][i]]); } });
+  rg.style.width = '100%';
+  demo(cs, 'racegrid · 可操作', rg).style.width = '100%';
+  var rt = U.racetree(); rt.style.width = '100%';
+  demo(cs, 'racetree', rt).style.width = '100%';
+  demo(cs, 'avaframe · onEdit', [U.avaframe({ gold: true, avatar: ava('divine-phoenix'), onEdit: function () { toast('更换头像'); } }), U.avaframe({ avatar: ava('beast-dog') })]);
+
+  // 图标
+  var ig = $('iconGrid');
+  Object.keys(U.ICONS).forEach(function (k) {
+    var b = document.createElement('button'); b.type = 'button';
+    b.innerHTML = U.ICONS[k].replace(/^<svg/, '<svg aria-hidden="true"');
+    var t = document.createElement('span'); t.textContent = k + (U.LABELS[k] ? ' · ' + U.LABELS[k] : ''); b.appendChild(t);
+    b.setAttribute('aria-label', '复制图标名 ' + k);
+    b.onclick = function () { copy(k); };
+    ig.appendChild(b);
+  });
+})();
+</script>
+<script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017"></script>
+</body>
+</html>

@@ -94,6 +94,8 @@ CHECKS = [
     ("huiguan.iridescently.xyz", "/", 200),
     ("huiguan.iridescently.xyz", "/design-system/ui/lxh-ui.css", 200),
     ("huiguan.iridescently.xyz", "/design-system/design-system.css", 200),
+    ("huiguan.iridescently.xyz", "/design-system/components.html", 200),
+    ("huiguan.iridescently.xyz", "/design-system/ui/lxh-ui.js", 200),
     ("huiguan.iridescently.xyz", "/api/official/characters?limit=1", 200),
     ("huiguan.iridescently.xyz", "/api/assets/manifest", 200),
     ("oc.iridescently.xyz", "/", 200),

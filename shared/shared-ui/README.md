@@ -10,9 +10,27 @@
 | --- | --- | --- |
 | `site-nav.js` | **站点导航**：三站共用的唯一全局栏（品牌标、三站切换、更多、页面插槽、语言、账户） | 所有页面；React 应用 `import '@lxh/shared-ui/site-nav.js'` 后调用 `IridescentlyNav.mount()` |
 | `brand/iridescently-mark.svg` | **品牌标**：像素直角坐标系，红绿蓝三球（16×16 网格） | 站点导航、样式指南；PNG 副本在 `portal/www/assets/iridescently-mark.png` |
-| `lxh-ui.css` / `lxh-ui.js` | 游戏画风组件（HUD、面板、气泡、按钮…）与 **加载状态** `.qc-loading` | 众生之门、模块、样式指南 |
+| `lxh-ui.css` / `lxh-ui.js` | **游戏界面组件库**：HUD、面板、气泡、按钮、输入框、确认框，以及 **加载状态** `.qc-loading`。组件库页面：`/design-system/components.html` | 众生之门、模块、会馆页面、样式指南 |
 | `lxh-intro.js` / `intro-controls.css` | 开场进度条与跳过控件 | 众生之门开场、会馆首页开场 |
 | `lxh/` | 组件运行时真正引用的图片（约 8 MB） | 见下文 |
+
+## 游戏界面组件库 lxh-ui
+
+实时示例、全部状态、token 和可复制用法：`https://huiguan.iridescently.xyz/design-system/components.html`（源码 `portal/huiguan/design-system/components.html`）。
+
+```html
+<link rel="stylesheet" href="/design-system/ui/lxh-ui.css?v=20261020">   <!-- 其他站点：/shared/shared-ui/lxh-ui.css -->
+<script src="/design-system/ui/lxh-ui.js?v=20261020"></script>            <!-- 之后使用 window.LXHUI -->
+```
+
+React / Vite 模块用 `import '@lxh/shared-ui/lxh-ui.css'` 和 `import '@lxh/shared-ui/lxh-ui.js'`。模块的构建产物会把 CSS 打包进去，改了本目录后要重新构建该模块才会生效。
+
+- **类名是契约。** 现有类名、`--lxh-*` token 名和 `LXHUI` 的参数都不能删、不能改含义；要新造型就加修饰类。动选择器前先搜 `server/app/src` 和 `portal/` 里的消费者。目前模块只用到 token、`.qc-loading` 和 `LXHUI.ICONS`；组件类主要在样式指南和 slay 预览页里用。
+- **两层 token。** `--qc-*` 属于会馆和站点页面（`design-system.css`），`--lxh-*` 属于游戏画面（`lxh-ui.css`）。危险色同源：`--lxh-danger` 引用 `--qc-danger`。组件里不写色值，新颜色先加 token。
+- **状态基线（2026-10-20）。** 可点控件都有悬停、按下、`:focus-visible` 焦点环（浅底青玉 `--lxh-focus`，深底描金 `--lxh-focus-on-dark`）、`:disabled` / `aria-disabled`、提交中 `aria-busy="true"`；输入框有 `aria-invalid` 校验失败。触控区不小于 `--lxh-tap`（44px）。开启「减少动态效果」时停掉闪烁和扫光。
+- **基础件。** `.lxh-btn`（`--yes` / `--no` / `--danger` / `--ghost` / `--sm`）、`.lxh-field` + `.lxh-input`（`--dark`）、`.qc-loading`（`--page` / `--inline` / `--dark`）。脚本：`LXHUI.button()`、`setBusy()`、`field()`、`loading()`、`confirm()`。
+- **文本转义。** `name`、`text`、`id` 等数据字段自动转义，可以放玩家输入；`title`、`hint`、`intro`、`abilities` 接受可信 HTML（如 `<br>`），不要把用户输入放进去。
+- **确认框。** `LXHUI.confirm()` 是带 `role="dialog"` 的模态框：焦点先落在「否」，Tab 只在框内循环，Esc 或点遮罩等于「否」，关闭后焦点回到原处；`onYes` 返回 Promise 时「是」显示提交中，完成后再关闭。层级 `--lxh-z-modal: 10000`，盖住全局栏。
 
 ## 站点导航怎么接
 
