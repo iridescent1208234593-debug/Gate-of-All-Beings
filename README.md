@@ -1,6 +1,6 @@
-# Iridescently
+# 众生之门 · Gate of All Beings
 
-罗小黑主题网站、会馆角色档案与众生之门游戏的生产工作区。主仓库为 private：`iridescent1208234593-debug/iridescently`。
+罗小黑主题网站、会馆角色档案与众生之门游戏的生产工作区。主仓库为 private：`iridescent1208234593-debug/Gate-of-All-Beings`。
 
 ## 目录与所有权
 

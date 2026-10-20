@@ -1,6 +1,6 @@
 # 文档索引
 
-Iridescently / 众生之门 工作区文档。总览见根 [README.md](../README.md)。
+Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../README.md)。
 
 | 文档 | 内容 |
 | --- | --- |
