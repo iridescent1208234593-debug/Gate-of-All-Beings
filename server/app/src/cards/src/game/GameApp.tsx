@@ -49,9 +49,10 @@ export default function GameApp({ onReturnGate, onCreateIdentity }: { onReturnGa
   useEffect(()=>{let active=true;readSave().then(s=>{if(active){setSave(s);setDurableSave(s);setReady(true);}}).catch(()=>{if(active){setStorageOK(false);setSaveStatus('存档不可用 · 可导出备份');setReady(true);setError('本地存档无法读取，已进入临时游玩模式；原存档不会被覆盖。');}});return()=>{active=false;};},[]);
   useEffect(()=>{if(!storageOK)return;let active=true;const refresh=()=>{if(!revision.current)return;setReady(false);pendingSave.current.then(()=>readSave()).then(s=>{if(active){setSave(s);setDurableSave(s);setReady(true);}}).catch(e=>{if(active){setReady(true);setError(e.message);}});};window.addEventListener('focus',refresh);return()=>{active=false;window.removeEventListener('focus',refresh);};},[storageOK]);
   useEffect(()=>{if(!ready||!storageOK)return;const rev=++revision.current;setSaveStatus('正在保存');pendingSave.current=pendingSave.current.catch(()=>{}).then(()=>writeSave(save)).then(()=>{setDurableSave(save);if(revision.current===rev)setSaveStatus('已自动保存');}).catch(()=>{setSaveStatus('保存失败 · 请导出备份');});},[save,ready,storageOK]);
-  // 全员阵亡后五小时复活：读档时与之后每 30 秒检查一次。
+  // 旧入世历练的「全员阵亡后五小时复活」：只在 #adventure 里检查（进入时与之后每 30 秒）。
+  // 众生牌录按夜恢复同行者，两边写同一份陨落记录，所以其他页面不能跑这个计时。
   const [now,setNow]=useState(Date.now);
-  useEffect(()=>{if(!ready)return;const tick=()=>{const t=Date.now();setNow(t);setSave(s=>{const meta=reviveIfDue(s.meta,t);return meta===s.meta?s:{...s,meta};});};tick();const id=setInterval(tick,30000);return()=>clearInterval(id);},[ready]);
+  useEffect(()=>{if(!ready||view!=='adventure')return;const tick=()=>{const t=Date.now();setNow(t);setSave(s=>{const meta=reviveIfDue(s.meta,t);return meta===s.meta?s:{...s,meta};});};tick();const id=setInterval(tick,30000);return()=>clearInterval(id);},[ready,view]);
   // Keep the current tab visible in the scrollable mobile nav.
   useEffect(()=>{const button=document.querySelector<HTMLElement>('.game-header nav button.active');const nav=button?.parentElement;if(button&&nav&&nav.scrollWidth>nav.clientWidth)nav.scrollTo({left:button.offsetLeft-(nav.clientWidth-button.offsetWidth)/2,behavior:'smooth'});},[view]);
   useEffect(()=>{const fn=()=>setView(readView());window.addEventListener('hashchange',fn);return()=>window.removeEventListener('hashchange',fn);},[]);
