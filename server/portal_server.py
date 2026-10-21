@@ -57,7 +57,6 @@ MODULES_DIR = ROOT / "server" / "app" / "modules"
 # set IRIDESCENTLY_MODULE_CODE_MAX_AGE=14400 and restart portal (see server/app/README.md).
 MODULE_CODE_MAX_AGE = max(0, int(os.environ.get("IRIDESCENTLY_MODULE_CODE_MAX_AGE", "0") or 0))
 PROXY_PORTS = {"cards": 5174, "card-balance": 5178, "softie": 4173, "juling": 5177}
-OZTREE_STATIC = Path(r"E:\External Projects\众生之门生物树可视化前端\OZtree\static")
 
 API_RE = re.compile(r"^/app/modules/([^/]+)/api/")
 
@@ -289,9 +288,6 @@ def route(host, path):
     # The shooter lives in the main site's static tree, not the Cards SPA.
     if p == "/playtest/shengsheng-shoot" or p.startswith("/playtest/shengsheng-shoot/"):
         return www.Handler, {}
-    # 生物树可视化测试入口（OneZoom 改造 · 鳞翅目导入试用）
-    if p == "/ozmtree" or p.startswith("/ozmtree/"):
-        return StaticHandler, {"root": str(OZTREE_STATIC), "strip": "/ozmtree"}
     if p == "/ecology" or p.startswith("/ecology/"):
         return StaticHandler, {"root": str(MODULES_DIR / "ecology"), "strip": "/ecology"}
     if h == "zszm.iridescently.xyz":

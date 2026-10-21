@@ -27,13 +27,13 @@ SECURITY_HEADERS = {
     "Strict-Transport-Security": "max-age=86400",
     "Content-Security-Policy-Report-Only": "; ".join((
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://static.cloudflareinsights.com https://*.iridescently.xyz",
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://static.cloudflareinsights.com https://*.iridescently.xyz https://*.paypal.com https://*.paypalobjects.com",
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://*.iridescently.xyz",
-        "img-src 'self' data: blob: https://*.iridescently.xyz",
+        "img-src 'self' data: blob: https://*.iridescently.xyz https://*.paypal.com https://*.paypalobjects.com",
         "font-src 'self' data: https://cdn.jsdelivr.net https://*.iridescently.xyz",
-        "connect-src 'self' https://*.iridescently.xyz wss://*.iridescently.xyz https://static.cloudflareinsights.com",
+        "connect-src 'self' https://*.iridescently.xyz wss://*.iridescently.xyz https://static.cloudflareinsights.com https://*.paypal.com",
         "media-src 'self' data: blob: https://*.iridescently.xyz",
-        "frame-src 'self' https://*.iridescently.xyz",
+        "frame-src 'self' https://*.iridescently.xyz https://*.paypal.com",
         "worker-src 'self' blob:",
     )),
 }
