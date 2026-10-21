@@ -22,9 +22,10 @@ from pathlib import Path
 
 PORT = int(os.environ.get("PORT", "8080"))
 HERE = Path(__file__).resolve().parent
+CODE_ROOT = HERE.parent
 DATA_ROOT = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", HERE.parent)).resolve()
 COPIED = ("portal/huiguan/characters.json", "portal/huiguan/game_saves.json")
-LINKED = ("assets", "server/app/modules", "portal/www", "portal/huiguan/assets/uploads")
+DATA_LINKED = ("assets", "portal/huiguan/assets/uploads")
 
 
 def _link(target, link):
@@ -52,10 +53,25 @@ def isolated_root():
         if (DATA_ROOT / name).exists():
             shutil.copy2(DATA_ROOT / name, root / name)
     links = []
-    for name in LINKED:
+    for name in DATA_LINKED:
         if (DATA_ROOT / name).is_dir():
             _link(DATA_ROOT / name, root / name)
             links.append(root / name)
+    # Runtime data may come from DATA_ROOT, but served code must come from this
+    # candidate. The portal server resolves modules under its runtime root.
+    modules = CODE_ROOT / "server" / "app" / "modules"
+    if modules.is_dir():
+        _link(modules, root / "server" / "app" / "modules")
+        links.append(root / "server" / "app" / "modules")
+    # The homepage handler reads / and /assets/homepage from RUNTIME_DIR. Seed
+    # that part of the isolated root from the candidate, excluding runtime data.
+    candidate_www = CODE_ROOT / "portal" / "www"
+    if candidate_www.is_dir():
+        shutil.copytree(
+            candidate_www,
+            root / "portal" / "www",
+            ignore=shutil.ignore_patterns("gallery-files", "links.json", "thanks.json"),
+        )
     env_file = DATA_ROOT / "server" / ".env.local"
     if env_file.exists():
         (root / "server").mkdir(exist_ok=True)
@@ -208,10 +224,10 @@ def main():
             print("FAIL  site-status JSON:", body[:100])
         _, body = req("zszm.iridescently.xyz", "/ecology/index.html")
         if body == (HERE / "app/modules/ecology/index.html").read_bytes():
-            print("PASS  zszm ecology route serves ecology instead of Cards fallback")
+            print("PASS  zszm ecology response matches the candidate file byte-for-byte")
         else:
             fails += 1
-            print("FAIL  zszm ecology route served the wrong module")
+            print("FAIL  zszm ecology response differs from the candidate file")
         print("\n%d/%d passed" % (total - fails, total))
         return 1 if fails else 0
     finally:
