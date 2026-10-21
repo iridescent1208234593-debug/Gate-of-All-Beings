@@ -13,8 +13,9 @@ ROOT = Path(__file__).resolve().parents[1]
 PRIVATE = ROOT / '.releases/hk-full-migration'
 KEY = PRIVATE / 'deploy_ed25519'
 OUTPUT = ROOT / '.releases/hk-code-publish'
+SSH_PORT = 43012
 SSH = ['ssh', '-T', '-i', str(KEY), '-o', 'BatchMode=yes', '-o', 'IdentitiesOnly=yes',
-       '-o', 'StrictHostKeyChecking=yes', '-o', 'ConnectTimeout=15',
+       '-o', 'StrictHostKeyChecking=yes', '-o', 'ConnectTimeout=15', '-p', str(SSH_PORT),
        'iridescently-deploy@154.222.26.70']
 SKIP = {'node_modules', '.git', '__pycache__', 'backups', 'backup', 'work', 'tests',
         '.local', '.homepage-build', '.homepage-publish'}

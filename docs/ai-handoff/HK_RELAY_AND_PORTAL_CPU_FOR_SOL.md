@@ -4,7 +4,11 @@
 
 > 2026-10-18 18:30 后架构已更新：九个正式域名与全部后端、账户、存档和媒体已迁移到香港，nginx 上游为香港 `127.0.0.1:18180`，本机五个网站服务已停止。以下中继架构和 DNS 回退办法属于历史记录，不应恢复到冻结的本机数据库。最新部署、发布与回滚方式见 [DEPLOYMENT.md](../../work/hk-bandwidth/DEPLOYMENT.md)，管理入口为 Windows 网站管家的「发布到香港 / 回滚版本」。
 
-时间基准：2026-10-18 00:10 左右。目标：`https://zszm.iridescently.xyz` 稳定、低延迟。
+时间基准：历史观测为 2026-10-18 00:10 左右。目标：`https://zszm.iridescently.xyz` 稳定、低延迟。
+
+## 2026-10-21 SSH 诊断更新
+
+香港正式 SSH 端口已更新为 `43012`。经 Mihomo/TUN 时 TCP 曾建立但没有 SSH banner；经物理以太网时 `OpenSSH_9.6p1` banner、host key 严格校验、deploy 公钥认证和只读 `status` 均通过。服务器端正常。旧的 `rxITxsewevGf` 规则组件不是当前激活 profile 使用的规则组件；当前运行配置需使用 active profile 的规则组件，并在 Mihomo runtime 中验证 `154.222.26.70/32 → DIRECT`。
 你只做「任务」一节。其余一律不动。
 
 ## 当前架构（GPT 已部署，Claude 已验收）
@@ -40,7 +44,7 @@ zszm.iridescently.xyz -> Cloudflare -> 香港独立隧道 -> ecsvkdu0 (154.222.2
 
 - 本机 Clash Verge 开着 TUN（`Meta` 网卡，`gvisor`，fake-ip）。节点选择当前是「新加坡SG11-HY2」。
 - 运行时规则里 `cloudflared.exe`、`argotunnel.com`、`cloudflare.com` 已经 `DIRECT`，主隧道连接已确认直连。
-- **香港中继的 `ssh.exe -> 154.222.26.70:22` 命中 `Match`，链路是「新加坡SG11-HY2 > 节点选择」。**
+- **历史观测时香港中继 `ssh.exe -> 154.222.26.70:22` 命中 `Match`，链路是「新加坡SG11-HY2 > 节点选择」；该端口已被 43012 取代。**
   也就是 Windows 到香港这一段绕了新加坡代理节点。到香港的 ping 平均 67 ms。
 - 公网 API 延迟约 1 到 2 秒，本机 8080 直连只要几毫秒。差的那一秒多在公网路径上。
 - 门户（8080）有间歇性 CPU 突增，约 2 核，持续几十秒，之后回落到接近 0。
@@ -67,7 +71,7 @@ Claude 已经把规则写进了持久配置，但 Clash Verge 还没重新应用
 
 步骤：
 1. 让用户在 Clash Verge 里重新应用当前订阅（刷新或重新选择该配置）。如果你有办法让 Clash Verge 自己重新生成运行时配置，也可以用，但不要手改 `ProgramData` 下的运行时文件（路径受保护）。
-2. 通过 mihomo 管道查询连接，确认 `ssh.exe -> 154.222.26.70:22` 的链路是 `DIRECT`。
+2. 通过 mihomo 管道查询连接，确认 `154.222.26.70:43012` 命中 `IP-CIDR,154.222.26.70/32,DIRECT,no-resolve`，链路为 `DIRECT`。
    - 管道名：`\\.\pipe\verge-mihomo-production-1d0738970a87ca890680ef0135e03eb7100734193d838daa64379ba334c62684`
    - 在 PowerShell 里用 `System.IO.Pipes.NamedPipeClientStream` 发 HTTP 请求，`GET /connections`。
    - 注意 `clash-verge.yaml` 里写的 `sidecar-release` 管道是旧的，实际是 `production`。

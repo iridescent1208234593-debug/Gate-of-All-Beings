@@ -2,6 +2,8 @@
 
 用户已审完并批准这条提交链，要求由 Codex 发布到线上。本文只写发布需要的事实；背景见 [DIRTY_WORK_MAP](DIRTY_WORK_MAP.md) 顶部「2026-10-21 收敛」和 [CURRENT_PRIORITIES](CURRENT_PRIORITIES.md)。
 
+**SSH 连接信息（2026-10-21 更新）**：香港生产 SSH 已确认使用 `154.222.26.70:43012`，账户 `iridescently-deploy`，本机专用密钥 `.releases/hk-full-migration/deploy_ed25519`。`ops/hk-release.py` 是服务器管家、status 与发布入口共用的固定配置；保持 `IdentitiesOnly=yes`、`StrictHostKeyChecking=yes`，不使用 root 或密码登录。
+
 ## 0. 前置：先确认已经 push
 
 Claude 的 `git push` 被本机自动模式拦截，需要用户自己推送：

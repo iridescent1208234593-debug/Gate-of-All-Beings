@@ -120,6 +120,8 @@
 
 日常代码和资产操作使用既有的本机专用 SSH 密钥，不要求输入 root 密码。首次安装 / 修复服务器控制脚本才需要管理员权限。Cloudflare 账号证书只在配置域名时使用；运行隧道仅需本机专属凭据。
 
+香港生产 SSH 连接由 `ops/hk-release.py` 集中固定：`iridescently-deploy@154.222.26.70:43012`，密钥为 `.releases/hk-full-migration/deploy_ed25519`，并启用 `IdentitiesOnly=yes` 和 `StrictHostKeyChecking=yes`。服务器管家、只读状态检查和发布命令共用此入口；不要在管家里另设 host、user 或端口覆盖。
+
 不要分享 `.releases` 中的密钥、隧道凭据、环境文件或资产编辑副本。它们由 Git 忽略。Windows 专用 SSH 密钥和 PC 隧道凭据有当前用户 / SYSTEM 的 ACL；密码未写进管家或 README。
 
 ## 命令行与检查
