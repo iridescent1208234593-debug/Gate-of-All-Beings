@@ -3,17 +3,14 @@
 
 用法：python server/verify_portal.py      （默认 PORT=8080）
 
-默认在临时数据根下运行：复制 users.db / characters.json / game_saves.json，
-只读目录（媒体库、已发布模块、主站运行目录）以链接方式接入。门户启动会建表并导入
-旧存档，所以不能直接对真实数据运行；确需检查真实数据时设
-IRIDESCENTLY_VERIFY_LIVE_DATA=1。
+默认在空的临时数据根下运行。门户可在此创建空测试数据库；验证器不会读取或复制
+生产 users.db、用户存档或本地密钥配置。只读内容目录及候选代码以链接/副本接入。
 """
 import http.client
 import json
 import os
 import shutil
 import socket
-import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -24,7 +21,6 @@ PORT = int(os.environ.get("PORT", "8080"))
 HERE = Path(__file__).resolve().parent
 CODE_ROOT = HERE.parent
 DATA_ROOT = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", HERE.parent)).resolve()
-COPIED = ("portal/huiguan/characters.json", "portal/huiguan/game_saves.json")
 DATA_LINKED = ("assets", "portal/huiguan/assets/uploads")
 
 
@@ -42,16 +38,6 @@ def isolated_root():
     root = Path(tempfile.mkdtemp(prefix="verify-portal-"))
     runtime = root / "portal" / "huiguan"
     runtime.mkdir(parents=True)
-    source_db = DATA_ROOT / "portal" / "huiguan" / "users.db"
-    if source_db.exists():
-        source = sqlite3.connect(f"file:{source_db.as_posix()}?mode=ro", uri=True)
-        target = sqlite3.connect(runtime / "users.db")
-        source.backup(target)
-        target.close()
-        source.close()
-    for name in COPIED:
-        if (DATA_ROOT / name).exists():
-            shutil.copy2(DATA_ROOT / name, root / name)
     links = []
     for name in DATA_LINKED:
         if (DATA_ROOT / name).is_dir():
@@ -72,10 +58,6 @@ def isolated_root():
             root / "portal" / "www",
             ignore=shutil.ignore_patterns("gallery-files", "links.json", "thanks.json"),
         )
-    env_file = DATA_ROOT / "server" / ".env.local"
-    if env_file.exists():
-        (root / "server").mkdir(exist_ok=True)
-        shutil.copy2(env_file, root / "server" / ".env.local")
     return root, links
 
 
@@ -185,10 +167,10 @@ def main():
             print("FAIL: requested test port is already in use", PORT)
             return 1
     env = {**os.environ, "PORT": str(PORT)}
+    env["PYTHONIOENCODING"] = "utf-8"
     isolated = None
-    if os.environ.get("IRIDESCENTLY_VERIFY_LIVE_DATA") != "1":
-        isolated = isolated_root()
-        env["IRIDESCENTLY_PROJECT_ROOT"] = str(isolated[0])
+    isolated = isolated_root()
+    env["IRIDESCENTLY_PROJECT_ROOT"] = str(isolated[0])
     proc = subprocess.Popen([sys.executable, str(HERE / "portal_server.py")], env=env,
                             stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     total = len(CHECKS) + 3
