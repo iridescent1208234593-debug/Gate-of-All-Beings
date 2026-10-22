@@ -39,6 +39,7 @@ server/app/modules/
 /ops/网站恢复/logs/
 portal/huiguan/assets/uploads/
 portal/huiguan/assets/thumbs/
+portal/huiguan/assets/previews/
 portal/huiguan/assets/store/
 portal/huiguan/assets/gate/__probe.html
 

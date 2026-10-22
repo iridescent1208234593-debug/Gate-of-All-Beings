@@ -12,10 +12,14 @@ import hmac
 import gzip
 import base64
 import http.server
+import ipaddress
 import json
 import os
+import posixpath
 import re
 import secrets
+import shutil
+import socket
 import sqlite3
 import threading
 import time
@@ -30,6 +34,7 @@ from http.cookies import SimpleCookie
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "server"))
 import hx_sso
+from site_admin import is_site_owner
 from account_security import init_schema as init_security_schema, handle_security
 from account_email import init_schema as init_email_schema, handle_email
 from account_recovery import init_schema as init_recovery_schema, handle_recovery
@@ -91,6 +96,20 @@ WV_DB = os.path.join(WV_ROOT_DIR, "db", "worldview_luoxiaohei_v4.db")
 WV_IMG_DIR = os.path.join(WV_ROOT_DIR, "images")
 THUMB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "thumbs")
 os.makedirs(THUMB_DIR, exist_ok=True)
+# Public "site version" of every image: re-encoded WebP, bounded size, metadata stripped.
+# Source files are never sent to anyone but the site owner (see /api/original-image).
+PREVIEW_DIR = os.path.join(RUNTIME_DIR, "assets", "previews")  # derived cache; lives beside uploads, survives site publishes
+os.makedirs(PREVIEW_DIR, exist_ok=True)
+PREVIEW_MAX_EDGE = 1600
+PREVIEW_ANIMATED_EDGE = 640
+_PREVIEW_LOCK = threading.Lock()
+UPLOAD_NAME_RE = re.compile(r"^[A-Za-z0-9]{16,64}\.(?:png|jpe?g|webp|gif)$")
+REMOTE_IMAGE_HOSTS = frozenset({"huiji-thumb.huijistatic.com", "huiji-public.huijistatic.com"})
+IMAGE_SOURCE_LOCK = threading.Lock()
+IMAGE_SOURCES = {}
+IMAGE_SOURCE_LIMIT = 20000
+IMAGE_SOURCE_MAX_AGE = 3600
+IMAGE_FETCH_LIMIT = 20 * 1024 * 1024
 
 def wv():
     """只读连接世界观 SQLite 库"""
@@ -849,7 +868,7 @@ def store_source_data_uri(uri):
 def normalize_oc_avatar(data):
     if not isinstance(data, dict):
         return
-    asset = data.get("avatar_asset_id") or ""
+    asset = _persist_preview_reference(data.get("avatar_asset_id") or "")
     shape = data.get("avatar_display_shape")
     if asset.startswith("data:image/"):
         asset = store_avatar_data_uri(asset)
@@ -944,6 +963,374 @@ OAUTH_LOCK = threading.Lock()
 init_user_db()
 
 
+class _NoImage(Exception):
+    def __init__(self, status):
+        super().__init__(status)
+        self.status = status
+
+
+def _first(qs, key):
+    return qs.get(key, [None])[0]
+
+
+def _lookup_image(endpoint, qs):
+    """Resolve one public image endpoint + query to its stored file (or remote URL).
+
+    The single place that maps those requests to source files, shared by the public
+    (derived-only) handlers and the owner-only /api/original-image. Raises _NoImage(status).
+    """
+    path = None
+    if endpoint == "/api/image-preview":
+        path = _resolve_image_token(_first(qs, "id"))
+        if path is None:
+            raise _NoImage(404)
+        return path
+    if endpoint == "/api/uploads/preview":
+        name = _first(qs, "name") or ""
+        if not UPLOAD_NAME_RE.fullmatch(name) or "/" in name or "\\" in name:
+            raise _NoImage(404)
+        path = os.path.join(UPLOAD_DIR, name)
+        if not os.path.isfile(path):
+            raise _NoImage(404)
+        return path
+    if endpoint == "/api/official/img":
+        cid = _first(qs, "cid")
+        if not cid:
+            raise _NoImage(400)
+        try:
+            n = int(_first(qs, "n") or 0)
+        except ValueError:
+            raise _NoImage(400)
+        conn = wv()
+        rows = conn.execute("SELECT image_path FROM character_images WHERE character_id=? ORDER BY COALESCE(sort_order,id), id", (cid,)).fetchall()
+        conn.close()
+        paths = []
+        for r in rows:
+            p = _safe_image_path(r["image_path"])
+            if p and (_is_remote_image(p) or os.path.isfile(p)):
+                paths.append(p)
+        if not paths:
+            raise _NoImage(404)
+        return paths[max(0, min(n, len(paths) - 1))]
+    if endpoint in ("/api/official/img-id", "/api/assets/image", "/api/official/unclassified-img"):
+        iid = _first(qs, "id")
+        if not iid:
+            raise _NoImage(400)
+        table = "unclassified_images" if endpoint == "/api/official/unclassified-img" else "character_images"
+        w = sqlite3.connect(WV_DB, timeout=10)
+        row = w.execute(f"SELECT image_path FROM {table} WHERE id=?", (iid,)).fetchone()
+        w.close()
+        if not row:
+            raise _NoImage(404)
+        path = _safe_image_path(row[0])
+    elif endpoint == "/api/assets/shared":
+        iid = _first(qs, "id")
+        if not iid:
+            raise _NoImage(400)
+        conn = wv()
+        try:
+            row = conn.execute("SELECT path FROM shared_assets WHERE id=?", (iid,)).fetchone()
+        finally:
+            conn.close()
+        if not row:
+            raise _NoImage(404)
+        path = _safe_image_path(row["path"])
+    elif endpoint == "/api/assets/avatar":
+        cid, name = _first(qs, "cid"), _first(qs, "name")
+        conn = wv()
+        try:
+            if not cid and name:
+                name = name.strip()
+                row = conn.execute("SELECT id FROM characters WHERE name=? AND merged_to IS NULL", (name,)).fetchone()
+                if not row:
+                    row = conn.execute("SELECT id FROM characters WHERE (','||COALESCE(aliases,'')||',') LIKE ? AND merged_to IS NULL",
+                                       ("%" + name + "%",)).fetchone()
+                if not row:
+                    raise _NoImage(404)
+                cid = str(row["id"])
+            if not cid:
+                raise _NoImage(400)
+            crow = conn.execute("SELECT avatar_id FROM characters WHERE id=?", (cid,)).fetchone()
+            if crow and crow["avatar_id"]:
+                ir = conn.execute("SELECT image_path FROM character_images WHERE id=?", (crow["avatar_id"],)).fetchone()
+                if ir:
+                    p = _safe_image_path(ir["image_path"])
+                    if p and (_is_remote_image(p) or os.path.isfile(p)):
+                        return p
+            for r in conn.execute("SELECT image_path FROM character_images WHERE character_id=? ORDER BY COALESCE(sort_order,id), id", (cid,)):
+                p = _safe_image_path(r["image_path"])
+                if p and (_is_remote_image(p) or os.path.isfile(p)):
+                    return p
+        finally:
+            conn.close()
+        raise _NoImage(404)
+    else:
+        raise _NoImage(404)
+    if not path or (not _is_remote_image(path) and not os.path.isfile(path)):
+        raise _NoImage(404)
+    return path
+
+
+IMAGE_ENDPOINTS = frozenset({
+    "/api/official/img", "/api/official/img-id", "/api/official/unclassified-img",
+    "/api/assets/avatar", "/api/assets/image", "/api/assets/shared", "/api/uploads/preview", "/api/image-preview",
+})
+IMAGE_CONTENT_TYPES = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif"}
+
+
+def _register_image_source(source):
+    token = secrets.token_urlsafe(24)
+    now = time.time()
+    with IMAGE_SOURCE_LOCK:
+        expired = [key for key, (created, _) in IMAGE_SOURCES.items() if now - created > IMAGE_SOURCE_MAX_AGE]
+        for key in expired:
+            IMAGE_SOURCES.pop(key, None)
+        while len(IMAGE_SOURCES) >= IMAGE_SOURCE_LIMIT:
+            IMAGE_SOURCES.pop(next(iter(IMAGE_SOURCES)))
+        IMAGE_SOURCES[token] = (now, source)
+    return "/api/image-preview?id=" + urllib.parse.quote(token)
+
+
+def _resolve_image_token(token):
+    if not token or not re.fullmatch(r"[A-Za-z0-9_-]{24,64}", token):
+        return None
+    with IMAGE_SOURCE_LOCK:
+        entry = IMAGE_SOURCES.get(token)
+        if not entry:
+            return None
+        if time.time() - entry[0] > IMAGE_SOURCE_MAX_AGE:
+            IMAGE_SOURCES.pop(token, None)
+            return None
+        return entry[1]
+
+
+def _safe_image_reference(value):
+    """Replace a source path/URL/data URI in JSON with an opaque, WebP-only same-origin URL."""
+    if not isinstance(value, str):
+        return value
+    if value.startswith("/api/image-preview?"):
+        return value
+    source = None
+    if value.startswith("data:image/"):
+        try:
+            head, separator, encoded = value.partition(",")
+            mime = head[5:].split(";", 1)[0].lower()
+            if not separator or not head.endswith(";base64") or mime not in _DATAURI_EXT:
+                return ""
+            source = base64.b64decode(encoded, validate=True)
+            if not source or len(source) > IMAGE_FETCH_LIMIT:
+                return ""
+        except (ValueError, TypeError):
+            return ""
+    elif value.startswith("/assets/uploads/"):
+        name = urllib.parse.unquote(value[len("/assets/uploads/"):].split("?", 1)[0])
+        if not UPLOAD_NAME_RE.fullmatch(name) or "/" in name or "\\" in name:
+            return ""
+        if not os.path.isfile(os.path.join(UPLOAD_DIR, name)):
+            return ""
+        return "/api/uploads/preview?name=" + urllib.parse.quote(name)
+    elif _is_remote_image(value):
+        parsed = urllib.parse.urlsplit(value)
+        if parsed.scheme != "https" or (parsed.hostname or "").lower() not in REMOTE_IMAGE_HOSTS:
+            return ""
+        source = value
+    elif os.path.isabs(value) and os.path.splitext(value)[1].lower() in ASSET_IMAGE_EXTS:
+        source = _safe_image_path(value)
+        if not source or not os.path.isfile(source):
+            return ""
+    if source is None:
+        return value
+    return _register_image_source(source)
+
+
+def _sanitize_image_urls_in_text(value):
+    if not isinstance(value, str):
+        return value
+    decoded = value
+    for _ in range(4):
+        next_value = urllib.parse.unquote(decoded)
+        if next_value == decoded:
+            break
+        decoded = next_value
+    if "/assets/uploads/" in decoded.lower():
+        value = decoded
+    data_uri = re.compile(r"data:image/(?:png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+", re.I)
+    upload_path = re.compile(r"/assets/uploads/([A-Za-z0-9]{16,64}\.(?:png|jpe?g|webp|gif))", re.I)
+    remote_url = re.compile(r"https?://[^\s\"'<>),]+", re.I)
+    windows_path = re.compile(r"(?<![A-Za-z0-9])([A-Za-z]:\\[^\"'<>\r\n]+?\.(?:png|jpe?g|webp|gif))", re.I)
+    value = data_uri.sub(lambda match: _safe_image_reference(match.group(0)), value)
+    value = upload_path.sub(lambda match: _safe_image_reference("/assets/uploads/" + match.group(1)), value)
+    value = windows_path.sub(lambda match: _safe_image_reference(match.group(1)), value)
+    def replace_remote(match):
+        candidate = match.group(0).rstrip(".;:!")
+        suffix = match.group(0)[len(candidate):]
+        parsed = urllib.parse.urlsplit(candidate)
+        if os.path.splitext(parsed.path)[1].lower() in ASSET_IMAGE_EXTS:
+            return _safe_image_reference(candidate) + suffix
+        return match.group(0)
+    return remote_url.sub(replace_remote, value)
+
+
+def _sanitize_json_image_sources(value):
+    if isinstance(value, dict):
+        return {key: _sanitize_json_image_sources(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_sanitize_json_image_sources(item) for item in value]
+    if isinstance(value, str):
+        if os.path.isabs(value) and os.path.splitext(value)[1].lower() in ASSET_IMAGE_EXTS:
+            return _safe_image_reference(value)
+        return _sanitize_image_urls_in_text(value)
+    return value
+
+
+def _persist_preview_reference(value):
+    """Resolve an opaque preview URL submitted by an editor back to a durable source path."""
+    if not isinstance(value, str):
+        return value
+    if value.startswith("/api/uploads/preview?"):
+        name = _first(urllib.parse.parse_qs(urllib.parse.urlsplit(value).query), "name") or ""
+        if UPLOAD_NAME_RE.fullmatch(name) and os.path.isfile(os.path.join(UPLOAD_DIR, name)):
+            return "/assets/uploads/" + name
+        raise ValueError("图片预览已过期，请重新选择图片")
+    if not value.startswith("/api/image-preview?"):
+        return value
+    parsed = urllib.parse.urlsplit(value)
+    source = _resolve_image_token(_first(urllib.parse.parse_qs(parsed.query), "id"))
+    if source is None:
+        raise ValueError("图片预览已过期，请重新选择图片")
+    if isinstance(source, str) and not _is_remote_image(source):
+        try:
+            if os.path.commonpath((os.path.abspath(source), os.path.abspath(UPLOAD_DIR))) == os.path.abspath(UPLOAD_DIR):
+                return "/assets/uploads/" + os.path.basename(source)
+        except ValueError:
+            pass
+        with open(source, "rb") as stream:
+            raw = stream.read(IMAGE_FETCH_LIMIT + 1)
+    elif _is_remote_image(source):
+        raw = _remote_image_bytes(source) or b""
+    else:
+        raw = source
+    if not raw or len(raw) > IMAGE_FETCH_LIMIT:
+        raise ValueError("图片来源暂不可用")
+    try:
+        from PIL import Image
+        with Image.open(BytesIO(raw)) as im:
+            mime = {"JPEG": "image/jpeg", "PNG": "image/png", "WEBP": "image/webp", "GIF": "image/gif"}.get(im.format)
+        if not mime:
+            raise ValueError("图片格式无效")
+        raw, mime = validate_image(raw, mime)
+    except (OSError, ValueError) as error:
+        raise ValueError("图片格式无效") from error
+    return store_image(raw, mime)
+
+
+def _remote_image_bytes(url):
+    """Fetch only known public image hosts; reject private IPs, redirects to other hosts and oversized bodies."""
+    current = url
+    for _ in range(4):
+        parts = urllib.parse.urlsplit(current)
+        host = (parts.hostname or "").lower()
+        if parts.scheme != "https" or host not in REMOTE_IMAGE_HOSTS or parts.username or parts.password:
+            return None
+        try:
+            addresses = {ipaddress.ip_address(item[4][0]) for item in socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)}
+            if not addresses or any(not address.is_global for address in addresses):
+                return None
+            request = urllib.request.Request(current, headers={"Accept": "image/*", "User-Agent": "Iridescently-Preview/1.0"})
+            opener = urllib.request.build_opener(_NoImageRedirect())
+            with opener.open(request, timeout=8) as response:
+                content_type = (response.headers.get("Content-Type") or "").split(";", 1)[0].lower()
+                length = int(response.headers.get("Content-Length") or 0)
+                if not content_type.startswith("image/") or length > IMAGE_FETCH_LIMIT:
+                    return None
+                payload = response.read(IMAGE_FETCH_LIMIT + 1)
+                return payload if 0 < len(payload) <= IMAGE_FETCH_LIMIT else None
+        except urllib.error.HTTPError as error:
+            if error.code not in (301, 302, 303, 307, 308):
+                return None
+            location = error.headers.get("Location")
+            if not location:
+                return None
+            current = urllib.parse.urljoin(current, location)
+        except (OSError, ValueError, urllib.error.URLError):
+            return None
+    return None
+
+
+class _NoImageRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def _encode_webp_preview(target, source, thumb):
+    try:
+        from PIL import Image, ImageOps, ImageSequence
+        tmp = target + ".tmp"
+        with Image.open(source) as im:
+            animated = getattr(im, "n_frames", 1) > 1
+            edge = 360 if thumb else (PREVIEW_ANIMATED_EDGE if animated else PREVIEW_MAX_EDGE)
+            if animated:
+                frames, durations = [], []
+                for frame in ImageSequence.Iterator(im):
+                    f = frame.convert("RGBA")
+                    f.thumbnail((edge, edge), Image.LANCZOS)
+                    frames.append(f)
+                    durations.append(frame.info.get("duration", 100))
+                frames[0].save(tmp, "WEBP", save_all=True, append_images=frames[1:], duration=durations,
+                               loop=im.info.get("loop", 0), quality=72 if thumb else 76, method=4)
+            else:
+                im = ImageOps.exif_transpose(im)
+                has_alpha = im.mode in ("RGBA", "LA") or (im.mode == "P" and "transparency" in im.info)
+                im = im.convert("RGBA" if has_alpha else "RGB")
+                im.thumbnail((edge, edge), Image.LANCZOS)
+                im.save(tmp, "WEBP", quality=76 if thumb else 82, method=4)
+        os.replace(tmp, target)
+    except Exception:
+        return None, None
+    with open(target, "rb") as f:
+        return f.read(), "image/webp"
+
+
+def _preview_bytes(source, thumb=False):
+    """Return a cached, metadata-free WebP preview for local, remote, or in-memory image sources."""
+    profile = "thumb-360-v2" if thumb else "v1"
+    if isinstance(source, bytes):
+        seed = "bytes|" + hashlib.sha256(source).hexdigest() + "|" + profile
+        image_source = BytesIO(source)
+    elif _is_remote_image(source):
+        seed = "remote|" + source + "|" + profile
+        key = hashlib.md5(seed.encode("utf-8")).hexdigest()
+        target = os.path.join(PREVIEW_DIR, key + ".webp")
+        if os.path.isfile(target):
+            with open(target, "rb") as f:
+                return f.read(), "image/webp"
+        payload = _remote_image_bytes(source)
+        if not payload:
+            return None, None
+        image_source = BytesIO(payload)
+    else:
+        try:
+            stat = os.stat(source)
+        except (OSError, TypeError):
+            return None, None
+        # Keep the v1 key for full previews so existing valid cache files remain reusable.
+        seed = f"{source}|{stat.st_size}|{int(stat.st_mtime)}|{profile}"
+        if not thumb:
+            seed = f"{source}|{stat.st_size}|{int(stat.st_mtime)}|v1"
+        image_source = source
+    key = hashlib.md5(seed.encode("utf-8")).hexdigest()
+    target = os.path.join(PREVIEW_DIR, key + ".webp")
+    if not os.path.exists(target):
+        with _PREVIEW_LOCK:
+            if not os.path.exists(target):
+                result = _encode_webp_preview(target, image_source, thumb)
+                if result[0] is None:
+                    return None, None
+                return result
+    with open(target, "rb") as f:
+        return f.read(), "image/webp"
+
+
 class Handler(BaseStaticHandler):
     protocol_version = "HTTP/1.1"
     _static_dir = STATIC_DIR
@@ -952,14 +1339,29 @@ class Handler(BaseStaticHandler):
         super().__init__(*args, **kwargs)
 
     def translate_path(self, path):
-        decoded = urllib.parse.unquote(urllib.parse.urlparse(path).path)
-        for prefix, root in (("/assets/uploads/", UPLOAD_DIR), ("/design-system/ui/", os.path.join(CODE_ROOT, "shared", "shared-ui"))):
-            if decoded.startswith(prefix):
-                relative = decoded[len(prefix):]
+        decoded = urllib.parse.urlparse(path).path
+        for _ in range(16):
+            unquoted = urllib.parse.unquote(decoded)
+            if unquoted == decoded:
+                break
+            decoded = unquoted
+        else:
+            return os.path.join(STATIC_DIR, "__missing__")
+        decoded = decoded.replace("\\", "/")
+        normalized = "/" + posixpath.normpath(decoded).lstrip("/")
+        for prefix, root in (("/design-system/ui/", os.path.join(CODE_ROOT, "shared", "shared-ui")),):
+            if normalized.startswith(prefix):
+                relative = normalized[len(prefix):]
                 target = os.path.abspath(os.path.join(root, relative))
                 if os.path.commonpath((os.path.abspath(root), target)) == os.path.abspath(root):
                     return target
                 return os.path.join(STATIC_DIR, "__missing__")
+        if normalized.lower().startswith("/assets/uploads/"):
+            # Upload sources are never static; public images must use WebP preview routes.
+            return os.path.join(STATIC_DIR, "__missing__")
+        if normalized.lower().startswith("/assets/store/"):
+            # Showcase HTML is served only through sanitized JSON, never as a raw static file.
+            return os.path.join(STATIC_DIR, "__missing__")
         return super().translate_path(path)
 
     # send_header / end_headers 由 BaseStaticHandler 统一处理安全头+缓存
@@ -973,6 +1375,13 @@ class Handler(BaseStaticHandler):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
         qs = urllib.parse.parse_qs(parsed.query)
+
+        if path == "/api/original-image":
+            return self._api_original_image(qs)
+        if path == "/api/image-preview":
+            return self._api_image_preview(qs)
+        if path == "/api/uploads/preview":
+            return self._api_upload_preview(qs)
 
         if path.startswith("/api/huiguan/"):
             path = "/api/" + path[len("/api/huiguan/"):]
@@ -1587,15 +1996,17 @@ class Handler(BaseStaticHandler):
 
     # ---------- /api/sso-user（共享导航显示账户） ----------
     def _api_sso_user(self):
+        can_view_original = self._original_allowed()
         ident = self._require_ident_optional()
         if not ident:
-            self._json(200, {"logged_in": False}); return
+            self._json(200, {"logged_in": False, "can_view_original": can_view_original}); return
         conn = db()
         account_avatar = get_profile(conn, ident["kind"], ident["uid"])["account_avatar_url"]
         conn.close()
         self._json(200, {"logged_in": True, "kind": ident["kind"], "user_id": ident["uid"],
                          "name": ident.get("nickname") or ident.get("username") or "",
                          "role": ident.get("role"), "is_admin": ident.get("is_admin"),
+                         "can_view_original": can_view_original,
                          "account_avatar_url": account_avatar, "picture": ident.get("picture") or ""})
 
     def _api_account_avatar(self):
@@ -1836,6 +2247,7 @@ class Handler(BaseStaticHandler):
         self.wfile.write(body)
 
     def _send_html(self, html):
+        html = _sanitize_image_urls_in_text(html)
         body = html.encode("utf-8")
         accept = (self.headers.get("Accept-Encoding") or "")
         use_gzip = "gzip" in accept and len(body) > 1024
@@ -1936,6 +2348,13 @@ class Handler(BaseStaticHandler):
         # 外置大字段：展示页 HTML -> 文件；base64 图片 -> 独立文件 URL
         html_ref = store_showcase_html(html) if html else None
         if isinstance(data_field, dict):
+            try:
+                if isinstance(data_field.get("image"), str):
+                    data_field["image"] = _persist_preview_reference(data_field["image"])
+                if isinstance(data_field.get("images"), list):
+                    data_field["images"] = [_persist_preview_reference(x) if isinstance(x, str) else x for x in data_field["images"]]
+            except ValueError as error:
+                self._json(400, {"error": str(error)}); return
             if data_field.get("image", "").startswith("data:"):
                 data_field["image"] = store_data_uri(data_field["image"])
             if isinstance(data_field.get("images"), list):
@@ -2015,6 +2434,10 @@ class Handler(BaseStaticHandler):
             if isinstance(c, dict):
                 try:
                     normalize_oc_avatar(c)
+                    if isinstance(c.get("image"), str):
+                        c["image"] = _persist_preview_reference(c["image"])
+                    if isinstance(c.get("images"), list):
+                        c["images"] = [_persist_preview_reference(x) if isinstance(x, str) else x for x in c["images"]]
                 except ValueError as error:
                     self._json(400, {"error": str(error)}); return
                 if c.get("image", "").startswith("data:"):
@@ -2223,22 +2646,126 @@ class Handler(BaseStaticHandler):
             })
         self._json(200, {"stickers": stickers})
 
-    def _thumb_bytes(self, path):
-        key = hashlib.md5((path + str(os.path.getsize(path))).encode("utf-8")).hexdigest()
-        tp = os.path.join(THUMB_DIR, key + ".jpg")
-        if not os.path.exists(tp):
+    # ---------- 图片分发：公开接口只发派生版本，原图仅站长 ----------
+    def _original_allowed(self):
+        """Same definition of "admin" as the main site's gallery: a verified hx_sso account that is a site owner."""
+        return is_site_owner(hx_sso.read_cookie(self.headers), PROJECT_ROOT)
+
+    def _send_derived_image(self, path, thumb, cors, max_age, head=False):
+        data, ct = _preview_bytes(path, thumb=thumb)
+        if data is None:
+            self.send_error(404); return
+        self.send_response(200)
+        if cors:
+            self._assets_cors()
+        self.send_header("Content-Type", ct)
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", f"public, max-age={max_age}")
+        self.end_headers()
+        if not head:
+            self.wfile.write(data)
+
+    def _send_public_image(self, endpoint, qs, cors=False, max_age=604800):
+        try:
+            path = _lookup_image(endpoint, qs)
+        except _NoImage as error:
+            self.send_error(error.status); return
+        self._send_derived_image(path, _first(qs, "t") in ("1", "true"), cors, max_age)
+
+    def _api_upload_preview(self, qs, head=False):
+        try:
+            path = _lookup_image("/api/uploads/preview", qs)
+        except _NoImage:
+            self.send_error(404); return
+        self._send_derived_image(path, _first(qs, "t") in ("1", "true"), False, 86400, head)
+
+    def _api_image_preview(self, qs, head=False):
+        try:
+            source = _lookup_image("/api/image-preview", qs)
+        except _NoImage:
+            self.send_error(404); return
+        self._send_derived_image(source, _first(qs, "t") in ("1", "true"), False, 86400, head)
+
+    def _api_original_image(self, qs, head=False):
+        """The only route that returns a source file. Owner session required; never cacheable."""
+        def refuse(code, message):
+            body = b"" if head else json.dumps({"error": message}, ensure_ascii=False).encode("utf-8")
+            self.send_response(code)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            if body:
+                self.wfile.write(body)
+        fetch_site = (self.headers.get("Sec-Fetch-Site") or "").lower()
+        origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
+        origin_host = (urllib.parse.urlparse(origin).hostname or "").lower() if origin else ""
+        if fetch_site == "cross-site" or (origin_host and origin_host not in ("localhost", "127.0.0.1", "iridescently.xyz")
+                                          and not origin_host.endswith(".iridescently.xyz")):
+            return refuse(403, "原图请求来源不被允许")
+        if not self._original_allowed():
+            return refuse(403, "原图仅限站长登录后查看")
+        src = urllib.parse.urlsplit(_first(qs, "src") or "")
+        if src.scheme or src.netloc or not src.path.startswith("/"):
+            return refuse(400, "图片地址无效")
+        src_qs = urllib.parse.parse_qs(src.query)
+        if src.path.startswith("/assets/uploads/"):
+            name = urllib.parse.unquote(src.path[len("/assets/uploads/"):])
+            target = os.path.join(UPLOAD_DIR, name)
+            if not UPLOAD_NAME_RE.fullmatch(name) or not os.path.isfile(target):
+                return refuse(404, "原图暂不可用")
+        elif src.path in IMAGE_ENDPOINTS:
+            try:
+                target = _lookup_image(src.path, src_qs)
+            except _NoImage as error:
+                return refuse(error.status, "原图暂不可用")
+        else:
+            return refuse(404, "原图暂不可用")
+        if _is_remote_image(target):
+            self.send_response(302)
+            self.send_header("Location", target)
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        if isinstance(target, bytes):
+            data = target
             try:
                 from PIL import Image
-                with Image.open(path) as im:
-                    im = im.convert("RGB")
-                    w, h = im.size
-                    if w > 360:
-                        im = im.resize((360, int(h * 360 / w)), Image.LANCZOS)
-                    im.save(tp, "JPEG", quality=80, optimize=True)
+                with Image.open(BytesIO(data)) as im:
+                    content_type = IMAGE_CONTENT_TYPES.get("." + (im.format or "").lower(), "application/octet-stream")
             except Exception:
-                return None, None
-        with open(tp, "rb") as f:
-            return f.read(), "image/jpeg"
+                return refuse(404, "原图暂不可用")
+            self.send_response(200)
+            self.send_header("Content-Type", content_type)
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "private, no-store")
+            self.send_header("Vary", "Cookie")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.end_headers()
+            if not head:
+                self.wfile.write(data)
+            return
+        self.send_response(200)
+        self.send_header("Content-Type", IMAGE_CONTENT_TYPES.get(os.path.splitext(target)[1].lower(), "application/octet-stream"))
+        self.send_header("Content-Length", str(os.path.getsize(target)))
+        self.send_header("Cache-Control", "private, no-store")
+        self.send_header("Vary", "Cookie")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.end_headers()
+        if not head:
+            with open(target, "rb") as stream:
+                shutil.copyfileobj(stream, self.wfile)
+
+    def do_HEAD(self):
+        parsed = urllib.parse.urlparse(self.path)
+        if parsed.path == "/api/original-image":
+            return self._api_original_image(urllib.parse.parse_qs(parsed.query), head=True)
+        if parsed.path == "/api/image-preview":
+            return self._api_image_preview(urllib.parse.parse_qs(parsed.query), head=True)
+        if parsed.path == "/api/uploads/preview":
+            return self._api_upload_preview(urllib.parse.parse_qs(parsed.query), head=True)
+        super().do_HEAD()
 
     def _api_official_graph(self):
         cached = _wv_get(("graph",))
@@ -2313,77 +2840,10 @@ class Handler(BaseStaticHandler):
         self._json(200, {"ok": True})
 
     def _api_official_img(self, qs):
-        cid = qs.get("cid", [None])[0]
-        n = int(qs.get("n", ["0"])[0] or 0)
-        thumb = (qs.get("t", ["0"])[0] in ("1", "true"))
-        if not cid:
-            self.send_error(400); return
-        conn = wv()
-        rows = conn.execute("SELECT image_path FROM character_images WHERE character_id=? ORDER BY COALESCE(sort_order,id), id", (cid,)).fetchall()
-        conn.close()
-        paths = []
-        for r in rows:
-            p = _safe_image_path(r["image_path"])
-            if p and (_is_remote_image(p) or os.path.isfile(p)):
-                paths.append(p)
-        if not paths:
-            self.send_error(404); return
-        path = paths[min(n, len(paths) - 1)]
-        if _is_remote_image(path):
-            self.send_response(302)
-            self.send_header("Location", path)
-            self.send_header("Cache-Control", "public, max-age=604800")
-            self.send_header("Content-Length", "0")
-            self.end_headers()
-            return
-        if thumb:
-            data, ct = self._thumb_bytes(path)
-            if data is None:
-                thumb = False
-        if not thumb:
-            ext = os.path.splitext(path)[1].lower()
-            ct = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif"}.get(ext, "application/octet-stream")
-            with open(path, "rb") as f:
-                data = f.read()
-        self.send_response(200)
-        self.send_header("Content-Type", ct)
-        self.send_header("Content-Length", str(len(data)))
-        self.send_header("Cache-Control", "public, max-age=604800")
-        self.end_headers()
-        self.wfile.write(data)
-
-    # ---------- 素材库（/api/assets/*）：世界观库素材的统一对外出口 ----------
-    # 游戏端通过 https://huiguan.iridescently.xyz/api/assets/* 复用角色立绘与设计资源，
-    # 不再各自复制图片到 public/assets。公开只读，任意来源可跨域。
+        self._send_public_image("/api/official/img", qs)
 
     def _assets_cors(self):
         self.send_header("Access-Control-Allow-Origin", "*")
-
-    def _send_asset_image(self, path, thumb=False):
-        if _is_remote_image(path):
-            self.send_response(302)
-            self._assets_cors()
-            self.send_header("Location", path)
-            self.send_header("Cache-Control", "public, max-age=604800")
-            self.send_header("Content-Length", "0")
-            self.end_headers()
-            return
-        if thumb:
-            data, ct = self._thumb_bytes(path)
-            if data is None:
-                thumb = False
-        if not thumb:
-            ext = os.path.splitext(path)[1].lower()
-            ct = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif"}.get(ext, "application/octet-stream")
-            with open(path, "rb") as f:
-                data = f.read()
-        self.send_response(200)
-        self._assets_cors()
-        self.send_header("Content-Type", ct)
-        self.send_header("Content-Length", str(len(data)))
-        self.send_header("Cache-Control", "public, max-age=2592000")
-        self.end_headers()
-        self.wfile.write(data)
 
     def _api_assets_manifest(self):
         """素材库清单：角色 → 头像/立绘列表 + 设计资源入口（供各小游戏与素材库页使用）"""
@@ -2425,58 +2885,12 @@ class Handler(BaseStaticHandler):
         self._json(200, cached)
 
     def _api_assets_avatar(self, qs):
-        """角色代表图：?cid=N 或 ?name=角色名（支持别名），&t=1 返回缩略图"""
-        cid = qs.get("cid", [None])[0]
-        name = qs.get("name", [None])[0]
-        thumb = (qs.get("t", ["0"])[0] in ("1", "true"))
-        conn = wv()
-        try:
-            if not cid and name:
-                name = name.strip()
-                row = conn.execute("SELECT id FROM characters WHERE name=? AND merged_to IS NULL", (name,)).fetchone()
-                if not row:
-                    row = conn.execute("SELECT id FROM characters WHERE (','||COALESCE(aliases,'')||',') LIKE ? AND merged_to IS NULL",
-                                       ("%" + name + "%",)).fetchone()
-                if not row:
-                    self.send_error(404); return
-                cid = str(row["id"])
-            if not cid:
-                self.send_error(400); return
-            path = None
-            crow = conn.execute("SELECT avatar_id FROM characters WHERE id=?", (cid,)).fetchone()
-            if crow and crow["avatar_id"]:
-                ir = conn.execute("SELECT image_path FROM character_images WHERE id=?", (crow["avatar_id"],)).fetchone()
-                if ir:
-                    p = _safe_image_path(ir["image_path"])
-                    if p and (_is_remote_image(p) or os.path.isfile(p)):
-                        path = p
-            if not path:
-                for r in conn.execute("SELECT image_path FROM character_images WHERE character_id=? ORDER BY COALESCE(sort_order,id), id", (cid,)):
-                    p = _safe_image_path(r["image_path"])
-                    if p and (_is_remote_image(p) or os.path.isfile(p)):
-                        path = p
-                        break
-        finally:
-            conn.close()
-        if not path:
-            self.send_error(404); return
-        self._send_asset_image(path, thumb)
+        """角色代表图：?cid=N 或 ?name=角色名（支持别名），&t=1 返回缩略图；其余为站点预览版"""
+        self._send_public_image("/api/assets/avatar", qs, cors=True, max_age=2592000)
 
     def _api_assets_image(self, qs):
-        """按 character_images.id 取图：?id=N，&t=1 返回缩略图"""
-        iid = qs.get("id", [None])[0]
-        thumb = (qs.get("t", ["0"])[0] in ("1", "true"))
-        if not iid:
-            self.send_error(400); return
-        conn = wv()
-        row = conn.execute("SELECT image_path FROM character_images WHERE id=?", (iid,)).fetchone()
-        conn.close()
-        if not row:
-            self.send_error(404); return
-        path = _safe_image_path(row["image_path"])
-        if not path or (not _is_remote_image(path) and not os.path.isfile(path)):
-            self.send_error(404); return
-        self._send_asset_image(path, thumb)
+        """按 character_images.id 取图：?id=N，&t=1 返回缩略图；其余为站点预览版"""
+        self._send_public_image("/api/assets/image", qs, cors=True, max_age=2592000)
 
     def _api_assets_shared(self, qs):
         """共用素材库（不依赖角色）：?id=N 取图(&t=1 缩略)；无 id 时按类别返回清单"""
@@ -2485,13 +2899,8 @@ class Handler(BaseStaticHandler):
         conn = wv()
         try:
             if iid:
-                row = conn.execute("SELECT path FROM shared_assets WHERE id=?", (iid,)).fetchone()
-                if not row:
-                    self.send_error(404); return
-                path = _safe_image_path(row["path"])
-                if not path or (not _is_remote_image(path) and not os.path.isfile(path)):
-                    self.send_error(404); return
-                self._send_asset_image(path, thumb)
+                conn.close()
+                self._send_public_image("/api/assets/shared", qs, cors=True, max_age=2592000)
                 return
             cat = qs.get("category", [None])[0]
             sql = "SELECT id, category, name, source, tags, file_size FROM shared_assets"
@@ -3534,64 +3943,10 @@ class Handler(BaseStaticHandler):
         self._json(200, {"images": rows})
 
     def _api_official_unclassified_img(self, qs):
-        iid = qs.get("id", [None])[0]
-        if not iid:
-            self.send_error(400); return
-        w = sqlite3.connect(WV_DB, timeout=10)
-        row = w.execute("SELECT image_path FROM unclassified_images WHERE id=?", (iid,)).fetchone()
-        w.close()
-        if not row:
-            self.send_error(404); return
-        path = _safe_image_path(row[0])
-        if not path or not os.path.isfile(path):
-            self.send_error(404); return
-        ext = os.path.splitext(path)[1].lower()
-        ct = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif"}.get(ext, "application/octet-stream")
-        with open(path, "rb") as f:
-            data = f.read()
-        self.send_response(200)
-        self.send_header("Content-Type", ct)
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        self._send_public_image("/api/official/unclassified-img", qs)
 
     def _api_official_img_id(self, qs):
-        iid = qs.get("id", [None])[0]
-        thumb = (qs.get("t", ["0"])[0] in ("1", "true"))
-        if not iid:
-            self.send_error(400); return
-        w = sqlite3.connect(WV_DB, timeout=10)
-        row = w.execute("SELECT image_path FROM character_images WHERE id=?", (iid,)).fetchone()
-        w.close()
-        if not row:
-            self.send_error(404); return
-        path = _safe_image_path(row[0])
-        if not path:
-            self.send_error(404); return
-        if _is_remote_image(path):
-            self.send_response(302)
-            self.send_header("Location", path)
-            self.send_header("Cache-Control", "public, max-age=604800")
-            self.send_header("Content-Length", "0")
-            self.end_headers()
-            return
-        if not os.path.isfile(path):
-            self.send_error(404); return
-        if thumb:
-            data, ct = self._thumb_bytes(path)
-            if data is None:
-                thumb = False
-        if not thumb:
-            ext = os.path.splitext(path)[1].lower()
-            ct = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp", ".gif": "image/gif"}.get(ext, "application/octet-stream")
-            with open(path, "rb") as f:
-                data = f.read()
-        self.send_response(200)
-        self.send_header("Content-Type", ct)
-        self.send_header("Content-Length", str(len(data)))
-        self.send_header("Cache-Control", "public, max-age=604800")
-        self.end_headers()
-        self.wfile.write(data)
+        self._send_public_image("/api/official/img-id", qs)
 
     def _api_official_image_reorder(self):
         ident = self._require_edit()
@@ -4381,6 +4736,10 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "角色名不能为空"}); return
         if len(name) > 50:
             self._json(400, {"error": "角色名过长（≤50字）"}); return
+        try:
+            image_data = _persist_preview_reference((body.get("image_data") or "").strip())
+        except ValueError as error:
+            self._json(400, {"error": str(error)}); return
         conn = db()
         conn.execute(
             """INSERT INTO fan_characters
@@ -4397,7 +4756,7 @@ class Handler(BaseStaticHandler):
              (body.get("ability") or "").strip(),
              (body.get("appearance") or "").strip(),
              (body.get("story") or "").strip(),
-             (body.get("image_data") or "").strip(),
+             image_data,
              1 if body.get("is_public", True) else 0,
              now_iso(), now_iso())
         )
@@ -4656,6 +5015,7 @@ class Handler(BaseStaticHandler):
         return _base_static_allowed(path)
 
     def _json(self, status, data, cookie=None):
+        data = _sanitize_json_image_sources(data)
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
         accept = (self.headers.get("Accept-Encoding") or "")
         use_gzip = "gzip" in accept and len(body) > 1024

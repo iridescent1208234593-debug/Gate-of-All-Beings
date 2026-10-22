@@ -115,12 +115,17 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
         else:
             ext = os.path.splitext(self.path.split("?")[0])[1].lower()
             if ("image/" in ct or ext in (".woff", ".woff2", ".ttf", ".otf")) and not any(
-                header.lower().startswith(b"access-control-allow-origin:") for header in self._headers_buffer
+                header.lower().startswith((b"access-control-allow-origin:", b"cache-control: private"))
+                for header in self._headers_buffer
             ):
                 # Public media remains exportable from the opaque showcase sandbox.
                 super().send_header("Access-Control-Allow-Origin", "*")
             max_age = CACHE_MAX_AGE.get(ext)
-            if self.code_max_age is not None and ext in (".js", ".mjs", ".css") and not HASHED_ASSET.search(self.path.split("?")[0]):
+            # A handler that set its own policy (e.g. private owner-only originals) keeps it.
+            own_policy = any(h.lower().startswith(b"cache-control:") for h in self._headers_buffer)
+            if own_policy:
+                pass
+            elif self.code_max_age is not None and ext in (".js", ".mjs", ".css") and not HASHED_ASSET.search(self.path.split("?")[0]):
                 # Unhashed game module code: browsers and the CDN must revalidate so a publish is visible at once.
                 # code_max_age > 0 is the rollback switch (see server/app/README.md).
                 if self.code_max_age > 0:
