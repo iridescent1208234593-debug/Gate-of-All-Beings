@@ -111,6 +111,36 @@ IMAGE_SOURCE_LIMIT = 20000
 IMAGE_SOURCE_MAX_AGE = 3600
 IMAGE_FETCH_LIMIT = 20 * 1024 * 1024
 
+# Official worldview names cannot be used as community account titles.
+OFFICIAL_NAME_BLACKLIST = frozenset(" ".join((
+    'MT Nonopanda 一凡 一笙 丁 七果 七臂 乙',
+    '乞峰 云飞 余 佳柒 元尾 元月 兆岳 兴帝',
+    '冠旭 冠萱 冬冬 凌铜 勃勃 千针 南歌 卡里',
+    '叶子 叶澜 哪吒 夏雨 大志 大松 大爽 大须',
+    '大黄 天介 天心 天虎 太上老君 子墨 宴瑞 小叶',
+    '小吴 小明 小瑶 小白 小白老师 小皇 小绿 小金龙',
+    '小鱼 小黑 山新 岩烬 师父 希声 归月 心缘',
+    '撒旦 斑臂 无限 旺财 明月 星月 晓月 最强执行者',
+    '月山 木炎 机长 李清凝 杨雪 杰克斯 极光 极阳',
+    '极阴 柚子 比丢 毛毛 江泠 池年 沐夜 泽宇',
+    '洛 洛竹 浩客 涅帕 清凝 清凝仙子 清泉 潘靖',
+    '灵遥 炎帝 狗剩 猫妖 猫渣 玄止 玄离 甲',
+    '画虎 白宜 白鬃 皆逆荒 皇受 破老 秃贝 秋辞',
+    '移动仓库 稀碎 空空 竹叶 粉末 紫罗兰 绿萝 罗小白',
+    '罗小黑 羽夕 羽毛球 老君 老府 肄目 肉山 肖符',
+    '舟渡 花轮 芷清 若水 莉澄 莽眼 蓝玉 虎妞',
+    '虚淮 蛋蛋 西地 西木子 谛听 辛绝 逸风 那伽',
+    '郑信毅 酒仙 酒鬼 银钩 镜云 闵先生 闵翔 阎明',
+    '阿柱 阿根 阿狸 阿良 阿赫 阿龙 雨夜 雨檀',
+    '雨笛 青丘 青峰 风息 飞毯豹 鬼辰 鬼镰 鳄鱼',
+    '鸠老 鸭鸭 鹤天 鹿野 黄溜溜 黑猫 黑阳 龙游市市长',
+    '龙老 木落 艾米 老龙王 众生之门',
+)).split())
+OFFICIAL_NAME_ERROR = "该名号为官方世界观角色名，禁止用作名号，请另取一个"
+
+def is_official_title_name(value):
+    return (value or "").strip() in OFFICIAL_NAME_BLACKLIST
+
 def wv():
     """只读连接世界观 SQLite 库"""
     conn = sqlite3.connect(WV_DB, timeout=10)
@@ -1856,6 +1886,9 @@ class Handler(BaseStaticHandler):
         password = body.get("password") or ""
         nickname = (body.get("nickname") or "").strip()[:24]
 
+        if is_official_title_name(nickname or username):
+            self._json(400, {"error": OFFICIAL_NAME_ERROR})
+            return
         if not USERNAME_RE.match(username):
             self._json(400, {"error": "用户名需为 2-16 位中英文、数字或下划线"})
             return
@@ -1958,6 +1991,10 @@ class Handler(BaseStaticHandler):
             return
 
         # —— 注册（用户名不存在） ——
+        # 新账号默认以用户名作为名号；已有账号登录不会经过此检查。
+        if is_official_title_name(username):
+            self._json(400, {"error": OFFICIAL_NAME_ERROR})
+            return
         if rate_blocked(f"reg:{ip}", 5, 3600):
             self._json(429, {"error": "注册过于频繁，请稍后再试"})
             return
@@ -3022,6 +3059,12 @@ class Handler(BaseStaticHandler):
             return
         if len(newname) > 24:
             self._json(400, {"error": "昵称最长 24 个字符"})
+            return
+        if newname.isdigit():
+            self._json(400, {"error": "昵称不可为纯数字"})
+            return
+        if is_official_title_name(newname):
+            self._json(400, {"error": OFFICIAL_NAME_ERROR})
             return
 
         kind, uid = ident["kind"], ident["uid"]
