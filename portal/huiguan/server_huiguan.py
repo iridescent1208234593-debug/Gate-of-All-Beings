@@ -2547,7 +2547,7 @@ class Handler(BaseStaticHandler):
             self._json(200, cached); return
         conn = wv()
         rows = conn.execute(
-            "SELECT * FROM v_character_gallery WHERE id NOT IN (SELECT id FROM characters WHERE merged_to IS NOT NULL) AND completeness BETWEEN ? AND ? "
+            "SELECT * FROM v_character_gallery WHERE id NOT IN (SELECT id FROM characters WHERE merged_to IS NOT NULL) AND id NOT IN (SELECT id FROM characters WHERE category='同人角色') AND completeness BETWEEN ? AND ? "
             + ("AND (name LIKE ? OR aliases LIKE ?) " if q else "") + dup_clause
             + "ORDER BY "
             + "CASE WHEN type LIKE '%主角%' THEN 0 "
@@ -2558,7 +2558,7 @@ class Handler(BaseStaticHandler):
             [min_c, max_c] + ([f"%{q}%", f"%{q}%"] if q else []) + [limit, offset]
         ).fetchall()
         total = conn.execute(
-            "SELECT COUNT(*) FROM v_character_gallery WHERE id NOT IN (SELECT id FROM characters WHERE merged_to IS NOT NULL) AND completeness BETWEEN ? AND ? "
+            "SELECT COUNT(*) FROM v_character_gallery WHERE id NOT IN (SELECT id FROM characters WHERE merged_to IS NOT NULL) AND id NOT IN (SELECT id FROM characters WHERE category='同人角色') AND completeness BETWEEN ? AND ? "
             + ("AND (name LIKE ? OR aliases LIKE ?)" if q else "") + (" " + dup_clause.strip() if dup else ""),
             [min_c, max_c] + ([f"%{q}%", f"%{q}%"] if q else [])
         ).fetchone()[0]
