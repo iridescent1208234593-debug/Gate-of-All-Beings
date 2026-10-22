@@ -57,7 +57,14 @@
     if (!/^\/assets\/uploads\/[a-f0-9]+\.(png|jpg|webp|gif)$/.test(result.url || '')) throw new Error('图片保存地址无效');
     return result.url;
   }
+  // The server shows stored uploads as /api/uploads/preview?name=…; saving needs the durable path back.
+  function durable(value) {
+    const match = typeof value === 'string' && /^\/api\/uploads\/preview\?name=([A-Za-z0-9]{16,64}\.(?:png|jpe?g|webp|gif))$/.exec(value);
+    return match ? '/assets/uploads/' + match[1] : value;
+  }
   async function character(data) {
+    data = { ...data, image: durable(data.image), avatar_asset_id: durable(data.avatar_asset_id) };
+    if (Array.isArray(data.images)) data.images = data.images.map(durable);
     const next = { ...data };
     const cache = new Map();
     const resolve = async value => {
