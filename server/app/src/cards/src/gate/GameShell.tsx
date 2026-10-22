@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import '@lxh/shared-ui/site-nav.js';
 import { EntryGate } from './EntryGate';
 import { AccountLinkReminder } from './AccountLinkReminder';
+import { OrientationGuard, useOrientationGuard } from './OrientationGuard';
 import { needsAccountAfterOnboarding } from './accountReminder';
 import { LoadBoundary } from '../components/LoadBoundary';
 import { EMPTY_IDENTITY, PlayerProfileProvider, accountScope, identityComplete, usePlayerProfile, type GateIdentity } from '../game/PlayerProfile';
@@ -41,6 +42,9 @@ function GateFlow() {
   const onboarding = entered && !profile.loading && profile.resolved && (creatingNew || !identityComplete(profile.identity));
   // The shared site bar belongs to the app and its loading state, not to the intro or onboarding screens.
   const showBar = entered && !gateVisible && !onboarding;
+  // Phones: landscape is forced until the hall itself is on screen, then only the default.
+  const inGame = entered && !gateVisible && !creatingNew && profile.resolved && identityComplete(profile.identity);
+  const orientation = useOrientationGuard(inGame ? 'game' : 'opening');
   useEffect(() => { if (!showBar) return; siteNav()?.mount(); return () => siteNav()?.unmount(); }, [showBar]);
   function enter() {
     if (leaving) return;
@@ -80,7 +84,8 @@ function GateFlow() {
     </Suspense></LoadBoundary>}
     {accountReminder && !profile.account.logged_in && <AccountLinkReminder onContinue={() => setAccountReminder(false)} />}
     {entered && profile.resolved && profile.error && <div className="gate-profile-status" role="status">{profile.error}<button type="button" onClick={() => void profile.refresh()}>重试</button></div>}
-    {gateVisible && <EntryGate leaving={leaving} onEnter={enter} onSkip={enter} />}
+    {gateVisible && <EntryGate leaving={leaving} paused={orientation.blocked} onEnter={enter} onSkip={enter} />}
+    <OrientationGuard {...orientation} />
   </>;
 }
 export default function GameShell() {
