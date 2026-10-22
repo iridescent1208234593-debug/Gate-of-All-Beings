@@ -24,6 +24,7 @@ import sqlite3
 import threading
 import time
 import traceback
+import unicodedata
 from io import BytesIO
 from email import policy
 from email.parser import BytesParser
@@ -112,7 +113,12 @@ IMAGE_SOURCE_MAX_AGE = 3600
 IMAGE_FETCH_LIMIT = 20 * 1024 * 1024
 
 # Official worldview names cannot be used as community account titles.
-OFFICIAL_NAME_BLACKLIST = frozenset(" ".join((
+def _normalize_title_name(value):
+    value = unicodedata.normalize("NFKC", str(value or "")).casefold()
+    return "".join(ch for ch in value if not ch.isspace() and unicodedata.category(ch) != "Cf")
+
+
+OFFICIAL_NAME_BLACKLIST = frozenset(_normalize_title_name(name) for name in " ".join((
     'MT Nonopanda 一凡 一笙 丁 七果 七臂 乙',
     '乞峰 云飞 余 佳柒 元尾 元月 兆岳 兴帝',
     '冠旭 冠萱 冬冬 凌铜 勃勃 千针 南歌 卡里',
@@ -139,7 +145,7 @@ OFFICIAL_NAME_BLACKLIST = frozenset(" ".join((
 OFFICIAL_NAME_ERROR = "该名号为官方世界观角色名，禁止用作名号，请另取一个"
 
 def is_official_title_name(value):
-    return (value or "").strip() in OFFICIAL_NAME_BLACKLIST
+    return _normalize_title_name(value) in OFFICIAL_NAME_BLACKLIST
 
 def wv():
     """只读连接世界观 SQLite 库"""

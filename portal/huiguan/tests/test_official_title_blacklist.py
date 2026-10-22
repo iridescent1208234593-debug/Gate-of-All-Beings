@@ -37,9 +37,11 @@ class Client:
         self.base = base
         self.session = ""
 
-    def call(self, path, body=None):
+    def call(self, path, body=None, client_ip=None):
         data = None if body is None else json.dumps(body, ensure_ascii=False).encode()
         headers = {"Content-Type": "application/json"}
+        if client_ip:
+            headers["CF-Connecting-IP"] = client_ip
         if self.session:
             headers["Cookie"] = "session=" + self.session
         request = urllib.request.Request(self.base + path, data=data, headers=headers)
@@ -86,24 +88,50 @@ class OfficialTitleBlacklistTest(unittest.TestCase):
 
     def test_register_rejects_official_display_name(self):
         status, result = self.client.call("/api/register", {
-            "username": "new_member", "password": "test-password-123", "nickname": "罗小黑"})
+            "username": "new_member", "password": "test-password-123", "nickname": "罗小黑"},
+            client_ip="192.0.2.10")
         self.assertEqual(status, 400)
         self.assertIn("官方世界观角色名", result["error"])
 
+    def test_register_rejects_normalized_official_name_variants(self):
+        for index, nickname in enumerate(("ＭＴ", "mT", "M\u200bT", "M T")):
+            with self.subTest(nickname=nickname):
+                status, result = self.client.call("/api/register", {
+                    "username": f"variant_{index}", "password": "test-password-123", "nickname": nickname},
+                    client_ip=f"192.0.2.{20 + index}")
+                self.assertEqual(status, 400)
+                self.assertIn("官方世界观角色名", result["error"])
+
+    def test_matching_remains_exact_after_normalization(self):
+        status, result = self.client.call("/api/register", {
+            "username": "near_match", "password": "test-password-123", "nickname": "余某"},
+            client_ip="192.0.2.11")
+        self.assertEqual(status, 200, result)
+
+    def test_registration_keeps_existing_numeric_name_behavior(self):
+        status, result = self.client.call("/api/register", {
+            "username": "numeric_name", "password": "test-password-123", "nickname": "123456"},
+            client_ip="192.0.2.15")
+        self.assertEqual(status, 200, result)
+        status, result = self.client.call("/api/auth", {
+            "username": "654321", "password": "test-password-123"}, client_ip="192.0.2.16")
+        self.assertEqual((status, result.get("registered")), (200, True))
+
     def test_auth_rejects_official_name_only_for_new_accounts(self):
         status, result = self.client.call("/api/auth", {
-            "username": "罗小黑", "password": "test-password-123"})
+            "username": "罗小黑", "password": "test-password-123"}, client_ip="192.0.2.12")
         self.assertEqual(status, 400)
         self.assertIn("官方世界观角色名", result["error"])
 
         # An existing account can still log in even if its stored display title is a role name.
         status, result = self.client.call("/api/auth", {
-            "username": "existing_official", "password": "test-password-123"})
+            "username": "existing_official", "password": "test-password-123"}, client_ip="192.0.2.13")
         self.assertEqual((status, result.get("registered")), (200, False))
 
     def test_rename_rejects_official_and_numeric_names(self):
         status, result = self.client.call("/api/register", {
-            "username": "rename_member", "password": "test-password-123", "nickname": "普通名号"})
+            "username": "rename_member", "password": "test-password-123", "nickname": "普通名号"},
+            client_ip="192.0.2.14")
         self.assertEqual(status, 200, result)
         status, result = self.client.call("/api/rename", {"nickname": "罗小黑"})
         self.assertEqual(status, 400)
