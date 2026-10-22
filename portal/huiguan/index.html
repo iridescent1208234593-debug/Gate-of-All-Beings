@@ -751,6 +751,9 @@
   .fan-corner-btn:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 4px 14px rgba(212,168,64,.35)}
   .cream-corner-btn{position:fixed;top:14px;right:118px;z-index:10000;padding:5px 14px;font-size:12px;font-family:inherit;letter-spacing:1px;background:#f5f0e8;color:#3a4a3e;border:1px solid #d4cfbe;border-radius:6px;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(0,0,0,.12)}
   .cream-corner-btn:hover{background:#fbf8f2;border-color:#5a9e8f;color:#2a3a2e;transform:translateY(-1px)}
+  @media (max-width: 720px) {
+    .fan-corner-btn, .cream-corner-btn { padding: 4px 8px; letter-spacing: 0; white-space: nowrap; }
+  }
   .theme-transition{transition:background-color .6s ease,color .6s ease}
 </style>
 
@@ -828,7 +831,7 @@
     if (!btn.isConnected) return;
     var nav = document.getElementById('qc-nav');
     if (!nav) { setTimeout(place, 200); return; }
-    var slot = nav.querySelector('.qc-slot');
+    var slot = nav.querySelector('.qc-nav-slot');
     if (!slot) { setTimeout(place, 200); return; }
     // Corner controls live in the shared bar's page slot (design-system.md 布局约束).
     [document.querySelector('.fan-corner-btn'), btn].forEach(function (control) {
@@ -3839,7 +3842,10 @@ function generateAndSave(data, colors) {
 
   // 保存到 localStorage：编辑模式原位替换，否则追加到头部
   const all = loadAll();
+  let previousCode = '';
   if (editingIndex !== null) {
+    // 编辑时改了编号：带上原编号，服务端原位改名（画廊记录随之更新），不另存一份
+    if (all[editingIndex] && all[editingIndex].code !== data.code) previousCode = all[editingIndex].code || '';
     all[editingIndex] = data;
   } else {
     const previous = all.findIndex(item => item.code === data.code);
@@ -3848,16 +3854,16 @@ function generateAndSave(data, colors) {
   saveAll(all);
 
   if (currentUser && currentUser.logged_in) {
-    postSave(data, html);
+    postSave(data, html, previousCode);
   } else {
     // 未登录：暂存并强制登录，登录后自动补交
-    pendingSave = { data, html };
+    pendingSave = { data, html, previousCode };
     showToast('success', '✔ 展示页已生成！登录 / 注册后即可收录进会馆名册。', 5000);
     openAuthModal('登录 / 注册后，你的人设将自动保存并绑定到你的账户。');
   }
 }
 
-async function postSave(data, html) {
+async function postSave(data, html, previousCode = '') {
   const button = document.getElementById('btnSubmit');
   if (button.disabled) return false;
   button.disabled = true;
@@ -3868,7 +3874,7 @@ async function postSave(data, html) {
     html = generateShowcaseHTML(data, colorsFromData(data));
     const r = await fetch('/api/save-character', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: data.code, html, data }), signal: AbortSignal.timeout(30000)
+      body: JSON.stringify({ code: data.code, previous_code: previousCode, html, data }), signal: AbortSignal.timeout(30000)
     });
     const result = await r.json().catch(() => ({}));
     if (!r.ok || !result.ok || !result.url) {
@@ -3900,7 +3906,7 @@ async function postSave(data, html) {
 function flushPending() {
   if (pendingSave) {
     const p = pendingSave;
-    postSave(p.data, p.html);
+    postSave(p.data, p.html, p.previousCode);
   }
 }
 
@@ -3995,7 +4001,6 @@ function fillFormFromData(c) {
   document.querySelectorAll('input[name="extra_sys"]').forEach(cb => cb.checked = false);
   document.getElementById('royalCustomName').value = '';
   customBranches = {};
-  if (f.gender) for (const r of f.gender) r.checked = false;
   // 解析 abilities 字符串
   const royalBranches = [];
   const extraMap = {};
@@ -4214,6 +4219,13 @@ renderList();
 window.__HUIGUAN_OWN_AUTH = true;
 const initialLoginCheck = checkLogin();
 window.__AUTH_NEXT = new URLSearchParams(location.search).get('next') || '';
+// 从同人画廊「编辑」进入：?edit=<编号>，登录同步完成后打开该人设的编辑表单
+const editFromQuery = new URLSearchParams(location.search).get('edit');
+if (editFromQuery) initialLoginCheck.then(() => {
+  const i = loadAll().findIndex(c => c && c.code === editFromQuery);
+  if (i >= 0) editChar(i);
+  else showToast('error', '没有在你的人设里找到「' + escapeHtml(editFromQuery) + '」。请确认已登录创建它的账户。', 7000);
+});
 if (new URLSearchParams(location.search).get('openauth')) initialLoginCheck.then(() => {
   if (!currentUser) openAuthModal('登录会馆账号后，保存的数据才能更可靠地关联到你。');
 });

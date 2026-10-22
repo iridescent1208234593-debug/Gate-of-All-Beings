@@ -718,6 +718,42 @@ def to_str(v):
         return "、".join(str(x) for x in v if x)
     return str(v).strip()
 
+
+# 同人画廊卡片字段 ← 已登记人设（公开与后续编辑同步共用一套映射）
+FAN_SYNC_COLUMNS = ("name", "type", "species", "gender", "faction", "ability", "appearance", "story", "image_data")
+
+
+def fan_fields(cd):
+    return {
+        "name": (cd.get("name") or "").strip(),
+        # 登记表单的字段名在后（species_type / species_detail / abilities / background）
+        "type": to_str(cd.get("type") or cd.get("species_type")),
+        "species": to_str(cd.get("species") or cd.get("species_detail")),
+        "gender": to_str(cd.get("gender")),
+        "faction": to_str(cd.get("faction_label") or cd.get("faction")),
+        "ability": to_str(cd.get("ability") or cd.get("abilities")),
+        "appearance": to_str(cd.get("appearance")),
+        "story": to_str(cd.get("story") or cd.get("background")),
+        "image_data": to_str(cd.get("image") or (cd.get("images") or [None])[0]),
+    }
+
+
+def sync_fan_characters(conn, ident, code, cd, previous_code=None):
+    """所有者保存人设后，原位刷新其画廊记录（不改公开状态、不新建副本）；只匹配本人 (kind, uid)。"""
+    if not code or not isinstance(cd, dict):
+        return 0
+    fields = fan_fields(cd)
+    if not fields["name"]:
+        return 0
+    codes = [code] + ([previous_code] if previous_code and previous_code != code else [])
+    qm = ",".join("?" * len(codes))
+    sets = ", ".join(f"{col}=?" for col in FAN_SYNC_COLUMNS)
+    cur = conn.execute(
+        f"UPDATE fan_characters SET {sets}, code=?, updated_at=? "
+        f"WHERE user_kind=? AND user_uid=? AND COALESCE(type,'')!='配色海报' AND code IN ({qm})",
+        [fields[col] for col in FAN_SYNC_COLUMNS] + [code, now_iso(), ident["kind"], ident["uid"]] + codes)
+    return cur.rowcount
+
 def load_data():
     if not os.path.exists(DATA_FILE):
         return {}
@@ -1909,6 +1945,16 @@ class Handler(BaseStaticHandler):
         key = self._data_key(ident)
         chars = data.get(key, [])
 
+        # 编辑时改了编号：原位改名，而不是另存一份新记录
+        previous_code = body.get("previous_code") or ""
+        if previous_code and previous_code != code and not any(c.get("code") == code for c in chars):
+            for c in chars:
+                if c.get("code") == previous_code:
+                    c["code"] = code
+                    break
+            else:
+                previous_code = ""
+
         found = False
         for c in chars:
             if c.get("code") == code:
@@ -1926,6 +1972,13 @@ class Handler(BaseStaticHandler):
 
         data[key] = chars
         save_data(data)
+
+        conn = db()
+        try:
+            sync_fan_characters(conn, ident, code, data_field, previous_code)
+            conn.commit()
+        finally:
+            conn.close()
 
         # 等级积分：只有新登记的设表计分（修改已有设表不计），每日有上限，规则见 account_progress.RULES
         awarded = []
@@ -1976,6 +2029,13 @@ class Handler(BaseStaticHandler):
             new_chars.append(rec)
         data[key] = new_chars
         save_data(data)
+        conn = db()
+        try:
+            for rec in new_chars:
+                sync_fan_characters(conn, ident, rec["code"], rec["data"])
+            conn.commit()
+        finally:
+            conn.close()
         self._json(200, {"ok": True})
 
     # ---------- 管理员 ----------
@@ -4267,6 +4327,8 @@ class Handler(BaseStaticHandler):
         q = (qs.get("q", [""])[0] or "").strip()
         ft = (qs.get("type", [""])[0] or "").strip()
         offset = (page - 1) * limit
+        # 只回传「是否本人」，不下发所有者 id（Stage 1.7）
+        viewer = self._require_ident_optional()
         conn = db()
         where = ["is_public=1"]
         params = []
@@ -4280,18 +4342,19 @@ class Handler(BaseStaticHandler):
         self._ensure_fan_reaction_tables(conn)
         rows = conn.execute(
             f"""SELECT id, '' AS user_kind, '' AS user_uid, user_name, name, type, species, gender, faction, ability, appearance, story, image_data, is_public, code, created_at, updated_at,
+                      (user_kind=? AND user_uid=?) AS is_mine,
                       (SELECT COUNT(*) FROM fan_char_favorites fav WHERE fav.character_id=fan_characters.id)
                       + (SELECT COUNT(*) FROM fan_char_votes vote WHERE vote.character_id=fan_characters.id AND vote.vote=1)
                       - 2 * (SELECT COUNT(*) FROM fan_char_votes vote WHERE vote.character_id=fan_characters.id AND vote.vote=-1) AS reaction_score
                FROM fan_characters WHERE {wc}
                ORDER BY reaction_score DESC, created_at DESC, id DESC LIMIT ? OFFSET ?""",
-            params + [limit, offset]
+            [viewer["kind"] if viewer else "", viewer["uid"] if viewer else ""] + params + [limit, offset]
         ).fetchall()
         total = conn.execute(
             f"SELECT COUNT(*) FROM fan_characters WHERE {wc}", params
         ).fetchone()[0]
         conn.close()
-        chars = [dict(r) for r in rows]
+        chars = [dict(r, is_mine=bool(viewer and r["is_mine"])) for r in rows]
         self._json(200, {"characters": chars, "total": total, "page": page, "limit": limit})
 
     def _api_fan_my(self):
@@ -4411,24 +4474,28 @@ class Handler(BaseStaticHandler):
                 code = cd.get("code")
                 if code not in codes:
                     continue
-                name = (cd.get("name") or "").strip()
-                if not name:
+                fields = fan_fields(cd)
+                if not fields["name"]:
                     continue
+                # 同一角色只保留一条画廊记录：先按编号找，旧记录（无编号）再按名字找
                 existing = conn.execute(
-                    "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND name=?",
-                    (ident["kind"], ident["uid"], name)
+                    "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND code=? AND COALESCE(type,'')!='配色海报' ORDER BY id LIMIT 1",
+                    (ident["kind"], ident["uid"], code)
+                ).fetchone() or conn.execute(
+                    "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND name=? AND COALESCE(code,'')='' ORDER BY id LIMIT 1",
+                    (ident["kind"], ident["uid"], fields["name"])
                 ).fetchone()
                 if existing:
-                    if existing["is_public"]:
-                        # 已公开：跳过
-                        skipped += 1
-                        continue
-                    # 曾公开后取消：重新公开
+                    # 已公开：跳过；曾公开后取消：重新公开。两种情况都顺带刷新为最新资料
+                    sets = ", ".join(f"{col}=?" for col in FAN_SYNC_COLUMNS)
                     conn.execute(
-                        "UPDATE fan_characters SET is_public=1, updated_at=? WHERE id=?",
-                        (now_iso(), existing["id"])
+                        f"UPDATE fan_characters SET {sets}, code=?, is_public=1, updated_at=? WHERE id=?",
+                        [fields[col] for col in FAN_SYNC_COLUMNS] + [to_str(code), now_iso(), existing["id"]]
                     )
-                    published += 1
+                    if existing["is_public"]:
+                        skipped += 1
+                    else:
+                        published += 1
                     continue
                 conn.execute(
                     """INSERT INTO fan_characters
@@ -4437,17 +4504,9 @@ class Handler(BaseStaticHandler):
                        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                     (ident["kind"], ident["uid"],
                      ident.get("nickname") or ident.get("username") or "",
-                     name,
-                     to_str(cd.get("type")),
-                     to_str(cd.get("species")),
-                     to_str(cd.get("gender")),
-                     to_str(cd.get("faction") or cd.get("faction_label")),
-                     to_str(cd.get("ability")),
-                     to_str(cd.get("appearance")),
-                     to_str(cd.get("story")),
-                     to_str(cd.get("image") or (cd.get("images") or [None])[0]),
+                     *[fields[col] for col in FAN_SYNC_COLUMNS],
                      1,  # is_public
-                     to_str(cd.get("code")),
+                     to_str(code),
                      now_iso(), now_iso())
                 )
                 published += 1

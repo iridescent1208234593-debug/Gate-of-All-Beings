@@ -45,6 +45,8 @@ h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
 .card-published-tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;background:var(--accent);color:#fff;margin-top:4px}
 .card-unpublish-btn{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid var(--red,#e74c3c);color:var(--red,#e74c3c);background:transparent;cursor:pointer;margin-top:4px;margin-left:4px;font-family:inherit}
 .card-unpublish-btn:hover{background:var(--red,#e74c3c);color:#fff}
+.card-edit-btn{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid var(--gold);color:var(--gold);background:transparent;cursor:pointer;margin-top:4px;margin-left:4px;font-family:inherit;text-decoration:none}
+.card-edit-btn:hover{background:var(--gold);color:#fff}
 .load-more{display:block;margin:18px auto 0;font-family:inherit;font-size:13px;cursor:pointer;padding:9px 30px;border-radius:8px;border:1px solid var(--accent);background:var(--panel);color:var(--accent);transition:all .15s}
 .load-more:hover{background:var(--accent);color:#fff}
 .back{display:inline-block;margin-bottom:12px;color:var(--dim);font-size:13px;text-decoration:none}
@@ -159,9 +161,13 @@ const PAGE=12;
 let curType='', curQ='', timer=null;
 let curPage=1, loaded=0, total=0, loading=false;
 let currentUser=null;
-let myChars=[], publishedNames=new Set(), publishedIds={};
+let myChars=[], publishedIds={};
 let selectedCodes=new Set();
 
+// 已公开记录按编号对应；早期无编号的记录按名字对应
+function publishedId(c){return publishedIds['code:'+(c.code||'')]||publishedIds['name:'+(c.name||'')];}
+// #charForm：首页跳过开场并直接展开登记表单
+function editHref(code){return '/?edit='+encodeURIComponent(code||'')+'#charForm';}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 // ====== 公开角色卡片（画廊列表）======
@@ -181,7 +187,7 @@ function cardHTML(c){
     ${img}${placeholder}
     <div class="card-body">
       <div class="card-name">${esc(c.name)}</div>
-      <div class="card-author">— ${esc(c.user_name||'匿名')}${isPoster?' · <a href="/haibao/" style="color:var(--gold)" onclick="event.stopPropagation()">去制作</a>':''}</div>
+      <div class="card-author">— ${esc(c.user_name||'匿名')}${isPoster?' · <a href="/haibao/" style="color:var(--gold)" onclick="event.stopPropagation()">去制作</a>':''}${c.is_mine&&!isPoster&&c.code?`<a class="card-edit-btn" href="${esc(editHref(c.code))}" onclick="event.stopPropagation()">编辑</a>`:''}</div>
       ${RFX.bar('fan',c.id)}
     </div>
   </div>`;
@@ -226,7 +232,7 @@ function onSearch(v){curQ=(v||'').trim();clearTimeout(timer);timer=setTimeout(()
 
 // ====== 我的已登记人设 ======
 function myCardHTML(c,idx){
-  const isPublished=publishedNames.has(c.name||'');
+  const isPublished=!!publishedId(c);
   const cls='card checkable'+(selectedCodes.has(c.code)?' selected':'')+(isPublished?' published':'');
   const img=c.image
     ? `<img class="card-img" data-original-image src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.querySelector('.card-placeholder').style.display='flex';this.style.display='none'">`
@@ -239,7 +245,7 @@ function myCardHTML(c,idx){
     ${img}${placeholder}
     <div class="card-body">
       <div class="card-name">${esc(c.name)}</div>
-      ${isPublished?`<span class="card-published-tag">已公开</span><button class="card-unpublish-btn" onclick="event.stopPropagation();unpublishChar(myChars[${idx}])">取消公开</button>`:''}
+      ${isPublished?`<span class="card-published-tag">已公开</span><a class="card-edit-btn" href="${esc(editHref(c.code))}" onclick="event.stopPropagation()">编辑</a><button class="card-unpublish-btn" onclick="event.stopPropagation();unpublishChar(myChars[${idx}])">取消公开</button>`:''}
     </div>
   </div>`;
 }
@@ -247,9 +253,9 @@ function myCardHTML(c,idx){
 function onMyCardClick(idx){
   const c=myChars[idx];
   if(!c) return;
-  if(publishedNames.has(c.name||'')){
-    // 已公开：取消公开
-    unpublishChar(c);
+  if(publishedId(c)){
+    // 已公开：进入编辑（取消公开走卡片上的按钮），保存后画廊记录原位更新
+    location.href=editHref(c.code);
     return;
   }
   if(selectedCodes.has(c.code)){
@@ -262,7 +268,7 @@ function onMyCardClick(idx){
 
 async function unpublishChar(c){
   try{
-    const fid=publishedIds[c.name];
+    const fid=publishedId(c);
     if(!fid){alert('找不到该角色的已公开记录');return;}
     const r=await fetch('/api/fan/toggle',{
       method:'POST',headers:{'Content-Type':'application/json'},
@@ -279,7 +285,7 @@ async function unpublishChar(c){
 function renderMyCards(){
   const grid=document.getElementById('myGrid');
   grid.innerHTML=myChars.map((c,i)=>myCardHTML(c,i)).join('');
-  document.getElementById('myCount').textContent=`（共 ${myChars.length} 个，已公开 ${publishedNames.size} 个）`;
+  document.getElementById('myCount').textContent=`（共 ${myChars.length} 个，已公开 ${myChars.filter(publishedId).length} 个）`;
   const btn=document.getElementById('publishBtn');
   btn.disabled=selectedCodes.size===0;
   if(selectedCodes.size>0){
@@ -301,8 +307,7 @@ async function loadMy(){
     const fchars=fd.characters||[];
     // 仅将「已公开」的记录计入映射，取消公开后自动失效
     const pub=fchars.filter(c=>c.is_public);
-    publishedNames=new Set(pub.map(c=>c.name));
-    publishedIds={}; pub.forEach(c=>{ publishedIds[c.name]=c.id; });
+    publishedIds={}; pub.forEach(c=>{ publishedIds[c.code?'code:'+c.code:'name:'+c.name]=c.id; });
     
     if(myChars.length===0){
       document.getElementById('myGrid').innerHTML='<div class="empty">你还没有登记人设，去<a href="/">登记页</a>创建吧。</div>';
