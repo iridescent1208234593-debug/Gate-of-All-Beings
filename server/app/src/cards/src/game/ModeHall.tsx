@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { ThumbsDown, ThumbsUp } from 'lucide-react';
-import { ArrowUpRight, ArrowRight, BookOpen, ScrollText, Sprout, PenLine, Trophy } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, BookOpen, Sprout, PenLine, Trophy } from 'lucide-react';
 import { leaderboardUrl } from '@lxh/shared-session/progress.js';
 import portal from '../../../../portal.json';
 import shore from './previews/shore.webp';
@@ -27,7 +27,6 @@ type Game = { key: string; title: string; genre: string; desc: string; points: s
 const auxiliary = [
   { view: 'hall', title: '会馆日常', caption: '照料同行者，积攒默契', icon: Sprout },
   { view: 'collection', title: '灵卡图鉴', caption: '翻阅已结缘的灵卡', icon: BookOpen },
-  { view: 'timeline', title: '旅途手札', caption: '安排下一程的奇遇', icon: ScrollText },
   { view: 'world', title: '万灵志', caption: '查阅人物、地点与灵术', icon: BookOpen },
 ];
 
@@ -56,22 +55,16 @@ type Vote = 'up' | 'down' | null;
 function readVote(): Vote { try { const v = localStorage.getItem(VOTE_KEY); return v === 'up' || v === 'down' ? v : null; } catch { return null; } }
 function writeVote(v: Vote) { try { if (v) localStorage.setItem(VOTE_KEY, v); else localStorage.removeItem(VOTE_KEY); } catch { /* storage unavailable */ } }
 
-/** The retired 入世历练 entry: greyed out but still reachable behind a second confirmation, with a thumbs vote on this update. */
-function LegacyAdventure({ onEnter }: { onEnter: () => void }) {
-  const [confirming, setConfirming] = useState(false);
+/** A thumbs vote on the 众生牌录 update (kept locally; nothing is sent anywhere). */
+function UpdateVote() {
   const [vote, setVote] = useState<Vote>(readVote);
   const cast = (next: 'up' | 'down') => { const v = vote === next ? null : next; setVote(v); writeVote(v); };
-  return <div className="mode-hall__chapter mode-hall__chapter--legacy">
-    <button type="button" className="mode-hall__legacy-entry" onClick={() => setConfirming(true)}><small>旧版 · 即将下线</small><strong>入世历练</strong><span>已并入众生牌录，仍可进入 <ArrowUpRight size={14}/></span></button>
+  return <div className="mode-hall__chapter mode-hall__chapter--vote">
     <div className="mode-hall__vote" role="group" aria-label="这次更新你觉得如何">
       <em>这次更新</em>
       <button type="button" aria-pressed={vote === 'up'} aria-label="赞" onClick={() => cast('up')}><ThumbsUp size={14}/></button>
       <button type="button" aria-pressed={vote === 'down'} aria-label="踩" onClick={() => cast('down')}><ThumbsDown size={14}/></button>
     </div>
-    {confirming && <div className="mode-hall__confirm" role="dialog" aria-modal="true" aria-label="确认进入入世历练" onClick={() => setConfirming(false)}>
-      <div onClick={event => event.stopPropagation()}><strong>进入入世历练？</strong><p>这个玩法即将下线，仍要进入吗？</p>
-        <div><button type="button" onClick={() => setConfirming(false)}>再想想</button><button type="button" className="is-primary" onClick={() => { setConfirming(false); onEnter(); }}>仍要进入</button></div></div>
-    </div>}
   </div>;
 }
 
@@ -132,7 +125,7 @@ export function ModeHall({ onNavigate, onEditIdentity }: Props) {
     <SharedResources onOpen={()=>onNavigate('journey')}/>
     <div className="mode-hall__row mode-hall__row--feature">
       <GameCard game={ADVENTURE} index={1} onNavigate={onNavigate}/>
-      <LegacyAdventure onEnter={() => onNavigate('adventure')}/>
+      <UpdateVote/>
     </div>
     <div className="mode-hall__row">{firstRow.map((game, index) => <GameCard key={game.key} game={game} index={index + 2} onNavigate={onNavigate}/>)}</div>
     {secondRow.length > 0 && <div className="mode-hall__row mode-hall__row--compact">{secondRow.map((game, index) => <GameCard key={game.key} game={game} index={firstRow.length + index + 2} onNavigate={onNavigate}/>)}</div>}
