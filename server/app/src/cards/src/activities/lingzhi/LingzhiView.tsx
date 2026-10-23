@@ -28,7 +28,7 @@ export function LingzhiSetup({ busy, onCancel, onStart }: { busy: boolean; onCan
   return <section className="encounter"><span className="round-emblem"><Orbit /></span><span className="eyebrow">灵质修行</span><h1>步入灵质回路</h1>
     <p>七层回路，层层试炼，击败第七层的守门者即算贯通。<br />贯通带回灵质 {LINGZHI_REWARD.victory.spirit}；散灵带回灵质 {LINGZHI_REWARD.defeat.spirit}。占用今天的白天。</p>
     {LINGZHI.characters.map(c => { const open = OPEN_CHARACTERS.includes(c.id); return <button key={c.id} className="choice" disabled={!open || busy} aria-pressed={character === c.id} onClick={() => setCharacter(c.id)}>
-      <strong>{c.name}{character === c.id ? ' · 已选' : ''}</strong><span>{open ? `${c.passive.name}：${c.passive.desc}` : `需要 ${c.cost} 残片解锁（尚未开放）`}</span><ArrowRight size={17} /></button>; })}
+      <strong>{c.name}{character === c.id ? ' · 已选' : ''}</strong><span>{open ? `${c.passive.name}：${c.passive.desc}` : '尚未开放'}</span><ArrowRight size={17} /></button>; })}
     <div className="hero-actions"><button className="secondary" disabled={busy} onClick={onCancel}>回众生牌录</button><button className="primary" disabled={busy} onClick={() => onStart({ character })}>进入灵质回路 <ArrowRight size={17} /></button></div></section>;
 }
 

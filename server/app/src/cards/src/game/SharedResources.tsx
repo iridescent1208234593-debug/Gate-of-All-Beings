@@ -1,5 +1,6 @@
 import {useEffect,useState} from 'react';
 import {readGame,onGameChange,type GameProfile} from '@lxh/shared-session/game.js';
+import {SHOWN_RESOURCES,RESOURCE_NAMES} from '../world/resources';
 import './journey.css';
 export function useGameProfile(){
   const [profile,setProfile]=useState<GameProfile|null>(null),[error,setError]=useState('');
@@ -7,8 +8,7 @@ export function useGameProfile(){
   return {profile,error,setError};
 }
 export function ResourceBar({profile}:{profile:GameProfile|null}){
-  const labels={spirit:'灵质',herb:'草药',food:'食物',soul:'魂灵',shards:'修行残片'};
-  return <div className="journey-resources">{Object.entries(labels).map(([key,label])=><span key={key}>{label}<b>{profile?.resources[key as keyof typeof labels]??'—'}</b></span>)}</div>;
+  return <div className="journey-resources">{SHOWN_RESOURCES.map(key=><span key={key}>{RESOURCE_NAMES[key]}<b>{profile?.resources[key]??'—'}</b></span>)}</div>;
 }
 export function SharedResources({onOpen}:{onOpen:()=>void}){
   const {profile,error}=useGameProfile();

@@ -14,10 +14,10 @@ import { CardTile, Portrait } from '../game/CardTile';
 import { Forest } from '../game/Forest';
 import { useCardBalance } from '../game/useCardBalance';
 import { defaultLoadout, expeditionResult, heroOf, REBIRTH_REWARD, rebirthDailyKey, rebirthResult, rebirthResults, startExpedition, startRebirth, stayResult, type ExpeditionSession, type RebirthSession } from '../world/activities';
-import { RESOURCE_KEYS_LIST, RESOURCE_NAMES } from '../world/resources';
+import { isShownResource, RESOURCE_NAMES, SHOWN_RESOURCES } from '../world/resources';
 import { allFallen, canStartExpedition, commitResult, markSeen, nightResult, RULES, sealResult, summarize, unseenEntries } from '../world/rules';
 import { onWorldLedgerChange, openWorld, saveWorld, type WorldStore } from '../world/store';
-import type { ActivityResult, ActivitySession, Assignment, Change, ExpeditionLoadout, JournalEntry, PlaceId, RebirthLoadout, WorldSnapshot } from '../world/types';
+import type { ActivityResult, ActivitySession, Assignment, Change, ExpeditionLoadout, JournalEntry, PlaceId, RebirthLoadout, ResourceKey, WorldSnapshot } from '../world/types';
 import { ExpeditionView } from './ExpeditionView';
 import './journal.css';
 import { LoadError } from '../components/LoadBoundary';
@@ -172,7 +172,7 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
   return <>
     <div className="section-heading"><div><span className="eyebrow">YOUR JOURNAL</span><h1>众生牌录</h1><p className="subtle">每一次出行、每一夜，都记在这里。</p></div><span className="day-label">第 {world.day} 日 · {morning ? '清晨' : '傍晚'}</span></div>
     <div className="hall-scene"><Forest village /><div className="hall-overlay"><span>林间小馆</span><h2>{latest?.note ?? '山有木兮，灵有所栖。'}</h2>
-      <div className="resource-bar">{RESOURCE_KEYS_LIST.filter(k => k === 'spirit' || k === 'herb' || store.ledger.resources[k] > 0).map(k => {
+      <div className="resource-bar">{SHOWN_RESOURCES.filter(k => k === 'spirit' || k === 'herb' || store.ledger.resources[k] > 0).map(k => {
         const d = summary.resources[k];
         return <span key={k}>{k === 'spirit' ? <Sparkles size={17} /> : k === 'herb' ? <Sprout size={17} /> : <Gem size={17} />}{RESOURCE_NAMES[k]} {store.ledger.resources[k]}{d ? <em className={`journal-delta ${d < 0 ? 'is-loss' : ''}`}>{d > 0 ? '+' : ''}{d}</em> : null}</span>;
       })}</div></div></div>
@@ -227,7 +227,7 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
 
 function ReturnPanel({ entries, summary, onDone, onOpenCollection }: { entries: JournalEntry[]; summary: ReturnType<typeof summarize>; onDone: () => void; onOpenCollection?: () => void }) {
   const chips: Change[] = [];
-  for (const [k, v] of Object.entries(summary.resources)) chips.push({ kind: 'resource', key: k as Extract<Change, { kind: 'resource' }>['key'], amount: v! });
+  for (const [k, v] of Object.entries(summary.resources)) if (isShownResource(k as ResourceKey)) chips.push({ kind: 'resource', key: k as ResourceKey, amount: v! });
   for (const e of entries) for (const c of e.changes) if (c.kind === 'wound' || c.kind === 'fall' || c.kind === 'recover' || c.kind === 'place' || c.kind === 'seal' || c.kind === 'world-event') chips.push(c);
   return <section className="journal-return" role="status" aria-label="新的见闻">
     <span className="round-emblem"><Sparkles /></span>
@@ -243,7 +243,7 @@ function ReturnPanel({ entries, summary, onDone, onOpenCollection }: { entries: 
 }
 
 function EntryItem({ entry, fresh }: { entry: JournalEntry; fresh: boolean }) {
-  const shown = entry.changes.filter(c => c.kind !== 'card');
+  const shown = entry.changes.filter(c => c.kind !== 'card' && !(c.kind === 'resource' && !isShownResource(c.key)));
   const cards = entry.changes.filter(c => c.kind === 'card').length;
   return <li className={`${fresh ? 'is-fresh' : ''} is-${entry.activity}`}>
     <span className="journal-when">第 {entry.day} 日{entry.activity === 'night' ? ' · 夜' : entry.daypart === 'morning' ? '' : ' · 傍晚'}</span>
