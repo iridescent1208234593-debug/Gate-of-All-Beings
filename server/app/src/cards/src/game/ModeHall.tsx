@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { ThumbsDown, ThumbsUp } from 'lucide-react';
-import { ArrowUpRight, ArrowRight, BookOpen, ScrollText, Sprout, PenLine, Trophy } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, BookOpen, ScrollText, Sprout, PenLine, Trophy, Map as MapIcon } from 'lucide-react';
 import { leaderboardUrl } from '@lxh/shared-session/progress.js';
 import portal from '../../../../portal.json';
 import shore from './previews/shore.webp';
@@ -46,6 +46,9 @@ const GAMES: Game[] = [
     desc: '在灵质空间里建造据点、招募小妖、研究与远征，经营大家共同的会馆。', points: ['等距建造', '小妖五行分工', '聚落 → 结盟 → 会馆'] },
   { key: 'ecology', view: 'ecosystem', title: '生态进化', genre: '模拟 · 万灵', shots: [ecology],
     desc: '物质灵滋养植物，生灵随生命流动。编辑细胞、拼装生灵，把收获送回会馆。', points: ['3D 生态循环', '细胞编辑', '收获回流会馆'] },
+  { key: 'world-map', title: '罗小黑世界地图', genre: '地图 · 探索', shots: [],
+    scene: <span className="game-card__atlas" aria-hidden="true"><MapIcon/><i/><i/><i/></span>,
+    desc: '转动环形地图，浏览龙游、流石、灵溪、西木会馆等地点与档案。', points: ['环形世界', '地点档案', '自由缩放'] },
   { key: 'softie', title: '灵体互动', genre: '社交 · 多人', shots: [softie],
     desc: '捏一只自己的软软灵体，在林间空地与其他旅人相遇、贴贴、戳一下。', points: ['自定义灵体', '多人同场'] },
   { key: 'aeon', title: 'AEON', genre: '模拟 · 神经演化', shots: [aeon],
@@ -76,6 +79,7 @@ function LegacyAdventure({ onEnter }: { onEnter: () => void }) {
 }
 
 const published = new Set(portal.links.filter(link => link.group === '游戏').map(link => link.key));
+const publishedLinks = new Map(portal.links.filter(link => link.group === '游戏').map(link => [link.key, link]));
 
 function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNavigate: (view: string) => void }) {
   const [active, setActive] = useState(false);
@@ -88,7 +92,7 @@ function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNa
   }, [active, game.shots.length]);
   const content = <>
     {game.scene}
-    <span className={game.scene ? 'game-card__window' : 'game-card__shots'} aria-hidden="true">{game.shots.map((shot, shotIndex) => <img key={shot} src={shot} alt="" loading="lazy" decoding="async" className={shotIndex === frame ? 'is-shown' : ''}/>)}</span>
+    {game.shots.length > 0 && <span className={game.scene ? 'game-card__window' : 'game-card__shots'} aria-hidden="true">{game.shots.map((shot, shotIndex) => <img key={shot} src={shot} alt="" loading="lazy" decoding="async" className={shotIndex === frame ? 'is-shown' : ''}/>)}</span>}
     {game.shots.length > 1 && <span className="game-card__dots" aria-hidden="true">{game.shots.map((shot, shotIndex) => <i key={shot} className={shotIndex === frame ? 'is-on' : ''}/>)}</span>}
     <span className="game-card__number">{String(index).padStart(2, '0')}</span>
     <span className="game-card__body">
@@ -106,8 +110,12 @@ function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNa
     onMouseEnter: () => setActive(true), onMouseLeave: () => setActive(false),
     onFocus: () => setActive(true), onBlur: () => setActive(false),
   };
-  return game.view ? <button type="button" {...props} onClick={() => onNavigate(game.view!)}>{content}</button>
-    : <a {...props} href={`/app/shell/m/${game.key}`}>{content}</a>;
+  if (game.view) return <button type="button" {...props} onClick={() => onNavigate(game.view!)}>{content}</button>;
+  const configuredUrl = publishedLinks.get(game.key)?.url;
+  const external = Boolean(configuredUrl && /^https?:\/\//i.test(configuredUrl));
+  const href = external ? configuredUrl! : `/app/shell/m/${game.key}`;
+  return <a {...props} href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}
+    aria-label={external ? `${game.title}（新标签页打开）` : undefined}>{content}</a>;
 }
 
 /** portal.json decides which external modes are published; the hall owns order and presentation. */

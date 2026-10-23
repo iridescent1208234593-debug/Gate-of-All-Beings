@@ -14,6 +14,7 @@
     { "key": "slay", "group": "游戏", "name": "重生之门", "desc": "卡牌 roguelike 引擎", "url": "/app/modules/slay/", "icon": "⚔", "embed": true },
     { "key": "softie", "group": "游戏", "name": "灵体互动", "desc": "自定义灵体与多人互动", "url": "/app/modules/softie/", "icon": "🌌", "embed": true },
     { "key": "aeon", "group": "游戏", "name": "AEON", "desc": "神经演化文明模拟", "url": "/app/modules/aeon/", "icon": "🧠", "embed": true },
+    { "key": "world-map", "group": "游戏", "name": "罗小黑世界地图", "desc": "环形世界地图 · 地点档案与自由探索", "url": "https://aaabby-w.github.io/temp/", "icon": "🗺️" },
     { "key": "shengsheng-shoot", "group": "游戏", "name": "省省海滩射击试玩", "desc": "省省角色小游戏 · 海滩像素射击", "url": "/playtest/shengsheng-shoot/", "icon": "🎯" }
   ]
 }

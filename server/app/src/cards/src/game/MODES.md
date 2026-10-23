@@ -28,6 +28,7 @@
 | `/app/shell/m/softie` | 灵体互动 | 原 Softie 模块，不在本轮改动 |
 | `/app/shell/m/aeon` | AEON | 原 AEON 模块 |
 | `/app/shell/m/shengsheng-shoot` | 省省海滩射击试玩 | 现有壳承载静态试玩，保留返回门庭 |
+| `https://aaabby-w.github.io/temp/` | 罗小黑世界地图 | `portal.json` 登记的外部体验；门庭新标签页打开，不进入模块壳 |
 | `/playtest/shengsheng-shoot/` | 射击试玩旧直达书签 | 继续有效；统一代理显式转到主站 Handler |
 
 小游戏继续保留各自存档与账号能力。此次统一的是入口和玩家资料读取边界，没有把所有玩法数据合并到 Gate Identity。

@@ -32,6 +32,14 @@
 .game-card::after { position: absolute; inset: 0; z-index: -1; content: ''; background: linear-gradient(180deg, #0a1a1f00 30%, #0a1d22b0 62%, #081a1ef2 100%); transition: background 400ms ease; }
 .game-card.is-active::after { background: linear-gradient(180deg, #0a1a1f00 22%, #0a1d22c4 55%, #081a1ef7 100%); }
 .game-card--management .game-card__shots img, .game-card--ecology .game-card__shots img, .game-card--softie .game-card__shots img { object-position: center; }
+.game-card.game-card--world-map { background: radial-gradient(circle at 72% 22%, #d4b66d40, transparent 24%), linear-gradient(145deg, #26463c, #111f24 70%); }
+.game-card__atlas { position: absolute; inset: 0; z-index: -2; overflow: hidden; color: #efd58c; }
+.game-card__atlas>svg { position: absolute; top: 15%; left: 50%; width: 45%; height: 45%; opacity: .76; filter: drop-shadow(0 12px 22px #06141099); transform: translateX(-28%) rotate(-8deg); transition: transform 6s linear; }
+.game-card__atlas>i { position: absolute; width: 9px; height: 9px; border: 1px solid #f1dfaa; border-radius: 50%; background: #9d3d31; box-shadow: 0 0 0 5px #f1dfaa1f; }
+.game-card__atlas>i:nth-of-type(1) { top: 25%; left: 24%; }
+.game-card__atlas>i:nth-of-type(2) { top: 39%; left: 68%; }
+.game-card__atlas>i:nth-of-type(3) { top: 17%; left: 78%; }
+.game-card--world-map.is-active .game-card__atlas>svg { transform: translateX(-28%) rotate(-2deg) scale(1.08); }
 
 /* 入世历练: the hero's forest scene is the door; gameplay floats in a window on hover. */
 .mode-hall__row--feature { position: relative; }
@@ -119,7 +127,7 @@
   .mode-hall__desk nav { grid-template-columns: 1fr; margin-top: 18px; gap: 9px; }
   .mode-hall__desk button, .mode-hall__desk nav>a { min-height: 58px; }
 }
-@media (prefers-reduced-motion: reduce) { .game-card, .game-card__shots img, .game-card__more { transition: none; } .game-card.is-active .game-card__shots img.is-shown { transform: scale(1.02); } }
+@media (prefers-reduced-motion: reduce) { .game-card, .game-card__shots img, .game-card__more, .game-card__atlas>svg { transition: none; } .game-card.is-active .game-card__shots img.is-shown { transform: scale(1.02); } }
 
 /* 入世历练 retired entry: greyed, still clickable behind a confirmation */
 .mode-hall__chapter--legacy { gap: 8px; }
