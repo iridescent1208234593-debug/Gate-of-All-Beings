@@ -79,7 +79,6 @@ function LegacyAdventure({ onEnter }: { onEnter: () => void }) {
 }
 
 const published = new Set(portal.links.filter(link => link.group === '游戏').map(link => link.key));
-const publishedLinks = new Map(portal.links.filter(link => link.group === '游戏').map(link => [link.key, link]));
 
 function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNavigate: (view: string) => void }) {
   const [active, setActive] = useState(false);
@@ -111,14 +110,10 @@ function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNa
     onFocus: () => setActive(true), onBlur: () => setActive(false),
   };
   if (game.view) return <button type="button" {...props} onClick={() => onNavigate(game.view!)}>{content}</button>;
-  const configuredUrl = publishedLinks.get(game.key)?.url;
-  const external = Boolean(configuredUrl && /^https?:\/\//i.test(configuredUrl));
-  const href = external ? configuredUrl! : `/app/shell/m/${game.key}`;
-  return <a {...props} href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}
-    aria-label={external ? `${game.title}（新标签页打开）` : undefined}>{content}</a>;
+  return <a {...props} href={`/app/shell/m/${game.key}`}>{content}</a>;
 }
 
-/** portal.json decides which external modes are published; the hall owns order and presentation. */
+/** portal.json decides which independent modes are published; the hall owns order and presentation. */
 export function ModeHall({ onNavigate, onEditIdentity }: Props) {
   const { identity } = usePlayerProfile();
   const parts = speciesParts(identity);

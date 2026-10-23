@@ -2,6 +2,7 @@
   "name": "gate-of-all-beings",
   "private": true,
   "workspaces": [
+    "server/app/src/world-map",
     "shared/shared-ui",
     "shared/shared-types",
     "shared/shared-data",
@@ -15,7 +16,10 @@
     "build:homepage": "node portal/www/scripts/build-homepage.mjs",
     "dev:homepage": "node portal/www/scripts/build-homepage.mjs --dev",
     "build:cards": "node ops/build-cards.mjs",
+    "build:world-map": "node ops/build-world-map.mjs",
+    "check:world-map": "npm run check --workspace=@iridescently/world-map",
     "publish:cards": "node ops/publish-release.mjs cards",
+    "publish:world-map": "node ops/publish-release.mjs world-map",
     "build:modules": "node server/app/scripts/build-modules.mjs",
     "publish:homepage": "node ops/publish-release.mjs homepage",
     "publish:modules": "node ops/publish-release.mjs modules",
