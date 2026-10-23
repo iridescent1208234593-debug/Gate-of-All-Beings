@@ -16,6 +16,7 @@ const siteNav = () => (window as Window & { IridescentlyNav?: SiteNav }).Iridesc
 // Coming back from a module (or reloading) within this window goes straight to the hall.
 const INTRO_SEEN_KEY = 'zszm.introSeenAt';
 const INTRO_SKIP_MS = 6 * 60 * 60 * 1000;
+type OpeningPhase = 'intro' | 'intro-exit' | 'door' | 'destination';
 function introRecentlySeen() {
   try { return Date.now() - Number(localStorage.getItem(INTRO_SEEN_KEY) || 0) < INTRO_SKIP_MS; } catch { return false; }
 }
@@ -27,10 +28,8 @@ function GateFlow() {
   const music = useOpeningMusic();
   const [skipIntro] = useState(introRecentlySeen);
   const [entered, setEntered] = useState(skipIntro);
-  const [gateVisible, setGateVisible] = useState(!skipIntro);
-  const [doorVisible, setDoorVisible] = useState(false);
+  const [phase, setPhase] = useState<OpeningPhase>(skipIntro ? 'destination' : 'intro');
   const [doorRevealed, setDoorRevealed] = useState(false);
-  const [leaving, setLeaving] = useState(false);
   // An extra identity made through the full opening: gate → onboarding, then back to the hall.
   const [creatingNew, setCreatingNew] = useState(false);
   const [accountReminder, setAccountReminder] = useState(false);
@@ -47,25 +46,28 @@ function GateFlow() {
   }, []);
   const onboarding = entered && !profile.loading && profile.resolved && (creatingNew || !identityComplete(profile.identity));
   // The shared site bar belongs to the app and its loading state, not to the intro or onboarding screens.
+  const gateVisible = phase === 'intro' || phase === 'intro-exit';
+  const doorVisible = phase === 'door';
+  const leaving = phase === 'intro-exit';
   const destinationVisible = entered && !gateVisible && (!doorVisible || doorRevealed);
-  const appActive = entered && !gateVisible && !doorVisible;
+  const appActive = entered && phase === 'destination';
   const showBar = appActive && !onboarding;
   // Phones: landscape is forced until the hall itself is on screen, then only the default.
   const inGame = appActive && !creatingNew && profile.resolved && identityComplete(profile.identity);
   const orientation = useOrientationGuard(inGame ? 'game' : 'opening');
   useEffect(() => { if (!showBar) return; siteNav()?.mount(); return () => siteNav()?.unmount(); }, [showBar]);
   function enter() {
-    if (leaving) return;
-    setLeaving(true);
+    if (phase !== 'intro') return;
+    setPhase('intro-exit');
     setEntered(true);
     rememberIntro();
-    timer.current = window.setTimeout(() => { setGateVisible(false); setDoorVisible(true); }, EXIT_MS);
+    timer.current = window.setTimeout(() => setPhase('door'), EXIT_MS);
   }
   function returnToGate() {
     if (timer.current !== null) window.clearTimeout(timer.current);
     window.scrollTo({ top: 0 });
     music.setInside(false);
-    setLeaving(false); setDoorVisible(false); setDoorRevealed(false); setGateVisible(true);
+    setPhase('intro'); setDoorRevealed(false);
   }
   function createWithOpening() {
     setCreatingNew(true);
@@ -96,7 +98,7 @@ function GateFlow() {
       {entered && profile.resolved && profile.error && <div className="gate-profile-status" role="status">{profile.error}<button type="button" onClick={() => void profile.refresh()}>重试</button></div>}
     </div>}
     {gateVisible && <EntryGate leaving={leaving} paused={orientation.blocked} onEnter={enter} onSkip={enter} />}
-    {doorVisible && <DoorScene onFlashStart={() => music.setInside(true)} onReveal={() => setDoorRevealed(true)} onFinish={() => { setDoorVisible(false); setDoorRevealed(false); }} />}
+    {doorVisible && <DoorScene onFlashStart={() => music.setInside(true)} onReveal={() => setDoorRevealed(true)} onFinish={() => { setPhase('destination'); setDoorRevealed(false); }} />}
     <OrientationGuard {...orientation} />
   </>;
 }

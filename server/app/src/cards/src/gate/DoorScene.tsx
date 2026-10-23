@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { OpeningMusicPicker } from './OpeningMusicPicker';
 import './door-scene.css';
 
 const W = 1920;
@@ -228,6 +229,7 @@ export function DoorScene({ onFinish, onFlashStart, onReveal }: Props) {
   }, [entering]);
 
   return <section className={`door-scene${entering ? ' is-entering' : ''}${revealing ? ' is-revealing' : ''}${ready ? ' is-ready' : ''}${reduceMotion ? ' is-reduced-motion' : ''}`} aria-label="门前场景">
+    <OpeningMusicPicker />
     <div className="door-view">
       <div ref={stageRef} className="door-stage">
         <div className="door-world">
