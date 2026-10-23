@@ -104,6 +104,16 @@
 
 公开接口复查：被删除的两个图片 ID 均返回 404；剩余 4 张本地图的原图哈希未命中隔离名单。另有 1 个外链重定向和 1 张图片（ID 1184）返回 404，未把这些项当成全量哈希通过，详见 `work/hk-bandwidth/verification-realperson-removal.json`。未扩大删除范围。
 
+## 香港缓存与旧 / 失败 release 清理
+
+1. 点 **预览清理范围**，管家只读扫描 `/tmp/iridescently-npm-cache` 和 `/srv/iridescently/releases/<版本>`，显示每个候选版本类型、大小、文件数，以及当前 / 上一版本。
+2. 确认预览范围后点 **确认并清理**。服务器会在同一部署锁下重新计算预览指纹；期间状态有变化就停止并要求重新预览。
+3. 清理只包含专用 npm 缓存、超过 24 小时且未验证的失败 release，以及早于 `current` 和 `previous` 的已验证旧 release。
+
+`current`、`previous`、较新的候选版本、进程工作目录仍落在其中的 release、其他缓存目录、`incoming`、资产库、数据库、账户、存档、上传和密钥均不在清理范围。管理员确认是显式操作；没有自动定时清理。清理 release 目录不可逆，请先检查预览列出的版本。
+
+此功能需要香港 `/usr/local/sbin/iridescently-control` 已安装对应的受限清理命令；源码见 `ops/hk-release-control.py`。旧版控制脚本会拒绝新命令，因此只更新本机管家时，预览按钮会报远端不支持；需要按管理员维护流程单独更新 root 控制脚本，且不需要改动任何玩家数据。
+
 ## 文件与凭据
 
 | 用途 | 位置 |
@@ -111,6 +121,7 @@
 | 窗口 | `ops/server-manager.py` |
 | CLI | `ops/server-control.py` |
 | 代码发布 | `ops/hk-release.py` |
+| 香港受限控制脚本源码 | `ops/hk-release-control.py` |
 | 增量资产校验 | `ops/server_assets.py` |
 | 本机无数据库网关 | `ops/pc-preview.py` |
 | 本机隧道、进程状态与日志 | `.releases/server-manager/` |
@@ -133,6 +144,8 @@ python ops/server-control.py pc-stop
 python ops/server-control.py code-prepare
 python ops/server-control.py code-publish
 python ops/server-control.py code-rollback
+python ops/server-control.py cleanup-preview
+python ops/server-control.py cleanup-apply
 python ops/server-control.py assets-init
 python ops/server-control.py assets-plan
 python ops/server-control.py assets-publish

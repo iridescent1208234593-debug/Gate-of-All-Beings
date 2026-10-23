@@ -8,6 +8,7 @@ import subprocess
 import sys
 import threading
 import tkinter as tk
+from tkinter import messagebox
 import webbrowser
 
 HERE=Path(__file__).resolve().parent
@@ -29,6 +30,8 @@ class App:
             ('启用本机新版并登录自启','pc-start'),('停止本机新版并取消自启','pc-stop'),('配置本机入口','pc-configure')])
         self.section(outer,'服务器 2 · 香港稳定版 / 代码更新','先完成本地构建和本地发布；此处只发布程序，不改资产库、账户或存档。',[
             ('预览代码包','code-prepare'),('发布香港代码','code-publish'),('回滚香港代码','code-rollback')])
+        self.section(outer,'香港服务器缓存与旧版本清理','先预览清理范围；仅针对专用 npm 缓存、很旧的失败 release 和早于 current/previous 的旧 release。current、previous、运行中版本及用户数据会保留。',[
+            ('预览清理范围','cleanup-preview'),('确认并清理','cleanup-apply')])
         self.section(outer,'独立资产库更新','先下载香港基线，在编辑副本修改资料/媒体，预览增量，再发布。遇到线上并发改动会停止。',[
             ('下载资产编辑副本','assets-init'),('预览资产更新','assets-plan'),('发布资产更新','assets-publish'),('回滚上次资产更新','assets-rollback')])
         bar=tk.Frame(outer,bg=style.QC['bg']);bar.pack(fill='x',pady=10)
@@ -42,7 +45,9 @@ class App:
         frame=tk.LabelFrame(parent,text=title,bg=style.QC['panel'],fg=style.QC['text'],font=(style.TEXT_FONT,13,'bold'),padx=14,pady=9);frame.pack(fill='x',pady=7)
         tk.Label(frame,text=description,bg=style.QC['panel'],fg=style.QC['dim'],font=(style.TEXT_FONT,11),wraplength=1000,justify='left').pack(anchor='w')
         buttons=tk.Frame(frame,bg=style.QC['panel']);buttons.pack(anchor='w',pady=(8,0))
-        for text,action in actions:style.QcButton(buttons,text,lambda a=action:self.run(a),variant='ghost' if 'rollback' in action else 'primary').pack(side='left',padx=(0,10))
+        for text,action in actions:
+            callback=self.confirm_cleanup if action=='cleanup-apply' else lambda a=action:self.run(a)
+            style.QcButton(buttons,text,callback,variant='ghost' if 'rollback' in action or action=='cleanup-apply' else 'primary').pack(side='left',padx=(0,10))
 
     def write(self,text):self.log.insert('end',text+'\n');self.log.see('end')
     def open_workspace(self):
@@ -66,6 +71,13 @@ class App:
             except Exception as error:self.events.put(('error',str(error)))
             finally:self.events.put(('idle',None))
         threading.Thread(target=worker,daemon=True).start()
+
+    def confirm_cleanup(self):
+        plan=control.STATE/'cleanup-plan.json'
+        if not plan.exists():
+            messagebox.showinfo('需要先预览','请先点击“预览清理范围”，确认候选 release 和缓存大小。',parent=self.root);return
+        if messagebox.askyesno('确认清理香港服务器','将重新核对预览状态，并只删除预览列出的旧/失败 release 与专用 npm 缓存。current、previous、运行中版本和用户数据会保留。继续吗？',parent=self.root):
+            self.run('cleanup-apply')
     def drain(self):
         try:
             while True:

@@ -162,11 +162,22 @@ def perform(action):
     if action=='code-publish':
         candidate=release.prepare();staged=release.remote('stage '+candidate['version'],Path(candidate['archive']))
         return {**release.remote('activate '+candidate['version']),'staged':staged}
+    if action=='cleanup-preview':
+        result=release.cleanup_preview()
+        (STATE/'cleanup-plan.json').write_text(json.dumps({'plan_token':result['plan_token']},ensure_ascii=False),encoding='utf-8')
+        return result
+    if action=='cleanup-apply':
+        plan=STATE/'cleanup-plan.json'
+        if not plan.exists():raise RuntimeError('请先预览清理范围')
+        token=json.loads(plan.read_text(encoding='utf-8')).get('plan_token')
+        result=release.cleanup_apply(token)
+        plan.unlink(missing_ok=True)
+        return result
     raise ValueError('Unknown operation')
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action',choices=['status','pc-configure','pc-start','pc-stop','assets-init','assets-plan','assets-publish','assets-rollback','code-prepare','code-publish','code-rollback'])
+    parser.add_argument('action',choices=['status','pc-configure','pc-start','pc-stop','assets-init','assets-plan','assets-publish','assets-rollback','code-prepare','code-publish','code-rollback','cleanup-preview','cleanup-apply'])
     try:
         action=parser.parse_args().action
         if action.startswith('pc-') and os.name=='nt':

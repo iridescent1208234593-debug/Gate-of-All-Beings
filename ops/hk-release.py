@@ -29,6 +29,14 @@ def remote(command, archive=None):
                            result.stdout.decode('utf-8', 'replace').strip() or 'SSH failed')
     return json.loads(result.stdout)
 
+def cleanup_preview():
+    return remote('cleanup-preview')
+
+def cleanup_apply(token):
+    if not isinstance(token, str) or len(token) != 64 or any(c not in '0123456789abcdef' for c in token):
+        raise ValueError('清理预览标记无效；请重新预览')
+    return remote('cleanup-apply ' + token)
+
 def prepare(base_version=None, overlay_list=None):
     version = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     files = {}
