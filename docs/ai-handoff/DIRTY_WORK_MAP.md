@@ -6,7 +6,7 @@
 
 | 事项 | 决定 |
 | --- | --- |
-| 旧入世历练（门庭「旧版 · 即将下线」入口、`#adventure`、`#hall`） | 入口先留；5 小时复活计时只在 `#adventure` 内运行（`4deee6c`），不再改写众生牌录的同行者状态 |
+| 旧入世历练（门庭「旧版 · 即将下线」入口、`#adventure`、`#hall`） | **2026-10-23 已下线**（`#adventure`、旅途手札、门庭入口；`#hall` 保留），见 [legacy-adventure-20261023.md](../archive/legacy-adventure-20261023.md)。此前：入口先留；5 小时复活计时只在 `#adventure` 内运行（`4deee6c`），不再改写众生牌录的同行者状态 |
 | 旧重生之门 slay 模块（含旧灵质修行） | 保留，等共同引擎迁完（剧情回想、长期进度、结局、旧档转换）再删；`world/activities.ts` 的 `rebirthResults` 过渡写法随之保留 |
 | 六系演武 `52-全库复审收口说明.md` 的 AIGC 元数据头 | 已丢弃 |
 | `ops/hk-release.py` 的 `ZSZM_HK_SSH_TARGET` 覆盖 | 未提交：自动模式把它判为放宽发布安全边界，留给用户决定 |

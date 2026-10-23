@@ -59,3 +59,12 @@ git push origin zszm-batch-20261021
 已验证（HEAD `68ab14f`）：cards `check:game`、全量 `tsc`、`npm test` 61/61、后端 4/4；统一存档浏览器验证 25/25；management 测试 6/6；cards 与 management 的 Vite 生产构建（输出到临时目录，没有覆盖 `.releases/candidate`）；浏览器里 9 个主模块加载和上面几项界面检查。
 
 未验证：`test:portal`（会复制真实 `users.db`，按约束跳过）；slay 测试（`ava` 未安装，原本如此）；需要登录资料的页面没有在本地点进去（本地 API 会用 `users.db`，没有启动）。发布后的线上验收要补上这几块。
+
+## 6. 2026-10-23 追加（HEAD 上比 `68ab14f` 多出的改动）
+
+用户后来又决定：魂灵和修行残片从界面去掉，旧版入世历练归档下线。对应两个提交：
+
+- `e263562`：共同旅途和众生牌录的资源条、见闻里不再显示魂灵 / 修行残片（它们仍留在共享账本里，旧重生之门页面还会写入，账本校验要求这两项存在，已有余额不能丢）。
+- `2045553`：下线 `#adventure`、旅途手札 `#timeline`、门庭里的「旧版」入口；旧链接回到门庭。旧代码在本地标签 `archive/legacy-adventure-20261023`（指向 `e263562`），说明见 [legacy-adventure-20261023.md](../archive/legacy-adventure-20261023.md)。
+
+所以：**如果发布的是这两个提交之后的 HEAD，第 3 节「不要删除旧实现：旧入世历练入口、`#adventure`」和第 4 节「旧版入世历练入口还在」都不再适用**。改为验收：门庭没有「旧版」入口；访问 `#adventure` 回到门庭；资源条只有灵质 / 草药 / 食物。`#hall` 会馆日常、旧重生之门 slay 模块仍然保留。标签需要 `git push origin archive/legacy-adventure-20261023` 才会到远端。
