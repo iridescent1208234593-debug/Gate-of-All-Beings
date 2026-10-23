@@ -83,7 +83,7 @@ function GateFlow() {
     setCreatingNew(false);
   }
   return <>
-    {entered && <div className="gate-destination" aria-hidden={!destinationVisible} inert={!destinationVisible}>
+    {entered && <div className={`gate-destination${appActive ? ' is-active' : ''}`} aria-hidden={!destinationVisible} inert={!destinationVisible}>
       <LoadBoundary page><Suspense fallback={<div className="qc-loading qc-loading--page" role="status">正在打开众生之门…</div>}>
       {profile.loading || (!profile.resolved && profile.error) ? <div className="qc-loading qc-loading--page" role={profile.error ? 'alert' : 'status'}>
         {profile.error || '正在读取玩家资料…'}

@@ -43,4 +43,5 @@
 @media(max-width:600px){.gate{padding:0 18px 10vh}.gate-title{font-size:clamp(24px,7.2vw,34px)}.gate-subtitle{letter-spacing:.26em;text-indent:.26em}.gate-enter{padding:11px 27px;font-size:12.5px}.gate-bar{width:170px}.gate-tools{top:12px;right:12px;gap:7px}.gate-skip{right:10px;bottom:10px}}
 @media(prefers-reduced-motion:reduce){.gate{transition:opacity .3s linear;animation:none}.gate.is-leaving{transform:none}}
 .gate-destination{position:fixed;inset:0;z-index:1}
+.gate-destination.is-active{position:relative;inset:auto;min-height:100vh;min-height:100dvh}
 .gate-destination[aria-hidden="true"]{visibility:hidden;pointer-events:none}
