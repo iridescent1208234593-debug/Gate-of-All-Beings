@@ -1,6 +1,8 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import '@lxh/shared-ui/site-nav.js';
 import { EntryGate } from './EntryGate';
+import { OpeningMusicProvider, useOpeningMusic } from './OpeningMusic';
+import { DoorScene } from './DoorScene';
 import { AccountLinkReminder } from './AccountLinkReminder';
 import { OrientationGuard, useOrientationGuard } from './OrientationGuard';
 import { needsAccountAfterOnboarding } from './accountReminder';
@@ -22,15 +24,19 @@ function rememberIntro() {
 }
 
 function GateFlow() {
+  const music = useOpeningMusic();
   const [skipIntro] = useState(introRecentlySeen);
   const [entered, setEntered] = useState(skipIntro);
   const [gateVisible, setGateVisible] = useState(!skipIntro);
+  const [doorVisible, setDoorVisible] = useState(false);
+  const [doorRevealed, setDoorRevealed] = useState(false);
   const [leaving, setLeaving] = useState(false);
   // An extra identity made through the full opening: gate → onboarding, then back to the hall.
   const [creatingNew, setCreatingNew] = useState(false);
   const [accountReminder, setAccountReminder] = useState(false);
   const timer = useRef<number | null>(null);
   const profile = usePlayerProfile();
+  useEffect(() => { if (skipIntro) music.setInside(true); }, [music.setInside, skipIntro]);
   useEffect(() => { if (profile.account.logged_in) setAccountReminder(false); }, [profile.account.logged_in]);
   useEffect(() => () => { if (timer.current !== null) window.clearTimeout(timer.current); }, []);
   // Fetch the app while the intro plays, so entering never stops on a loading page.
@@ -41,9 +47,11 @@ function GateFlow() {
   }, []);
   const onboarding = entered && !profile.loading && profile.resolved && (creatingNew || !identityComplete(profile.identity));
   // The shared site bar belongs to the app and its loading state, not to the intro or onboarding screens.
-  const showBar = entered && !gateVisible && !onboarding;
+  const destinationVisible = entered && !gateVisible && (!doorVisible || doorRevealed);
+  const appActive = entered && !gateVisible && !doorVisible;
+  const showBar = appActive && !onboarding;
   // Phones: landscape is forced until the hall itself is on screen, then only the default.
-  const inGame = entered && !gateVisible && !creatingNew && profile.resolved && identityComplete(profile.identity);
+  const inGame = appActive && !creatingNew && profile.resolved && identityComplete(profile.identity);
   const orientation = useOrientationGuard(inGame ? 'game' : 'opening');
   useEffect(() => { if (!showBar) return; siteNav()?.mount(); return () => siteNav()?.unmount(); }, [showBar]);
   function enter() {
@@ -51,12 +59,13 @@ function GateFlow() {
     setLeaving(true);
     setEntered(true);
     rememberIntro();
-    timer.current = window.setTimeout(() => setGateVisible(false), EXIT_MS);
+    timer.current = window.setTimeout(() => { setGateVisible(false); setDoorVisible(true); }, EXIT_MS);
   }
   function returnToGate() {
     if (timer.current !== null) window.clearTimeout(timer.current);
     window.scrollTo({ top: 0 });
-    setLeaving(false); setGateVisible(true);
+    music.setInside(false);
+    setLeaving(false); setDoorVisible(false); setDoorRevealed(false); setGateVisible(true);
   }
   function createWithOpening() {
     setCreatingNew(true);
@@ -72,7 +81,8 @@ function GateFlow() {
     setCreatingNew(false);
   }
   return <>
-    {entered && <LoadBoundary page><Suspense fallback={<div className="qc-loading qc-loading--page" role="status">正在打开众生之门…</div>}>
+    {entered && <div className="gate-destination" aria-hidden={!destinationVisible} inert={!destinationVisible}>
+      <LoadBoundary page><Suspense fallback={<div className="qc-loading qc-loading--page" role="status">正在打开众生之门…</div>}>
       {profile.loading || (!profile.resolved && profile.error) ? <div className="qc-loading qc-loading--page" role={profile.error ? 'alert' : 'status'}>
         {profile.error || '正在读取玩家资料…'}
         {profile.error && <button type="button" onClick={() => void profile.refresh()}>重新读取</button>}
@@ -81,13 +91,15 @@ function GateFlow() {
       : identityComplete(profile.identity) ? <GameApp onReturnGate={returnToGate} onCreateIdentity={createWithOpening} /> :
         <PlayerOnboarding key={accountScope(profile.account)} initialIdentity={profile.identity}
           onComplete={finishIdentity} onCancel={returnToGate} />}
-    </Suspense></LoadBoundary>}
-    {accountReminder && !profile.account.logged_in && <AccountLinkReminder onContinue={() => setAccountReminder(false)} />}
-    {entered && profile.resolved && profile.error && <div className="gate-profile-status" role="status">{profile.error}<button type="button" onClick={() => void profile.refresh()}>重试</button></div>}
+      </Suspense></LoadBoundary>
+      {accountReminder && !profile.account.logged_in && <AccountLinkReminder onContinue={() => setAccountReminder(false)} />}
+      {entered && profile.resolved && profile.error && <div className="gate-profile-status" role="status">{profile.error}<button type="button" onClick={() => void profile.refresh()}>重试</button></div>}
+    </div>}
     {gateVisible && <EntryGate leaving={leaving} paused={orientation.blocked} onEnter={enter} onSkip={enter} />}
+    {doorVisible && <DoorScene onFlashStart={() => music.setInside(true)} onReveal={() => setDoorRevealed(true)} onFinish={() => { setDoorVisible(false); setDoorRevealed(false); }} />}
     <OrientationGuard {...orientation} />
   </>;
 }
 export default function GameShell() {
-  return <PlayerProfileProvider><GateFlow /></PlayerProfileProvider>;
+  return <PlayerProfileProvider><OpeningMusicProvider><GateFlow /></OpeningMusicProvider></PlayerProfileProvider>;
 }

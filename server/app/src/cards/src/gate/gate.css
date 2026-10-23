@@ -30,5 +30,17 @@
 .gate-swatch.is-active{opacity:1;transform:scale(1.2);border-color:#fdfbe5;box-shadow:0 0 12px #fdfbe599}
 .gate-sound{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;margin-left:3px;padding:0;color:#fdfbe5cc;background:#fdfbe50f;border:1px solid #fdfbe533;border-radius:50%;cursor:pointer;transition:background .25s ease,color .25s ease,border-color .25s ease}
 .gate-sound:hover{background:#fdfbe521;color:#fdfbe5;border-color:#fdfbe566}
+.gate-audio-choice{position:relative;display:flex;align-items:center;gap:5px}
+.gate-music-button{height:25px;padding:0 9px;color:#fdfbe5a8;background:transparent;border:1px solid #fdfbe52e;border-radius:999px;font:inherit;font-size:10px;letter-spacing:.08em;white-space:nowrap;cursor:pointer;transition:background .2s ease,color .2s ease,border-color .2s ease}
+.gate-music-button:hover,.gate-music-button[aria-expanded="true"]{color:#fdfbe5;background:#05080788;border-color:#fdfbe566}
+.gate-music-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:8;width:258px;max-width:calc(100vw - 24px);padding:6px;border:1px solid #fdfbe538;border-radius:10px;background:#0a140fd9;backdrop-filter:blur(10px);box-shadow:0 10px 30px #0008}
+.gate-music-menu[hidden]{display:none}
+.gate-music-menu button{position:relative;display:flex;align-items:baseline;gap:8px;width:100%;padding:8px 9px 8px 23px;color:#fdfbe5ed;background:transparent;border:0;border-radius:6px;font:inherit;font-size:11px;letter-spacing:.04em;text-align:left;white-space:nowrap;cursor:pointer}
+.gate-music-menu button small{margin-left:auto;color:#fdfbe599;font-size:9px;letter-spacing:0;white-space:nowrap}
+.gate-music-menu button:hover,.gate-music-menu button:focus-visible{background:#fdfbe51a;outline:none}
+.gate-music-menu button[aria-checked="true"]::before{position:absolute;left:8px;top:50%;content:"●";font-size:7px;transform:translateY(-50%)}
+.gate-music-menu p{margin:4px 8px 1px;padding-top:7px;border-top:1px solid #fdfbe51f;color:#fdfbe580;font-size:9px;letter-spacing:.12em}
 @media(max-width:600px){.gate{padding:0 18px 10vh}.gate-title{font-size:clamp(24px,7.2vw,34px)}.gate-subtitle{letter-spacing:.26em;text-indent:.26em}.gate-enter{padding:11px 27px;font-size:12.5px}.gate-bar{width:170px}.gate-tools{top:12px;right:12px;gap:7px}.gate-skip{right:10px;bottom:10px}}
 @media(prefers-reduced-motion:reduce){.gate{transition:opacity .3s linear;animation:none}.gate.is-leaving{transform:none}}
+.gate-destination{position:fixed;inset:0;z-index:1}
+.gate-destination[aria-hidden="true"]{visibility:hidden;pointer-events:none}

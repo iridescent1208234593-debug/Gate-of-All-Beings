@@ -7,6 +7,7 @@ import { ReferenceScene2D } from '../components/reference/ReferenceScene2D';
 import { ALL_LAYERS, DURATION } from '../components/reference/sceneModel';
 import type { GateSceneHandle } from '../embed/gateEmbed';
 import { speakGreeting } from '../utils/sound';
+import { useOpeningMusic, type MusicChoice } from './OpeningMusic';
 import type { ThemeMode } from '../types';
 import '../components/reference/reference.css';
 import './gate.css';
@@ -24,6 +25,12 @@ const THEMES: { id: ThemeMode; label: string; color: string }[] = [
   { id: 'cyber', label: 'Cyber Neon', color: '#FD79A8' },
 ];
 const FIRST_FRAME_MARK = 'gate:first-frame';
+const MUSIC_CHOICES: { id: MusicChoice; label: string; detail?: string }[] = [
+  { id: 'auto', label: '自动', detail: '推荐' },
+  { id: 'ext', label: '配乐 1', detail: 'lxh demo1延长' },
+  { id: 'demo2', label: '配乐 2', detail: 'lxh demo2 · 试听 / 未完成' },
+  { id: 'mute', label: '静音' },
+];
 
 // The single first-frame measure for ops/perf/zszm-startup.mjs: the first drawn scene frame
 // (3D render or 2D fallback). The 2D placeholder shown while the runtime loads is empty at t=0.
@@ -40,6 +47,9 @@ export function EntryGate({ leaving, paused = false, onEnter, onSkip }: { leavin
   const spoken = useRef(false);
   const rangeRef = useRef<HTMLInputElement>(null);
   const skipRef = useRef<HTMLButtonElement>(null);
+  const musicMenuRef = useRef<HTMLDivElement>(null);
+  const musicButtonRef = useRef<HTMLButtonElement>(null);
+  const musicMenuRootRef = useRef<HTMLDivElement>(null);
   const themeRef = useRef<ThemeMode>('original');
   const lastUiUpdate = useRef(0);
   const pausedRef = useRef(paused);
@@ -49,9 +59,10 @@ export function EntryGate({ leaving, paused = false, onEnter, onSkip }: { leavin
   const [sceneReady, setSceneReady] = useState(false);
   const [using3D, setUsing3D] = useState(false);
   const [theme, setTheme] = useState<ThemeMode>(() => THEMES[Math.floor(Math.random() * THEMES.length)].id);
-  const [soundOn, setSoundOn] = useState(true);
+  const [musicMenuOpen, setMusicMenuOpen] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
+  const music = useOpeningMusic();
   themeRef.current = theme;
 
   useEffect(() => window.LXHIntro.bindSkip(skipRef.current, onSkip), [onSkip]);
@@ -209,10 +220,38 @@ export function EntryGate({ leaving, paused = false, onEnter, onSkip }: { leavin
   }, [sceneReady, seconds]);
   useEffect(() => { sceneRef.current?.setTheme(theme); }, [theme]);
   useEffect(() => {
-    if (leaving || !soundOn || !unlocked || spoken.current || seconds < SPEAK_AT) return;
+    if (leaving || music.muted || !unlocked || spoken.current || seconds < SPEAK_AT) return;
     spoken.current = true;
     speakGreeting(GREETING);
-  }, [leaving, soundOn, unlocked, seconds]);
+  }, [leaving, music.muted, unlocked, seconds]);
+
+  useEffect(() => {
+    if (!musicMenuOpen) return;
+    const selected = musicMenuRef.current?.querySelector<HTMLButtonElement>('[aria-checked="true"]');
+    (selected || musicMenuRef.current?.querySelector<HTMLButtonElement>('button'))?.focus({ preventScroll: true });
+    const onPointerDown = (event: PointerEvent) => {
+      if (!musicMenuRootRef.current?.contains(event.target as Node)) setMusicMenuOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault(); event.stopPropagation();
+        setMusicMenuOpen(false);
+        musicButtonRef.current?.focus({ preventScroll: true });
+      } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        const items = [...(musicMenuRef.current?.querySelectorAll<HTMLButtonElement>('[data-music-choice]') || [])];
+        const index = items.indexOf(document.activeElement as HTMLButtonElement);
+        if (!items.length) return;
+        event.preventDefault();
+        items[(index + (event.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('keydown', onKeyDown, true);
+    };
+  }, [music.choice, musicMenuOpen]);
 
   function seek(value: number) {
     const next = Math.max(0, Math.min(DURATION, value));
@@ -243,16 +282,37 @@ export function EntryGate({ leaving, paused = false, onEnter, onSkip }: { leavin
             onClick={() => setTheme(t.id)}
           />
         ))}
-        <button
-          type="button"
-          className="gate-sound"
-          onClick={() => { setSoundOn(on => { if (!on) spoken.current = false; return !on; }); }}
-          title={soundOn ? '关闭声音' : '开启声音'}
-          aria-label={soundOn ? '关闭声音' : '开启声音'}
-          aria-pressed={soundOn}
-        >
-          {soundOn ? <Volume2 size={14} /> : <VolumeX size={14} />}
-        </button>
+        <div className="gate-audio-choice" ref={musicMenuRootRef}>
+          <button
+            type="button"
+            className="gate-sound"
+            onClick={() => { if (music.muted) spoken.current = false; music.toggleMute(); }}
+            title={music.muted ? '开启声音' : '关闭声音'}
+            aria-label={music.muted ? '开启声音' : '关闭声音'}
+            aria-pressed={!music.muted}
+          >
+            {music.muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+          </button>
+          <button
+            ref={musicButtonRef}
+            type="button"
+            className="gate-music-button"
+            aria-haspopup="menu"
+            aria-expanded={musicMenuOpen}
+            aria-controls="gate-music-menu"
+            title="选择开场配乐"
+            onClick={() => setMusicMenuOpen(open => !open)}
+          >曲 · {music.choice === 'demo2' ? '配乐 2' : music.choice === 'ext' ? '配乐 1' : music.choice === 'mute' ? '静音' : '自动'}</button>
+          <div id="gate-music-menu" ref={musicMenuRef} className="gate-music-menu" role="menu" aria-label="开场配乐" hidden={!musicMenuOpen}>
+            {MUSIC_CHOICES.map(option => (
+              <button key={option.id} type="button" role="menuitemradio" data-music-choice={option.id} aria-checked={music.choice === option.id}
+                onClick={() => { if (option.id !== 'mute') spoken.current = false; music.choose(option.id); setMusicMenuOpen(false); musicButtonRef.current?.focus({ preventScroll: true }); }}>
+                <span>{option.label}</span>{option.detail && <small>{option.detail}</small>}
+              </button>
+            ))}
+            <p>配乐 · 小废物 老师</p>
+          </div>
+        </div>
         <span className="gate-language-host" />
       </div>
       <img className="gate-mark" src="https://iridescently.xyz/assets/iridescently-mark.png" alt="Iridescently" />

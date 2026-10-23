@@ -74,4 +74,4 @@ npm run publish:site       # 显式提升静态/Python 源码
 
 文件维护入口：[首页](portal/www/README.md)、[应用模块](server/app/README.md)、[共享资源](shared/README.md)、[发布](docs/release-workflow.md)。
 
-众生之门最新源码集成：正式门景 → 玩家初始化 → 统一门庭；原型浅滩独立为模式，成熟玩法保留原引擎和存档。此轮仅本地与候选，未发布。见 [流程与路由](docs/zszm-flow-integration.md)、[账户与存档边界](docs/zszm-identity-and-save-map.md)、[首屏加载审查](docs/zszm-loading-audit.md)。
+众生之门最新源码集成：正式门景 → 玩家初始化 → 统一门庭；原型浅滩独立为模式，成熟玩法保留原引擎和存档。开场新增可记忆的配乐选择与静音控制，配乐从开场延续到门庭。此轮仅本地工作源码，未发布。见 [流程与路由](docs/zszm-flow-integration.md)、[账户与存档边界](docs/zszm-identity-and-save-map.md)、[首屏加载审查](docs/zszm-loading-audit.md)。
