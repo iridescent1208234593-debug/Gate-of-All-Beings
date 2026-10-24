@@ -1,6 +1,7 @@
 """Persistent, account-scoped interactions for the homepage gallery."""
 import re
 import sqlite3
+import sys
 from pathlib import Path
 from contextlib import contextmanager
 
@@ -13,12 +14,29 @@ def database_path(project_root):
     return Path(project_root) / "data" / "homepage-gallery.sqlite3"
 
 
+def _init_journal_mode(db):
+    """设置 journal 模式。journal_mode 是持久属性，只在需要时切换。
+
+    Windows 上本机 SQLite 构建（3.53.1）的 WAL 并发写存在缺陷：
+    多连接同时 BEGIN IMMEDIATE 时，部分连接的 -shm 映射失败，
+    报 "attempt to write a readonly database"（实测约 1/3 轮次复现，
+    BEGIN IMMEDIATE 阶段即抛 SQLITE_READONLY(8)，重连重试也无法完全恢复）。
+    回滚日志模式（DELETE）在同一测试矩阵下零失败，画廊低频写场景足够。
+    非 Windows 平台保留 WAL 的读写并发优势。
+    """
+    if sys.platform == "win32":
+        if db.execute("PRAGMA journal_mode").fetchone()[0].lower() != "delete":
+            db.execute("PRAGMA journal_mode=DELETE")
+    elif db.execute("PRAGMA journal_mode").fetchone()[0].lower() != "wal":
+        db.execute("PRAGMA journal_mode=WAL")
+
+
 def connect(project_root):
     path = database_path(project_root)
     path.parent.mkdir(parents=True, exist_ok=True)
     db = sqlite3.connect(path, timeout=10)
     db.row_factory = sqlite3.Row
-    db.execute("PRAGMA journal_mode=WAL")
+    _init_journal_mode(db)
     db.executescript("""
         CREATE TABLE IF NOT EXISTS gallery_actions (
             kind TEXT NOT NULL, uid TEXT NOT NULL, image TEXT NOT NULL,

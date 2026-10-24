@@ -122,7 +122,9 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
             conn.request(method, path, body=body, headers=headers)
             resp = conn.getresponse()
             data = resp.read()
-        except OSError as e:
+        except (OSError, http.client.HTTPException) as e:
+            # HTTPException：上游返回畸形响应（BadStatusLine 等）时抛出，
+            # 不捕获会击穿 BaseHTTPRequestHandler 直接炸掉处理线程。
             self.send_error(502, "upstream unavailable: %s" % e)
             return
         finally:
@@ -283,9 +285,6 @@ def route(host, path):
         return StaticHandler, {"root": str(APP_DIR), "strip": "/app"}
     if p == "/app/modules" or p.startswith("/app/modules/"):
         return StaticHandler, {"root": str(MODULES_DIR), "strip": "/app/modules"}
-    # Embedded modules and shared resources must win before the Cards SPA fallback.
-    if p.startswith("/shared/"):
-        return StaticHandler, {"root": str(CODE_ROOT / "shared"), "strip": "/shared"}
     # The shooter lives in the main site's static tree, not the Cards SPA.
     if p == "/playtest/shengsheng-shoot" or p.startswith("/playtest/shengsheng-shoot/"):
         return www.Handler, {}
