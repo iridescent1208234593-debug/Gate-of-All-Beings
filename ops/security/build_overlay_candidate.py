@@ -13,6 +13,7 @@ base must reproduce the same SHA-256.
 """
 import argparse
 from datetime import datetime, timezone
+import difflib
 import gzip
 import hashlib
 import io
@@ -77,7 +78,8 @@ for name in overlays:
     old = base.get(name, (None, None))[0]
     if old is not None and b'\r\n' in old and b'\r\n' not in content:
         content = content.replace(b'\n', b'\r\n')
-    changed = None if old is None else sum(a != b for a, b in zip(lines(old), lines(content))) + abs(len(lines(old)) - len(lines(content)))
+    changed = None if old is None else sum(max(i2 - i1, j2 - j1) for tag, i1, i2, j1, j2 in
+                                           difflib.SequenceMatcher(None, lines(old), lines(content), autojunk=False).get_opcodes() if tag != 'equal')
     report.append({'path': name, 'base_sha256': old and hashlib.sha256(old).hexdigest(),
                    'sha256': hashlib.sha256(content).hexdigest(), 'changed_lines_vs_base': changed})
     files[name] = (content, mtime)
