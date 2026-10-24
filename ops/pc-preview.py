@@ -17,9 +17,9 @@ from urllib.parse import unquote, urlsplit, urlunsplit
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'server'))
 from base_static import BaseStaticHandler
+from host_policy import PREVIEW_HOSTS, enforce_request, normalize_host
 
-HOSTS={('pc' if name=='iridescently.xyz' else 'pc-'+name.split('.')[0])+'.iridescently.xyz':name
-       for name in ['iridescently.xyz','www.iridescently.xyz','huiguan.iridescently.xyz','oc.iridescently.xyz','spirit.iridescently.xyz','zszm.iridescently.xyz','game.iridescently.xyz','juling.iridescently.xyz','lingjing.iridescently.xyz']}
+HOSTS=PREVIEW_HOSTS
 PUBLIC=ROOT/'ops/server-public'
 TEXT_EXTENSIONS={'.html','.js','.mjs','.css','.json','.svg'}
 COMPRESSIBLE_EXTENSIONS=TEXT_EXTENSIONS|{'.ttf','.otf','.wasm'}
@@ -70,6 +70,8 @@ def central_path(path):
 
 class Handler(BaseStaticHandler):
     protocol_version='HTTP/1.1'
+    def parse_request(self):
+        return super().parse_request() and enforce_request(self, HOSTS, os.environ.get('IRIDESCENTLY_ENVIRONMENT') == 'development')
     def _is_api_path(self):return central_path(urlsplit(self.path).path)
 
     def log_message(self,fmt,*args):
@@ -82,13 +84,13 @@ class Handler(BaseStaticHandler):
         super().end_headers()
 
     def canonical(self):
-        host=self.headers.get('Host','').split(':')[0].lower()
+        host=normalize_host(self.headers.get('Host',''))
         if host in {'127.0.0.1','localhost'}:return 'zszm.iridescently.xyz'
         if host not in HOSTS:raise ValueError('Unknown preview host')
         return HOSTS[host]
 
     def headers_for_hk(self,host,body=None):
-        headers={k:v for k,v in self.headers.items() if k.lower() not in {'host','connection','content-length','accept-encoding','x-forwarded-host','x-forwarded-proto','cf-connecting-ip','x-forwarded-for','cf-ray'}}
+        headers={k:v for k,v in self.headers.items() if k.lower() not in {'host','connection','content-length','accept-encoding','x-forwarded-host','x-forwarded-proto','forwarded','cf-connecting-ip','x-forwarded-for','cf-ray'}}
         headers['Host']=host;headers['Accept-Encoding']='identity'
         # Only rewrite the known preview origins, retaining the regular server-side CSRF checks.
         for key in ['Origin','Referer']:

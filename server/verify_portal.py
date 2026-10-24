@@ -121,7 +121,6 @@ CHECKS = [
     ("iridescently.xyz", "/app/modules/juling/", 200),
     ("iridescently.xyz", "/app/modules/slay/", 200),
     ("iridescently.xyz", "/app/modules/aeon/", 200),
-    ("iridescently.xyz", "/app/modules/world-map/", 200),
     ("iridescently.xyz", "/management/index.html", 308),
     ("iridescently.xyz", "/management/index.html?embed=1", 200),
     ("iridescently.xyz", "/ecology/index.html", 200),
@@ -138,6 +137,12 @@ CHECKS = [
     ("huiguan.iridescently.xyz", "/users.DB", 404),
     ("huiguan.iridescently.xyz", "/game_saves%2ejson", 404),
 ]
+
+# A security overlay may intentionally preserve an older production module set.
+# Require world-map when the candidate registers it, without deploying it merely
+# because the operator's source checkout has moved ahead of production.
+if any(link.get("key") == "world-map" for link in json.loads((HERE / "app/portal.json").read_text(encoding="utf-8"))["links"]):
+    CHECKS.append(("iridescently.xyz", "/app/modules/world-map/", 200))
 
 
 def wait(port, timeout=25):
@@ -163,6 +168,9 @@ def req(host, path):
 
 
 def main():
+    # The forced production stage command already runs this verifier. Keep Host
+    # isolation mandatory here so a future release cannot silently omit it.
+    subprocess.run([sys.executable, "-X", "utf8", str(HERE / "security_ingress_test.py"), "--host-only"], check=True)
     with socket.socket() as probe:
         if probe.connect_ex(("127.0.0.1", PORT)) == 0:
             print("FAIL: requested test port is already in use", PORT)

@@ -26,22 +26,20 @@ import urllib.request
 
 HOST = "zszm.iridescently.xyz"
 ROOT = Path(__file__).resolve().parents[1]
-APPROVED_HOSTS = {"iridescently.xyz", "www.iridescently.xyz", "huiguan.iridescently.xyz",
-                  "oc.iridescently.xyz", "spirit.iridescently.xyz", HOST,
-                  "pc-zszm.iridescently.xyz", "game.iridescently.xyz",
-                  "juling.iridescently.xyz", "lingjing.iridescently.xyz"}
+from host_policy import PRODUCTION_HOSTS, PREVIEW_HOSTS, normalize_host
+APPROVED_HOSTS = PRODUCTION_HOSTS | PREVIEW_HOSTS.keys()
 PATHS = ["/", "/app", "/app/shell/", "/api/sso-user", "/__server/select",
          "/__server/select?return=%2F%2Fevil.example",
          "/__server/select?return=%5C%5Cevil.example", "/a?b=1"]
 
 
-def request(connect, scheme, path, host=HOST, headers=None, method="GET"):
+def request(connect, scheme, path, host=HOST, headers=None, method="GET", sni=None):
     conn = http.client.HTTPConnection(connect[0], connect[1], timeout=15)
     try:
         raw = socket.create_connection(connect, timeout=15)
         cert = None
         if scheme == "https":
-            raw = ssl.create_default_context().wrap_socket(raw, server_hostname=host)
+            raw = ssl.create_default_context().wrap_socket(raw, server_hostname=sni or host)
             cert = raw.getpeercert()  # OpenSSL already checked hostname and expiry.
         conn.sock = raw
         conn.request(method, path, headers={"Host": host, "Connection": "close", **(headers or {})})
@@ -52,14 +50,14 @@ def request(connect, scheme, path, host=HOST, headers=None, method="GET"):
         conn.close()
 
 
-def local_checks():
+def local_checks(chooser=True):
     # Importing portal creates databases only under this throwaway data root.
     with tempfile.TemporaryDirectory(prefix="ingress-security-") as temporary:
         env = dict(os.environ, IRIDESCENTLY_PROJECT_ROOT=temporary,
                    IRIDESCENTLY_ENVIRONMENT="production", PORT="0")
         if os.environ.get("IRIDESCENTLY_INGRESS_CHILD") != "1":
             env["IRIDESCENTLY_INGRESS_CHILD"] = "1"
-            subprocess.run([sys.executable, "-X", "utf8", __file__], env=env, check=True)
+            subprocess.run([sys.executable, "-X", "utf8", __file__] + ([] if chooser else ['--host-only']), env=env, check=True)
             return
         sys.path.insert(0, str(ROOT / "server"))
         import portal_server as portal
@@ -79,6 +77,25 @@ def local_checks():
                 status, headers, _, _ = request(connect, "http", "/", host=host,
                                                 headers={"X-Forwarded-Proto": "https"})
                 assert status == 421 and "Location" not in headers, host
+                checks += 1
+            for value in ('evil-iridescently.xyz', 'iridescently.xyz@evil.com', 'iridescently.xyz.',
+                          'iridescently.xyz:0', 'iridescently.xyz:65536', '[::1]:443', '[::1',
+                          'iridescently.xyz/path', 'iridescently.xyz:bad', 'iridescently.xyz:'):
+                assert normalize_host(value) not in PRODUCTION_HOSTS, value
+                status, _, _, _ = request(connect, 'http', '/', host=value, headers={'X-Forwarded-Proto':'https'})
+                assert status == 421, value
+                checks += 1
+            for host in sorted(PRODUCTION_HOSTS):
+                for value in (host, host.upper(), host + ':443'):
+                    status, _, _, _ = request(connect, 'http', '/__server/status', host=value,
+                        headers={'X-Forwarded-Proto':'https','X-Forwarded-Host':'evil.com','Forwarded':'host=evil.com'})
+                    assert status == 200, value
+                    checks += 1
+            for extra in ('Host: evil.example\r\n', 'X-Forwarded-Proto: https\r\n'):
+                raw=socket.create_connection(connect,timeout=10)
+                raw.sendall(('GET /__server/status HTTP/1.1\r\nHost: '+HOST+'\r\nX-Forwarded-Proto: https\r\n'+extra+'Connection: close\r\n\r\n').encode())
+                wire=raw.recv(65536);raw.close()
+                assert (b'421' if extra.startswith('Host:') else b'308') in wire.split(b'\r\n',1)[0], wire[:100]
                 checks += 1
             # A loopback trusted proxy is the only source allowed to attest HTTPS.
             for host in (HOST, "iridescently.xyz", "huiguan.iridescently.xyz"):
@@ -107,6 +124,24 @@ def local_checks():
             checks += 1
         finally:
             server.shutdown(); server.server_close()
+        print(f"PASS: {checks} HTTP/Host/header/error/keep-alive checks")
+        if Path('/srv/iridescently').is_dir() and sys.platform.startswith('linux'):
+            # The existing production stage runner executes this as the service
+            # user. Check actual kernel binds without requiring root or reading data.
+            protected = {80, 443, 4173, 5174, 5177, 5178, 8080, 18180, 18190}
+            inspected = []
+            for file in ('/proc/net/tcp', '/proc/net/tcp6'):
+                for line in Path(file).read_text().splitlines()[1:]:
+                    fields = line.split()
+                    address, port = fields[1].split(':')
+                    if fields[3] == '0A' and int(port, 16) in protected:
+                        packed = bytes.fromhex(address)
+                        ip = ipaddress.ip_address(b''.join(packed[i:i+4][::-1] for i in range(0,len(packed),4)))
+                        assert not ip.is_unspecified and (ip.is_loopback or ip.is_private), ('public bind', str(ip), int(port,16))
+                        inspected.append({'port':int(port,16),'address_hex':address})
+            print('PASS: origin kernel listener audit ' + json.dumps(inspected))
+        if not chooser:
+            return
         # Execute the existing chooser script; do not alter its return filtering.
         select = (ROOT / "ops/server-public/select").read_text("utf-8")
         script = select.split("<script>", 1)[1].split("</script>", 1)[0]
@@ -120,7 +155,6 @@ for(const dest of ['//evil.example','\\\\\\\\evil.example','https://evil.example
  assert.equal(nodes.stable.href,'https://zszm.iridescently.xyz'+(dest==='/safe?a=1'?dest:'/'));
 } console.log('PASS: existing chooser rejects six return payloads');"""
         subprocess.run(["node", "-e", js, json.dumps(script)], check=True)
-        print(f"PASS: {checks} HTTP/Host/header/error/keep-alive checks")
 
 
 def public_checks():
@@ -129,10 +163,9 @@ def public_checks():
         with opener.open(urllib.request.Request(url, headers={"Accept": "application/dns-json"}), timeout=15) as response:
             return json.load(response)
     answers = []
-    networks = []
-    for kind in ("v4", "v6"):
-        with opener.open("https://www.cloudflare.com/ips-" + kind, timeout=15) as response:
-            networks += [ipaddress.ip_network(line) for line in response.read().decode().splitlines() if line]
+    ip_ranges = get_json('https://api.cloudflare.com/client/v4/ips')
+    assert ip_ranges.get('success'), ip_ranges
+    networks = [ipaddress.ip_network(value) for key in ('ipv4_cidrs','ipv6_cidrs') for value in ip_ranges['result'][key]]
     for resolver in ("https://cloudflare-dns.com/dns-query", "https://dns.google/resolve"):
         result = get_json(resolver + "?name=" + HOST + "&type=A")
         ips = [r["data"] for r in result.get("Answer", []) if r["type"] == 1]
@@ -144,6 +177,15 @@ def public_checks():
                 "network_environment": "this runner only; two resolvers are NOT two networks",
                 "dns": answers, "checks": []}
     for ip in ips:
+        for sni, host in ((HOST, 'evil.example'), ('evil.example', HOST), ('evil.example', 'evil.example'),
+                          ('unregistered-isolation.iridescently.xyz', 'unregistered-isolation.iridescently.xyz')):
+            try:
+                status, headers, body, _ = request((ip,443),'https','/',host=host,sni=sni)
+                assert status >= 400 and b'id="root"' not in body and b'iridescently-shell-view' not in body, (sni,host,status)
+                outcome = {'status':status}
+            except ssl.SSLError as error:
+                outcome = {'tls_rejected':str(error)}
+            evidence['checks'].append({'ip':ip,'sni':sni,'host':host,**outcome})
         for path in PATHS:
             status, headers, body, _ = request((ip, 80), "http", path)
             assert status in (301, 308), (ip, path, status)
@@ -184,6 +226,7 @@ def public_checks():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--public", action="store_true")
+    parser.add_argument("--host-only", action="store_true", help="production stage gate; no browser/Node fixtures required")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.public:
@@ -198,4 +241,4 @@ if __name__ == "__main__":
         print(json.dumps(result, ensure_ascii=False, indent=2))
         sys.exit(0 if result["ok"] else 1)
     else:
-        local_checks()
+        local_checks(chooser=not args.host_only)

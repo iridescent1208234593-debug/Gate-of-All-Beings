@@ -54,7 +54,7 @@ def main():
     thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
     def get(path,headers=None,method='GET'):
         connection=http.client.HTTPConnection('127.0.0.1',server.server_port,timeout=10)
-        connection.request(method,path,headers={'Host':'pc-zszm.iridescently.xyz',**(headers or {})})
+        connection.request(method,path,headers={'Host':'pc-zszm.iridescently.xyz','X-Forwarded-Proto':'https',**(headers or {})})
         response=connection.getresponse();body=response.read();result=(response.status,dict(response.getheaders()),body);connection.close();return result
     try:
         for path in ['/app/shell/','/app/shell/m/shengsheng-shoot','/app/shell/m/slay']:
