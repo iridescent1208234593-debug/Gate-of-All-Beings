@@ -41,3 +41,7 @@
 - API：旧 Cards OAuth `/api/login` 保留为 410 停用响应；`/api/sso-user`、`/api/gate/identity` 与 `/api/gate/ocs` 使用会馆共享 `hx_sso`，不创建第二套账户状态。
 - 身份资料：账号使用 `(kind, uid)` 隔离。Gate Identity 保存于会馆 `users.db.account_profiles.gate_identity_json`；OC 仍在会馆 `characters.json` 每条记录的 `data` 中。导入 OC 是经用户确认的一次字段复制，不保持同步，种族名称为自由文本。账户头像、OC 头像和 Gate 头像彼此独立；API / 资源细节见 `portal/huiguan/README.md` 的“账户、OC 与众生之门形象”。
 - 测试：`npm test`、`npm run check:game`。
+
+## 卡牌数值管理
+
+在本机打开 `#collection` 图鉴后，可编辑费用、效果、目标、出牌条件和使用后消耗；数值配置由本地 Vite API 保存，并与浏览器旅途存档分开。完整操作、效果范围、权限、备份与恢复说明见[卡牌数值后台与功能手册](docs/card-balance-admin.md)。

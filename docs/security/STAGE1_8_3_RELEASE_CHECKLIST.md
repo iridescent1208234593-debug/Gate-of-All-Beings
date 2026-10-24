@@ -64,7 +64,7 @@ Cloudflare 的 WAF/Bot/限速/Hotlink/缓存配置；线上 robots.txt 实际响
 
 ## 7. 风险验证结果（2026-10-18，全部在隔离环境，未发布、未重启线上服务）
 
-证据位于 `work/stage1.8.3-r2/`（`drill.py`/`result.json`、`r1_stress.py`、`r5.py`/`r5b.py`、`r6/`）。
+证据位于 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/stage1.8.3-r2`（`drill.py`/`result.json`、`r1_stress.py`、`r5.py`/`r5b.py`、`r6/`）。
 
 ### R2 WAL 备份 — 已验证，附带发现
 - **线上 `portal/huiguan/users.db` 已经是 WAL 模式**（文件头标志=2，存在 `-wal`/`-shm`；cards `users.db`、juling `save.db` 仍是 delete 模式）。也就是说 R2 不是"发布后才会出现"的风险，现在就存在。
@@ -76,7 +76,7 @@ Cloudflare 的 WAF/Bot/限速/Hotlink/缓存配置；线上 robots.txt 实际响
   | sqlite3 `backup()` API | 可恢复，integrity ok |
   | `VACUUM INTO` | 可恢复，integrity ok |
   | 恢复时旧 `-wal`/`-shm` 仍在目录里 | **危险**：旧 WAL 被重放，"恢复"后数据变回写入时的状态，备份被悄悄覆盖 |
-- 现有备份脚本（`work/stage15_backup.py`）对 SQLite 用 `backup()` API，是安全的。对真实 `portal/huiguan/users.db` 做了只读 `backup()`：integrity ok，26 张表，users 行数一致。
+- 现有备份脚本（`ops/stage15_backup.py`）对 SQLite 用 `backup()` API，是安全的。对真实 `portal/huiguan/users.db` 做了只读 `backup()`：integrity ok，26 张表，users 行数一致。
 - 结论：备份必须用 `backup()`/`VACUUM INTO`；**恢复前必须先删除目标旁的 `-wal`/`-shm`**；任何 rsync/OneDrive/复制 `*.db` 的流程都不可用于该库。该点需写入恢复手册。
 
 ### R6 Cards 从源码树导入 — 已修复（未提交、未上线）

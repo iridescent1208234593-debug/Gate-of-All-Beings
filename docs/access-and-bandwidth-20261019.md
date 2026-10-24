@@ -4,7 +4,7 @@
 
 用户明确批准后，定向修复 `20261019T051405Z` 已于 2026-10-19 16:18（新加坡时间）发布，基线为 `20261018T103017Z`；香港 5 个服务正常，nginx 恢复页与 gzip 配置已加载。本机网关已加载相应路由及压缩修复。
 
-候选由稳定版原始代码包叠加本轮补丁生成，仅改变 11 个代码文件。`work/access-audit-20261019/reviewed-hotfix.patch` 与 `hotfix-manifest.json` 记录逐文件前后 SHA256。没有重新构建或打包 Claude 正在修改的 Cards、Slay、共享数据、账户或设计系统。
+候选由稳定版原始代码包叠加本轮补丁生成，仅改变 11 个代码文件。`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/audits/access-audit-20261019/reviewed-hotfix.patch` 与 `hotfix-manifest.json` 记录逐文件前后 SHA256。没有重新构建或打包 Claude 正在修改的 Cards、Slay、共享数据、账户或设计系统。
 
 18:34 后检测到 Claude 的并行发布 `20261019T103413Z`，用户确认由她执行。本轮保留其发布，以这份真实代码包为基线补发 `20261019T103900Z`，仅修正 `server/access_recovery.py` 的原始路径判断。逐文件验证 1,519 个文件，除该文件外全部匹配 Claude 的发布清单；上一版本保留为 `20261019T103413Z`。未提交或推送 Git。
 
@@ -89,4 +89,4 @@ PC 原站此前不做文本编码。候选在 HTML 注入完成后压缩，支�
 - 尚未用玩家账户新增/改写存档或设表；账户、存档没有为测试覆盖、迁移或清空。原始设表缺失的那 1 条 OC 只能呈现保留的公开资料，完整原始设表需所有者重新保存或从可靠历史副本恢复。
 - 基线浏览器检查香港 Management/Ecology/Juling/Softie/AEON 均能加载；Slay 延长观察后也显示完整开局选择。没有为测试改写实际账户的游戏进度。Slay 旧账户栏跨站读取会馆 `/api/user` 存在 CORS 告警，共享全局导航仍读取现有 SSO；本轮未修改 Claude 正在整合的 Slay 账户/存档实现。外站 Flip 当前能导入，未将其误列为已确认故障或新增发布项。健康端点只证明门户在线。
 
-证据目录：`work/access-audit-20261019/`，含基线 JSON、候选浏览器结果、带宽测量、门户日志与定向发布清单。没有提交或推送。
+证据目录：`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/audits/access-audit-20261019`，含基线 JSON、候选浏览器结果、带宽测量、门户日志与定向发布清单。没有提交或推送。

@@ -17,7 +17,7 @@
 
 ## 为什么之前"停 portal + 等待"仍失败
 
-Cards OAuth（5174）是独立进程，cwd 在 site 树更深处，只停 portal 时它仍存活。2026-10-17 的 `work/publish-simulation-20261017` 已证明：只停 portal 或只停 oauth 均 13×EPERM/-4048，两个都停才成功。
+Cards OAuth（5174）是独立进程，cwd 在 site 树更深处，只停 portal 时它仍存活。2026-10-17 的 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/publish-simulation-20261017` 已证明：只停 portal 或只停 oauth 均 13×EPERM/-4048，两个都停才成功。
 
 ## 复现（本次独立验证，隔离目录）
 
@@ -69,7 +69,7 @@ Cards OAuth（5174）是独立进程，cwd 在 site 树更深处，只停 portal
 
 审计结论：portal_server.py、各 portal 子服务、cards server.py 均按 `__file__` 或 `IRIDESCENTLY_PROJECT_ROOT` 解析路径（SQLite `users.db` 在 `ROOT/server/app/src/cards/`，日志在 `ops/网站恢复/logs`），无 cwd 依赖。服务端口、URL、数据格式未改。
 
-### 隔离验证（`work/stage1.8.2-cwd-fix/drive.py`，结果 `result.json`，端口 18080/15174）
+### 隔离验证（`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/stage1.8.2-cwd-fix/drive.py`，结果 `result.json`，端口 18080/15174）
 真实 production 树拷贝 + 真实发布器 + 真实 `launch()`：
 - 两服务运行中，cwd 均为 `.releases\runtime\*`，扫描无 cwd 位于 production 下。
 - **服务保持运行时发布器 rename 成功**（exit 0，0 个文件系统错误，VERSION old→new），两服务仍存活并响应（Cards 200，Portal 对该 Host 返回 404/redirect，与切换前一致）。

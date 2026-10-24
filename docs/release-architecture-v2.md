@@ -84,7 +84,7 @@ v2 的接入位：
 
 ### 阶段 0 结论（2026-10-17）：假设成立
 
-脚本：`node work/publish-simulation-20261017/repro-cwd-lock.mjs`（可重复运行；每个场景重建自己的假项目树）。日志：同目录下 `<场景>.log`（含完整 `[release-preflight]` / `[release-fs]` 行）和 `summary.json`。
+脚本：`node file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/publish-simulation-20261017/repro-cwd-lock.mjs`（可重复运行；每个场景重建自己的假项目树）。日志：同目录下 `<场景>.log`（含完整 `[release-preflight]` / `[release-fs]` 行）和 `summary.json`。
 
 做法：把真实的 `ops/publish-release.mjs`、`ops/release-artifacts.mjs` 原样复制进假树。按 `website-manager.py` 的 cwd 规则起两个替身进程（`python -m http.server 0`，只绑 127.0.0.1 随机端口）：portal → `production/site/server`，zszm-oauth → `production/site/server/app/src/cards`。替身空闲时不打开树内任何文件，所以**唯一变量是 cwd**。按场景停掉其中一部分，再运行 `publish-release.mjs site`。
 

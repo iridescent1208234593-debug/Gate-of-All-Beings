@@ -41,6 +41,7 @@ HOST = "127.0.0.1"
 PORT = int(os.environ.get("PORT", "5174"))
 
 USER_DB = os.path.join(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", str(__import__("pathlib").Path(__file__).resolve().parents[4])), "server", "app", "src", "cards", "users.db")
+UPDATE_FEEDBACK_DB = os.path.join(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", str(__import__("pathlib").Path(__file__).resolve().parents[4])), "server", "app", "src", "cards", "update-feedback.sqlite3")
 HUIGUAN_CHARACTERS = os.path.join(PROJECT_ROOT, "portal", "huiguan", "characters.json")
 
 def init_user_db():
@@ -80,7 +81,47 @@ def get_user(user_id):
     conn.close()
     return dict(row) if row else None
 
+def init_update_feedback_db():
+    os.makedirs(os.path.dirname(UPDATE_FEEDBACK_DB), exist_ok=True)
+    with sqlite3.connect(UPDATE_FEEDBACK_DB, timeout=10) as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS update_feedback (
+                voter_id TEXT PRIMARY KEY,
+                vote TEXT NOT NULL CHECK (vote IN ('up', 'down'))
+            )
+        """)
+
+def update_feedback(voter_id, vote):
+    with sqlite3.connect(UPDATE_FEEDBACK_DB, timeout=10) as conn:
+        if vote is None:
+            conn.execute("DELETE FROM update_feedback WHERE voter_id=?", (voter_id,))
+        else:
+            conn.execute("""
+                INSERT INTO update_feedback (voter_id, vote) VALUES (?, ?)
+                ON CONFLICT(voter_id) DO UPDATE SET vote=excluded.vote
+            """, (voter_id, vote))
+        row = conn.execute("""
+            SELECT COALESCE(SUM(vote='up'), 0), COALESCE(SUM(vote='down'), 0)
+            FROM update_feedback
+        """).fetchone()
+        current = conn.execute("SELECT vote FROM update_feedback WHERE voter_id=?", (voter_id,)).fetchone()
+        return {"up": row[0], "down": row[1], "vote": current[0] if current else None}
+
+def get_update_feedback(voter_id):
+    with sqlite3.connect(UPDATE_FEEDBACK_DB, timeout=10) as conn:
+        row = conn.execute("""
+            SELECT COALESCE(SUM(vote='up'), 0), COALESCE(SUM(vote='down'), 0)
+            FROM update_feedback
+        """).fetchone()
+        current = conn.execute("SELECT vote FROM update_feedback WHERE voter_id=?", (voter_id,)).fetchone()
+        return {"up": row[0], "down": row[1], "vote": current[0] if current else None}
+
+def valid_feedback_voter_id(value):
+    return (isinstance(value, str) and len(value) == 36 and
+            all(value[index] == "-" if index in (8, 13, 18, 23) else value[index] in "0123456789abcdef" for index in range(36)))
+
 init_user_db()
+init_update_feedback_db()
 
 
 class Session:
@@ -350,6 +391,13 @@ class OAuthHandler(BaseStaticHandler):
                     "is_admin": False,
                 })
 
+        elif path == "/api/update-feedback":
+            voter_id = self.headers.get("X-Feedback-Voter", "")
+            if not valid_feedback_voter_id(voter_id):
+                self._json_resp(400, {"error": "投票编号无效"})
+            else:
+                self._json_resp(200, get_update_feedback(voter_id))
+
         elif path == "/api/gate/identity":
             user = _shared_user(self)
             profile = user["gate_identity"] if user else None
@@ -387,6 +435,22 @@ class OAuthHandler(BaseStaticHandler):
 
     def do_POST(self):
         path = urllib.parse.urlparse(self.path).path
+        if path == "/api/update-feedback":
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                if length <= 0 or length > 1024:
+                    return self._json_resp(413, {"error": "投票请求无效"})
+                body = json.loads(self.rfile.read(length).decode("utf-8"))
+                voter_id = body.get("voter_id") if isinstance(body, dict) else None
+                vote = body.get("vote") if isinstance(body, dict) else None
+                if not valid_feedback_voter_id(voter_id):
+                    return self._json_resp(400, {"error": "投票编号无效"})
+                if vote not in ("up", "down", None):
+                    return self._json_resp(400, {"error": "投票选项无效"})
+            except (ValueError, UnicodeError):
+                return self._json_resp(400, {"error": "投票请求格式无效"})
+            return self._json_resp(200, update_feedback(voter_id, vote))
+
         if path not in ("/api/gate/identity", "/api/gate/identity/select", "/api/gate/identity/delete"):
             return self._json_resp(404, {"error": "接口不存在"})
         user = _shared_user(self)
@@ -488,6 +552,7 @@ class OAuthHandler(BaseStaticHandler):
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
         self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)

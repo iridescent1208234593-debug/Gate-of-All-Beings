@@ -21,7 +21,7 @@ Checked 2026-10-16 (Asia/Singapore). Scope was limited to source review, a bound
 
 - `ops/assets/gallery-manifest.json` lists 384 Gallery images totalling 319,169,642 bytes. `portal/www/gallery-engine/gallery-plugin.js` copies the discovered originals into the public `gallery-files/` output without resizing. The current live deployment artifact path could not be identified from this checkout, so actual deployed bytes remain **UNKNOWN**.
 - Three local Gallery samples (700×1012 PNG, 1670×2334 JPEG, and 1800×3800 PNG) had no EXIF keys, GPS, or software fields. This small sample does not establish that all 384 assets or user uploads are metadata-free.
-- One local proof of concept used `2026年雨水贺图.png` (1800×3800, 4,406,036 bytes) without modifying the source. Generated outputs are under `work/security-stage1.7/poc/`: `display-1600.webp` (758×1600, 104,864 bytes) and `thumbnail-400.webp` (189×400, 15,924 bytes). Both reopen successfully and contain no EXIF keys. The display is capped on its longest edge at 1600px; visual acceptance in the live Gallery has not been performed.
+- One local proof of concept used `2026年雨水贺图.png` (1800×3800, 4,406,036 bytes) without modifying the source. Generated outputs are under `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/security-stage1.7/poc/`: `display-1600.webp` (758×1600, 104,864 bytes) and `thumbnail-400.webp` (189×400, 15,924 bytes). Both reopen successfully and contain no EXIF keys. The display is capped on its longest edge at 1600px; visual acceptance in the live Gallery has not been performed.
 - Full originals remain available without authentication from official image and shared asset APIs, and the original upload URLs are stable. Whether every upload is intended public is **UNKNOWN**; do not blanket-block the shared upload directory.
 
 ## Rate-Limit and Edge Plan
@@ -43,6 +43,6 @@ Cloudflare plan capabilities, verified-bot signals, existing WAF/rate rules, hot
 
 ## Git and Change Attribution
 
-- Initial and final snapshots are in `work/security-stage1.7/git-status-baseline.txt`, `git-diff-stat-baseline.txt`, `git-status-final.txt`, and `git-diff-stat-final.txt`.
+- Initial and final snapshots are in `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/security-stage1.7/git-status-baseline.txt`, `git-diff-stat-baseline.txt`, `git-status-final.txt`, and `git-diff-stat-final.txt`.
 - The branch remains `master...origin/master [ahead 10]`. `portal/huiguan/server_huiguan.py` was already dirty before Stage 1.7 because of earlier account/avatar/security work. Comparing the saved pre-stage diff with the current diff shows this stage added 28 lines and removed 8 lines in that file; these are the pagination clamps and two public-field minimizations described above. All other pre-existing edits were left alone.
 - The two reports and two POC images live under `docs/security/` and `work/`, directories already untracked at the baseline. No files were staged and no commit was created. `git diff --check` reported no whitespace errors; it printed existing LF-to-CRLF warnings for unrelated dirty files.

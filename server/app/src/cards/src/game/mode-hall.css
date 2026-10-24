@@ -132,5 +132,8 @@
 .mode-hall__chapter--vote { gap: 8px; }
 .mode-hall__vote { display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px solid #f5efcf33; font-size: 11px; color: #e9eddfbd; }
 .mode-hall__vote em { font-style: normal; margin-right: auto; }
-.mode-hall__vote button { display: inline-grid; place-items: center; width: 28px; height: 24px; border: 1px solid #f5efcf55; border-radius: 8px; background: transparent; color: #f5efcf; cursor: pointer; }
+.mode-hall__vote-total { color: #e9eddf88; font-size: 9px; white-space: nowrap; }
+.mode-hall__vote button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 42px; height: 24px; padding: 0 6px; border: 1px solid #f5efcf55; border-radius: 8px; background: transparent; color: #f5efcf; cursor: pointer; font: inherit; font-variant-numeric: tabular-nums; }
+.mode-hall__vote button:disabled { cursor: wait; opacity: .7; }
 .mode-hall__vote button[aria-pressed="true"] { background: #ebc77a; border-color: #ebc77a; color: #0e2620; }
+.mode-hall__vote-message { color: #f1c98b; }

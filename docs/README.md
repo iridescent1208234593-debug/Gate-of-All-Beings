@@ -23,6 +23,7 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 
 ## 维护与研发资料
 
+- [卡牌数值后台与功能手册](../server/app/src/cards/docs/card-balance-admin.md)：图鉴卡牌数值编辑、权限、API、备份和恢复。
 - [统一更新流程](update-system.md)
 - [众生之门新版流程集成](zszm-flow-integration.md)：单次开场、玩家初始化、门庭与小游戏入口；本地候选未发布。
 - [身份、头像与存档关系](zszm-identity-and-save-map.md)：Account / OC / Gate 的数据边界、跨站限制和后续风险。

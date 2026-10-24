@@ -7,7 +7,7 @@
 数据来源：`node ops/perf/zszm-startup.mjs --build --runs 3`。把工作树（`31bfe0e` + 首帧打点）临时构建后测量，构建配置与 `.releases/candidate/cards` 相同；现有候选早于打点，无法直接测。
 
 - 条件：冷 / 热缓存，Fast 4G（9 Mbps / 150 ms RTT），CPU 4× 降速，Chrome 155 headless，视口 1440×900。文本资源按 gzip 计。
-- 报告：`work/qa/perf/2026-10-17/`。真实网络与 `--block-cross-origin` 各一份，另有两者的 diff。
+- 报告：`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/perf/2026-10-17/`。真实网络与 `--block-cross-origin` 各一份，另有两者的 diff。
 - 时间均自导航开始，取 3 次中位数。
 
 | 指标（第 2 节口径） | 真实网络 | 跨子域立即失败 | 预算 | 结果 |
@@ -103,7 +103,7 @@ P4 门庭模式清单、各模式 chunk（hover / 视口内预取）
 6. **测量 harness**：
    - 在仓库内加 `ops/perf/zszm-startup.mjs`：Playwright + Chrome DevTools Protocol，冷 / 热缓存、网络与 CPU 节流。
    - 输出 `{firstGateFrame, jsBeforeFrame, crossOriginBlocking, onboardingBytes}`，与第 2 节预算比较，超标即非零退出。
-   - 报告写入 `work/qa/perf/<date>/`。门景用 `performance.mark('gate:first-frame')` 打点，作为唯一首帧口径。
+   - 报告写入 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/perf/%3Cdate%3E/`。门景用 `performance.mark('gate:first-frame')` 打点，作为唯一首帧口径。
    - 已实现（2026-10-17）。用法：`node ops/perf/zszm-startup.mjs [--dist <dir> | --build | --url <url>] [--runs 3] [--block-cross-origin] [--compare <before.json>]`；只比较两份报告用 `--diff <before.json> <after.json>`。默认测 `.releases/candidate/cards`。退出码：0 全部达标，1 有超标，2 无法测量（例如构建没有打点）。
    - 报告格式固定（`schema: zszm-startup/v1`），取各次运行的中位数：
      - `summary.metrics`：五个预算指标。

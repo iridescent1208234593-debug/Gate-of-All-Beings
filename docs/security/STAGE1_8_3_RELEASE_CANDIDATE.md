@@ -86,7 +86,7 @@ R2 恢复手册；R3；R4 局限；Cards 无过期会话清理；多线程 `_Ser
 
 ## 证据位置
 
-`work/stage1.8.3-candidate/verify.py`+`result.json`；`work/stage1.8.3-r2/`（WAL、R5、R1 压测）；worktree `E:\Projects-worktrees\stage183`。
+`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/stage1.8.3-candidate/verify.py`+`result.json`；`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/stage1.8.3-r2`（WAL、R5、R1 压测）；worktree `E:\Projects-worktrees\stage183`。
 
 ---
 

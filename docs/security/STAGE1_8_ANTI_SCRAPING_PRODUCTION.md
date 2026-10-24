@@ -11,7 +11,7 @@ Checked: 2026-10-16 (Asia/Singapore). Scope: bounded production checks, source a
 - Candidate `.releases/candidate/site` contains the Stage 1.7 pagination/privacy edits, the Stage 1.8 observe-only logger and response hook, and the robots cleanup described below. Candidate manifest verification passed for 1,371 files.
 - The active production snapshot does not contain `server/scraping_observer.py`; its `portal/huiguan/server_huiguan.py` remains the pre-Stage-1.7 version. The stage changes are **candidate-only**, not deployed.
 - Before-deployment production boundary evidence from Stage 1.7 remains the applicable behavior: official characters `limit=61` returned 61 rows; `limit=-1` and `-100` each returned all 439 rows. Fan list `limit=-1` and `-100` were echoed as negative values (16 public rows existed at the time); its response still included `user_kind` and `user_uid`. No post-deployment checks are possible until the candidate is published.
-- Three safe publisher attempts ended in the same `EPERM` rename failure and automatic rollback. No non-atomic file copy was attempted. Original production and candidate snapshots are preserved under `work/security-stage1.8/release-backup/`.
+- Three safe publisher attempts ended in the same `EPERM` rename failure and automatic rollback. No non-atomic file copy was attempted. Original production and candidate snapshots are preserved under `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/security-stage1.8/release-backup/`.
 
 ## Real Client Logging
 
@@ -64,7 +64,7 @@ The recommended minimum TLS version is TLS 1.2 if legacy-client requirements per
 
 ## Derivative Pipeline v1 POC
 
-A local-only page at `work/security-stage1.8/derivatives-final/index.html` displays five representative sample derivatives. Thumbnail clicks link only to 1600px-bounded display WebP files; no original source URL is linked. The POC is not deployed.
+A local-only page at `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/security-stage1.8/derivatives-final/index.html` displays five representative sample derivatives. Thumbnail clicks link only to 1600px-bounded display WebP files; no original source URL is linked. The POC is not deployed.
 
 | Sample | Source dimensions / bytes | Display WebP | Thumbnail WebP | Source SHA-256 unchanged |
 |---|---:|---:|---:|---|
@@ -74,7 +74,7 @@ A local-only page at `work/security-stage1.8/derivatives-final/index.html` displ
 | 2018 Jingzhe JPEG | 800×1545 / 133,013 | 800×1545 / 52,780 | 207×400 / 7,344 | Yes |
 | 2021 Chushu | 1052×2216 / 1,530,525 | 760×1600 / 78,230 | 190×400 / 12,918 | Yes |
 
-Across these samples, display files total 286,414 bytes (about 4.3% of the 6,683,470 source bytes); thumbnails total 75,396 bytes. Reopened outputs are WebP and have no EXIF payload. Two selected source images had RGBA channels but alpha extrema were `(255,255)`; the five samples contain no actual transparent pixels, so RGB output has no visual alpha loss. The contact sheet was visually reviewed for gross scaling/composition issues; static link targets were verified. The POC HTML was not browser-rendered, and this is not live Gallery acceptance. Full per-file evidence and hashes are in `work/security-stage1.8/derivatives-final/derivative-evidence.json`.
+Across these samples, display files total 286,414 bytes (about 4.3% of the 6,683,470 source bytes); thumbnails total 75,396 bytes. Reopened outputs are WebP and have no EXIF payload. Two selected source images had RGBA channels but alpha extrema were `(255,255)`; the five samples contain no actual transparent pixels, so RGB output has no visual alpha loss. The contact sheet was visually reviewed for gross scaling/composition issues; static link targets were verified. The POC HTML was not browser-rendered, and this is not live Gallery acceptance. Full per-file evidence and hashes are in `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/security-stage1.8/derivatives-final/derivative-evidence.json`.
 
 ## Cache, Rate Limit, and False Positives
 
@@ -119,5 +119,5 @@ Resolve the Windows file-lock/atomic rename blocker without bypassing the publis
 
 - Stage 1.8 source changes: stale crawler directives removed from `portal/www/robots.txt`, `portal/huiguan/robots.txt`, and `portal/oc/robots.txt`; observe hook added to the already-dirty `server/base_static.py`; new `server/scraping_observer.py`; this report added. The same file's HSTS/CSP header edits predate Stage 1.8 and are not attributed to this stage.
 - The existing worktree contains many unrelated uncommitted files and deletions. They were not reset, cleaned, staged, committed, or copied into the candidate. `portal/huiguan/server_huiguan.py` already contained Stage 1.7 edits and other pre-existing account/profile work; this turn did not rewrite that source file.
-- Candidate-only release artifacts and derivative evidence remain under `.releases/candidate/` and `work/security-stage1.8/`; complete pre-attempt release snapshots remain under `work/security-stage1.8/release-backup/`.
+- Candidate-only release artifacts and derivative evidence remain under `.releases/candidate/` and `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/security-stage1.8`; complete pre-attempt release snapshots remain under `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/security-stage1.8/release-backup/`.
 - No commit was created. `git diff --check` reported no whitespace errors in the reviewed files; Git emitted an existing LF-to-CRLF notice for `portal/www/robots.txt`.

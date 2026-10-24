@@ -54,20 +54,79 @@ const GAMES: Game[] = [
     desc: '每个生灵都用真实的神经网络思考：领导一个民族，或以神之手塑造世界，看文明兴衰。', points: ['生存 / 创造双模式', '神经网络生灵'] },
 ];
 const VOTE_KEY = 'zszm.journal-update-vote';
+const VOTER_KEY = 'zszm.journal-update-voter-id';
+const VOTE_SYNC_KEY = 'zszm.journal-update-vote-synced';
 type Vote = 'up' | 'down' | null;
 function readVote(): Vote { try { const v = localStorage.getItem(VOTE_KEY); return v === 'up' || v === 'down' ? v : null; } catch { return null; } }
 function writeVote(v: Vote) { try { if (v) localStorage.setItem(VOTE_KEY, v); else localStorage.removeItem(VOTE_KEY); } catch { /* storage unavailable */ } }
+function readOrCreateVoterId() {
+  try {
+    const existing = localStorage.getItem(VOTER_KEY);
+    if (existing && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(existing)) return existing;
+    const id = crypto.randomUUID();
+    localStorage.setItem(VOTER_KEY, id);
+    return id;
+  } catch { return crypto.randomUUID(); }
+}
+type VoteState = { up: number; down: number; vote: Vote };
+const feedbackUrl = `${import.meta.env.BASE_URL}api/update-feedback`;
+async function saveVote(voterId: string, vote: Vote): Promise<VoteState> {
+  const response = await fetch(feedbackUrl, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ voter_id: voterId, vote }),
+  });
+  if (!response.ok) throw new Error('投票暂时没有保存');
+  return response.json();
+}
 
-/** A thumbs vote on the 众生牌录 update (kept locally; nothing is sent anywhere). */
+/** An anonymous browser vote on the 众生牌录 update, with a shared site-wide tally. */
 function UpdateVote() {
+  const [voterId] = useState(readOrCreateVoterId);
   const [vote, setVote] = useState<Vote>(readVote);
-  const cast = (next: 'up' | 'down') => { const v = vote === next ? null : next; setVote(v); writeVote(v); };
+  const [counts, setCounts] = useState<VoteState>({ up: 0, down: 0, vote: null });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('');
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const response = await fetch(feedbackUrl, { headers: { 'X-Feedback-Voter': voterId }, cache: 'no-store' });
+        if (!response.ok) throw new Error('读取投票失败');
+        let next: VoteState = await response.json();
+        let synced = false;
+        try { synced = localStorage.getItem(VOTE_SYNC_KEY) === 'true'; } catch { /* storage unavailable */ }
+        const legacyVote = readVote();
+        if (!synced && legacyVote && !next.vote) next = await saveVote(voterId, legacyVote);
+        if (active) {
+          setCounts(next); setVote(next.vote); writeVote(next.vote);
+          try { localStorage.setItem(VOTE_SYNC_KEY, 'true'); } catch { /* storage unavailable */ }
+        }
+      } catch { if (active) setMessage('暂时无法读取全站票数'); }
+      finally { if (active) setLoading(false); }
+    };
+    void load();
+    return () => { active = false; };
+  }, []);
+  const cast = async (next: 'up' | 'down') => {
+    if (saving || loading) return;
+    const value = vote === next ? null : next;
+    setSaving(true); setMessage('');
+    try {
+      const result = await saveVote(voterId, value);
+      setCounts(result); setVote(result.vote); writeVote(result.vote);
+      try { localStorage.setItem(VOTE_SYNC_KEY, 'true'); } catch { /* storage unavailable */ }
+    } catch { setMessage('投票没有保存，请稍后重试'); }
+    finally { setSaving(false); }
+  };
   return <div className="mode-hall__chapter mode-hall__chapter--vote">
     <div className="mode-hall__vote" role="group" aria-label="这次更新你觉得如何">
       <em>这次更新</em>
-      <button type="button" aria-pressed={vote === 'up'} aria-label="赞" onClick={() => cast('up')}><ThumbsUp size={14}/></button>
-      <button type="button" aria-pressed={vote === 'down'} aria-label="踩" onClick={() => cast('down')}><ThumbsDown size={14}/></button>
+      <small className="mode-hall__vote-total">匿名 · 全站票数</small>
+      <button type="button" aria-pressed={vote === 'up'} aria-label={`赞 ${loading ? '加载中' : counts.up}`} onClick={() => void cast('up')} disabled={loading || saving}><ThumbsUp size={14}/><span>{loading ? '—' : counts.up}</span></button>
+      <button type="button" aria-pressed={vote === 'down'} aria-label={`踩 ${loading ? '加载中' : counts.down}`} onClick={() => void cast('down')} disabled={loading || saving}><ThumbsDown size={14}/><span>{loading ? '—' : counts.down}</span></button>
     </div>
+    {message && <small className="mode-hall__vote-message" role="status">{message}</small>}
   </div>;
 }
 
@@ -84,7 +143,7 @@ function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNa
   }, [active, game.shots.length]);
   const content = <>
     {game.scene}
-    <span className={game.scene ? 'game-card__window' : 'game-card__shots'} aria-hidden="true">{game.shots.map((shot, shotIndex) => <img key={shot} src={shot} alt="" loading="lazy" decoding="async" className={shotIndex === frame ? 'is-shown' : ''}/>)}</span>
+    {game.shots.length > 0 && <span className={game.scene ? 'game-card__window' : 'game-card__shots'} aria-hidden="true">{game.shots.map((shot, shotIndex) => <img key={shot} src={shot} alt="" loading="lazy" decoding="async" className={shotIndex === frame ? 'is-shown' : ''}/>)}</span>}
     {game.shots.length > 1 && <span className="game-card__dots" aria-hidden="true">{game.shots.map((shot, shotIndex) => <i key={shot} className={shotIndex === frame ? 'is-on' : ''}/>)}</span>}
     <span className="game-card__number">{String(index).padStart(2, '0')}</span>
     <span className="game-card__body">
@@ -106,7 +165,7 @@ function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNa
     : <a {...props} href={`/app/shell/m/${game.key}`}>{content}</a>;
 }
 
-/** portal.json decides which external modes are published; the hall owns order and presentation. */
+/** portal.json decides which independent modes are published; the hall owns order and presentation. */
 export function ModeHall({ onNavigate, onEditIdentity }: Props) {
   const { identity } = usePlayerProfile();
   const parts = speciesParts(identity);
