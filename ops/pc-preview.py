@@ -17,7 +17,7 @@ from urllib.parse import unquote, urlsplit, urlunsplit
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'server'))
 from base_static import BaseStaticHandler
-from host_policy import PREVIEW_HOSTS, enforce_request, normalize_host
+from host_policy import FORWARDING_HEADERS, PREVIEW_HOSTS, enforce_request, normalize_host
 
 HOSTS=PREVIEW_HOSTS
 PUBLIC=ROOT/'ops/server-public'
@@ -90,7 +90,7 @@ class Handler(BaseStaticHandler):
         return HOSTS[host]
 
     def headers_for_hk(self,host,body=None):
-        headers={k:v for k,v in self.headers.items() if k.lower() not in {'host','connection','content-length','accept-encoding','x-forwarded-host','x-forwarded-proto','forwarded','cf-connecting-ip','x-forwarded-for','cf-ray'}}
+        headers={k:v for k,v in self.headers.items() if k.lower() not in {'host','connection','content-length','accept-encoding','cf-connecting-ip','x-forwarded-for','cf-ray'}|FORWARDING_HEADERS}
         headers['Host']=host;headers['Accept-Encoding']='identity'
         # Only rewrite the known preview origins, retaining the regular server-side CSRF checks.
         for key in ['Origin','Referer']:

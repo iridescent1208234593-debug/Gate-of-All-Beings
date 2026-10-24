@@ -40,7 +40,7 @@ def _load(name, path):
 
 sys.path.insert(0, str(CODE_ROOT / "server"))
 from base_static import BaseStaticHandler  # noqa: E402
-from host_policy import PRODUCTION_HOSTS, enforce_request, normalize_host  # noqa: E402
+from host_policy import FORWARDING_HEADERS, PRODUCTION_HOSTS, enforce_request, normalize_host  # noqa: E402
 
 www = _load("portal_www", CODE_ROOT / "portal" / "www" / "server.py")
 oc = _load("portal_oc", CODE_ROOT / "portal" / "oc" / "server.py")
@@ -104,7 +104,7 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
             return
         body = self.rfile.read(length) if length else None
         headers = {k: v for k, v in self.headers.items()
-                   if k.lower() not in ("host", "connection", "content-length", "x-forwarded-host", "x-forwarded-proto", "forwarded")}
+                   if k.lower() not in ("host", "connection", "content-length") and k.lower() not in FORWARDING_HEADERS}
         # Replace, never forward client-supplied proxy identity headers.
         headers["X-Forwarded-Host"] = normalize_host(self.headers.get("Host", "")) or ""
         headers["X-Forwarded-Proto"] = "https" if self.headers.get("X-Forwarded-Proto") == "https" else "http"
@@ -152,7 +152,7 @@ class WebSocketProxyHandler(ProxyHandler):
         try:
             upstream = socket.create_connection(("127.0.0.1", self.upstream_port), timeout=5)
             headers = {k: v for k, v in self.headers.items()
-                       if k.lower() not in ("host", "x-forwarded-host", "x-forwarded-proto", "forwarded")}
+                       if k.lower() != "host" and k.lower() not in FORWARDING_HEADERS}
             headers["Host"] = f"127.0.0.1:{self.upstream_port}"
             headers["X-Forwarded-Host"] = normalize_host(self.headers.get("Host", "")) or ""
             headers["X-Forwarded-Proto"] = "https" if self.headers.get("X-Forwarded-Proto") == "https" else "http"

@@ -8,10 +8,18 @@ from urllib.parse import urlsplit
 INVENTORY = json.loads(Path(__file__).with_name('allowed_hosts.json').read_text('utf-8'))
 PRODUCTION_HOSTS = frozenset(h['hostname'] for h in INVENTORY['hosts'] if h['registered'] and h['node'] == 'hk')
 PREVIEW_HOSTS = {h['hostname']: h['application_host'] for h in INVENTORY['hosts'] if h['registered'] and h['node'] == 'pc'}
+# Proxy identity, scheme and URL overrides a client could inject. Gateways drop
+# all of them and send upstream only values derived from the validated Host.
+FORWARDING_HEADERS = frozenset({
+    'forwarded', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port', 'x-forwarded-prefix',
+    'x-forwarded-server', 'x-forwarded-scheme', 'x-forwarded-ssl', 'x-original-host', 'x-host',
+    'x-original-url', 'x-rewrite-url', 'x-url-scheme', 'front-end-https'})
 
 
 def normalize_host(value):
-    if not value or any(c.isspace() for c in value) or not value.isascii() or value.endswith(':'):
+    # Host grammar only (name/IPv4, bracketed IPv6, port). urlsplit alone accepts
+    # an empty '#'/'?' suffix, userinfo or path, so reject those characters first.
+    if not value or not re.fullmatch(r'[A-Za-z0-9.:\[\]-]+', value) or value.endswith(':'):
         return None
     try:
         parsed = urlsplit('//' + value)
@@ -20,8 +28,10 @@ def normalize_host(value):
             return None
         if host.endswith('.') or port == 0:
             return None
-        if ':' in host:
-            ipaddress.IPv6Address(host)  # parse bracketed IPv6 correctly; it is never registered
+        if ':' in host or '[' in value:
+            # Brackets may only hold IPv6 (never registered). Reject IPvFuture and
+            # bracketed names even where urlsplit itself does not validate them.
+            ipaddress.IPv6Address(host)
         elif not re.fullmatch(r'[a-z0-9]+(?:[.-][a-z0-9]+)*', host):
             return None
         return host
