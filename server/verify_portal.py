@@ -170,7 +170,19 @@ def req(host, path):
 def main():
     # The forced production stage command already runs this verifier. Keep Host
     # isolation mandatory here so a future release cannot silently omit it.
-    subprocess.run([sys.executable, "-X", "utf8", str(HERE / "security_ingress_test.py"), "--host-only"], check=True)
+    ingress = subprocess.run([sys.executable, "-X", "utf8", str(HERE / "security_ingress_test.py"), "--host-only"],
+                             capture_output=True, text=True, encoding="utf-8", errors="replace")
+    print(ingress.stdout, end="")
+    if ingress.returncode:
+        print(ingress.stderr[-6000:])
+        print("FAIL: Host isolation / origin listener gate")
+        return 1
+    # The stage command returns only the last line, so carry the listener audit there.
+    audit = next((json.loads(line.split(" ", 1)[1]) for line in ingress.stdout.splitlines()
+                  if line.startswith("ORIGIN-LISTENERS ")), {"skipped": "audit line missing"})
+    listeners = ("not audited (%s)" % audit["skipped"] if "skipped" in audit else
+                 "%d listening, non-loopback %s" % (audit["listening"], ",".join(
+                     "%s:%d/%s" % (x["address"], x["port"], x["protocol"]) for x in audit["non_loopback"]) or "none"))
     with socket.socket() as probe:
         if probe.connect_ex(("127.0.0.1", PORT)) == 0:
             print("FAIL: requested test port is already in use", PORT)
@@ -219,7 +231,7 @@ def main():
         else:
             fails += 1
             print("FAIL  zszm ecology response differs from the candidate file")
-        print("\n%d/%d passed" % (total - fails, total))
+        print("\n%d/%d passed; origin listeners: %s" % (total - fails, total, listeners))
         return 1 if fails else 0
     finally:
         proc.terminate()
