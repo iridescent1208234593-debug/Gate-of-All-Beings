@@ -519,6 +519,33 @@ def handle(handler, method, path, project_root=None):
             if not me:
                 return send(200, {"logged_in": False, "ranked": False, "daily_cap": DAILY_CAP_X10 / 10})
             return send(200, {"logged_in": True, "ranked": True, "name": ident["name"], **summary(conn, *me)})
+        if method in ("GET", "HEAD") and route == "/api/progress/chains":
+            import task_chains
+            if not me:
+                return send(200, {"logged_in": False, "chains": task_chains.catalog()})
+            return send(200, {"logged_in": True, "chains": task_chains.view(conn, *me)})
+        if method == "POST" and route == "/api/progress/chains/claim":
+            import task_chains
+            if not _allowed_origin(handler.headers.get("Origin", "")):
+                return send(403, {"error": "来源不被允许"})
+            if "application/json" not in (handler.headers.get("Content-Type") or ""):
+                return send(415, {"error": "需要 JSON"})
+            try:
+                length = int(handler.headers.get("Content-Length") or 0)
+            except ValueError:
+                length = -1
+            if length <= 0 or length > 4096:
+                return send(400, {"error": "请求体无效"})
+            try:
+                chain_id = task_chains.clean_claim(json.loads(handler.rfile.read(length).decode("utf-8")))
+            except (ValueError, UnicodeDecodeError) as error:
+                return send(400, {"error": str(error) or "请求格式错误"})
+            if not me:
+                return send(401, {"error": "登录会馆账号后才能领取任务链奖励"})
+            try:
+                return send(200, task_chains.claim(conn, *me, ident["name"], chain_id))
+            except ValueError as error:
+                return send(400, {"error": str(error)})
         if method == "POST" and route == "/api/progress/report":
             if not _allowed_origin(handler.headers.get("Origin", "")):
                 return send(403, {"error": "来源不被允许"})
