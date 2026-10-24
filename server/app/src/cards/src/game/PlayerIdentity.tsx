@@ -10,6 +10,16 @@ declare global { interface Window { HuiguanAvatarCropper?: { open(source: Blob|s
 const apiAsset = identityAssetUrl;
 const KINDS = [{ value: HUMAN, label: '人类' }, { value: YAOJING, label: '妖精' }, { value: '', label: '其他' }];
 const kindChoice = (kind: string) => !kind || kind === HUMAN || kind === YAOJING ? kind || HUMAN : '';
+// Phones may discard the page while the system photo picker is open; this marks a pick in flight
+// so the reloaded page reopens the editor instead of silently dropping the player back in the hall.
+const AVATAR_PICK_KEY = 'zszm.avatarPickAt';
+const AVATAR_PICK_MS = 10 * 60 * 1000;
+export function avatarPickInterrupted() {
+  try { return Date.now() - Number(sessionStorage.getItem(AVATAR_PICK_KEY) || 0) < AVATAR_PICK_MS; } catch { return false; }
+}
+function markAvatarPick(active: boolean) {
+  try { if (active) sessionStorage.setItem(AVATAR_PICK_KEY, String(Date.now())); else sessionStorage.removeItem(AVATAR_PICK_KEY); } catch { /* private mode: nothing to resume */ }
+}
 
 export function PlayerIdentity({ account, onClose, onCreateWithOpening }: { account: Account; onClose: () => void; onCreateWithOpening?: () => void }) {
   const profile = usePlayerProfile();
@@ -26,6 +36,7 @@ export function PlayerIdentity({ account, onClose, onCreateWithOpening }: { acco
   const [avatarDraft, setAvatarDraft] = useState<Blob|null>(null);
   const [previewDraftUrl, setPreviewDraftUrl] = useState('');
   const [selectedOC, setSelectedOC] = useState('');
+  const [pickInterrupted] = useState(avatarPickInterrupted);
   const avatarUrl = useMemo(() => previewDraftUrl || apiAsset(identity.avatar_asset_id), [identity.avatar_asset_id, previewDraftUrl]);
   const creating = !identity.id;
 
@@ -41,6 +52,7 @@ export function PlayerIdentity({ account, onClose, onCreateWithOpening }: { acco
   }, [account.logged_in, account.kind, account.user_id]);
 
   useEffect(() => () => { if (previewDraftUrl) URL.revokeObjectURL(previewDraftUrl); }, [previewDraftUrl]);
+  useEffect(() => { markAvatarPick(false); return () => markAvatarPick(false); }, []);
 
   function edit(next: Identity) {
     setIdentity(next); const parts = speciesParts(next); setSpecies(parts); setChoice(kindChoice(parts.kind));
@@ -132,7 +144,7 @@ export function PlayerIdentity({ account, onClose, onCreateWithOpening }: { acco
           {ocs.length === 1 ? <button type="button" className="secondary" onClick={() => importOC(ocs[0])}><Import size={15}/>导入「{ocs[0].name}」</button> : <div className="identity-oc-picker"><select aria-label="选择要导入的 OC" value={selectedOC} onChange={event => setSelectedOC(event.target.value)}><option value="">选择一个 OC…</option>{ocs.map(oc => <option key={oc.id} value={oc.id}>{oc.name} · {oc.species_type}{oc.species_detail ? ` · ${oc.species_detail}` : ''}</option>)}</select><button type="button" className="secondary" disabled={!selectedOC} onClick={() => { const oc=ocs.find(item=>item.id===selectedOC); if(oc)importOC(oc); }}><Import size={15}/>导入所选 OC</button></div>}
           {identity.source_oc_id === selectedOC && selectedOC && ocs.find(oc => oc.id === selectedOC)?.images.length ? <div className="identity-candidates"><span>从该 OC 的已有图片中选择头像</span>{ocs.find(oc => oc.id === selectedOC)!.images.map((src,index) => <button type="button" key={`${src}-${index}`} onClick={() => void crop(src)} aria-label={`裁切已有图片 ${index+1}`}><img src={src} alt=""/></button>)}</div> : null}
         </section>}
-        <div className="identity-fields"><div className="identity-avatar"><div className="identity-avatar__preview">{<PlayerAvatar identity={{ ...identity, avatar_asset_id: avatarUrl }}/> }</div><button type="button" className="secondary" onClick={() => document.getElementById('gateAvatarFile')?.click()}><ImagePlus size={15}/>上传并裁切头像</button><input id="gateAvatarFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={event => { const file=event.target.files?.[0];event.target.value='';if(file)void crop(file); }}/>
+        <div className="identity-fields"><div className="identity-avatar"><div className="identity-avatar__preview">{<PlayerAvatar identity={{ ...identity, avatar_asset_id: avatarUrl }}/> }</div><button type="button" className="secondary" onClick={() => { markAvatarPick(true); document.getElementById('gateAvatarFile')?.click(); }}><ImagePlus size={15}/>上传并裁切头像</button><input id="gateAvatarFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={event => { markAvatarPick(false); const file=event.target.files?.[0];event.target.value='';if(file)void crop(file); }}/>
           {account.account_avatar_url && <button type="button" className="text-button" onClick={() => { const url=new URL(account.account_avatar_url!);setIdentity(current=>({...current,avatar_asset_id:url.pathname,avatar_mode:'account'}));setAvatarDraft(null);setPreviewDraftUrl('');setSaved(''); }}>使用账户头像</button>}
         </div><div className="identity-text">
           <label>显示名称<input required maxLength={60} value={identity.display_name} onChange={event => { setIdentity(current => ({ ...current, display_name: event.target.value })); setSaved(''); }} placeholder="例如：小苔"/></label>
@@ -149,7 +161,7 @@ export function PlayerIdentity({ account, onClose, onCreateWithOpening }: { acco
             {preview && <p className="identity-species__preview">显示为 <b>{preview}</b>{species.note.trim() && <span>{species.note.trim()}</span>}</p>}
           </fieldset>
         </div></div>
-        <footer><span role="status" className={error?'identity-error':'identity-saved'}>{error||saved|| (account.logged_in?'登录账户后会跨设备保存。':'未登录时只保存在当前浏览器会话。')}</span>
+        <footer><span role="status" className={error?'identity-error':'identity-saved'}>{error||saved|| (pickInterrupted?'刚才选图时页面被手机系统重新加载，图片没有带回来，请再选一次。':account.logged_in?'登录账户后会跨设备保存。':'未登录时只保存在当前浏览器会话。')}</span>
           <div className="identity-actions">
             {(creating || profile.identities.length > 0) && (confirmDelete ? <span className="identity-confirm">{creating ? '放弃这个新形象？' : profile.identities.length === 1 ? '删除后会回到初始化。确定？' : '确定删除这个形象？'}<button type="button" className="danger" disabled={busy} onClick={() => void remove()}>{creating ? '放弃' : '删除'}</button><button type="button" className="text-button" onClick={() => setConfirmDelete(false)}>取消</button></span>
               : <button type="button" className="text-button identity-delete" disabled={busy} onClick={() => setConfirmDelete(true)}><Trash2 size={14}/>{creating ? '放弃' : '删除形象'}</button>)}

@@ -86,7 +86,10 @@
         const out = document.createElement('canvas'); out.width = out.height = 512;
         const crop = cropRect();
         out.getContext('2d').drawImage(img, (0 - crop.left) / (base * scale), (0 - crop.top) / (base * scale), stageSize / (base * scale), stageSize / (base * scale), 0, 0, out.width, out.height);
-        out.toBlob(blob => blob ? finish(blob) : reject(new Error('头像裁切失败')), 'image/png');
+        // WebP keeps a 512px avatar small enough for guest session storage and slow mobile uploads;
+        // browsers without a WebP encoder hand back PNG, which every avatar endpoint also accepts.
+        const done = blob => blob ? finish(blob) : (cleanup(), reject(new Error('头像裁切失败')));
+        out.toBlob(blob => blob && blob.type === 'image/webp' ? done(blob) : out.toBlob(done, 'image/png'), 'image/webp', 0.92);
       });
       window.addEventListener('keydown', onKey);
       const loadSource = async () => {

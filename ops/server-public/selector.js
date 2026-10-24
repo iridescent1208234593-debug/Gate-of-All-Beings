@@ -1,14 +1,20 @@
 (function(){
-  if(document.getElementById('ir-server-switch'))return;
+  // Embedded modules (灵境会馆 and other iframes) leave the switch to the page around them.
+  if(window.self!==window.top||document.getElementById('ir-server-switch'))return;
   var host=location.hostname,pc=host==='pc.iridescently.xyz'||host.startsWith('pc-');
   var a=document.createElement('a');a.id='ir-server-switch';
   a.textContent=(pc?'本机新版':'香港稳定版')+' · 切换服务器';
   a.href='/__server/select?return='+encodeURIComponent(location.pathname+location.search+location.hash);
   var floating='position:fixed;left:14px;bottom:14px;z-index:2147483000;padding:9px 14px;border:1px solid #9eae9f;border-radius:999px;background:#fbf8f2;color:#294e42;font:13px/1.5 system-ui;box-shadow:0 3px 18px #0002;text-decoration:none';
-  a.style.cssText=floating;
+  // Phones: a fixed pill sits on top of bottom toolbars (灵境会馆's 营造/小妖), so it flows at the end of the page instead.
+  var narrow=window.matchMedia('(max-width: 760px)');
+  var inline='display:block;width:fit-content;margin:12px auto max(16px,env(safe-area-inset-bottom));padding:7px 14px;border:1px solid #9eae9f;border-radius:999px;background:#fbf8f2;color:#294e42;font:12px/1.5 system-ui;text-decoration:none';
+  function loose(){return narrow.matches?inline:floating;}
+  a.style.cssText=loose();
   document.body.appendChild(a);
-  function place(){var panel=document.querySelector('#qc-nav .qc-more-panel');if(panel){if(a.parentNode!==panel)panel.prepend(a);a.style.cssText='display:block;text-decoration:none';}else{if(a.parentNode!==document.body)document.body.appendChild(a);a.style.cssText=floating;}}
+  function place(){var panel=document.querySelector('#qc-nav .qc-more-panel');if(panel){if(a.parentNode!==panel)panel.prepend(a);a.style.cssText='display:block;text-decoration:none';}else{if(a.parentNode!==document.body||(narrow.matches&&a.nextElementSibling))document.body.appendChild(a);var style=loose();if(a.style.cssText!==style)a.style.cssText=style;}}
   new MutationObserver(place).observe(document.body,{childList:true,subtree:true});place();
+  if(narrow.addEventListener)narrow.addEventListener('change',place);
   if(pc)document.addEventListener('click',function(event){
     var link=event.target.closest('a[href]');
     if(!link||link.id==='stable'||link.hasAttribute('data-server-choice')||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||link.target==='_blank'||link.hasAttribute('download'))return;

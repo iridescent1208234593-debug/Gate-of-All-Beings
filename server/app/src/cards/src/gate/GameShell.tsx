@@ -16,11 +16,15 @@ const siteNav = () => (window as Window & { IridescentlyNav?: SiteNav }).Iridesc
 // Coming back from a module (or reloading) within this window goes straight to the hall.
 const INTRO_SEEN_KEY = 'zszm.introSeenAt';
 const INTRO_SKIP_MS = 6 * 60 * 60 * 1000;
+// Per tab: phones often discard the page while the photo picker is open; that reload must not replay the intro.
+const TAB_ENTERED_KEY = 'zszm.enteredThisTab';
 type OpeningPhase = 'intro' | 'intro-exit' | 'door' | 'destination';
 function introRecentlySeen() {
+  try { if (sessionStorage.getItem(TAB_ENTERED_KEY)) return true; } catch { /* fall back to the time window */ }
   try { return Date.now() - Number(localStorage.getItem(INTRO_SEEN_KEY) || 0) < INTRO_SKIP_MS; } catch { return false; }
 }
 function rememberIntro() {
+  try { sessionStorage.setItem(TAB_ENTERED_KEY, '1'); } catch { /* private mode: this page only */ }
   try { localStorage.setItem(INTRO_SEEN_KEY, String(Date.now())); } catch { /* private mode: replay next time */ }
 }
 
@@ -52,9 +56,12 @@ function GateFlow() {
   const destinationVisible = entered && !gateVisible && (!doorVisible || doorRevealed);
   const appActive = entered && phase === 'destination';
   const showBar = appActive && !onboarding;
-  // Phones: landscape is forced until the hall itself is on screen, then only the default.
+  // Phones: landscape is forced only while the intro, door or onboarding is on screen; elsewhere
+  // (including the profile loading after a reload) the player's portrait choice stands.
   const inGame = appActive && !creatingNew && profile.resolved && identityComplete(profile.identity);
-  const orientation = useOrientationGuard(inGame ? 'game' : 'opening');
+  const orientation = useOrientationGuard(gateVisible || doorVisible || onboarding ? 'opening' : 'game');
+  // Playing keeps the intro window fresh, so a later reload in this tab or soon after lands in the hall.
+  useEffect(() => { if (inGame) rememberIntro(); }, [inGame]);
   useEffect(() => { if (!showBar) return; siteNav()?.mount(); return () => siteNav()?.unmount(); }, [showBar]);
   function enter() {
     if (phase !== 'intro') return;

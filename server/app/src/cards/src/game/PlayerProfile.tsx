@@ -138,7 +138,10 @@ export function PlayerProfileProvider({ children }: { children: ReactNode }) {
       roster = current.some(item => item.id === next.id) ? current.map(item => item.id === next.id ? next : item) : [...current, next];
     }
     if (revision !== generation.current || expectedScope !== scope.current) throw new Error('账户已切换，请重新确认玩家资料。');
-    if (!account.logged_in) writeGuest(roster, next);
+    if (!account.logged_in) {
+      try { writeGuest(roster, next); }
+      catch { throw new Error('浏览器本地空间不足，头像没能保存；登录会馆账户后可以跨设备保存。'); }
+    }
     if (active.current) { setIdentity(next); setIdentities(roster); }
     return next;
     } finally { saving.current = false; }

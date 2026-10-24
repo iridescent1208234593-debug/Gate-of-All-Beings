@@ -16,7 +16,7 @@ import { validateEcoExchange } from '@lxh/shared-types/exchange';
 import { useCardBalance } from './useCardBalance';
 import { CardCollection } from './CardCollection';
 import { FeatureGuide, FullGuide } from './FeatureGuide';
-import { PlayerIdentity } from './PlayerIdentity';
+import { PlayerIdentity, avatarPickInterrupted } from './PlayerIdentity';
 import { usePlayerProfile } from './PlayerProfile';
 import { PlayerAvatar } from './PlayerAvatar';
 import { CardTile, Portrait } from './CardTile';
@@ -38,7 +38,7 @@ export default function GameApp({ onReturnGate, onCreateIdentity }: { onReturnGa
   const balance=useCardBalance();
   const { account: ssoUser, identity: playerIdentity } = usePlayerProfile();
   const [save,setSave]=useState<SaveData>(freshSave);const [ready,setReady]=useState(false);const [saveStatus,setSaveStatus]=useState('读取存档');const [storageOK,setStorageOK]=useState(true);
-  const [view,setView]=useState<View>(readView);const [modal,setModal]=useState<'help'|'identity'|null>(null);const [error,setError]=useState('');
+  const [view,setView]=useState<View>(readView);const [modal,setModal]=useState<'help'|'identity'|null>(()=>avatarPickInterrupted()?'identity':null);const [error,setError]=useState('');
   const [durableSave,setDurableSave]=useState<SaveData|null>(null);
   const pendingSave=useRef(Promise.resolve());const revision=useRef(0);
   useEffect(()=>{let active=true;readSave().then(s=>{if(active){setSave(s);setDurableSave(s);setReady(true);}}).catch(()=>{if(active){setStorageOK(false);setSaveStatus('存档不可用 · 可导出备份');setReady(true);setError('本地存档无法读取，已进入临时游玩模式；原存档不会被覆盖。');}});return()=>{active=false;};},[]);

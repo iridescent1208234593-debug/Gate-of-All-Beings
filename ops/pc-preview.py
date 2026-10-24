@@ -30,7 +30,7 @@ def text_representation(path,mtime_ns,size,inject):
     content=Path(path).read_bytes()
     if inject:
         # A body-closing tag can occur inside an inline JavaScript template.
-        content=content.replace(b'<head>',b'<head><script defer src="/__server/selector.js?v=20261019.4"></script>',1)
+        content=content.replace(b'<head>',b'<head><script defer src="/__server/selector.js?v=20261024.1"></script>',1)
     packed=gzip.compress(content,compresslevel=5,mtime=0) if len(content)>=512 else content
     return content,packed,hashlib.sha256(content).hexdigest()
 
