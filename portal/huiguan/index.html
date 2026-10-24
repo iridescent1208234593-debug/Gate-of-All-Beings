@@ -1589,9 +1589,10 @@ async function submitAuth() {
       msg.className = 'auth-msg ok';
       msg.textContent = d.registered ? '已自动注册并登录' : '登录成功';
       document.getElementById('authPassword').value = '';
-      if (window.__AUTH_NEXT && /^https:\/\/[\w.-]*iridescently\.xyz\//.test(window.__AUTH_NEXT)) {
+      const next = window.__AUTH_NEXT && safeAuthNext(window.__AUTH_NEXT);
+      if (next) {
         msg.textContent += '，正在返回…';
-        setTimeout(() => { location.href = window.__AUTH_NEXT; }, 400);
+        setTimeout(() => { location.href = next; }, 400);
         return;
       }
       setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 300);
@@ -4218,7 +4219,16 @@ applyFormTheme(COLOR_SCHEMES[selectedColorIdx]);
 renderList();
 window.__HUIGUAN_OWN_AUTH = true;
 const initialLoginCheck = checkLogin();
-window.__AUTH_NEXT = new URLSearchParams(location.search).get('next') || '';
+// Post-login return target: exact registered HTTPS hosts only, never a substring/regex match.
+const AUTH_NEXT_HOSTS = new Set(['iridescently.xyz', 'www.iridescently.xyz', 'huiguan.iridescently.xyz', 'oc.iridescently.xyz', 'spirit.iridescently.xyz', 'zszm.iridescently.xyz', 'game.iridescently.xyz', 'juling.iridescently.xyz', 'lingjing.iridescently.xyz',
+  'pc.iridescently.xyz', 'pc-www.iridescently.xyz', 'pc-huiguan.iridescently.xyz', 'pc-oc.iridescently.xyz', 'pc-spirit.iridescently.xyz', 'pc-zszm.iridescently.xyz', 'pc-game.iridescently.xyz', 'pc-juling.iridescently.xyz', 'pc-lingjing.iridescently.xyz']);
+function safeAuthNext(raw) {
+  try {
+    const url = new URL(raw);
+    return url.protocol === 'https:' && !url.username && !url.password && !url.port && AUTH_NEXT_HOSTS.has(url.hostname) ? url.href : '';
+  } catch { return ''; }
+}
+window.__AUTH_NEXT = safeAuthNext(new URLSearchParams(location.search).get('next') || '');
 // 从同人画廊「编辑」进入：?edit=<编号>，登录同步完成后打开该人设的编辑表单
 const editFromQuery = new URLSearchParams(location.search).get('edit');
 if (editFromQuery) initialLoginCheck.then(() => {
