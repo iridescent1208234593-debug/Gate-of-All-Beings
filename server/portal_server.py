@@ -328,6 +328,11 @@ class Dispatcher(www.Handler):
         if not ok:
             return ok
         host = (self.headers.get("Host") or "").split(":", 1)[0].lower()
+        # Reject unconfigured virtual hosts before the default main-site route.
+        if ENVIRONMENT != "development" and (len(self.headers.get_all("Host", [])) != 1 or host not in PRODUCTION_HOSTS):
+            self.close_connection = True
+            self.send_error(421)
+            return False
         peer_is_loopback = False
         try:
             peer_is_loopback = ipaddress.ip_address(self.client_address[0]).is_loopback
@@ -336,9 +341,15 @@ class Dispatcher(www.Handler):
         trusted_https = peer_is_loopback and self.headers.get("X-Forwarded-Proto", "").strip().lower() == "https"
         if ENVIRONMENT != "development" and host in PRODUCTION_HOSTS and not trusted_https:
             target_url = "https://" + host + (self.path if (self.path or "").startswith("/") else "/")
-            self.__class__ = RedirectHandler
-            self.redirect_to = target_url
-            return ok
+            # Finish before method dispatch: OPTIONS/unknown verbs and request
+            # bodies must not reach the app on an unencrypted visitor request.
+            self.close_connection = True
+            self.send_response(308)
+            self.send_header("Location", target_url)
+            self.send_header("Content-Length", "0")
+            self.send_header("Connection", "close")
+            self.end_headers()
+            return False
 
         target, cfg = route(host, self.path or "")
         if target is not type(self):
