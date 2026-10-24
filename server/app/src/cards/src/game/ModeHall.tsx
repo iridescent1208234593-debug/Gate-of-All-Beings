@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { ThumbsDown, ThumbsUp } from 'lucide-react';
-import { ArrowUpRight, ArrowRight, BookOpen, Sprout, PenLine, Trophy } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, BookOpen, Sprout, PenLine, Trophy, Map as MapIcon } from 'lucide-react';
 import { leaderboardUrl } from '@lxh/shared-session/progress.js';
 import portal from '../../../../portal.json';
 import shore from './previews/shore.webp';
@@ -45,6 +45,9 @@ const GAMES: Game[] = [
     desc: '在灵质空间里建造据点、招募小妖、研究与远征，经营大家共同的会馆。', points: ['等距建造', '小妖五行分工', '聚落 → 结盟 → 会馆'] },
   { key: 'ecology', view: 'ecosystem', title: '生态进化', genre: '模拟 · 万灵', shots: [ecology],
     desc: '物质灵滋养植物，生灵随生命流动。编辑细胞、拼装生灵，把收获送回会馆。', points: ['3D 生态循环', '细胞编辑', '收获回流会馆'] },
+  { key: 'world-map', title: '罗小黑世界地图', genre: '地图 · 探索', shots: [],
+    scene: <span className="game-card__atlas" aria-hidden="true"><MapIcon/><i/><i/><i/></span>,
+    desc: '转动环形地图，浏览龙游、流石、灵溪、西木会馆等地点与档案。', points: ['环形世界', '地点档案', '自由缩放'] },
   { key: 'softie', title: '灵体互动', genre: '社交 · 多人', shots: [softie],
     desc: '捏一只自己的软软灵体，在林间空地与其他旅人相遇、贴贴、戳一下。', points: ['自定义灵体', '多人同场'] },
   { key: 'aeon', title: 'AEON', genre: '模拟 · 神经演化', shots: [aeon],

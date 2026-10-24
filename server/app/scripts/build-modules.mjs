@@ -1,5 +1,5 @@
 // 构建候选到 .releases/candidate/modules/；显式 publish 才更新运行目录。
-// - 已并入源码的三模块（cards/management/ecology）从 server/app/src 构建
+// - 已并入源码的 Vite 模块从 server/app/src 构建
 // - 其余游戏从 games/ 构建或拷贝；静态站必要时修正根绝对链接
 // 用法：node server/app/scripts/build-modules.mjs
 import { spawnSync } from 'node:child_process';
@@ -29,8 +29,12 @@ function reset(dest) {
 
 function viteModule(srcDir, destName) {
   const dest = path.join(outRoot, destName);
+  const localVite = path.join(srcDir, 'node_modules/vite/bin/vite.js');
+  const workspaceVite = path.join(appDir, '..', '..', 'node_modules/vite/bin/vite.js');
+  const vite = existsSync(localVite) ? localVite : workspaceVite;
+  if (!existsSync(vite)) throw new Error(`${destName} requires Vite; run npm ci in the module or repository root`);
   const r = spawnSync(process.execPath,
-    [path.join(srcDir, 'node_modules/vite/bin/vite.js'), 'build', '--base', `/app/modules/${destName}/`, '--outDir', dest, '--emptyOutDir'],
+    [vite, 'build', '--base', `/app/modules/${destName}/`, '--outDir', dest, '--emptyOutDir'],
     { cwd: srcDir, stdio: 'inherit' });
   if (r.status !== 0) throw new Error(`${destName} build failed`);
   console.log(`[vite] ${destName}`);
@@ -65,6 +69,7 @@ function walk(dir, fn) {
 
 // 全部游戏源码已并入 server/app/src
 for (const name of ['management', 'ecology', 'cards']) viteModule(path.join(srcRoot, name), name);
+viteModule(path.join(srcRoot, 'world-map'), 'world-map');
 viteModule(path.join(srcRoot, 'softie-webgpu'), 'softie');
 copyModule(path.join(srcRoot, 'juling', 'public'), 'juling');
 copyModule(path.join(srcRoot, 'slay-the-web', 'public'), 'slay');

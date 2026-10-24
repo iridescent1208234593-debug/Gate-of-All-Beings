@@ -121,6 +121,7 @@ CHECKS = [
     ("iridescently.xyz", "/app/modules/juling/", 200),
     ("iridescently.xyz", "/app/modules/slay/", 200),
     ("iridescently.xyz", "/app/modules/aeon/", 200),
+    ("iridescently.xyz", "/app/modules/world-map/", 200),
     ("iridescently.xyz", "/management/index.html", 308),
     ("iridescently.xyz", "/management/index.html?embed=1", 200),
     ("iridescently.xyz", "/ecology/index.html", 200),

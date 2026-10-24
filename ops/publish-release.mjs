@@ -52,8 +52,9 @@ async function promoteRename(source, target) {
 }
 
 const command = process.argv[2];
-if (!['homepage', 'modules', 'cards', 'site'].includes(command) || process.argv.length > 3) {
-  throw new Error('Usage: node ops/publish-release.mjs homepage|modules|cards|site');
+const moduleNames = ['management', 'ecology', 'cards', 'world-map', 'softie', 'juling', 'slay', 'aeon'];
+if (!['homepage', 'modules', 'cards', 'world-map', 'site'].includes(command) || process.argv.length > 3) {
+  throw new Error('Usage: node ops/publish-release.mjs homepage|modules|cards|world-map|site');
 }
 const components = command === 'modules' ? ['modules', 'homepage'] : [command];
 const productionRecord = path.join(releaseRoot, 'production.json');
@@ -91,8 +92,11 @@ if (['homepage', 'modules'].includes(command) && (!existsSync(path.join(homepage
 if (command === 'cards' && !existsSync(path.join(candidateRoot, 'cards', 'index.html'))) {
   throw new Error('Cards candidate is incomplete.');
 }
+if (command === 'world-map' && !existsSync(path.join(candidateRoot, 'world-map', 'index.html'))) {
+  throw new Error('World map candidate is incomplete.');
+}
 if (command === 'modules') {
-  for (const name of ['management', 'ecology', 'cards', 'softie', 'juling', 'slay', 'aeon']) {
+  for (const name of moduleNames) {
     if (!existsSync(path.join(candidateRoot, 'modules', name, 'index.html'))) throw new Error(`Missing module: ${name}`);
   }
 }
@@ -103,11 +107,12 @@ filesystemStep('mkdir', null, promotionRoot, 1, () => mkdirSync(promotionRoot));
 // Copy first, so a copy error leaves the running site intact.
 const swaps = [];
 if (command === 'modules') {
-  for (const name of ['management', 'ecology', 'cards', 'softie', 'juling', 'slay', 'aeon']) {
+  for (const name of moduleNames) {
     swaps.push({ source: `modules/${name}`, target: `server/app/modules/${name}` });
   }
 }
 if (command === 'cards') swaps.push({ source: 'cards', target: 'server/app/modules/cards' });
+if (command === 'world-map') swaps.push({ source: 'world-map', target: 'server/app/modules/world-map' });
 if (command === 'site') {
   swaps.push({ source: 'site', target: '.releases/production/site' });
 } else if (command === 'homepage' || command === 'modules') {

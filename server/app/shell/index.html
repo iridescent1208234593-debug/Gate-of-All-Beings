@@ -92,7 +92,7 @@ function navigate(path, replace) {
   render();
 }
 
-const TAB_ORDER = ['slay', 'juling', 'management', 'ecology', 'softie', 'aeon'];
+const TAB_ORDER = ['slay', 'juling', 'management', 'ecology', 'world-map', 'softie', 'aeon'];
 function renderNav() {
   navlinks.replaceChildren();
   const tabs = portal.links.filter(x => isInternal(x.url) && x.key !== 'cards')

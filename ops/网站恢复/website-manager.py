@@ -525,7 +525,7 @@ def recover_site(site, report, quiet=False):
         if site['key'] == 'portal':
             required = [ROOT / 'portal/www/index.html'] + [
                 ROOT / 'server/app/modules' / name / 'index.html'
-                for name in ('cards', 'management', 'ecology', 'softie', 'juling', 'slay', 'aeon')
+                for name in ('cards', 'management', 'ecology', 'world-map', 'softie', 'juling', 'slay', 'aeon')
             ]
             if any(not item.is_file() for item in required):
                 raise RuntimeError('正式产物不完整；请先构建候选、检查并显式 publish:modules')
