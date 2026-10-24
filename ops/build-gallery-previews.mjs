@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { discoverGallery, previewName } from '../portal/www/gallery-engine/gallery-plugin.js'
@@ -11,8 +11,11 @@ const safeOutputRoot = path.resolve(projectRoot, '.releases/.work') + path.sep
 if (!output.startsWith(safeOutputRoot)) throw new Error(`Preview output must stay under ${safeOutputRoot}`)
 
 const ffmpeg = process.env.FFMPEG_PATH || 'ffmpeg'
+if (!existsSync(source) || !statSync(source).isDirectory()) {
+  throw new Error(`Gallery source directory is missing or invalid: ${source}. Set GALLERY_DIR to a directory containing supported JPG, JPEG, PNG, or WebP images.`)
+}
 const files = await discoverGallery(source)
-if (!files.length) throw new Error(`No supported gallery images found in ${source}`)
+if (!files.length) throw new Error(`No supported gallery images found in ${source}. Set GALLERY_DIR to the intended local or externally mounted gallery directory.`)
 
 rmSync(output, { recursive: true, force: true })
 mkdirSync(output, { recursive: true })

@@ -12,6 +12,10 @@ const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const srcRoot = path.join(appDir, 'src');
 const outRoot = path.join(candidateRoot, 'modules');
 rmSync(path.join(candidateRoot, 'modules.json'), { force: true });
+// A module-only build cannot leave an older homepage candidate eligible for
+// the combined `publish:modules` release.
+rmSync(path.join(candidateRoot, 'homepage.json'), { force: true });
+rmSync(path.join(candidateRoot, 'homepage'), { recursive: true, force: true });
 reset(outRoot);
 
 function reset(dest) {
@@ -90,10 +94,5 @@ if (slayImageSource) {
   console.log('[skip] slay images: no source configured (server/app/module-assets.json); building without optional art');
 }
 
-// 同时生成首页候选，不改动生产入口或资源。
-const homepageBuild = spawnSync(process.execPath,
-  [path.join(appDir, '..', '..', 'portal', 'www', 'scripts', 'build-homepage.mjs')],
-  { cwd: path.resolve(appDir, '..', '..'), stdio: 'inherit' });
-if (homepageBuild.status !== 0) throw new Error('Homepage build failed');
 await recordCandidate('modules');
-console.log(`[modules] Candidate ready: ${outRoot} — review before npm run publish:modules.`);
+console.log(`[modules] Candidate ready: ${outRoot} — run npm run build:homepage before the combined npm run publish:modules release.`);

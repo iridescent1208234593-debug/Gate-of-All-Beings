@@ -97,6 +97,7 @@ ensureInside(releaseRoot, stageDir);
 ensureInside(candidateRoot, homepageCandidate);
 ensureInside(homepageCandidate, publicDir);
 rmSync(path.join(candidateRoot, "homepage.json"), { force: true });
+rmSync(homepageCandidate, { recursive: true, force: true });
 
 const previews = spawnSync(
   process.execPath,
