@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'server'))
-from host_policy import INVENTORY
+from host_policy import FORWARDING_HEADERS, INVENTORY
 
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--output',type=Path,required=True)
@@ -16,8 +16,17 @@ names=[h['hostname'] for h in hosts]
 mapping=['# http context; generated from server/allowed_hosts.json',
          'map $http_host $iridescently_registered_host {', '    default "";']
 mapping += ['    ~*^'+re.escape(h)+'(?::(?:80|443))?$ '+h+';' for h in names]
-mapping += ['}', 'map $http_x_forwarded_proto $iridescently_visitor_https {', '    default 0;', '    https 1;', '}']
+mapping += ['}', 'map $http_x_forwarded_proto $iridescently_visitor_https {', '    default 0;', '    https 1;', '}',
+             '# Cloudflare overwrites X-Forwarded-Proto with the visitor scheme; anything else is http.',
+             'map $http_x_forwarded_proto $iridescently_visitor_proto {', '    default http;', '    https https;', '}']
 (args.output/'host-map.conf').write_text('\n'.join(mapping)+'\n',encoding='utf-8')
+# Included from /etc/nginx/snippets/zszm-proxy.conf. It deliberately has no
+# X-Forwarded-Proto line: that snippet's single fixed "https" line is replaced
+# in place by $iridescently_visitor_proto (two values would loop every request).
+forwarding=['# Generated from server/host_policy.py FORWARDING_HEADERS; clears client overrides.']
+forwarding +=['proxy_set_header '+'-'.join(p.capitalize() for p in h.split('-'))+' "";'
+               for h in sorted(FORWARDING_HEADERS - {'x-forwarded-host','x-forwarded-proto'})]
+(args.output/'proxy-forwarding.conf').write_text('\n'.join(forwarding)+'\n',encoding='utf-8')
 (args.output/'origin-default.conf').write_text('''# Never open public 80/443 for a Tunnel-only origin.
 server {
     listen 127.0.0.1:8080 default_server;
