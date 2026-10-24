@@ -4,6 +4,7 @@ import path from 'path';
 import {realpathSync} from 'node:fs';
 import {defineConfig, type Plugin} from 'vite';
 import {cardBalancePlugin} from './server/cardBalanceServer';
+import {preloadManifestPlugin} from './server/preloadManifest';
 
 // index.html 在生产里引用已发布的会馆设计系统（稳定发布路径）；开发时改读工作区源码，改 design-system.css 立即生效。
 const designSystemDir = realpathSync(path.resolve(__dirname, '../../../../portal/huiguan/design-system'));
@@ -18,7 +19,7 @@ function localDesignSystem(): Plugin {
 
 export default defineConfig(() => {
   return {
-    plugins: [cardBalancePlugin(path.resolve(__dirname,'data/card-balance')), localDesignSystem(), react(), tailwindcss()],
+    plugins: [cardBalancePlugin(path.resolve(__dirname,'data/card-balance')), localDesignSystem(), preloadManifestPlugin(), react(), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

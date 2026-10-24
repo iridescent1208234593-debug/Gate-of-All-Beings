@@ -6,6 +6,7 @@ import { DoorScene } from './DoorScene';
 import { AccountLinkReminder } from './AccountLinkReminder';
 import { OrientationGuard, useOrientationGuard } from './OrientationGuard';
 import { needsAccountAfterOnboarding } from './accountReminder';
+import { startPreload } from './preload';
 import { LoadBoundary } from '../components/LoadBoundary';
 import { EMPTY_IDENTITY, PlayerProfileProvider, accountScope, identityComplete, usePlayerProfile, type GateIdentity } from '../game/PlayerProfile';
 const GameApp = lazy(() => import('../game/GameApp'));
@@ -44,6 +45,7 @@ function GateFlow() {
   useEffect(() => () => { if (timer.current !== null) window.clearTimeout(timer.current); }, []);
   // Fetch the app while the intro plays, so entering never stops on a loading page.
   useEffect(() => {
+    startPreload();
     const load = () => { void import('../game/GameApp'); void import('../game/ModeHall'); };
     const idle = (window as Window & { requestIdleCallback?: (callback: () => void) => number }).requestIdleCallback;
     if (idle) idle(load); else window.setTimeout(load, 1200);
