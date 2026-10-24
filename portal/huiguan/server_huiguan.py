@@ -222,7 +222,17 @@ def db():
 def init_user_db():
     with DB_LOCK:
         conn = db()
-        conn.execute("PRAGMA journal_mode=WAL")  # readers no longer block on the writer; persists in the file
+        # journal_mode 是持久属性，这里只设置一次（启动期，有 DB_LOCK 保护）。
+        # 注意：本机 Windows 的 SQLite 构建（3.53.1）WAL 并发写有缺陷（-shm 映射
+        # 竞态导致 "attempt to write a readonly database"，见 server/gallery_interactions.py
+        # 中 _init_journal_mode 的注释）。注册/登录属于低频写、读多写少，
+        # Windows 上退回回滚日志模式更稳；非 Windows 保留 WAL。
+        import sys as _sys
+        if _sys.platform == "win32":
+            if conn.execute("PRAGMA journal_mode").fetchone()[0].lower() != "delete":
+                conn.execute("PRAGMA journal_mode=DELETE")
+        else:
+            conn.execute("PRAGMA journal_mode=WAL")  # readers no longer block on the writer; persists in the file
         init_security_schema(conn)
         init_email_schema(conn)
         init_recovery_schema(conn)
