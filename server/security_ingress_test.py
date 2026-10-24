@@ -304,7 +304,8 @@ console.log('PASS: Huiguan login next rejects '+reject.length+' payloads and kee
         subprocess.run(["node", "-e", js, json.dumps(block), json.dumps(sorted(APPROVED_HOSTS))], check=True)
 
 
-def public_checks(hosts, edge_ip=None):
+def public_checks(hosts, edge_ip, evidence):
+    """Fill `evidence` as checks pass, so a failing run still records what it saw."""
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
     def get_json(url):
         with opener.open(urllib.request.Request(url, headers={"Accept": "application/dns-json"}), timeout=15) as response:
@@ -316,11 +317,11 @@ def public_checks(hosts, edge_ip=None):
     # Two runs only count as two networks when these egress addresses differ.
     with opener.open('https://www.cloudflare.com/cdn-cgi/trace', timeout=15) as response:
         trace = dict(line.split('=', 1) for line in response.read().decode().splitlines() if '=' in line)
-    evidence = {"at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                "mode": "pre-DNS pinned edge " + edge_ip if edge_ip else "public DNS",
-                "egress": {key: trace.get(key) for key in ('ip', 'colo', 'loc', 'warp')},
-                "network_environment": "this runner only; repeat from a second network and compare egress.ip",
-                "hosts": list(hosts), "dns": [], "checks": []}
+    evidence.update({"at_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                     "mode": "pre-DNS pinned edge " + edge_ip if edge_ip else "public DNS",
+                     "egress": {key: trace.get(key) for key in ('ip', 'colo', 'loc', 'warp')},
+                     "network_environment": "this runner only; repeat from a second network and compare egress.ip",
+                     "hosts": list(hosts), "dns": [], "checks": []})
     def addresses(host):
         if edge_ip:
             return [edge_ip]
@@ -336,6 +337,23 @@ def public_checks(hosts, edge_ip=None):
         return sorted(found)
     if edge_ip:
         assert cloudflare(edge_ip), ("pinned address is not a Cloudflare edge", edge_ip)
+    # Negatives first: they do not depend on the redirect rule or restored DNS.
+    ip = edge_ip or addresses(hosts[0])[0]
+    for sni, host in ((HOST, 'evil.example'), ('evil.example', HOST), ('evil.example', 'evil.example'),
+                      ('unregistered-isolation.iridescently.xyz', 'unregistered-isolation.iridescently.xyz')):
+        try:
+            status, headers, body, _ = request((ip,443),'https','/',host=host,sni=sni)
+            assert status >= 400 and b'id="root"' not in body and b'iridescently-shell-view' not in body, (sni,host,status)
+            outcome = {'status':status}
+        except ssl.SSLError as error:
+            outcome = {'tls_rejected':str(error)}
+        evidence['checks'].append({'ip':ip,'sni':sni,'host':host,**outcome})
+    # Unknown names over HTTP are rejected outright, never redirected to the main site.
+    for host in ('unregistered-isolation.iridescently.xyz', 'evil.example', 'evil-iridescently.xyz'):
+        status, headers, body, _ = request((ip, 80), 'http', '/', host=host)
+        assert status >= 400 and 'Location' not in headers, (host, status, headers.get('Location'))
+        assert b'id="root"' not in body and b'iridescently-shell-view' not in body, host
+        evidence['checks'].append({'ip': ip, 'scheme': 'http', 'host': host, 'status': status})
     for host in hosts:
         for ip in addresses(host):
             # HTTP may only answer with a same-host HTTPS first hop, path and query intact.
@@ -390,23 +408,6 @@ def public_checks(hosts, edge_ip=None):
                 assert b"if(!dest.startsWith('/')||dest.startsWith('//')||dest.includes('\\\\'))dest='/';" in body, "chooser filter"
                 evidence["checks"].append({"ip": ip, "host": host, "chooser_sha256": hashlib.sha256(body).hexdigest(),
                     "chooser_matches_repository": body == (ROOT / "ops/server-public/select").read_bytes()})
-    ip = edge_ip or addresses(hosts[0])[0]
-    for sni, host in ((HOST, 'evil.example'), ('evil.example', HOST), ('evil.example', 'evil.example'),
-                      ('unregistered-isolation.iridescently.xyz', 'unregistered-isolation.iridescently.xyz')):
-        try:
-            status, headers, body, _ = request((ip,443),'https','/',host=host,sni=sni)
-            assert status >= 400 and b'id="root"' not in body and b'iridescently-shell-view' not in body, (sni,host,status)
-            outcome = {'status':status}
-        except ssl.SSLError as error:
-            outcome = {'tls_rejected':str(error)}
-        evidence['checks'].append({'ip':ip,'sni':sni,'host':host,**outcome})
-    # Unknown names over HTTP are rejected outright, never redirected to the main site.
-    for host in ('unregistered-isolation.iridescently.xyz', 'evil.example', 'evil-iridescently.xyz'):
-        status, headers, body, _ = request((ip, 80), 'http', '/', host=host)
-        assert status >= 400 and 'Location' not in headers, (host, status, headers.get('Location'))
-        assert b'id="root"' not in body and b'iridescently-shell-view' not in body, host
-        evidence['checks'].append({'ip': ip, 'scheme': 'http', 'host': host, 'status': status})
-    return evidence
 
 
 if __name__ == "__main__":
@@ -418,12 +419,13 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.public:
+        result = {}
         try:
             hosts = [h.strip() for h in args.hosts.split(",") if h.strip()]
             assert hosts and set(hosts) <= PRODUCTION_HOSTS, ("unregistered --hosts", hosts)
-            result = public_checks(hosts, args.edge_ip)
+            public_checks(hosts, args.edge_ip, result)
         except Exception as error:
-            result = {"ok": False, "error": str(error)}
+            result.update(ok=False, error=str(error))
         else:
             result["ok"] = True
         if args.output:
