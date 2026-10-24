@@ -4,11 +4,13 @@ from urllib.parse import urlsplit
 
 
 def send_recovery(handler, code):
+    if code not in {404, 502, 503, 504} or handler.command not in {'GET', 'HEAD'}:
+        return False
     # Dispatcher strips /app/modules before static serving. The request target
     # retains the public navigation path used to decide whether recovery applies.
     path = urlsplit(handler.requestline.split()[1]).path
     navigation = 'text/html' in handler.headers.get('Accept', '') or handler.headers.get('Sec-Fetch-Dest') in {'document', 'iframe'}
-    if code not in {404, 502, 503, 504} or handler.command not in {'GET', 'HEAD'} or not navigation:
+    if not navigation:
         return False
     if not path.startswith(('/app/', '/playtest/')) or '/api/' in path:
         return False

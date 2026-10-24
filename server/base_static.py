@@ -73,9 +73,28 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
     """带安全头 + 静态防护 + 错误静默的通用 Handler 基类。"""
     _static_dir = None  # 子类覆写
 
+    def version_string(self):
+        if (getattr(self, "headers", {}).get("Host", "").split(":", 1)[0].lower() == "zszm.iridescently.xyz"):
+            return "Iridescently"
+        return super().version_string()
+
     def send_error(self, code, message=None, explain=None):
         from access_recovery import send_recovery
         if not send_recovery(self, code):
+            if getattr(self, "headers", {}).get("Host", "").split(":", 1)[0].lower() == "zszm.iridescently.xyz":
+                # Do not reflect exception details or the Python default template.
+                body = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
+                        "<title>众生之门</title><h1>" + str(code) +
+                        "</h1><p>页面暂时不可用。</p><a href=\"/\">返回众生之门</a></html>").encode("utf-8")
+                self.close_connection = True
+                self.send_response(code)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                if self.command != "HEAD":
+                    self.wfile.write(body)
+                return
             super().send_error(code, message, explain)
 
     def __init__(self, *args, **kwargs):
@@ -98,9 +117,19 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
 
     # ---- 安全响应头 + 缓存策略（在 end_headers 时统一注入） ----
     def end_headers(self):
+        if not hasattr(self, "_headers_buffer"):
+            return super().end_headers()
+        path = getattr(self, "path", "")  # malformed requests may fail before a path exists
         # 安全头
         for k, v in SECURITY_HEADERS.items():
+            if k == "Strict-Transport-Security" and getattr(self, "headers", {}).get("Host", "").split(":", 1)[0].lower() == "zszm.iridescently.xyz":
+                v = "max-age=2592000"
             super().send_header(k, v)
+        if getattr(self, "headers", {}).get("Host", "").split(":", 1)[0].lower() == "zszm.iridescently.xyz":
+            # First enforced phase does not restrict legacy inline game scripts.
+            # The existing script/style policy remains Report-Only until real
+            # browser violations for embedded modules have been reviewed.
+            super().send_header("Content-Security-Policy", "base-uri 'self'; object-src 'none'")
         # 扫描已缓冲的 headers，找 Content-Type
         ct = ""
         if hasattr(self, "_headers_buffer"):
@@ -113,7 +142,7 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
             super().send_header("Pragma", "no-cache")
             super().send_header("Expires", "0")
         else:
-            ext = os.path.splitext(self.path.split("?")[0])[1].lower()
+            ext = os.path.splitext(path.split("?")[0])[1].lower()
             if ("image/" in ct or ext in (".woff", ".woff2", ".ttf", ".otf")) and not any(
                 header.lower().startswith((b"access-control-allow-origin:", b"cache-control: private"))
                 for header in self._headers_buffer
@@ -125,14 +154,14 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
             own_policy = any(h.lower().startswith(b"cache-control:") for h in self._headers_buffer)
             if own_policy:
                 pass
-            elif self.code_max_age is not None and ext in (".js", ".mjs", ".css") and not HASHED_ASSET.search(self.path.split("?")[0]):
+            elif self.code_max_age is not None and ext in (".js", ".mjs", ".css") and not HASHED_ASSET.search(path.split("?")[0]):
                 # Unhashed game module code: browsers and the CDN must revalidate so a publish is visible at once.
                 # code_max_age > 0 is the rollback switch (see server/app/README.md).
                 if self.code_max_age > 0:
                     super().send_header("Cache-Control", f"public, max-age={self.code_max_age}")
                 else:
                     super().send_header("Cache-Control", "no-cache, max-age=0, must-revalidate")
-            elif HASHED_ASSET.search(self.path.split("?")[0]):
+            elif HASHED_ASSET.search(path.split("?")[0]):
                 # Vite content-hashed file: the name changes whenever the bytes do.
                 super().send_header("Cache-Control", "public, max-age=31536000, immutable")
             elif max_age:
