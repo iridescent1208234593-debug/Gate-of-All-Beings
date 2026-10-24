@@ -71,7 +71,8 @@ def cleanup(root, links):
     shutil.rmtree(root, ignore_errors=True)
 
 CHECKS = [
-    ("iridescently.xyz", "/", 200),
+    ("iridescently.xyz", "/", 302),
+    ("iridescently.xyz", "/gallery.html", 200),
     ("iridescently.xyz", "/connections.html", 200),
     ("iridescently.xyz", "/styles/connections.css", 200),
     ("iridescently.xyz", "/scripts/connections.js", 200),

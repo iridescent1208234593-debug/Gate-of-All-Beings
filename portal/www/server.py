@@ -39,6 +39,10 @@ EDIT_TARGETS = {
     "/api/admin/thanks": "thanks.json",
 }
 
+# 主域根路径跳转到会馆；节气画廊在 /gallery.html
+MAIN_HOSTS = {"iridescently.xyz", "www.iridescently.xyz"}
+ROOT_DESTINATION = "https://huiguan.iridescently.xyz/"
+
 SITE_STATUS_TARGETS = {
     "huiguan": "https://huiguan.iridescently.xyz/",
     "zszm": "https://zszm.iridescently.xyz/",
@@ -162,8 +166,10 @@ class Handler(BaseStaticHandler):
 
     def translate_path(self, path):
         decoded = urllib.parse.unquote(urllib.parse.urlparse(path).path)
-        if decoded in ("/", "/index.html", "/links.json", "/thanks.json") or decoded.startswith("/assets/homepage/"):
-            target = os.path.abspath(os.path.join(RUNTIME_DIR, decoded.lstrip("/") or "index.html"))
+        if decoded in ("/", "/index.html", "/gallery.html", "/links.json", "/thanks.json") or decoded.startswith("/assets/homepage/"):
+            # 节气画廊的构建产物仍是 index.html；主域根路径改跳会馆后由 /gallery.html 提供
+            name = "index.html" if decoded in ("/", "/gallery.html") else decoded.lstrip("/")
+            target = os.path.abspath(os.path.join(RUNTIME_DIR, name))
             if os.path.commonpath((os.path.abspath(RUNTIME_DIR), target)) == os.path.abspath(RUNTIME_DIR):
                 return target
             return os.path.join(STATIC_DIR, "__missing__")
@@ -211,6 +217,14 @@ class Handler(BaseStaticHandler):
             "/links.html": "/connections.html#neighbors",
             "/thanks.html": "/connections.html#with-thanks",
         }
+        host = (self.headers.get("Host") or "").split(":", 1)[0].lower()
+        if path in ("/", "/index.html") and host in MAIN_HOSTS:
+            # 302 而非 308：首页去向以后可能再调整，不让浏览器永久记住
+            self.send_response(302)
+            self.send_header("Location", ROOT_DESTINATION)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return True
         if path in redirects:
             self.send_response(308)
             self.send_header("Location", redirects[path])

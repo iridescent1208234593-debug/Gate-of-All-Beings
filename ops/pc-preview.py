@@ -63,6 +63,7 @@ def static_target(host,path):
     section='huiguan' if host=='huiguan.iridescently.xyz' else 'oc' if host=='oc.iridescently.xyz' else 'www'
     if section=='huiguan' and path.startswith('/design-system/ui/'):
         return ROOT/'shared/shared-ui',path.removeprefix('/design-system/ui/'),False
+    if section=='www' and path=='/gallery.html':return ROOT/'portal/www','index.html',False
     return ROOT/'portal'/section,path.lstrip('/'),False
 
 def central_path(path):
@@ -167,6 +168,9 @@ class Handler(BaseStaticHandler):
         if host in {'game.iridescently.xyz','juling.iridescently.xyz','lingjing.iridescently.xyz'}:
             suffix='/app/shell/m/juling' if host.startswith('juling') else '/#management' if host.startswith('lingjing') else '/#home'
             self.send_response(308);self.send_header('Location','https://pc-zszm.iridescently.xyz'+suffix);self.send_header('Content-Length','0');self.end_headers();return
+        # Same as production: the main domain root goes to the 会馆, the gallery lives at /gallery.html.
+        if host in {'iridescently.xyz','www.iridescently.xyz'} and path in {'/','/index.html'}:
+            self.send_response(302);self.send_header('Location','https://pc-huiguan.iridescently.xyz/');self.send_header('Content-Length','0');self.end_headers();return
         self.static_host=host
         return super().do_HEAD() if self.command=='HEAD' else super().do_GET()
 

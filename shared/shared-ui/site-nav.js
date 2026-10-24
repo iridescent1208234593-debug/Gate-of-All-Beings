@@ -1,4 +1,4 @@
-/* Iridescently site navigation — the one global bar shared by 节气画廊, 西木会馆 and 众生之门.
+/* Iridescently site navigation — the one global bar shared by 西木会馆, 众生之门 and 节气画廊.
  *
  * Classic <script src=".../shared/shared-ui/site-nav.js"> mounts it immediately.
  *   data-variant="overlay"  lighter glass over an immersive first screen (gallery, hero)
@@ -17,9 +17,9 @@
   var ORIGIN = 'https://iridescently.xyz';
   var MARK = ORIGIN + '/shared/shared-ui/brand/iridescently-mark.svg';
   var SITES = [
-    { host: 'iridescently.xyz', label: '节气画廊', path: '/' },
     { host: 'huiguan.iridescently.xyz', label: '西木会馆', path: '/' },
-    { host: 'zszm.iridescently.xyz', label: '众生之门', path: '/', beta: true }
+    { host: 'zszm.iridescently.xyz', label: '众生之门', path: '/', beta: true },
+    { host: 'iridescently.xyz', label: '节气画廊', path: '/gallery.html' }
   ];
   var MORE = [
     { host: 'oc.iridescently.xyz', label: '佳霖馆长设定', path: '/' },
@@ -119,7 +119,7 @@
     var nav = el('nav'); nav.id = 'qc-nav'; nav.setAttribute('aria-label', '站点导航');
     if (options.variant === 'overlay') nav.dataset.variant = 'overlay';
     if (options.tone === 'light') nav.dataset.tone = 'light';
-    var brand = el('a', 'qc-brand'); brand.href = ORIGIN + '/'; brand.setAttribute('aria-label', 'Iridescently 节气画廊');
+    var brand = el('a', 'qc-brand'); brand.href = ORIGIN + '/'; brand.setAttribute('aria-label', 'Iridescently 首页');
     brand.innerHTML = '<img src="' + MARK + '" width="26" height="26" alt=""><span>Iridescently</span>';
     nav.appendChild(brand);
 
