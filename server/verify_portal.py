@@ -84,6 +84,7 @@ CHECKS = [
     ("zszm.iridescently.xyz", "/playtest/shengsheng-shoot/index.html", 200),
     ("zszm.iridescently.xyz", "/api/sso-user", 200),
     ("zszm.iridescently.xyz", "/api/progress/boards", 200),
+    ("iridescently.xyz", "/api/progress/chains", 200),
     ("spirit.iridescently.xyz", "/api/progress/me", 200),
     ("huiguan.iridescently.xyz", "/api/progress/leaderboard?board=level", 200),
     ("iridescently.xyz", "/api/progress/leaderboard?board=slay", 200),

@@ -27,6 +27,17 @@
     .tasks { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
     .tasks li { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; background: var(--paper-dim); border-radius: 8px; font-size: 14px; }
     .tasks li.done { color: var(--dim); text-decoration: line-through; }
+    .chain { border: 1px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 10px; background: var(--paper-dim); }
+    .chain-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+    .chain-head h3 { margin: 0; font-size: 15px; color: var(--ink); }
+    .chain-head .reward { font-size: 13px; color: var(--gold); font-weight: 600; white-space: nowrap; }
+    .chain > .muted { margin: 2px 0 8px; }
+    .chain .bar { margin: 0 0 2px; }
+    .claim { border: 1px solid var(--gold); color: var(--gold); background: var(--paper); border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 14px; cursor: pointer; min-height: 36px; }
+    .claim:hover { background: var(--gold); color: #f6f1e3; }
+    .claim[disabled] { border-color: var(--line); color: var(--dim); background: var(--paper); cursor: default; }
+    .claim.claimed { border-color: var(--line); color: var(--dim); cursor: default; }
+    .chain-foot { display: flex; justify-content: flex-end; margin-top: 8px; }
     .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px; scrollbar-width: thin; }
     .tabs button { flex: none; border: 1px solid var(--line); background: var(--paper); color: var(--text); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 14px; cursor: pointer; min-height: 36px; }
     .tabs button[aria-selected="true"] { background: var(--hud); border-color: var(--hud); color: #f6f1e3; }
@@ -55,6 +66,8 @@
 
   <section class="card" id="me" aria-live="polite"><p class="muted">正在读取你的等级……</p></section>
 
+  <section class="card" id="chains" aria-live="polite"><p class="muted">正在读取任务链……</p></section>
+
   <section class="card">
     <div class="tabs" role="tablist" id="tabs" aria-label="选择排行榜"></div>
     <div class="board-head"><h2 id="board-title">排行榜</h2><span class="muted" id="board-metric"></span></div>
@@ -66,12 +79,13 @@
     <summary>积分怎么来</summary>
     <p>每种玩法每天第一次游玩 +0.5；每完成一局 +0.2（每玩法每天至多 5 局）；胜利 / 通关再 +0.3（至多 3 次）；刷新个人最佳 +0.5（每玩法每天 1 次）。</p>
     <p>每日任务：完成任意一局 +1；今天玩三种不同玩法 +1。会馆登记新角色设表 +1（每天至多 2 张），使用自定义配色 +0.5。</p>
+    <p>跨玩法任务链：进度由你在各玩法的累计成绩自动推导（无需上报），完成整条链可一次性领取积分奖励，每条链限领一次。</p>
     <p>每个账户每天最多获得 8 分。第 1 级需要 1 分，之后每一级比上一级多 1 分（第 n 级累计 n(n+1)/2 分）。</p>
     <p>访客可以照常游玩，但只有登录会馆账号后，成绩才会上榜。</p>
   </details>
 </main>
 <script type="module">
-  import { fetchBoards, fetchLeaderboard, fetchMyProgress } from '/shared/shared-session/progress.js';
+  import { fetchBoards, fetchLeaderboard, fetchMyProgress, fetchChains, claimChain } from '/shared/shared-session/progress.js';
 
   const $ = id => document.getElementById(id);
   const params = new URLSearchParams(location.search);
@@ -97,6 +111,52 @@
         <p class="muted">今天已获得 ${me.today.earned} / ${me.today.cap} 分</p><ul class="tasks">${tasks}</ul>`;
     } catch {
       $('me').innerHTML = '<p class="muted">暂时读不到你的等级，稍后再试。</p>';
+    }
+  }
+
+  async function loadChains() {
+    try {
+      const data = await fetchChains();
+      if (!data.logged_in) {
+        const list = data.chains.map(c => `<div class="chain"><div class="chain-head"><h3>${esc(c.name)}</h3>
+          <span class="reward">+${c.reward} 分</span></div><p class="muted">${esc(c.desc)}</p>
+          <ul class="tasks">${c.steps.map(s => `<li>${esc(s.label)}</li>`).join('')}</ul></div>`).join('');
+        $('chains').innerHTML = '<h2 style="margin:0 0 10px;font-size:18px;color:var(--ink)">跨玩法任务链</h2>' + list
+          + '<p class="muted">登录会馆账号后开始累计进度，完成后可领取积分奖励。</p>';
+        return;
+      }
+      const list = data.chains.map(c => {
+        const doneCount = c.steps.filter(s => s.done).length;
+        const pct = Math.round(doneCount / c.steps.length * 100);
+        const steps = c.steps.map(s => `<li class="${s.done ? 'done' : ''}"><span>${esc(s.label)}（${s.progress}/${s.target}）</span>
+          <span>${s.done ? '完成' : ''}</span></li>`).join('');
+        let action;
+        if (c.claimed) action = '<button type="button" class="claim claimed" disabled>已领取</button>';
+        else if (c.complete) action = `<button type="button" class="claim" data-chain="${esc(c.id)}">领取 +${c.reward} 分</button>`;
+        else action = `<button type="button" class="claim" disabled>${doneCount}/${c.steps.length} 段完成</button>`;
+        return `<div class="chain"><div class="chain-head"><h3>${esc(c.name)}</h3><span class="reward">+${c.reward} 分</span></div>
+          <p class="muted">${esc(c.desc)}</p>
+          <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="${esc(c.name)}进度"><i style="width:${pct}%"></i></div>
+          <ul class="tasks">${steps}</ul><div class="chain-foot">${action}</div></div>`;
+      }).join('');
+      $('chains').innerHTML = '<h2 style="margin:0 0 10px;font-size:18px;color:var(--ink)">跨玩法任务链</h2>' + list;
+      $('chains').addEventListener('click', async event => {
+        const btn = event.target.closest('button.claim[data-chain]');
+        if (!btn || btn.disabled) return;
+        btn.disabled = true;
+        btn.textContent = '领取中……';
+        try {
+          const result = await claimChain(btn.dataset.chain);
+          btn.textContent = result && result.already ? '已领取' : `已领取 +${result && result.reward} 分`;
+          btn.classList.add('claimed');
+          loadMe(); // 等级变了，刷新顶栏
+        } catch (error) {
+          btn.disabled = false;
+          btn.textContent = String(error.message || '').indexOf('任务链还没有完成') === 0 ? '进度未达成' : '领取失败，稍后再试';
+        }
+      });
+    } catch {
+      $('chains').innerHTML = '<p class="muted">任务链暂时打不开，稍后再试。</p>';
     }
   }
 
@@ -130,6 +190,7 @@
   $('tabs').innerHTML = boards.map(b => `<button type="button" role="tab" data-board="${esc(b.board)}">${esc(b.name)}</button>`).join('');
   $('tabs').addEventListener('click', event => { const b = event.target.closest('button'); if (b) loadBoard(b.dataset.board); });
   loadMe();
+  loadChains();
   loadBoard(current);
   $('tabs').querySelector('[aria-selected="true"]')?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
 </script>

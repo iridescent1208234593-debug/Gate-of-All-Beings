@@ -9,5 +9,9 @@ export function reportProgress(game: string, score: number, opts?: { minInterval
 export function fetchMyProgress(): Promise<any>;
 export function fetchLeaderboard(board?: string, limit?: number): Promise<any>;
 export function fetchBoards(): Promise<{ board: string; name: string; metric: string; unit: string }[]>;
+export interface ChainStep { id: string; label: string; game?: string; progress?: number; target?: number; done?: boolean }
+export interface ChainView { id: string; name: string; desc: string; reward: number; steps: ChainStep[]; complete?: boolean; claimed?: boolean }
+export function fetchChains(): Promise<{ logged_in: boolean; chains: ChainView[] }>;
+export function claimChain(chain: string): Promise<{ ok: boolean; chain: string; reward: number; already: boolean }>;
 export function leaderboardUrl(board?: string): string;
 export function showProgressToast(result: ProgressResult | null): void;
