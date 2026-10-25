@@ -59,6 +59,12 @@ jobs:
           echo "GALLERY_DIR=$RUNNER_TEMP/gallery" >> "$GITHUB_ENV"
       - name: Build release candidates
         run: npm run build:release
+      - name: Audit production npm dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Audit Gallery Engine build dependencies
+        run: npm audit --prefix portal/www/gallery-engine --audit-level=high
+      - name: Audit Cards module dependencies
+        run: npm audit --prefix server/app/src/cards --audit-level=high
       - name: Verify release manifests and output hashes
         shell: bash
         run: |
