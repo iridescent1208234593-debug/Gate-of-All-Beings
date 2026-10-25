@@ -11,7 +11,7 @@
 | `portal/huiguan` | 会馆、设表、官方/同人档案、海报 |
 | `portal/oc` | 佳霖馆长设定 |
 | `server` | Python 统一门户、SSO 与安全能力 |
-| `server/app/src` | 七个游戏模块源码 |
+| `server/app/src` | 八个游戏模块源码 |
 | `server/app/shell` / `portal.json` | 同页模块壳与导航清单；非 embed 试玩使用 iframe，不能概括为全站无 iframe |
 | `shared` | UI、账户/session/save、契约与只读事实的唯一公共源码 |
 | `scripts` / `docs` | 根目录运维入口、构建发布文档与维护索引；运维实现位于外部 Ops 目录 |
@@ -46,11 +46,13 @@ API 上游：5174 Cards OAuth、5178 数值配置、5177 聚灵、4173 灵体 We
 
 ```powershell
 npm ci
-npm run build:modules       # 七模块和首页只写候选
+npm run build:modules       # 八模块和首页只写候选
 npm run build:cards         # 只构建众生之门前端候选
+npm run build:world-map     # 只构建世界地图候选
 npm run test:portal         # 默认 PORT=8080 被占用即拒绝；用 $env:PORT=18081 指定；数据根为临时副本
 npm run publish:modules    # 显式提升模块和首页
 npm run publish:cards      # 只更新众生之门前端模块
+npm run publish:world-map  # 只更新世界地图模块
 npm run build:site          # 从 Git HEAD 导出源码快照，排除密钥/数据
 npm run publish:site       # 显式提升静态/Python 源码
 # 网站管家入口：E:\External Projects\Iridescently Operations\网站恢复\打开网站管家.vbs

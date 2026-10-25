@@ -36,6 +36,7 @@
     "publish:site": "node scripts/run-ops.mjs publish-release.mjs site"
   },
   "devDependencies": {
+    "playwright": "^1.64.1",
     "wrangler": "^4.147.0"
   },
   "overrides": {

@@ -14,7 +14,10 @@
         if (/^data:image\/(png|jpeg|webp|gif);base64,/i.test(src)) continue;
         try {
           const url = new URL(src, location.href);
-          if (url.origin !== location.origin || !/^\/assets\/uploads\/[a-f0-9]+\.(png|jpg|webp|gif)$/.test(url.pathname)) throw new Error('unsupported image');
+          const storedUpload = /^\/assets\/uploads\/[a-f0-9]{16,64}\.(png|jpe?g|webp|gif)$/i.test(url.pathname);
+          const derivedUpload = url.pathname === '/api/uploads/preview' && /^[A-Za-z0-9]{16,64}\.(png|jpe?g|webp|gif)$/i.test(url.searchParams.get('name') || '');
+          const opaquePreview = url.pathname === '/api/image-preview' && /^[A-Za-z0-9_-]{24,64}$/.test(url.searchParams.get('id') || '');
+          if (url.origin !== location.origin || !(storedUpload || derivedUpload || opaquePreview)) throw new Error('unsupported image');
           node.src = url.href;
         } catch { node.removeAttribute('src'); }
       }

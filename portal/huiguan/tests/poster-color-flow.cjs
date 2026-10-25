@@ -1,4 +1,4 @@
-/* Real Chrome and real handlers; schemas only, all account/image writes are temporary. */
+/* Playwright Chromium and real handlers; all account/image writes are temporary. */
 const { chromium } = require('playwright');
 const { spawn } = require('node:child_process');
 const { randomFillSync } = require('node:crypto');
@@ -8,17 +8,12 @@ const path = require('node:path');
 const assert = require('node:assert/strict');
 const sharp = require('sharp');
 const root = path.resolve(__dirname, '../../..');
-const schemaRoot = process.env.IRIDESCENT_SCHEMA_ROOT || root;
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'huiguan-poster-'));
 const evidence = process.env.IRIDESCENT_EVIDENCE_DIR;
 if (evidence) fs.mkdirSync(evidence, { recursive: true });
 const fixture = `
 import pathlib,sys,types,http.server,re,sqlite3
-root=pathlib.Path(sys.argv[1]);temp=pathlib.Path(sys.argv[2]);schema=pathlib.Path(sys.argv[3])
-origin=sqlite3.connect((schema/'portal/huiguan/users.db').as_uri()+'?mode=ro',uri=True)
-target=sqlite3.connect(temp/'users.db')
-for (sql,) in origin.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND sql IS NOT NULL"):target.execute(sql)
-target.commit();target.close();origin.close()
+root=pathlib.Path(sys.argv[1]);temp=pathlib.Path(sys.argv[2])
 world=sqlite3.connect(temp/'world.db')
 world.execute('CREATE TABLE characters(id INTEGER PRIMARY KEY,name TEXT,merged_to TEXT)')
 world.execute('CREATE TABLE character_images(id INTEGER PRIMARY KEY,character_id INTEGER,image_path TEXT,image_type TEXT,description TEXT,created_at TEXT)')
@@ -29,6 +24,7 @@ for name,value in [('USER_DB',str(temp/'users.db')),('DATA_FILE',str(temp/'chara
 (temp/'world-images').mkdir()
 module=types.ModuleType('poster_flow');module.__file__=str(root/'portal/huiguan/server_huiguan.py');sys.modules[module.__name__]=module
 exec(compile(source,module.__file__,'exec'),module.__dict__)
+module.init_user_db()
 class Handler(module.Handler):
  def _session_cookie(self,sid):return super()._session_cookie(sid).replace('; Domain=.iridescently.xyz','')
  def _sso_cookie(self,*args):return super()._sso_cookie(*args).replace('; Domain=.iridescently.xyz','')
@@ -41,7 +37,7 @@ class Server(http.server.ThreadingHTTPServer):
 server=Server(('127.0.0.1',0),Handler)
 print(server.server_address[1],flush=True);server.serve_forever()
 `;
-const server = spawn('python', ['-u', '-c', fixture, root, temp, schemaRoot], { cwd: root, windowsHide: true, env: { ...process.env, HX_SSO_SECRET: 'temporary-poster-test-only-secret' } });
+const server = spawn('python', ['-u', '-c', fixture, root, temp], { cwd: root, windowsHide: true, env: { ...process.env, HX_SSO_SECRET: 'temporary-poster-test-only-secret' } });
 (async () => {
  let browser;
  const results = [];
@@ -51,7 +47,7 @@ const server = spawn('python', ['-u', '-c', fixture, root, temp, schemaRoot], { 
   console.log('Temporary fixture:', base);
   const image = await sharp(randomFillSync(Buffer.alloc(1080 * 1920 * 3)), { raw: { width: 1080, height: 1920, channels: 3 } }).png({ compressionLevel: 0 }).toBuffer();
   assert.ok(image.length > 2 * 1024 * 1024 && image.length < 8 * 1024 * 1024);
-  browser = await chromium.launch({ channel: 'chrome', headless: true });
+  browser = await chromium.launch({ headless: true });
   for (const width of [390, 1440]) {
    const context = await browser.newContext({ viewport: { width, height: 900 }, deviceScaleFactor: width === 390 ? 3 : 1, isMobile: width === 390, hasTouch: width === 390, reducedMotion: 'reduce' });
    await context.route('https://iridescently.xyz/**', route => route.fulfill({ contentType: 'application/javascript', body: '' }));
@@ -63,8 +59,9 @@ const server = spawn('python', ['-u', '-c', fixture, root, temp, schemaRoot], { 
    const errors = []; page.on('pageerror', error => errors.push(error.message));
    const consoleErrors = [];
    page.on('dialog', async dialog => { console.log('Browser dialog:', dialog.message()); await dialog.dismiss(); });
-   page.on('console', message => { if (message.type() === 'error') { consoleErrors.push(message.text()); console.log('Browser console:', message.text()); } });
+   page.on('console', message => { if (message.type() === 'error') { consoleErrors.push(message.text()); console.log('Browser console:', message.text(), message.location()); } });
    page.on('response', response => { if (response.status() === 404) console.log('Fixture 404:', response.url()); });
+   page.on('requestfailed', request => console.log('Fixture request failed:', request.url(), request.failure()?.errorText));
    await page.goto(base + '/#charForm', { waitUntil: 'domcontentloaded' });
    await page.waitForFunction(() => window.currentUser?.logged_in && window.HuiguanColors);
    const record = { code: 'poster_' + width, name: 'Color check', gender: '男', species_type: '人类', age: 20, appearance: 'Test-only character', background: 'Test-only archive', abilities: [], colorIndex: 0, colorPrimary: '#426666', colorAccent: '#e06e5e', images: [], customDetails: {} };
@@ -92,11 +89,13 @@ const server = spawn('python', ['-u', '-c', fixture, root, temp, schemaRoot], { 
     const data = { ...record, image: imageList[0], images: imageList.slice() };
     return postSave(data, generateShowcaseHTML(data, colorsFromData(data)));
    }, record);
-   assert.equal(formSaved, true);
+   assert.equal(formSaved, true, JSON.stringify({ errors, consoleErrors, toast: await page.locator('.toast').allTextContents().catch(() => []) }));
    let records = await (await context.request.get(base + '/api/get-characters')).json();
    assert.equal(records.characters[0].data.colorPrimary, '#426666');
-   assert.match(records.characters[0].data.image, /^\/assets\/uploads\/[a-f0-9]+\.png$/);
+   assert.match(records.characters[0].data.image, /^\/api\/uploads\/preview\?name=[a-f0-9]{64}\.(png|jpe?g|webp)$/);
    assert.ok(!JSON.stringify(records).includes('data:image'));
+   assert.equal((await context.request.get(base + records.characters[0].data.image)).status(), 200, 'Authenticated session can load the derived image preview');
+   assert.equal((await context.request.get(base + '/api/original-image?src=' + encodeURIComponent(records.characters[0].data.image))).status(), 403, 'Original source remains owner-only');
    // A historical HTML snapshot with a washed-out surface must obey today's saved HEX.
    const historicalHtml = await page.evaluate(data => generateShowcaseHTML(data, colorsFromData(data)).replace(/--character-primary:[^;]+;/, '').replace(/--surface:[^;]+;/, '--surface:#ffffff;'), records.characters[0].data);
    const unsafeIndex = '</script><script>window.untrusted_index_marker=1</script>';
@@ -131,14 +130,20 @@ const server = spawn('python', ['-u', '-c', fixture, root, temp, schemaRoot], { 
    let posters = await (await context.request.get(base + '/api/posters/my')).json();
    const saved = posters.posters[0];
    const state = JSON.parse(saved.state_json);
-   assert.match(state.charImg, /^\/assets\/uploads\/[a-f0-9]+\.png$/);
+   assert.match(state.charImg, /^\/api\/uploads\/preview\?name=[a-f0-9]{64}\.(png|jpe?g|webp)$/);
    assert.equal(state.colorA, saved.primary_color);
    assert.ok(!saved.state_json.includes('data:image'));
    const cloudImage = await context.request.get(base + saved.img_ref);
    assert.equal(cloudImage.status(), 200);
    const cloudBytes = await cloudImage.body();
-   assert.deepEqual((await sharp(cloudBytes).metadata()).width, 1080);
-   const rgbPixels = await sharp(cloudBytes).removeAlpha().raw().toBuffer();
+   assert.equal((await sharp(cloudBytes).metadata()).format, 'webp', 'Cloud poster reference is a derived WebP preview');
+   assert.deepEqual((await sharp(cloudBytes).metadata()).width, 900);
+   const storedCandidates = await Promise.all(fs.readdirSync(path.join(temp, 'uploads')).map(async name => {
+    const file = path.join(temp, 'uploads', name), meta = await sharp(file).metadata().catch(() => null);
+    return meta?.format === 'png' && meta.width === 1080 && meta.height === 1920 ? file : null;
+   }));
+   assert.ok(storedCandidates.some(Boolean), 'A full-resolution 1080×1920 PNG is stored for the saved poster');
+   const rgbPixels = await sharp(storedCandidates.find(Boolean)).removeAlpha().raw().toBuffer();
    let exactPrimaryPixels = 0;
    for (let i = 0; i < rgbPixels.length; i += 3) if (rgbPixels[i] === 184 && rgbPixels[i + 1] === 62 && rgbPixels[i + 2] === 78) exactPrimaryPixels++;
    assert.ok(exactPrimaryPixels > 1000, 'Exported PNG keeps the exact source color in its solid region');
@@ -153,7 +158,7 @@ const server = spawn('python', ['-u', '-c', fixture, root, temp, schemaRoot], { 
    await page.reload({ waitUntil: 'domcontentloaded' });
    await page.waitForFunction(() => window.HB_USER && MY_POSTERS.length > 0);
    await page.locator('[data-act=load]').first().click();
-   await page.waitForFunction(() => layers.charImg.img?.naturalWidth === 1080);
+   await page.waitForFunction(() => layers.charImg.img?.naturalWidth === 900);
    const reopened = await page.evaluate(() => ({ primary: colorA(), accent: colorB(), position: { ...charPos }, scale: layers.charImg.scale }));
    assert.equal(reopened.primary, '#b83e4e'); assert.equal(reopened.accent, '#0eb83a');
    assert.deepEqual(reopened.position, expected.position); assert.equal(reopened.scale, expected.scale);

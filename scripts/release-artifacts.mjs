@@ -28,13 +28,13 @@ async function filesIn(dir, prefix = '') {
   return files.sort();
 }
 
-export async function recordCandidate(component) {
+export async function recordCandidate(component, metadata = {}) {
   const dir = path.join(candidateRoot, component);
   const hashes = {};
   for (const name of await filesIn(dir)) hashes[name] = await hashFile(path.join(dir, name));
   const head = spawnSync('git', ['rev-parse', 'HEAD'], { cwd: projectRoot, encoding: 'utf8' });
   const status = spawnSync('git', ['status', '--porcelain', '--untracked-files=normal'], { cwd: projectRoot, encoding: 'utf8' });
-  const record = { schema: 1, component, builtAt: new Date().toISOString(), sourceHead: head.stdout?.trim() || null, sourceDirty: Boolean(status.stdout?.trim()), files: hashes };
+  const record = { schema: 1, component, builtAt: new Date().toISOString(), sourceHead: head.stdout?.trim() || null, sourceDirty: Boolean(status.stdout?.trim()), ...metadata, files: hashes };
   await mkdir(candidateRoot, { recursive: true });
   await writeFile(path.join(candidateRoot, `${component}.json`), `${JSON.stringify(record, null, 2)}\n`);
   return record;

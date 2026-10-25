@@ -16,6 +16,8 @@ npm run publish:homepage # 检查首页候选后显式发布
 开发预览地址：`http://127.0.0.1:5173/assets/homepage/homepage.html`。图廊互动 API 由 Vite 转发到本机主站服务；需要同时运行 `python -X utf8 portal/www/server.py`（8088）。互动和管理员原图使用现有签名 SSO，未登录的 localhost 预览只显示访客态；可用 `python -m unittest server.test_gallery_interactions` 验证完整权限、66 次解锁和并发限制。
 `build:modules` 只生成模块候选，并使旧首页候选失效；它不读取画廊素材。`build:homepage` 会先按 gallery-engine 自己的锁文件安装独立依赖，再生成首页候选；首页素材通过 `GALLERY_DIR` 指定，默认兼容本机 `assets/罗小黑战记数据库/罗小黑节气贺图（gallery素材）`。完整候选使用 `npm run build:release`，该命令依次构建模块和首页，首页失败时整体失败。显式 `publish:modules` 仍会把全部模块和首页作为一个组合发布，发布前必须成功生成这两类候选：
 
+如果画廊原图位于 Git 外部目录，构建产物 `.releases/candidate/homepage.json` 会在 `externalAssets` 记录素材目录标识、文件数及按相对文件名和原始字节计算的 SHA-256。复现同一候选时需使用内容哈希相同的素材目录；`sourceDirty` 仍准确反映 Git 工作树状态，不得手工改写。
+
 ```powershell
 npm run build:modules # 纯模块构建，无需画廊素材
 npm run build:homepage # 需要通过 GALLERY_DIR 或默认目录提供画廊素材

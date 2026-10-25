@@ -98,41 +98,44 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
 
     # ---- 安全响应头 + 缓存策略（在 end_headers 时统一注入） ----
     def end_headers(self):
+        request_path = getattr(self, "path", "").split("?", 1)[0]
+        if not hasattr(self, "_headers_buffer"):
+            self._headers_buffer = []
+        headers_buffer = self._headers_buffer
         # 安全头
         for k, v in SECURITY_HEADERS.items():
             super().send_header(k, v)
         # 扫描已缓冲的 headers，找 Content-Type
         ct = ""
-        if hasattr(self, "_headers_buffer"):
-            for h in self._headers_buffer:
-                if isinstance(h, bytes) and h.lower().startswith(b"content-type"):
-                    ct = h.decode("utf-8", errors="replace").lower()
-                    break
+        for h in headers_buffer:
+            if isinstance(h, bytes) and h.lower().startswith(b"content-type"):
+                ct = h.decode("utf-8", errors="replace").lower()
+                break
         if "text/html" in ct:
             super().send_header("Cache-Control", "no-cache, no-store, must-revalidate")
             super().send_header("Pragma", "no-cache")
             super().send_header("Expires", "0")
         else:
-            ext = os.path.splitext(self.path.split("?")[0])[1].lower()
+            ext = os.path.splitext(request_path)[1].lower()
             if ("image/" in ct or ext in (".woff", ".woff2", ".ttf", ".otf")) and not any(
                 header.lower().startswith((b"access-control-allow-origin:", b"cache-control: private"))
-                for header in self._headers_buffer
+                for header in headers_buffer
             ):
                 # Public media remains exportable from the opaque showcase sandbox.
                 super().send_header("Access-Control-Allow-Origin", "*")
             max_age = CACHE_MAX_AGE.get(ext)
             # A handler that set its own policy (e.g. private owner-only originals) keeps it.
-            own_policy = any(h.lower().startswith(b"cache-control:") for h in self._headers_buffer)
+            own_policy = any(h.lower().startswith(b"cache-control:") for h in headers_buffer)
             if own_policy:
                 pass
-            elif self.code_max_age is not None and ext in (".js", ".mjs", ".css") and not HASHED_ASSET.search(self.path.split("?")[0]):
+            elif self.code_max_age is not None and ext in (".js", ".mjs", ".css") and not HASHED_ASSET.search(request_path):
                 # Unhashed game module code: browsers and the CDN must revalidate so a publish is visible at once.
                 # code_max_age > 0 is the rollback switch (see server/app/README.md).
                 if self.code_max_age > 0:
                     super().send_header("Cache-Control", f"public, max-age={self.code_max_age}")
                 else:
                     super().send_header("Cache-Control", "no-cache, max-age=0, must-revalidate")
-            elif HASHED_ASSET.search(self.path.split("?")[0]):
+            elif HASHED_ASSET.search(request_path):
                 # Vite content-hashed file: the name changes whenever the bytes do.
                 super().send_header("Cache-Control", "public, max-age=31536000, immutable")
             elif max_age:

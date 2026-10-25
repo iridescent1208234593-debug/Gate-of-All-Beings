@@ -6,8 +6,12 @@ from urllib.parse import urlsplit
 def send_recovery(handler, code):
     # Dispatcher strips /app/modules before static serving. The request target
     # retains the public navigation path used to decide whether recovery applies.
-    path = urlsplit(handler.requestline.split()[1]).path
-    navigation = 'text/html' in handler.headers.get('Accept', '') or handler.headers.get('Sec-Fetch-Dest') in {'document', 'iframe'}
+    request = handler.requestline.split()
+    if len(request) < 2:
+        return False
+    path = urlsplit(request[1]).path
+    headers = getattr(handler, 'headers', {})
+    navigation = 'text/html' in headers.get('Accept', '') or headers.get('Sec-Fetch-Dest') in {'document', 'iframe'}
     if code not in {404, 502, 503, 504} or handler.command not in {'GET', 'HEAD'} or not navigation:
         return False
     if not path.startswith(('/app/', '/playtest/')) or '/api/' in path:

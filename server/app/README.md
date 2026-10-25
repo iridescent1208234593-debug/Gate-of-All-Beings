@@ -4,7 +4,7 @@
 
 | 路径 | 作用 |
 | --- | --- |
-| `shell/index.html` | 统一壳：History API 路径路由（`/app/shell/m/<名>`），七个 `embed: true` 模块挂入当前文档；非 embed 入口用独立浏览上下文；`<base>` 按模块基址解析相对资源；`window.__iridescentlyDispose` 统一卸载 |
+| `shell/index.html` | 统一壳：History API 路径路由（`/app/shell/m/<名>`），七个 `embed: true` 模块挂入当前文档；世界地图等非 embed 入口用同域 iframe 隔离；`<base>` 按模块基址解析相对资源；`window.__iridescentlyDispose` 统一卸载 |
 | `portal.json` | 门户清单（站点/游戏分组、URL、图标、`embed` 标记），导航唯一数据源 |
 | `scripts/build-modules.mjs` | 把 `src/` 下各游戏构建/拷贝到 `.releases/candidate/modules/`，同时生成首页候选 |
 | `src/<名>/` | 游戏源码（由项目根目录 Git 统一管理） |
@@ -19,6 +19,7 @@
 | ecology | Vite | ✅ 停止 RAF 循环 |
 | juling | 静态拷贝 | ✅ 内联脚本包 IIFE + 卸载 |
 | aeon | 静态拷贝 | ✅ 停止帧循环 |
+| world-map | Vite | ❌ 同域 iframe 隔离全屏 WebGL 与事件生命周期 |
 | slay | 静态拷贝 | ✅ 挂载进 `#SlayTheWeb` |
 | softie | Vite | ✅ `mount(container)/unmount` |
 

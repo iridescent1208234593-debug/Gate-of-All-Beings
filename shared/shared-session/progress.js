@@ -70,6 +70,24 @@ export async function fetchBoards() {
   return (await res.json()).boards;
 }
 
+/** 跨玩法任务链：登录返回各链实时进度，访客返回目录（无进度）。 */
+export async function fetchChains() {
+  const res = await fetch(API + 'chains', { credentials: 'same-origin' });
+  if (!res.ok) throw new Error('任务链暂时打不开');
+  return res.json();
+}
+
+/** 领取已完成任务链的一次性积分奖励；失败时抛出服务器给的原因。 */
+export async function claimChain(chain) {
+  const res = await fetch(API + 'chains/claim', {
+    method: 'POST', credentials: 'same-origin', keepalive: true,
+    headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chain }),
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error((data && data.error) || '领取失败，稍后再试');
+  return data;
+}
+
 export function leaderboardUrl(board) {
   return LEADERBOARD_URL + (board ? '?board=' + encodeURIComponent(board) : '');
 }

@@ -375,6 +375,9 @@ button { font: inherit; }
 .footer-actions { display: flex; height: 100%; align-items: center; }
 .footer-actions button { height: 100%; padding: 0 10px; }
 #author-toggle { margin-right: 2px; }
+#theme-auto { display: flex; height: 100%; align-items: center; gap: 5px; padding: 0 10px; cursor: pointer; }
+#theme-auto input { width: 11px; height: 11px; margin: 0; accent-color: var(--accent, var(--text)); }
+#theme-auto:hover { color: var(--text); }
 
 @keyframes node-ripple { 0%, 12% { opacity: 0; transform: translate(-50%, -50%) scale(.95); } 25% { opacity: .4; } 85%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.9); } }
 @keyframes ocean-drift { to { transform: translate3d(4%, -2%, 0) scale(1.04); } }

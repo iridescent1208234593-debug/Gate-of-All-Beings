@@ -8,7 +8,8 @@
 
 | 路径 | 内容 | 消费者 |
 | --- | --- | --- |
-| `site-nav.js` | **站点导航**：三站共用的唯一全局栏（品牌标、三站切换、更多、页面插槽、语言、账户） | 所有页面；React 应用 `import '@lxh/shared-ui/site-nav.js'` 后调用 `IridescentlyNav.mount()` |
+| `site-nav.js` | **站点导航**：三站共用的唯一全局栏（品牌标、三站切换、更多、页面插槽、语言、账户）。页面声明 `data-theme-enabled` 后附加**主题设置弹层**（两态选择 + 跟随系统开关，导航玻璃 tone 自动跟随主题） | 所有页面；React 应用 `import '@lxh/shared-ui/site-nav.js'` 后调用 `IridescentlyNav.mount()` |
+| `theme.js` / `theme.d.ts` | **全站主题内核**：`light/dark/auto` 三态，偏好存 cookie `hx_theme`（跨 `*.iridescently.xyz` 子站共享），`auto` 跟随系统并实时响应 `prefers-color-scheme` 变化；生效主题写 `<html data-theme>`，变更派发 document 事件 `xthemechange`。防闪烁内联片段取 `XTheme.HEAD_SNIPPET`。接入范例：`connections.html`、`world-map` | 所有需要深浅色的页面；`window.XTheme`（普通 script） |
 | `brand/iridescently-mark.svg` | **品牌标**：像素直角坐标系，红绿蓝三球（16×16 网格） | 站点导航、样式指南；PNG 副本在 `portal/www/assets/iridescently-mark.png` |
 | `lxh-ui.css` / `lxh-ui.js` | **游戏界面组件库**：HUD、面板、气泡、按钮、输入框、确认框，以及 **加载状态** `.qc-loading`。组件库页面：`/design-system/components.html` | 众生之门、模块、会馆页面、样式指南 |
 | `lxh-intro.js` / `intro-controls.css` | 开场进度条与跳过控件 | 众生之门开场、会馆首页开场 |

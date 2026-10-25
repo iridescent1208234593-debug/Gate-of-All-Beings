@@ -350,6 +350,16 @@ export function createGalleryInteractions({ engine, gallery, canvas, getCurrentI
     return { left: Math.min(...xs), right: Math.max(...xs),
       top: Math.min(...ys), bottom: Math.max(...ys) };
   };
+  // 画作标签浮层（左下序号/文件名、右侧规格卡）是固定定位的 UI，面板落点需避让。
+  const hitsLabelOverlay = (x, y, w, h) => {
+    for (const node of document.querySelectorAll(".plane-label-overlay__left, .plane-label-overlay__right")) {
+      const r = node.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      const pad = 8;
+      if (x < r.right + pad && r.left - pad < x + w && y < r.bottom + pad && r.top - pad < y + h) return true;
+    }
+    return false;
+  };
   const update = () => {
     const index = getCurrentIndex();
     const plane = gallery.planes[index];
@@ -384,8 +394,27 @@ export function createGalleryInteractions({ engine, gallery, canvas, getCurrentI
     projectedRect = rect;
     const width = Math.min(innerWidth - 16, innerWidth <= 700 ? 140 : 190);
     const height = Math.max(panelHeight, !commentForm.hidden ? 180 : !peek.hidden ? 145 : 56);
-    const position = placeGalleryControls(rect, { width: innerWidth, height: innerHeight, ...safeInsets },
-      { width, height });
+    const view = { width: innerWidth, height: innerHeight, ...safeInsets };
+    let position = placeGalleryControls(rect, view, { width, height });
+    if (position && hitsLabelOverlay(position.x, position.y, width, height)) {
+      // 常规落点与画作标签浮层（序号/文件名/规格卡）相交时，依次尝试对侧、下方、上方。
+      const gap = 10;
+      const m = 8;
+      const minLeft = Math.max(m, view.safeLeft || 0);
+      const maxRight = view.width - Math.max(m, view.safeRight || 0);
+      const minTop = Math.max(m, view.safeTop || 0);
+      const maxBottom = view.height - Math.max(m, view.safeBottom || 0);
+      const centerX = Math.max(minLeft, Math.min(maxRight - width, (rect.left + rect.right - width) / 2));
+      const alternatives = [];
+      const otherX = position.side === "right" ? rect.left - gap - width : rect.right + gap;
+      if (otherX >= minLeft && otherX + width <= maxRight)
+        alternatives.push({ side: position.side === "right" ? "left" : "right", x: otherX, y: position.y });
+      if (rect.bottom + gap + height <= maxBottom)
+        alternatives.push({ side: "below", x: centerX, y: rect.bottom + gap });
+      if (rect.top - gap - height >= minTop)
+        alternatives.push({ side: "above", x: centerX, y: rect.top - gap - height });
+      position = alternatives.find((c) => !hitsLabelOverlay(c.x, c.y, width, height)) || position;
+    }
     panel.hidden = !position;
     if (!position) return;
     panel.dataset.side = position.side;

@@ -127,7 +127,7 @@
   .mode-hall__desk nav { grid-template-columns: 1fr; margin-top: 18px; gap: 9px; }
   .mode-hall__desk button, .mode-hall__desk nav>a { min-height: 58px; }
 }
-@media (prefers-reduced-motion: reduce) { .game-card, .game-card__shots img, .game-card__more { transition: none; } .game-card.is-active .game-card__shots img.is-shown { transform: scale(1.02); } }
+@media (prefers-reduced-motion: reduce) { .game-card, .game-card__shots img, .game-card__more, .game-card__atlas>svg { transition: none; } .game-card.is-active .game-card__shots img.is-shown { transform: scale(1.02); } }
 
 .mode-hall__chapter--vote { gap: 8px; }
 .mode-hall__vote { display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px solid #f5efcf33; font-size: 11px; color: #e9eddfbd; }

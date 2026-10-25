@@ -11,17 +11,19 @@ import json
 import os
 import shutil
 import socket
+import sqlite3
 import subprocess
 import sys
 import tempfile
 import time
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 PORT = int(os.environ.get("PORT", "8080"))
 HERE = Path(__file__).resolve().parent
 CODE_ROOT = HERE.parent
-DATA_ROOT = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", HERE.parent)).resolve()
-DATA_LINKED = ("assets", "portal/huiguan/assets/uploads")
 
 
 def _link(target, link):
@@ -39,16 +41,38 @@ def isolated_root():
     runtime = root / "portal" / "huiguan"
     runtime.mkdir(parents=True)
     links = []
-    for name in DATA_LINKED:
-        if (DATA_ROOT / name).is_dir():
-            _link(DATA_ROOT / name, root / name)
-            links.append(root / name)
+    # Build a minimal, deterministic read-only worldview fixture. Tests never
+    # mount the production database or uploaded user images.
+    world_db = root / "assets" / "罗小黑战记数据库" / "db" / "worldview_luoxiaohei_v4.db"
+    world_db.parent.mkdir(parents=True, exist_ok=True)
+    world = sqlite3.connect(world_db)
+    world.executescript("""
+        CREATE TABLE characters (
+            id INTEGER PRIMARY KEY, name TEXT, aliases TEXT DEFAULT '', category TEXT DEFAULT '',
+            merged_to TEXT, completeness INTEGER DEFAULT 8, type TEXT DEFAULT '',
+            thumb_path TEXT, avatar_id INTEGER
+        );
+        CREATE TABLE character_images (
+            id INTEGER PRIMARY KEY, character_id INTEGER, image_path TEXT, image_type TEXT,
+            description TEXT, sort_order INTEGER
+        );
+        INSERT INTO characters(id, name, category, completeness, type)
+            VALUES (1, '测试角色', '官方角色', 8, '主角');
+        CREATE VIEW v_character_gallery AS
+            SELECT id, name, aliases, category, merged_to, completeness, type,
+                   thumb_path, avatar_id FROM characters;
+    """)
+    world.commit()
+    world.close()
+    (root / "assets" / "罗小黑战记数据库" / "images").mkdir(parents=True, exist_ok=True)
+    (runtime / "assets" / "uploads").mkdir(parents=True, exist_ok=True)
     # Runtime data may come from DATA_ROOT, but served code must come from this
     # candidate. The portal server resolves modules under its runtime root.
-    modules = CODE_ROOT / "server" / "app" / "modules"
-    if modules.is_dir():
-        _link(modules, root / "server" / "app" / "modules")
-        links.append(root / "server" / "app" / "modules")
+    modules = CODE_ROOT / ".releases" / "candidate" / "modules"
+    if not modules.is_dir():
+        raise RuntimeError("Build candidate modules first: npm run build:modules")
+    _link(modules, root / "server" / "app" / "modules")
+    links.append(root / "server" / "app" / "modules")
     # The homepage handler reads / and /assets/homepage from RUNTIME_DIR. Seed
     # that part of the isolated root from the candidate, excluding runtime data.
     candidate_www = CODE_ROOT / "portal" / "www"
@@ -72,7 +96,7 @@ def cleanup(root, links):
 
 CHECKS = [
     ("iridescently.xyz", "/", 302),
-    ("iridescently.xyz", "/gallery.html", 200),
+    ("iridescently.xyz", "/gallery.html", 404),
     ("iridescently.xyz", "/connections.html", 200),
     ("iridescently.xyz", "/styles/connections.css", 200),
     ("iridescently.xyz", "/scripts/connections.js", 200),
@@ -122,8 +146,7 @@ CHECKS = [
     ("iridescently.xyz", "/app/modules/juling/", 200),
     ("iridescently.xyz", "/app/modules/slay/", 200),
     ("iridescently.xyz", "/app/modules/aeon/", 200),
-    # 世界地图尚未发布到香港，暂时跳过；世界地图正式上线时恢复下一行
-    # ("iridescently.xyz", "/app/modules/world-map/", 200),
+    ("iridescently.xyz", "/app/modules/world-map/", 200),
     ("iridescently.xyz", "/management/index.html", 308),
     ("iridescently.xyz", "/management/index.html?embed=1", 200),
     ("iridescently.xyz", "/ecology/index.html", 200),
@@ -174,8 +197,10 @@ def main():
     isolated = None
     isolated = isolated_root()
     env["IRIDESCENTLY_PROJECT_ROOT"] = str(isolated[0])
+    server_log = isolated[0] / "portal-server.log"
+    log_stream = server_log.open("wb")
     proc = subprocess.Popen([sys.executable, str(HERE / "portal_server.py")], env=env,
-                            stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+                            stdout=log_stream, stderr=subprocess.STDOUT)
     total = len(CHECKS) + 3
     fails = 0
     try:
@@ -195,9 +220,9 @@ def main():
             data = json.loads(body)
             assert "logged_in" in data
             print("PASS  sso-user JSON 字段完整")
-        except Exception:  # noqa: BLE001
+        except Exception as error:  # noqa: BLE001
             fails += 1
-            print("FAIL  sso-user JSON:", body[:80])
+            print("FAIL  sso-user JSON:", body[:80], error)
         st, body = req("iridescently.xyz", "/api/site-status")
         try:
             data = json.loads(body)
@@ -208,7 +233,7 @@ def main():
             fails += 1
             print("FAIL  site-status JSON:", body[:100])
         _, body = req("zszm.iridescently.xyz", "/ecology/index.html")
-        if body == (HERE / "app/modules/ecology/index.html").read_bytes():
+        if body == (CODE_ROOT / ".releases" / "candidate" / "modules" / "ecology" / "index.html").read_bytes():
             print("PASS  zszm ecology response matches the candidate file byte-for-byte")
         else:
             fails += 1
@@ -222,6 +247,10 @@ def main():
         except subprocess.TimeoutExpired:
             proc.kill()
             proc.wait(timeout=5)
+        log_stream.close()
+        if fails:
+            print("\nLocal portal diagnostics:")
+            print(server_log.read_text(encoding="utf-8", errors="replace")[-6000:])
         if isolated:
             cleanup(*isolated)
 

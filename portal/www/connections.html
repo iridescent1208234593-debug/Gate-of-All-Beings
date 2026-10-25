@@ -10,11 +10,15 @@
     />
     <link rel="canonical" href="https://iridescently.xyz/connections.html" />
     <link rel="icon" href="/favicon.png" />
-    <link rel="stylesheet" href="./styles/connections.css?v=20261021-tl" />
+    <script>
+      (function(){try{var m=document.cookie.match(/(?:^|;\s*)hx_theme=(light|dark|auto)/);var p=m?m[1]:'auto';document.documentElement.dataset.theme=p==='auto'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;}catch(e){}})();
+    </script>
+    <link rel="stylesheet" href="./styles/connections.css?v=20261025-theme" />
     <title>连接与鸣谢 · Iridescently</title>
   </head>
   <body>
-    <script src="/shared/shared-ui/site-nav.js?v=20261018-nav" data-tone="light"></script>
+    <script>document.addEventListener('xthemechange', function(event){var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',event.detail.resolved==='dark'?'#10171a':'#f1e9d9');});</script>
+    <script src="/shared/shared-ui/site-nav.js?v=20261025-navfix" data-theme-enabled></script>
 
     <main class="connections">
       <header class="connections-intro">

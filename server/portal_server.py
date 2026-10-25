@@ -25,7 +25,8 @@ from urllib.parse import parse_qs, urlsplit
 from pathlib import Path
 
 PORT = int(os.environ.get("PORT", "8080"))
-HOST = "127.0.0.1"
+# Default loopback-only; set HOST=0.0.0.0 to expose on the LAN.
+HOST = os.environ.get("HOST", "127.0.0.1").strip() or "127.0.0.1"
 ENVIRONMENT = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip().lower()
 PRODUCTION_HOSTS = frozenset({
     "iridescently.xyz", "www.iridescently.xyz", "huiguan.iridescently.xyz",
@@ -121,7 +122,9 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
             conn.request(method, path, body=body, headers=headers)
             resp = conn.getresponse()
             data = resp.read()
-        except OSError as e:
+        except (OSError, http.client.HTTPException) as e:
+            # HTTPException：上游返回畸形响应（BadStatusLine 等）时抛出，
+            # 不捕获会击穿 BaseHTTPRequestHandler 直接炸掉处理线程。
             self.send_error(502, "upstream unavailable: %s" % e)
             return
         finally:
@@ -282,9 +285,6 @@ def route(host, path):
         return StaticHandler, {"root": str(APP_DIR), "strip": "/app"}
     if p == "/app/modules" or p.startswith("/app/modules/"):
         return StaticHandler, {"root": str(MODULES_DIR), "strip": "/app/modules"}
-    # Embedded modules and shared resources must win before the Cards SPA fallback.
-    if p.startswith("/shared/"):
-        return StaticHandler, {"root": str(CODE_ROOT / "shared"), "strip": "/shared"}
     # The shooter lives in the main site's static tree, not the Cards SPA.
     if p == "/playtest/shengsheng-shoot" or p.startswith("/playtest/shengsheng-shoot/"):
         return www.Handler, {}
@@ -366,7 +366,7 @@ class Dispatcher(www.Handler):
 
 
 if __name__ == "__main__":
-    print(f"portal 统一入口启动: http://127.0.0.1:{PORT}", flush=True)
+    print(f"portal 统一入口启动: http://{HOST}:{PORT}", flush=True)
     class _Server(http.server.ThreadingHTTPServer):
         daemon_threads = True
         request_queue_size = 1024  # default backlog of 5 drops connections under a signup burst

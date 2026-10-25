@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import {
+  createReadStream,
   cpSync,
   existsSync,
   mkdirSync,
@@ -123,6 +124,13 @@ if (build.status !== 0) process.exit(build.status ?? 1);
 const manifest = await discoverGallery(galleryDir);
 if (manifest.length === 0)
   throw new Error(`No supported Gallery images found in ${galleryDir}`);
+const gallerySourceHash = createHash("sha256");
+for (const asset of manifest) {
+  gallerySourceHash.update(asset.name, "utf8").update("\0");
+  for await (const chunk of createReadStream(path.join(galleryDir, ...asset.name.split("/")))) {
+    gallerySourceHash.update(chunk);
+  }
+}
 
 const builtHomepagePath = path.join(stageDir, "homepage.html");
 const builtHomepage = readFileSync(builtHomepagePath, "utf8");
@@ -157,7 +165,15 @@ for (const entry of readdirSync(stageDir, { withFileTypes: true })) {
   });
 }
 writeFileSync(path.join(homepageCandidate, "index.html"), versionedHomepage);
-await recordCandidate("homepage");
+await recordCandidate("homepage", {
+  externalAssets: [{
+    name: "seasonal-gallery-source",
+    source: process.env.GALLERY_DIR ? "GALLERY_DIR (external asset directory)" : "assets/罗小黑战记数据库/罗小黑节气贺图（gallery素材）",
+    directory: path.basename(galleryDir),
+    fileCount: manifest.length,
+    sha256: gallerySourceHash.digest("hex"),
+  }],
+});
 
 console.log(
   galleryUsesCdn

@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { ThumbsDown, ThumbsUp } from 'lucide-react';
-import { ArrowUpRight, ArrowRight, BookOpen, Sprout, PenLine, Trophy, Map as MapIcon } from 'lucide-react';
+import { ArrowUpRight, ArrowRight, BookOpen, ScrollText, Sprout, PenLine, Trophy, Map as MapIcon } from 'lucide-react';
 import { leaderboardUrl } from '@lxh/shared-session/progress.js';
 import portal from '../../../../portal.json';
 import shore from './previews/shore.webp';
@@ -161,8 +161,8 @@ function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNa
     onMouseEnter: () => setActive(true), onMouseLeave: () => setActive(false),
     onFocus: () => setActive(true), onBlur: () => setActive(false),
   };
-  return game.view ? <button type="button" {...props} onClick={() => onNavigate(game.view!)}>{content}</button>
-    : <a {...props} href={`/app/shell/m/${game.key}`}>{content}</a>;
+  if (game.view) return <button type="button" {...props} onClick={() => onNavigate(game.view!)}>{content}</button>;
+  return <a {...props} href={`/app/shell/m/${game.key}`}>{content}</a>;
 }
 
 /** portal.json decides which independent modes are published; the hall owns order and presentation. */

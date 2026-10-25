@@ -277,7 +277,17 @@ def db():
 def init_user_db():
     with DB_LOCK:
         conn = db()
-        conn.execute("PRAGMA journal_mode=WAL")  # readers no longer block on the writer; persists in the file
+        # journal_mode 是持久属性，这里只设置一次（启动期，有 DB_LOCK 保护）。
+        # 注意：本机 Windows 的 SQLite 构建（3.53.1）WAL 并发写有缺陷（-shm 映射
+        # 竞态导致 "attempt to write a readonly database"，见 server/gallery_interactions.py
+        # 中 _init_journal_mode 的注释）。注册/登录属于低频写、读多写少，
+        # Windows 上退回回滚日志模式更稳；非 Windows 保留 WAL。
+        import sys as _sys
+        if _sys.platform == "win32":
+            if conn.execute("PRAGMA journal_mode").fetchone()[0].lower() != "delete":
+                conn.execute("PRAGMA journal_mode=DELETE")
+        else:
+            conn.execute("PRAGMA journal_mode=WAL")  # readers no longer block on the writer; persists in the file
         init_security_schema(conn)
         init_email_schema(conn)
         init_recovery_schema(conn)
@@ -339,6 +349,20 @@ def init_user_db():
                 created_at TEXT
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS executor_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_kind TEXT NOT NULL,
+                user_uid TEXT NOT NULL,
+                user_name TEXT DEFAULT '',
+                message TEXT DEFAULT '',
+                status TEXT DEFAULT 'pending',
+                created_at TEXT DEFAULT (datetime('now','localtime')),
+                reviewed_by TEXT DEFAULT '',
+                reviewed_at TEXT
+            )
+        """)
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_executor_requests_pending ON executor_requests(user_kind, user_uid, status)")
         # 角色模型升级：注册默认执行者，旧 'user' 迁移为 'executor'
         conn.execute("UPDATE local_users SET role='executor' WHERE role='user'")
         # 改名冷却字段（3 天一次）
@@ -358,6 +382,12 @@ def init_user_db():
         for tbl in ("local_users", "user_flags"):
             if "edit_role" not in {r[1] for r in conn.execute(f"PRAGMA table_info({tbl})")}:
                 conn.execute(f"ALTER TABLE {tbl} ADD COLUMN edit_role TEXT DEFAULT 'none'")
+        for tbl in ("local_users", "user_flags"):
+            columns = {row[1] for row in conn.execute(f"PRAGMA table_info({tbl})")}
+            if "group_confirmed" not in columns:
+                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN group_confirmed INTEGER DEFAULT 0")
+            if "group_nickname" not in columns:
+                conn.execute(f"ALTER TABLE {tbl} ADD COLUMN group_nickname TEXT DEFAULT ''")
         # 豁免权限字段（突破年龄 / 突破技能选择），批准后置 1
         for tbl in ("local_users", "user_flags"):
             for col in ("exempt_age", "exempt_skill"):
@@ -2095,7 +2125,9 @@ class Handler(BaseStaticHandler):
             asset_url = store_avatar_image(*image)
         except ValueError as error:
             self._json(400, {"error": str(error)}); return
-        self._json(200, {"ok": True, "avatar_asset_id": asset_url})
+        # Upload clients need the durable path to persist it in a character record.
+        # Other API responses still expose opaque, permission-checked preview URLs.
+        self._json(200, {"ok": True, "avatar_asset_id": asset_url}, sanitize_images=False)
 
     # ---------- /api/user ----------
     def _api_user(self):
@@ -4470,7 +4502,8 @@ class Handler(BaseStaticHandler):
         image = body.pop("_image_file", None)
         if not image:
             self._json(400, {"error": "缺少图片文件"}); return
-        self._json(200, {"ok": True, "url": store_image(*image)})
+        # The editor uploads this path and then saves it as durable character data.
+        self._json(200, {"ok": True, "url": store_image(*image)}, sanitize_images=False)
 
     def _poster_row_out(self, r):
         d = dict(r)
@@ -5063,8 +5096,9 @@ class Handler(BaseStaticHandler):
     def _static_allowed(self, path):
         return _base_static_allowed(path)
 
-    def _json(self, status, data, cookie=None):
-        data = _sanitize_json_image_sources(data)
+    def _json(self, status, data, cookie=None, *, sanitize_images=True):
+        if sanitize_images:
+            data = _sanitize_json_image_sources(data)
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
         accept = (self.headers.get("Accept-Encoding") or "")
         use_gzip = "gzip" in accept and len(body) > 1024
