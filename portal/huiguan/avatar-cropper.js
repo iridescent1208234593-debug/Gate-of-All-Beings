@@ -18,6 +18,8 @@
       const zoom = overlay.querySelector('input[type=range]');
       const square = overlay.querySelector('.avatar-cropper__square');
       const circle = overlay.querySelector('.avatar-cropper__circle');
+      const confirm = overlay.querySelector('[data-action=confirm]');
+      confirm.disabled = true;
       const ctx = stage.getContext('2d');
       const img = new Image();
       let scale = 1, x = 0, y = 0, base = 1, stageSize = 0, drag = null, active = true, objectUrl = null;
@@ -81,24 +83,24 @@
       stage.addEventListener('wheel', event => { event.preventDefault(); applyZoom(scale * (event.deltaY < 0 ? 1.06 : 0.94)); }, { passive: false });
       overlay.addEventListener('click', event => { if (event.target === overlay) finish(null); });
       overlay.querySelector('[data-action=cancel]').addEventListener('click', () => finish(null));
-      overlay.querySelector('[data-action=confirm]').addEventListener('click', () => {
-        if (!active) return;
+      confirm.addEventListener('click', () => {
+        if (!active || !img.naturalWidth || !stageSize) return;
         const out = document.createElement('canvas'); out.width = out.height = 512;
         const crop = cropRect();
         out.getContext('2d').drawImage(img, (0 - crop.left) / (base * scale), (0 - crop.top) / (base * scale), stageSize / (base * scale), stageSize / (base * scale), 0, 0, out.width, out.height);
-        out.toBlob(blob => blob ? finish(blob) : reject(new Error('头像裁切失败')), 'image/png');
+        out.toBlob(blob => { if (!active) return; if (blob) finish(blob); else { cleanup(); reject(new Error('头像裁切失败')); } }, 'image/png');
       });
       window.addEventListener('keydown', onKey);
       const loadSource = async () => {
         if (source instanceof Blob) objectUrl = URL.createObjectURL(source);
         else {
-          const response = await fetch(source, { mode: 'cors', credentials: 'omit' });
+          const response = await fetch(source, { mode: 'cors', credentials: 'same-origin' });
           if (!response.ok) throw new Error('图片无法读取');
           objectUrl = URL.createObjectURL(await response.blob());
         }
         if (active) img.src = objectUrl;
       };
-      img.onload = () => { draw(); panel.querySelector('button').focus(); };
+      img.onload = () => { if (!active) return; draw(); confirm.disabled = false; panel.querySelector('button').focus(); };
       img.onerror = () => { cleanup(); if (objectUrl) URL.revokeObjectURL(objectUrl); reject(new Error('无法读取此图片')); };
       loadSource().catch(error => { cleanup(); reject(error); });
       window.addEventListener('resize', draw);

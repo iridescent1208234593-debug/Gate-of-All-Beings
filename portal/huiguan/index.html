@@ -679,7 +679,7 @@
   .auth-legacy .auth-hint { margin: 6px 0 0; }
 </style>
 <link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261015-1">
-<link rel="stylesheet" href="/homepage.css?v=20261021-sub3">
+<link rel="stylesheet" href="/homepage.css?v=20261025-form-layout">
 <link rel="preload" as="script" href="/design-system/ui/lxh-intro.js?v=20261015-1">
 <link rel="preload" as="script" href="/assets/gate/gate-scene.js?v=20261009-6">
 <link rel="preload" as="script" href="/homepage.js?v=20261016-1">
@@ -1189,18 +1189,19 @@
         </div>
         <div id="imgGallery" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
         <div class="oc-avatar-editor" aria-labelledby="ocAvatarHeading">
-          <div class="oc-avatar-editor__preview"><img id="ocAvatarPreview" alt="OC 头像预览" hidden><span id="ocAvatarFallback" aria-hidden="true">人设</span></div>
+          <div class="oc-avatar-editor__preview" id="ocAvatarFrame"><img id="ocAvatarPreview" alt="OC 头像预览" hidden><span id="ocAvatarFallback" aria-hidden="true">人设</span></div>
           <div class="oc-avatar-editor__body">
             <strong id="ocAvatarHeading">这份 OC 的独立头像</strong>
-            <p>从本 OC 的设定图中选择，或上传后裁切。不会使用或修改账户头像。</p>
+            <p>点下方设定图，或上传一张图片，裁切后用作这份 OC 的头像。不会修改账户头像。</p>
             <div id="ocAvatarCandidates" class="oc-avatar-editor__candidates" aria-label="从已有图片选择头像"></div>
             <div class="oc-avatar-editor__actions">
-              <button type="button" class="btn-edit" onclick="document.getElementById('ocAvatarInput').click()">上传并裁切</button>
-              <button type="button" class="btn-edit" onclick="setOCAvatarShape('square')" aria-pressed="true" id="ocAvatarSquare">方形显示</button>
-              <button type="button" class="btn-edit" onclick="setOCAvatarShape('circle')" aria-pressed="false" id="ocAvatarCircle">圆形显示</button>
-              <button type="button" class="btn-del" onclick="clearOCAvatar()">删除头像</button>
+              <button type="button" class="btn-edit" id="ocAvatarUpload" onclick="document.getElementById('ocAvatarInput').click()">上传并裁切</button>
+              <button type="button" class="btn-edit" onclick="setOCAvatarShape('square')" aria-pressed="false" id="ocAvatarSquare" disabled>方形显示</button>
+              <button type="button" class="btn-edit" onclick="setOCAvatarShape('circle')" aria-pressed="true" id="ocAvatarCircle" disabled>圆形显示</button>
+              <button type="button" class="btn-del" id="ocAvatarRemove" onclick="clearOCAvatar()" disabled>删除头像</button>
               <input type="file" id="ocAvatarInput" accept="image/png,image/jpeg,image/webp,image/gif" hidden onchange="handleOCAvatarFile(event)">
             </div>
+            <p id="ocAvatarStatus" class="oc-avatar-editor__status" role="status" aria-live="polite">尚未选择头像。请先点设定图或上传图片。</p>
           </div>
         </div>
         <div class="haibao-entry">
@@ -1217,11 +1218,13 @@
           <a class="ability-detail-link" href="#ability-detail-section" onclick="document.getElementById('ability-detail-section').open = true" title="展开本栏能力详解">能力详解 ↓</a>
         </span>
       </h2>
-      <div class="ability-guidance hint">
+      <p class="ability-intro hint">先选系别，再选分支技能；不填写能力也可以继续登记。</p>
+      <details class="ability-guidance hint">
+        <summary>选择规则与身份说明 <span>点按展开</span></summary>
         <p><strong>基础与身份</strong>妖精默认具备御灵基础，系别特化可选。未登录御灵系最多选 1 系，年龄上限 450 岁；注册后默认成为执行者，御灵系可选 2 系。长老在执行者基础上，年龄上限提升至 1500 岁，需申请并经馆长批准；也可免申请成为荣誉长老，或写下理由成为妖王，同样可达 1500 岁。</p>
         <p><strong>系别与技能</strong>最多可再选两个大系。空间系只能选一个特殊能力，其他系别最多选两个能力。双系合璧技能（如画灵＝造物×生灵）占用两个大系、计 2 个分支名额。</p>
         <p><strong>特殊限制</strong>治愈系与空间系互斥。选治愈系后，生灵系还可再选 1 个分支，其他大系分支不可选；名额受限时会自动取消治愈系。选择治愈系或空间系后会弹出限定提示。</p>
-      </div>
+      </details>
 
       <div class="ability-panel">
         <!-- 御灵系 - 必选 -->
@@ -1237,7 +1240,7 @@
           <label id="breakSkillWrap" style="display:none;margin-top:8px;"><input type="checkbox" id="breakSkill" onchange="applyLimits()"> 突破选择限制（已获批：解除御灵系/大系/分支数量、空间系限1、治愈与空间互斥等所有限制，可自由选择）</label>
           <div class="elder-option">
             <div class="role-line" id="roleLine">身份加载中…</div>
-            <div class="hint">执行者御灵系可选 2 系；长老在执行者基础上年龄上限提升至 1500 岁，需申请并经馆长批准，或由管理员直接设置；荣誉长老 / 妖王可在页面中直接选择。</div>
+            <details class="role-guidance hint"><summary>查看身份与年龄说明</summary><p>执行者御灵系可选 2 系；长老在执行者基础上年龄上限提升至 1500 岁，需申请并经馆长批准，或由管理员直接设置；荣誉长老 / 妖王可在页面中直接选择。</p></details>
           </div>
           <!-- 御灵系自定义分支 -->
           <div class="branch-custom-row" id="royalCustomRow" style="margin-top:10px;display:none;">
@@ -1248,7 +1251,8 @@
 
         <!-- 额外系别 - 最多选1个 -->
         <div class="ability-cat">
-          <div class="ability-cat-title">额外大系 <span style="color:var(--text-dim);font-size:11px;">（最多再选 2 个；若选治愈系则另一个大系仅 1 个分支）</span></div>
+          <div class="ability-cat-title">额外大系</div>
+          <p class="ability-field-hint hint">最多再选 2 个。选治愈系时，另一个大系仅可选 1 个分支。</p>
           <div class="check-group" id="extraSystems">
             <label><input type="checkbox" name="extra_sys" value="生灵系" onchange="onExtraSystemChange()"><span>生灵系</span></label>
             <label><input type="checkbox" name="extra_sys" value="造物系" onchange="onExtraSystemChange()"><span>造物系</span></label>
@@ -1262,12 +1266,12 @@
         <div id="extraBranchesContainer"></div>
 
         <!-- 双系合璧技能 -->
-        <div class="ability-cat" style="margin-top:14px;">
-          <div class="ability-cat-title" style="display:flex;align-items:center;gap:8px;">
+        <div class="ability-cat combo-category" style="margin-top:14px;">
+          <div class="ability-cat-title">
             <span>双系合璧技能</span>
-            <span style="color:var(--text-dim);font-size:11px;">（一个技能占用两个大系、计 2 个分支名额）</span>
             <button type="button" id="comboCustomToggle" onclick="toggleComboCustom()" style="margin-left:auto;font-size:11px;color:var(--accent);background:none;border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;">＋ 自设合璧</button>
           </div>
+          <p class="ability-field-hint hint">一个技能占用两个大系，计 2 个分支名额。</p>
           <div class="ability-branches" id="comboPresets"></div>
           <div id="comboCustomWrap" style="display:none;">
             <div class="branch-custom-row combo-row" style="margin-top:8px;">
@@ -1412,8 +1416,8 @@
 <script src="/image-upload.js?v=20261024-2"></script>
 <script src="/reactions-fx.js?v=20261018"></script>
 <script src="/group-reminder.js?v=20261018-2"></script>
-<link rel="stylesheet" href="/avatar-cropper.css">
-<script src="/avatar-cropper.js?v=20261017"></script>
+<link rel="stylesheet" href="/avatar-cropper.css?v=20261025-controls">
+<script src="/avatar-cropper.js?v=20261025-controls"></script>
 <script src="/character-colors.js?v=20261013"></script>
 <script>
 const STORAGE_KEY = 'luoxiaohei_characters';
@@ -2187,9 +2191,9 @@ function renderExtraBranches() {
     html += `<div class="ability-cat" style="margin-top:12px;">
       <div class="ability-cat-title">${sys}分支技能 <span class="branch-requirement">（至少选一项）</span></div>
       <div class="ability-branches">${comboChips}${branchChecks}</div>
-      <div class="branch-custom-row combo-row" style="margin-top:8px;">
-        <span class="branch-preset-label">自定义分支技能</span>
-        <input type="text" placeholder="自定义${sys}分支技能名称" style="flex:1;" data-custom-branch="${sys}" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomBranch('${sys}')}">
+      <div class="branch-custom-row branch-entry" style="margin-top:8px;">
+        <label class="branch-preset-label" for="customBranch_${sys}">自定义分支技能</label>
+        <input type="text" id="customBranch_${sys}" placeholder="输入${sys}技能名称" style="flex:1;" data-custom-branch="${sys}" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomBranch('${sys}')}">
         <button type="button" onclick="addCustomBranch('${sys}')">添加</button>
       </div>
       <div id="cbTags_${sys}" style="margin-top:4px;"></div>
@@ -2478,21 +2482,32 @@ let imageList = [];
 let ocAvatarAsset = '';
 let ocAvatarDisplayShape = 'circle';
 let ocAvatarPreviewUrl = '';
+let ocAvatarBusy = false;
 function setOCAvatarShape(shape) {
+  if (!ocAvatarAsset && !ocAvatarPreviewUrl) return;
   ocAvatarDisplayShape = shape === 'square' ? 'square' : 'circle';
-  document.getElementById('ocAvatarSquare').setAttribute('aria-pressed', String(ocAvatarDisplayShape === 'square'));
-  document.getElementById('ocAvatarCircle').setAttribute('aria-pressed', String(ocAvatarDisplayShape === 'circle'));
-  renderOCAvatarPreview();
+  renderOCAvatarPreview('已切换为' + (ocAvatarDisplayShape === 'square' ? '方形' : '圆形') + '头像。');
 }
-function renderOCAvatarPreview() {
+function renderOCAvatarPreview(message) {
   const img = document.getElementById('ocAvatarPreview');
   const fallback = document.getElementById('ocAvatarFallback');
   if (!img || !fallback) return;
   const source = ocAvatarPreviewUrl || ocAvatarAsset;
   img.hidden = !source;
   fallback.hidden = !!source;
-  img.style.borderRadius = ocAvatarDisplayShape === 'circle' ? '50%' : '6px';
-  img.src = source || '';
+  const radius = ocAvatarDisplayShape === 'circle' ? '50%' : '6px';
+  img.style.borderRadius = radius;
+  document.getElementById('ocAvatarFrame').style.borderRadius = radius;
+  if (source) img.src = source; else img.removeAttribute('src');
+  for (const [id, shape] of [['ocAvatarSquare', 'square'], ['ocAvatarCircle', 'circle']]) {
+    const button = document.getElementById(id);
+    button.disabled = !source || ocAvatarBusy;
+    button.setAttribute('aria-pressed', String(ocAvatarDisplayShape === shape));
+  }
+  document.getElementById('ocAvatarRemove').disabled = !source || ocAvatarBusy;
+  document.getElementById('ocAvatarUpload').disabled = ocAvatarBusy;
+  document.querySelectorAll('.oc-avatar-candidate').forEach(button => { button.disabled = ocAvatarBusy; });
+  document.getElementById('ocAvatarStatus').textContent = message || (source ? '头像已就绪，可以切换形状或重新裁切。' : '尚未选择头像。请先点设定图或上传图片。');
 }
 function renderOCAvatarCandidates() {
   const root = document.getElementById('ocAvatarCandidates');
@@ -2500,7 +2515,7 @@ function renderOCAvatarCandidates() {
   root.replaceChildren();
   if (!imageList.length) return;
   const label = document.createElement('span');
-  label.textContent = '从已有图片选择头像：'; root.appendChild(label);
+  label.textContent = '点一张设定图裁切头像：'; root.appendChild(label);
   imageList.forEach((source, index) => {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'oc-avatar-candidate';
     button.setAttribute('aria-label', `裁切第 ${index + 1} 张人设图作为头像`);
@@ -2509,14 +2524,25 @@ function renderOCAvatarCandidates() {
   });
 }
 async function cropOCAvatar(source) {
+  if (ocAvatarBusy) return;
   if (!window.HuiguanAvatarCropper) { showToast('error', '头像裁切器暂不可用，请刷新后重试。'); return; }
+  ocAvatarBusy = true;
+  renderOCAvatarPreview('正在裁切头像，请在弹窗中确认或取消。');
+  let message = '';
   try {
     const blob = await window.HuiguanAvatarCropper.open(source);
     if (!blob) return;
-    const reader = new FileReader();
-    reader.onload = () => { ocAvatarAsset = String(reader.result); if (ocAvatarPreviewUrl) URL.revokeObjectURL(ocAvatarPreviewUrl); ocAvatarPreviewUrl = URL.createObjectURL(blob); renderOCAvatarPreview(); };
-    reader.readAsDataURL(blob);
-  } catch (error) { showToast('error', error.message || '头像图片处理失败'); }
+    const dataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(new Error('头像图片读取失败，请重试。'));
+      reader.readAsDataURL(blob);
+    });
+    ocAvatarAsset = dataUrl;
+    if (ocAvatarPreviewUrl) URL.revokeObjectURL(ocAvatarPreviewUrl);
+    ocAvatarPreviewUrl = URL.createObjectURL(blob);
+  } catch (error) { message = error.message || '头像图片处理失败'; showToast('error', message); }
+  finally { ocAvatarBusy = false; renderOCAvatarPreview(message); }
 }
 function handleOCAvatarFile(event) {
   const file = event.target.files && event.target.files[0]; event.target.value = '';
@@ -2525,7 +2551,7 @@ function handleOCAvatarFile(event) {
 function clearOCAvatar() {
   ocAvatarAsset = '';
   if (ocAvatarPreviewUrl) URL.revokeObjectURL(ocAvatarPreviewUrl);
-  ocAvatarPreviewUrl = ''; renderOCAvatarPreview();
+  ocAvatarPreviewUrl = ''; renderOCAvatarPreview('头像已移除。可重新选择设定图或上传图片。');
 }
 function handleImage(e) {
   const files = Array.from(e.target.files || []);
@@ -4173,6 +4199,7 @@ function fillFormFromData(c) {
   }
   // 图片：沿用原图（多张），可重新上传/删除
   imageList = Array.isArray(c.images) && c.images.length ? c.images.slice() : (c.image ? [c.image] : []);
+  clearOCAvatar();
   ocAvatarAsset = c.avatar_asset_id || '';
   ocAvatarDisplayShape = c.avatar_display_shape === 'square' ? 'square' : 'circle';
   renderOCAvatarPreview();

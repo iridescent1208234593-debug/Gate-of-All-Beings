@@ -68,6 +68,8 @@
 
 每条 OC 仍保存在 `characters.json` 原有角色记录的 `data` 中，原有 `species_type` / `species_detail` 不变；新增 `data.avatar_asset_id` 和 `data.avatar_display_shape` (`square` / `circle`) 是可选字段，旧 OC 缺省时继续用原封面或首字 fallback。设定图候选由用户选择并进入同一 1:1 裁切器，不自动选择或裁切。替换 / 清空头像不会立即删资源：上传目录还被角色图、海报、展示页和跨模块引用共用，当前没有可证明全站无引用的垃圾回收器，因此保留内容寻址文件以避免破坏其他内容。
 
+头像未选择时，形状与删除按钮禁用并显示操作提示；裁切确认后才启用。方形 / 圆形同步改变图片与外框，编辑其他角色时清理旧的临时预览引用。同源图片裁切保留现有登录凭据，图片加载完成后才可确认；取消或失败保留原头像。`npm run test:huiguan-avatar` 检查这些状态与读取行为。手机能力栏采用两列选项、全宽字段标签和「输入 + 添加」行，长规则及身份说明可折叠；配色变量与角色数据规则保持原样。
+
 众生之门 Identity 位于相同 `account_profiles` 行的 `gate_identity_json`，结构带 `schema_version: 1`，包含 `display_name`、自由文本 `species_name`、独立 `avatar_asset_id`、`avatar_frame_id`、`avatar_mode` 与可选 `source_oc_id`。登录账户读取已签名的 `hx_sso` cookie，再用 `(kind, uid)` 解析会馆账户；从自己的 OC 导入必须用户主动确认，只复制名称、`species_type + species_detail` 和头像引用，之后编辑只写 Gate Identity，不回写 OC。匿名形象仅存当前标签页 `sessionStorage`。头像引用指向不可变内容文件，三种资料的可变字段和记录彼此分离。
 
 相关接口：`GET /api/user` 和 `/api/sso-user` 返回 `account_avatar_url`；`POST /api/account/avatar` 更新 / 清除账户头像；`POST /api/avatars/upload` 供已登录用户上传 OC 头像；`GET /api/user/ocs` 返回本人 OC 候选。众生之门使用 Cards 服务的 `GET /api/gate/identity`、`POST /api/gate/identity`、`GET /api/gate/ocs`，登录态只认共享 `hx_sso`；Cards 自己的旧 OAuth `/api/login` 返回 410，不创建第二个账户状态。

@@ -274,6 +274,13 @@
 #charForm .hint { font-size: 11px; line-height: 1.75; }
 #charForm .ability-guidance { margin: 0 0 16px; font-size: 11px; }
 #charForm .ability-guidance p { margin: 0 0 7px; }
+#charForm .ability-intro { margin: 0 0 8px; }
+#charForm .ability-guidance > summary { min-height: 40px; padding: 8px 0; cursor: pointer; font-size: 12px; }
+#charForm .ability-guidance > summary span { margin-left: 8px; font-size: 11px; }
+#charForm .ability-guidance[open] > summary { margin-bottom: 8px; }
+#charForm .role-guidance > summary { min-height: 32px; padding: 5px 0; cursor: pointer; }
+#charForm .role-guidance p { margin: 6px 0 0; }
+#charForm .ability-field-hint { margin: -2px 0 10px; letter-spacing: 0; }
 #charForm .ability-guidance strong { display: inline-block; margin-right: 8px; color: var(--text); font-weight: 500; }
 #charForm .ability-section > h2 > span:last-child { flex-wrap: wrap; }
 #charForm .ability-cat-title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; }
@@ -285,9 +292,37 @@
 #charForm .ability-explanations .ad-desc { font-size: 12px; line-height: 1.8; }
 #charForm .form-row > label { line-height: 1.6; }
 @media (max-width: 600px) {
-  #charForm .branch-custom-row { flex-wrap: wrap; }
-  #charForm .branch-custom-row input { min-width: 130px; }
+  #charForm .section { padding: 20px 14px; }
+  #charForm .section h2 { gap: 6px; line-height: 1.5; letter-spacing: 1px; }
+  #charForm .ability-section > h2 > span:last-child { flex-basis: 100%; margin-top: 6px; justify-content: flex-start; }
+  #charForm .ability-section h2 .btn-elder-apply { margin-left: 0; }
+  #charForm .form-row { margin-bottom: 20px; }
+  #charForm .form-row > label { margin-bottom: 8px; }
+  #charForm :is(input[type="text"], input[type="number"], select, textarea) { min-width: 0; min-height: 44px; font-size: 16px !important; line-height: 1.5; }
+  #charForm .row-flex { display: grid; grid-template-columns: minmax(0,1fr); gap: 10px; }
+  #charForm .hint { line-height: 1.8; }
+  #charForm .ability-panel { padding: 12px; }
+  #charForm .ability-cat { margin-bottom: 24px; }
+  #charForm .ability-cat-title { line-height: 1.65; margin-bottom: 10px; letter-spacing: .5px; }
+  #charForm :is(.ability-branches, #extraSystems) { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; padding-left: 0; }
+  #charForm :is(.ability-branches, #extraSystems) label { min-width: 0; min-height: 44px; margin: 0; padding: 8px !important; gap: 6px; font-size: 12px !important; line-height: 1.5; letter-spacing: 0; }
+  #charForm :is(.ability-branches, #extraSystems) input { width: 17px; height: 17px; flex: 0 0 17px; margin: 0; }
+  #charForm :is(.ability-branches, #extraSystems) label span { min-width: 0; overflow-wrap: anywhere; }
+  #charForm .elder-option { gap: 8px; padding: 12px; margin-top: 12px; }
+  #charForm .role-line { line-height: 1.8; }
+  #charForm .role-line .btn-elder-apply { display: block; width: fit-content; min-height: 36px; margin: 8px 0 0; }
+  #charForm .branch-custom-row { flex-wrap: wrap; gap: 8px; padding: 10px; }
+  #charForm .branch-custom-row input { min-width: 0; padding: 9px 10px !important; }
   #charForm .branch-preset-label { white-space: nowrap; }
+  #charForm .branch-custom-row > .branch-preset-label { flex-basis: 100%; margin: 0; }
+  #charForm .branch-entry { display: grid; grid-template-columns: minmax(0,1fr) auto; }
+  #charForm .branch-entry > .branch-preset-label { grid-column: 1/-1; }
+  #charForm .branch-entry button { min-height: 44px; padding: 8px 12px; font: inherit; white-space: nowrap; }
+  #charForm .combo-row > input { flex-basis: 100%; }
+  #charForm .combo-row > select { flex: 1 1 35%; width: auto; }
+  #charForm .combo-row > button { min-height: 44px; padding: 8px 12px; }
+  #charForm .ability-guidance strong { display: block; margin: 0 0 3px; }
+  #charForm .ability-guidance p { margin-bottom: 12px; }
   #charForm .ability-explanations > summary span { display: block; margin: 5px 0 0 16px; }
 }
 /* The homepage uses the overlay variant of the shared site bar; only the cream toggle needs fitting. */

@@ -1,4 +1,4 @@
-.avatar-cropper{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:16px;background:rgba(20,25,22,.72)}
+.avatar-cropper{position:fixed;inset:0;z-index:10020;display:grid;place-items:center;padding:16px;background:rgba(20,25,22,.72)}
 .avatar-cropper__panel{width:min(100%,430px);max-height:min(94dvh,760px);overflow:auto;padding:22px;border:1px solid var(--qc-border,#c8c2b1);border-radius:12px;background:var(--qc-panel,#faf7ef);color:var(--qc-text,#344239);box-shadow:0 20px 70px #0005}
 .avatar-cropper__panel h2{margin:0 0 5px;font-size:18px}.avatar-cropper__panel p{margin:0 0 14px;color:var(--qc-muted,#758176);font-size:13px}
 .avatar-cropper__stage{display:block;width:min(100%,340px);aspect-ratio:1;margin:auto;background:#252925;touch-action:none;cursor:grab;border-radius:4px}.avatar-cropper__stage:active{cursor:grabbing}
@@ -16,4 +16,9 @@
 .oc-avatar-candidate{width:42px;height:42px;padding:0;overflow:hidden;border:1px solid var(--border,#d4cfbe);border-radius:5px;background:none;cursor:pointer}
 .oc-avatar-candidate img{width:100%;height:100%;object-fit:cover}
 .oc-avatar-editor__actions button[aria-pressed="true"]{outline:2px solid var(--accent,#5a9e8f)}
-@media(max-width:520px){.oc-avatar-editor{gap:9px;padding:9px}.oc-avatar-editor__preview{width:54px;height:54px}.oc-avatar-editor__actions button{min-height:38px}}
+.oc-avatar-editor__actions button{min-height:40px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);font:inherit;font-size:12px;cursor:pointer}
+.oc-avatar-editor__actions button:disabled,.oc-avatar-candidate:disabled{opacity:.45;cursor:default}
+.oc-avatar-editor__actions button:focus-visible,.oc-avatar-candidate:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.oc-avatar-editor__body>.oc-avatar-editor__status{margin:9px 0 0}
+.oc-avatar-editor__preview [hidden]{display:none}
+@media(max-width:520px){.oc-avatar-editor{display:grid;grid-template-columns:54px minmax(0,1fr);gap:10px;padding:12px}.oc-avatar-editor__preview{width:54px;height:54px}.oc-avatar-editor__body{display:contents}.oc-avatar-editor__body>strong{align-self:center;font-size:14px}.oc-avatar-editor__body>p,.oc-avatar-editor__candidates,.oc-avatar-editor__actions{grid-column:1/-1}.oc-avatar-editor__body>p{font-size:12px;line-height:1.7}.oc-avatar-editor__candidates>span{flex-basis:100%}.oc-avatar-editor__actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.oc-avatar-editor__actions button{min-height:44px;width:100%;font-size:13px}.oc-avatar-candidate{width:48px;height:48px}}
