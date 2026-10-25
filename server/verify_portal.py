@@ -3,8 +3,8 @@
 
 用法：python server/verify_portal.py      （默认 PORT=8080）
 
-默认在空的临时数据根下运行。门户可在此创建空测试数据库；验证器不会读取或复制
-生产 users.db、用户存档或本地密钥配置。只读内容目录及候选代码以链接/副本接入。
+默认在初始化后的临时 test 存储下运行。不会读取或复制真实数据库、上传或密钥。
+模块从显式配置的外部候选目录只读接入，代码始终来自当前 checkout。
 """
 import http.client
 import json
@@ -17,6 +17,8 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from storage_paths import release_root, initialize_storage, storage_layout
+from site_domains import ALLOWED_ROOTS
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -26,24 +28,29 @@ HERE = Path(__file__).resolve().parent
 CODE_ROOT = HERE.parent
 
 
-def _link(target, link):
-    link.parent.mkdir(parents=True, exist_ok=True)
-    if os.name == "nt":
-        subprocess.run(["cmd", "/c", "mklink", "/J", str(link), str(target)], check=True,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    else:
-        os.symlink(target, link, target_is_directory=True)
-
-
 def isolated_root():
-    """Build a throwaway data root; returns (path, links) for cleanup()."""
+    """Build external fixture storage and return its explicit child environment."""
+    modules = Path(os.environ.get("IRIDESCENTLY_MODULES_ROOT", str(release_root() / "candidate" / "modules"))).resolve()
+    if not modules.is_dir():
+        raise RuntimeError("Build external candidate modules first: npm run build:modules")
     root = Path(tempfile.mkdtemp(prefix="verify-portal-"))
-    runtime = root / "portal" / "huiguan"
-    runtime.mkdir(parents=True)
-    links = []
+    environment = {key: value for key, value in os.environ.items()
+                   if not (key.startswith("IRIDESCENTLY_") and key.endswith("_ROOT"))}
+    environment.update(IRIDESCENTLY_ENVIRONMENT="test", IRIDESCENTLY_STORAGE_ROOT=str(root),
+                       IRIDESCENTLY_PROJECT_ROOT=str(CODE_ROOT), IRIDESCENTLY_MODULES_ROOT=str(modules),
+                       IRIDESCENTLY_SSO_SECRET="isolated-portal-fixture-secret")
+    original = dict(os.environ)
+    try:
+        os.environ.clear()
+        os.environ.update(environment)
+        initialize_storage()
+        layout = storage_layout()
+    finally:
+        os.environ.clear()
+        os.environ.update(original)
     # Build a minimal, deterministic read-only worldview fixture. Tests never
     # mount the production database or uploaded user images.
-    world_db = root / "assets" / "罗小黑战记数据库" / "db" / "worldview_luoxiaohei_v4.db"
+    world_db = layout["data"] / "worldview" / "worldview_luoxiaohei_v4.db"
     world_db.parent.mkdir(parents=True, exist_ok=True)
     world = sqlite3.connect(world_db)
     world.executescript("""
@@ -64,35 +71,9 @@ def isolated_root():
     """)
     world.commit()
     world.close()
-    (root / "assets" / "罗小黑战记数据库" / "images").mkdir(parents=True, exist_ok=True)
-    (runtime / "assets" / "uploads").mkdir(parents=True, exist_ok=True)
-    # Runtime data may come from DATA_ROOT, but served code must come from this
-    # candidate. The portal server resolves modules under its runtime root.
-    modules = CODE_ROOT / ".releases" / "candidate" / "modules"
-    if not modules.is_dir():
-        raise RuntimeError("Build candidate modules first: npm run build:modules")
-    _link(modules, root / "server" / "app" / "modules")
-    links.append(root / "server" / "app" / "modules")
-    # The homepage handler reads / and /assets/homepage from RUNTIME_DIR. Seed
-    # that part of the isolated root from the candidate, excluding runtime data.
-    candidate_www = CODE_ROOT / "portal" / "www"
-    if candidate_www.is_dir():
-        shutil.copytree(
-            candidate_www,
-            root / "portal" / "www",
-            ignore=shutil.ignore_patterns("gallery-files", "links.json", "thanks.json"),
-        )
-    return root, links
-
-
-def cleanup(root, links):
-    # Remove links first so deleting the temporary tree can never reach their targets.
-    for link in links:
-        if os.name == "nt":
-            os.rmdir(link)
-        else:
-            os.unlink(link)
-    shutil.rmtree(root, ignore_errors=True)
+    (layout["assets"] / "managed" / "worldview" / "images").mkdir(parents=True, exist_ok=True)
+    (layout["assets"] / "managed" / "huiguan" / "uploads").mkdir(parents=True, exist_ok=True)
+    return root, environment, modules
 
 
 def select_port():
@@ -109,6 +90,11 @@ def select_port():
 
 
 PORT = select_port()
+# Every approved root runs the same contract; the list below is written once for the template root.
+TEMPLATE_ROOT = "iridescently.xyz"
+ROOTS = [root for root in os.environ.get("VERIFY_PORTAL_ROOTS", ",".join(ALLOWED_ROOTS)).split(",") if root]
+if not ROOTS or any(root not in ALLOWED_ROOTS for root in ROOTS):
+    raise SystemExit("VERIFY_PORTAL_ROOTS must list approved roots")
 
 CHECKS = [
     ("iridescently.xyz", "/", 302),
@@ -179,6 +165,20 @@ CHECKS = [
     ("huiguan.iridescently.xyz", "/users.DB", 404),
     ("huiguan.iridescently.xyz", "/game_saves%2ejson", 404),
 ]
+# Unapproved authorities stay closed regardless of which roots are enabled.
+REJECTED_HOSTS = ["evil.example", "iridescently.xyz.evil.example", "zszm.iridescently.cn.evil.example",
+                  "evil-iridescently.cn", "dpdns.org", "x.zszm.iridescently.dpdns.org", "127.0.0.2",
+                  "iridescently.xyz.", "*.iridescently.cn", "zszm.iridescently.xyz:8443"]
+# Legacy hosts and the apex redirect inside their own root, never to another registrable domain.
+REDIRECTS = [("{root}", "/", "https://huiguan.{root}/"), ("game.{root}", "/", "https://zszm.{root}/#home"),
+             ("lingjing.{root}", "/", "https://zszm.{root}/#management"),
+             ("juling.{root}", "/", "https://zszm.{root}/app/shell/m/juling")]
+
+
+def root_checks():
+    for root in ROOTS:
+        for host, path, expect in CHECKS:
+            yield host.replace(TEMPLATE_ROOT, root), path, expect
 
 
 def wait(port, proc, timeout=25):
@@ -194,13 +194,13 @@ def wait(port, proc, timeout=25):
     return False
 
 
-def req(host, path):
+def req(host, path, full=False):
     c = http.client.HTTPConnection("127.0.0.1", PORT, timeout=10)
     try:
         c.request("GET", path, headers={"Host": host, "X-Forwarded-Proto": "https"})
         r = c.getresponse()
         body = r.read()
-        return r.status, body
+        return (r.status, body, r.headers) if full else (r.status, body)
     finally:
         c.close()
 
@@ -210,22 +210,19 @@ def main():
         if probe.connect_ex(("127.0.0.1", PORT)) == 0:
             print("FAIL: requested test port is already in use", PORT)
             return 1
-    env = {**os.environ, "PORT": str(PORT)}
-    env["PYTHONIOENCODING"] = "utf-8"
-    isolated = None
     isolated = isolated_root()
-    env["IRIDESCENTLY_PROJECT_ROOT"] = str(isolated[0])
+    env = {**isolated[1], "PORT": str(PORT), "PYTHONIOENCODING": "utf-8", "PYTHONDONTWRITEBYTECODE": "1"}
     server_log = isolated[0] / "portal-server.log"
     log_stream = server_log.open("wb")
     proc = subprocess.Popen([sys.executable, str(HERE / "portal_server.py")], env=env,
                             stdout=log_stream, stderr=subprocess.STDOUT)
-    total = len(CHECKS) + 3
+    total = len(CHECKS) * len(ROOTS) + len(REJECTED_HOSTS) + len(REDIRECTS) * len(ROOTS) + len(ROOTS) + 3
     fails = 0
     try:
         if not wait(PORT, proc):
             print("FAIL: portal_server 未在端口就绪", PORT)
             return 1
-        for host, path, expect in CHECKS:
+        for host, path, expect in root_checks():
             try:
                 st, _ = req(host, path)
             except Exception as e:  # noqa: BLE001
@@ -233,6 +230,25 @@ def main():
             ok = st == expect
             fails += 0 if ok else 1
             print("%s  %s%s -> %s (want %s)" % ("PASS" if ok else "FAIL", host, path, st, expect))
+        for host in REJECTED_HOSTS:
+            try:
+                st, _ = req(host, "/")
+            except Exception as e:  # noqa: BLE001
+                st = "ERR:%s" % e
+            fails += 0 if st == 421 else 1
+            print("%s  unapproved Host %r -> %s (want 421)" % ("PASS" if st == 421 else "FAIL", host, st))
+        for root in ROOTS:
+            for host, path, location in REDIRECTS:
+                st, _, headers = req(host.format(root=root), path, full=True)
+                ok = st in (302, 308) and headers.get("Location") == location.format(root=root)
+                fails += 0 if ok else 1
+                print("%s  %s%s -> %s %s" % ("PASS" if ok else "FAIL", host.format(root=root), path, st, headers.get("Location")))
+            _, _, headers = req("zszm." + root, "/", full=True)
+            policy = headers.get("Content-Security-Policy-Report-Only", "")
+            foreign = [other for other in ALLOWED_ROOTS if other != root and other in policy]
+            ok = ("https://zszm." + root) in policy and not foreign
+            fails += 0 if ok else 1
+            print("%s  CSP for %s names only its own root%s" % ("PASS" if ok else "FAIL", root, "" if ok else " %r" % foreign))
         st, body = req("iridescently.xyz", "/api/sso-user")
         try:
             data = json.loads(body)
@@ -251,7 +267,7 @@ def main():
             fails += 1
             print("FAIL  site-status JSON:", body[:100])
         _, body = req("zszm.iridescently.xyz", "/ecology/index.html")
-        if body == (CODE_ROOT / ".releases" / "candidate" / "modules" / "ecology" / "index.html").read_bytes():
+        if body == (isolated[2] / "ecology" / "index.html").read_bytes():
             print("PASS  zszm ecology response matches the candidate file byte-for-byte")
         else:
             fails += 1
@@ -270,7 +286,7 @@ def main():
             print("\nLocal portal diagnostics:")
             print(server_log.read_text(encoding="utf-8", errors="replace")[-6000:])
         if isolated:
-            cleanup(*isolated)
+            shutil.rmtree(isolated[0], ignore_errors=True)
 
 
 if __name__ == "__main__":

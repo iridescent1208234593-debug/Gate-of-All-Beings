@@ -13,25 +13,20 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { candidateRoot, releaseRoot, recordCandidate } from "../../../scripts/release-artifacts.mjs";
+import runtimePaths from "../../../server/runtime-paths.cjs";
 
 const homepageRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
 const projectRoot = path.resolve(homepageRoot, "../..");
-const operationsRoot = path.resolve(
-  process.env.IRIDESCENTLY_OPS_ROOT || "E:/External Projects/Iridescently Operations",
-);
 const galleryRoot = path.join(
   projectRoot,
   "portal/www/gallery-engine",
 );
-const galleryDir =
-  process.env.GALLERY_DIR ||
-  path.join(
-    projectRoot,
-    "assets/罗小黑战记数据库/罗小黑节气贺图（gallery素材）",
-  );
+const galleryDir = process.env.GALLERY_DIR || path.join(
+  runtimePaths.assetsRoot, "source/罗小黑战记数据库/罗小黑节气贺图（gallery素材）",
+);
 const stageDir = path.join(releaseRoot, ".work/homepage");
 const homepageCandidate = path.join(candidateRoot, "homepage");
 const publicDir = path.join(homepageCandidate, "assets/homepage");
@@ -42,11 +37,11 @@ const viteNodeModule = path.join(
   "node_modules/vite/dist/node/index.js",
 );
 const galleryPluginModule = path.join(galleryRoot, "gallery-plugin.js");
-const previewDir = path.join(releaseRoot, ".work", "gallery-previews");
+const previewDir = path.join(runtimePaths.cacheRoot, "homepage", "gallery-previews");
 const operationsEnv = {
   ...process.env,
   IRIDESCENTLY_PROJECT_ROOT: projectRoot,
-  IRIDESCENTLY_OPS_ROOT: operationsRoot,
+  GALLERY_DIR: galleryDir,
   GALLERY_PREVIEW_DIR: previewDir,
 };
 const [{ loadEnv }, { resolveGalleryAssetBase, discoverGallery }] =
@@ -84,7 +79,7 @@ function runVite(args) {
     [viteBin, ...args, "--config", viteConfig],
     {
       cwd: homepageRoot,
-      env: { ...process.env, GALLERY_PREVIEW_DIR: previewDir },
+      env: { ...operationsEnv, GALLERY_PREVIEW_DIR: previewDir },
       stdio: "inherit",
     },
   );
@@ -93,7 +88,7 @@ function runVite(args) {
 if (process.argv.includes("--dev")) {
   const previews = spawnSync(
     process.execPath,
-    [path.join(operationsRoot, "build-gallery-previews.mjs")],
+    [path.join(projectRoot, "scripts/build-gallery-previews.mjs")],
     { cwd: projectRoot, stdio: "inherit", env: operationsEnv },
   );
   if (previews.error) throw previews.error;
@@ -111,7 +106,7 @@ rmSync(homepageCandidate, { recursive: true, force: true });
 
 const previews = spawnSync(
   process.execPath,
-  [path.join(operationsRoot, "build-gallery-previews.mjs")],
+  [path.join(projectRoot, "scripts/build-gallery-previews.mjs")],
   { cwd: projectRoot, stdio: "inherit", env: operationsEnv },
 );
 if (previews.error) throw previews.error;
@@ -181,4 +176,4 @@ console.log(
     ? `[homepage] Candidate: ${manifest.length} Gallery preview CDN references; originals stay in the persistent server asset library behind the authenticated API. Upload gallery-previews before publishing.`
     : `[homepage] Candidate: ${manifest.length} locally served WebP previews; original images stay in the persistent server asset library behind the authenticated API.`,
 );
-console.log(`[homepage] ${homepageCandidate} — run npm run publish:homepage only after review.`);
+console.log(`[homepage] ${homepageCandidate} — seal it with the site and modules candidates via npm run release:seal.`);

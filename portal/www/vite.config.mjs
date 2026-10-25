@@ -1,5 +1,8 @@
+const siteDomains = createRequire(import.meta.url)('../../shared/site-domains.js');
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
+const runtimePaths = createRequire(import.meta.url)("../../server/runtime-paths.cjs");
 
 const homepageRoot = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(homepageRoot, "../..");
@@ -40,8 +43,8 @@ export default ({ command }) => ({
     externalGallery(
       process.env.GALLERY_DIR ||
         path.join(
-          projectRoot,
-          "assets/罗小黑战记数据库/罗小黑节气贺图（gallery素材）",
+          runtimePaths.assetsRoot,
+          "source/罗小黑战记数据库/罗小黑节气贺图（gallery素材）",
         ),
     ),
     ...(command === "serve" ? [homepageDevRoute] : []),
@@ -56,7 +59,7 @@ export default ({ command }) => ({
     ],
   },
   build: {
-    outDir: path.join(projectRoot, ".releases/.work/homepage"),
+    outDir: path.join(runtimePaths.releaseRoot, ".work/homepage"),
     assetsDir: "",
     cssCodeSplit: false,
     emptyOutDir: true,
@@ -72,7 +75,7 @@ export default ({ command }) => ({
       },
     },
   },
-  server: {
+  server: { allowedHosts: siteDomains.allowedHosts,
     host: "127.0.0.1",
     port: 5173,
     strictPort: true,

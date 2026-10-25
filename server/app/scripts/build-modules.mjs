@@ -1,4 +1,4 @@
-// 构建候选到 .releases/candidate/modules/；显式 publish 才更新运行目录。
+// Build into the external environment release root; publishing is separate.
 // - 已并入源码的 Vite 模块从 server/app/src 构建
 // - 其余游戏从 games/ 构建或拷贝；静态站必要时修正根绝对链接
 // 用法：node server/app/scripts/build-modules.mjs
@@ -13,7 +13,7 @@ const srcRoot = path.join(appDir, 'src');
 const outRoot = path.join(candidateRoot, 'modules');
 rmSync(path.join(candidateRoot, 'modules.json'), { force: true });
 // A module-only build cannot leave an older homepage candidate eligible for
-// the combined `publish:modules` release.
+// the next sealed release.
 rmSync(path.join(candidateRoot, 'homepage.json'), { force: true });
 rmSync(path.join(candidateRoot, 'homepage'), { recursive: true, force: true });
 reset(outRoot);
@@ -100,4 +100,4 @@ if (slayImageSource) {
 }
 
 await recordCandidate('modules', { buildCommand: 'npm run build:modules' });
-console.log(`[modules] Candidate ready: ${outRoot} — run npm run build:homepage before the combined npm run publish:modules release.`);
+console.log(`[modules] Candidate ready: ${outRoot} — run npm run build:homepage and npm run build:site, then npm run release:seal.`);

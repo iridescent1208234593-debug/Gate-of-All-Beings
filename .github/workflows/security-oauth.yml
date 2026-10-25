@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [zszm-batch-20261021]
   push:
-    branches: [codex/batch3-integration-candidate]
+    branches: [codex/batch3-integration-candidate, codex/batch6-asset-data-architecture]
 
 permissions:
   contents: read
@@ -13,6 +13,10 @@ jobs:
   security-oauth:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Every build and test step uses disposable storage; CI never sees production data.
+    env:
+      IRIDESCENTLY_ENVIRONMENT: test
+      IRIDESCENTLY_STORAGE_ROOT: ${{ runner.temp }}/iridescently-storage
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -31,14 +35,8 @@ jobs:
       - run: npm ci --prefix server/app/src/cards
       - run: npx playwright install --with-deps chromium
 
-      - name: Server unit and security tests
-        run: python -m unittest discover -s server -p 'test_*.py' -v
-      - name: Huiguan Python tests (one module per process)
-        shell: bash
-        run: |
-          for test_file in portal/huiguan/tests/test_*.py; do
-            python -m unittest discover -s portal/huiguan/tests -p "$(basename "$test_file")" -v
-          done
+      - name: Python, storage, domain and release contract tests (one module per process)
+        run: python scripts/check-batch6.py --report "$RUNNER_TEMP/batch6-checks.json"
       - name: Install gallery preview encoder
         run: |
           sudo apt-get update
@@ -79,7 +77,9 @@ jobs:
             console.log(`${name}: ${record.sourceRepository} ${record.sourceBranch}@${record.sourceHead} (${Object.keys(record.files).length} hashed files)`);
           }
           NODE
-      - name: Portal host routing and API regression
+      - name: Built candidates contain no unreviewed own-domain URLs
+        run: python scripts/check-domain-hardcodes.py "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate"
+      - name: Portal host routing and API regression on every approved root
         run: npm run test:portal
       - name: OAuth return URL allowlist
         run: npm run test:huiguan-auth-next
