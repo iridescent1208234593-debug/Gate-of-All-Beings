@@ -33,7 +33,8 @@
     "update:assets": "node scripts/run-ops.mjs update.mjs assets",
     "update": "node scripts/run-ops.mjs update.mjs",
     "build:site": "node scripts/run-ops.mjs build-site.mjs",
-    "publish:site": "node scripts/run-ops.mjs publish-release.mjs site"
+    "publish:site": "node scripts/run-ops.mjs publish-release.mjs site",
+    "test:huiguan-image-upload": "node portal/huiguan/tests/image-upload-contract.cjs"
   },
   "devDependencies": {
     "playwright": "^1.64.1",
