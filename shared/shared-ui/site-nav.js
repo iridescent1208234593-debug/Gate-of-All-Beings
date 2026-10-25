@@ -69,6 +69,20 @@
     '#qc-nav .auth-bar>a,#qc-nav .auth-bar>button,#qc-nav .auth-bar>span{display:inline-flex;align-items:center;min-height:32px;white-space:nowrap}',
     '#qc-nav .auth-bar>a:first-child:last-child{padding:0 12px;border:1px solid var(--qc-edge);border-radius:999px;background:var(--qc-hover);color:var(--qc-mark)}',
     '#qc-nav .site-language-toggle{min-height:30px;padding:0 10px;border:1px solid var(--qc-edge);border-radius:999px;background:transparent;color:inherit;font:12px/1 system-ui,sans-serif;cursor:pointer}',
+    '#qc-nav .qc-theme{position:relative;display:flex;align-items:center}',
+    '#qc-nav .qc-theme>button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:1px solid var(--qc-edge);border-radius:999px;background:transparent;color:inherit;cursor:pointer;transition:background .15s}',
+    '#qc-nav .qc-theme>button:hover{background:var(--qc-hover)}',
+    '#qc-nav .qc-theme>button svg{width:16px;height:16px;display:block}',
+    '#qc-nav .qc-theme-panel{position:absolute;right:0;top:calc(100% + 8px);z-index:1;min-width:210px;padding:10px 12px;background:var(--qc-panel);border:1px solid var(--qc-edge);border-radius:12px;box-shadow:inset 0 1px 0 var(--qc-hi),0 14px 34px rgba(4,16,11,.22);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);text-align:left}',
+    '#qc-nav .qc-theme-seg{display:flex;gap:6px}',
+    '#qc-nav .qc-theme-opt{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:0 10px;border:1px solid var(--qc-edge);border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer;transition:background .15s,border-color .15s}',
+    '#qc-nav .qc-theme-opt:hover{background:var(--qc-hover)}',
+    '#qc-nav .qc-theme-opt.is-active{border-color:var(--qc-mark);background:var(--qc-hover)}',
+    '#qc-nav .qc-theme-opt svg{width:14px;height:14px}',
+    '#qc-nav .qc-theme-panel[hidden]{display:none}',
+    '#qc-nav .qc-theme-follow{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;white-space:nowrap}',
+    '#qc-nav .qc-theme-follow input{width:15px;height:15px;margin:0;accent-color:var(--qc-mark)}',
+    '#qc-nav .qc-theme-hint{margin:7px 0 0;color:var(--qc-sub);font-size:11px;line-height:1.6}',
     '#qc-nav :where(a,button,summary):focus-visible{outline:2px solid var(--qc-mark);outline-offset:2px;border-radius:4px}',
     '@media(max-width:720px){',
     '#qc-nav{gap:4px;padding:0 8px;font-size:13px}',
@@ -80,6 +94,7 @@
     '#qc-nav .qc-more>summary::after{margin:-4px 0 0;width:7px;height:7px}',
     '#qc-nav .qc-more-panel{position:fixed;left:8px;right:8px;top:calc(var(--qc-nav-h) + 4px);max-width:none}',
     '#qc-nav .qc-right{gap:6px}',
+    '#qc-nav .qc-theme-panel{position:fixed;right:8px;left:auto;top:calc(var(--qc-nav-h) + 4px);min-width:190px}',
     '#qc-nav .auth-bar :is(.role-tag,.lv-tag,.sync-status,.email-reminder){display:none}',
     '#qc-nav .auth-bar>span{display:none}',
     '#qc-nav .site-language-toggle{padding:0 8px}',
@@ -118,7 +133,9 @@
     document.querySelectorAll('.topnav, .ip-footer').forEach(function (node) { node.remove(); });
     var nav = el('nav'); nav.id = 'qc-nav'; nav.setAttribute('aria-label', '站点导航');
     if (options.variant === 'overlay') nav.dataset.variant = 'overlay';
-    if (options.tone === 'light') nav.dataset.tone = 'light';
+    // 声明了 data-theme-enabled 的页面由主题控件接管 tone；未声明的保持手动指定（向后兼容）。
+    if (options.theme) nav.dataset.themeControl = '';
+    else if (options.tone === 'light') nav.dataset.tone = 'light';
     var brand = el('a', 'qc-brand'); brand.href = ORIGIN + '/'; brand.setAttribute('aria-label', 'Iridescently 节气画廊');
     brand.innerHTML = '<img src="' + MARK + '" width="26" height="26" alt=""><span>Iridescently</span>';
     nav.appendChild(brand);
@@ -176,7 +193,7 @@
     nav.addEventListener('click', click);
     document.addEventListener('pointerdown', closeMenu);
     document.addEventListener('keydown', closeMenu);
-    state = { nav: nav, slot: slot, cleanup: function () {
+    state = { nav: nav, slot: slot, right: right, cleanup: function () {
       observer.disconnect(); nav.removeEventListener('click', click);
       document.removeEventListener('pointerdown', closeMenu); document.removeEventListener('keydown', closeMenu);
       if (!overlay) document.body.style.paddingTop = previousPadding;
@@ -187,6 +204,22 @@
       var language = el('script'); language.src = ORIGIN + '/assets/site-language.js?v=20261017-nav';
       language.dataset.siteLanguage = ''; document.head.appendChild(language);
     }
+    // 主题控件等 theme.js 加载完成再挂（脚本注入是异步的，直接挂会拿不到 window.XTheme）。
+    // 先试同源（主站/众生之门都部署了 shared/），404 再回退主域集中资源（会馆等子站）。
+    if (options.theme) {
+      var themeReady = function () { if (state && state.right === right) buildThemeControl(right, nav); };
+      if (window.XTheme) themeReady();
+      else {
+        var THEME_SRC = '/shared/shared-ui/theme.js?v=20261025';
+        var loadTheme = function (src, fallback) {
+          var tag = el('script'); tag.src = src; tag.dataset.siteTheme = '';
+          tag.addEventListener('load', themeReady);
+          if (fallback) tag.addEventListener('error', function () { tag.remove(); loadTheme(fallback, null); });
+          document.head.appendChild(tag);
+        };
+        loadTheme(THEME_SRC, ORIGIN + THEME_SRC);
+      }
+    }
     if (host === 'iridescently.xyz') showStatus(nav);
     if (!window.__HUIGUAN_OWN_AUTH) loadAccount(auth);
     return nav;
@@ -195,6 +228,59 @@
   function unmount() {
     if (!state) return;
     state.cleanup(); state.nav.remove(); state = null;
+  }
+
+  var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>';
+  var MOON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.6 14.8A8.9 8.9 0 0 1 9.2 3.4a.5.5 0 0 0-.65-.6 9.4 9.4 0 1 0 12.65 12.65.5.5 0 0 0-.6-.65z"/></svg>';
+
+  /** 主题设置弹层（仅声明 data-theme-enabled 的页面挂载）：
+   *  按钮打开面板 → 两态分段选择（浅色/深色）+ “跟随系统”开关；nav 玻璃 tone 跟随生效主题。 */
+  function buildThemeControl(right, nav) {
+    if (!window.XTheme) return;
+    var wrap = el('div', 'qc-theme');
+    var button = el('button'); button.type = 'button';
+    button.innerHTML = MOON;
+    var panel = el('div', 'qc-theme-panel'); panel.hidden = true;
+    var seg = el('div', 'qc-theme-seg');
+    var light = el('button', 'qc-theme-opt'); light.type = 'button';
+    light.innerHTML = SUN + '<span>浅色</span>';
+    var dark = el('button', 'qc-theme-opt'); dark.type = 'button';
+    dark.innerHTML = MOON + '<span>深色</span>';
+    seg.appendChild(light); seg.appendChild(dark);
+    var label = el('label', 'qc-theme-follow');
+    var checkbox = el('input'); checkbox.type = 'checkbox';
+    label.appendChild(checkbox); label.appendChild(el('span', '', '跟随系统'));
+    panel.appendChild(seg); panel.appendChild(label);
+    panel.appendChild(el('p', 'qc-theme-hint', '手动选择会覆盖系统偏好，设置在所有子站生效。'));
+    function render(event) {
+      var payload = event && event.detail;
+      var effective = payload ? payload.resolved : window.XTheme.resolved();
+      var darkNow = effective === 'dark';
+      button.innerHTML = darkNow ? MOON : SUN;
+      button.setAttribute('aria-label', '主题设置（当前' + (darkNow ? '深色' : '浅色') + '）');
+      light.classList.toggle('is-active', !darkNow);
+      dark.classList.toggle('is-active', darkNow);
+      light.setAttribute('aria-pressed', String(!darkNow));
+      dark.setAttribute('aria-pressed', String(darkNow));
+      checkbox.checked = window.XTheme.stored() === 'auto';
+      if (darkNow) delete nav.dataset.tone; else nav.dataset.tone = 'light';
+    }
+    light.addEventListener('click', function () { window.XTheme.set('light'); });
+    dark.addEventListener('click', function () { window.XTheme.set('dark'); });
+    checkbox.addEventListener('change', function () {
+      window.XTheme.set(checkbox.checked ? 'auto' : window.XTheme.resolved());
+    });
+    button.addEventListener('click', function () { panel.hidden = !panel.hidden; });
+    function closePanel(event) {
+      if (event.type === 'keydown' && event.key !== 'Escape') return;
+      if (panel.hidden || wrap.contains(event.target)) return;
+      panel.hidden = true;
+    }
+    document.addEventListener('pointerdown', closePanel);
+    document.addEventListener('keydown', closePanel);
+    document.addEventListener('xthemechange', render);
+    wrap.appendChild(button); wrap.appendChild(panel); right.appendChild(wrap);
+    render(null);
   }
 
   /** Online dots next to the other two sites; only the main host serves /api/site-status. */
@@ -236,7 +322,7 @@
   };
   var script = document.currentScript;
   if (script && !('manual' in script.dataset)) {
-    var start = function () { mount({ variant: script.dataset.variant, tone: script.dataset.tone }); };
+    var start = function () { mount({ variant: script.dataset.variant, tone: script.dataset.tone, theme: 'themeEnabled' in script.dataset }); };
     if (document.body) start(); else document.addEventListener('DOMContentLoaded', start, { once: true });
   }
 })();

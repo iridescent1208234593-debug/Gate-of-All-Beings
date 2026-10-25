@@ -3,19 +3,35 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#18242b" />
+    <meta name="theme-color" content="#f1e9d9" />
     <meta
       name="description"
       content="Iridescently 与开源项目、友站、创作者之间的连接与鸣谢。"
     />
     <link rel="canonical" href="https://iridescently.xyz/connections.html" />
     <link rel="icon" href="/favicon.png" />
-    <link rel="stylesheet" href="./styles/connections.css?v=20261020-credits" />
+    <script>
+      // 防闪烁：渲染前从 cookie（跨子站共享）或系统偏好定主题，逻辑与 shared-ui/theme.js 一致。
+      (function(){try{
+        var m=document.cookie.match(/(?:^|;\s*)hx_theme=(light|dark|auto)/);
+        var p=m?m[1]:'auto';
+        var t=p==='auto'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;
+        document.documentElement.dataset.theme=t;
+      }catch(e){}})();
+    </script>
+    <link rel="stylesheet" href="./styles/connections.css?v=20261025-theme" />
     <script src="https://www.paypal.com/sdk/js?client-id=BAANzCYUqeyO6SAVspz1OpVkuwmPe3jXm9f5GFAd_S5EiGXBdoa8dJjozlMO1m2tUIHdniugLIZeIv5zm8&components=hosted-buttons&disable-funding=venmo&currency=USD"></script>
     <title>连接与鸣谢 · Iridescently</title>
   </head>
   <body>
-    <script src="/shared/shared-ui/site-nav.js?v=20261018-nav" data-tone="light"></script>
+    <script>
+      // 状态栏/标题栏颜色跟随主题。
+      document.addEventListener('xthemechange', function (event) {
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', event.detail.resolved === 'dark' ? '#10171a' : '#f1e9d9');
+      });
+    </script>
+    <script src="/shared/shared-ui/site-nav.js?v=20261025-theme" data-theme-enabled></script>
 
     <main class="connections">
       <header class="connections-intro">

@@ -6,6 +6,19 @@ import "./style.css";
 type Theme = "light" | "dark";
 type MarkerBinding = { button: HTMLButtonElement; railButton?: HTMLButtonElement };
 
+// shared/shared-ui/theme.js 提供的全站主题内核（cookie 跨子站 + 跟随系统）。
+declare global {
+  interface Window {
+    XTheme?: {
+      stored(): "light" | "dark" | "auto";
+      resolved(): "light" | "dark";
+      set(preference: "light" | "dark" | "auto"): "light" | "dark";
+      toggleTwoState(): "light" | "dark";
+      migrateLegacy(key: string): void;
+    };
+  }
+}
+
 const TAU = Math.PI * 2;
 const RADIUS = 7.8;
 const MAP_ASPECT = MAP_SIZE.width / MAP_SIZE.height;
@@ -134,7 +147,9 @@ const gridMaterial = new THREE.MeshBasicMaterial({
 });
 ring.add(new THREE.Mesh(ringGeometry(RADIUS - 0.018), gridMaterial));
 
-let theme: Theme = localStorage.getItem("fantasy-map-theme") === "dark" ? "dark" : "light";
+// 初值由 head 内联脚本写入 <html data-theme>（cookie 偏好或系统偏好）；
+// 迁移与后续同步在下方 syncThemeCore() 完成。
+let theme: Theme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 function applyTheme() {
   document.documentElement.dataset.theme = theme;
   const dark = theme === "dark";
@@ -144,8 +159,29 @@ function applyTheme() {
   gridMaterial.color.set(dark ? 0x9bb1aa : 0x355c51);
   gridMaterial.opacity = dark ? 0.14 : 0.1;
   document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", dark ? "#07100f" : "#e8f0ed");
-  localStorage.setItem("fantasy-map-theme", theme);
   requestRender();
+}
+
+// 接入全站主题内核：旧 localStorage 偏好迁入 cookie，此后以 xthemechange 为准。
+const xtheme = window.XTheme;
+if (xtheme) {
+  xtheme.migrateLegacy("fantasy-map-theme");
+  const syncThemeCore = (event?: Event) => {
+    const detail = (event as CustomEvent<{ resolved: Theme }> | undefined)?.detail;
+    theme = detail ? detail.resolved : (xtheme.resolved() as Theme);
+    applyTheme();
+    if (themeAutoCheckbox) themeAutoCheckbox.checked = xtheme.stored() === "auto";
+  };
+  const themeAutoCheckbox = document.querySelector<HTMLInputElement>("#theme-auto input");
+  document.addEventListener("xthemechange", syncThemeCore);
+  themeButton.addEventListener("click", () => xtheme.toggleTwoState());
+  themeAutoCheckbox?.addEventListener("change", () => {
+    xtheme.set(themeAutoCheckbox.checked ? "auto" : xtheme.resolved());
+  });
+  syncThemeCore();
+} else {
+  // 主题内核不可用时退化为本页内两态切换（不持久化）。
+  themeButton.addEventListener("click", () => { theme = theme === "light" ? "dark" : "light"; applyTheme(); });
 }
 
 function nodeVector(node: AtlasNode) {
@@ -616,7 +652,6 @@ authorCopy.addEventListener("click", async () => {
   window.clearTimeout(toastTimer);
   toastTimer = window.setTimeout(() => authorToast.classList.remove("show"), 1800);
 });
-themeButton.addEventListener("click", () => { theme = theme === "light" ? "dark" : "light"; applyTheme(); });
 reducedMotion.addEventListener("change", requestRender);
 document.addEventListener("visibilitychange", () => {
   if (document.hidden && animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = 0; }
