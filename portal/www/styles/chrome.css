@@ -435,7 +435,8 @@
   z-index: 2;
   pointer-events: auto;
   right: max(24px, env(safe-area-inset-right));
-  bottom: max(82px, calc(env(safe-area-inset-bottom) + 76px));
+  /* 抬到右下 customizer 齿轮按钮（bottom 78 + 32px 高）上方，避免"不再显示"与其重叠 */
+  bottom: max(122px, calc(env(safe-area-inset-bottom) + 116px));
   display: grid;
   justify-items: end;
   gap: 5px;

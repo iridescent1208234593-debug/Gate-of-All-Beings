@@ -56,6 +56,7 @@
     '#qc-nav .qc-more>summary::after{content:"";width:6px;height:6px;margin:-3px 0 0 7px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(45deg);opacity:.7}',
     '#qc-nav .qc-more-panel{position:absolute;left:0;top:calc(100% + 6px);display:grid;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:72svh;overflow:auto;padding:8px;background:var(--qc-panel);border:1px solid var(--qc-edge);border-radius:12px;box-shadow:inset 0 1px 0 var(--qc-hi),0 14px 34px rgba(4,16,11,.22);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}',
     '#qc-nav .qc-more-panel>a,#qc-nav .qc-more-panel>details>summary{display:flex;align-items:center;gap:8px;padding:10px;border-radius:5px}',
+    '#qc-nav .qc-more-panel .qc-panel-site,#qc-nav .qc-more-panel .qc-panel-sites-head{display:none}',
     '#qc-nav .qc-more-panel>a:hover{background:var(--qc-hover)}',
     '#qc-nav .qc-more-panel>small{padding:8px 10px;color:var(--qc-sub);font-size:11px}',
     '#qc-nav .qc-copy{margin:6px 10px 8px;white-space:normal;font-size:12px;line-height:1.8;color:var(--qc-sub)}',
@@ -102,6 +103,7 @@
     '#qc-nav .auth-bar>a:first-child:last-child{padding:0 10px}',
     '}',
     '@media(max-width:380px){#qc-nav .qc-links>a{padding:0 5px}}',
+    '@media(max-width:420px){#qc-nav .qc-links>a{display:none}#qc-nav .qc-more>summary{font-size:inherit;padding:0 8px}#qc-nav .qc-more-panel .qc-panel-site{display:flex}#qc-nav .qc-more-panel .qc-panel-site[aria-current]{color:var(--qc-fg)}#qc-nav .qc-more-panel .qc-panel-sites-head{display:block}}',
     'body:has(#qc-nav) #QcAccountBar{display:none}',
     '@media(prefers-reduced-motion:reduce){#qc-nav *{transition:none}}'
   ].join('\n');
@@ -150,6 +152,14 @@
     var menu = el('details', 'qc-more');
     menu.innerHTML = '<summary aria-label="更多去处">更多</summary>';
     var panel = el('div', 'qc-more-panel');
+    // 窄屏（≤420px）下顶部站点链接收纳进面板，桌面端隐藏以避免重复。
+    panel.appendChild(el('small', 'qc-panel-sites-head', '站点'));
+    SITES.forEach(function (site) {
+      var link = el('a', 'qc-panel-site', site.label); link.href = href(site);
+      if (site.host === host) link.setAttribute('aria-current', 'page');
+      if (site.beta) link.appendChild(el('small', 'qc-beta', 'beta'));
+      panel.appendChild(link);
+    });
     MORE.forEach(function (item) {
       var link = el('a', '', item.label); link.href = href(item);
       if (item.unpublished) {

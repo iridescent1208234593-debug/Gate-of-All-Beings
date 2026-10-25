@@ -25,7 +25,8 @@ from urllib.parse import parse_qs, urlsplit
 from pathlib import Path
 
 PORT = int(os.environ.get("PORT", "8080"))
-HOST = "127.0.0.1"
+# Default loopback-only; set HOST=0.0.0.0 to expose on the LAN.
+HOST = os.environ.get("HOST", "127.0.0.1").strip() or "127.0.0.1"
 ENVIRONMENT = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip().lower()
 PRODUCTION_HOSTS = frozenset({
     "iridescently.xyz", "www.iridescently.xyz", "huiguan.iridescently.xyz",
@@ -369,7 +370,7 @@ class Dispatcher(www.Handler):
 
 
 if __name__ == "__main__":
-    print(f"portal 统一入口启动: http://127.0.0.1:{PORT}", flush=True)
+    print(f"portal 统一入口启动: http://{HOST}:{PORT}", flush=True)
     class _Server(http.server.ThreadingHTTPServer):
         daemon_threads = True
         request_queue_size = 1024  # default backlog of 5 drops connections under a signup burst

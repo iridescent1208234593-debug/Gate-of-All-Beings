@@ -128,8 +128,11 @@
   }
 
   .gallery-capacity-note {
+    /* 手机端底部同时有标签带、互动按钮、customizer 与分页控件，
+       提示统一移到头部下方右侧空白区，避开全部底部控件 */
+    top: calc(env(safe-area-inset-top) + 122px);
     right: max(14px, env(safe-area-inset-right));
-    bottom: max(67px, calc(env(safe-area-inset-bottom) + 60px));
+    bottom: auto;
     max-width: min(300px, calc(100vw - 28px));
     font-size: 9px;
   }
@@ -205,6 +208,13 @@
   .site-chrome {
     min-height: 66px;
     padding-top: calc(14px + env(safe-area-inset-top));
+  }
+
+  .gallery-capacity-note {
+    /* 横屏矮视口下同样避让左下标签带 */
+    right: max(14px, env(safe-area-inset-right));
+    bottom: calc(env(safe-area-inset-bottom) + 176px);
+    max-width: min(300px, calc(100vw - 28px));
   }
 
   .gallery-controls {
