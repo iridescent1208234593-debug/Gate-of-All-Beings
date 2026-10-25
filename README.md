@@ -36,37 +36,36 @@
 | `psyche.*` | 未正式并入，导航红点；不由此工作区启动 |
 | `*/ozmtree/` | 生物树可视化试用（OneZoom 改造，鳞翅目导入）；任意站点 Host 均可访问 |
 
-`/ozmtree/` 由 `server/portal_server.py` 的 `OZTREE_STATIC` 直接提供工作区外的静态目录 `E:\External Projects\众生之门生物树可视化前端\OZtree\static`，不经构建、候选或 `publish:site`，也不在源码快照内；换机部署需单独提供该目录，或改为显式发布。OZtree 自身源码、数据与许可见其仓库 README。
+同一份代码同时接受 `iridescently.xyz`、`iridescently.cn`、`iridescently.dpdns.org` 三个批准根域下的上述子域（集中配置 `shared/site-domains.json`）；每个根域独立登录、Cookie 与 CSP，`.xyz` 继续运行且不强制跳转。是否已有 DNS、证书与 OAuth 回调登记属于上线批次，见 [domain-readiness](docs/domain-readiness.md)。
+
+`/ozmtree/` 由 `server/portal_server.py` 的 `OZTREE_STATIC` 直接提供工作区外的静态目录 `E:\External Projects\众生之门生物树可视化前端\OZtree\static`，不经构建、候选或 Release，也不在源码快照内；换机部署需单独提供该目录，或改为显式发布。OZtree 自身源码、数据与许可见其仓库 README。
 
 API 上游：5174 Cards OAuth、5178 数值配置、5177 聚灵、4173 灵体 WebSocket/API。5178/4173 预览明确读取已发布模块；不是直接把源码 `dist` 上线。5173 的 Ecology 本地开发服务不属于生产，不能因端口存在就判为废弃。具体清单见网站管家 `SITES`。
 
 ## 构建、发布、启动
 
-构建与运维工具独立存放在 `E:\External Projects\Iridescently Operations`，不随主仓库提交。根目录的 `scripts/run-ops.mjs` 负责调用该目录中的正式脚本；若目录不在默认位置，设置 `IRIDESCENTLY_OPS_ROOT`。构建/发布命令仍须从本仓库根目录运行，确保候选产物、Git HEAD 和源码路径归属 `E:\Projects`。
+源码、持久数据、用户上传、派生缓存、构建候选、Release 与备份分别位于不同根目录，契约见 [存储与运行期写入方](docs/storage-runtime-writers.md) 和 [发布流程](docs/release-workflow.md)。`IRIDESCENTLY_STORAGE_ROOT` 选择外部存储父目录，`IRIDESCENTLY_ENVIRONMENT`（`development` / `staging` / `production` / `test`）选择其中相互隔离的环境；源码树、worktree 与 Release 目录永远不会被选为数据根，服务在缺少已验证的就绪标记时拒绝启动。
 
 ```powershell
 npm ci
-npm run build:modules       # 八模块和首页只写候选
-npm run build:cards         # 只构建众生之门前端候选
-npm run build:world-map     # 只构建世界地图候选
-npm run test:portal         # 默认 PORT=8080 被占用即拒绝；用 $env:PORT=18081 指定；数据根为临时副本
-npm run publish:modules    # 显式提升模块和首页
-npm run publish:cards      # 只更新众生之门前端模块
-npm run publish:world-map  # 只更新世界地图模块
-npm run build:site          # 从 Git HEAD 导出源码快照，排除密钥/数据
-npm run publish:site       # 显式提升静态/Python 源码
-# 网站管家入口：E:\External Projects\Iridescently Operations\网站恢复\打开网站管家.vbs
+npm run build:site        # Git HEAD 源码快照 → <releases>/candidate/site，排除数据、上传与密钥
+npm run build:release     # 八个模块 + 首页候选
+npm run release:seal      # 三个候选须来自同一干净提交；生成不可变 <releases>/store/<id> 并切换 channel
+npm run release:rollback -- <release-id>    # 只切换 channel，持久数据不变
+python scripts/local-runtime.py start       # 只在本机回环启动已封存 Release，不启动 Tunnel、不改 DNS
+python scripts/local-runtime.py status | stop
+python scripts/check-batch6.py --full --modules <candidate>/modules   # 回归，只使用临时 test 存储
 ```
 
-源码快照必须从审查后的提交构建；尚未提交的更改不会混入 `build:site`。门户/OAuth 由管家从 `.releases/production/site` 启动，`IRIDESCENTLY_PROJECT_ROOT` 指向原工作区运行数据。正式服务不读取候选目录。发布不会自动杀服务或修改 DNS。部署后记录与完整步骤见 [release-workflow](docs/release-workflow.md)。
+本机外部存储位于 `E:\External Projects\Iridescently Runtime\<environment>\{data,assets,cache,releases,backups}`。旧本地运行数据的迁移证据与可恢复原件在 `production\backups\batch6-migration-20261025`；只读复核：`python scripts/storage-migrate.py verify --manifest <该目录>\manifest.json`。`python scripts/backup-storage.py snapshot` 生成同盘快照，不等于异地备份。外部运维工具（`E:\External Projects\Iridescently Operations`）通过 `local-workspace.json` 选择源码与存储根；香港发布工具仍按其自身流程运行，本仓库不包含香港部署动作。
 
 ## 数据与密钥
 
-`users.db`、`characters.json`、`game_saves.json`、上传/HTML store、`.env.local` 留在原位置，忽略且不随源码快照覆盖。`portal/activation-core/.env.local` 是本机独立 Next.js 应用配置，不删除、不提交，也不由门户启动。
+`users.db`、`characters.json`、`game_saves.json`、上传与展示 store、Cards/聚灵/首页互动数据库、世界观可编辑库及 `secrets/server.env` 都只存在于外部 data / assets 根，不进入 Git、候选或 Release；Release 替换与回滚不会覆盖它们。`portal/activation-core/.env.local` 是本机独立 Next.js 应用配置，不删除、不提交，也不由门户启动。
 
-外部 `assets/罗小黑战记数据库` 是真实媒体数据（不纳入 Git），供 Gallery 384 图构建与会馆使用；部署到其他机器需单独提供并确认素材许可。`assets/素材` 是现有会馆资产；网站快照与会话导出是本地资料。生产数据库和媒体需要单独备份，Git 不能恢复它们。
+`assets/source/罗小黑战记数据库` 是真实媒体原件（不纳入 Git），供 Gallery 构建与会馆使用；派生 WebP 预览、缩略图写入 cache 根，可随时重建。部署到其他机器需单独提供原件并确认素材许可。Git 不能恢复数据库和媒体，须单独备份。
 
-配置：会馆 USSO OAuth 使用 `USSO_CLIENT_SECRET`，众生之门 OAuth 使用 `ZSZM_CLIENT_SECRET`，均只从运行环境读取；`HX_SSO_SECRET` 环境优先，也可从忽略的 `server/.env.local` 读取。会馆 OAuth 的 Client ID 在 `portal/huiguan/server_huiguan.py` 配置；真实 OAuth 应用密钥需由 USSO 应用管理端签发，不能用站内账户密码代替。所有账户逻辑仍复用会馆和 `shared-session`，无第二套身份系统。
+配置：会馆 USSO OAuth 使用 `USSO_CLIENT_SECRET`，众生之门 OAuth 使用 `ZSZM_CLIENT_SECRET`，均只从运行环境读取；`HX_SSO_SECRET` 环境优先，也可从外部 data 根的 `secrets/server.env` 读取。会馆 OAuth 的 Client ID 在 `portal/huiguan/server_huiguan.py` 配置；真实 OAuth 应用密钥需由 USSO 应用管理端签发，不能用站内账户密码代替。所有账户逻辑仍复用会馆和 `shared-session`，无第二套身份系统。
 
 AI 协作指令与隔离边界见 [Copilot 仓库指令](.github/copilot-instructions.md)、[架构说明](docs/architecture.md) 和 [环境隔离审计](docs/architecture/ENVIRONMENT_BOUNDARIES.md)。分支治理当前为建议稿，尚未执行，见 [BRANCH_STRATEGY](docs/development/BRANCH_STRATEGY.md)；归档边界见 [ARCHIVE_POLICY](docs/development/ARCHIVE_POLICY.md)。
 

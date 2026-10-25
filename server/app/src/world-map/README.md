@@ -9,8 +9,7 @@
 ```powershell
 npm ci
 npm run check:world-map
-npm run build:world-map
-npm run publish:world-map
+npm run build:world-map   # 单独检查本模块构建
 ```
 
-全模块发布时，`npm run build:modules` / `npm run publish:modules` 也会包含本模块。修改 `portal.json` 或统一壳后，另按正式流程执行 `build:site` / `publish:site` 并重启受影响的门户服务。
+本模块随 `npm run build:modules` 进入模块候选；与 `build:site`、`build:homepage` 候选一起经 `npm run release:seal` 封存为不可变 Release 后，再重启受影响的门户服务。修改 `portal.json` 或统一壳时同样走这一完整封存流程。
