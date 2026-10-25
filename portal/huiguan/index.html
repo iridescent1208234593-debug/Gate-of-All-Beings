@@ -9,7 +9,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <meta name="description" content="西木会馆 · 人设登记 - 你所登记的人设，将汇入罗小黑战记「众生之门」世界观。">
-<meta name="theme-color" content="#f5f0e8">
+<meta name="theme-color" content="#103428">
 <meta property="og:title" content="西木会馆 · 人设登记">
 <meta property="og:description" content="西木会馆 · 人设登记 - 你所登记的人设，将汇入罗小黑战记「众生之门」世界观。">
 <meta property="og:image" content="https://huiguan.iridescently.xyz/favicon.png">
@@ -20,22 +20,25 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #f5f0e8;
-    --surface: #ffffff;
-    --surface-hover: #f0ead8;
-    --border: #d4cfbe;
-    --text: #3a4a3e;
-    --text-dim: #8a9a8e;
-    --accent: #5a9e8f;
-    --accent-glow: rgba(90, 158, 143, 0.15);
-    --gold: #d4a840;
-    --gold-dim: #92a959;
+    /* 首帧直接使用表单默认的「深绿×暖黄」，避免脚本加载前出现浅底浅字。 */
+    --bg: #103428;
+    --surface: #1b4d3e;
+    --surface-hover: #1b4d3e;
+    --border: rgba(232, 192, 80, 0.25);
+    --text: #fff;
+    --text-dim: #fff;
+    --accent: #e8c050;
+    --accent-glow: rgba(232, 192, 80, 0.16);
+    --accent-hover: #e8c050;
+    --gold: #f0d878;
+    --gold-dim: #fff;
     --error: #d45050;
     --success: #5a9e8f;
     --radius: 6px;
     --shadow: none;
-    --outline: #2a3a2e;
-    --paper: #faf8f0;
+    --outline: #fff;
+    --paper: #103428;
+    --btn-text: #161823;
   
   /* === Chinese Traditional Colors === */
   --zhusha: #c03f3c;
@@ -308,20 +311,50 @@
   .upload-zone input[type="file"] { display: none; }
   .preview-img { max-width: 200px; max-height: 200px; border-radius: 4px; border: 1px solid var(--border); margin-top: 10px; }
 
-  /* 滑块 */
-  .slider-wrap { display: flex; align-items: center; gap: 12px; }
-  .slider-wrap input[type="range"] {
-    flex: 1; -webkit-appearance: none; height: 6px; border-radius: 3px;
-    background: linear-gradient(90deg, var(--surface) 0%, var(--accent) 100%);
-    box-shadow: inset 0 0 0 1px var(--border);
-    outline: none;
+  /* 阵营滑块：左右等宽，数值跟随滑块，避免 50 因右侧数字占位而看似偏左。 */
+  #row-faction { --faction-pct: 50; --faction-thumb: var(--gold); }
+  .faction-scale { display: grid; grid-template-columns: 56px minmax(0, 1fr) 56px; align-items: center; gap: 10px; }
+  .faction-end { font-size: 12px; color: var(--text-dim); white-space: nowrap; text-align: center; transition: color .18s, font-weight .18s; }
+  .faction-track { position: relative; height: 32px; min-width: 0; }
+  .faction-track input[type="range"] {
+    position: absolute; inset: 0; z-index: 2; width: 100%; height: 32px; margin: 0;
+    -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; outline: none;
   }
-  .slider-wrap input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
-    background: var(--accent); cursor: pointer; border: 2px solid var(--bg);
+  .faction-track input[type="range"]::-webkit-slider-runnable-track {
+    height: 7px; border: 1px solid var(--border); border-radius: 999px;
+    background: linear-gradient(90deg, var(--text-dim) 0 40%, var(--gold) 40% 60%, var(--accent) 60% 100%);
   }
-  .slider-val { font-size: 14px; color: var(--text); min-width: 42px; text-align: right; }
-  .faction-tags { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-dim); margin-top: 2px; padding: 0 2px; }
+  .faction-track input[type="range"]::-moz-range-track {
+    height: 7px; border: 1px solid var(--border); border-radius: 999px;
+    background: linear-gradient(90deg, var(--text-dim) 0 40%, var(--gold) 40% 60%, var(--accent) 60% 100%);
+  }
+  .faction-track input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 30px; height: 30px; margin-top: -12px; border: 0; border-radius: 50%; background: transparent;
+  }
+  .faction-track input[type="range"]::-moz-range-thumb { width: 30px; height: 30px; border: 0; border-radius: 50%; background: transparent; }
+  .faction-track input[type="range"]:focus-visible { filter: drop-shadow(0 0 5px var(--accent)); }
+  .faction-value-rail { position: absolute; z-index: 3; inset: 0 15px; pointer-events: none; }
+  .slider-val {
+    position: absolute; top: 50%; left: calc(var(--faction-pct) * 1%); transform: translate(-50%, -50%);
+    display: grid; place-items: center; width: 30px; height: 30px; border: 2px solid var(--bg); border-radius: 50%;
+    background: var(--faction-thumb); color: #13241e; box-shadow: 0 3px 10px rgba(0,0,0,.24);
+    font-size: 10px; font-weight: 700; line-height: 1; transition: left .08s linear, background .18s, box-shadow .18s;
+  }
+  .slider-val.is-pulsing { animation: factionPulse .24s ease-out; }
+  #row-faction[data-zone="human"] { --faction-thumb: var(--text-dim); }
+  #row-faction[data-zone="fairy"] { --faction-thumb: var(--accent); }
+  #row-faction[data-zone="human"] .faction-human, #row-faction[data-zone="fairy"] .faction-fairy { color: var(--gold); font-weight: 700; }
+  .faction-tags { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; margin: 2px 66px 0; font-size: 11px; color: var(--text-dim); }
+  .faction-tags span:first-child { text-align: left; }
+  .faction-tags span:last-child { text-align: right; }
+  #factionLabel { min-width: 72px; padding: 1px 9px; border: 1px solid var(--border); border-radius: 999px; color: var(--gold); text-align: center; transition: background .18s, border-color .18s; }
+  #row-faction[data-zone="neutral"] #factionLabel { background: var(--accent-glow); border-color: var(--gold); }
+  @keyframes factionPulse { 50% { transform: translate(-50%, -50%) scale(1.16); box-shadow: 0 0 0 6px var(--accent-glow); } }
+  @media (max-width: 520px) {
+    .faction-scale { grid-template-columns: 42px minmax(0, 1fr) 42px; gap: 6px; }
+    .faction-tags { margin-inline: 48px; gap: 4px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .slider-val.is-pulsing { animation: none; } }
 
   /* 按钮 */
   .btn-row { display: flex; gap: 12px; margin-top: 20px; }
@@ -1301,16 +1334,18 @@
     <div class="section">
       <h2>阵营 <span class="req">*</span></h2>
       <div class="form-row" id="row-faction">
-        <div class="slider-wrap">
-          <span style="font-size:12px;color:var(--text-dim);white-space:nowrap;">人类</span>
-          <input type="range" name="faction" min="0" max="100" value="50" oninput="updateSlider(this)">
-          <span style="font-size:12px;color:var(--text-dim);white-space:nowrap;">妖精</span>
-          <span class="slider-val" id="sliderVal">50</span>
+        <div class="faction-scale">
+          <span class="faction-end faction-human">人类</span>
+          <div class="faction-track">
+            <input type="range" id="factionRange" name="faction" min="0" max="100" value="50" oninput="updateSlider(this)" aria-describedby="factionHint">
+            <div class="faction-value-rail"><output class="slider-val" id="sliderVal" for="factionRange" aria-hidden="true">50</output></div>
+          </div>
+          <span class="faction-end faction-fairy">妖精</span>
         </div>
         <div class="faction-tags">
           <span>亲近人类</span><span id="factionLabel">中立</span><span>亲近妖精</span>
         </div>
-        <div class="hint">滑块不超过 60% 代表中立（即 40-60 之间为中立方）</div>
+        <div class="hint" id="factionHint">40–60 为中立；向左更亲近人类，向右更亲近妖精。</div>
         <div class="err"></div>
       </div>
     </div>
@@ -2473,12 +2508,22 @@ function renderGallery() {
 
 // ========== 阵营滑块 ==========
 function updateSlider(slider) {
-  const val = parseInt(slider.value);
-  document.getElementById('sliderVal').textContent = val;
+  const min = Number(slider.min || 0);
+  const max = Number(slider.max || 100);
+  const val = Math.max(min, Math.min(max, Number(slider.value) || 0));
+  const pct = max === min ? 0 : ((val - min) / (max - min)) * 100;
+  const output = document.getElementById('sliderVal');
   const label = document.getElementById('factionLabel');
-  if (val < 40) label.textContent = '亲近人类';
-  else if (val > 60) label.textContent = '亲近妖精';
-  else label.textContent = '中立';
+  const row = document.getElementById('row-faction');
+  const zone = val < 40 ? 'human' : val > 60 ? 'fairy' : 'neutral';
+  output.textContent = String(val);
+  label.textContent = zone === 'human' ? '亲近人类' : zone === 'fairy' ? '亲近妖精' : '中立';
+  row.dataset.zone = zone;
+  row.style.setProperty('--faction-pct', String(pct));
+  slider.setAttribute('aria-valuetext', val + ' · ' + label.textContent);
+  output.classList.remove('is-pulsing');
+  void output.offsetWidth;
+  output.classList.add('is-pulsing');
 }
 
 // ========== 验证 ==========
@@ -2875,10 +2920,14 @@ function toggleCreamMode() {
   syncCreamBtn();
   if (window.__gateSetTheme) { try { window.__gateSetTheme('original', false); } catch (e) {} }
 }
-function applyFormTheme(colors) {
+function applyFormTheme(colors, animate = true) {
   if (colors !== CREAM_THEME && creamMode) { creamMode = false; syncCreamBtn(); }
-  document.body.classList.add('theme-transition');
-  setTimeout(() => document.body.classList.remove('theme-transition'), 1000);
+  if (animate) {
+    document.body.classList.add('theme-transition');
+    setTimeout(() => document.body.classList.remove('theme-transition'), 1000);
+  } else {
+    document.body.classList.remove('theme-transition');
+  }
   const root = document.documentElement.style;
   for (const [name, value] of Object.entries(HuiguanColors.tokens(colors))) root.setProperty(name, value);
   root.setProperty('--accent-glow', hexToRgba(colors.accent, 0.16));
@@ -2886,6 +2935,8 @@ function applyFormTheme(colors) {
   document.body.style.backgroundImage =
     'radial-gradient(ellipse at 20% 10%, ' + hexToRgba(colors.accent, 0.10) + ' 0%, transparent 50%),' +
     'radial-gradient(ellipse at 80% 90%, ' + hexToRgba(colors.accentLight, 0.08) + ' 0%, transparent 50%)';
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) themeMeta.content = colors.primaryDark;
 }
 
 // ========== 自由选色 · 中国古色 ==========
@@ -3925,8 +3976,7 @@ function resetForm() {
   const _wi = document.getElementById('weaponInput'); if (_wi) _wi.value = '';
   document.getElementById('abilityDetailPanel').innerHTML = '<div class="empty-tip" style="padding:16px;" id="abilityDetailEmpty">选择能力系别和分支技能后，这里会自动显示解释；未收录的技能可自行补充说明。</div>';
   renderRoleLine();
-  document.getElementById('sliderVal').textContent = '50';
-  document.getElementById('factionLabel').textContent = '中立';
+  updateSlider(document.getElementById('factionRange'));
   document.querySelectorAll('.form-row.error').forEach(r => r.classList.remove('error'));
   // 退出编辑模式
   editingIndex = null;
@@ -3985,8 +4035,7 @@ function fillFormFromData(c) {
   else if (c.org) { orgPreset.value = '_custom'; orgInput.style.display = ''; orgInput.value = c.org; }
   // 阵营
   f.faction.value = (c.faction != null) ? c.faction : 50;
-  document.getElementById('sliderVal').textContent = f.faction.value;
-  document.getElementById('factionLabel').textContent = c.faction_label || (f.faction.value < 40 ? '亲近人类' : f.faction.value > 60 ? '亲近妖精' : '中立');
+  updateSlider(f.faction);
   // 长老身份现由登录账号角色派生，仅刷新状态行
   renderRoleLine();
   // 重置能力勾选与动态分支
@@ -4209,7 +4258,14 @@ initCustomPicker();
 let inlineWheelReady = false;
 document.getElementById('wheelSection').addEventListener('toggle', function () { if (this.open && !inlineWheelReady) { inlineWheelReady = true; initWheelPickers(); } });
 loadUserSchemes();
-applyFormTheme(COLOR_SCHEMES[selectedColorIdx]);
+applyFormTheme(COLOR_SCHEMES[selectedColorIdx], false);
+updateSlider(document.getElementById('factionRange'));
+window.addEventListener('pageshow', function () {
+  requestAnimationFrame(function () {
+    applyFormTheme(creamMode ? CREAM_THEME : (selectedColor || COLOR_SCHEMES[selectedColorIdx]), false);
+    updateSlider(document.getElementById('factionRange'));
+  });
+});
 renderList();
 window.__HUIGUAN_OWN_AUTH = true;
 const initialLoginCheck = checkLogin();
