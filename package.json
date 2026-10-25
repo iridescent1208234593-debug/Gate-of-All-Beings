@@ -24,6 +24,7 @@
     "publish:homepage": "node ops/publish-release.mjs homepage",
     "publish:modules": "node ops/publish-release.mjs modules",
     "test:portal": "python server/verify_portal.py",
+    "test:huiguan-image-upload": "node portal/huiguan/tests/image-upload-contract.cjs",
     "assets:manifest": "node ops/assets-manifest.mjs",
     "update:status": "node ops/update.mjs status",
     "update:check": "node ops/update.mjs check",

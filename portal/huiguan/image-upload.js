@@ -3,6 +3,9 @@
   'use strict';
   const LIMIT = 8 * 1024 * 1024;
   const TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+  const ASSET_URL = /^\/assets\/uploads\/[a-f0-9]{32,64}\.(png|jpg|webp|gif)$/;
+  const FRESH_AVATAR_URL = /^\/assets\/uploads\/[a-f0-9]{64}\.(png|jpg)$/;
+  const PREVIEW_URL = /^\/api\/uploads\/preview\?name=([a-f0-9]{32,64}\.(?:png|jpg|webp|gif))$/;
   // gifLimit：动图上限默认 5MB；同人图投稿传 8MB（与服务端 gif_limit 一致）
   function check(file, gifLimit = 5 * 1024 * 1024) {
     if (!file || !TYPES.includes(file.type)) throw new Error('仅支持 JPG / PNG / WebP / GIF 图片');
@@ -49,15 +52,24 @@
       return blob;
     } catch (error) { return file; }
   }
+  // Public responses may expose stored uploads through the preview route. Business
+  // records still keep the durable same-origin asset path used by save handlers.
+  function durable(value) {
+    const match = typeof value === 'string' && PREVIEW_URL.exec(value);
+    return match ? '/assets/uploads/' + match[1] : value;
+  }
   async function upload(source) {
     let file = source instanceof Blob ? source : null;
     if (!file && /^data:image\//.test(source || '')) file = await (await fetch(source)).blob();
     if (!file) return source;
     const result = await request('/api/images/upload', {}, await shrink(file));
-    if (!/^\/assets\/uploads\/[a-f0-9]+\.(png|jpg|webp|gif)$/.test(result.url || '')) throw new Error('图片保存地址无效');
-    return result.url;
+    const savedUrl = durable(result.url);
+    if (!ASSET_URL.test(savedUrl || '')) throw new Error('图片保存地址无效');
+    return savedUrl;
   }
   async function character(data) {
+    data = { ...data, image: durable(data.image), avatar_asset_id: durable(data.avatar_asset_id) };
+    if (Array.isArray(data.images)) data.images = data.images.map(durable);
     const next = { ...data };
     const cache = new Map();
     const resolve = async value => {
@@ -73,11 +85,12 @@
       if (avatar instanceof Blob || /^data:image\//.test(avatar || '')) {
         const file = avatar instanceof Blob ? avatar : await (await fetch(avatar)).blob();
         const result = await request('/api/avatars/upload', {}, file);
-        if (!/^\/assets\/uploads\/[a-f0-9]{64}\.(png|jpg)$/.test(result.avatar_asset_id || '')) throw new Error('头像保存地址无效');
-        next.avatar_asset_id = result.avatar_asset_id;
+        const savedAvatar = durable(result.avatar_asset_id);
+        if (!FRESH_AVATAR_URL.test(savedAvatar || '')) throw new Error('头像保存地址无效');
+        next.avatar_asset_id = savedAvatar;
       }
     }
-    if (next.avatar_asset_id && !/^\/assets\/uploads\/[a-f0-9]{32,64}\.(png|jpg|webp|gif)$/.test(next.avatar_asset_id)) throw new Error('OC 头像资源地址无效');
+    if (next.avatar_asset_id && !ASSET_URL.test(next.avatar_asset_id)) throw new Error('OC 头像资源地址无效');
     if (next.avatar_display_shape && !['square', 'circle'].includes(next.avatar_display_shape)) throw new Error('OC 头像显示形状无效');
     if (Array.isArray(next.images)) {
       next.images = [];
