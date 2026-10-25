@@ -2,6 +2,8 @@
 
 `portal_server.py` 按 Host/路径分发静态站点、壳、发布模块、共享资源、API/WebSocket。`base_static.py` 禁止解码后敏感路径、目录列表与数据下载；`hx_sso.py` 复用会馆 cookie；`account_security.py` 保留原账户安全逻辑。
 
+生产 Portal 强制绑定 `127.0.0.1`；`host_policy.py` 在路由前拒绝未登记或格式异常的 Host、重复 Host，并只接受来自 loopback 的单个 `X-Forwarded-Proto: https` 作为 TLS 终止证明。向上游转发时会删除客户端提供的转发身份头并按已验证请求重建。`python -m unittest discover -s server -p 'test_host_policy.py' -v` 覆盖 Host/HTTPS/转发头策略；它不验证运行中的 Cloudflare Tunnel 或 Nginx 是否正确覆盖入站 `X-Forwarded-Proto`，部署边界仍需单独只读核验。
+
 生产8080，OAuth5174，数值配置5178，聚灵5177，Softie4173。旧 game/lingjing/juling 前端域名转入众生之门；API仍留必要上游。源码公开下载 `/app/src` 不允许。
 
 `build:modules` 只生成候选；`publish:modules` 更新 modules；`build:site`/`publish:site` 冻结静态与Python源码。网站管家从发布快照启动 Portal/OAuth，`IRIDESCENTLY_PROJECT_ROOT` 保持原用户数据路径。无自动启动构建。详见 [发布流程](../docs/release-workflow.md)。

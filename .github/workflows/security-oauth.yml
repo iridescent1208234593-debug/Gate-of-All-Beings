@@ -1,0 +1,87 @@
+name: Security and OAuth regression
+
+on:
+  pull_request:
+    branches: [zszm-batch-20261021]
+  push:
+    branches: [codex/batch3-integration-candidate]
+
+permissions:
+  contents: read
+
+jobs:
+  security-oauth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            server/app/src/cards/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix server/app/src/cards
+      - run: npx playwright install --with-deps chromium
+
+      - name: Server unit and security tests
+        run: python -m unittest discover -s server -p 'test_*.py' -v
+      - name: Huiguan Python tests (one module per process)
+        shell: bash
+        run: |
+          for test_file in portal/huiguan/tests/test_*.py; do
+            python -m unittest discover -s portal/huiguan/tests -p "$(basename "$test_file")" -v
+          done
+      - name: Install gallery preview encoder
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+      - name: Create isolated gallery build fixture
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/gallery"
+          python - <<'PY'
+          import os, struct, zlib
+          from pathlib import Path
+          def chunk(kind, data):
+              return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data) & 0xffffffff)
+          png = (b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>2I5B', 1, 1, 8, 6, 0, 0, 0))
+                 + chunk(b'IDAT', zlib.compress(b'\x00\x80\x60\x40\xff')) + chunk(b'IEND', b''))
+          Path(os.environ['RUNNER_TEMP'], 'gallery', 'ci-fixture.png').write_bytes(png)
+          PY
+          echo "GALLERY_DIR=$RUNNER_TEMP/gallery" >> "$GITHUB_ENV"
+      - name: Build release candidates
+        run: npm run build:release
+      - name: Verify release manifests and output hashes
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { verifyCandidate } from './scripts/release-artifacts.mjs';
+          const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          for (const name of ['modules', 'homepage']) {
+            const record = await verifyCandidate(name);
+            if (record.sourceHead !== head || record.sourceDirty !== false) throw new Error(`${name} manifest does not match the clean checkout`);
+            if (!record.sourceRepository || !record.sourceBranch || !record.buildCommand || !Object.keys(record.files).length) throw new Error(`${name} manifest lacks provenance or output hashes`);
+            console.log(`${name}: ${record.sourceRepository} ${record.sourceBranch}@${record.sourceHead} (${Object.keys(record.files).length} hashed files)`);
+          }
+          NODE
+      - name: Portal host routing and API regression
+        run: npm run test:portal
+      - name: OAuth return URL allowlist
+        run: npm run test:huiguan-auth-next
+      - name: OAuth mock provider browser E2E
+        run: npm run test:oauth-mock
+      - name: Cards frontend tests
+        run: npm test --prefix server/app/src/cards
+      - name: Cards backend tests
+        run: npm run test:backend --prefix server/app/src/cards
+      - name: Cards type and game checks
+        run: npm run check:game --prefix server/app/src/cards
+      - name: World Map checks
+        run: npm run check:world-map

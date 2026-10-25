@@ -12,7 +12,6 @@
 """
 import http.client
 import http.server
-import ipaddress
 import importlib.util
 import os
 import re
@@ -25,14 +24,9 @@ from urllib.parse import parse_qs, urlsplit
 from pathlib import Path
 
 PORT = int(os.environ.get("PORT", "8080"))
-# Default loopback-only; set HOST=0.0.0.0 to expose on the LAN.
-HOST = os.environ.get("HOST", "127.0.0.1").strip() or "127.0.0.1"
 ENVIRONMENT = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip().lower()
-PRODUCTION_HOSTS = frozenset({
-    "iridescently.xyz", "www.iridescently.xyz", "huiguan.iridescently.xyz",
-    "oc.iridescently.xyz", "spirit.iridescently.xyz", "zszm.iridescently.xyz",
-    "game.iridescently.xyz", "juling.iridescently.xyz", "lingjing.iridescently.xyz",
-})
+# Production ingress must remain loopback-only; HOST is configurable only for local development.
+HOST = (os.environ.get("HOST", "127.0.0.1").strip() or "127.0.0.1") if ENVIRONMENT == "development" else "127.0.0.1"
 CODE_ROOT = Path(__file__).resolve().parents[1]
 ROOT = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", CODE_ROOT)).resolve()
 
@@ -47,6 +41,7 @@ def _load(name, path):
 
 sys.path.insert(0, str(CODE_ROOT / "server"))
 from base_static import BaseStaticHandler  # noqa: E402
+from host_policy import enforce_request, forwarded_headers  # noqa: E402
 
 www = _load("portal_www", CODE_ROOT / "portal" / "www" / "server.py")
 oc = _load("portal_oc", CODE_ROOT / "portal" / "oc" / "server.py")
@@ -109,11 +104,7 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
             self.send_error(413 if length > 0 else 400, "request body exceeds 8 MiB")
             return
         body = self.rfile.read(length) if length else None
-        headers = {k: v for k, v in self.headers.items()
-                   if k.lower() not in ("host", "connection", "content-length", "x-forwarded-host", "x-forwarded-proto")}
-        # Replace, never forward client-supplied proxy identity headers.
-        headers["X-Forwarded-Host"] = self.headers.get("Host", "")
-        headers["X-Forwarded-Proto"] = "https" if self.headers.get("X-Forwarded-Proto") == "https" else "http"
+        headers = forwarded_headers(self.headers, self._external_host, self._trusted_external_scheme)
         if body is not None:
             headers["Content-Length"] = str(len(body))
         conn = None
@@ -159,11 +150,8 @@ class WebSocketProxyHandler(ProxyHandler):
         upgraded = False
         try:
             upstream = socket.create_connection(("127.0.0.1", self.upstream_port), timeout=5)
-            headers = {k: v for k, v in self.headers.items()
-                       if k.lower() not in ("host", "x-forwarded-host", "x-forwarded-proto")}
+            headers = forwarded_headers(self.headers, self._external_host, self._trusted_external_scheme, websocket=True)
             headers["Host"] = f"127.0.0.1:{self.upstream_port}"
-            headers["X-Forwarded-Host"] = self.headers.get("Host", "")
-            headers["X-Forwarded-Proto"] = "https" if self.headers.get("X-Forwarded-Proto") == "https" else "http"
             path = self.path[len(self.strip):] if self.strip and self.path.startswith(self.strip + "/") else self.path
             head = f"GET {path} HTTP/1.1\r\n" + "".join(f"{k}: {v}\r\n" for k, v in headers.items()) + "\r\n"
             upstream.sendall(head.encode("iso-8859-1"))
@@ -327,18 +315,9 @@ class Dispatcher(www.Handler):
         ok = super().parse_request()
         if not ok:
             return ok
-        host = (self.headers.get("Host") or "").split(":", 1)[0].lower()
-        peer_is_loopback = False
-        try:
-            peer_is_loopback = ipaddress.ip_address(self.client_address[0]).is_loopback
-        except ValueError:
-            pass
-        trusted_https = peer_is_loopback and self.headers.get("X-Forwarded-Proto", "").strip().lower() == "https"
-        if ENVIRONMENT != "development" and host in PRODUCTION_HOSTS and not trusted_https:
-            target_url = "https://" + host + (self.path if (self.path or "").startswith("/") else "/")
-            self.__class__ = RedirectHandler
-            self.redirect_to = target_url
-            return ok
+        if not enforce_request(self, ENVIRONMENT):
+            return False
+        host = self._external_host
 
         target, cfg = route(host, self.path or "")
         if target is not type(self):

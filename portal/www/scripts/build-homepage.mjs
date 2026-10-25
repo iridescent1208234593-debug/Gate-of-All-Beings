@@ -166,6 +166,7 @@ for (const entry of readdirSync(stageDir, { withFileTypes: true })) {
 }
 writeFileSync(path.join(homepageCandidate, "index.html"), versionedHomepage);
 await recordCandidate("homepage", {
+  buildCommand: "npm run build:homepage",
   externalAssets: [{
     name: "seasonal-gallery-source",
     source: process.env.GALLERY_DIR ? "GALLERY_DIR (external asset directory)" : "assets/罗小黑战记数据库/罗小黑节气贺图（gallery素材）",

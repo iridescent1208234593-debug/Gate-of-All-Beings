@@ -1454,7 +1454,7 @@ class Handler(BaseStaticHandler):
 
         if path == "/api/login":
             return self._api_sso_login()
-        if path in ("/", "/cb", "/api/callback") and qs.get("code"):
+        if path in ("/", "/cb", "/api/callback") and (qs.get("code") or qs.get("error") or qs.get("state")):
             return self._api_callback(qs)
         if path == "/api/user":
             return self._api_user()
@@ -1854,17 +1854,20 @@ class Handler(BaseStaticHandler):
         code = qs.get("code", [None])[0]
         state = qs.get("state", [None])[0]
         error = qs.get("error", [None])[0]
-        if error:
-            self._json(400, {"error": f"用户拒绝了授权: {error}"})
-            return
-        if not code or not state:
+        if not state:
             self._json(400, {"error": "缺少 code 或 state"})
             return
 
         with OAUTH_LOCK:
             ts = OAUTH_STATES.pop(state, None)
-        if not ts:
+        if not ts or time.time() - ts > 600:
             self._json(400, {"error": "state 校验失败"})
+            return
+        if error:
+            self._json(400, {"error": f"用户拒绝了授权: {error}"})
+            return
+        if not code:
+            self._json(400, {"error": "缺少 code 或 state"})
             return
 
         token_result = sso_post(SSO_TOKEN, {

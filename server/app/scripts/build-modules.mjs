@@ -99,5 +99,5 @@ if (slayImageSource) {
   console.log('[skip] slay images: no source configured (server/app/module-assets.json); building without optional art');
 }
 
-await recordCandidate('modules');
+await recordCandidate('modules', { buildCommand: 'npm run build:modules' });
 console.log(`[modules] Candidate ready: ${outRoot} — run npm run build:homepage before the combined npm run publish:modules release.`);

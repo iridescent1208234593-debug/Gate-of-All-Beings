@@ -46,6 +46,10 @@
 
 ## 账户服务配置
 
+### OAuth 回归
+
+`npm run test:huiguan-auth-next` 校验登录后的 `next` 回跳严格匹配 HTTPS 主站域名白名单。`npm run test:oauth-mock` 启动本机临时 SQLite 数据根目录和 loopback Mock Provider，并用 Playwright 覆盖登录、state 过期与重放、Cookie、重启后的 Session、退出、拒绝授权和 Token 错误；不访问真实 Provider、生产数据库或真实凭据。CI 在 PR 和候选分支推送时运行这些检查。真实 USSO 应用行为仍需独立测试应用验收；当前客户端未实现 PKCE，也未验证 ID Token nonce，因此 Mock 结果不代表这些协议能力已覆盖。
+
 本地未发布的首屏性能修正：head 精确预加载 intro / gate / homepage 脚本，先初始化门景再加载共享导航和内容；fallback 使用监听先于 load、幂等 ready 与 8 秒出口，未缩短模型动画时间轴。真实测量、延迟导航与视频 smoke 见 [加载审查](../../docs/zszm-loading-audit.md)。正式服务仍读取发布快照，源码通过不等于线上已生效。
 
 共享会话签名使用 `HX_SSO_SECRET`。邮箱验证邮件使用 `ACCOUNT_EMAIL_SMTP_*`；两者都支持环境变量优先、本机 Git 忽略的 `server/.env.local` 作为回退配置，样例在 `server/.env.example`。邮箱 SMTP 凭据应使用邮箱客户端授权码，不要复用邮箱网页登录密码。配置邮件后重启会馆服务；不要把真实密钥提交进 Git。
