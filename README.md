@@ -14,7 +14,7 @@
 | `server/app/src` | 七个游戏模块源码 |
 | `server/app/shell` / `portal.json` | 同页模块壳与导航清单；非 embed 试玩使用 iframe，不能概括为全站无 iframe |
 | `shared` | UI、账户/session/save、契约与只读事实的唯一公共源码 |
-| `ops` / `docs` | 网站管家、构建发布、维护与索引 |
+| `scripts` / `docs` | 根目录运维入口、构建发布文档与维护索引；运维实现位于外部 Ops 目录 |
 | `.releases/candidate` | 未发布候选（Git 忽略） |
 | `.releases/production/site` | 已发布静态/Python 源码快照（Git 忽略） |
 | `server/app/modules` / `portal/www/assets/homepage` | 已显式发布的构建产物（Git 忽略） |
