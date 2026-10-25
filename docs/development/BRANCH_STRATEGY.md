@@ -13,8 +13,8 @@
 ## 审计证据
 
 - GitHub 默认分支为 `master`，远端 HEAD `561e36df7e2a747dac106679c1cfb7a86106b2d2`。
-- 当前 `zszm-batch-20261021` HEAD `bb886549ab4a06f74398d93cf44446846cbf7f93` 与其远端分支一致。
-- 两者已分叉：`master` 有 8 个集成线没有的提交；集成线有 40 个 `master` 没有的提交。远端包含站点主题、跨游戏任务链、WAL 并发修复及世界地图后续提交，不能用快进或重置替代审查。
+- 审计开始时 `zszm-batch-20261021` HEAD `bb886549ab4a06f74398d93cf44446846cbf7f93` 与其远端分支一致；随后本次治理文档以单独提交推送。
+- 以该审计基线计算，两者已分叉：`master` 有 8 个集成线没有的提交；集成线有 40 个 `master` 没有的提交。远端包含站点主题、跨游戏任务链、WAL 并发修复及世界地图后续提交，不能用快进或重置替代审查。
 - 实际仓库内的 `origin/master` 跟踪引用落后于 GitHub 远端；分支合并前须先只读核对远端最新 SHA，再建立隔离候选。
 - `codex/security-ingress-20261024`、`fix/huiguan-upload-preview-url`、`codex/r2-asset-resolver` 与 `release/stage1.8.3` 含有集成线或稳定线未覆盖的提交，暂不删除。
 - `codex/iridescently-update` 与 `feat/sixsys-deck-alloc` 指向同一 SHA。若与默认分支比较为零 ahead 的旧分支，仅标记为归档候选，不代表可以直接删除。
