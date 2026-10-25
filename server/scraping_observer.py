@@ -42,7 +42,8 @@ def _log():
     global _logger
     if _logger is None:
         root = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[1]))
-        directory = Path(os.environ.get("IRIDESCENTLY_SCRAPING_LOG_DIR", root / "ops" / "网站恢复" / "logs"))
+        operations = Path(os.environ.get("IRIDESCENTLY_OPS_ROOT", root / "ops"))
+        directory = Path(os.environ.get("IRIDESCENTLY_SCRAPING_LOG_DIR", operations / "网站恢复" / "logs"))
         directory.mkdir(parents=True, exist_ok=True)
         _logger = logging.getLogger("scraping_observe")
         _logger.setLevel(logging.INFO)
