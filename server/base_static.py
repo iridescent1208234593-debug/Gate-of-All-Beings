@@ -10,7 +10,7 @@ import http.server
 import os
 import re
 from urllib.parse import unquote
-from site_domains import SITE_DOMAIN, csp_policy, request_root
+from site_domains import SITE_DOMAIN, csp_policy, request_host, request_root, service_name
 
 # 禁止直接下载的敏感后缀
 BLOCKED_SUFFIXES = (".py", ".db", ".db-shm", ".db-wal", ".log", ".sqlite", ".sqlite3", ".json.bak", ".bak", ".pem", ".key", ".pfx", ".p12")
@@ -63,9 +63,32 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
     """带安全头 + 静态防护 + 错误静默的通用 Handler 基类。"""
     _static_dir = None  # 子类覆写
 
+    def _zszm_request(self):
+        """The game entry on any approved root gets the hardened response profile."""
+        return service_name(request_host(self) or "") == "zszm"
+
+    def version_string(self):
+        if self._zszm_request():
+            return "Iridescently"
+        return super().version_string()
+
     def send_error(self, code, message=None, explain=None):
         from access_recovery import send_recovery
         if not send_recovery(self, code):
+            if self._zszm_request():
+                # Do not reflect exception details or the Python default template.
+                body = ("<!doctype html><html lang=zh-CN><meta charset=utf-8>"
+                        "<title>众生之门</title><h1>" + str(code) +
+                        "</h1><p>页面暂时不可用。</p><a href=\"/\">返回众生之门</a></html>").encode("utf-8")
+                self.close_connection = True
+                self.send_response(code)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                if self.command != "HEAD":
+                    self.wfile.write(body)
+                return
             super().send_error(code, message, explain)
 
     def __init__(self, *args, **kwargs):
@@ -94,12 +117,19 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
         headers_buffer = self._headers_buffer
         # 安全头
         for k, v in SECURITY_HEADERS.items():
+            if k == "Strict-Transport-Security" and self._zszm_request():
+                v = "max-age=2592000"
             super().send_header(k, v)
         try:
             root = request_root(self)
         except ValueError:
             root = SITE_DOMAIN
         super().send_header("Content-Security-Policy-Report-Only", csp_policy(root))
+        if self._zszm_request():
+            # First enforced phase does not restrict legacy inline game scripts.
+            # The existing script/style policy remains Report-Only until real
+            # browser violations for embedded modules have been reviewed.
+            super().send_header("Content-Security-Policy", "base-uri 'self'; object-src 'none'")
         # 扫描已缓冲的 headers，找 Content-Type
         ct = ""
         for h in headers_buffer:

@@ -23,22 +23,26 @@ HOST_MAP = {f"{prefix}.{root}" if prefix else root: (service, root)
             for root in ALLOWED_ROOTS for service, prefix in CONFIG["services"].items()}
 PRODUCTION_HOSTS = frozenset(HOST_MAP)
 DEVELOPMENT_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
-PREVIEW_HOSTS = frozenset(CONFIG["previewHosts"])
+# PC preview host -> the application host it mirrors (pc.R -> R, pc-<prefix>.R -> <prefix>.R).
+PREVIEW_HOSTS = {preview: preview[3:] for preview in CONFIG["previewHosts"]}
+if any(host not in HOST_MAP for host in PREVIEW_HOSTS.values()):
+    raise ValueError("every preview host must mirror an approved application host")
 _AUTHORITY = re.compile(r"\A[A-Za-z0-9.\[\]:-]+\Z")
 _DNS = re.compile(r"\A[a-z0-9]+(?:[.-][a-z0-9]+)*\Z")
 
 
 def normalize_host(value, allow_any_port=False):
-    if not isinstance(value, str) or not _AUTHORITY.fullmatch(value):
+    # Host grammar only: urlsplit alone tolerates an empty port, port 0 and bracketed names.
+    if not isinstance(value, str) or not _AUTHORITY.fullmatch(value) or value.endswith(":"):
         return None
     try:
         parsed = urlsplit("//" + value)
         host, port = parsed.hostname, parsed.port
         if not host or parsed.username is not None or parsed.path or parsed.query or parsed.fragment:
             return None
-        if host.endswith(".") or (port is not None and port not in (80, 443) and not allow_any_port):
+        if host.endswith(".") or port == 0 or (port is not None and port not in (80, 443) and not allow_any_port):
             return None
-        if ":" in host:
+        if ":" in host or "[" in value:
             ipaddress.IPv6Address(host)
         elif not _DNS.fullmatch(host.lower()) or len(host) > 253 or any(len(label) > 63 for label in host.split(".")):
             return None

@@ -1,0 +1,12 @@
+{
+  "description": "ZSZM security: HSTS and initial enforced CSP",
+  "expression": "(http.host eq \"zszm.iridescently.xyz\" and http.request.scheme eq \"https\")",
+  "action": "rewrite",
+  "action_parameters": {
+    "headers": {
+      "strict-transport-security": {"operation": "set", "value": "max-age=2592000"},
+      "content-security-policy": {"operation": "set", "value": "base-uri 'self'; object-src 'none'"}
+    }
+  },
+  "enabled": true
+}

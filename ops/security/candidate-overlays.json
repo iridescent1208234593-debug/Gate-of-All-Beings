@@ -1,0 +1,10 @@
+[
+  "server/portal_server.py",
+  "server/base_static.py",
+  "server/access_recovery.py",
+  "server/host_policy.py",
+  "server/allowed_hosts.json",
+  "server/security_ingress_test.py",
+  "server/verify_portal.py",
+  "portal/huiguan/index.html"
+]

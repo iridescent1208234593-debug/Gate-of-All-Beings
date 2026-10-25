@@ -24,6 +24,7 @@ EXCEPT_FILES = {
     "**/tests/**": "test fixtures exercise exact public hosts",
     "server/test_*.py": "test fixtures exercise exact public hosts",
     "server/verify_portal.py": "route contract template, expanded to every approved root",
+    "server/security_ingress_test.py": "ingress regression fixtures for the deployed canonical host",
     "scripts/check-domain-hardcodes.py": "this scanner",
     "shared/shared-data/worldview.json": "historical export kept as a data record",
     "portal/www/links.json": "editable homepage content seed; runtime copy is persistent data",

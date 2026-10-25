@@ -4,15 +4,18 @@ from urllib.parse import urlsplit
 
 
 def send_recovery(handler, code):
+    # Status and method first: malformed requests reach send_error before a command exists.
+    if code not in {404, 502, 503, 504} or getattr(handler, 'command', None) not in {'GET', 'HEAD'}:
+        return False
     # Dispatcher strips /app/modules before static serving. The request target
     # retains the public navigation path used to decide whether recovery applies.
-    request = handler.requestline.split()
+    request = getattr(handler, 'requestline', '').split()
     if len(request) < 2:
         return False
     path = urlsplit(request[1]).path
     headers = getattr(handler, 'headers', {})
     navigation = 'text/html' in headers.get('Accept', '') or headers.get('Sec-Fetch-Dest') in {'document', 'iframe'}
-    if code not in {404, 502, 503, 504} or handler.command not in {'GET', 'HEAD'} or not navigation:
+    if not navigation:
         return False
     if not path.startswith(('/app/', '/playtest/')) or '/api/' in path:
         return False

@@ -1,12 +1,17 @@
 """Strict host and proxy-header rules for the public portal ingress."""
 import ipaddress
-from site_domains import DEVELOPMENT_HOSTS, PRODUCTION_HOSTS, normalize_host, request_origin_allowed
-FORWARDING_HEADERS = frozenset({
-    "forwarded", "x-forwarded-for", "x-forwarded-host", "x-forwarded-port",
-    "x-forwarded-prefix", "x-forwarded-proto", "x-forwarded-scheme",
-    "x-forwarded-server", "x-forwarded-ssl", "x-original-host", "x-host",
-    "x-original-url", "x-rewrite-url", "x-url-scheme", "front-end-https",
-    "x-real-ip", "x-client-ip", "true-client-ip", "cf-connecting-ip", "cf-visitor",
+import json
+from site_domains import DEVELOPMENT_HOSTS, PREVIEW_HOSTS, PRODUCTION_HOSTS, normalize_host, request_origin_allowed
+# Proxy identity, scheme and URL overrides a client could inject. The edge proxy clears
+# these before the portal; it keeps the edge-attested client IP the portal rate-limits on.
+IDENTITY_OVERRIDE_HEADERS = frozenset({
+    "forwarded", "x-forwarded-host", "x-forwarded-port", "x-forwarded-prefix",
+    "x-forwarded-proto", "x-forwarded-scheme", "x-forwarded-server", "x-forwarded-ssl",
+    "x-original-host", "x-host", "x-original-url", "x-rewrite-url", "x-url-scheme", "front-end-https",
+})
+# Relays to internal upstreams also drop client-IP claims; upstreams trust only rebuilt identity.
+FORWARDING_HEADERS = IDENTITY_OVERRIDE_HEADERS | frozenset({
+    "x-forwarded-for", "x-real-ip", "x-client-ip", "true-client-ip", "cf-connecting-ip", "cf-visitor",
 })
 SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
@@ -32,6 +37,9 @@ def enforce_request(handler, environment="production"):
     host = normalize_host(values[0], allow_any_port=environment == "development" and loopback) if len(values) == 1 else None
     development = environment == "development" and loopback and host in DEVELOPMENT_HOSTS
     if not development and host not in PRODUCTION_HOSTS:
+        # JSON escapes CR/LF; the request target, cookies and tokens are never logged.
+        print(json.dumps({"event": "host_rejected", "host": (values[0] if values else "")[:253],
+                          "host_count": len(values)}, ensure_ascii=True), flush=True)
         handler.close_connection = True
         handler.send_response_only(421)
         handler.send_header("Content-Length", "0")

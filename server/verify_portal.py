@@ -148,7 +148,6 @@ CHECKS = [
     ("iridescently.xyz", "/app/modules/juling/", 200),
     ("iridescently.xyz", "/app/modules/slay/", 200),
     ("iridescently.xyz", "/app/modules/aeon/", 200),
-    ("iridescently.xyz", "/app/modules/world-map/", 200),
     ("iridescently.xyz", "/management/index.html", 308),
     ("iridescently.xyz", "/management/index.html?embed=1", 200),
     ("iridescently.xyz", "/ecology/index.html", 200),
@@ -173,6 +172,12 @@ REJECTED_HOSTS = ["evil.example", "iridescently.xyz.evil.example", "zszm.iridesc
 REDIRECTS = [("{root}", "/", "https://huiguan.{root}/"), ("game.{root}", "/", "https://zszm.{root}/#home"),
              ("lingjing.{root}", "/", "https://zszm.{root}/#management"),
              ("juling.{root}", "/", "https://zszm.{root}/app/shell/m/juling")]
+
+# A security overlay may intentionally preserve an older production module set.
+# Require world-map when the candidate registers it, without deploying it merely
+# because the operator's source checkout has moved ahead of production.
+if any(link.get("key") == "world-map" for link in json.loads((HERE / "app/portal.json").read_text(encoding="utf-8"))["links"]):
+    CHECKS.append(("iridescently.xyz", "/app/modules/world-map/", 200))
 
 
 def root_checks():
@@ -206,6 +211,21 @@ def req(host, path, full=False):
 
 
 def main():
+    # The forced production stage command already runs this verifier. Keep Host
+    # isolation mandatory here so a future release cannot silently omit it.
+    ingress = subprocess.run([sys.executable, "-X", "utf8", str(HERE / "security_ingress_test.py"), "--host-only"],
+                             capture_output=True, text=True, encoding="utf-8", errors="replace")
+    print(ingress.stdout, end="")
+    if ingress.returncode:
+        print(ingress.stderr[-6000:])
+        print("FAIL: Host isolation / origin listener gate")
+        return 1
+    # The stage command returns only the last line, so carry the listener audit there.
+    audit = next((json.loads(line.split(" ", 1)[1]) for line in ingress.stdout.splitlines()
+                  if line.startswith("ORIGIN-LISTENERS ")), {"skipped": "audit line missing"})
+    listeners = ("not audited (%s)" % audit["skipped"] if "skipped" in audit else
+                 "%d listening, non-loopback %s" % (audit["listening"], ",".join(
+                     "%s:%d/%s" % (x["address"], x["port"], x["protocol"]) for x in audit["non_loopback"]) or "none"))
     with socket.socket() as probe:
         if probe.connect_ex(("127.0.0.1", PORT)) == 0:
             print("FAIL: requested test port is already in use", PORT)
@@ -272,7 +292,7 @@ def main():
         else:
             fails += 1
             print("FAIL  zszm ecology response differs from the candidate file")
-        print("\n%d/%d passed" % (total - fails, total))
+        print("\n%d/%d passed; origin listeners: %s" % (total - fails, total, listeners))
         return 1 if fails else 0
     finally:
         proc.terminate()

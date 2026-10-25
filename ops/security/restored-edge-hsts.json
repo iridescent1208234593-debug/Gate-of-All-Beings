@@ -1,0 +1,11 @@
+{
+  "description": "Restored apex/Huiguan/OC: HSTS on every HTTPS response, including nginx-served paths",
+  "expression": "(http.host in {\"iridescently.xyz\" \"huiguan.iridescently.xyz\" \"oc.iridescently.xyz\"} and http.request.scheme eq \"https\")",
+  "action": "rewrite",
+  "action_parameters": {
+    "headers": {
+      "strict-transport-security": {"operation": "set", "value": "max-age=86400"}
+    }
+  },
+  "enabled": true
+}

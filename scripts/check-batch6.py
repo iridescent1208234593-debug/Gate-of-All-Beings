@@ -43,6 +43,7 @@ def main():
         for directory in (ROOT / "server", ROOT / "portal/huiguan/tests", ROOT / "server/app/src/cards/tests"):
             for file in sorted(directory.glob("test_*.py")):
                 run(str(file.relative_to(ROOT)), [sys.executable, "-X", "utf8", str(file)])
+        run("ingress security regression", [sys.executable, "-X", "utf8", "server/security_ingress_test.py"])
         node = shutil.which("node")
         run("release boundary and hash contracts", [node, "scripts/test-release-artifacts.mjs"])
         publisher_check = ROOT / "scripts/test-publish-release.mjs"
