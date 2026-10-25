@@ -1,3 +1,4 @@
+import siteDomains from '../../../../../../shared/site-domains.mjs';
 import { useEffect, useRef } from 'react';
 import './account-link-reminder.css';
 
@@ -7,7 +8,7 @@ export function AccountLinkReminder({ onContinue }: { onContinue: () => void }) 
   useEffect(() => { login.current?.focus(); }, []);
   const returnTo = new URL(window.location.href);
   returnTo.hash = '';
-  const loginUrl = `https://huiguan.iridescently.xyz/?openauth=1&next=${encodeURIComponent(returnTo.toString())}`;
+  const loginUrl = `${siteDomains.url('huiguan')}/?openauth=1&next=${encodeURIComponent(returnTo.toString())}`;
   return <div className="gate-account-mask">
     <section className="gate-account-dialog" role="dialog" aria-modal="true" aria-labelledby="gate-account-title" aria-describedby="gate-account-copy">
       <span className="gate-account-kicker">众生之门 · 建档完成</span>

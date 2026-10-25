@@ -18,14 +18,17 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[3]
 TEMP = tempfile.TemporaryDirectory(prefix="huiguan-originals-")
-DATA = Path(TEMP.name)
-os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(DATA)
+sys.path.insert(0, str(ROOT / "server"))
+from testing_storage import configure
+from storage_paths import assets_root
+DATA = configure(TEMP.name)
+os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(ROOT)
 os.environ["HX_SSO_SECRET"] = "test-only-original-secret"
-UPLOADS = DATA / "portal" / "huiguan" / "assets" / "uploads"
-UPLOADS.mkdir(parents=True)
+UPLOADS = assets_root() / "managed" / "huiguan" / "uploads"
+UPLOADS.mkdir(parents=True, exist_ok=True)
 
-WORLD = DATA / "assets" / "罗小黑战记数据库"
-(WORLD / "db").mkdir(parents=True)
+WORLD = assets_root() / "source" / "罗小黑战记数据库"
+(WORLD / "db").mkdir(parents=True, exist_ok=True)
 (WORLD / "images").mkdir()
 
 
@@ -40,7 +43,7 @@ upload_name = "a" * 64 + ".png"
 upload_original = big_png(UPLOADS / upload_name, (2000, 1500))
 unclassified_original = big_png(WORLD / "images" / "unclassified.png", (1900, 1300))
 
-wv = sqlite3.connect(WORLD / "db" / "worldview_luoxiaohei_v4.db")
+wv = sqlite3.connect(DATA / "worldview" / "worldview_luoxiaohei_v4.db")
 wv.executescript("""
 CREATE TABLE characters (id INTEGER PRIMARY KEY, name TEXT, aliases TEXT, category TEXT, avatar_id INTEGER, merged_to INTEGER, type TEXT, species TEXT, deity TEXT);
 CREATE TABLE character_images (id INTEGER PRIMARY KEY, character_id INTEGER, image_path TEXT, sort_order INTEGER, image_type TEXT, description TEXT);
@@ -61,7 +64,7 @@ wv.execute("INSERT INTO shared_assets VALUES (1, 'c', 'n', '', '', 1, ?)", (str(
 wv.commit()
 wv.close()
 
-users = sqlite3.connect(DATA / "portal" / "huiguan" / "users.db")
+users = sqlite3.connect(DATA / "huiguan" / "users.db")
 users.executescript("""
 CREATE TABLE local_users (uid INTEGER PRIMARY KEY, username TEXT, role TEXT, status TEXT);
 CREATE TABLE user_flags (kind TEXT, uid TEXT, status TEXT, role TEXT, PRIMARY KEY(kind, uid));
@@ -244,6 +247,32 @@ class OriginalImageAccessTest(unittest.TestCase):
             for path in paths:
                 self.assertEqual(self.get(path, who)[0], 404, (who, path))
                 self.assertEqual(self.get(path, who, method="HEAD")[0], 404, (who, path, "HEAD"))
+
+    def test_relocated_originals_use_verified_roots_and_reject_traversal(self):
+        marker_path = DATA / ".storage-ready.json"
+        original_marker = marker_path.read_bytes()
+        marker = json.loads(original_marker)
+        marker["legacy_asset_roots"] = ["C:\\retired-project\\assets"]
+        marker_path.write_text(json.dumps(marker), encoding="utf-8")
+        try:
+            stored = "C:\\retired-project\\assets\\罗小黑战记数据库\\images\\char.png"
+            self.assertEqual(huiguan._safe_image_path(stored), str(WORLD / "images" / "char.png"))
+            self.assertIsNone(huiguan._safe_image_path("C:\\retired-project\\assets\\..\\users.png"))
+            self.assertIsNone(huiguan._safe_image_path("C:\\unapproved\\assets\\罗小黑战记数据库\\images\\char.png"))
+            self.assertIsNone(huiguan._safe_image_path(str(DATA / "huiguan" / "users.db")))
+        finally:
+            marker_path.write_bytes(original_marker)
+
+    def test_worldview_and_cache_are_external_and_missing_db_is_not_recreated(self):
+        self.assertEqual(Path(huiguan.WV_DB), DATA / "worldview" / "worldview_luoxiaohei_v4.db")
+        self.assertEqual(Path(huiguan.WV_IMG_DIR), assets_root() / "managed" / "worldview" / "images")
+        for path in (huiguan.DATA_FILE, huiguan.USER_DB, huiguan.UPLOAD_DIR, huiguan.PREVIEW_DIR, huiguan.THUMB_DIR):
+            self.assertFalse(Path(path).is_relative_to(ROOT), path)
+        missing = DATA / "worldview" / "missing.db"
+        with mock.patch.object(huiguan, "WV_DB", str(missing)):
+            with self.assertRaises(sqlite3.OperationalError):
+                huiguan.wv()
+        self.assertFalse(missing.exists())
 
     def test_sso_user_exposes_only_the_server_owner_decision(self):
         for who, expected in ((self.GUEST, False), (self.MEMBER, False), (self.HALL_ADMIN, False), (self.OWNER, True)):

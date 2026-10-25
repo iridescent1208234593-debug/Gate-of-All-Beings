@@ -1,7 +1,11 @@
 import sqlite3
 import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+from storage_paths import data_root, require_ready
 
-DB_PATH = r'E:\罗小黑战记数据库\db\worldview_luoxiaohei_v4.db'
+require_ready()
+DB_PATH = str(data_root() / 'worldview' / 'worldview_luoxiaohei_v4.db')
 
 def get_tables():
     conn = sqlite3.connect(DB_PATH)

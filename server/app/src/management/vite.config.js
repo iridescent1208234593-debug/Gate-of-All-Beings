@@ -1,3 +1,5 @@
+const siteDomains = createRequire(import.meta.url)('../../../../shared/site-domains.js');
+import { createRequire } from 'node:module';
 import { defineConfig } from 'vite';
 import { realpathSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -10,8 +12,8 @@ export default defineConfig({
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const host = String(req.headers.host || '').split(':')[0].toLowerCase();
-        if (host === 'lingjing.iridescently.xyz' && !req.url?.startsWith('/api/')) {
-          res.writeHead(308, { Location: 'https://zszm.iridescently.xyz/#management' });
+        if (siteDomains.service(host) === 'lingjing' && !req.url?.startsWith('/api/')) {
+          res.writeHead(308, { Location: siteDomains.url('zszm', '/#management', host) });
           res.end();
           return;
         }
@@ -20,8 +22,8 @@ export default defineConfig({
     },
   }],
   server: {
-    fs: { allow: ['.', '../../../../shared/shared-types', '../../../../shared/shared-ui'].map(p => realpathSync(fileURLToPath(new URL(p, import.meta.url)))) },
-    allowedHosts: ['.iridescently.xyz', '.trycloudflare.com'],
+    fs: { allow: ['.', '../../../../shared', '../../../../shared/shared-types', '../../../../shared/shared-ui'].map(p => realpathSync(fileURLToPath(new URL(p, import.meta.url)))) },
+    allowedHosts: siteDomains.allowedHosts,
       port: 5179,
     open: false,
   },

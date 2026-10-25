@@ -1,3 +1,5 @@
+const siteDomains = createRequire(import.meta.url)('../../../../shared/site-domains.js');
+import { createRequire } from 'node:module';
 // 重生之门：纯静态项目，vite 仅用作静态服务器（未装依赖，走 npx 缓存）
 // root 指向 public，/ 直接命中 index.html
 import path from 'node:path'
@@ -18,7 +20,7 @@ export default {
     host: '127.0.0.1',
     port: 5176,
     strictPort: true,
-    allowedHosts: ['.iridescently.xyz', '.trycloudflare.com'],
+    allowedHosts: siteDomains.allowedHosts,
     // public/ui/images 是 junction（真实指向 portal/huiguan/design-system/ui），
     // 必须把 junction 真实路径加入 fs.allow，否则 vite 生成的 /@fs/ 图片请求会被 403
     fs: {

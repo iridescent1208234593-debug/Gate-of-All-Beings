@@ -23,7 +23,8 @@ HERE = Path(__file__).resolve().parents[1]
 BOOT = r'''
 import json, os, sys, http.server
 sys.path.insert(0, sys.argv[1])
-import server_huiguan as s
+sys.path.insert(0, str(__import__("pathlib").Path(sys.argv[1]).parents[1] / "server"))
+from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s
 s.init_user_db()
 conn = s.db()
 sids = {}
@@ -49,7 +50,9 @@ class FanartVolumesTest(unittest.TestCase):
         cls.root = tempfile.mkdtemp(prefix="fanart-volumes-")
         (Path(cls.root) / "portal" / "huiguan").mkdir(parents=True)
         cls.err = open(os.path.join(cls.root, "server.err"), "w")
-        env = {**os.environ, "IRIDESCENTLY_PROJECT_ROOT": cls.root, "IRIDESCENTLY_ENVIRONMENT": "development", "PYTHONIOENCODING": "utf-8"}
+        env = {**os.environ, "IRIDESCENTLY_STORAGE_ROOT": cls.root, "IRIDESCENTLY_ENVIRONMENT": "test", "PYTHONIOENCODING": "utf-8"}
+        for key in ("DATA", "ASSETS", "CACHE", "RELEASE", "BACKUP", "PROJECT"):
+            env.pop(f"IRIDESCENTLY_{key}_ROOT", None)
         cls.proc = subprocess.Popen([sys.executable, "-c", BOOT, str(HERE)], env=env, stdout=subprocess.PIPE, stderr=cls.err, text=True)
         info = json.loads(cls.proc.stdout.readline())
         cls.port, cls.sessions, cls.arts, cls.db_path = info["port"], info["sessions"], info["arts"], info["db"]

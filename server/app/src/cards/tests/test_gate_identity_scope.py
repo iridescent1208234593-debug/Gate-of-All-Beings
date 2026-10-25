@@ -34,8 +34,9 @@ class GateIdentityScopeTest(unittest.TestCase):
         # that unrelated side effect inside a disposable test project.
         (root / "server" / "app" / "src" / "cards").mkdir(parents=True)
         cls.environment = patch.dict(os.environ, {
-            "IRIDESCENTLY_PROJECT_ROOT": str(root),
-            "IRIDESCENTLY_ENVIRONMENT": "development",
+            "IRIDESCENTLY_PROJECT_ROOT": str(PROJECT),
+            "IRIDESCENTLY_STORAGE_ROOT": str(root),
+            "IRIDESCENTLY_ENVIRONMENT": "test",
             "HX_SSO_SECRET": "test-only-not-a-production-secret",
         })
         cls.environment.start()
@@ -43,10 +44,12 @@ class GateIdentityScopeTest(unittest.TestCase):
         cls.path_before = list(sys.path)
         sys.path.insert(0, str(PROJECT / "server"))
         cls.addClassCleanup(lambda: sys.path.__setitem__(slice(None), cls.path_before))
+        from testing_storage import configure
+        configure(root)
         spec = importlib.util.spec_from_file_location("gate_identity_scope_test_server", SOURCE)
         cls.module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(cls.module)
-        assert cls.module.PROJECT_ROOT == str(root)
+        assert cls.module.PROJECT_ROOT == str(PROJECT)
 
     def setUp(self):
         module = self.module
@@ -161,7 +164,7 @@ class GateIdentityScopeTest(unittest.TestCase):
     def test_matching_multipart_owner_keeps_upload_working(self):
         status, result = self.request(account="B", identity=self.draft(owner="B"), multipart=True)
         self.assertEqual(status, 200)
-        self.upload.assert_called_once_with(b"test-image-payload", "image/webp", self.module.PROJECT_ROOT)
+        self.upload.assert_called_once_with(b"test-image-payload", "image/webp", self.module.DATA_ROOT)
         self.assertEqual(result["identity"]["avatar_mode"], "upload")
         self.assertEqual(self.write.call_args.args[1:3], ("local", "B"))
 

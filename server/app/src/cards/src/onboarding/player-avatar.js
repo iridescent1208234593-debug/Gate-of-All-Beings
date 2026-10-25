@@ -1,3 +1,4 @@
+import siteDomains from '../../../../../../shared/site-domains.mjs';
 /** One SVG window/overlay geometry for the setup preview and world HUD. */
 import frameArt from './media/appearance-choices/custom-frame.svg?raw';
 import mirrorArt from './media/appearance-choices/mirror-frame.svg?raw';
@@ -6,7 +7,7 @@ let viewId = 0;
 export function resolvePlayerAvatar(profile) {
   return profile.avatar_mode === 'default'
     ? AVATARS[`./media/race-avatars/${profile.avatar_frame_id}.png`] || ''
-    : profile.avatar_asset_id?.startsWith('/assets/uploads/') ? `https://huiguan.iridescently.xyz${profile.avatar_asset_id}` : profile.avatar_asset_id || '';
+    : profile.avatar_asset_id?.startsWith('/assets/uploads/') ? `${siteDomains.url('huiguan')}${profile.avatar_asset_id}` : profile.avatar_asset_id || '';
 }
 export function createPlayerAvatar(host, { mirror = false } = {}) {
   const suffix = `-view-${++viewId}`;

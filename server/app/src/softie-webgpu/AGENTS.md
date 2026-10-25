@@ -13,7 +13,7 @@
 - 保留原生 WebGPU 初始化和物理核心，不新增渲染通道或 WebGL 回退。
 - 灵体皮肤可替换，所有可见部件跟随统一软体形变。
 - 输入、失焦、捕获丢失和离开场景时清理 WASD 与抓取。
-- 参数保存只写 .local/spirit-settings.json；本机配置不纳入 Git。
+- 参数保存写统一外置存储的 data/spirit/spirit-settings.json；本机配置不纳入 Git。
 
 ## 验证
 - 相关轻单测：node --test tests/<name>.test.js。

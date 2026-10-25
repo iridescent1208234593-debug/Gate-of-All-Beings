@@ -6,6 +6,7 @@ import sqlite3
 import hashlib
 from io import BytesIO
 from pathlib import Path
+from storage_paths import data_root, huiguan_data_dir, managed_asset_dir, require_ready
 
 
 ASSET_RE = re.compile(r"^/assets/uploads/[a-f0-9]{32,64}\.(?:png|jpg|webp|gif)$")
@@ -27,8 +28,10 @@ def init_schema(conn):
 
 
 def open_db(project_root=None):
-    root = Path(project_root or os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[1]))
-    database = root / "portal" / "huiguan" / "users.db"
+    if project_root is None or Path(project_root).resolve() == data_root():
+        require_ready()
+    root = Path(project_root) if project_root is not None else data_root()
+    database = huiguan_data_dir(root) / "users.db"
     database.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(database, timeout=10)
     conn.row_factory = sqlite3.Row
@@ -43,11 +46,14 @@ def valid_asset_url(value):
 
 
 def asset_public_url(value):
-    return "https://huiguan.iridescently.xyz" + value if valid_asset_url(value) else ""
+    # The ingress serves uploads through the permission-preserving Huiguan image handler.
+    return value if valid_asset_url(value) else ""
 
 
 def store_avatar_image(raw, mime, project_root=None):
     """Decode, center-crop, resize and strip metadata from an avatar upload."""
+    if project_root is None or Path(project_root).resolve() == data_root():
+        require_ready()
     allowed = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp", "image/gif": ".gif"}
     detected = None
     if raw.startswith(b"\x89PNG\r\n\x1a\n"):
@@ -79,9 +85,9 @@ def store_avatar_image(raw, mime, project_root=None):
         image.save(output, format="PNG" if output_mime == "image/png" else "JPEG", optimize=True, quality=88)
     except (OSError, Image.DecompressionBombError) as error:
         raise ValueError("头像图片损坏或无法解码") from error
-    root = Path(project_root or os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[1]))
+    root = Path(project_root) if project_root is not None else data_root()
     name = hashlib.sha256(output.getvalue()).hexdigest() + (".png" if output_mime == "image/png" else ".jpg")
-    target = root / "portal" / "huiguan" / "assets" / "uploads" / name
+    target = managed_asset_dir("huiguan", "uploads", root=root) / name
     target.parent.mkdir(parents=True, exist_ok=True)
     if not target.exists():
         target.write_bytes(output.getvalue())
@@ -90,6 +96,8 @@ def store_avatar_image(raw, mime, project_root=None):
 
 def store_source_image(raw, mime, project_root=None):
     """Validate and expose an existing OC image as a cropper source without altering it."""
+    if project_root is None or Path(project_root).resolve() == data_root():
+        require_ready()
     allowed = {"image/png": ".png", "image/jpeg": ".jpg", "image/webp": ".webp", "image/gif": ".gif"}
     signatures = {"image/png": raw.startswith(b"\x89PNG\r\n\x1a\n"),
                   "image/jpeg": raw.startswith(b"\xff\xd8\xff"),
@@ -105,9 +113,9 @@ def store_source_image(raw, mime, project_root=None):
             image.verify()
     except (OSError, Image.DecompressionBombError) as error:
         raise ValueError("图片损坏或无法解码") from error
-    root = Path(project_root or os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[1]))
+    root = Path(project_root) if project_root is not None else data_root()
     name = hashlib.sha256(raw).hexdigest() + allowed[mime]
-    target = root / "portal" / "huiguan" / "assets" / "uploads" / name
+    target = managed_asset_dir("huiguan", "uploads", root=root) / name
     target.parent.mkdir(parents=True, exist_ok=True)
     if not target.exists():
         target.write_bytes(raw)

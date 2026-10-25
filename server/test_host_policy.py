@@ -18,6 +18,7 @@ class Request:
         self.headers = Headers(headers)
         self.client_address = (peer, 12345)
         self.path = path
+        self.command = "GET"
         self.close_connection = False
         self.response = []
 

@@ -1,3 +1,4 @@
+import siteDomains from '../../../../../../shared/site-domains.mjs';
 // Web Audio API Synthesizer for high-quality sound effects
 
 let audioCtx: AudioContext | null = null;
@@ -126,8 +127,8 @@ export function playGateUnfold(volume = 0.5) {
 
 // 众生之门原视频已缓存的 CDN 地址（各域名 assets 下，6s 原片，含 AAC 音轨）
 const DEFAULT_VIDEO_AUDIO_URLS = [
-  'https://huiguan.iridescently.xyz/assets/luoxiaohei_ep29.mp4',
-  'https://oc.iridescently.xyz/assets/luoxiaohei_ep29.mp4',
+  siteDomains.url('huiguan', '/assets/luoxiaohei_ep29.mp4'),
+  siteDomains.url('oc', '/assets/luoxiaohei_ep29.mp4'),
 ];
 
 let cdnAudioEl: HTMLAudioElement | null = null;

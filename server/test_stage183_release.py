@@ -22,7 +22,9 @@ CARDS = SERVER_DIR / "app" / "src" / "cards" / "server.py"
 
 
 def load_cards(project_root):
-    os.environ.update(IRIDESCENTLY_PROJECT_ROOT=str(project_root), IRIDESCENTLY_ENVIRONMENT="production", PORT="0")
+    from testing_storage import configure
+    configure(project_root)
+    os.environ["PORT"] = "0"
     spec = importlib.util.spec_from_file_location("cards_server_under_test", CARDS)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

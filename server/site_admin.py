@@ -11,6 +11,7 @@ being a 会馆 admin does not grant main-site editing, matching existing practic
 import os
 import sqlite3
 from pathlib import Path
+from storage_paths import data_root, huiguan_data_dir
 
 
 # The site owner's two accounts. Add entries here; never compare a bare uid.
@@ -18,8 +19,8 @@ SITE_OWNER_ACCOUNTS = frozenset({("usso", "7"), ("local", "7")})
 
 
 def _users_db(project_root=None):
-    root = Path(project_root or os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[1]))
-    return root / "portal" / "huiguan" / "users.db"
+    root = Path(project_root) if project_root is not None else data_root()
+    return huiguan_data_dir(root) / "users.db"
 
 
 def account_usable(kind, uid, project_root=None):

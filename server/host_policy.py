@@ -1,14 +1,6 @@
 """Strict host and proxy-header rules for the public portal ingress."""
 import ipaddress
-import re
-from urllib.parse import urlsplit
-
-PRODUCTION_HOSTS = frozenset({
-    "iridescently.xyz", "www.iridescently.xyz", "huiguan.iridescently.xyz",
-    "oc.iridescently.xyz", "spirit.iridescently.xyz", "zszm.iridescently.xyz",
-    "game.iridescently.xyz", "juling.iridescently.xyz", "lingjing.iridescently.xyz",
-})
-DEVELOPMENT_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
+from site_domains import DEVELOPMENT_HOSTS, PRODUCTION_HOSTS, normalize_host, request_origin_allowed
 FORWARDING_HEADERS = frozenset({
     "forwarded", "x-forwarded-for", "x-forwarded-host", "x-forwarded-port",
     "x-forwarded-prefix", "x-forwarded-proto", "x-forwarded-scheme",
@@ -16,31 +8,7 @@ FORWARDING_HEADERS = frozenset({
     "x-original-url", "x-rewrite-url", "x-url-scheme", "front-end-https",
     "x-real-ip", "x-client-ip", "true-client-ip", "cf-connecting-ip", "cf-visitor",
 })
-_HOST_AUTHORITY = re.compile(r"\A[A-Za-z0-9.\[\]:-]+\Z")
-_DNS_NAME = re.compile(r"\A[a-z0-9]+(?:[.-][a-z0-9]+)*\Z")
-
-
-def normalize_host(value, allow_any_port=False):
-    """Return a canonical hostname, rejecting malformed authorities and unusual ports."""
-    if not value or not _HOST_AUTHORITY.fullmatch(value):
-        return None
-    try:
-        parsed = urlsplit("//" + value)
-        host, port = parsed.hostname, parsed.port
-        if not host or parsed.username is not None or parsed.path or parsed.query or parsed.fragment:
-            return None
-        if host.endswith(".") or (port is not None and port not in (80, 443) and not allow_any_port):
-            return None
-        host = host.lower()
-        if ":" in host:
-            ipaddress.IPv6Address(host)  # IP literals are parsed but never in the production allowlist.
-        elif not _DNS_NAME.fullmatch(host) or len(host) > 253:
-            return None
-        elif any(len(label) > 63 for label in host.split(".")):
-            return None
-        return host
-    except ValueError:
-        return None
+SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 
 def forwarded_headers(incoming, host, secure, websocket=False):
@@ -85,4 +53,14 @@ def enforce_request(handler, environment="production"):
 
     handler._external_host = host
     handler._trusted_external_scheme = secure
+    # Navigations from search results, shared links and OAuth providers carry foreign Referers;
+    # only state-changing requests and WebSocket upgrades owe a same-root Origin at ingress.
+    upgrade = any(value.strip().lower() == "websocket" for value in handler.headers.get_all("Upgrade", []))
+    if (upgrade or handler.command not in SAFE_METHODS) and not request_origin_allowed(handler, missing=not upgrade):
+        handler.close_connection = True
+        handler.send_response_only(403)
+        handler.send_header("Content-Length", "0")
+        handler.send_header("Connection", "close")
+        handler.end_headers()
+        return False
     return True

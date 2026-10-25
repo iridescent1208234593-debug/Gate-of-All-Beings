@@ -1,6 +1,7 @@
 """Account recovery: hashed answers, persistent throttling, atomic password updates."""
 import time
 import unicodedata
+from site_domains import request_origin_allowed
 
 
 def init_schema(conn):
@@ -15,8 +16,7 @@ def normalized_answer(value):
 
 def handle_security(handler, action, api):
     reply = handler._json
-    origin = handler.headers.get('Origin')
-    if origin and origin not in ('https://huiguan.iridescently.xyz', 'http://127.0.0.1:8089', 'http://localhost:8089'):
+    if not request_origin_allowed(handler):
         return reply(403, {'error': '请从会馆账户页面操作'})
     if handler.headers.get('Content-Type', '').split(';')[0].strip() != 'application/json':
         return reply(415, {'error': '请使用账户页面提交'})
@@ -110,5 +110,5 @@ def handle_security(handler, action, api):
             conn.close()
     if action == 'setup':
         return reply(200, {'ok': True, 'message': '找回问题已保存，请记住答案。'})
-    cookies = ['session=; Path=/; Domain=.iridescently.xyz; Max-Age=0; HttpOnly; Secure; SameSite=Lax', handler._sso_clear_cookie()]
+    cookies = [handler._session_clear_cookie(), handler._sso_clear_cookie()]
     return reply(200, {'ok': True, 'message': '密码已更新，请使用新密码重新登录。'}, cookie=cookies)

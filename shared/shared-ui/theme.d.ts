@@ -1,6 +1,6 @@
 /**
  * 全站主题内核（window.XTheme，普通 script）。
- * 偏好存 cookie `hx_theme`（light|dark|auto），跨 *.iridescently.xyz 子站共享；
+ * 偏好存 cookie `hx_theme`（light|dark|auto），在同一批准根域的子站间共享；
  * 生效主题写 <html data-theme>。变更时派发 document 事件 `xthemechange`。
  */
 export interface ThemeChangeDetail {

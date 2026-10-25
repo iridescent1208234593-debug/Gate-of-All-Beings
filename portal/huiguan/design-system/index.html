@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script src="/shared/site-domains.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -141,11 +142,11 @@
     <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">用于人物关系图：圆形头像 + 下方名称。头像取自角色设定图（缩略），无图时回退为首字母圆点。</p>
     <div style="display:flex;gap:24px;align-items:flex-end;">
       <div style="text-align:center;">
-        <img src="https://huiguan.iridescently.xyz/api/official/img?cid=1&n=0&t=1" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--qc-accent);">
+        <img src="/api/official/img?cid=1&n=0&t=1" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--qc-accent);">
         <div style="font-size:12px;margin-top:4px;">罗小黑</div>
       </div>
       <div style="text-align:center;">
-        <img src="https://huiguan.iridescently.xyz/api/official/img?cid=2&n=0&t=1" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--qc-gold);">
+        <img src="/api/official/img?cid=2&n=0&t=1" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--qc-gold);">
         <div style="font-size:12px;margin-top:4px;">无限</div>
       </div>
       <div style="text-align:center;">
@@ -203,7 +204,7 @@
     <h2 class="qc-h2">站点导航 Site Bar</h2>
     <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">本页顶部就是真实组件。三站与模块共用一条 48px 全局栏：像素标 + 西木会馆 / 众生之门 / 节气画廊三站并列，当前站点金色下划线；右侧依次是页面插槽、语言、账户。代码：<code>shared/shared-ui/site-nav.js</code>。</p>
     <div style="display:grid;gap:8px;max-width:640px;font-size:13px;line-height:1.8;">
-      <div><strong>普通页</strong>：<code>&lt;script src="https://iridescently.xyz/shared/shared-ui/site-nav.js"&gt;</code>，自动给 body 让出栏高。</div>
+      <div><strong>普通页</strong>：<code>&lt;script src="/shared/shared-ui/site-nav.js"&gt;</code>，自动给 body 让出栏高。</div>
       <div><strong>沉浸首屏</strong>（节气画廊）：加 <code>data-variant="overlay"</code>，透明叠在画面上，不让位。</div>
       <div><strong>站内子导航</strong>（众生之门页签、模块壳）：在全局栏下方放一条米白本地栏，<code>top: var(--qc-nav-h)</code> 粘顶；不要再画第二条深色栏。</div>
       <div><strong>页面自己的按钮</strong>：放进 <code>IridescentlyNav.slot()</code>，不要用 position:fixed 占角落。</div>
@@ -223,9 +224,9 @@
     <h2 class="qc-h2">品牌标 Mark</h2>
     <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">像素直角坐标系：三条坐标轴从原点伸出，端点是红、绿、蓝三颗球。16×16 网格，只能整数倍缩放（image-rendering: pixelated）；放在深色上时垫一块宣纸色底。文件：<code>shared/shared-ui/brand/iridescently-mark.svg</code>（PNG 副本 <code>portal/www/assets/iridescently-mark.png</code>）。</p>
     <div class="row">
-      <img src="https://iridescently.xyz/shared/shared-ui/brand/iridescently-mark.svg" width="64" height="64" alt="Iridescently 像素标" style="image-rendering:pixelated">
-      <img src="https://iridescently.xyz/shared/shared-ui/brand/iridescently-mark.svg" width="32" height="32" alt="" style="image-rendering:pixelated">
-      <span style="display:inline-grid;place-items:center;width:44px;height:44px;border-radius:8px;background:#13241e"><img src="https://iridescently.xyz/shared/shared-ui/brand/iridescently-mark.svg" width="28" height="28" alt="" style="padding:3px;border-radius:6px;background:#f4eedf;image-rendering:pixelated"></span>
+      <img src="/shared/shared-ui/brand/iridescently-mark.svg" width="64" height="64" alt="Iridescently 像素标" style="image-rendering:pixelated">
+      <img src="/shared/shared-ui/brand/iridescently-mark.svg" width="32" height="32" alt="" style="image-rendering:pixelated">
+      <span style="display:inline-grid;place-items:center;width:44px;height:44px;border-radius:8px;background:#13241e"><img src="/shared/shared-ui/brand/iridescently-mark.svg" width="28" height="28" alt="" style="padding:3px;border-radius:6px;background:#f4eedf;image-rendering:pixelated"></span>
     </div>
   </section>
 
@@ -240,6 +241,6 @@
 
 </div>
 <script src="qc-modal.js?v=20261019"></script>
-<script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
 </body>
 </html>

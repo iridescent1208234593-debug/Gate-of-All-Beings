@@ -18,9 +18,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMP = tempfile.TemporaryDirectory(prefix="account-progress-", ignore_cleanup_errors=True)
-DATA = Path(TEMP.name)
-(DATA / "portal" / "huiguan").mkdir(parents=True)
-os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(DATA)
+sys.path.insert(0, str(ROOT / "server"))
+from testing_storage import configure
+from storage_paths import assets_root
+DATA = configure(TEMP.name)
+(DATA / "huiguan").mkdir(parents=True, exist_ok=True)
+os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(ROOT)
 os.environ.setdefault("HX_SSO_SECRET", "test-secret-for-account-progress")
 sys.path.insert(0, str(ROOT / "server"))
 sys.path.insert(0, str(ROOT))
@@ -29,7 +32,7 @@ huiguan = importlib.import_module("portal.huiguan.server_huiguan")
 import account_progress as ap  # noqa: E402
 import hx_sso  # noqa: E402
 
-DB = DATA / "portal" / "huiguan" / "users.db"
+DB = DATA / "huiguan" / "users.db"
 seed = sqlite3.connect(DB)
 seed.executescript("""
 INSERT INTO local_users (uid, username, nickname, pass_hash, status, points) VALUES

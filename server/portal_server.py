@@ -28,7 +28,6 @@ ENVIRONMENT = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip().l
 # Production ingress must remain loopback-only; HOST is configurable only for local development.
 HOST = (os.environ.get("HOST", "127.0.0.1").strip() or "127.0.0.1") if ENVIRONMENT == "development" else "127.0.0.1"
 CODE_ROOT = Path(__file__).resolve().parents[1]
-ROOT = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", CODE_ROOT)).resolve()
 
 
 def _load(name, path):
@@ -42,13 +41,17 @@ def _load(name, path):
 sys.path.insert(0, str(CODE_ROOT / "server"))
 from base_static import BaseStaticHandler  # noqa: E402
 from host_policy import enforce_request, forwarded_headers  # noqa: E402
+from site_domains import service_name, site_url, cors_headers  # noqa: E402
+from storage_paths import data_root  # noqa: E402
+
+DATA_ROOT = data_root()
 
 www = _load("portal_www", CODE_ROOT / "portal" / "www" / "server.py")
 oc = _load("portal_oc", CODE_ROOT / "portal" / "oc" / "server.py")
 huiguan = _load("portal_huiguan", CODE_ROOT / "portal" / "huiguan" / "server_huiguan.py")
 
 APP_DIR = CODE_ROOT / "server" / "app"
-MODULES_DIR = ROOT / "server" / "app" / "modules"
+MODULES_DIR = Path(os.environ.get("IRIDESCENTLY_MODULES_ROOT", CODE_ROOT / "server" / "app" / "modules")).resolve()
 # Unhashed JS/CSS under modules/: 0 = always revalidate (default). Rollback to the old 4-hour cache:
 # set IRIDESCENTLY_MODULE_CODE_MAX_AGE=14400 and restart portal (see server/app/README.md).
 MODULE_CODE_MAX_AGE = max(0, int(os.environ.get("IRIDESCENTLY_MODULE_CODE_MAX_AGE", "0") or 0))
@@ -202,7 +205,8 @@ class PublicStatusHandler(BaseStaticHandler):
         self.send_response(200)
         self.send_header('Content-Type', 'application/json')
         self.send_header('Cache-Control', 'no-store')
-        self.send_header('Access-Control-Allow-Origin', '*')
+        for name, value in cors_headers(self, credentials=False):
+            self.send_header(name, value)
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
         if self.command != 'HEAD':
@@ -216,14 +220,14 @@ class ProgressHandler(BaseStaticHandler):
 
     def _serve(self):
         import account_progress
-        account_progress.handle(self, self.command, self.path, str(ROOT))
+        account_progress.handle(self, self.command, self.path, str(DATA_ROOT))
 
     do_GET = do_HEAD = do_POST = _serve
 
 
 def route(host, path):
     """-> (处理类, 配置 dict)。"""
-    h = (host or "").split(":")[0].lower()
+    h = service_name(host)
     p = (path or "").split("?")[0]
     if p == '/__server/status':
         return PublicStatusHandler, {}
@@ -232,24 +236,30 @@ def route(host, path):
         return ProgressHandler, {}
     if p.startswith('/shared/'):
         return StaticHandler, {"root": str(CODE_ROOT / "shared"), "strip": "/shared"}
-    if h == "huiguan.iridescently.xyz" or h.endswith(".huiguan.iridescently.xyz"):
+    # Shared code and public derived media have one same-origin path on every domain.
+    if p.startswith('/design-system/') or p in ('/avatar-cropper.js', '/avatar-cropper.css') or \
+            p.startswith(('/api/assets/', '/api/official/img', '/api/image-preview', '/assets/uploads/')):
         return huiguan.Handler, {}
-    if h == "oc.iridescently.xyz" or h.endswith(".oc.iridescently.xyz"):
+    if p in ('/assets/site-language.js', '/assets/iridescently-mark.png'):
+        return www.Handler, {}
+    if h == "huiguan":
+        return huiguan.Handler, {}
+    if h == "oc":
         return oc.Handler, {}
     legacy_destinations = {
-        "game.iridescently.xyz": "https://zszm.iridescently.xyz/#home",
-        "lingjing.iridescently.xyz": "https://zszm.iridescently.xyz/#management",
-        "juling.iridescently.xyz": "https://zszm.iridescently.xyz/app/shell/m/juling",
+        "game": "/#home",
+        "lingjing": "/#management",
+        "juling": "/app/shell/m/juling",
     }
     if h in legacy_destinations:
-        if h == "juling.iridescently.xyz" and p.startswith("/api/"):
+        if h == "juling" and p.startswith("/api/"):
             return ProxyHandler, {"port": PROXY_PORTS["juling"], "strip": ""}
-        return RedirectHandler, {"location": legacy_destinations[h]}
+        return RedirectHandler, {"location": site_url("zszm", legacy_destinations[h], host)}
     if p == "/management" or p.startswith("/management/"):
         if "embed" in parse_qs(urlsplit(path or "").query):
             return StaticHandler, {"root": str(MODULES_DIR / "management"), "strip": "/management"}
-        return RedirectHandler, {"location": "https://zszm.iridescently.xyz/#management"}
-    if h == "zszm.iridescently.xyz" and (p == "/api/card-balance" or p.startswith("/api/card-balance/")):
+        return RedirectHandler, {"location": site_url("zszm", "/#management", host)}
+    if h == "zszm" and (p == "/api/card-balance" or p.startswith("/api/card-balance/")):
         return ProxyHandler, {"port": PROXY_PORTS["card-balance"], "strip": ""}
     if p == "/app/modules/softie/api/spirit-room/ws":
         return WebSocketProxyHandler, {"port": PROXY_PORTS["softie"], "strip": "/app/modules/softie"}
@@ -259,7 +269,7 @@ def route(host, path):
         if name == "cards" and p.startswith("/app/modules/cards/api/card-balance"):
             return ProxyHandler, {"port": PROXY_PORTS["card-balance"], "strip": "/app/modules/cards"}
         return ProxyHandler, {"port": PROXY_PORTS[name], "strip": "/app/modules/" + name}
-    if h == "spirit.iridescently.xyz":
+    if h == "spirit":
         if p == "/api/sso-user":
             return www.Handler, {}
         return StaticHandler, {
@@ -278,7 +288,7 @@ def route(host, path):
         return www.Handler, {}
     if p == "/ecology" or p.startswith("/ecology/"):
         return StaticHandler, {"root": str(MODULES_DIR / "ecology"), "strip": "/ecology"}
-    if h == "zszm.iridescently.xyz":
+    if h == "zszm":
         if p == "/api/sso-user":
             return www.Handler, {}
         if p.startswith("/api/"):

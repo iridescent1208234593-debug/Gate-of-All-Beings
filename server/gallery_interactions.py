@@ -4,6 +4,7 @@ import sqlite3
 import sys
 from pathlib import Path
 from contextlib import contextmanager
+from storage_paths import data_root, homepage_data_dir, source_asset_dir, require_ready
 
 
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
@@ -11,7 +12,8 @@ IMAGE_NAME = re.compile(r"^[^\\\x00]+$")
 
 
 def database_path(project_root):
-    return Path(project_root) / "data" / "homepage-gallery.sqlite3"
+    root = Path(project_root) if project_root is not None else data_root()
+    return homepage_data_dir(root) / "homepage-gallery.sqlite3"
 
 
 def _init_journal_mode(db):
@@ -32,6 +34,8 @@ def _init_journal_mode(db):
 
 
 def connect(project_root):
+    if project_root is None or Path(project_root).resolve() == data_root():
+        require_ready()
     path = database_path(project_root)
     path.parent.mkdir(parents=True, exist_ok=True)
     db = sqlite3.connect(path, timeout=10)
@@ -82,9 +86,8 @@ def find_original(project_root, runtime_dir, image):
     if not valid_image_name(image):
         return None
     roots = (
-        Path(project_root) / "asset-library" / "homepage-gallery",
-        Path(runtime_dir) / "assets" / "homepage" / "gallery-files",
-        Path(project_root) / "assets" / "罗小黑战记数据库" / "罗小黑节气贺图（gallery素材）",
+        source_asset_dir("homepage-gallery"),
+        source_asset_dir("罗小黑战记数据库", "罗小黑节气贺图（gallery素材）"),
     )
     for root in roots:
         target = (root / image).resolve()

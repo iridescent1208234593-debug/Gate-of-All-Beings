@@ -16,7 +16,7 @@ from pathlib import Path
 
 HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = (
-    "import sys, http.server; sys.path.insert(0, sys.argv[1]); import server_huiguan as s; "
+    "import sys, http.server; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'server')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; "
     "s.init_user_db(); http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()"
 )
 
@@ -63,10 +63,12 @@ class FanOwnerEditTest(unittest.TestCase):
         cls.root = tempfile.TemporaryDirectory()
         (Path(cls.root.name) / "portal" / "huiguan").mkdir(parents=True)
         port = free_port()
-        env = dict(os.environ, IRIDESCENTLY_PROJECT_ROOT=cls.root.name, IRIDESCENTLY_ENVIRONMENT="development",
+        env = dict(os.environ, IRIDESCENTLY_STORAGE_ROOT=cls.root.name, IRIDESCENTLY_ENVIRONMENT="test",
                    HX_SSO_SECRET="test-only-secret")
+        for key in ("DATA", "ASSETS", "CACHE", "RELEASE", "BACKUP", "PROJECT"):
+            env.pop(f"IRIDESCENTLY_{key}_ROOT", None)
         cls.proc = subprocess.Popen([sys.executable, "-c", LAUNCH, str(HUIGUAN), str(port)], env=env,
-                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                    stdout=subprocess.DEVNULL, stderr=None)
         cls.base = f"http://127.0.0.1:{port}"
         for _ in range(100):
             try:

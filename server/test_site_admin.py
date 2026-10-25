@@ -18,13 +18,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMP = tempfile.TemporaryDirectory(prefix="site-admin-", ignore_cleanup_errors=True)
-DATA = Path(TEMP.name)
-(DATA / "portal" / "huiguan").mkdir(parents=True)
-(DATA / "portal" / "www").mkdir(parents=True)
-os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(DATA)
+sys.path.insert(0, str(ROOT / "server"))
+from testing_storage import configure
+from storage_paths import assets_root
+DATA = configure(TEMP.name)
+(DATA / "huiguan").mkdir(parents=True, exist_ok=True)
+(DATA / "homepage" / "config").mkdir(parents=True, exist_ok=True)
+os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(ROOT)
 os.environ["HX_SSO_SECRET"] = "test-only-site-admin-secret"
 
-conn = sqlite3.connect(DATA / "portal" / "huiguan" / "users.db")
+conn = sqlite3.connect(DATA / "huiguan" / "users.db")
 conn.executescript("""
 CREATE TABLE local_users (uid INTEGER PRIMARY KEY, username TEXT, role TEXT, status TEXT);
 CREATE TABLE user_flags (kind TEXT, uid TEXT, status TEXT, role TEXT, PRIMARY KEY (kind, uid));
@@ -93,7 +96,7 @@ class SiteOwnerTest(unittest.TestCase):
         self.assertFalse(site_admin.is_site_owner({"kind": "local", "uid": "8"}))
 
     def test_disabled_owner_account_loses_admin(self):
-        db = DATA / "portal" / "huiguan" / "users.db"
+        db = DATA / "huiguan" / "users.db"
         conn = sqlite3.connect(db)
         try:
             conn.execute("UPDATE local_users SET status='banned' WHERE uid=7")

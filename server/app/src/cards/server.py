@@ -17,20 +17,24 @@ import base64
 from email import policy
 from email.parser import BytesParser
 from datetime import datetime, timezone
+from contextlib import closing
 
-PROJECT_ROOT = os.environ.get("IRIDESCENTLY_PROJECT_ROOT", str(__import__("pathlib").Path(__file__).resolve().parents[4]))
-# Code comes from the tree this file lives in (the published snapshot in production); PROJECT_ROOT is data only.
-# Importing from PROJECT_ROOT/server would let uncommitted source-tree edits go live on any restart.
+# Code and imports come from this checkout, independently of persistent storage.
 CODE_ROOT = str(__import__("pathlib").Path(__file__).resolve().parents[4])
 sys.path.insert(0, os.path.join(CODE_ROOT, "server"))
 from base_static import BaseStaticHandler
+from site_domains import oauth_callback
+from storage_paths import project_root as resolve_project_root, data_root, cards_data_dir, huiguan_data_dir, require_ready
 import hx_sso
 from account_profile import open_db as open_profile_db, get_profile, resolve_sso_identity, set_gate_identity, set_gate_identities, valid_asset_url, asset_public_url, store_avatar_image as normalize_avatar_image, store_source_image
+
+PROJECT_ROOT = str(resolve_project_root())
+DATA_ROOT = data_root()
 
 # ========== 配置 ==========
 CLIENT_ID = "client_1ab6604db009b647"
 CLIENT_SECRET = os.environ.get("ZSZM_CLIENT_SECRET", "")
-REDIRECT_URI = "https://zszm.iridescently.xyz/api/callback"
+REDIRECT_URI = oauth_callback("zszm")
 SSO_BASE = "https://sso.umrc.cn"
 SCOPES = "openid basic email profile"
 # ===========================================
@@ -40,11 +44,13 @@ COOKIE_SECURE = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip()
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("PORT", "5174"))
 
-USER_DB = os.path.join(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", str(__import__("pathlib").Path(__file__).resolve().parents[4])), "server", "app", "src", "cards", "users.db")
-UPDATE_FEEDBACK_DB = os.path.join(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", str(__import__("pathlib").Path(__file__).resolve().parents[4])), "server", "app", "src", "cards", "update-feedback.sqlite3")
-HUIGUAN_CHARACTERS = os.path.join(PROJECT_ROOT, "portal", "huiguan", "characters.json")
+USER_DB = str(cards_data_dir(DATA_ROOT) / "users.db")
+UPDATE_FEEDBACK_DB = str(cards_data_dir(DATA_ROOT) / "update-feedback.sqlite3")
+HUIGUAN_CHARACTERS = str(huiguan_data_dir(DATA_ROOT) / "characters.json")
 
 def init_user_db():
+    require_ready()
+    os.makedirs(os.path.dirname(USER_DB), exist_ok=True)
     conn = sqlite3.connect(USER_DB)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
@@ -83,7 +89,7 @@ def get_user(user_id):
 
 def init_update_feedback_db():
     os.makedirs(os.path.dirname(UPDATE_FEEDBACK_DB), exist_ok=True)
-    with sqlite3.connect(UPDATE_FEEDBACK_DB, timeout=10) as conn:
+    with closing(sqlite3.connect(UPDATE_FEEDBACK_DB, timeout=10)) as conn, conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS update_feedback (
                 voter_id TEXT PRIMARY KEY,
@@ -92,7 +98,7 @@ def init_update_feedback_db():
         """)
 
 def update_feedback(voter_id, vote):
-    with sqlite3.connect(UPDATE_FEEDBACK_DB, timeout=10) as conn:
+    with closing(sqlite3.connect(UPDATE_FEEDBACK_DB, timeout=10)) as conn, conn:
         if vote is None:
             conn.execute("DELETE FROM update_feedback WHERE voter_id=?", (voter_id,))
         else:
@@ -108,7 +114,7 @@ def update_feedback(voter_id, vote):
         return {"up": row[0], "down": row[1], "vote": current[0] if current else None}
 
 def get_update_feedback(voter_id):
-    with sqlite3.connect(UPDATE_FEEDBACK_DB, timeout=10) as conn:
+    with closing(sqlite3.connect(UPDATE_FEEDBACK_DB, timeout=10)) as conn, conn:
         row = conn.execute("""
             SELECT COALESCE(SUM(vote='up'), 0), COALESCE(SUM(vote='down'), 0)
             FROM update_feedback
@@ -173,7 +179,7 @@ def _get_session(handler):
 
 def _shared_user(handler):
     payload = hx_sso.read_cookie(handler.headers)
-    return resolve_sso_identity(payload, PROJECT_ROOT) if payload else None
+    return resolve_sso_identity(payload, DATA_ROOT) if payload else None
 
 
 def _owned_ocs(user):
@@ -195,7 +201,7 @@ def _owned_ocs(user):
                 try:
                     head, encoded = source.split(",", 1)
                     mime = head[5:].split(";", 1)[0]
-                    asset = store_source_image(base64.b64decode(encoded, validate=True), mime, PROJECT_ROOT)
+                    asset = store_source_image(base64.b64decode(encoded, validate=True), mime, DATA_ROOT)
                     source = asset
                 except (ValueError, TypeError):
                     continue
@@ -232,7 +238,7 @@ def _public_identity(identity):
 
 
 def _write_roster(user, roster, active):
-    conn = open_profile_db(PROJECT_ROOT)
+    conn = open_profile_db(DATA_ROOT)
     try:
         now = datetime.now(timezone.utc).isoformat()
         set_gate_identities(conn, user["kind"], user["uid"], roster, now)
@@ -499,7 +505,7 @@ class OAuthHandler(BaseStaticHandler):
             return self._json_resp(400, {"error": f"最多保存 {GATE_ROSTER_LIMIT} 个形象，请先删除一个"})
         if image:
             try:
-                avatar = normalize_avatar_image(*image, PROJECT_ROOT)
+                avatar = normalize_avatar_image(*image, DATA_ROOT)
                 mode = "upload"
             except ValueError as error:
                 return self._json_resp(400, {"error": str(error)})

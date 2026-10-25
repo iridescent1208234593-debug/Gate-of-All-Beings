@@ -1,3 +1,4 @@
+import siteDomains from '../../../../../../shared/site-domains.mjs';
 import './player-profile.css';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
@@ -9,7 +10,7 @@ export const GUEST_ROSTER_KEY = 'zszm.gateIdentities.v1';
 export const IDENTITY_LIMIT = 6;
 export const accountScope = (account: Account) => account.logged_in ? `${account.kind}:${account.user_id ?? account.uid}` : 'anonymous';
 export const identityComplete = (identity: GateIdentity) => Boolean(identity.display_name.trim() && identity.species_name.trim() && (identity.avatar_asset_id || identity.avatar_frame_id));
-export const identityAssetUrl = (asset: string) => asset.startsWith('/assets/uploads/') ? `https://huiguan.iridescently.xyz${asset}` : asset;
+export const identityAssetUrl = (asset: string) => asset.startsWith('/assets/uploads/') ? `${siteDomains.url('huiguan')}${asset}` : asset;
 export function readGuestIdentity(): GateIdentity {
   try {
     const saved = JSON.parse(sessionStorage.getItem(GUEST_IDENTITY_KEY) || 'null');

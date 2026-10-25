@@ -16,13 +16,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMP = tempfile.TemporaryDirectory(prefix="homepage-gallery-")
-DATA = Path(TEMP.name)
-os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(DATA)
+sys.path.insert(0, str(ROOT / "server"))
+from testing_storage import configure
+from storage_paths import assets_root
+DATA = configure(TEMP.name)
+os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(ROOT)
 os.environ["HX_SSO_SECRET"] = "test-only-gallery-secret"
-(DATA / "portal" / "huiguan").mkdir(parents=True)
-(DATA / "portal" / "www" / ".gallery-originals").mkdir(parents=True)
-(DATA / "data").mkdir()
-conn = sqlite3.connect(DATA / "portal" / "huiguan" / "users.db")
+(DATA / "huiguan").mkdir(parents=True, exist_ok=True)
+(DATA / "homepage" / "config" / ".gallery-originals").mkdir(parents=True, exist_ok=True)
+(DATA / "homepage").mkdir(exist_ok=True)
+conn = sqlite3.connect(DATA / "huiguan" / "users.db")
 conn.executescript("""
 CREATE TABLE local_users (uid INTEGER PRIMARY KEY, username TEXT, role TEXT, status TEXT);
 CREATE TABLE user_flags (kind TEXT, uid TEXT, status TEXT, role TEXT, PRIMARY KEY(kind, uid));
@@ -32,17 +35,17 @@ conn.commit()
 conn.close()
 image_name = "test/样例.jpg"
 other_image_name = "test/另一张.jpg"
-source = DATA / "assets" / "罗小黑战记数据库" / "罗小黑节气贺图（gallery素材）" / image_name
-source.parent.mkdir(parents=True)
+source = assets_root() / "source" / "罗小黑战记数据库" / "罗小黑节气贺图（gallery素材）" / image_name
+source.parent.mkdir(parents=True, exist_ok=True)
 source.write_bytes(b"original image bytes")
-persistent_other = DATA / "asset-library" / "homepage-gallery" / other_image_name
-persistent_other.parent.mkdir(parents=True)
+persistent_other = assets_root() / "source" / "homepage-gallery" / other_image_name
+persistent_other.parent.mkdir(parents=True, exist_ok=True)
 persistent_other.write_bytes(b"another image")
-persistent_original = DATA / "asset-library" / "homepage-gallery" / image_name
+persistent_original = assets_root() / "source" / "homepage-gallery" / image_name
 persistent_original.parent.mkdir(parents=True, exist_ok=True)
 persistent_original.write_bytes(b"original image bytes")
-legacy_public = DATA / "portal" / "www" / "assets" / "homepage" / "gallery-files" / "anything.jpg"
-legacy_public.parent.mkdir(parents=True)
+legacy_public = DATA / "homepage" / "config" / "assets" / "homepage" / "gallery-files" / "anything.jpg"
+legacy_public.parent.mkdir(parents=True, exist_ok=True)
 legacy_public.write_bytes(b"legacy public path")
 
 sys.path.insert(0, str(ROOT / "server"))
@@ -118,11 +121,11 @@ class GalleryPermissionsTest(unittest.TestCase):
         TEMP.cleanup()
 
     def setUp(self):
-        os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(DATA)
+        os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(ROOT)
         os.environ["HX_SSO_SECRET"] = "test-only-gallery-secret"
-        www.RUNTIME_DIR = str(DATA / "portal" / "www")
+        www.RUNTIME_DIR = str(DATA / "homepage" / "config")
         hx_sso.HX_SSO_SECRET = "test-only-gallery-secret"
-        database = DATA / "data" / "homepage-gallery.sqlite3"
+        database = DATA / "homepage" / "homepage-gallery.sqlite3"
         for suffix in ("", "-wal", "-shm"):
             Path(str(database) + suffix).unlink(missing_ok=True)
 

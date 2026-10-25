@@ -10,7 +10,7 @@
     var slot = window.IridescentlyNav && window.IridescentlyNav.slot();
     if (!slot || slot.querySelector('[data-return-hall]')) return;
     var back = document.createElement('a');
-    back.href = 'https://zszm.iridescently.xyz/#home';
+    back.href = window.IridescentlyDomains.url('zszm', '/#home');
     back.textContent = '回门庭';
     back.dataset.returnHall = '';
     back.style.cssText = 'padding:0 10px;opacity:.85';
@@ -18,7 +18,7 @@
   }
   if (window.IridescentlyNav) { window.IridescentlyNav.mount(); addReturn(); return; }
   var script = document.createElement('script');
-  script.src = 'https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261017';
+  script.src = '/shared/shared-ui/site-nav.js?v=20261017';
   script.onload = addReturn;
   document.head.appendChild(script);
 })();

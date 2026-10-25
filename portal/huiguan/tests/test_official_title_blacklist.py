@@ -17,7 +17,8 @@ HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = r'''
 import sys, http.server
 sys.path.insert(0, sys.argv[1])
-import server_huiguan as s
+sys.path.insert(0, str(__import__("pathlib").Path(sys.argv[1]).parents[1] / "server"))
+from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s
 s.init_user_db()
 conn=s.db()
 conn.execute("INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES (?,?,?,?,?,?,?)", ("existing_official", s.hash_password("test-password-123"), "罗小黑", "executor", "active", s.now_iso(), s.now_iso()))
@@ -64,10 +65,12 @@ class OfficialTitleBlacklistTest(unittest.TestCase):
         cls.root = tempfile.TemporaryDirectory()
         (Path(cls.root.name) / "portal" / "huiguan").mkdir(parents=True)
         port = free_port()
-        env = dict(os.environ, IRIDESCENTLY_PROJECT_ROOT=cls.root.name,
-                   IRIDESCENTLY_ENVIRONMENT="development", HX_SSO_SECRET="test-only-secret")
+        env = dict(os.environ, IRIDESCENTLY_STORAGE_ROOT=cls.root.name,
+                   IRIDESCENTLY_ENVIRONMENT="test", HX_SSO_SECRET="test-only-secret")
+        for key in ("DATA", "ASSETS", "CACHE", "RELEASE", "BACKUP", "PROJECT"):
+            env.pop(f"IRIDESCENTLY_{key}_ROOT", None)
         cls.proc = subprocess.Popen([sys.executable, "-c", LAUNCH, str(HUIGUAN), str(port)], env=env,
-                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                    stdout=subprocess.DEVNULL, stderr=None)
         cls.base = f"http://127.0.0.1:{port}"
         for _ in range(100):
             try:

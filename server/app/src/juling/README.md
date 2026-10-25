@@ -29,13 +29,13 @@
 node server.js   # 打开 http://localhost:8080
 ```
 
-- 需要 Node ≥ 22.5（内置 node:sqlite，否则自动 JSON 兜底）
-- 进度存 SQLite（`data/save.db`），重启不丢
+- 需要支持 `node:sqlite` 的 Node；存储损坏或未完成迁移时停止启动，不创建另一套 JSON 存档
+- 进度存 SQLite（`<storage>/<environment>/data/juling/save.db`），重启不丢
 
 ## Docker 部署
 
 ```bash
-docker compose up -d --build   # 映射到 8091 端口
+docker compose up -d --build   # 本机 8091 端口；先配置外置存储并验证迁移
 ```
 
 ## 项目结构
@@ -61,5 +61,7 @@ wuxing-game/
 
 - 运行：`PORT=5177 node server.js`（或 docker compose，8091）。
 - 构建挂载：静态拷贝到 `/app/modules/juling/`；内联脚本包 IIFE 并以 `window.__iridescentlyDispose` 卸载。
-- 存档：`data/save.db`（node:sqlite，表 `save_state`）；前端镜像 `m:juling:summary`。
+- 存档：`<storage>/<environment>/data/juling/save.db`（node:sqlite，表 `save_state`）；前端镜像 `m:juling:summary`。
 - API：`/api/state`、`/api/start`、`/api/action`（统一入口 `/app/modules/juling/api/*` 代理）。
+
+Batch 6：通过 `IRIDESCENTLY_STORAGE_ROOT` / `IRIDESCENTLY_ENVIRONMENT` 选择外置存储。旧 `save.json` 保留并幂等导入 SQLite。容器挂载 `/storage`，就绪标记必须绑定容器内的路径；不能直接复用 Windows 路径标记。

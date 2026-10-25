@@ -16,11 +16,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMP = tempfile.TemporaryDirectory(prefix="task-chains-", ignore_cleanup_errors=True)
-DATA = Path(TEMP.name)
-(DATA / "portal" / "huiguan").mkdir(parents=True)
-# No IRIDESCENTLY_PROJECT_ROOT here: every call below passes DATA explicitly, and
-# setting the global env at import time would leak into sibling test files that
-# read it at call time (test_site_admin does). Only the SSO secret is process-wide.
+sys.path.insert(0, str(ROOT / "server"))
+from testing_storage import configure
+from storage_paths import assets_root
+DATA = configure(TEMP.name)
+(DATA / "huiguan").mkdir(parents=True, exist_ok=True)
+# Each test module runs in a separate process with disposable external storage.
 os.environ.setdefault("HX_SSO_SECRET", "test-secret-for-task-chains")
 sys.path.insert(0, str(ROOT / "server"))
 sys.path.insert(0, str(ROOT))
@@ -28,7 +29,7 @@ import account_progress as ap  # noqa: E402
 import hx_sso  # noqa: E402
 import task_chains as tc  # noqa: E402
 
-DB = DATA / "portal" / "huiguan" / "users.db"
+DB = DATA / "huiguan" / "users.db"
 seed = sqlite3.connect(DB)
 # Minimal local-account table: only what account_profile.resolve_sso_identity reads.
 # Deliberately no 会馆 module import here — importing it would rebind shared sys.modules

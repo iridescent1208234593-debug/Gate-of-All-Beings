@@ -4,6 +4,7 @@ import secrets
 import time
 
 from account_email import EMAIL_RE, send_recovery_email
+from site_domains import request_origin_allowed, site_url, request_host
 
 
 def init_schema(conn):
@@ -29,12 +30,7 @@ def _json_body(handler, reply):
 
 
 def _origin_allowed(handler):
-    origin = handler.headers.get("Origin")
-    return not origin or origin in (
-        "https://huiguan.iridescently.xyz",
-        "http://127.0.0.1:8089",
-        "http://localhost:8089",
-    )
+    return request_origin_allowed(handler)
 
 
 def handle_recovery(handler, action, api):
@@ -92,7 +88,11 @@ def handle_recovery(handler, action, api):
 
         if user:
             try:
-                (api.get("send_recovery_email") or send_recovery_email)(email, token, user["username"])
+                if api.get("send_recovery_email"):
+                    api["send_recovery_email"](email, token, user["username"])
+                else:
+                    send_recovery_email(email, token, user["username"],
+                                        site_url("huiguan", "/security.html?mode=recover", request_host(handler)))
             except Exception:
                 with api["DB_LOCK"]:
                     conn = api["db"]()
@@ -159,7 +159,7 @@ def handle_recovery(handler, action, api):
         finally:
             conn.close()
     cookies = [
-        "session=; Path=/; Domain=.iridescently.xyz; Max-Age=0; HttpOnly; Secure; SameSite=Lax",
+        handler._session_clear_cookie(),
         handler._sso_clear_cookie(),
     ]
     return reply(200, {"ok": True, "message": "密码已重置，请使用新密码登录。"}, cookie=cookies)

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script src="/shared/site-domains.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>众生之门 · 统一门户</title>
@@ -42,12 +43,12 @@
   @media (prefers-reduced-motion: reduce) { .module-state[role="status"]::before { animation: none; } }
   @media (max-width: 640px) { .shell-topbar a { padding: 0 9px; font-size: 13px; } .shell-topbar a.active::after { left: 9px; right: 9px; } }
 </style>
-<script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
 <script defer src="/shared/shared-ui/server-recovery.js"></script>
 </head>
 <body>
 <header class="shell-topbar" id="iridescently-shell-chrome" aria-label="众生之门模块">
-  <a class="shell-return" id="iridescently-shell-return" href="https://zszm.iridescently.xyz/#home">门庭</a>
+  <a class="shell-return" id="iridescently-shell-return" href="/#home" data-site-service="zszm" data-site-path="/#home">门庭</a>
   <nav id="iridescently-shell-navlinks" aria-label="模块"></nav>
   <a class="shell-board" id="iridescently-shell-board" href="/shared/shared-ui/leaderboard/index.html">排行榜</a>
   <span id="iridescently-shell-user"></span>
@@ -61,7 +62,7 @@ import { get, set } from '/shared/shared-session/save.js';
 const view = document.getElementById('iridescently-shell-view');
 const navlinks = document.getElementById('iridescently-shell-navlinks');
 const BASE_PATH = '/app/shell/';
-if (['zszm.iridescently.xyz', 'pc-zszm.iridescently.xyz', '127.0.0.1', 'localhost'].includes(location.hostname)) {
+if (IridescentlyDomains.service(location.hostname) === 'zszm' || ['127.0.0.1', 'localhost'].includes(location.hostname)) {
   document.getElementById('iridescently-shell-return').href = '/#home';
 }
 let portal = { links: [] };

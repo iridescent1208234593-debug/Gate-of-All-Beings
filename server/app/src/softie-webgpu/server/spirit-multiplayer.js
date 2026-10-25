@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { WebSocket, WebSocketServer } from 'ws';
 import { DEFAULT_SPIRIT_SETTINGS, validateSpiritSettings } from '../src/games/spirit-playground/settings.js';
 import { SpiritRoomPhysics } from '../src/multiplayer/room-physics.js';
+import siteDomains from '../../../../../shared/site-domains.mjs';
 
 export const SPIRIT_ROOM_WS = '/api/spirit-room/ws';
 const MAX_PAYLOAD = 8 * 1024;
@@ -11,18 +12,7 @@ const SNAPSHOT_HZ = 15;
 const zeroDirection = () => ({ x: 0, z: 0 });
 const isLoopback = address => address === '::1' || /^(?:::ffff:)?127(?:\.\d{1,3}){3}$/.test(address ?? '');
 
-function verifyOrigin(request) {
-  const forwarded = isLoopback(request.socket.remoteAddress) && request.headers['x-forwarded-host'];
-  const host = forwarded || request.headers.host;
-  const protocol = forwarded ? request.headers['x-forwarded-proto'] : request.socket.encrypted ? 'https' : 'http';
-  let expected, origin;
-  try {
-    expected = new URL(`${protocol}://${host}`);
-    origin = new URL(request.headers.origin ?? '');
-  } catch { return false; }
-  return ['http:', 'https:'].includes(expected.protocol) && origin.origin === expected.origin
-    && !origin.username && !origin.password;
-}
+export const verifyOrigin = request => siteDomains.sameOrigin(request);
 
 const percentile = (values, fraction) => {
   if (!values.length) return 0;

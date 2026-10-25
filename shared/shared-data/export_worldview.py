@@ -89,7 +89,7 @@ def export(database=DATABASE, source='local-reference', output=None, media_manif
             choices=image_candidates.get(c['id'],[])
             if choices:
                 selected=avatar_ids[c['id']] if avatar_ids[c['id']] in choices else choices[0]
-                c['imageRef']={'kind':'character-image','id':selected,'url':'https://huiguan.iridescently.xyz/api/official/img-id?id='+str(selected)+'&t=1'}
+                c['imageRef']={'kind':'character-image','id':selected,'url':'/api/official/img-id?id='+str(selected)+'&t=1'}
         fingerprint = hashlib.sha256(json.dumps(facts, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
         data = {
             'schemaVersion': 2,

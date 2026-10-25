@@ -2,7 +2,7 @@
  * 全站主题内核：light / dark / auto 三态，cookie 跨子站同步。
  *
  *   - 偏好存在 cookie `hx_theme`（light|dark|auto，缺省 auto = 跟随系统），
- *     在 *.iridescently.xyz 子站间共享；本地开发时退化为当前域 cookie。
+ *     在同一批准根域（见 shared/site-domains.json）的子站间共享；本地开发时退化为当前域 cookie。
  *   - 最终生效主题写到 <html data-theme="light|dark">，CSS 侧沿用
  *     `[data-theme="dark"]` 令牌覆盖（见 world-map/style.css、connections.css）。
  *   - auto 状态监听 prefers-color-scheme 变化，实时跟随系统。
@@ -41,12 +41,9 @@
       'max-age=31536000',
       'samesite=lax',
     ];
-    var isIp = /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname);
-    // 跨子站共享：主域取最后两段（iridescently.xyz）；localhost / IP 不设 domain。
-    if (!isIp && hostname !== 'localhost' && hostname.indexOf('.') > 0) {
-      var labels = hostname.split('.');
-      parts.push('domain=.' + labels.slice(-2).join('.'));
-    }
+    var root = global.IridescentlyDomains && global.IridescentlyDomains.rootFor(hostname);
+    if (root) parts.push('domain=.' + root);
+    if (global.location.protocol === 'https:') parts.push('secure');
     document.cookie = parts.join('; ');
   }
 

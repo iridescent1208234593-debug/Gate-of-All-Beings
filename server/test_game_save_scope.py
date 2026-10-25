@@ -19,9 +19,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMP = tempfile.TemporaryDirectory(prefix="game-save-scope-", ignore_cleanup_errors=True)
-DATA = Path(TEMP.name)
-RUNTIME = DATA / "portal" / "huiguan"
-RUNTIME.mkdir(parents=True)
+sys.path.insert(0, str(ROOT / "server"))
+from testing_storage import configure
+from storage_paths import assets_root
+DATA = configure(TEMP.name)
+RUNTIME = DATA / "huiguan"
+RUNTIME.mkdir(parents=True, exist_ok=True)
 
 LEGACY = {
     # Collides: local uid 7 and USSO uid 7 both exist; userName matches the local username.
@@ -34,7 +37,7 @@ LEGACY = {
     # No account at all.
     "404": {"savedAt": "2026-10-01T10:00:00+01:00", "userName": "x", "state": {"management": "orphan"}},
 }
-os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(DATA)
+os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(ROOT)
 sys.path.insert(0, str(ROOT / "server"))
 sys.path.insert(0, str(ROOT))
 # 会馆模块在 import 期就会执行 init_user_db()（见 server_huiguan.py 模块尾部），

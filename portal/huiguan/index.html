@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script src="/shared/site-domains.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- 字体改用本地 CJK 衬线字体栈，不再外部请求 Google Fonts -->
@@ -759,13 +760,12 @@
 
 <!-- 导航栏 HTML -->
 <nav class="topnav">
-  <a href="https://iridescently.xyz" class="brand">西木会馆</a>
+  <a href="/" data-site-service="main" data-site-path="/" class="brand">西木会馆</a>
   <div class="links">
-    <a href="https://iridescently.xyz" data-site="main">主页</a>
-    <a href="https://huiguan.iridescently.xyz" data-site="huiguan">西木会馆</a>
-    <a href="https://oc.iridescently.xyz" data-site="oc">佳霖馆长设定</a>
-    <a href="https://zszm.iridescently.xyz" data-site="zszm"><span class="beta-wrap">众生之门<i class="beta">beta</i></span></a>
-    <a href="https://psy.iridescently.xyz" data-site="psy">心理测试</a>
+    <a href="/" data-site-service="main" data-site-path="/" data-site="main">主页</a>
+    <a href="/" data-site-service="huiguan" data-site-path="/" data-site="huiguan">西木会馆</a>
+    <a href="/" data-site-service="oc" data-site-path="/" data-site="oc">佳霖馆长设定</a>
+    <a href="/" data-site-service="zszm" data-site-path="/" data-site="zszm"><span class="beta-wrap">众生之门<i class="beta">beta</i></span></a>
   </div>
   <div class="auth-bar" id="authBar">
     <a class="btn-login" href="javascript:void(0)" onclick="openAuthModal()">登录 / 注册</a>
@@ -799,15 +799,7 @@
   
   // 根据当前域名高亮对应链接
   var hostname = window.location.hostname;
-  var siteMap = {
-    'iridescently.xyz': 'main',
-    'huiguan.iridescently.xyz': 'huiguan',
-    'oc.iridescently.xyz': 'oc',
-    'psyche.iridescently.xyz': 'psyche',
-    'psy.iridescently.xyz': 'psy',
-    'zszm.iridescently.xyz': 'zszm'
-  };
-  var currentSite = siteMap[hostname] || 'main';
+  var currentSite = IridescentlyDomains.service(hostname) || 'main';
   
   // 高亮当前站点链接
   var links = document.querySelectorAll('.topnav a[data-site]');
@@ -3667,8 +3659,8 @@ body.theme-transition, body.theme-transition * { transition: background-color 0.
     ${eggHTML}` : ''}
   </div>
   <nav class="site-nav">
-    <a href="https://huiguan.iridescently.xyz/">会馆首页</a>
-    <a href="https://huiguan.iridescently.xyz/index.html">人设登记</a>
+    <a href="/" data-site-service="huiguan" data-site-path="/">会馆首页</a>
+    <a href="/index.html" data-site-service="huiguan" data-site-path="/index.html">人设登记</a>
     <a href="#" class="current">${escapeHtml(data.code)}</a>
   </nav>
   <div class="footer">第 1 页，共 1 页 · ${escapeHtml(data.code)} · ${escapeHtml(data.name)}</div>
@@ -4237,7 +4229,7 @@ if (new URLSearchParams(location.search).get('openauth')) initialLoginCheck.then
 <script src="/design-system/ui/lxh-intro.js?v=20261015-1"></script>
 <script src="/assets/gate/gate-scene.js?v=20261009-6"></script>
 <script src="/homepage.js?v=20261016-1"></script>
-<script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
 <script src="/homepage-chrome.js?v=20261017-nav"></script>
 <script src="/homepage-content.js?v=20261009-2"></script>
 <script src="/original-image-viewer.js?v=20261022-1"></script>

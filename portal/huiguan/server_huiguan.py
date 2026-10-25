@@ -26,6 +26,7 @@ import time
 import traceback
 import unicodedata
 from io import BytesIO
+from pathlib import Path, PureWindowsPath, PurePosixPath
 from email import policy
 from email.parser import BytesParser
 import urllib.parse
@@ -35,6 +36,8 @@ from http.cookies import SimpleCookie
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "server"))
 import hx_sso
+from site_domains import (SITE_DOMAIN, PRODUCTION_HOSTS, cookie_domain, request_host, request_root,
+                          request_origin_allowed, cors_headers, oauth_callback, site_url, OAuthUnavailable)
 from site_admin import is_site_owner
 from account_security import init_schema as init_security_schema, handle_security
 from account_email import init_schema as init_email_schema, handle_email
@@ -44,12 +47,16 @@ import game_saves
 import account_progress
 from showcase_document import published_document
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
+from storage_paths import (project_root as resolve_project_root, data_root, huiguan_data_dir,
+                           managed_asset_dir, source_asset_dir, cache_dir, require_ready)
 
 # ========== 配置 ==========
 PORT = 8089
 STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.environ.get("IRIDESCENTLY_PROJECT_ROOT", os.path.dirname(os.path.dirname(STATIC_DIR)))
-RUNTIME_DIR = os.path.join(PROJECT_ROOT, "portal", "huiguan")
+PROJECT_ROOT = str(resolve_project_root())
+DATA_ROOT = data_root()
+require_ready()
+RUNTIME_DIR = str(huiguan_data_dir(DATA_ROOT))
 CODE_ROOT = os.path.dirname(os.path.dirname(STATIC_DIR))
 
 # USSO 配置（去 https://sso.umrc.cn/dev.php 创建应用后获取）
@@ -59,7 +66,7 @@ USSO_LOGIN_ENABLED = os.environ.get("USSO_LOGIN_ENABLED", "0").strip().lower() i
 SCOPE = "openid basic email profile"
 
 # 回调地址（必须与 USSO 后台配置完全一致）
-CALLBACK_URL = "https://huiguan.iridescently.xyz/cb"
+CALLBACK_URL = oauth_callback("huiguan")
 
 # USSO 端点
 SSO_AUTHORIZE = "https://sso.umrc.cn/authorize.php"
@@ -92,14 +99,15 @@ USER_DB = os.path.join(RUNTIME_DIR, "users.db")
 DB_LOCK = threading.Lock()
 
 # 罗小黑战记世界观库（只读直查）；大型素材目录由部署环境单独提供。
-WV_ROOT_DIR = os.path.join(PROJECT_ROOT, "assets", "罗小黑战记数据库")
-WV_DB = os.path.join(WV_ROOT_DIR, "db", "worldview_luoxiaohei_v4.db")
-WV_IMG_DIR = os.path.join(WV_ROOT_DIR, "images")
-THUMB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets", "thumbs")
+WV_ROOT_DIR = str(source_asset_dir("罗小黑战记数据库"))
+WV_DB = str(DATA_ROOT / "worldview" / "worldview_luoxiaohei_v4.db")
+WV_IMG_DIR = str(managed_asset_dir("worldview", "images"))
+THUMB_DIR = str(cache_dir("huiguan", "thumbs"))
+os.makedirs(WV_IMG_DIR, exist_ok=True)
 os.makedirs(THUMB_DIR, exist_ok=True)
 # Public "site version" of every image: re-encoded WebP, bounded size, metadata stripped.
 # Source files are never sent to anyone but the site owner (see /api/original-image).
-PREVIEW_DIR = os.path.join(RUNTIME_DIR, "assets", "previews")  # derived cache; lives beside uploads, survives site publishes
+PREVIEW_DIR = str(cache_dir("huiguan", "previews"))
 os.makedirs(PREVIEW_DIR, exist_ok=True)
 PREVIEW_MAX_EDGE = 1600
 PREVIEW_ANIMATED_EDGE = 640
@@ -147,9 +155,14 @@ OFFICIAL_NAME_ERROR = "该名号为官方世界观角色名，禁止用作名号
 def is_official_title_name(value):
     return _normalize_title_name(value) in OFFICIAL_NAME_BLACKLIST
 
+def _worldview_connection():
+    """The migrated worldview must exist; an empty replacement is never created."""
+    return sqlite3.connect(Path(WV_DB).as_uri() + "?mode=rw", uri=True, timeout=10)
+
+
 def wv():
     """只读连接世界观 SQLite 库"""
-    conn = sqlite3.connect(WV_DB, timeout=10)
+    conn = _worldview_connection()
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -201,7 +214,7 @@ def _is_remote_image(raw):
     return bool(raw) and raw.lower().startswith(("http://", "https://"))
 
 # 允许经素材接口分发的本地根目录（白名单）；http(s) 外链不受此限
-ASSET_ROOT_DIRS = (WV_ROOT_DIR, os.path.join(PROJECT_ROOT, "assets", "素材"))
+ASSET_ROOT_DIRS = (WV_ROOT_DIR, str(source_asset_dir("素材")), WV_IMG_DIR)
 # 仅允许分发的图片后缀，防止借白名单读取根内非图片文件
 ASSET_IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".webp", ".gif")
 
@@ -211,14 +224,30 @@ def _safe_image_path(raw):
         return None
     if _is_remote_image(raw):
         return raw
-    p = os.path.normpath(raw)
+    # Migrated DBs retain their original bytes, including old absolute paths.
+    # Only roots recorded by the verified migration may be translated.
+    try:
+        marker = json.loads((DATA_ROOT / ".storage-ready.json").read_text(encoding="utf-8"))
+        path_type = PureWindowsPath if PureWindowsPath(raw).drive else PurePosixPath
+        stored = path_type(raw)
+        for legacy_root in marker.get("legacy_asset_roots", []):
+            try:
+                relative = stored.relative_to(path_type(legacy_root))
+            except ValueError:
+                continue
+            if ".." not in relative.parts:
+                raw = str(source_asset_dir(*relative.parts))
+                break
+    except (OSError, ValueError, TypeError):
+        pass
+    p = os.path.realpath(raw)
     if not os.path.isabs(p):
         return None
     if os.path.splitext(p)[1].lower() not in ASSET_IMAGE_EXTS:
         return None
     for root in ASSET_ROOT_DIRS:
         try:
-            if os.path.commonpath([p, root]) == root:
+            if os.path.commonpath([p, os.path.realpath(root)]) == os.path.realpath(root):
                 return p
         except ValueError:
             continue
@@ -275,6 +304,7 @@ def db():
 
 
 def init_user_db():
+    os.makedirs(RUNTIME_DIR, exist_ok=True)
     with DB_LOCK:
         conn = db()
         # journal_mode 是持久属性，这里只设置一次（启动期，有 DB_LOCK 保护）。
@@ -327,6 +357,8 @@ def init_user_db():
                 expires_at TEXT
             )
         """)
+        if "audience" not in {row[1] for row in conn.execute("PRAGMA table_info(sessions_db)")}:
+            conn.execute("ALTER TABLE sessions_db ADD COLUMN audience TEXT NOT NULL DEFAULT 'iridescently.xyz'")
         # USSO 用户的管理标记（封禁 / 管理员）
         conn.execute("""
             CREATE TABLE IF NOT EXISTS user_flags (
@@ -685,25 +717,25 @@ def resolve_identity(kind, uid):
         }
 
 
-def create_session(kind, uid):
+def create_session(kind, uid, root_domain=None):
     sid = secrets.token_urlsafe(32)
     exp = (datetime.now(timezone.utc) + timedelta(days=SESSION_DAYS)).isoformat()
     with DB_LOCK:
         conn = db()
-        conn.execute("INSERT INTO sessions_db (sid, kind, uid, created_at, expires_at) VALUES (?,?,?,?,?)",
-                     (sid, kind, str(uid), now_iso(), exp))
+        conn.execute("INSERT INTO sessions_db (sid, kind, uid, created_at, expires_at, audience) VALUES (?,?,?,?,?,?)",
+                     (sid, kind, str(uid), now_iso(), exp, root_domain or SITE_DOMAIN))
         conn.commit()
         conn.close()
     return sid
 
 
-def read_session(sid):
+def read_session(sid, root_domain=None):
     if not sid:
         return None
     conn = db()
     row = conn.execute("SELECT * FROM sessions_db WHERE sid=?", (sid,)).fetchone()
     conn.close()
-    if not row:
+    if not row or (root_domain is not None and row["audience"] != root_domain):
         return None
     try:
         exp = datetime.fromisoformat(row["expires_at"])
@@ -858,8 +890,8 @@ def save_data(data_dict):
 
 
 # ---------- 外置存储（展示页 HTML / 上传图），给 characters.json 瘦身 ----------
-STORE_DIR = os.path.join(RUNTIME_DIR, "assets", "store")
-UPLOAD_DIR = os.path.join(RUNTIME_DIR, "assets", "uploads")
+STORE_DIR = str(managed_asset_dir("huiguan", "store", root=DATA_ROOT))
+UPLOAD_DIR = str(managed_asset_dir("huiguan", "uploads", root=DATA_ROOT))
 os.makedirs(STORE_DIR, exist_ok=True)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -908,7 +940,7 @@ def store_image(raw, mime):
 
 def store_avatar_image(raw, mime):
     """Normalize a confirmed avatar crop to a metadata-free square image."""
-    return normalize_avatar_image(raw, mime, PROJECT_ROOT)
+    return normalize_avatar_image(raw, mime, DATA_ROOT)
 
 def store_avatar_data_uri(uri):
     if not isinstance(uri, str) or not uri.startswith("data:image/"):
@@ -1083,7 +1115,7 @@ def _lookup_image(endpoint, qs):
         if not iid:
             raise _NoImage(400)
         table = "unclassified_images" if endpoint == "/api/official/unclassified-img" else "character_images"
-        w = sqlite3.connect(WV_DB, timeout=10)
+        w = _worldview_connection()
         row = w.execute(f"SELECT image_path FROM {table} WHERE id=?", (iid,)).fetchone()
         w.close()
         if not row:
@@ -1833,13 +1865,19 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "服务器未配置 CLIENT_ID/CLIENT_SECRET"})
             return
         state = secrets.token_hex(16)
+        try:
+            callback = self._oauth_callback()
+        except OAuthUnavailable:
+            # Sessions are per registrable root; never bounce this login through another root.
+            self._json(503, {"error": "当前域名尚未开通统一登录，请使用会馆站内账号登录"})
+            return
         with OAUTH_LOCK:
-            for k in [k for k, v in OAUTH_STATES.items() if time.time() - v > 600]:
+            for k in [k for k, v in OAUTH_STATES.items() if time.time() - v["created"] > 600]:
                 OAUTH_STATES.pop(k, None)
-            OAUTH_STATES[state] = time.time()
+            OAUTH_STATES[state] = {"created": time.time(), "callback": callback}
         params = {
             "response_type": "code", "client_id": CLIENT_ID,
-            "redirect_uri": CALLBACK_URL, "scope": SCOPE, "state": state,
+            "redirect_uri": OAUTH_STATES[state]["callback"], "scope": SCOPE, "state": state,
         }
         url = f"{SSO_AUTHORIZE}?{urllib.parse.urlencode(params)}"
         self.send_response(302)
@@ -1859,8 +1897,12 @@ class Handler(BaseStaticHandler):
             return
 
         with OAUTH_LOCK:
-            ts = OAUTH_STATES.pop(state, None)
-        if not ts or time.time() - ts > 600:
+            pending = OAUTH_STATES.pop(state, None)
+        try:
+            callback = self._oauth_callback()
+        except OAuthUnavailable:
+            callback = None
+        if not pending or time.time() - pending["created"] > 600 or pending["callback"] != callback:
             self._json(400, {"error": "state 校验失败"})
             return
         if error:
@@ -1873,7 +1915,7 @@ class Handler(BaseStaticHandler):
         token_result = sso_post(SSO_TOKEN, {
             "grant_type": "authorization_code", "code": code,
             "client_id": CLIENT_ID, "client_secret": CLIENT_SECRET,
-            "redirect_uri": CALLBACK_URL,
+            "redirect_uri": pending["callback"],
         })
         if token_result.get("code") != 200:
             self._json(500, token_result)
@@ -1902,7 +1944,7 @@ class Handler(BaseStaticHandler):
         picture = user.get("picture", user.get("avatar", ""))
         upsert_user(user_id, nickname, email, picture)
 
-        session_id = create_session("usso", user_id)
+        session_id = create_session("usso", user_id, request_root(self))
         self.send_response(302)
         self.send_header("Location", "/")
         self.send_header("Set-Cookie", self._session_cookie(session_id))
@@ -1960,7 +2002,7 @@ class Handler(BaseStaticHandler):
             conn.commit()
             conn.close()
 
-        session_id = create_session("local", uid)
+        session_id = create_session("local", uid, request_root(self))
         ident = resolve_identity("local", uid)
         self._json(200, {"ok": True, "user": ident}, cookie=[self._session_cookie(session_id), self._sso_cookie(uid, "local", ident.get("name") or "")])
 
@@ -1991,7 +2033,7 @@ class Handler(BaseStaticHandler):
             conn.commit()
             conn.close()
 
-        session_id = create_session("local", u["uid"])
+        session_id = create_session("local", u["uid"], request_root(self))
         ident = resolve_identity("local", u["uid"])
         self._json(200, {"ok": True, "user": ident}, cookie=[self._session_cookie(session_id), self._sso_cookie(u["uid"], "local", ident.get("name") or username)])
 
@@ -2023,7 +2065,7 @@ class Handler(BaseStaticHandler):
                 conn.execute("UPDATE local_users SET last_login=? WHERE uid=?", (now_iso(), u["uid"]))
                 conn.commit()
                 conn.close()
-            session_id = create_session("local", u["uid"])
+            session_id = create_session("local", u["uid"], request_root(self))
             ident = resolve_identity("local", u["uid"])
             self._json(200, {"ok": True, "registered": False, "user": ident},
                        cookie=[self._session_cookie(session_id), self._sso_cookie(u["uid"], "local", ident.get("name") or username)])
@@ -2065,7 +2107,7 @@ class Handler(BaseStaticHandler):
             conn.commit()
             conn.close()
 
-        session_id = create_session("local", uid)
+        session_id = create_session("local", uid, request_root(self))
         ident = resolve_identity("local", uid)
         self._json(200, {"ok": True, "registered": True, "user": ident},
                    cookie=[self._session_cookie(session_id), self._sso_cookie(uid, "local", ident.get("name") or username)])
@@ -2220,7 +2262,7 @@ class Handler(BaseStaticHandler):
         for k, v in self._cors_headers():
             self.send_header(k, v)
         self.send_header("Location", "/")
-        self.send_header("Set-Cookie", "session=; Path=/; Domain=.iridescently.xyz; Max-Age=0; HttpOnly; Secure; SameSite=Lax")
+        self.send_header("Set-Cookie", self._session_clear_cookie())
         self.send_header("Set-Cookie", self._sso_clear_cookie())
         self.send_header("Content-Length", "0")
         self.end_headers()
@@ -2350,7 +2392,7 @@ class Handler(BaseStaticHandler):
         if not token:
             self._json(400, {"error": "缺少 token 参数"})
             return
-        payload = hx_sso.verify_token(token)
+        payload = hx_sso.verify_token(token, request_root(self))
         if not payload:
             self._json(401, {"error": "token 无效或已过期"})
             return
@@ -2481,7 +2523,7 @@ class Handler(BaseStaticHandler):
         awarded = []
         if not found:
             custom = isinstance(data_field, dict) and bool(data_field.get("colorPrimary")) and (data_field.get("colorIndex") in (None, "", -1))
-            conn = account_progress.open_db(PROJECT_ROOT)
+            conn = account_progress.open_db(DATA_ROOT)
             try:
                 awarded = account_progress.award_sheet(conn, ident["kind"], ident["uid"],
                                                        ident.get("nickname") or ident.get("username") or "", code, custom)
@@ -2642,7 +2684,7 @@ class Handler(BaseStaticHandler):
         ).fetchone()[0]
         conn.close()
         chars = [dict(r) for r in rows]
-        fix = sqlite3.connect(WV_DB, timeout=10); fix.row_factory = sqlite3.Row
+        fix = _worldview_connection(); fix.row_factory = sqlite3.Row
         for c in chars:
             tp = c.get("thumb_path")
             sp = _safe_image_path(tp) if tp else None
@@ -2727,7 +2769,7 @@ class Handler(BaseStaticHandler):
     # ---------- 图片分发：公开接口只发派生版本，原图仅站长 ----------
     def _original_allowed(self):
         """Same definition of "admin" as the main site's gallery: a verified hx_sso account that is a site owner."""
-        return is_site_owner(hx_sso.read_cookie(self.headers), PROJECT_ROOT)
+        return is_site_owner(hx_sso.read_cookie(self.headers), DATA_ROOT)
 
     def _send_derived_image(self, path, thumb, cors, max_age, head=False):
         data, ct = _preview_bytes(path, thumb=thumb)
@@ -2777,9 +2819,7 @@ class Handler(BaseStaticHandler):
                 self.wfile.write(body)
         fetch_site = (self.headers.get("Sec-Fetch-Site") or "").lower()
         origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
-        origin_host = (urllib.parse.urlparse(origin).hostname or "").lower() if origin else ""
-        if fetch_site == "cross-site" or (origin_host and origin_host not in ("localhost", "127.0.0.1", "iridescently.xyz")
-                                          and not origin_host.endswith(".iridescently.xyz")):
+        if fetch_site == "cross-site" or not request_origin_allowed(self):
             return refuse(403, "原图请求来源不被允许")
         if not self._original_allowed():
             return refuse(403, "原图仅限站长登录后查看")
@@ -2906,7 +2946,7 @@ class Handler(BaseStaticHandler):
         img_id = body.get("image_id")
         if not cid or not img_id:
             self._json(400, {"error": "缺少角色 / 图片 ID"}); return
-        w = sqlite3.connect(WV_DB, timeout=10)
+        w = _worldview_connection()
         row = w.execute("SELECT character_id FROM character_images WHERE id=?", (img_id,)).fetchone()
         if not row or str(row[0]) != str(cid):
             w.close(); self._json(400, {"error": "该图片不属于此角色"}); return
@@ -2948,7 +2988,7 @@ class Handler(BaseStaticHandler):
                     "images": lst,
                 })
             cached = {
-                "base": "https://huiguan.iridescently.xyz",
+                "base": site_url("huiguan", host=request_host(self)),
                 "generated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
                 "characters": characters,
                 "design": {
@@ -2995,7 +3035,7 @@ class Handler(BaseStaticHandler):
                     "url": "/api/assets/shared?id=%d" % r["id"],
                     "thumb": "/api/assets/shared?id=%d&t=1" % r["id"],
                 })
-            self._json(200, {"base": "https://huiguan.iridescently.xyz", "categories": groups})
+            self._json(200, {"base": site_url("huiguan", host=request_host(self)), "categories": groups})
         finally:
             conn.close()
 
@@ -3639,7 +3679,7 @@ class Handler(BaseStaticHandler):
 
     # ---------- 账户等级：account_progress（积分按 0.1 记账；第 n 级累计 n(n+1)/2 分） ----------
     def _level_fields(self, ident):
-        conn = account_progress.open_db(PROJECT_ROOT)
+        conn = account_progress.open_db(DATA_ROOT)
         try:
             info = account_progress.level_info(account_progress.get_points_x10(conn, ident["kind"], ident["uid"]))
         finally:
@@ -3705,7 +3745,7 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "该字段不可编辑"}); return
         # 能力列表：改写 character_abilities_ext
         if field == 'abilities':
-            w2 = sqlite3.connect(WV_DB, timeout=10); w2.row_factory = sqlite3.Row
+            w2 = _worldview_connection(); w2.row_factory = sqlite3.Row
             cname = w2.execute("SELECT name FROM characters WHERE id=?", (cid,)).fetchone()
             if not cname:
                 w2.close(); self._json(404, {"error": "角色不存在"}); return
@@ -3726,7 +3766,7 @@ class Handler(BaseStaticHandler):
             return
         # 人物关系：改写 character_relations_ext（每行一条：关系类型：对象：描述）
         if field == 'relations':
-            w2 = sqlite3.connect(WV_DB, timeout=10); w2.row_factory = sqlite3.Row
+            w2 = _worldview_connection(); w2.row_factory = sqlite3.Row
             cname = w2.execute("SELECT name FROM characters WHERE id=?", (cid,)).fetchone()
             if not cname:
                 w2.close(); self._json(404, {"error": "角色不存在"}); return
@@ -3899,7 +3939,7 @@ class Handler(BaseStaticHandler):
         except Exception:
             self._json(500, {"error": "保存图片失败"}); return
         # 写入 character_images（世界观库可写）
-        w = sqlite3.connect(WV_DB, timeout=10)
+        w = _worldview_connection()
         cur = w.execute("INSERT INTO character_images (character_id, image_path, image_type, description, created_at) VALUES (?,?,?,?,datetime('now'))",
                         (cid, path, itype, filename))
         new_id = cur.lastrowid
@@ -3964,7 +4004,7 @@ class Handler(BaseStaticHandler):
         except Exception:
             self._json(500, {"error": "保存图片失败"}); return
         # 写入 character_images（image_type='sticker'）与 sticker_uploads 旁路表
-        w = sqlite3.connect(WV_DB, timeout=10)
+        w = _worldview_connection()
         w.execute("CREATE TABLE IF NOT EXISTS sticker_uploads (id INTEGER PRIMARY KEY AUTOINCREMENT, image_id INTEGER NOT NULL UNIQUE, kind TEXT NOT NULL, uid TEXT NOT NULL, nickname TEXT DEFAULT '', created_at TEXT DEFAULT (datetime('now','localtime')))")
         cur = w.execute("INSERT INTO character_images (character_id, image_path, image_type, description, created_at) VALUES (?,?,?,?,datetime('now'))",
                         (cid, path, "sticker", desc[:200]))
@@ -3996,7 +4036,7 @@ class Handler(BaseStaticHandler):
         reason = (body.get("reason") or "").strip()
         if not img_id:
             self._json(400, {"error": "缺少图片 ID"}); return
-        w = sqlite3.connect(WV_DB, timeout=10)
+        w = _worldview_connection()
         w.execute("CREATE TABLE IF NOT EXISTS unclassified_images (id INTEGER PRIMARY KEY AUTOINCREMENT, image_path TEXT, from_character_id INTEGER, reason TEXT, created_at TIMESTAMP)")
         ensure_sticker_table(w)
         if other:
@@ -4018,7 +4058,7 @@ class Handler(BaseStaticHandler):
         self._json(200, {"ok": True, "msg": "已移入未分类" if other else "图片已删除"})
 
     def _api_official_unclassified(self):
-        w = sqlite3.connect(WV_DB, timeout=10); w.row_factory = sqlite3.Row
+        w = _worldview_connection(); w.row_factory = sqlite3.Row
         try:
             rows = [dict(r) for r in w.execute("SELECT id, reason FROM unclassified_images ORDER BY id DESC")]
         except Exception:
@@ -4043,7 +4083,7 @@ class Handler(BaseStaticHandler):
         ordered = body.get("ordered_ids") or []
         if not cid or not ordered:
             self._json(400, {"error": "缺少参数"}); return
-        w = sqlite3.connect(WV_DB, timeout=10)
+        w = _worldview_connection()
         for i, iid in enumerate(ordered):
             w.execute("UPDATE character_images SET sort_order=? WHERE id=? AND character_id=?", (i, iid, cid))
         w.commit(); w.close()
@@ -4071,7 +4111,7 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "缺少图片分类"}); return
         if len(itype) > 32:
             self._json(400, {"error": "分类名过长"}); return
-        w = sqlite3.connect(WV_DB, timeout=10)
+        w = _worldview_connection()
         row = w.execute("SELECT character_id FROM character_images WHERE id=?", (img_id,)).fetchone()
         if not row:
             w.close()
@@ -4114,7 +4154,7 @@ class Handler(BaseStaticHandler):
         w.execute("CREATE TABLE IF NOT EXISTS char_votes (id INTEGER PRIMARY KEY AUTOINCREMENT, user_kind TEXT, user_uid TEXT, character_id INTEGER, vote INTEGER, created_at INTEGER, UNIQUE(user_kind, user_uid, character_id))")
 
     def _api_official_reactions(self):
-        w = sqlite3.connect(WV_DB, timeout=10); w.row_factory = sqlite3.Row
+        w = _worldview_connection(); w.row_factory = sqlite3.Row
         self._ensure_reaction_tables(w)
         fav = {r['character_id']: r['c'] for r in w.execute("SELECT character_id, COUNT(*) c FROM char_favorites GROUP BY character_id")}
         up = {r['character_id']: r['c'] for r in w.execute("SELECT character_id, COUNT(*) c FROM char_votes WHERE vote=1 GROUP BY character_id")}
@@ -4205,7 +4245,7 @@ class Handler(BaseStaticHandler):
         if rate_blocked(f"react:{ident['kind']}:{ident['uid']}", 60, 60):
             self._json(429, {"error": "操作太快了，歇一会儿再点吧"}); return
         rate_add(f"react:{ident['kind']}:{ident['uid']}")
-        w = sqlite3.connect(WV_DB, timeout=10); w.row_factory = sqlite3.Row
+        w = _worldview_connection(); w.row_factory = sqlite3.Row
         self._ensure_reaction_tables(w)
         self._do_react(w, "char_favorites", "char_votes", ident)
 
@@ -5007,17 +5047,29 @@ class Handler(BaseStaticHandler):
         self._do_react(w, "fan_char_favorites", "fan_char_votes", ident, allow_multiple_favorites=bool(ident.get("is_admin")))
 
     # ---------- 辅助 ----------
+    def _oauth_callback(self):
+        host = request_host(self)
+        # Only the disposable mock fixture overrides this constant with a loopback URL.
+        if host in ("localhost", "127.0.0.1", "::1") and not COOKIE_SECURE:
+            return CALLBACK_URL
+        return oauth_callback("huiguan", host)
+
     def _get_session(self):
         cookie = SimpleCookie(self.headers.get("Cookie", ""))
         m = cookie.get("session")
-        return m.value if m else ""
+        sid = m.value if m else ""
+        return sid if sid and read_session(sid, request_root(self)) else ""
 
     def _client_ip(self):
         return self.headers.get("CF-Connecting-IP") or self.client_address[0]
 
     def _session_cookie(self, sid):
         secure = "; Secure" if COOKIE_SECURE else ""
-        return f"session={sid}; Path=/; Domain=.iridescently.xyz; Max-Age={SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax{secure}"
+        return f"session={sid}; Path=/{cookie_domain(self)}; Max-Age={SESSION_DAYS * 86400}; HttpOnly; SameSite=Lax{secure}"
+
+    def _session_clear_cookie(self):
+        secure = "; Secure" if COOKIE_SECURE else ""
+        return f"session=; Path=/{cookie_domain(self)}; Max-Age=0; HttpOnly; SameSite=Lax{secure}"
 
     def _sso_cookie(self, uid, kind, name):
         color = None
@@ -5035,13 +5087,13 @@ class Handler(BaseStaticHandler):
                     color = {"p": p, "a": a}
         except Exception:
             color = None
-        token = hx_sso.make_token(uid, kind, name, color)
+        token = hx_sso.make_token(uid, kind, name, color, root_domain=request_root(self))
         secure = "; Secure" if COOKIE_SECURE else ""
-        return f"{hx_sso.COOKIE_NAME}={token}; Path=/; Domain={hx_sso.COOKIE_DOMAIN}; Max-Age={hx_sso.MAX_AGE}; HttpOnly; SameSite=Lax{secure}"
+        return f"{hx_sso.COOKIE_NAME}={token}; Path=/{cookie_domain(self)}; Max-Age={hx_sso.MAX_AGE}; HttpOnly; SameSite=Lax{secure}"
 
     def _sso_clear_cookie(self):
         secure = "; Secure" if COOKIE_SECURE else ""
-        return f"{hx_sso.COOKIE_NAME}=; Path=/; Domain={hx_sso.COOKIE_DOMAIN}; Max-Age=0; HttpOnly; SameSite=Lax{secure}"
+        return f"{hx_sso.COOKIE_NAME}=; Path=/{cookie_domain(self)}; Max-Age=0; HttpOnly; SameSite=Lax{secure}"
 
     def _read_image_form(self, gif_limit=GIF_LIMIT):
         content_type = self.headers.get("Content-Type", "")
@@ -5127,30 +5179,7 @@ class Handler(BaseStaticHandler):
         self.wfile.write(body)
 
     def _cors_headers(self):
-        """game/psy 等子域跨站调用 /api/* 时返回 CORS 头（携带 cookie 需精确回显 Origin）"""
-        origin = self.headers.get("Origin") or ""
-        allowed = (
-            "https://iridescently.xyz",
-            "https://spirit.iridescently.xyz",
-            "https://game.iridescently.xyz",
-            "https://huiguan.iridescently.xyz",
-            "https://psy.iridescently.xyz",
-            "http://127.0.0.1:4173",
-            "http://localhost:4173",
-            "http://127.0.0.1:5180",
-            "http://localhost:5180",
-            "http://127.0.0.1:5176",
-            "http://localhost:5176",
-            "http://127.0.0.1:8089",
-            "http://localhost:8089",
-        )
-        if origin in allowed:
-            return [
-                ("Access-Control-Allow-Origin", origin),
-                ("Access-Control-Allow-Credentials", "true"),
-                ("Vary", "Origin"),
-            ]
-        return []
+        return cors_headers(self)
 
     def do_OPTIONS(self):
         self.send_response(204)

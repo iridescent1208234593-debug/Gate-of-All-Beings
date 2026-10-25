@@ -156,7 +156,11 @@
   function saveLanguage(value) {
     language = value === 'en' ? 'en' : 'zh-CN';
     try { localStorage.setItem(COOKIE, language); } catch (_) {}
-    try { document.cookie = COOKIE + '=' + language + '; Domain=.iridescently.xyz; Path=/; Max-Age=31536000; SameSite=Lax; Secure'; } catch (_) {}
+    try {
+      // Shared only within the page's own approved root; other hosts keep a host-only cookie.
+      var root = window.IridescentlyDomains && window.IridescentlyDomains.rootFor(location.hostname);
+      document.cookie = COOKIE + '=' + language + (root ? '; Domain=.' + root : '') + '; Path=/; Max-Age=31536000; SameSite=Lax' + (location.protocol === 'https:' ? '; Secure' : '');
+    } catch (_) {}
     apply(document.head);
     apply(document.body);
     document.documentElement.lang = language;

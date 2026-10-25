@@ -4,6 +4,8 @@ import { mkdtemp, readFile, writeFile, mkdir, readdir, rm, stat } from 'node:fs/
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { Readable } from 'node:stream';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import {
   DEFAULT_SPIRIT_SETTINGS, SPIRIT_SETTINGS_API, SPIRIT_SETTINGS_LIMITS,
   normalizeSpiritSettings, spiritRadius, validateSpiritSettings,
@@ -25,7 +27,7 @@ async function fixture(t) {
     root,
     directory: join(root, '.local'),
     file: join(root, '.local', 'spirit-settings.json'),
-    middleware: createSpiritSettingsMiddleware({ root }),
+    middleware: createSpiritSettingsMiddleware({ directory: join(root, '.local') }),
   };
 }
 
@@ -260,16 +262,32 @@ test('simultaneous saves finish with a complete JSON file and no temporary resid
   assert.deepEqual(await readdir(f.directory), ['spirit-settings.json']);
 });
 
-test('Vite plugin registers middleware against its resolved root for dev and preview', async t => {
+test('Vite plugin saves dev and preview settings in isolated external storage', async t => {
   const f = await fixture(t);
-  const plugin = spiritSettingsPlugin();
-  plugin.configResolved({ root: f.root });
-  const middleware = [];
-  const server = { middlewares: { use(handler) { middleware.push(handler); } } };
-  plugin.configureServer(server);
-  plugin.configurePreviewServer(server);
-  assert.equal(middleware.length, 2);
-  assert.equal((await request(middleware[0], { method: 'PUT', body: DEFAULT_SPIRIT_SETTINGS })).statusCode, 200);
-  assert.deepEqual((await request(middleware[1])).json, DEFAULT_SPIRIT_SETTINGS);
-  assert.deepEqual(JSON.parse(await readFile(f.file, 'utf8')), DEFAULT_SPIRIT_SETTINGS);
+  const environment = { ...process.env, IRIDESCENTLY_ENVIRONMENT: 'test', IRIDESCENTLY_STORAGE_ROOT: f.root };
+  for (const name of ['DATA', 'ASSETS', 'CACHE', 'RELEASE', 'BACKUP', 'PROJECT']) delete environment[`IRIDESCENTLY_${name}_ROOT`];
+  const code = `
+    import assert from 'node:assert/strict';
+    import {createRequire} from 'node:module';
+    import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
+    import {join} from 'node:path';
+    import {createServer} from 'node:http';
+    const paths=createRequire(import.meta.url)(${JSON.stringify(fileURLToPath(new URL('../../../../runtime-paths.cjs', import.meta.url)))});
+    for(const directory of Object.values(paths.layout))mkdirSync(directory,{recursive:true});
+    writeFileSync(join(paths.dataRoot,'.storage-ready.json'),JSON.stringify({schema:1,state:'ready',environment:'test',roots:paths.layout}));
+    const {spiritSettingsPlugin}=await import(${JSON.stringify(new URL('../server/spirit-settings.js', import.meta.url).href)});
+    const middleware=[],plugin=spiritSettingsPlugin();
+    const server={middlewares:{use(handler){middleware.push(handler);}}};
+    plugin.configureServer(server);plugin.configurePreviewServer(server);assert.equal(middleware.length,2);
+    const http=createServer((request,response)=>middleware[0](request,response,()=>{response.statusCode=404;response.end();}));
+    await new Promise(resolve=>http.listen(0,'127.0.0.1',resolve));
+    const base='http://127.0.0.1:'+http.address().port;
+    try{
+      const put=await fetch(base+${JSON.stringify(SPIRIT_SETTINGS_API)},{method:'PUT',headers:{'Content-Type':'application/json',Origin:base},body:${JSON.stringify(JSON.stringify(DEFAULT_SPIRIT_SETTINGS))}});
+      assert.equal(put.status,200);
+      assert.deepEqual(JSON.parse(readFileSync(join(paths.dataRoot,'spirit','spirit-settings.json'),'utf8')),${JSON.stringify(DEFAULT_SPIRIT_SETTINGS)});
+    }finally{await new Promise(resolve=>http.close(resolve));}
+  `;
+  const result = spawnSync(process.execPath, ['--input-type=module', '-e', code], { env: environment, encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
 });

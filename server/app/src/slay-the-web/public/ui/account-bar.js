@@ -1,9 +1,10 @@
-// 游戏站登录入口：并入西木会馆(huiguan)账户系统，共享 .iridescently.xyz 登录态
+const siteDomains = globalThis.IridescentlyDomains;
+// 游戏站登录入口：并入西木会馆(huiguan)账户系统，共享当前根域的会馆登录态
 // 未登录显示「登录/注册」，点击跳转 huiguan 登录页（带回跳参数）
 // 已登录显示用户名与退出按钮
 import {html, render, Component} from '../web_modules/htm/preact/standalone.module.js'
 
-const HUIGUAN_BASE = 'https://huiguan.iridescently.xyz'
+const HUIGUAN_BASE = siteDomains.url('huiguan', '')
 
 export default class AccountBar extends Component {
 	constructor() {

@@ -1,5 +1,5 @@
 """
-iridescently.xyz 主站 — 纯静态站点 + 跨站 SSO 读取 + 管理员内容编辑接口
+主站（各批准根域的 apex / www）— 纯静态站点 + 跨站 SSO 读取 + 管理员内容编辑接口
 基于 base_static 公共模块，自带静态防护 + 安全头 + 错误静默 + 缓存。
 启动: python server.py
 """
@@ -22,16 +22,16 @@ from urllib.parse import urlparse
 
 PORT = 8088
 STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
-RUNTIME_DIR = os.path.join(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", os.path.dirname(os.path.dirname(STATIC_DIR))), "portal", "www")
+RUNTIME_DIR = STATIC_DIR
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "server"))
 import hx_sso
+from site_domains import (PRODUCTION_HOSTS, service_name, site_url, request_host,
+                          request_origin_allowed, cors_headers)
 from base_static import BaseStaticHandler
 # 管理员：完整 (kind, uid) 站长账户 + 账户库状态复核，见 server/site_admin.py
 from site_admin import is_site_owner
 import gallery_interactions
-
-# 允许发起写操作的来源主机（域名后缀命中 .iridescently.xyz 亦放行）
-ALLOWED_HOSTS = {"iridescently.xyz", "localhost", "127.0.0.1"}
+from storage_paths import data_root, homepage_data_dir, require_ready
 
 # 需要写权限的接口 -> 目标文件名
 EDIT_TARGETS = {
@@ -40,13 +40,10 @@ EDIT_TARGETS = {
 }
 
 # 主域根路径跳转到会馆；节气画廊在 /gallery.html
-MAIN_HOSTS = {"iridescently.xyz", "www.iridescently.xyz"}
-ROOT_DESTINATION = "https://huiguan.iridescently.xyz/"
+MAIN_HOSTS = {host for host in PRODUCTION_HOSTS if service_name(host) in ("main", "www")}
 
 SITE_STATUS_TARGETS = {
-    "huiguan": "https://huiguan.iridescently.xyz/",
-    "zszm": "https://zszm.iridescently.xyz/",
-    "oc": "https://oc.iridescently.xyz/",
+    service: site_url(service, "/") for service in ("huiguan", "zszm", "oc")
 }
 _SITE_STATUS_LOCK = threading.Lock()
 _SITE_STATUS_CACHE = {"expires": 0, "sites": {}}
@@ -150,7 +147,9 @@ def _clean_thanks(payload):
 
 def _write_json(name, data):
     """原子写入，写前留 .bak 备份（.bak 不可被静态下载）"""
-    path = os.path.join(RUNTIME_DIR, name)
+    require_ready()
+    path = _site_config_path(name, for_write=True)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     if os.path.exists(path):
         shutil.copy2(path, path + ".bak")
     tmp = path + ".tmp"
@@ -158,6 +157,10 @@ def _write_json(name, data):
         json.dump(data, f, ensure_ascii=False, indent=2)
         f.write("\n")
     os.replace(tmp, path)
+
+
+def _site_config_path(name, for_write=False):
+    return str(homepage_data_dir() / "config" / name)
 
 
 class Handler(BaseStaticHandler):
@@ -169,8 +172,9 @@ class Handler(BaseStaticHandler):
         if decoded in ("/", "/index.html", "/gallery.html", "/links.json", "/thanks.json") or decoded.startswith("/assets/homepage/"):
             # 节气画廊的构建产物仍是 index.html；主域根路径改跳会馆后由 /gallery.html 提供
             name = "index.html" if decoded in ("/", "/gallery.html") else decoded.lstrip("/")
-            target = os.path.abspath(os.path.join(RUNTIME_DIR, name))
-            if os.path.commonpath((os.path.abspath(RUNTIME_DIR), target)) == os.path.abspath(RUNTIME_DIR):
+            target = os.path.abspath(_site_config_path(name) if name in ("links.json", "thanks.json") else os.path.join(RUNTIME_DIR, name))
+            base = os.path.dirname(target) if name in ("links.json", "thanks.json") else RUNTIME_DIR
+            if os.path.commonpath((os.path.abspath(base), target)) == os.path.abspath(base):
                 return target
             return os.path.join(STATIC_DIR, "__missing__")
         return super().translate_path(path)
@@ -221,7 +225,7 @@ class Handler(BaseStaticHandler):
         if path in ("/", "/index.html") and host in MAIN_HOSTS:
             # 302 而非 308：首页去向以后可能再调整，不让浏览器永久记住
             self.send_response(302)
-            self.send_header("Location", ROOT_DESTINATION)
+            self.send_header("Location", site_url("huiguan", "/", request_host(self)))
             self.send_header("Content-Length", "0")
             self.end_headers()
             return True
@@ -254,7 +258,7 @@ class Handler(BaseStaticHandler):
             if gallery_interactions.find_original(self._gallery_root(), RUNTIME_DIR, image) is None:
                 self._json(404, {"error": "图片不存在"})
                 return
-            with gallery_interactions.session(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[2])) as db:
+            with gallery_interactions.session(data_root()) as db:
                 self._json(200, gallery_interactions.snapshot(db, image, hx_sso.read_cookie(self.headers)))
             return
         if path == "/api/gallery/comments":
@@ -270,7 +274,7 @@ class Handler(BaseStaticHandler):
             except ValueError:
                 self._json(400, {"error": "评论位置无效"})
                 return
-            with gallery_interactions.session(self._gallery_root()) as db:
+            with gallery_interactions.session(data_root()) as db:
                 self._json(200, {"comments": gallery_interactions.comments_page(db, image, offset),
                                  "total": gallery_interactions.comment_count(db, image)})
             return
@@ -306,11 +310,9 @@ class Handler(BaseStaticHandler):
 
         # 同源校验：带 Origin/Referer 时必须是本站域名
         origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
-        if origin:
-            host = (urlparse(origin).hostname or "").lower()
-            if host not in ALLOWED_HOSTS and not host.endswith(".iridescently.xyz"):
-                self._json(403, {"error": "来源不被允许"})
-                return
+        if not request_origin_allowed(self):
+            self._json(403, {"error": "来源不被允许"})
+            return
 
         user = hx_sso.read_cookie(self.headers)
         if not self._is_admin(user):
@@ -342,13 +344,12 @@ class Handler(BaseStaticHandler):
         self._json(200, {"ok": True, "file": name, "count": count})
 
     def _gallery_root(self):
-        return Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[2]))
+        return data_root()
 
     def _send_gallery_original(self, head=False):
         fetch_site = (self.headers.get("Sec-Fetch-Site") or "").lower()
         origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
-        origin_host = (urlparse(origin).hostname or "").lower() if origin else ""
-        if fetch_site == "cross-site" or (origin_host and origin_host not in ALLOWED_HOSTS and not origin_host.endswith(".iridescently.xyz")):
+        if fetch_site == "cross-site" or not request_origin_allowed(self):
             if head:
                 self.send_response(403)
                 self.send_header("Cache-Control", "no-store")
@@ -383,7 +384,8 @@ class Handler(BaseStaticHandler):
         self.send_header("Content-Length", str(target.stat().st_size))
         self.send_header("Cache-Control", "private, no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("Access-Control-Allow-Origin", "https://iridescently.xyz")
+        for name, value in cors_headers(self):
+            self.send_header(name, value)
         self.send_header("Vary", "Origin")
         self.end_headers()
         if not head:
@@ -392,11 +394,9 @@ class Handler(BaseStaticHandler):
 
     def _post_gallery_interaction(self, path):
         origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
-        if origin:
-            host = (urlparse(origin).hostname or "").lower()
-            if host not in ALLOWED_HOSTS and not host.endswith(".iridescently.xyz"):
-                self._json(403, {"error": "来源不被允许"})
-                return
+        if not request_origin_allowed(self):
+            self._json(403, {"error": "来源不被允许"})
+            return
         user = hx_sso.read_cookie(self.headers)
         if not user or not user.get("uid") or not user.get("kind"):
             self._json(401, {"error": "登录后即可参与互动"})

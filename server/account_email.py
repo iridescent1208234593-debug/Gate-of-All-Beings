@@ -8,6 +8,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from pathlib import Path
+from site_domains import site_url, request_host, request_origin_allowed
+from storage_paths import secrets_dir
 
 
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
@@ -31,7 +33,7 @@ def _mail_setting():
     import os
 
     config = {}
-    env_file = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[1])) / "server" / ".env.local"
+    env_file = secrets_dir() / "server.env"
     try:
         for line in env_file.read_text(encoding="utf-8").splitlines():
             key, separator, value = line.strip().partition("=")
@@ -69,16 +71,16 @@ def _send_message(email, subject, content):
         smtp.send_message(message)
 
 
-def _send_email(email, token):
+def _send_email(email, token, base_url=None):
     setting = _mail_setting()
-    base = setting("ACCOUNT_EMAIL_BASE_URL", "https://huiguan.iridescently.xyz/account.html").strip()
+    base = base_url or setting("ACCOUNT_EMAIL_BASE_URL", site_url("huiguan", "/account.html")).strip()
     link = f"{base}#verify-email={token}"
     _send_message(email, "验证你的西木会馆邮箱", f"请打开以下链接验证邮箱（30 分钟内有效）：\n\n{link}\n\n如果不是你本人操作，请忽略此邮件。")
 
 
-def send_recovery_email(email, token, username):
+def send_recovery_email(email, token, username, base_url=None):
     setting = _mail_setting()
-    base = setting("ACCOUNT_EMAIL_RECOVERY_URL", "https://huiguan.iridescently.xyz/security.html?mode=recover").strip()
+    base = base_url or setting("ACCOUNT_EMAIL_RECOVERY_URL", site_url("huiguan", "/security.html?mode=recover")).strip()
     link = f"{base}#email-recovery={token}"
     content = (
         f"你的西木会馆账号名是：{username}\n\n"
@@ -90,8 +92,7 @@ def send_recovery_email(email, token, username):
 
 def handle_email(handler, action, api):
     reply = handler._json
-    origin = handler.headers.get("Origin")
-    if origin and origin not in ("https://huiguan.iridescently.xyz", "http://127.0.0.1:8089", "http://localhost:8089"):
+    if not request_origin_allowed(handler):
         return reply(403, {"error": "请从会馆账户页面操作"})
     if action == "status":
         session = api["read_session"](handler._get_session())
@@ -143,7 +144,10 @@ def handle_email(handler, action, api):
             conn.execute("INSERT OR REPLACE INTO account_email_challenges VALUES (?,?,?,?,?,?,?)", (kind, uid, email, normalized, hashlib.sha256(token.encode()).hexdigest(), now + 1800, now))
             conn.commit(); conn.close()
         try:
-            (api.get("send_email") or _send_email)(email, token)
+            if api.get("send_email"):
+                api["send_email"](email, token)
+            else:
+                _send_email(email, token, site_url("huiguan", "/account.html", request_host(handler)))
         except Exception:
             with api["DB_LOCK"]:
                 conn = api["db"]()

@@ -255,7 +255,7 @@ export function EntryGate({ leaving, paused = false, onEnter, onSkip }: { leavin
         </button>
         <span className="gate-language-host" />
       </div>
-      <img className="gate-mark" src="https://iridescently.xyz/assets/iridescently-mark.png" alt="Iridescently" />
+      <img className="gate-mark" src="/shared/shared-ui/brand/iridescently-mark.svg" alt="Iridescently" />
       <div className="gate-content">
         <p className="gate-eyebrow">罗小黑战记 · 非商业同人</p>
         <h1 className="gate-title">众生之门</h1>

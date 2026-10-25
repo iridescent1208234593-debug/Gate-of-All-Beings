@@ -11,13 +11,14 @@ Scores are reported by the game clients and therefore only as trustworthy as the
 browser; each game has a plausibility ceiling and points are capped per day, so a
 forged score can at most top one board, never farm levels.
 
-CLI (run from the project root; IRIDESCENTLY_PROJECT_ROOT selects the data root):
+CLI (run from the project root; IRIDESCENTLY_STORAGE_ROOT and IRIDESCENTLY_ENVIRONMENT select isolated data):
   python server/account_progress.py status                 # legacy points and new totals
   python server/account_progress.py reset-legacy           # dry run: what the reset would change
   python server/account_progress.py reset-legacy --apply   # archive + zero every account's points
   python server/account_progress.py restore-legacy --apply # rollback: put archived legacy points back
 """
 import argparse
+from storage_paths import data_root, huiguan_data_dir, require_ready
 import json
 import math
 import os
@@ -176,8 +177,10 @@ def init_schema(conn):
 
 
 def open_db(project_root=None):
-    root = Path(project_root or os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[1]))
-    database = root / "portal" / "huiguan" / "users.db"
+    if project_root is None or Path(project_root).resolve() == data_root():
+        require_ready()
+    root = Path(project_root) if project_root is not None else data_root()
+    database = huiguan_data_dir(root) / "users.db"
     database.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(database, timeout=10, isolation_level=None)
     conn.row_factory = sqlite3.Row
@@ -474,10 +477,8 @@ def restore_legacy(conn):
 # ---------- HTTP (mounted at /api/progress/* on every host by portal_server) ----------
 
 def _allowed_origin(origin):
-    if not origin:
-        return True
-    host = origin.split("://", 1)[-1].split(":")[0].lower()
-    return host == "iridescently.xyz" or host.endswith(".iridescently.xyz") or host in ("localhost", "127.0.0.1")
+    from site_domains import allowed_origin
+    return not origin or allowed_origin(origin)
 
 
 def handle(handler, method, path, project_root=None):
@@ -526,7 +527,8 @@ def handle(handler, method, path, project_root=None):
             return send(200, {"logged_in": True, "chains": task_chains.view(conn, *me)})
         if method == "POST" and route == "/api/progress/chains/claim":
             import task_chains
-            if not _allowed_origin(handler.headers.get("Origin", "")):
+            from site_domains import request_origin_allowed
+            if not request_origin_allowed(handler):
                 return send(403, {"error": "来源不被允许"})
             if "application/json" not in (handler.headers.get("Content-Type") or ""):
                 return send(415, {"error": "需要 JSON"})
@@ -547,7 +549,8 @@ def handle(handler, method, path, project_root=None):
             except ValueError as error:
                 return send(400, {"error": str(error)})
         if method == "POST" and route == "/api/progress/report":
-            if not _allowed_origin(handler.headers.get("Origin", "")):
+            from site_domains import request_origin_allowed
+            if not request_origin_allowed(handler):
                 return send(403, {"error": "来源不被允许"})
             if "application/json" not in (handler.headers.get("Content-Type") or ""):
                 return send(415, {"error": "需要 JSON"})

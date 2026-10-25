@@ -7,6 +7,8 @@ import {BASE_CARDS} from '../src/game/core/content';
 import {validateBalance,type CardOverrides} from '../src/game/core/cardBalance';
 import {validateEcoIndividual} from '@lxh/shared-types/exchange';
 import type {EcoIndividual} from '@lxh/shared-types/models';
+import {createRequire} from 'node:module';
+const runtimePaths = createRequire(import.meta.url)('../../../../runtime-paths.cjs');
 
 interface BalanceFile {schemaVersion:1;revision:number;updatedAt:string|null;overrides:CardOverrides;individuals:Record<string,EcoIndividual>}
 const empty=():BalanceFile=>({schemaVersion:1,revision:0,updatedAt:null,overrides:{},individuals:{}});
@@ -91,6 +93,6 @@ export function createCardBalanceApi(directory:string){
   return app;
 }
 export function cardBalancePlugin(directory:string):Plugin {
-  const attach=(server:{middlewares:{use:(path:string,handler:ReturnType<typeof createCardBalanceApi>)=>unknown}})=>{server.middlewares.use('/api/card-balance',createCardBalanceApi(directory));};
+  const attach=(server:{middlewares:{use:(path:string,handler:ReturnType<typeof createCardBalanceApi>)=>unknown}})=>{runtimePaths.requireReady();server.middlewares.use('/api/card-balance',createCardBalanceApi(directory));};
   return {name:'card-balance-backend',configureServer:attach,configurePreviewServer:attach};
 }

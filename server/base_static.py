@@ -10,6 +10,7 @@ import http.server
 import os
 import re
 from urllib.parse import unquote
+from site_domains import SITE_DOMAIN, csp_policy, request_root
 
 # 禁止直接下载的敏感后缀
 BLOCKED_SUFFIXES = (".py", ".db", ".db-shm", ".db-wal", ".log", ".sqlite", ".sqlite3", ".json.bak", ".bak", ".pem", ".key", ".pfx", ".p12")
@@ -25,17 +26,6 @@ SECURITY_HEADERS = {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
     "Strict-Transport-Security": "max-age=86400",
-    "Content-Security-Policy-Report-Only": "; ".join((
-        "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://static.cloudflareinsights.com https://*.iridescently.xyz https://*.paypal.com https://*.paypalobjects.com",
-        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://*.iridescently.xyz",
-        "img-src 'self' data: blob: https://*.iridescently.xyz https://*.paypal.com https://*.paypalobjects.com",
-        "font-src 'self' data: https://cdn.jsdelivr.net https://*.iridescently.xyz",
-        "connect-src 'self' https://*.iridescently.xyz wss://*.iridescently.xyz https://static.cloudflareinsights.com https://*.paypal.com",
-        "media-src 'self' data: blob: https://*.iridescently.xyz",
-        "frame-src 'self' https://*.iridescently.xyz https://*.paypal.com",
-        "worker-src 'self' blob:",
-    )),
 }
 
 # 静态资源缓存（按后缀 -> max-age 秒数）
@@ -105,6 +95,11 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
         # 安全头
         for k, v in SECURITY_HEADERS.items():
             super().send_header(k, v)
+        try:
+            root = request_root(self)
+        except ValueError:
+            root = SITE_DOMAIN
+        super().send_header("Content-Security-Policy-Report-Only", csp_policy(root))
         # 扫描已缓冲的 headers，找 Content-Type
         ct = ""
         for h in headers_buffer:
@@ -121,7 +116,8 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
                 header.lower().startswith((b"access-control-allow-origin:", b"cache-control: private"))
                 for header in headers_buffer
             ):
-                # Public media remains exportable from the opaque showcase sandbox.
+                # Public media remains exportable from the opaque showcase sandbox (Origin: null);
+                # never credentialed, and owner-only originals are excluded by their private policy.
                 super().send_header("Access-Control-Allow-Origin", "*")
             max_age = CACHE_MAX_AGE.get(ext)
             # A handler that set its own policy (e.g. private owner-only originals) keeps it.

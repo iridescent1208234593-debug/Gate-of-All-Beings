@@ -1,12 +1,13 @@
+import siteDomains from '../../../../../../shared/site-domains.mjs';
 import { unifiedStorage } from '@lxh/shared-session/kv.js';
 const localStorage = unifiedStorage('management');
 /**
  * 灵境会馆 - 账号系统
  * 对接 huiguan 站点账号（/api/auth 注册登录、/api/user 会话、/api/game/save|load 云存档）。
- * 跨域：开发环境 localhost:5179 → 本地 8089；其他域名 → https://huiguan.iridescently.xyz
+ * 跨域：开发环境 localhost:5179 → 本地 8089；其他域名 → 同一根域下的会馆（见 shared/site-domains.json）
  */
 const DEV_ORIGIN = typeof location !== 'undefined' && ['localhost', '127.0.0.1'].includes(location.hostname);
-export const ACCOUNT_API = DEV_ORIGIN ? 'http://localhost:8089' : 'https://huiguan.iridescently.xyz';
+export const ACCOUNT_API = DEV_ORIGIN ? 'http://localhost:8089' : siteDomains.url('huiguan', '');
 
 const SESSION_KEY = 'lingjing-huiguan-account';
 

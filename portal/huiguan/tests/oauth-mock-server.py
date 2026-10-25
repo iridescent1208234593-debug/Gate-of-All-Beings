@@ -11,12 +11,15 @@ from urllib.parse import parse_qs, urlencode, urlsplit
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "server"))
-os.environ["IRIDESCENTLY_ENVIRONMENT"] = "development"
 os.environ["USSO_LOGIN_ENABLED"] = "1"
 os.environ["USSO_CLIENT_SECRET"] = "test-only-oauth-secret"
 os.environ["HX_SSO_SECRET"] = "test-only-hx-sso-secret"
 DATA_ROOT = Path(tempfile.mkdtemp(prefix="huiguan-oauth-mock-", dir=os.environ.get("OAUTH_TEST_PARENT") or None))
-os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(DATA_ROOT)
+from testing_storage import configure
+from storage_paths import initialize_storage
+configure(DATA_ROOT)
+os.environ["IRIDESCENTLY_ENVIRONMENT"] = "development"
+initialize_storage()
 
 spec = importlib.util.spec_from_file_location("huiguan_oauth_test_app", ROOT / "portal" / "huiguan" / "server_huiguan.py")
 app = importlib.util.module_from_spec(spec)
@@ -109,7 +112,7 @@ class Provider(http.server.BaseHTTPRequestHandler):
             state = query.get("state", [""])[0]
             with app.OAUTH_LOCK:
                 if state in app.OAUTH_STATES:
-                    app.OAUTH_STATES[state] = app.time.time() - 601
+                    app.OAUTH_STATES[state]["created"] = app.time.time() - 601
                     return self._json(200, {"ok": True})
             return self._json(404, {"ok": False})
         if parsed.path == "/__test__/restart-app":

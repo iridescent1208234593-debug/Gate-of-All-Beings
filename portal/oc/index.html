@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script src="/shared/site-domains.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -520,12 +521,12 @@
 <canvas id="ink-canvas"></canvas>
 
 <nav class="topnav">
-  <a href="https://iridescently.xyz" class="brand">西木会馆</a>
+  <a href="/" data-site-service="main" data-site-path="/" class="brand">西木会馆</a>
   <div class="links">
-    <a href="https://iridescently.xyz" data-site="main">主页</a>
-    <a href="https://huiguan.iridescently.xyz" data-site="huiguan">西木会馆</a>
-    <a href="https://oc.iridescently.xyz" data-site="oc">馆长设定</a>
-    <a href="https://zszm.iridescently.xyz" data-site="zszm">众生之门</a>
+    <a href="/" data-site-service="main" data-site-path="/" data-site="main">主页</a>
+    <a href="/" data-site-service="huiguan" data-site-path="/" data-site="huiguan">西木会馆</a>
+    <a href="/" data-site-service="oc" data-site-path="/" data-site="oc">馆长设定</a>
+    <a href="/" data-site-service="zszm" data-site-path="/" data-site="zszm">众生之门</a>
   </div>
   <span class="sign">佳霖的原创角色设定页</span>
 </nav>
@@ -650,10 +651,10 @@
         </details>
     </div>
     <nav class="site-nav">
-        <a href="https://iridescently.xyz">主页</a>
-        <a href="https://huiguan.iridescently.xyz">西木会馆</a>
-        <a href="https://oc.iridescently.xyz" class="current">馆长设定</a>
-        <a href="https://zszm.iridescently.xyz">众生之门</a>
+        <a href="/" data-site-service="main" data-site-path="/">主页</a>
+        <a href="/" data-site-service="huiguan" data-site-path="/">西木会馆</a>
+        <a href="/" data-site-service="oc" data-site-path="/" class="current">馆长设定</a>
+        <a href="/" data-site-service="zszm" data-site-path="/">众生之门</a>
     </nav>
     <div class="footer">第 1 页，共 1 页 · 虹 · 佳霖（三足乌）</div>
 </div>
@@ -703,14 +704,7 @@
 
   document.body.classList.add("has-topnav");
   var hostname = window.location.hostname;
-  var siteMap = {
-    'iridescently.xyz': 'main',
-    'huiguan.iridescently.xyz': 'huiguan',
-    'oc.iridescently.xyz': 'oc',
-    'psyche.iridescently.xyz': 'psyche',
-    'zszm.iridescently.xyz': 'zszm'
-  };
-  var currentSite = siteMap[hostname] || 'main';
+  var currentSite = IridescentlyDomains.service(hostname) || 'main';
   var links = document.querySelectorAll('.topnav a[data-site]');
   for (var i = 0; i < links.length; i++) {
     if (links[i].getAttribute('data-site') === currentSite) {
@@ -747,7 +741,7 @@
     <p class="ip-disclaimer">本站为非商业性粉丝社区项目，仅为用户提供信息交流与身份认证服务。所有涉及"罗小黑战记"及相关角色、形象、作品的内容，其著作权、商标权等知识产权均归原作者及寒木春华动画工作室所有。本站未获官方授权，如有侵权请联系管理员删除。</p>
   </details>
 </footer>
-<script src="https://iridescently.xyz/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
 <script>
 /* 链接框（浏览器标签 / 分享链接标题）文字轮播：小猫脸眨眼 → 站点文案打字机 */
 (function () {

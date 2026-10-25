@@ -1,8 +1,14 @@
 ﻿import sqlite3
 import json
 from datetime import datetime
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from storage_paths import data_root, require_ready
 
-conn = sqlite3.connect(r'E:\罗小黑战记数据库\db\worldview_luoxiaohei_v4.db')
+require_ready()
+database = data_root() / 'worldview' / 'worldview_luoxiaohei_v4.db'
+conn = sqlite3.connect(database.as_uri() + '?mode=rw', uri=True)
 cursor = conn.cursor()
 
 # 1. Add special case entry: 风息化树 (Fengxi's tree transformation as unusual dispersal)

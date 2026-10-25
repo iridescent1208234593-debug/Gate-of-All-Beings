@@ -1,14 +1,14 @@
 // 罗小黑战记 · 素材库共享加载器（西木会馆设计系统）
 // 用法：
-//   <script src="https://huiguan.iridescently.xyz/design-system/lxh-assets.js"></script>
+//   <script src="/design-system/lxh-assets.js"></script> (after /shared/site-domains.js)
 //   LXAssets.avatarUrl('无限')                 → 角色代表图（缩略）
 //   LXAssets.avatarUrl('无限', { thumb:false }) → 原图
 //   LXAssets.imageUrl(123)                     → 按 character_images.id 取图
 //   await LXAssets.manifest()                  → 全量清单（角色/立绘/设计资源）
 //   LXAssets.designURL('css' | 'font' | ...)   → 设计资源绝对 URL
 (function (root) {
-  var IS_SITE = /\.iridescently\.xyz$/.test(location.hostname);
-  var BASE = IS_SITE ? 'https://huiguan.iridescently.xyz' : 'http://localhost:8089';
+  var IS_SITE = Boolean(root.IridescentlyDomains.rootFor(location.hostname));
+  var BASE = IS_SITE ? root.IridescentlyDomains.url('huiguan') : 'http://localhost:8089';
   var _manifest = null, _pending = null;
 
   function manifest() {

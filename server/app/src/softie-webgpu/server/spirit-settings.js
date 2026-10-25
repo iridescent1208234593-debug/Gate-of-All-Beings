@@ -2,6 +2,8 @@ import { readFile, mkdir, writeFile, rename, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { DEFAULT_SPIRIT_SETTINGS, SPIRIT_SETTINGS_API, validateSpiritSettings } from '../src/games/spirit-playground/settings.js';
+import { createRequire } from 'node:module';
+const runtimePaths = createRequire(import.meta.url)('../../../../runtime-paths.cjs');
 
 export const MAX_SETTINGS_BODY_BYTES = 8 * 1024;
 const localHost = hostname => ['localhost', '127.0.0.1', '[::1]'].includes(hostname);
@@ -77,8 +79,7 @@ async function saveSettings(directory, settings) {
 }
 
 /** Connect middleware; Vite owns the HTTP server. A queue serializes atomic writes. */
-export function createSpiritSettingsMiddleware({ root = process.cwd() } = {}) {
-  const directory = join(root, '.local');
+export function createSpiritSettingsMiddleware({ directory = runtimePaths.dataPath('spirit') } = {}) {
   const file = join(directory, 'spirit-settings.json');
   let pendingWrite = Promise.resolve();
   return async (request, response, next) => {
@@ -114,11 +115,13 @@ export function createSpiritSettingsMiddleware({ root = process.cwd() } = {}) {
 }
 
 export function spiritSettingsPlugin() {
-  let root;
+  const attach = server => {
+    runtimePaths.requireReady();
+    server.middlewares.use(createSpiritSettingsMiddleware());
+  };
   return {
     name: 'local-spirit-settings',
-    configResolved(config) { root = config.root; },
-    configureServer(server) { server.middlewares.use(createSpiritSettingsMiddleware({ root })); },
-    configurePreviewServer(server) { server.middlewares.use(createSpiritSettingsMiddleware({ root })); },
+    configureServer: attach,
+    configurePreviewServer: attach,
   };
 }

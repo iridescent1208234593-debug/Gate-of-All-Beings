@@ -5,13 +5,14 @@ by a bare uid shared between local and USSO accounts. The JSON file is only read
 (once per content hash) and never written, so it stays a rollback source; see
 docs/game-save-ownership.md for the resolution rules and rollback procedure.
 
-CLI (run from the project root; IRIDESCENTLY_PROJECT_ROOT selects the data root):
+CLI (run from the project root; IRIDESCENTLY_STORAGE_ROOT and IRIDESCENTLY_ENVIRONMENT select isolated data):
   python server/game_saves.py plan              # show how legacy keys resolve, no writes
   python server/game_saves.py import            # import legacy JSON (idempotent)
   python server/game_saves.py status            # row counts and quarantined records
   python server/game_saves.py export --out FILE # write legacy-format JSON for rollback
 """
 import argparse
+from storage_paths import data_root, huiguan_data_dir, require_ready
 import hashlib
 import json
 import os
@@ -236,11 +237,13 @@ def export_legacy(conn):
 
 
 def _project_root():
-    return Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[1]))
+    return data_root()
 
 
 def _connect(root, readonly=False):
-    database = root / "portal" / "huiguan" / "users.db"
+    if Path(root).resolve() == data_root():
+        require_ready()
+    database = huiguan_data_dir(root) / "users.db"
     if readonly:
         conn = sqlite3.connect(f"file:{database.as_posix()}?mode=ro", uri=True, timeout=10)
     else:
@@ -251,12 +254,13 @@ def _connect(root, readonly=False):
 
 
 def main(argv=None):
+    require_ready()
     parser = argparse.ArgumentParser(description="Account-owned cloud save maintenance")
     parser.add_argument("command", choices=("plan", "import", "status", "export"))
     parser.add_argument("--out", help="export destination (required for export)")
     args = parser.parse_args(argv)
     root = _project_root()
-    legacy = root / "portal" / "huiguan" / "game_saves.json"
+    legacy = huiguan_data_dir(root) / "game_saves.json"
     if args.command == "plan":
         conn = _connect(root, readonly=True)
         _, data = _read_legacy(legacy)

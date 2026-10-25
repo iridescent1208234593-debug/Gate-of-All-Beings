@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parents[1]
-INIT_TWICE = "import sys; sys.path.insert(0, sys.argv[1]); import server_huiguan as s; s.init_user_db(); s.init_user_db(); print(s.USER_DB)"
+INIT_TWICE = "import sys; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'server')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; s.init_user_db(); s.init_user_db(); print(s.USER_DB)"
 
 
 class EditRoleColumnTest(unittest.TestCase):
@@ -18,7 +18,9 @@ class EditRoleColumnTest(unittest.TestCase):
         root = tempfile.mkdtemp(prefix="edit-role-")
         try:
             (Path(root) / "portal" / "huiguan").mkdir(parents=True)
-            env = {**os.environ, "IRIDESCENTLY_PROJECT_ROOT": root, "PYTHONIOENCODING": "utf-8"}
+            env = {**os.environ, "IRIDESCENTLY_STORAGE_ROOT": root, "IRIDESCENTLY_ENVIRONMENT": "test", "PYTHONIOENCODING": "utf-8"}
+            for key in ("DATA", "ASSETS", "CACHE", "RELEASE", "BACKUP", "PROJECT"):
+                env.pop(f"IRIDESCENTLY_{key}_ROOT", None)
             out = subprocess.run([sys.executable, "-c", INIT_TWICE, str(HERE)], env=env, capture_output=True, text=True, check=True)
             db_path = out.stdout.strip().splitlines()[-1]
             self.assertTrue(db_path.startswith(root), db_path)

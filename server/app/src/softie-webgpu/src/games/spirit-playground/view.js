@@ -1,3 +1,4 @@
+import siteDomains from '../../../../../../../shared/site-domains.mjs';
 import * as THREE from 'three/webgpu';
 import { SpiritInstance } from './spirit-instance.js';
 import { createSpiritController } from './controller.js';
@@ -11,7 +12,7 @@ import { extractLargestContour } from './body-shape.js';
 const BASE = import.meta.env.BASE_URL;
 const API_URL = BASE + SPIRIT_SETTINGS_API.replace(/^\//, '');
 const ACCOUNT_API = ['localhost', '127.0.0.1'].includes(location.hostname)
-  ? 'http://localhost:8089' : 'https://huiguan.iridescently.xyz';
+  ? 'http://localhost:8089' : siteDomains.url('huiguan', '');
 const CLOUD_PROFILE_URL = `${ACCOUNT_API}/api/game/load?scope=softie`;
 import { makeStudio } from '../../studio.js';
 import { setSceneAnimation } from '../../scene-animation.js';
@@ -52,7 +53,7 @@ export function mountSpiritPlayground(root) {
           <p class="spirit-room-message" role="status" aria-live="polite">输入相同房间码即可相遇。</p>
         </section>
         <fieldset class="spirit-settings" disabled><legend class="sr-only">灵体参数</legend>
-          <p class="spirit-account-row"><span class="spirit-account-status" role="status" aria-live="polite">正在读取账户…</span> <a class="spirit-account-login" href="https://huiguan.iridescently.xyz/" target="_blank" rel="noreferrer">登录 / 注册</a><span class="spirit-perk-hint">登录可同步档案并领取测试挂饰</span><button class="spirit-perk" type="button" hidden>佩戴测试挂饰「灵界小徽记」</button></p>
+          <p class="spirit-account-row"><span class="spirit-account-status" role="status" aria-live="polite">正在读取账户…</span> <a class="spirit-account-login" href="${siteDomains.url('huiguan', '/')}" target="_blank" rel="noreferrer">登录 / 注册</a><span class="spirit-perk-hint">登录可同步档案并领取测试挂饰</span><button class="spirit-perk" type="button" hidden>佩戴测试挂饰「灵界小徽记」</button></p>
           <label for="spirit-name-input">灵体昵称</label><input id="spirit-name-input" type="text" maxlength="20" autocomplete="off" />
           <div class="spirit-color-row"><label for="spirit-color">颜色</label><input id="spirit-color" type="color" /></div>
           <label for="spirit-skin">灵体形态</label><select id="spirit-skin"><option value="softie">柔团灵</option><option value="cat">耳尾灵</option><option value="bud">芽灵</option><option value="custom">手绘灵体</option></select>

@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
+<script src="/shared/site-domains.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>众生之门 · 官方 UI 复刻组件库</title>
-<script src="https://huiguan.iridescently.xyz/design-system/game-nav.js" defer></script>
+<script src="/design-system/game-nav.js" defer></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css">
-<link rel="stylesheet" href="https://huiguan.iridescently.xyz/design-system/ui/lxh-ui.css">
+<link rel="stylesheet" href="/design-system/ui/lxh-ui.css">
 <style>
   body { margin: 0; padding: 70px 24px 60px; background: #efe9db; font-family: "LXGW WenKai", "Noto Serif SC", serif; color: #4a4636; }
   h1 { font-size: 26px; letter-spacing: 4px; margin: 0 0 6px; }
@@ -73,7 +74,7 @@
   <div class="frame rowline" id="misc"></div>
 </section>
 
-<script src="https://huiguan.iridescently.xyz/design-system/ui/lxh-ui.js"></script>
+<script src="/design-system/ui/lxh-ui.js"></script>
 <script>
   var U = window.LXHUI
 
@@ -94,8 +95,8 @@
   // 3. 角色面板（罗小黑示例，立绘走素材库 API）
   document.getElementById('charpanel').appendChild(U.charpanel({
     name: '罗小黑', race: '猫妖', lv: 10,
-    avatar: 'https://huiguan.iridescently.xyz/api/assets/avatar?cid=1',
-    portrait: 'https://huiguan.iridescently.xyz/api/assets/avatar?cid=1',
+    avatar: '/api/assets/avatar?cid=1',
+    portrait: '/api/assets/avatar?cid=1',
     intro: '猫妖，10 岁。御灵系金，双空间系：吞噬（已失）+ 传送。被小白猫罐中带回家后一同生活，后拜无限为师。',
     abilities: ['空间系<br>传送', '御灵系<br>金', '生灵系？<br>变化？']
   }))

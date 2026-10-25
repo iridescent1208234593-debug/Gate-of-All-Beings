@@ -86,7 +86,7 @@ npm run preview
 
 访问 `/games/spirit-playground`，点击空地前往，点自己的灵体戳一下，点同伴靠近并贴住；桌面端也可用 WASD。按住灵体局部揉捏，拖动搬动或拎起，松手回弹。输入、失焦、切页和断线都会清除控制。
 
-右侧参数即时预览，点击「保存参数」由现有 Vite 服务的 `GET/PUT /api/spirit-settings` 保存到 `.local/spirit-settings.json`（Git 忽略）。后台校验版本、字段和范围并原子写入；仅本机可访问，不另开服务。JSON 导入后预览，需点击保存才持久化。静态部署没有此本地 API，可使用导入导出。
+右侧参数即时预览，点击「保存参数」由现有 Vite 服务的 `GET/PUT /api/spirit-settings` 保存到 统一外置存储的 `data/spirit/spirit-settings.json`（Git 忽略）。后台校验版本、字段和范围并原子写入；仅本机可访问，不另开服务。JSON 导入后预览，需点击保存才持久化。静态部署没有此本地 API，可使用导入导出。
 
 `SpiritInstance` 持有独立物理与可替换皮肤。皮肤工厂接收 `{ physics, appearance, environment }`，返回 `root / pickMeshes / metrics / applyAppearance / update / dispose`；柔团灵使用 softie 的软体形变与凝胶材质，耳尾灵和芽灵复用同一形变场。每个场景按需创建并在非活动路由暂停渲染。
 

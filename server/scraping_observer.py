@@ -11,16 +11,13 @@ import threading
 import time
 from urllib.parse import parse_qs, urlsplit
 from collections import deque
+from storage_paths import cache_dir, require_ready
+from site_domains import PRODUCTION_HOSTS as _PRODUCTION_HOSTS
 
 _lock = threading.Lock()
 _windows = {}
 _logger = None
 _RAY = re.compile(r"^[A-Za-z0-9-]{1,64}$")
-_PRODUCTION_HOSTS = frozenset({
-    "iridescently.xyz", "www.iridescently.xyz", "huiguan.iridescently.xyz",
-    "oc.iridescently.xyz", "spirit.iridescently.xyz", "zszm.iridescently.xyz",
-    "game.iridescently.xyz", "juling.iridescently.xyz", "lingjing.iridescently.xyz",
-})
 
 
 class _SafeRotatingHandler(RotatingFileHandler):
@@ -41,9 +38,8 @@ class _SafeRotatingHandler(RotatingFileHandler):
 def _log():
     global _logger
     if _logger is None:
-        root = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", Path(__file__).resolve().parents[1]))
-        operations = Path(os.environ.get("IRIDESCENTLY_OPS_ROOT", root / "ops"))
-        directory = Path(os.environ.get("IRIDESCENTLY_SCRAPING_LOG_DIR", operations / "网站恢复" / "logs"))
+        require_ready()
+        directory = cache_dir("logs", "scraping")
         directory.mkdir(parents=True, exist_ok=True)
         _logger = logging.getLogger("scraping_observe")
         _logger.setLevel(logging.INFO)
