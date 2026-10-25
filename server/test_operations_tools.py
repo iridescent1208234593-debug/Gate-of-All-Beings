@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import sqlite3
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -97,8 +98,33 @@ class LocalRuntime(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.runtime.selected_release()
         self.channel()
-        with self.assertRaises(Exception):
+        with self.assertRaises(subprocess.CalledProcessError):
             # The release named by the channel does not exist, so hash verification fails.
+            self.runtime.selected_release()
+
+    def test_a_sealed_release_is_selected_and_tampering_is_refused(self):
+        seal = """
+import { mkdirSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+const { candidateRoot, recordCandidate } = await import('./scripts/release-artifacts.mjs');
+const { sealRelease } = await import('./scripts/publish-release.mjs');
+for (const [name, file] of [['site', 'server/portal_server.py'], ['modules', 'cards/index.html'], ['homepage', 'index.html']]) {
+  mkdirSync(path.dirname(path.join(candidateRoot, name, file)), { recursive: true });
+  writeFileSync(path.join(candidateRoot, name, file), name);
+  await recordCandidate(name, { buildCommand: 'fixture' });
+}
+console.log(JSON.stringify(await sealRelease({ allowDirty: true })));
+"""
+        result = subprocess.run(["node", "--input-type=module", "-e", seal], cwd=SCRIPTS.parent,
+                                capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        channel = json.loads(result.stdout.strip().splitlines()[-1])
+        site, selected = self.runtime.selected_release()
+        self.assertEqual(selected["current"], channel["current"])
+        self.assertEqual(site, (storage_paths.release_root() / channel["site"]).resolve())
+        self.assertTrue(site.is_relative_to(storage_paths.release_root()))
+        (site / "server/portal_server.py").write_text("tampered", encoding="utf-8")
+        with self.assertRaises(subprocess.CalledProcessError):
             self.runtime.selected_release()
 
     def test_secret_files_cannot_override_storage_selection(self):

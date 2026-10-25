@@ -31,9 +31,10 @@ def selected_release():
     if (not re.fullmatch(r"\d{8}T\d{9}Z-[a-f0-9]{12}-[a-f0-9]{12}", release_id)
             or channel.get("environment") != environment() or channel.get("site") != f"store/{release_id}/site"):
         raise ValueError("invalid local release channel")
-    code = "const p=await import((await import('node:url')).pathToFileURL(process.argv[1]));const v=p.verifyRelease(process.argv[2]);console.log(JSON.stringify({sha:v.manifestSha256,head:v.manifest.sourceHead}));"
-    result = subprocess.run([shutil.which("node"), "--input-type=module", "-e", code,
-                             str(ROOT / "scripts/publish-release.mjs"), release_id],
+    # The publisher runs its CLI when argv[1] names it, so the module travels in the environment.
+    code = "const p=await import(process.env.IRIDESCENTLY_PUBLISHER_URL);const v=p.verifyRelease(process.argv[1]);console.log(JSON.stringify({sha:v.manifestSha256,head:v.manifest.sourceHead}));"
+    result = subprocess.run([shutil.which("node"), "--input-type=module", "-e", code, release_id],
+                            env={**os.environ, "IRIDESCENTLY_PUBLISHER_URL": (ROOT / "scripts/publish-release.mjs").as_uri()},
                             capture_output=True, text=True, encoding="utf-8", check=True, creationflags=NO_WINDOW)
     verified = json.loads(result.stdout)
     if verified["sha"] != channel.get("manifestSha256") or verified["head"] != channel.get("sourceHead"):
