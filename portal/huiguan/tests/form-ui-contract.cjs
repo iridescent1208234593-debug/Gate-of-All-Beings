@@ -14,6 +14,50 @@ assert.match(source, /id="factionRange"/);
 assert.match(source, /<output[^>]+id="sliderVal"[^>]+for="factionRange"/);
 assert.doesNotMatch(source, /<span class="slider-val"/);
 
+assert.match(source, /id="ageInput"[^>]+inputmode="numeric"[^>]+pattern="\[0-9\]\*"/);
+assert.match(source, /id="heightValue"[^>]+inputmode="decimal"/);
+assert.match(source, /id="heightUnit"[\s\S]*?<option value="cm">cm<\/option>[\s\S]*?<option value="m">m<\/option>/);
+assert.match(source, /type="hidden" name="height" id="heightInput"/);
+
+const numericBlock = source.match(/\/\/ ========== 数值输入 ==========([\s\S]*?)\/\/ ========== 能力与年龄限制 ==========/);
+assert.ok(numericBlock, 'numeric input helpers should be extractable');
+const numericElements = {
+  heightValue: { value: '', placeholder: '如 175', dataset: {} },
+  heightUnit: { value: 'cm' },
+  heightInput: { value: '' },
+};
+const numericContext = {
+  document: { getElementById(id) { return numericElements[id]; } },
+};
+vm.runInNewContext(`${numericBlock[1]}\nthis.helpers = { sanitizeIntegerInput, sanitizeDecimalInput, parseHeightMeasurement, syncHeightField, setHeightField };`, numericContext);
+
+const integerInput = { value: '20岁.5' };
+assert.equal(numericContext.helpers.sanitizeIntegerInput(integerInput), '205');
+assert.equal(integerInput.value, '205');
+
+const decimalInput = { value: '1..72米' };
+assert.equal(numericContext.helpers.sanitizeDecimalInput(decimalInput), '1.72');
+assert.equal(decimalInput.value, '1.72');
+
+assert.deepEqual(
+  JSON.parse(JSON.stringify(numericContext.helpers.parseHeightMeasurement('人形约 172cm'))),
+  { value: '172', unit: 'cm' },
+);
+assert.deepEqual(
+  JSON.parse(JSON.stringify(numericContext.helpers.parseHeightMeasurement('1.72 m'))),
+  { value: '1.72', unit: 'm' },
+);
+
+numericContext.helpers.setHeightField('172cm');
+assert.equal(numericElements.heightValue.value, '172');
+assert.equal(numericElements.heightUnit.value, 'cm');
+assert.equal(numericElements.heightInput.value, '172cm');
+numericElements.heightValue.value = '1,72';
+numericElements.heightUnit.value = 'm';
+numericContext.helpers.syncHeightField();
+assert.equal(numericElements.heightValue.value, '1.72');
+assert.equal(numericElements.heightInput.value, '1.72m');
+
 const functionMatch = source.match(/function updateSlider\(slider\)\s*\{([\s\S]*?)\n\}\n\n\/\/ ========== 验证/);
 assert.ok(functionMatch, 'updateSlider implementation should be extractable');
 
@@ -54,4 +98,4 @@ for (const [value, expectedLabel, expectedZone] of [
   assert.equal(attributes['aria-valuetext'], `${value} · ${expectedLabel}`);
 }
 
-console.log('form initial theme and faction slider contract PASS');
+console.log('form theme, numeric fields and faction slider contract PASS');
