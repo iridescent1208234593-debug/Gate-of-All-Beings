@@ -66,6 +66,8 @@ npm run publish:site       # 显式提升静态/Python 源码
 
 配置：会馆 USSO OAuth 使用 `USSO_CLIENT_SECRET`，众生之门 OAuth 使用 `ZSZM_CLIENT_SECRET`，均只从运行环境读取；`HX_SSO_SECRET` 环境优先，也可从忽略的 `server/.env.local` 读取。会馆 OAuth 的 Client ID 在 `portal/huiguan/server_huiguan.py` 配置；真实 OAuth 应用密钥需由 USSO 应用管理端签发，不能用站内账户密码代替。所有账户逻辑仍复用会馆和 `shared-session`，无第二套身份系统。
 
+AI 协作指令与隔离边界见 [Copilot 仓库指令](.github/copilot-instructions.md)、[架构说明](docs/architecture.md) 和 [环境隔离审计](docs/architecture/ENVIRONMENT_BOUNDARIES.md)。分支治理当前为建议稿，尚未执行，见 [BRANCH_STRATEGY](docs/development/BRANCH_STRATEGY.md)；归档边界见 [ARCHIVE_POLICY](docs/development/ARCHIVE_POLICY.md)。
+
 ## 颜色与海报
 
 `portal/huiguan/character-colors.js` 统一以保存的 HEX 为真值，古色色板索引仅作缺值 fallback；界面背景派生色与主色分开。图片/海报采用 Blob + multipart 上传并在 JSON/HTML 中引用同源 URL，避免重复 Base64。普通业务 JSON 上限 8 MiB，图片/PNG 8 MiB、GIF 5 MiB；64 MiB 旧角色写入兼容范围仍有界限。详见 [会馆](portal/huiguan/README.md) 与 [海报](portal/huiguan/haibao/README.md)。

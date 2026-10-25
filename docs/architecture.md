@@ -68,6 +68,13 @@
 - 经营 ← 主入口：iframe 消息（现仍在 cards 内嵌 management/ecology 时用 postMessage）；统一壳下为同文档挂载，可逐步替换为直接的模块调用。
 - 统一存档：`shared-session` 命名空间键，跨模块可读。
 
-## 2026-10-14 当前发布边界
+## 当前入口与发布边界（2026-10-25 审计）
 
-正式入口均经8080；game/lingjing/juling旧域名308进入众生之门，旧5176/5179前端关闭。Portal/OAuth从`.releases/production/site`源码快照运行，原目录只承担用户数据/媒体和显式发布产物。Node API插件为进程启动时加载；preview静态输出指向发布目录。壳对embed:true模块执行真实卸载；非embed试玩保留iframe。详情以根README、portal.json及release-workflow为准。
+- 正式域名由统一门户 `server/portal_server.py` 按 Host / 路径分发；网站管家配置的主门户端口为 8080。域名映射以 `portal.json` 和外置网站管家清单为准。
+- 构建候选位于 `.releases/candidate`，本机发布快照位于 `.releases/production/site`，服务运行目录位于 `.releases/runtime`。只有显式发布流程会提升候选；本机快照不等同于香港当前线上版本。
+- `IRIDESCENTLY_PROJECT_ROOT` 当前指向 `E:\Projects`，部分 SQLite 数据、上传目录和共享媒体因而与源码仓库同根。它们被 Git 忽略不代表物理隔离；禁止对该树运行会清除 ignored files 的清理命令。
+- 审计时香港发布控制器报告五个受管服务 active；本机未发现项目门户/应用服务进程。生产数据标记为香港权威维护，线上运行身份应以远端发布控制器为准。
+- `server/app/src/cards/server.py` 从代码快照所在目录导入服务模块，而 `IRIDESCENTLY_PROJECT_ROOT` 用于数据路径；不要把工作区源码改动当成已部署代码。
+- 统一壳中 `embed: true` 模块需实现 dispose；非 embed 试玩仍使用 iframe。共享会话、设计系统和类型契约的 canonical 目录是 `shared/*`。
+
+审计时本机发布清单、香港当前版本指针和候选构建记录存在时间及提交来源差异。发布前必须记录同一候选的 Git SHA、dirty 状态、逐文件校验和以及线上激活版本，不能依赖旧的本机指针推断线上版本。详见 [环境隔离审计](architecture/ENVIRONMENT_BOUNDARIES.md)、根 README 与 [release-workflow](release-workflow.md)。
