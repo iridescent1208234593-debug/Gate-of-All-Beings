@@ -4,7 +4,7 @@
 
 ## 1. 现状（2026-10-17 harness 实测基线）
 
-数据来源：`node ops/perf/zszm-startup.mjs --build --runs 3`。把工作树（`31bfe0e` + 首帧打点）临时构建后测量，构建配置与 `.releases/candidate/cards` 相同；现有候选早于打点，无法直接测。
+数据来源：`node scripts/run-ops.mjs perf/zszm-startup.mjs --build --runs 3`。把工作树（`31bfe0e` + 首帧打点）临时构建后测量，构建配置与 `.releases/candidate/cards` 相同；现有候选早于打点，无法直接测。
 
 - 条件：冷 / 热缓存，Fast 4G（9 Mbps / 150 ms RTT），CPU 4× 降速，Chrome 155 headless，视口 1440×900。文本资源按 gzip 计。
 - 报告：`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/perf/2026-10-17/`。真实网络与 `--block-cross-origin` 各一份，另有两者的 diff。
@@ -101,10 +101,10 @@ P4 门庭模式清单、各模式 chunk（hover / 视口内预取）
    - 种族头像合成雪碧图或保持小 PNG，按视口加载。
 5. **模式 chunk 预取**：门庭对卡片在 hover 或进入视口时 `import()` 预取；不在首屏预取全部模式。
 6. **测量 harness**：
-   - 在仓库内加 `ops/perf/zszm-startup.mjs`：Playwright + Chrome DevTools Protocol，冷 / 热缓存、网络与 CPU 节流。
+   - 性能工具保存在外部运维项目 `E:\External Projects\Iridescently Operations\perf\zszm-startup.mjs`：Playwright + Chrome DevTools Protocol，冷 / 热缓存、网络与 CPU 节流。
    - 输出 `{firstGateFrame, jsBeforeFrame, crossOriginBlocking, onboardingBytes}`，与第 2 节预算比较，超标即非零退出。
    - 报告写入 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/perf/%3Cdate%3E/`。门景用 `performance.mark('gate:first-frame')` 打点，作为唯一首帧口径。
-   - 已实现（2026-10-17）。用法：`node ops/perf/zszm-startup.mjs [--dist <dir> | --build | --url <url>] [--runs 3] [--block-cross-origin] [--compare <before.json>]`；只比较两份报告用 `--diff <before.json> <after.json>`。默认测 `.releases/candidate/cards`。退出码：0 全部达标，1 有超标，2 无法测量（例如构建没有打点）。
+   - 已实现（2026-10-17）。用法：`node scripts/run-ops.mjs perf/zszm-startup.mjs [--dist <dir> | --build | --url <url>] [--runs 3] [--block-cross-origin] [--compare <before.json>]`；只比较两份报告用 `--diff <before.json> <after.json>`。默认测 `.releases/candidate/cards`。退出码：0 全部达标，1 有超标，2 无法测量（例如构建没有打点）。
    - 报告格式固定（`schema: zszm-startup/v1`），取各次运行的中位数：
      - `summary.metrics`：五个预算指标。
      - `summary.milestones`：冷 / 热缓存的时间点，含 `firstGateFrame`、`skipClickable`、`enterClickable`、`enterClicked`、`onboardingInteractive`、`hallInteractive`。

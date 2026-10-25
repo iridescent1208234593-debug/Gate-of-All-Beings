@@ -43,7 +43,7 @@ git show "431f167^:New project/six-system-arena/data/stat-model.json"   # 逐个
 3. **数值去留**：入世历练英雄 HP 是 72–80 这种小数值，六系演武是 800–6400 的大数值，量级不一样。决定换算方式：比如六系数值只用来做相对强弱和分档，战斗里换算成小数值。
 4. **存档统一**：IndexedDB 和 localStorage 两套存档，加上用户要的"重伤 / 陨落 / 5 小时复活 / 全员陨落转重生之门"，这些状态现在只在入世历练的本地存档里（`core/meta.ts` 的 `heroState / allHeroesDead / reviveIfDue`）。决定：
    - 角色伤势、资源（灵质、草药）是否两个模式共享；
-   - 存档是否上服务端（登录用户按账户存，匿名用户留在本地）。上服务端的话，要接入现有 `users.db` 和会话体系，并且遵守"香港单主写"的原则，和服务器并联方案对齐（见 `work/hk-bandwidth/CODEX-服务器并联与后端分区-提示词.md`）；
+   - 存档是否上服务端（登录用户按账户存，匿名用户留在本地）。上服务端的话，要接入现有 `users.db` 和会话体系，并且遵守"香港单主写"的原则，和服务器并联方案对齐（见 `file:///E:/External%20Projects/Iridescently%20Operations/hk-bandwidth/CODEX-服务器并联与后端分区-提示词.md`）；
    - 旧存档的迁移和兼容（`checkSave` 现在只认 `version:1`）。
 5. **服务端接口**：是否新增统一的 `/api/cards/*`（角色表、卡池、存档读写），还是继续走前端静态 JSON 加本地存档。5178 数值服务要不要扩展成覆盖两个模式。
 6. **要删的东西**：`slay-the-web/public/game/backend.js` 的第三方上报（建议删掉）、`powers_20260830_055429_247.js` 这类备份文件、`xiuxian-card/` 子项目（确认有没有入口在用）。
@@ -51,8 +51,8 @@ git show "431f167^:New project/six-system-arena/data/stat-model.json"   # 逐个
 ## 四、约束
 
 - 香港是数据权威源。不要从 Windows 往香港推 DB 或用户文件，改香港数据前先 `sqlite3 .backup`。
-- 代码发布只走 `ops/hk-release.py` → `release_control.py`。注意：`hk-release.py` 已经被我改成保留文件真实 mtime（原来 mtime=0，会导致源站对所有 If-Modified-Since 都回 304，浏览器永远拿旧页面）。**这项修复还没发布**，下一次发布会顺带上线；发布后请验证带 IMS 的请求能返回 200。
-- `git add` 只加具体路径，禁止 `-A`。工作树里有很多并行会话没提交的改动（`ops/*` 服务器管家、`portal/huiguan/*`、`cards/server.py` 多线程改动等），不要误带。
+- 代码发布只走 `E:\External Projects\Iridescently Operations\hk-release.py` → `release_control.py`。注意：`hk-release.py` 已经被我改成保留文件真实 mtime（原来 mtime=0，会导致源站对所有 If-Modified-Since 都回 304，浏览器永远拿旧页面）。**这项修复还没发布**，下一次发布会顺带上线；发布后请验证带 IMS 的请求能返回 200。
+- `git add` 只加具体路径，禁止 `-A`。工作树里有很多并行会话没提交的改动（`E:\External Projects\Iridescently Operations\*` 服务器管家、`portal/huiguan/*`、`cards/server.py` 多线程改动等），不要误带。
 - 素材红线：只能用复审保留的官方图，禁止同人、AI 生成、真人图。
 - 入世历练重玩机制已经提交为 `360d41b`（线上本来就有），测试 23/23 通过。
 

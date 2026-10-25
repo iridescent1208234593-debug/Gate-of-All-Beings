@@ -1,12 +1,12 @@
 # 发布架构 v2：不可变版本 + 指针切换（规格，未实施）
 
-状态：2026-10-17 设计稿，供评审。它取代对 `ops/publish-release.mjs` 的补丁式修复。现行流程见 [release-workflow.md](release-workflow.md)，诊断证据见 [STAGE1_8_1_RELEASE_RECOVERY.md](security/STAGE1_8_1_RELEASE_RECOVERY.md)。
+状态：2026-10-17 设计稿，供评审。它取代对 `E:\External Projects\Iridescently Operations\publish-release.mjs` 的补丁式修复。现行流程见 [release-workflow.md](release-workflow.md)，诊断证据见 [STAGE1_8_1_RELEASE_RECOVERY.md](security/STAGE1_8_1_RELEASE_RECOVERY.md)。
 
 ## 1. 为什么现行方式会 EPERM
 
 现行发布用目录重命名完成"原子"切换：`production/site → .promotion/previous/0`，再把 candidate 改名进来。Windows 上，如果某个进程的**工作目录**或打开的句柄位于该目录树内，重命名就会失败。
 
-源码证据：`ops/网站恢复/website-manager.py` 对 **`portal` 和 `zszm-oauth` 两个服务**都把 cwd 改写到 `.releases/production/site/...` 内部（约第 326 行）。
+源码证据：`E:\External Projects\Iridescently Operations\网站恢复/website-manager.py` 对 **`portal` 和 `zszm-oauth` 两个服务**都把 cwd 改写到 `.releases/production/site/...` 内部（约第 326 行）。
 
 - Stage 1.8.1 报告只停了 Portal（8080），5174 Cards API 仍在运行，它的 cwd 在 `production/site/server/app/src/cards`。这足以解释"停掉 Portal 后重试仍失败"。报告把这一点记为 UNKNOWN；**阶段 0 已在隔离副本中复现该机制**（见第 7 节"阶段 0 结论"）。
 - 另外，Defender 扫描、`__pycache__` 写入，以及 10-17 出现在快照内的空 `users.db`（说明有进程在快照内打开过数据库），都会在被重命名的树里留下句柄。
@@ -84,9 +84,9 @@ v2 的接入位：
 
 ### 阶段 0 结论（2026-10-17）：假设成立
 
-脚本：`node file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/publish-simulation-20261017/repro-cwd-lock.mjs`（可重复运行；每个场景重建自己的假项目树）。日志：同目录下 `<场景>.log`（含完整 `[release-preflight]` / `[release-fs]` 行）和 `summary.json`。
+脚本：`node "E:\External Projects\Iridescently Operations Archive\releases\publish-simulation-20261017\repro-cwd-lock.mjs"`（可重复运行；每个场景重建自己的假项目树）。日志：同目录下 `<场景>.log`（含完整 `[release-preflight]` / `[release-fs]` 行）和 `summary.json`。
 
-做法：把真实的 `ops/publish-release.mjs`、`ops/release-artifacts.mjs` 原样复制进假树。按 `website-manager.py` 的 cwd 规则起两个替身进程（`python -m http.server 0`，只绑 127.0.0.1 随机端口）：portal → `production/site/server`，zszm-oauth → `production/site/server/app/src/cards`。替身空闲时不打开树内任何文件，所以**唯一变量是 cwd**。按场景停掉其中一部分，再运行 `publish-release.mjs site`。
+做法：把真实的 `E:\External Projects\Iridescently Operations\publish-release.mjs`、`E:\External Projects\Iridescently Operations\release-artifacts.mjs` 原样复制进假树。按 `website-manager.py` 的 cwd 规则起两个替身进程（`python -m http.server 0`，只绑 127.0.0.1 随机端口）：portal → `production/site/server`，zszm-oauth → `production/site/server/app/src/cards`。替身空闲时不打开树内任何文件，所以**唯一变量是 cwd**。按场景停掉其中一部分，再运行 `publish-release.mjs site`。
 
 | 场景 | 仍在运行（cwd 在树内） | 发布器退出码 | 发布后 production | rename 失败 |
 | --- | --- | --- | --- | --- |

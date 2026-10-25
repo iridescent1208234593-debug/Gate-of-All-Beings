@@ -1,8 +1,8 @@
 # 交接：香港中继绕开代理节点 + 门户 CPU 突增排查（给 sol6.1）
 
-> 2026-10-19 已新增独立[服务器管家](../../ops/服务器管家/README.md)：正式域名仍为香港稳定版，pc-* 域名提供本机新版页面 / 客户端，API 和玩家数据统一由香港提供；代码和参考资产库使用不同的发布 / 回滚通道。新本机入口不使用本文历史的 SSH 反向中继，也不向香港同步旧 Windows DB。
+> 2026-10-19 已新增独立[服务器管家](file:///E:/External%20Projects/Iridescently%20Operations/服务器管家/README.md)：正式域名仍为香港稳定版，pc-* 域名提供本机新版页面 / 客户端，API 和玩家数据统一由香港提供；代码和参考资产库使用不同的发布 / 回滚通道。新本机入口不使用本文历史的 SSH 反向中继，也不向香港同步旧 Windows DB。
 
-> 2026-10-18 18:30 后架构已更新：九个正式域名与全部后端、账户、存档和媒体已迁移到香港，nginx 上游为香港 `127.0.0.1:18180`，本机五个网站服务已停止。以下中继架构和 DNS 回退办法属于历史记录，不应恢复到冻结的本机数据库。最新部署、发布与回滚方式见 [DEPLOYMENT.md](../../work/hk-bandwidth/DEPLOYMENT.md)，管理入口为 Windows 网站管家的「发布到香港 / 回滚版本」。
+> 2026-10-18 18:30 后架构已更新：九个正式域名与全部后端、账户、存档和媒体已迁移到香港，nginx 上游为香港 `127.0.0.1:18180`，本机五个网站服务已停止。以下中继架构和 DNS 回退办法属于历史记录，不应恢复到冻结的本机数据库。最新部署、发布与回滚方式见 [DEPLOYMENT.md](file:///E:/External%20Projects/Iridescently%20Operations/hk-bandwidth/DEPLOYMENT.md)，管理入口为 Windows 网站管家的「发布到香港 / 回滚版本」。
 
 时间基准：历史观测为 2026-10-18 00:10 左右。目标：`https://zszm.iridescently.xyz` 稳定、低延迟。
 
@@ -20,8 +20,8 @@ zszm.iridescently.xyz -> Cloudflare -> 香港独立隧道 -> ecsvkdu0 (154.222.2
   -> SSH 反向通道（计划任务 Iridescently-HK-Origin，ssh.exe，免密钥） -> Windows 门户 127.0.0.1:8080
 ```
 
-细节见 `work/hk-bandwidth/DEPLOYMENT.md`。回滚：`python work/hk-bandwidth/cf_control.py rollback`。
-`python work/hk-bandwidth/verify.py --targets https://zszm.iridescently.xyz --require-hk` 在 00:00 前通过，28 项无失败。
+细节见 [`DEPLOYMENT.md`](file:///E:/External%20Projects/Iridescently%20Operations/hk-bandwidth/DEPLOYMENT.md)。历史回滚命令：`python "E:\External Projects\Iridescently Operations\hk-bandwidth\cf_control.py" rollback`。
+历史验收命令：`python "E:\External Projects\Iridescently Operations\hk-bandwidth\verify.py" --targets https://zszm.iridescently.xyz --require-hk`；当时 28 项无失败。
 
 ## Claude 今晚已改的东西（不要回滚）
 
@@ -37,7 +37,7 @@ zszm.iridescently.xyz -> Cloudflare -> 香港独立隧道 -> ecsvkdu0 (154.222.2
 
 另外：
 - 线上快照与发布清单的哈希已不一致，下次正规发布会消除。
-- 旧的 `ops/网站恢复/logs/scraping.log*` 保留未删。
+- 旧的 `E:\External Projects\Iridescently Operations\网站恢复/logs/scraping.log*` 保留未删。
 - 备份在 Claude 的 scratchpad，不需要你处理。
 
 ## 已确认的事实
@@ -51,7 +51,7 @@ zszm.iridescently.xyz -> Cloudflare -> 香港独立隧道 -> ecsvkdu0 (154.222.2
   突增时本机响应仍是几毫秒，没有直接拖慢请求。
   Claude 的发现：突增时进程每秒约 11 万次 socket 系统调用；大量线程在等 GIL。没有找到触发源。
 - 日志里有重复的 `GET /assets/cards/*.svg` 404（`wood/sword/spirit/...`）和 `POST /app/shell/api/action` 返回 501。
-  那些图标原在已删除的 `shared/shared-ui/AI image/cards/`，备份在 `ops/backups/release-deploy-20261017-140239/production_site/shared/shared-ui/AI image/cards/`。
+  那些图标原在已删除的 `shared/shared-ui/AI image/cards/`，备份在 `E:\External Projects\Iridescently Operations\backups/release-deploy-20261017-140239/production_site/shared/shared-ui/AI image/cards/`。
 - Claude 没有管理员权限，无法加主机路由，也无法让 Clash 重新应用配置。
 
 ## 任务

@@ -8,7 +8,7 @@
 | 10-17 production / OZtree 修改 | 用户本地 Agent 所为，已授权；`/ozmtree` 接受并补 README |
 | 拆分提交 | 允许，**不 push** |
 | `game_saves` | 迁移到长期账户隔离，已实现 |
-| `work/`、`ops/backups` | 暂时保留 |
+| `work/`、`E:\External Projects\Iridescently Operations\backups` | 暂时保留 |
 
 ## P0
 

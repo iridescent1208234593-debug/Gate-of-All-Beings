@@ -51,17 +51,19 @@
 PSD / PNG 是**设计稿**，页面用的仍然是 `shared/shared-ui/lxh-ui.css`，改图不会自动改线上。回写有两条路：
 
 1. **只改了颜色**：改 `tokens/色板.psd` 里色块图层的颜色，然后运行
-   ```bash
-   python ops/lxh-ui-kit/token_diff.py 改好的色板.psd
+   ```powershell
+   $env:IRIDESCENTLY_OPS_ROOT = 'E:\External Projects\Iridescently Operations'
+   python "$env:IRIDESCENTLY_OPS_ROOT\lxh-ui-kit\token_diff.py" 改好的色板.psd
    ```
    会列出哪些 `--lxh-*` token 从什么色变成了什么色。把这个列表交给开发（或 AI），改 `lxh-ui.css` 顶部的 token 就行，所有组件跟着变。
 2. **改了形状、间距、造型、图标**：把改好的 PSD / PNG（和图标的 svg）放回同名位置，告诉开发哪个组件改了什么；开发对照图改 CSS / SVG。图标 svg 可以直接替换 `LXHUI.ICONS` 里对应的那条。
 
 ## 重新导出（开发用）
 
-```bash
-python ops/lxh-ui-kit/export.py              # 全量，输出到本目录下的 lxh-ui/
-python ops/lxh-ui-kit/export.py --only 01 05 # 只导某几组
+```powershell
+$env:IRIDESCENTLY_OPS_ROOT = 'E:\External Projects\Iridescently Operations'
+python "$env:IRIDESCENTLY_OPS_ROOT\lxh-ui-kit\export.py"              # 全量，输出到本目录下的 lxh-ui/
+python "$env:IRIDESCENTLY_OPS_ROOT\lxh-ui-kit\export.py" --only 01 05 # 只导某几组
 ```
 
-需要：Python + `playwright`、`psd-tools`、`Pillow`、`numpy`，以及本机 Edge 或 Chrome。要加组件或状态，在 `ops/lxh-ui-kit/kit.html` 里加一行 `add(...)`。导出后看 `lxh-ui/导出报告.txt`：它把各层叠回去与整图逐像素比对，平均差 < 1 视为一致。
+需要：Python + `playwright`、`psd-tools`、`Pillow`、`numpy`，以及本机 Edge 或 Chrome。要加组件或状态，在 `E:\External Projects\Iridescently Operations\lxh-ui-kit\kit.html` 里加一行 `add(...)`。导出后看 `lxh-ui/导出报告.txt`：它把各层叠回去与整图逐像素比对，平均差 < 1 视为一致。

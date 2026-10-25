@@ -30,7 +30,7 @@ Additional findings:
 
 ## Backup
 
-**Off-host backup = UNKNOWN.** The known snapshot `ops/backups/security-pre-stage1.5-20261016-1700/` remains on the same workstation, approximately 581,843,391 bytes across 3,056 files. `C:\Users\hp\OneDrive` exists; the local ACL grants user/SYSTEM/Administrators full control and `CodexSandboxUsers` read/execute. The OneDrive sync process was not running and cloud account sharing/sync status could not be verified. No database was uploaded to cloud storage.
+**Off-host backup = UNKNOWN.** The known snapshot `E:\External Projects\Iridescently Operations\backups/security-pre-stage1.5-20261016-1700/` remains on the same workstation, approximately 581,843,391 bytes across 3,056 files. `C:\Users\hp\OneDrive` exists; the local ACL grants user/SYSTEM/Administrators full control and `CodexSandboxUsers` read/execute. The OneDrive sync process was not running and cloud account sharing/sync status could not be verified. No database was uploaded to cloud storage.
 
 ## Restore Drill
 

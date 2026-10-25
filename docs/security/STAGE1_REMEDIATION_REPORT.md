@@ -114,7 +114,7 @@ See [`security-question-migration.md`](security-question-migration.md), [`csp-mi
 
 ## Git Worktree
 
-Security-related edits in this stage are limited to `server/portal_server.py`, `server/base_static.py`, `portal/huiguan/server_huiguan.py`, `portal/huiguan/index.html`, `portal/huiguan/security.html`, `server/account_recovery.py`, `server/account_security.py`, `server/app/src/cards/server.py`, `server/app/src/juling/server.js`, `server/app/src/management/index.html`, `ops/网站恢复/website-manager.py`, and the Stage 1 security documents. `server/portal_server.py` also contains a pre-existing unrelated `/ozmtree` route; it was preserved. Other pre-existing dirty changes and deletions shown by `git status` were not reset, cleaned, staged, committed, or overwritten.
+Security-related edits in this stage are limited to `server/portal_server.py`, `server/base_static.py`, `portal/huiguan/server_huiguan.py`, `portal/huiguan/index.html`, `portal/huiguan/security.html`, `server/account_recovery.py`, `server/account_security.py`, `server/app/src/cards/server.py`, `server/app/src/juling/server.js`, `server/app/src/management/index.html`, `E:\External Projects\Iridescently Operations\网站恢复/website-manager.py`, and the Stage 1 security documents. `server/portal_server.py` also contains a pre-existing unrelated `/ozmtree` route; it was preserved. Other pre-existing dirty changes and deletions shown by `git status` were not reset, cleaned, staged, committed, or overwritten.
 
 ## Next Recommended Stage
 

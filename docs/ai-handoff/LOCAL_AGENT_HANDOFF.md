@@ -19,7 +19,7 @@
 
 ## Claude 的区域（不要改）
 
-- `server/`、`portal/`、`ops/`、`server/app/src/**` 源码
+- `server/`、`portal/`、`E:\External Projects\Iridescently Operations\`、`server/app/src/**` 源码
 - `docs/ai-handoff/`、`docs/release-architecture-v2.md`、`docs/zszm-startup-performance-spec.md`、`docs/game-save-ownership.md`
 - `.releases/`：发布由用户批准后执行；不要再手改 production 快照
 
@@ -35,7 +35,7 @@
 
 - 不覆盖、不 restore、不 stash、不 reset 任何你没写过的未提交修改。动一个文件前先 `git status` / `git diff` 确认它当前的状态。
 - 不 commit、不 push、不 publish、不重启正式服务，除非用户在对话中明确要求。
-- 不删除 `work/`、`ops/backups/`。
+- 不删除 `work/`、`E:\External Projects\Iridescently Operations\backups/`。
 - 不向 `.releases/production` 写入。
 
 ---
@@ -52,12 +52,12 @@
 - six-system-arena 的复审记录
 - 复审结论导致的 shared/shared-ui 素材增删
 
-其他区域（server/、portal/、ops/、.releases/、docs/ai-handoff 中 Claude 的文件）只读。需要那里发生变化时，写进报告，由 Claude 实施。
+其他区域（server/、portal/、E:\External Projects\Iridescently Operations\、.releases/、docs/ai-handoff 中 Claude 的文件）只读。需要那里发生变化时，写进报告，由 Claude 实施。
 
 约束：
 - 不覆盖、不还原、不 stash 任何你没写过的未提交修改；动文件前先看 git status / diff
 - 不 commit、不 push、不发布、不重启服务、不写 .releases/production，除非用户明确要求
-- 不删除 work/ 和 ops/backups/
+- 不删除 work/ 和 E:\External Projects\Iridescently Operations\backups/
 - 删除或新增 shared/shared-ui 素材前先 git grep 引用，并在报告中列出
 
 完成标准：写出 E:/Projects/docs/ai-handoff/LOCAL_AGENT_REPORT.md，包含：

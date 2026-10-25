@@ -34,7 +34,7 @@
 | `server/app/src/cards/server.py` | 由单线程 `HTTPServer` 改为 Threading，backlog 512、60s 超时 | 同上；见 R1 |
 | `server/base_static.py` | 哈希资源 `immutable` 一年缓存、字体缓存、异常后 `close_connection=True` | 性能为主；缓存头变化 |
 | `portal/huiguan/server_huiguan.py` | SQLite `timeout=30`、`synchronous=NORMAL`、`journal_mode=WAL`；注册时在锁外做 scrypt；导入 `valid_asset_url` | 稳定性/抗注册突发；见 R2、R3 |
-| `portal/huiguan/watchdog.py`、`ops/网站恢复/website-manager.py`（及其 README） | cwd 移出 production（本阶段 1.8.2 的修改） | 发布架构修复 |
+| `portal/huiguan/watchdog.py`、`E:\External Projects\Iridescently Operations\网站恢复/website-manager.py`（及其 README） | cwd 移出 production（本阶段 1.8.2 的修改） | 发布架构修复 |
 | `portal/www/connections.html`、`styles/connections.css`、`shared/shared-types/world.js` | 页面/样式/注释 | 非安全，内容改动 |
 | `New project/six-system-arena/docs/*.md` 等 | 文档 | 无关 |
 
@@ -43,7 +43,7 @@
 ## 4. 风险
 
 - **R1 Cards 线程安全（中）**：`cards/server.py` 的 `sessions` 是全局 dict（`server.py:95`），改为多线程后并发读写；单个 dict 操作在 CPython 下基本安全，但"检查再删除"（如 `if sid in sessions` 后 `del`）存在竞态，可能 KeyError。需要代码审查或加锁后再发。
-- **R2 WAL 模式持久化（中高）**：`PRAGMA journal_mode=WAL` 会改写数据库文件的持久模式并产生 `-wal`/`-shm`。影响：①所有备份/拷贝（含本阶段的还原演练、ops/backups 脚本）必须带上这些文件或先 checkpoint，否则丢最近写入；②回滚到旧代码后旧代码仍可读 WAL 库，但**拷贝单个 .db 文件会丢数据**；③数据库在网络/同步盘上不安全（OneDrive 同步风险）。需要先确认 `users.db` 所在位置与备份流程。
+- **R2 WAL 模式持久化（中高）**：`PRAGMA journal_mode=WAL` 会改写数据库文件的持久模式并产生 `-wal`/`-shm`。影响：①所有备份/拷贝（含本阶段的还原演练、E:\External Projects\Iridescently Operations\backups 脚本）必须带上这些文件或先 checkpoint，否则丢最近写入；②回滚到旧代码后旧代码仍可读 WAL 库，但**拷贝单个 .db 文件会丢数据**；③数据库在网络/同步盘上不安全（OneDrive 同步风险）。需要先确认 `users.db` 所在位置与备份流程。
 - **R3 `synchronous=NORMAL`（低）**：WAL 下断电可能丢最近事务，但不损坏库；账户注册数据可接受性需确认。
 - **R4 `immutable` 缓存（中）**：正则只匹配 `/assets/<name>-<8位hash>.<ext>`；若有同名不变更内容的资源，浏览器与 Cloudflare 会缓存一年，无法在不改文件名的情况下修复。需确认构建产物确为内容哈希命名，且 Cloudflare 缓存规则不会放大。
 - **R5 60 秒连接超时（低中）**：会掐断空闲 > 60s 的长连接；Spirit WebSocket 代理（`WebSocketProxyHandler`）走 Portal，必须验证 WebSocket 空闲/心跳是否会被误断。
@@ -76,7 +76,7 @@ Cloudflare 的 WAF/Bot/限速/Hotlink/缓存配置；线上 robots.txt 实际响
   | sqlite3 `backup()` API | 可恢复，integrity ok |
   | `VACUUM INTO` | 可恢复，integrity ok |
   | 恢复时旧 `-wal`/`-shm` 仍在目录里 | **危险**：旧 WAL 被重放，"恢复"后数据变回写入时的状态，备份被悄悄覆盖 |
-- 现有备份脚本（`ops/stage15_backup.py`）对 SQLite 用 `backup()` API，是安全的。对真实 `portal/huiguan/users.db` 做了只读 `backup()`：integrity ok，26 张表，users 行数一致。
+- 现有备份脚本（`E:\External Projects\Iridescently Operations\stage15_backup.py`）对 SQLite 用 `backup()` API，是安全的。对真实 `portal/huiguan/users.db` 做了只读 `backup()`：integrity ok，26 张表，users 行数一致。
 - 结论：备份必须用 `backup()`/`VACUUM INTO`；**恢复前必须先删除目标旁的 `-wal`/`-shm`**；任何 rsync/OneDrive/复制 `*.db` 的流程都不可用于该库。该点需写入恢复手册。
 
 ### R6 Cards 从源码树导入 — 已修复（未提交、未上线）

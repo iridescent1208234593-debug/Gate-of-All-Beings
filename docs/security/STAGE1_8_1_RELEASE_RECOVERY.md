@@ -28,7 +28,7 @@ Captured fields: `code=EPERM`, `syscall=rename`, source `E:\Projects\.releases\p
 
 ## Diagnostic Change
 
-`ops/publish-release.mjs` now writes `[release-preflight]` and `[release-fs]` JSON lines to stderr. Entries include timestamp, operation, source/destination, attempt, phase, and native `errno`, `code`, `syscall`, `path`, and `dest` when an error exists. Site preflight records candidate verification, path existence, volume roots, write access, publisher working directory, whether that directory is under production, and explicitly reports `serviceLockState=NOT_QUERIED`.
+`E:\External Projects\Iridescently Operations\publish-release.mjs` now writes `[release-preflight]` and `[release-fs]` JSON lines to stderr. Entries include timestamp, operation, source/destination, attempt, phase, and native `errno`, `code`, `syscall`, `path`, and `dest` when an error exists. Site preflight records candidate verification, path existence, volume roots, write access, publisher working directory, whether that directory is under production, and explicitly reports `serviceLockState=NOT_QUERIED`.
 
 Diagnostics do not decide whether to publish, stop services, alter retry limits, change the atomic swap, or suppress errors. Logging failures are swallowed so they cannot change publication behavior.
 

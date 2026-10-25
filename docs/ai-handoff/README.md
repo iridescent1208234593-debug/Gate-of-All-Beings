@@ -19,7 +19,7 @@
 
 ## 角色主参考与本次合并结果
 
-核心参考是 `assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db` 的世界观数据。本轮通过现有受限 SSH 的 **`assets-export` 只读命令**取得香港参考资料快照，在 `work/cards-unification/hk-reference-20261019/library.sqlite3` 重建离线参考库后生成共享数据；没有向香港写库。
+核心参考是 `assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db` 的世界观数据。本轮通过现有受限 SSH 的 **`assets-export` 只读命令**取得香港参考资料快照，在 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/cards-unification/hk-reference-20261019/library.sqlite3` 重建离线参考库后生成共享数据；没有向香港写库。
 
 | 核对项 | 结果 |
 |---|---:|
@@ -153,7 +153,7 @@ await transact('my-game', {
 在仓库根目录运行（参考快照不属于发布内容）：
 
 ```powershell
-npm run data:world -- --db work/cards-unification/hk-reference-20261019/library.sqlite3 --source hong-kong:assets-export:2026-10-19 --media-manifest work/cards-unification/hk-reference-20261019/baseline.json
+npm run data:world -- --db file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/cards-unification/hk-reference-20261019/library.sqlite3 --source hong-kong:assets-export:2026-10-19 --media-manifest file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/cards-unification/hk-reference-20261019/baseline.json
 npm run data:cards
 npm run verify:game-data
 npm run build:cards
@@ -162,7 +162,7 @@ npm run verify:game-ui
 
 生成器只读数据库，角色和演武产物可重复生成；合并报告记录旧 ID、详设匹配和悬空能力。卡牌生成器从当前两套原生定义生成共享索引，不修改原生卡池。未给媒体清单时不猜选配图。
 
-验证包括 25 项真实浏览器数据检查、8 项实际页面检查、23 项现有战斗/生态测试与 4 项原有数值后台测试；严格类型检查和 Cards 候选构建通过。导出器另验证 6 份产物字节一致、源数据库未变。桌面/手机截图在 `work/cards-unification/qa/`。所有构建只写本地候选；真正发布需同时包含 Cards、Slay、shared-data 与 shared-session，不能只上传一个前端 bundle。
+验证包括 25 项真实浏览器数据检查、8 项实际页面检查、23 项现有战斗/生态测试与 4 项原有数值后台测试；严格类型检查和 Cards 候选构建通过。导出器另验证 6 份产物字节一致、源数据库未变。桌面/手机截图在 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/cards-unification/qa/`。所有构建只写本地候选；真正发布需同时包含 Cards、Slay、shared-data 与 shared-session，不能只上传一个前端 bundle。
 
 ## 文件入口
 

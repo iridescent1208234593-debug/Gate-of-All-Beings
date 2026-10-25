@@ -6,8 +6,8 @@
 | --- | --- | --- |
 | [zszm-identity-and-save-map.md](../zszm-identity-and-save-map.md) | CURRENT | 与 `account_profile.py`、`cards/server.py`、`server_huiguan.py` 一致；自述"线上未包含" |
 | [zszm-flow-integration.md](../zszm-flow-integration.md) | CURRENT（本地/候选范围） | 流程与源码一致；本轮未发布 |
-| [zszm-loading-audit.md](../zszm-loading-audit.md) | CURRENT（本地/候选范围） | 测量脚本 `work/qa/zszm-merge-20261017/huiguan-source-smoke.py` 存在；数值未复跑 |
-| [work/qa/zszm-merge-20261017/README.md](../../work/qa/zszm-merge-20261017/README.md) | PARTIALLY CURRENT | tsc、check:game、22/22、2/2、7/7、门户 51/51（隔离数据根）已复现；浏览器验收 UNVERIFIED |
+| [zszm-loading-audit.md](../zszm-loading-audit.md) | CURRENT（本地/候选范围） | 测量脚本 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/zszm-merge-20261017/huiguan-source-smoke.py` 存在；数值未复跑 |
+| [file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/zszm-merge-20261017/README.md](file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/zszm-merge-20261017/README.md) | PARTIALLY CURRENT | tsc、check:game、22/22、2/2、7/7、门户 51/51（隔离数据根）已复现；浏览器验收 UNVERIFIED |
 | `server/app/src/cards/README.md`（工作树） | CURRENT（本地） | HEAD 版是 AI Studio 模板，属于 STALE |
 | [根 README.md](../../README.md) | PARTIALLY CURRENT | 10-17 已补 `/ozmtree` 边界与 `test:portal` 实际行为；仍未说明快照 dirty / overlay；外部目录表缺 8 项；research / Anime2SVG 读 `E:\Projects` 未写 |
 | [docs/README.md](../README.md) | PARTIALLY CURRENT | 索引已加 zszm 条目；仍引用已删除的 `AI image` |

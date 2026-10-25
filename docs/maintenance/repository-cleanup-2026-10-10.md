@@ -90,7 +90,7 @@ E:\New project/
 - DAY100、Gallery、OC/世界观/鸣谢设计资料、六系统、生命模拟研究与阶段 1–4 实验、射击游戏恢复资料及其原始素材：属于网站开发资产。
 - `InternalBeyond`、Gallery/motion/skills/reference 的内层仓库：保留设计参考和内层 Git 状态，没有批量提交、移除内层仓库或改写历史。
 - 实验 runs/builds、恢复素材、验证截图、工具下载包与模型证据：存在可追溯价值，未因叫“generated”或体积大而删除。
-- `.codex-remote-attachments/`、`ops/网站恢复/*.bak-20261005`、数据库、用户上传、会话导出：用途敏感/运行数据，保留现场。
+- `.codex-remote-attachments/`、`E:\External Projects\Iridescently Operations\网站恢复/*.bak-20261005`、数据库、用户上传、会话导出：用途敏感/运行数据，保留现场。
 - 有功能差异的旧 `SystemIcon`、Garden 独有 dist prompt、DAY100 收集占位：价值未确定，保留。
 
 完整整理前/后 Git 状态在 `E:\New project\归档\整理记录\2026-10-10`；剩余修改和未跟踪项目均有上述归属，不使用 reset/clean 或为了干净而提交全部实验文件。本轮没有运行 update 发布命令、安装主目录依赖或进行云端操作。

@@ -64,7 +64,7 @@
 ## 不要做的事
 
 - 不要重启或停止 cloudflared、portal_server、OAuth 代理。它们正在服务线上用户。
-  需要重启时先问用户，并走网站管家：`ops/网站恢复/website-manager.py`。
+  需要重启时先问用户，并走网站管家：`E:\External Projects\Iridescently Operations\网站恢复/website-manager.py`。
 - 不要改 `~/.cloudflared/config.yml`。
 - 不要往 `.releases/production` 写任何东西。
 - 不要 commit、push、publish。

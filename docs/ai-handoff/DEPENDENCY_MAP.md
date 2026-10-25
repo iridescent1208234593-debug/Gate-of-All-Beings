@@ -54,4 +54,4 @@
 
 `portal/huiguan/{users.db, characters.json, game_saves.json, assets/uploads}`、`server/app/src/cards/users.db`、`server/app/src/juling/data/save.db`、`assets/罗小黑战记数据库/`。
 
-`ops/backups/` 和 `work/restore-drill/databases/` 中有生产用户库副本，保持不入 Git、不外传。
+`E:\External Projects\Iridescently Operations\backups/` 和 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/restore-drill/databases/` 中有生产用户库副本，保持不入 Git、不外传。

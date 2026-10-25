@@ -72,7 +72,7 @@ R2 恢复手册；R3；R4 局限；Cards 无过期会话清理；多线程 `_Ser
 
 ## 回滚目标
 
-- 备份：`ops/backups/release-1.8.3-rollback-20261018/`（`production.json` + 当前线上整棵 `production_site`，**含**上述未入库的热修文件，117MB）。
+- 备份：`E:\External Projects\Iridescently Operations\backups/release-1.8.3-rollback-20261018/`（`production.json` + 当前线上整棵 `production_site`，**含**上述未入库的热修文件，117MB）。
 - 版本回滚：`779231c`（manifest）；若需连同热修回滚，用上面备份目录整棵恢复。
 - 回滚流程已在隔离环境实测：把旧树作为候选走发布器，服务运行中即可切换，重启后行为与切换前一致。
 
@@ -104,7 +104,7 @@ R2 恢复手册；R3；R4 局限；Cards 无过期会话清理；多线程 `_Ser
   | `server/test_stage183_release.py`（新增） | 本轮测试 |
   | `server/test_connection_reset_loop.py`（新增） | 热修的回归测试 |
   `portal_server.py`、`scraping_observer.py` 与生产磁盘内容相同（仅行尾 CRLF/LF 导致清单哈希不同）。**热修不会被回退。** 相对 `production.json` 清单为 4 个修改 + 2 个新增，全部可解释。
-- 回滚备份已刷新：`ops/backups/release-1.8.3-rollback-20261018b/`（含当前生产磁盘上的热修版本，三份已 `cmp` 确认）。旧的 `…20261018/` 备份保留但含更早一版 `portal_server.py`，回滚以 `…b` 为准。
+- 回滚备份已刷新：`E:\External Projects\Iridescently Operations\backups/release-1.8.3-rollback-20261018b/`（含当前生产磁盘上的热修版本，三份已 `cmp` 确认）。旧的 `…20261018/` 备份保留但含更早一版 `portal_server.py`，回滚以 `…b` 为准。
 
 ### 重新验证（新候选）
 | 项 | 结果 |
@@ -133,9 +133,9 @@ R2 恢复手册；R3；R4 局限；Cards 无过期会话清理；多线程 `_Ser
 
 - **基线变化**：在执行前，另一会话于 18:08Z 把 `site` 发布到 `a0583b2`（已含 `980a021` 热修，且 master 已包含修正后的 `HASHED_ASSET` 与 `f57cd40` 的模块缓存策略）。我按此重做候选：分支 `release/stage1.8.4` = `a0583b2` + cherry-pick `63772b6`（`base_static.py` 冲突取 master 版本，R4 已在其中）→ **`e0f5420`**，只剩 `cards/server.py`（R1+R6）与 `test_stage183_release.py`。
 - 候选 `e0f5420`（`sourceDirty=false`，1,093 文件）对 production 清单：`MODIFIED cards/server.py`、`ADDED test_stage183_release.py`，无其他差异。隔离验证（服务运行中切换、重启、无源码树、差分烟测、回滚）全部通过。
-- 备份：`ops/backups/release-1.8.4-pre-20261018/`（`production.json`、整棵 `production_site`、三个 SQLite 的 `backup()` 副本，integrity ok）。
+- 备份：`E:\External Projects\Iridescently Operations\backups/release-1.8.4-pre-20261018/`（`production.json`、整棵 `production_site`、三个 SQLite 的 `backup()` 副本，integrity ok）。
 - 执行：① Cards 重启（1.9 秒）→ ② Portal 重启（2.5 秒），均经管家 `launch()`，cwd=`.releases\runtime\*`；③ **服务运行中发布** `site`：发布器 exit 0，**0 个文件系统错误，首次 rename 即成功**；④ 再次重启 Cards（2.6 秒）与 Portal（2.7 秒）加载新代码。
 - 结果：`production.json` site=`e0f5420`，磁盘与清单 drift=0；cwd 扫描 production 下 0 进程；9 个域名响应与基线一致（`www` 301 无 HSTS 为既有项）；`/api/sso-user` 200、`/api/login` 410；Spirit WebSocket 握手 101；观察器日志持续写入 `scraping-portal_server.log`；重启后 Portal 日志无新 Traceback。
 - 副作用：Cards 登录会话清空（预期）；`assets/thumbs` 缓存目录随切换被重建（启动时 `makedirs`，缩略图按需再生成）；两次重启各约 2–3 秒中断（远低于估计）。
-- 回滚目标：`ops/backups/release-1.8.4-pre-20261018/`（含 `a0583b2` 时的生产树）；回滚流程已在隔离环境实测。
+- 回滚目标：`E:\External Projects\Iridescently Operations\backups/release-1.8.4-pre-20261018/`（含 `a0583b2` 时的生产树）；回滚流程已在隔离环境实测。
 - 遗留：`release/stage1.8.3`、`release/stage1.8.4` 分支未合入 master（`e0f5420` 的改动尚未在 master 上）；`cards/server.py` 的多线程 `_Server` 与 `server_huiguan.py` 的 WAL/锁外哈希仍是主工作树未提交改动，**未发布**；WAL 恢复手册、真实 SSO 端到端登录仍待办。

@@ -9,7 +9,7 @@
 | 灵体（4173） | `server/app/src/softie-webgpu/server/spirit-multiplayer.js` 由 Vite 插件挂到 HTTP upgrade；客户端连接 `/api/spirit-room/ws`。玩家进入房间后服务端以 30 Hz 推进物理、以 15 Hz 广播快照。房间与玩家 ID 都在进程内存中。 | 已有服务端权威物理、房间和多人状态同步，可以作为第一轮联机验收对象。当前房间 ID 是随机连接 ID；连接只校验同源 Origin，没有账户身份验证或持久化房间。服务重启会清空房间。 |
 | 聚灵（5177） | `server/app/src/juling/server.js` 暴露 `/api/state`、`/api/start`、`/api/action`。当前 `currentRun` 与 `globalSoul` 是进程级单例；累计魂灵写入 `save.db`，不支持账户或角色归属。 | 现在的状态会被同一进程内所有请求共享，不能直接作为多个玩家各自回合的联机房间；先要分离玩家运行状态并定义授权和存档 owner。 |
 
-端口证据来自 `ops/网站恢复/website-manager.py`：4173 是 Softie 的 Vite preview / WebSocket 上游，5177 是聚灵 Node 服务。该清单描述工作树的启动配置，不证明这两个源码版本已经部署到香港生产环境。
+端口证据来自 `E:\External Projects\Iridescently Operations\网站恢复/website-manager.py`：4173 是 Softie 的 Vite preview / WebSocket 上游，5177 是聚灵 Node 服务。该清单描述工作树的启动配置，不证明这两个源码版本已经部署到香港生产环境。
 
 ## 首个试点
 
@@ -35,6 +35,6 @@
 - `server/app/src/softie-webgpu/src/multiplayer/client.js`：连接重试、输入序号、移动与命令发送。
 - `server/app/src/softie-webgpu/tests/spirit-multiplayer.test.js`：现有房间服务测试入口（本次未运行）。
 - `server/app/src/juling/server.js`：聚灵全局状态与动作 API。
-- `ops/网站恢复/website-manager.py`：工作树服务端口与入口清单。
+- `E:\External Projects\Iridescently Operations\网站恢复/website-manager.py`：工作树服务端口与入口清单。
 
 下一项应是 IRI-17 的房间服务边界与 Durable Objects 评估，后续实施任务再单独定义部署形态、账户验证和多客户端验收范围。

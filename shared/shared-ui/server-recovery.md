@@ -16,4 +16,4 @@
 
 恢复页由源站或香港 nginx 提供。如果本机隧道完全离线、Cloudflare 直接返回 1033，页面代码无法运行；此时应直接打开香港正式入口。要覆盖 CDN 自身错误需另行配置边缘故障页或 Worker，本轮没有增加该架构。
 
-验收入口：`python ops/test_access_recovery.py`；浏览器覆盖脚本在 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/audits/access-audit-20261019/browser-candidate.js`。
+验收入口：`python "E:\External Projects\Iridescently Operations\test_access_recovery.py"`；浏览器覆盖脚本在 [browser-candidate.js](file:///E:/External%20Projects/Iridescently%20Operations%20Archive/audits/access-audit-20261019/browser-candidate.js)。

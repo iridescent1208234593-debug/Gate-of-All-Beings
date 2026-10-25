@@ -37,11 +37,11 @@
 | 射击试玩 | `/playtest/shengsheng-shoot/`（`portal/www`） | 8080 | 已发布 |
 | 公共账户 / SSO | `server/hx_sso.py`、`server/account_*.py`、会馆 `users.db` | 门户内 | 共用 |
 | shared | `shared/shared-{ui,types,data,session}` | npm workspaces | — |
-| 运维 / 发布 | `ops/`（网站管家 `ops/网站恢复/website-manager.py`、`publish-release.mjs`、`build-site.mjs`） | Cloudflare Tunnel | — |
+| 运维 / 发布 | `E:\External Projects\Iridescently Operations\`（网站管家 `E:\External Projects\Iridescently Operations\网站恢复/website-manager.py`、`publish-release.mjs`、`build-site.mjs`） | Cloudflare Tunnel | — |
 | six-system-arena 素材复审 | `New project/six-system-arena/docs`（+ research 仓库） | 文档型 | — |
 | psyche | `E:\心理\…`（管家中 `deployed=False`） | 8000 | 未并入 |
 
-非生产区域：`work/`（QA、安全阶段证据、一次性脚本，未跟踪）、`ops/backups/`（含生产用户库副本）、`.releases/`（candidate / production 快照，git 忽略）、`assets/`（媒体数据库，git 忽略）、`External Projects\{复审记录,待审区（用户终审）,未定以及以及疑似同人}`（素材复审材料）、`归档`、`小说`、`original-ui-version`（已整合进 cards/onboarding 的原型）。
+非生产区域：`work/`（QA、安全阶段证据、一次性脚本，未跟踪）、`E:\External Projects\Iridescently Operations\backups/`（含生产用户库副本）、`.releases/`（candidate / production 快照，git 忽略）、`assets/`（媒体数据库，git 忽略）、`External Projects\{复审记录,待审区（用户终审）,未定以及以及疑似同人}`（素材复审材料）、`归档`、`小说`、`original-ui-version`（已整合进 cards/onboarding 的原型）。
 
 ## 3. 生产运行真相（最重要）
 
@@ -52,7 +52,7 @@
   - 同一分钟出现空的 `production/site/portal/huiguan/users.db`，疑似有一次启动没有设置 `IRIDESCENTLY_PROJECT_ROOT`。真实库在 `portal/huiguan/users.db`。
   - `production.json` 中有 2 条手写 `overlays`（PayPal / QR 单文件推送，来自 `a3fc0f9`、`050be71`）。
   - 2026-10-18 凌晨（02:34）有人把工作区未提交的 `server/account_email.py`、`portal/huiguan/account.html` 直接热修进 `production/site`；`portal/huiguan/assets/thumbs/` 是运行时缩略图缓存，只在线上快照里。**整包 `publish:site` 会冲掉这三处**，发布前先把热修入 Git 或并入候选。
-  - 2026-10-18 Claude 按用户授权以单文件覆盖方式上线 `3ce361e`（玻璃导航 / 时间线 / AI 协作精灵）7 个文件，清单与哈希见 `work/release-20261018-nav/overlay.log`，回滚副本在同目录 `rollback/`；`portal/www/index.html`（工作树直出）只把 site-nav 版本号改为 `20261018-nav`。
+  - 2026-10-18 Claude 按用户授权以单文件覆盖方式上线 `3ce361e`（玻璃导航 / 时间线 / AI 协作精灵）7 个文件，清单与哈希见 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/release-20261018-nav/overlay.log`，回滚副本在同目录 `rollback/`；`portal/www/index.html`（工作树直出）只把 site-nav 版本号改为 `20261018-nav`。
 - 以上 10-17 修改由用户本地 Agent 完成，用户知情并授权。Stage 1/1.5 与 `/ozmtree` 已于下午入 Git，线上代码可由提交重建；快照 manifest 仍记 dirty / overlay，下次正规发布后一致。
 
 ## 4. 无法确定的区域（needs verification）

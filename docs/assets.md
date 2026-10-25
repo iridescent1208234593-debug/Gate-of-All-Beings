@@ -44,7 +44,7 @@ const modelUrl = asset("models/example.glb");
 
 ## Gallery 清单工具
 
-`npm run assets:manifest` 将 JPG/JPEG/PNG/WebP 的对象键、SHA-256、字节数和 MIME 写入 `ops/assets/gallery-manifest.json`；GIF 明确排除。沿用 Gallery 的 `discoverGallery()`，支持 `GALLERY_DIR`。这是本地清单，生成过程不上传或移动原件。命令安全边界见 [update-system.md](update-system.md)。
+`npm run assets:manifest` 将 JPG/JPEG/PNG/WebP 的对象键、SHA-256、字节数和 MIME 写入 `E:\External Projects\Iridescently Operations\assets/gallery-manifest.json`；GIF 明确排除。沿用 Gallery 的 `discoverGallery()`，支持 `GALLERY_DIR`。这是本地清单，生成过程不上传或移动原件。命令安全边界见 [update-system.md](update-system.md)。
 
 ## 首页图库展示图
 

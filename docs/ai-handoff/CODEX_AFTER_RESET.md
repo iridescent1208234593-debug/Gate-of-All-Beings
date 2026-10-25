@@ -17,12 +17,12 @@ Claude 于 2026-10-17 临时接替。上午 Phase 0 只读考古；下午按用�
 - 不要用真实数据根启动工作树里的门户 / 会馆：import 时会自动导入旧存档并建表。`npm run test:portal` 已默认使用临时数据根。
 - 不要单独 `publish:cards`。新前端需要新的 `/api/gate/*` 后端。
 - slay 美术为可选（`server/app/module-assets.json`）；未配置时构建出无图版本，这是预期行为。
-- 不要删除 `work/`。安全文档把它当作证据引用。其中 `work/restore-drill/databases/` 和 `ops/backups/` 含生产用户库副本。
+- `work/` 是临时工作区；长期证据已归置到 E:\External Projects\Iridescently Operations Archive。其中 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/restore-drill/databases/` 和 `E:\External Projects\Iridescently Operations\backups/` 含生产用户库副本。
 - 不要停止 5194 / 5195。它们留给用户验收众生之门。
 
 ## Claude 已复现的测试（2026-10-17）
 
-前 5 项在 `server/app/src/cards` 下运行，后 2 项在项目根运行，结果均 PASS（日志：`work/qa/claude-verify-20261017/`）：
+前 5 项在 `server/app/src/cards` 下运行，后 2 项在项目根运行，结果均 PASS（日志：`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/claude-verify-20261017/`）：
 
 | 命令 | 结果 |
 | --- | --- |

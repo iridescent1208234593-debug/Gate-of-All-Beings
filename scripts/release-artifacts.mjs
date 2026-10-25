@@ -5,7 +5,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
-export const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+export const projectRoot = path.resolve(
+  process.env.IRIDESCENTLY_PROJECT_ROOT || path.join(path.dirname(fileURLToPath(import.meta.url)), '..'),
+);
 export const releaseRoot = path.join(projectRoot, '.releases');
 export const candidateRoot = path.join(releaseRoot, 'candidate');
 

@@ -36,7 +36,7 @@
 
 最近一次状态检查显示 `master` 与 `origin/master` 对齐，同时以下内容未提交：
 
-- 两个已修改文件：`ops/网站恢复/打开网站管家.vbs`、`ops/网站恢复/网站管家使用说明.md`
+- 两个已修改文件：`E:\External Projects\Iridescently Operations\网站恢复/打开网站管家.vbs`、`E:\External Projects\Iridescently Operations\网站恢复/网站管家使用说明.md`
 - 未跟踪目录：`.codex-remote-attachments/`
 - 两个未跟踪备份文件：上述 VBS 与说明文档各有一个 `.bak-20261005` 文件
 
@@ -52,7 +52,7 @@
 
 ## 新对话第一步
 
-在 `E:\Projects` 打开本文件并核对现场。先确认最新 Git 状态和两个 `ops/网站恢复` 文件的差异与 `.codex-remote-attachments/` 内容归属；不要修改或提交它们。然后处理 GitHub 连接器重新授权的用户操作，并用连接器只读复查 `iridescently`。之后再规划 R2 订阅、bucket/key 结构、CDN 自定义域名与小规模验证；任何订阅或权限变更须停在明确确认边界。
+在 `E:\Projects` 打开本文件并核对现场。先确认最新 Git 状态和两个 `E:\External Projects\Iridescently Operations\网站恢复` 文件的差异与 `.codex-remote-attachments/` 内容归属；不要修改或提交它们。然后处理 GitHub 连接器重新授权的用户操作，并用连接器只读复查 `iridescently`。之后再规划 R2 订阅、bucket/key 结构、CDN 自定义域名与小规模验证；任何订阅或权限变更须停在明确确认边界。
 
 ### 可复制到新对话的开场白
 

@@ -39,7 +39,7 @@ Public low-frequency requests used automatic-redirect following disabled. `HTTPS
 | CORS | Public Cards `/api/user` with an untrusted Origin returned 200 without `Access-Control-Allow-Origin`; same-origin API calls succeeded. |
 | CSP | `Content-Security-Policy-Report-Only` was observed on apex, Huiguan, and ZSZM responses. Full browser violation evidence is in `csp-observation-20261016.md` and is inconclusive. |
 | Firewall | Domain profile ON; Private and Public OFF. Active Ethernet, WLAN, and Meta profiles were Public. Local firewall rules report `N/A (GPO-store only)`; no rule was changed. See `operations-security.md`. |
-| Backup | `ops/backups/security-pre-stage1.5-20261016-1700/`: 3,056 files, 581,843,391 bytes, SHA-256 manifest. Huiguan, Cards, and Juling SQLite snapshots passed `PRAGMA quick_check`. Same-device only; restore not tested. |
+| Backup | `E:\External Projects\Iridescently Operations\backups/security-pre-stage1.5-20261016-1700/`: 3,056 files, 581,843,391 bytes, SHA-256 manifest. Huiguan, Cards, and Juling SQLite snapshots passed `PRAGMA quick_check`. Same-device only; restore not tested. |
 | Cloudflare Tunnel | One connector with four edge connections in the Website Manager smoke check; local ingress to port 8080 responded. Edge redirect/WAF configuration was not inspected. |
 
 ## Regression Tests
@@ -66,7 +66,7 @@ Public low-frequency requests used automatic-redirect following disabled. `HTTPS
 
 ## Deployment and Git State
 
-Production was published with the atomic `node ops/publish-release.mjs site` flow from a candidate derived from the backed-up active production snapshot. Only the Stage 1 security backend, the 12–128 password form bounds/hints, and the one-day HSTS header were overlaid. The unrelated `/ozmtree` working-tree change was not copied into production. The original candidate directory and manifest were restored afterward.
+Production was published with the atomic `npm run publish:site` flow from a candidate derived from the backed-up active production snapshot. Only the Stage 1 security backend, the 12–128 password form bounds/hints, and the one-day HSTS header were overlaid. The unrelated `/ozmtree` working-tree change was not copied into production. The original candidate directory and manifest were restored afterward.
 
 Website Manager launch configuration restarted portal, OAuth, and Juling. OAuth's Manager entry now sets `PYTHONUTF8=1` and explicit production mode; this was necessary because its first Manager launch exited on a cp1252 startup-log encoding error. All three target listeners are loopback-only.
 

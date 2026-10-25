@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { candidateRoot, recordCandidate } from '../../../ops/release-artifacts.mjs';
+import { candidateRoot, recordCandidate } from '../../../scripts/release-artifacts.mjs';
 
 const appDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const srcRoot = path.join(appDir, 'src');

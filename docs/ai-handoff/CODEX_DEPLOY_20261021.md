@@ -2,7 +2,7 @@
 
 用户已审完并批准这条提交链，要求由 Codex 发布到线上。本文只写发布需要的事实；背景见 [DIRTY_WORK_MAP](DIRTY_WORK_MAP.md) 顶部「2026-10-21 收敛」和 [CURRENT_PRIORITIES](CURRENT_PRIORITIES.md)。
 
-**SSH 连接信息（2026-10-21 更新）**：香港生产 SSH 已确认使用 `154.222.26.70:43012`，账户 `iridescently-deploy`，本机专用密钥 `.releases/hk-full-migration/deploy_ed25519`。`ops/hk-release.py` 是服务器管家、status 与发布入口共用的固定配置；保持 `IdentitiesOnly=yes`、`StrictHostKeyChecking=yes`，不使用 root 或密码登录。
+**SSH 连接信息（2026-10-21 更新）**：香港生产 SSH 已确认使用 `154.222.26.70:43012`，账户 `iridescently-deploy`，本机专用密钥 `.releases/hk-full-migration/deploy_ed25519`。`E:\External Projects\Iridescently Operations\hk-release.py` 是服务器管家、status 与发布入口共用的固定配置；保持 `IdentitiesOnly=yes`、`StrictHostKeyChecking=yes`，不使用 root 或密码登录。
 
 ## 0. 前置：先确认已经 push
 
@@ -30,7 +30,7 @@ git push origin zszm-batch-20261021
 
 ## 2. 发布前必须做的
 
-1. **快照滞后陷阱**：`ops/hk-release.py prepare/publish` 从本地 `.releases/production/site` 重新打包 `server/ portal/ shared/`，这份快照落后于其他会话已经手工推到香港的文件（10-19 起有多个热修文件只在线上归档里）。`prepare` 之后，必须把新归档和线上 `current` 归档**逐文件比对 sha256**，每一处差异都要能对上本节第 1 节的改动才发布。对不上时，以线上归档为底只替换本次文件，再 `stage` / `activate` 那个归档（`hk-release.py` 里 `remote('stage <ver>', archive)`、`remote('activate <ver>')`）。
+1. **快照滞后陷阱**：`E:\External Projects\Iridescently Operations\hk-release.py prepare/publish` 从本地 `.releases/production/site` 重新打包 `server/ portal/ shared/`，这份快照落后于其他会话已经手工推到香港的文件（10-19 起有多个热修文件只在线上归档里）。`prepare` 之后，必须把新归档和线上 `current` 归档**逐文件比对 sha256**，每一处差异都要能对上本节第 1 节的改动才发布。对不上时，以线上归档为底只替换本次文件，再 `stage` / `activate` 那个归档（`hk-release.py` 里 `remote('stage <ver>', archive)`、`remote('activate <ver>')`）。
 2. **cards 与 site 一起发**：新前端调用 `/api/gate/identity`、`/api/gate/ocs`，依赖新的 `cards/server.py` 和 `server/account_profile.py`。先确认线上是否已有这两个接口；没有就必须和 site 同一窗口发布，否则身份接口 404。
 3. **slay 从构建产物提供**：`/app/modules/slay/` 读的是 `server/app/modules/slay`，不是 `slay-the-web/public`。发布前跑 `npm run build:modules`。
 4. **EPERM**：本地 `publish:site` 需要同时停掉 5174 与 8080（[release-architecture-v2.md](../release-architecture-v2.md) 第 7 节）。
@@ -39,9 +39,9 @@ git push origin zszm-batch-20261021
 
 ## 3. 不要做的
 
-- 不要提交或依赖工作区里未提交的 `ops/hk-release.py` 改动（`ZSZM_HK_SSH_TARGET` 覆盖发布 SSH 目标）。自动模式把它判为放宽发布安全边界，等用户决定；发布用已提交版本的默认部署账户和密钥。
-- 不要改、不要复制外传任何数据库：`portal/huiguan/users.db`、`server/app/src/cards/users.db`、`ops/backups/` 里的生产库副本。
-- 不要把 `work/`、`ops/backups/`、`assets/字体/`、`.bak`、画师截图入库。
+- 不要提交或依赖工作区里未提交的 `E:\External Projects\Iridescently Operations\hk-release.py` 改动（`ZSZM_HK_SSH_TARGET` 覆盖发布 SSH 目标）。自动模式把它判为放宽发布安全边界，等用户决定；发布用已提交版本的默认部署账户和密钥。
+- 不要改、不要复制外传任何数据库：`portal/huiguan/users.db`、`server/app/src/cards/users.db`、`E:\External Projects\Iridescently Operations\backups/` 里的生产库副本。
+- 不要把 `work/`、`E:\External Projects\Iridescently Operations\backups/`、`assets/字体/`、`.bak`、画师截图入库。
 - 不要删除旧实现：旧入世历练入口、`#adventure`、`#hall`，以及旧重生之门 slay 模块，都是用户决定暂时保留的（等重生之门迁完剧情回想、长期进度、结局、旧档转换）。
 
 ## 4. 发布后验收（zszm.iridescently.xyz）

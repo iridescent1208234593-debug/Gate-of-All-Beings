@@ -1,6 +1,6 @@
 # Stage 1.8.2 — EPERM 句柄/占用者定位
 
-日期：2026-10-17。只读取证；未发布、未停止/重启任何服务、未改 ops/ 源码。
+日期：2026-10-17。只读取证；未发布、未停止/重启任何服务、未改 E:\External Projects\Iridescently Operations\ 源码。
 
 ## 结论
 
@@ -56,18 +56,18 @@ Cards OAuth（5174）是独立进程，cwd 在 site 树更深处，只停 portal
 
 - 生产由 `production.json`（publishedAt 2026-10-17T11:50:11Z）描述：modules 21b9a89（10-14 构建）、cards/homepage 4cc19c5、site 2739c59（10-17 11:49Z）；四个组件均为 `sourceDirty=true`，即从有未提交改动的工作树构建。
 - **Stage 1.7（分页上限、公开字段清理）：在线。** 生产 `portal/huiguan/server_huiguan.py` 与工作树逐字节一致（含 `limit=max(1,min(limit,60))`）。注意该文件与 `server/base_static.py` 在 git 中仍是未提交修改。
-- **Stage 1.8（观察器）：在线且在产生真实数据。** `server/scraping_observer.py` 在生产树内，`base_static.py` 已调用 `observe()`；`ops/网站恢复/logs/scraping.log*` 共约 4.4 万行，样本含 `trusted_edge=1` 与 `cf_ray`（经 Cloudflare 的真实客户端）。仍为 `OBSERVE_ONLY`，未限速。此前"无真实样本"的结论已过时，可据此设定阈值（尚未分析）。
+- **Stage 1.8（观察器）：在线且在产生真实数据。** `server/scraping_observer.py` 在生产树内，`base_static.py` 已调用 `observe()`；`E:\External Projects\Iridescently Operations\网站恢复/logs/scraping.log*` 共约 4.4 万行，样本含 `trusted_edge=1` 与 `cf_ray`（经 Cloudflare 的真实客户端）。仍为 `OBSERVE_ONLY`，未限速。此前"无真实样本"的结论已过时，可据此设定阈值（尚未分析）。
 - **Stage 1.8 robots 清理：** `portal/www|huiguan|oc/robots.txt` 与工作树仅行尾差异，视为在线（线上 HTTP 响应未复核）。
 - **Stage 1.8.1（发布器诊断）：** 发布器 `[release-fs]` 日志在今日模拟与发布中均出现，视为在线；该文件本身在 git 中的状态未核对。
-- `scraping_observer.py` 的日志目录默认回退到 `<root>/ops/网站恢复/logs`；当前因启动时设置了 `IRIDESCENTLY_PROJECT_ROOT=E:\Projects`，日志在生产树之外，不会被 rename 影响。
+- `scraping_observer.py` 的日志目录默认回退到 `<root>/E:\External Projects\Iridescently Operations\网站恢复/logs`；当前因启动时设置了 `IRIDESCENTLY_PROJECT_ROOT=E:\Projects`，日志在生产树之外，不会被 rename 影响。
 
 ## 补充 B：cwd 架构修复
 
 修改的启动入口：
-1. `ops/网站恢复/website-manager.py` `launch()`：portal、zszm-oauth 的 cwd 改为 `E:\Projects\.releases\runtime\<key>`，入口脚本改为 `production/site/...` 下绝对路径；新增常量 `RUNTIME_CWD`；日志头记录 cwd。
+1. `E:\External Projects\Iridescently Operations\网站恢复/website-manager.py` `launch()`：portal、zszm-oauth 的 cwd 改为 `E:\Projects\.releases\runtime\<key>`，入口脚本改为 `production/site/...` 下绝对路径；新增常量 `RUNTIME_CWD`；日志头记录 cwd。
 2. `portal/huiguan/watchdog.py`：cwd 改为 `.releases/runtime/portal`，脚本用绝对路径。
 
-审计结论：portal_server.py、各 portal 子服务、cards server.py 均按 `__file__` 或 `IRIDESCENTLY_PROJECT_ROOT` 解析路径（SQLite `users.db` 在 `ROOT/server/app/src/cards/`，日志在 `ops/网站恢复/logs`），无 cwd 依赖。服务端口、URL、数据格式未改。
+审计结论：portal_server.py、各 portal 子服务、cards server.py 均按 `__file__` 或 `IRIDESCENTLY_PROJECT_ROOT` 解析路径（SQLite `users.db` 在 `ROOT/server/app/src/cards/`，日志在 `E:\External Projects\Iridescently Operations\网站恢复/logs`），无 cwd 依赖。服务端口、URL、数据格式未改。
 
 ### 隔离验证（`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/stage1.8.2-cwd-fix/drive.py`，结果 `result.json`，端口 18080/15174）
 真实 production 树拷贝 + 真实发布器 + 真实 `launch()`：

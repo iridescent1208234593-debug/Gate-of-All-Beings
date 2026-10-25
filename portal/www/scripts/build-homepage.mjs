@@ -11,13 +11,16 @@ import {
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { candidateRoot, releaseRoot, recordCandidate } from "../../../ops/release-artifacts.mjs";
+import { candidateRoot, releaseRoot, recordCandidate } from "../../../scripts/release-artifacts.mjs";
 
 const homepageRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
 const projectRoot = path.resolve(homepageRoot, "../..");
+const operationsRoot = path.resolve(
+  process.env.IRIDESCENTLY_OPS_ROOT || "E:/External Projects/Iridescently Operations",
+);
 const galleryRoot = path.join(
   projectRoot,
   "portal/www/gallery-engine",
@@ -39,6 +42,12 @@ const viteNodeModule = path.join(
 );
 const galleryPluginModule = path.join(galleryRoot, "gallery-plugin.js");
 const previewDir = path.join(releaseRoot, ".work", "gallery-previews");
+const operationsEnv = {
+  ...process.env,
+  IRIDESCENTLY_PROJECT_ROOT: projectRoot,
+  IRIDESCENTLY_OPS_ROOT: operationsRoot,
+  GALLERY_PREVIEW_DIR: previewDir,
+};
 const [{ loadEnv }, { resolveGalleryAssetBase, discoverGallery }] =
   await Promise.all([
     import(pathToFileURL(viteNodeModule)),
@@ -83,8 +92,8 @@ function runVite(args) {
 if (process.argv.includes("--dev")) {
   const previews = spawnSync(
     process.execPath,
-    [path.join(projectRoot, "ops/build-gallery-previews.mjs")],
-    { cwd: projectRoot, stdio: "inherit", env: { ...process.env, GALLERY_PREVIEW_DIR: previewDir } },
+    [path.join(operationsRoot, "build-gallery-previews.mjs")],
+    { cwd: projectRoot, stdio: "inherit", env: operationsEnv },
   );
   if (previews.error) throw previews.error;
   if (previews.status !== 0) process.exit(previews.status ?? 1);
@@ -101,8 +110,8 @@ rmSync(homepageCandidate, { recursive: true, force: true });
 
 const previews = spawnSync(
   process.execPath,
-  [path.join(projectRoot, "ops/build-gallery-previews.mjs")],
-  { cwd: projectRoot, stdio: "inherit", env: { ...process.env, GALLERY_PREVIEW_DIR: previewDir } },
+  [path.join(operationsRoot, "build-gallery-previews.mjs")],
+  { cwd: projectRoot, stdio: "inherit", env: operationsEnv },
 );
 if (previews.error) throw previews.error;
 if (previews.status !== 0) process.exit(previews.status ?? 1);

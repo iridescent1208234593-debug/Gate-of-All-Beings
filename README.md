@@ -42,6 +42,8 @@ API 上游：5174 Cards OAuth、5178 数值配置、5177 聚灵、4173 灵体 We
 
 ## 构建、发布、启动
 
+构建与运维工具独立存放在 `E:\External Projects\Iridescently Operations`，不随主仓库提交。根目录的 `scripts/run-ops.mjs` 负责调用该目录中的正式脚本；若目录不在默认位置，设置 `IRIDESCENTLY_OPS_ROOT`。构建/发布命令仍须从本仓库根目录运行，确保候选产物、Git HEAD 和源码路径归属 `E:\Projects`。
+
 ```powershell
 npm ci
 npm run build:modules       # 七模块和首页只写候选
@@ -51,7 +53,7 @@ npm run publish:modules    # 显式提升模块和首页
 npm run publish:cards      # 只更新众生之门前端模块
 npm run build:site          # 从 Git HEAD 导出源码快照，排除密钥/数据
 npm run publish:site       # 显式提升静态/Python 源码
-# 再由 ops/网站恢复/website-manager.py 启动/重启所需服务
+# 网站管家入口：E:\External Projects\Iridescently Operations\网站恢复\打开网站管家.vbs
 ```
 
 源码快照必须从审查后的提交构建；尚未提交的更改不会混入 `build:site`。门户/OAuth 由管家从 `.releases/production/site` 启动，`IRIDESCENTLY_PROJECT_ROOT` 指向原工作区运行数据。正式服务不读取候选目录。发布不会自动杀服务或修改 DNS。部署后记录与完整步骤见 [release-workflow](docs/release-workflow.md)。
