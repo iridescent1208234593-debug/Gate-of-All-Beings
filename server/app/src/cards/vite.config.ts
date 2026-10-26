@@ -1,4 +1,4 @@
-const siteDomains = createRequire(import.meta.url)('../../../../shared/site-domains.js');
+const siteDomains = createRequire(import.meta.url)('../../../../packages/site-domains/index.js');
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -29,7 +29,7 @@ export default defineConfig(() => {
       },
     },
     server: {
-      fs: { allow: [__dirname, '../../../../shared', '../../../../shared/shared-types', '../../../../shared/shared-data', '../../../../shared/shared-ui'].map(p => realpathSync(path.resolve(__dirname,p))).concat(designSystemDir) },
+      fs: { allow: [__dirname, '../../../../packages', '../../../../packages/shared-types', '../../../../packages/shared-data', '../../../../packages/shared-ui'].map(p => realpathSync(path.resolve(__dirname,p))).concat(designSystemDir) },
       allowedHosts: siteDomains.allowedHosts,
       hmr: process.env.DISABLE_HMR !== 'true',
       watch: process.env.DISABLE_HMR === 'true' ? null : {},

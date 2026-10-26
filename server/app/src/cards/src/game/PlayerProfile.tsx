@@ -1,4 +1,4 @@
-import siteDomains from '../../../../../../shared/site-domains.mjs';
+import siteDomains from '../../../../../../packages/site-domains/index.mjs';
 import './player-profile.css';
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 

@@ -15,7 +15,7 @@ releases = release_root()
 target = releases / 'candidate' / 'site'
 if target.resolve().parent != (releases / 'candidate').resolve():
     raise RuntimeError('Site candidate escapes release root')
-archive = subprocess.check_output(['git', 'archive', '--format=zip', 'HEAD', 'portal', 'server', 'shared'], cwd=root)
+archive = subprocess.check_output(['git', 'archive', '--format=zip', 'HEAD', 'portal', 'server', 'packages'], cwd=root)
 if target.exists():
     shutil.rmtree(target)
 target.mkdir(parents=True)

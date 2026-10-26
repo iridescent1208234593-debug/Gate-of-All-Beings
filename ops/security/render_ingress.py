@@ -7,7 +7,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'server'))
 from host_policy import IDENTITY_OVERRIDE_HEADERS, PRODUCTION_HOSTS
 
-# What DNS/Tunnel actually route today; the application allowlist (shared/site-domains.json) may be wider.
+# What DNS/Tunnel actually route today; the application allowlist (packages/site-domains/domains.json) may be wider.
 INVENTORY = json.loads(Path(__file__).with_name('deployed-hosts.json').read_text('utf-8'))
 _deployed = {h['hostname'] for h in INVENTORY['hosts'] if h['registered'] and h['node'] == 'hk'}
 if not _deployed <= PRODUCTION_HOSTS:

@@ -3,16 +3,16 @@
   "private": true,
   "workspaces": [
     "server/app/src/world-map",
-    "shared/shared-ui",
-    "shared/shared-types",
-    "shared/shared-data",
-    "shared/shared-session"
+    "packages/shared-ui",
+    "packages/shared-types",
+    "packages/shared-data",
+    "packages/shared-session"
   ],
   "scripts": {
-    "data:world": "python shared/shared-data/export_worldview.py",
-    "data:cards": "node --import ./server/app/src/cards/node_modules/tsx/dist/loader.mjs shared/shared-data/export_cards.mjs",
-    "verify:game-data": "node shared/shared-session/verify-game.mjs",
-    "verify:game-ui": "node shared/shared-session/verify-game-ui.mjs",
+    "data:world": "python packages/shared-data/export_worldview.py",
+    "data:cards": "node --import ./server/app/src/cards/node_modules/tsx/dist/loader.mjs packages/shared-data/export_cards.mjs",
+    "verify:game-data": "node packages/shared-session/verify-game.mjs",
+    "verify:game-ui": "node packages/shared-session/verify-game-ui.mjs",
     "prepare:gallery-engine": "npm ci --prefix portal/www/gallery-engine",
     "build:homepage": "npm run prepare:gallery-engine && node portal/www/scripts/build-homepage.mjs",
     "build:release": "npm run build:modules && npm run build:homepage",

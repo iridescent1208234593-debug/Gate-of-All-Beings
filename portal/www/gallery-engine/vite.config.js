@@ -1,4 +1,4 @@
-const siteDomains = createRequire(import.meta.url)('../../../shared/site-domains.js');
+const siteDomains = createRequire(import.meta.url)('../../../packages/site-domains/index.js');
 import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 import path from 'node:path'

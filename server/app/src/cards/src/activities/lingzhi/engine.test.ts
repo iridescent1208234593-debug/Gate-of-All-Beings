@@ -13,7 +13,7 @@ import type { LingzhiRun } from './types';
 import type { WorldState } from '../../world/types';
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '../../../../../../..');
-register('data:text/javascript,' + encodeURIComponent(`export async function resolve(s,c,n){return s.startsWith('/shared/')?n(${JSON.stringify(pathToFileURL(repo).href)}+s,c):n(s,c);}`));
+register('data:text/javascript,' + encodeURIComponent(`export async function resolve(s,c,n){return s.startsWith('/shared/')?n(${JSON.stringify(pathToFileURL(repo).href)}+'/packages/'+s.slice(8),c):n(s,c);}`));
 const slay = (p: string) => import(pathToFileURL(resolve(repo, 'server/app/src/slay-the-web/public', p)).href);
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const XI: any = await slay('content/lingzhi-xiuxing.js');

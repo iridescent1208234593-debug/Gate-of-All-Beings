@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<script src="/shared/site-domains.js"></script>
+<script src="/shared/site-domains/index.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -202,7 +202,7 @@
 
   <section>
     <h2 class="qc-h2">站点导航 Site Bar</h2>
-    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">本页顶部就是真实组件。三站与模块共用一条 48px 全局栏：像素标 + 西木会馆 / 众生之门 / 节气画廊三站并列，当前站点金色下划线；右侧依次是页面插槽、语言、账户。代码：<code>shared/shared-ui/site-nav.js</code>。</p>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">本页顶部就是真实组件。三站与模块共用一条 48px 全局栏：像素标 + 西木会馆 / 众生之门 / 节气画廊三站并列，当前站点金色下划线；右侧依次是页面插槽、语言、账户。代码：<code>packages/shared-ui/site-nav.js</code>。</p>
     <div style="display:grid;gap:8px;max-width:640px;font-size:13px;line-height:1.8;">
       <div><strong>普通页</strong>：<code>&lt;script src="/shared/shared-ui/site-nav.js"&gt;</code>，自动给 body 让出栏高。</div>
       <div><strong>沉浸首屏</strong>（节气画廊）：加 <code>data-variant="overlay"</code>，透明叠在画面上，不让位。</div>
@@ -222,7 +222,7 @@
 
   <section>
     <h2 class="qc-h2">品牌标 Mark</h2>
-    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">像素直角坐标系：三条坐标轴从原点伸出，端点是红、绿、蓝三颗球。16×16 网格，只能整数倍缩放（image-rendering: pixelated）；放在深色上时垫一块宣纸色底。文件：<code>shared/shared-ui/brand/iridescently-mark.svg</code>（PNG 副本 <code>portal/www/assets/iridescently-mark.png</code>）。</p>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">像素直角坐标系：三条坐标轴从原点伸出，端点是红、绿、蓝三颗球。16×16 网格，只能整数倍缩放（image-rendering: pixelated）；放在深色上时垫一块宣纸色底。文件：<code>packages/shared-ui/brand/iridescently-mark.svg</code>（PNG 副本 <code>portal/www/assets/iridescently-mark.png</code>）。</p>
     <div class="row">
       <img src="/shared/shared-ui/brand/iridescently-mark.svg" width="64" height="64" alt="Iridescently 像素标" style="image-rendering:pixelated">
       <img src="/shared/shared-ui/brand/iridescently-mark.svg" width="32" height="32" alt="" style="image-rendering:pixelated">

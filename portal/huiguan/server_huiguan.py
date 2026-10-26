@@ -1447,7 +1447,7 @@ class Handler(BaseStaticHandler):
             return os.path.join(STATIC_DIR, "__missing__")
         decoded = decoded.replace("\\", "/")
         normalized = "/" + posixpath.normpath(decoded).lstrip("/")
-        for prefix, root in (("/design-system/ui/", os.path.join(CODE_ROOT, "shared", "shared-ui")),):
+        for prefix, root in (("/design-system/ui/", os.path.join(CODE_ROOT, "packages", "shared-ui")),):
             if normalized.startswith(prefix):
                 relative = normalized[len(prefix):]
                 target = os.path.abspath(os.path.join(root, relative))

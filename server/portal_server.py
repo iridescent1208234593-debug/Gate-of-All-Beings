@@ -4,7 +4,7 @@
 - www / huiguan / oc：按 Host 复用各自 Handler。
 - 统一壳与游戏模块（内路径）：
     /app/*                 -> server/app（壳 + modules）
-    /shared/shared-ui/*    -> shared/shared-ui
+    /shared/shared-ui/*    -> packages/shared-ui
     /management/*,/ecology/* -> 兼容 cards 内嵌的根绝对路径
     /app/modules/<name>/api/*  -> 反向代理到各游戏自己的 API 上游
 - 未接入生产（cloudflared / 网站管家）前：
@@ -235,7 +235,7 @@ def route(host, path):
     if p.startswith('/api/progress/'):
         return ProgressHandler, {}
     if p.startswith('/shared/'):
-        return StaticHandler, {"root": str(CODE_ROOT / "shared"), "strip": "/shared"}
+        return StaticHandler, {"root": str(CODE_ROOT / "packages"), "strip": "/shared"}
     # Shared code and public derived media have one same-origin path on every domain.
     if p.startswith('/design-system/') or p in ('/avatar-cropper.js', '/avatar-cropper.css') or \
             p.startswith(('/api/assets/', '/api/official/img', '/api/image-preview', '/assets/uploads/')):

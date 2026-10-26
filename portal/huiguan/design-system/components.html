@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<script src="/shared/site-domains.js"></script>
+<script src="/shared/site-domains/index.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>lxh-ui 组件库 · 西木会馆设计系统</title>
@@ -80,7 +80,7 @@
   <h1>lxh-ui · 游戏界面组件库</h1>
   <p class="lede">众生之门、各游戏模块和会馆页面共用的游戏画面组件：HUD、面板、气泡、按钮、输入框、加载与出错。乳白圆角卡、赭金与灰绿双色按钮、深橄榄 HUD，配手写体。本页所有示例都由真实的 <code>lxh-ui.css</code> / <code>lxh-ui.js</code> 渲染，改源码后刷新就能看到。</p>
   <ul class="facts">
-    <li>源码 <code>shared/shared-ui/lxh-ui.css · lxh-ui.js</code></li>
+    <li>源码 <code>packages/shared-ui/lxh-ui.css · lxh-ui.js</code></li>
     <li id="ver">版本 —</li>
     <li>触控区 ≥ 44px</li>
     <li>键盘焦点环</li>
@@ -95,7 +95,7 @@
 
   <section id="start">
     <h2 class="qc-h2">接入</h2>
-    <p class="note">会馆页面用相对路径 <code>/design-system/ui/</code>（指向 <code>shared/shared-ui</code> 的 junction）；其他站点用 <code>/shared/shared-ui/</code>；React 模块用工作区包 <code>@lxh/shared-ui</code>。只要样式不要脚本也可以，所有组件都能手写 HTML。</p>
+    <p class="note">会馆页面用相对路径 <code>/design-system/ui/</code>（指向 <code>packages/shared-ui</code> 的 junction）；其他站点用 <code>/shared/shared-ui/</code>；React 模块用工作区包 <code>@lxh/shared-ui</code>。只要样式不要脚本也可以，所有组件都能手写 HTML。</p>
     <div class="code"><pre>&lt;link rel="stylesheet" href="/design-system/ui/lxh-ui.css?v=20261020"&gt;
 &lt;script src="/design-system/ui/lxh-ui.js?v=20261020"&gt;&lt;/script&gt;
 

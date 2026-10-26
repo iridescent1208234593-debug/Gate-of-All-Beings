@@ -1,6 +1,6 @@
 """Find absolute URLs to the site's own roots outside the reviewed exceptions.
 
-Code builds own-site URLs from shared/site-domains.json or uses same-origin paths.
+Code builds own-site URLs from packages/site-domains/domains.json or uses same-origin paths.
 The exceptions below are deliberate: search/social metadata stays on the current
 canonical root until a separately approved canonical switch, and provenance or
 content records are data, not routing. Usage:
@@ -15,10 +15,10 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
-ROOTS = json.loads((ROOT / "shared/site-domains.json").read_text(encoding="utf-8"))["roots"]
+ROOTS = json.loads((ROOT / "packages/site-domains/domains.json").read_text(encoding="utf-8"))["roots"]
 OWN_URL = re.compile(r"(?:https?|wss?)://(?:[a-z0-9-]+\.)*(?:" + "|".join(map(re.escape, ROOTS)) + r")\b", re.I)
 TEXT_SUFFIXES = {".py", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".html", ".css", ".json", ".svg", ".txt", ".env", ".example"}
-SOURCE_SCOPES = ("portal", "server", "shared", "scripts")
+SOURCE_SCOPES = ("portal", "server", "packages", "scripts")
 EXCEPT_FILES = {
     "*.md": "documentation",
     "**/tests/**": "test fixtures exercise exact public hosts",
@@ -26,7 +26,7 @@ EXCEPT_FILES = {
     "server/verify_portal.py": "route contract template, expanded to every approved root",
     "server/security_ingress_test.py": "ingress regression fixtures for the deployed canonical host",
     "scripts/check-domain-hardcodes.py": "this scanner",
-    "shared/shared-data/worldview.json": "historical export kept as a data record",
+    "packages/shared-data/worldview.json": "historical export kept as a data record",
     "portal/www/links.json": "editable homepage content seed; runtime copy is persistent data",
     "server/.env.example": "example operator configuration",
     "server/app/src/cards/scripts/inspect-sites.mjs": "operator inspection of the live canonical site",

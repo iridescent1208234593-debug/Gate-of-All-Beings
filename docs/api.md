@@ -48,7 +48,7 @@
 
 ## 7. 契约
 
-跨模块 JSON 契约见 `shared/shared-types`（`npm run verify`）。生态 → 主入口的收获包 `kind: eco-harvest`，详见 `shared/shared-types/README.md`。
+跨模块 JSON 契约见 `packages/shared-types`（`npm run verify`）。生态 → 主入口的收获包 `kind: eco-harvest`，详见 `packages/shared-types/README.md`。
 
 ## 示例
 

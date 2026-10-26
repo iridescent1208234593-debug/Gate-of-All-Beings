@@ -1,6 +1,6 @@
 import { Raycaster, Vector2, Vector3 } from "three";
 import "../../huiguan/reactions-fx.js";
-import { loadSsoUser } from "../../../shared/shared-session/session.js";
+import { loadSsoUser } from "../../../packages/shared-session/session.js";
 import { bindGalleryGestures } from "./gallery-gestures.mjs";
 import { placeGalleryControls } from "./gallery-placement.mjs";
 

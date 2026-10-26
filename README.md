@@ -36,7 +36,7 @@
 | `psyche.*` | 未正式并入，导航红点；不由此工作区启动 |
 | `*/ozmtree/` | 生物树可视化试用（OneZoom 改造，鳞翅目导入）；任意站点 Host 均可访问 |
 
-同一份代码同时接受 `iridescently.xyz`、`iridescently.cn`、`iridescently.dpdns.org` 三个批准根域下的上述子域（集中配置 `shared/site-domains.json`）；每个根域独立登录、Cookie 与 CSP，`.xyz` 继续运行且不强制跳转。是否已有 DNS、证书与 OAuth 回调登记属于上线批次，见 [domain-readiness](docs/domain-readiness.md)。
+同一份代码同时接受 `iridescently.xyz`、`iridescently.cn`、`iridescently.dpdns.org` 三个批准根域下的上述子域（集中配置 `packages/site-domains/domains.json`）；每个根域独立登录、Cookie 与 CSP，`.xyz` 继续运行且不强制跳转。是否已有 DNS、证书与 OAuth 回调登记属于上线批次，见 [domain-readiness](docs/domain-readiness.md)。
 
 `/ozmtree/` 由 `server/portal_server.py` 的 `OZTREE_STATIC` 直接提供工作区外的静态目录 `E:\External Projects\众生之门生物树可视化前端\OZtree\static`，不经构建、候选或 Release，也不在源码快照内；换机部署需单独提供该目录，或改为显式发布。OZtree 自身源码、数据与许可见其仓库 README。
 
@@ -77,6 +77,6 @@ AI 协作指令与隔离边界见 [Copilot 仓库指令](.github/copilot-instruc
 
 可独立运行的 Gallery 工程已公开：[iridescently-atmospheric-gallery](https://github.com/iridescent1208234593-debug/iridescently-atmospheric-gallery)。仅使用自行生成的样例图，保留 MIT/Codrops 来源。主站私有素材、音乐、用户内容、账户配置和研究原始资料不进入公开仓库。其他研究项目需要独立许可证、第三方/私有素材核查与迁移后资格验证，不能为了数量直接发布。
 
-文件维护入口：[首页](portal/www/README.md)、[应用模块](server/app/README.md)、[共享资源](shared/README.md)、[发布](docs/release-workflow.md)。
+文件维护入口：[首页](portal/www/README.md)、[应用模块](server/app/README.md)、[共享资源](packages/README.md)、[发布](docs/release-workflow.md)。
 
 众生之门最新源码集成：正式门景 → 玩家初始化 → 统一门庭；原型浅滩独立为模式，成熟玩法保留原引擎和存档。开场新增可记忆的配乐选择与静音控制，配乐从开场延续到门庭。此轮仅本地工作源码，未发布。见 [流程与路由](docs/zszm-flow-integration.md)、[账户与存档边界](docs/zszm-identity-and-save-map.md)、[首屏加载审查](docs/zszm-loading-audit.md)。

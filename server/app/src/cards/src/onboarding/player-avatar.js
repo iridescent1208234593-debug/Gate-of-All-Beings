@@ -1,4 +1,4 @@
-import siteDomains from '../../../../../../shared/site-domains.mjs';
+import siteDomains from '../../../../../../packages/site-domains/index.mjs';
 /** One SVG window/overlay geometry for the setup preview and world HUD. */
 import frameArt from './media/appearance-choices/custom-frame.svg?raw';
 import mirrorArt from './media/appearance-choices/mirror-frame.svg?raw';

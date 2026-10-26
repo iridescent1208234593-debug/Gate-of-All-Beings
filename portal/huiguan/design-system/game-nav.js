@@ -1,6 +1,6 @@
 /* Module pages (聚灵, 重生之门 …) opened on their own get the shared site bar plus a way back to 门庭.
  * Inside the 众生之门 module shell — embedded (window.__iridescentlyEmbed) or framed — the shell
- * already shows the bar, so this adds nothing. Bar itself: shared/shared-ui/site-nav.js. */
+ * already shows the bar, so this adds nothing. Bar itself: packages/shared-ui/site-nav.js. */
 (function () {
   'use strict';
   var framed = false;

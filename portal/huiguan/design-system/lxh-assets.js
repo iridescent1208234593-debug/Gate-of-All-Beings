@@ -1,6 +1,6 @@
 // 罗小黑战记 · 素材库共享加载器（西木会馆设计系统）
 // 用法：
-//   <script src="/design-system/lxh-assets.js"></script> (after /shared/site-domains.js)
+//   <script src="/design-system/lxh-assets.js"></script> (after /shared/site-domains/index.js)
 //   LXAssets.avatarUrl('无限')                 → 角色代表图（缩略）
 //   LXAssets.avatarUrl('无限', { thumb:false }) → 原图
 //   LXAssets.imageUrl(123)                     → 按 character_images.id 取图

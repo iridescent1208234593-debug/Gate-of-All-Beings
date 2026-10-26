@@ -1,4 +1,4 @@
-import siteDomains from '../../../../../../../shared/site-domains.mjs';
+import siteDomains from '../../../../../../../packages/site-domains/index.mjs';
 import * as THREE from 'three/webgpu';
 import { SpiritInstance } from './spirit-instance.js';
 import { createSpiritController } from './controller.js';

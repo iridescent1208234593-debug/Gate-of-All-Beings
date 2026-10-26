@@ -16,7 +16,7 @@ class SourceExportTests(unittest.TestCase):
             files = {
                 "server/app.py": "print('committed')\n",
                 "portal/page.html": "<p>committed</p>",
-                "shared/example.js": "export default 1;",
+                "packages/example.js": "export default 1;",
                 "server/users.db": "private database",
                 "server/registry.sqlite3": "private registry",
                 "portal/.env": "SECRET=private",
@@ -45,7 +45,7 @@ class SourceExportTests(unittest.TestCase):
             target = candidates[0]
             self.assertEqual((target / "server/app.py").read_text(), "print('committed')\n")
             self.assertEqual(sorted(path.relative_to(target).as_posix() for path in target.rglob("*") if path.is_file()),
-                             ["portal/page.html", "server/app.py", "shared/example.js"])
+                             ["packages/example.js", "portal/page.html", "server/app.py"])
             self.assertFalse((source / ".releases").exists())
 
 

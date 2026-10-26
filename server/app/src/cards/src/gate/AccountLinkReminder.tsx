@@ -1,4 +1,4 @@
-import siteDomains from '../../../../../../shared/site-domains.mjs';
+import siteDomains from '../../../../../../packages/site-domains/index.mjs';
 import { useEffect, useRef } from 'react';
 import './account-link-reminder.css';
 

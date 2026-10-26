@@ -286,7 +286,7 @@ for(const search of ['?return=%2F%2Fevil.example','?return=%252F%252Fevil.exampl
         subprocess.run(["node", "-e", js, json.dumps(script)], check=True)
         # Huiguan's post-login return target: exact approved HTTPS hosts on the page's own root,
         # through the shared domain map the page loads before auth-next.js.
-        domains = (ROOT / "shared/site-domains.js").read_text("utf-8")
+        domains = (ROOT / "packages/site-domains/index.js").read_text("utf-8")
         auth_next = (ROOT / "portal/huiguan/auth-next.js").read_text("utf-8")
         js = r"""const vm=require('node:vm'),assert=require('node:assert/strict');
 const [domains,authNext,approved]=process.argv.slice(1,4).map(value=>JSON.parse(value));

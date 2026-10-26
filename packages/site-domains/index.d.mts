@@ -1,4 +1,4 @@
-/** Types for the generated approved-root map in site-domains.js (see shared/site-domains.json). */
+/** Types for the generated approved-root map in site-domains.js (see packages/site-domains/domains.json). */
 export interface SiteDomainConfig {
   defaultRoot: string;
   roots: string[];

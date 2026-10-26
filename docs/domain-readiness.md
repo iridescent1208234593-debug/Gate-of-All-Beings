@@ -4,7 +4,7 @@
 
 ## 集中配置
 
-唯一真值是 `shared/site-domains.json`：
+唯一真值是 `packages/site-domains/domains.json`：
 
 | 字段 | 含义 |
 | --- | --- |
@@ -17,7 +17,7 @@
 | `assetHost` | R2 自定义域名（当前仅 `assets.iridescently.xyz`），不是应用入口主机 |
 | `localPorts` | development / test 下允许的本机 Origin 端口 |
 
-消费方：`server/site_domains.py`（Python 入口、Cookie、SSO、OAuth、CSP、CORS）、`shared/site-domains.js`（由 `scripts/generate-domain-config.py` 生成，浏览器与 Node 共用；`--check` 检查是否过期）和 `shared/site-domains.mjs`。部署时可用以下环境变量收窄或选择，但不能引入未批准的根域：
+消费方：`server/site_domains.py`（Python 入口、Cookie、SSO、OAuth、CSP、CORS）、`packages/site-domains/index.js`（由 `scripts/generate-domain-config.py` 生成，浏览器与 Node 共用；`--check` 检查是否过期）和 `packages/site-domains/index.mjs`。部署时可用以下环境变量收窄或选择，但不能引入未批准的根域：
 
 - `SITE_DOMAIN`：该部署的首选根域，必须在批准列表内。
 - `IRIDESCENTLY_ALLOWED_DOMAINS`：逗号分隔，限定本部署接受的根域子集（须唯一并包含 `SITE_DOMAIN`）。
@@ -73,7 +73,7 @@
 `scripts/check-domain-hardcodes.py` 扫描源码与构建产物中的自有域名绝对 URL，以下例外经过审查：
 
 - canonical 与 `og:image` 元数据（见上）；
-- 世界观数据的角色来源字段 `sourceUrl`、历史导出 `shared/shared-data/worldview.json`；
+- 世界观数据的角色来源字段 `sourceUrl`、历史导出 `packages/shared-data/worldview.json`；
 - 首页内容种子 `portal/www/links.json`（运行期副本是持久数据）与 `server/.env.example`；
 - 针对线上正式站的运维检查脚本 `cards/scripts/inspect-sites.mjs`、`verify-game.mjs`；
 - 文档、测试夹具与 `server/verify_portal.py` 的路由模板（运行时展开到每个批准根域）。

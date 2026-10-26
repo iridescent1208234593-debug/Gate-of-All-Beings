@@ -15,7 +15,7 @@ const server=createServer(async(req,res)=>{
       res.setHeader('Content-Type','application/json');
       res.end(JSON.stringify(pathname.includes('card-balance')?{revision:0,overrides:{},editable:false}:{logged_in:false}));return;
     }
-    const routes=[['/app/modules/cards/',path.join(root,'.releases/candidate/cards')],['/app/modules/slay/',path.join(root,'server/app/src/slay-the-web/public')],['/shared/',path.join(root,'shared')]];
+    const routes=[['/app/modules/cards/',path.join(root,'.releases/candidate/cards')],['/app/modules/slay/',path.join(root,'server/app/src/slay-the-web/public')],['/shared/',path.join(root,'packages')]];
     const route=routes.find(([prefix])=>pathname.startsWith(prefix));if(!route)throw Error('Unavailable route');
     const relative=pathname.slice(route[0].length)||'index.html',file=path.resolve(route[1],relative);
     if(path.relative(route[1],file).startsWith('..'))throw Error('Invalid path');

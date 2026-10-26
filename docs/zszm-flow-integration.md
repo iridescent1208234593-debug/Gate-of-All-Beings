@@ -46,7 +46,7 @@
 - 开场声音按钮旁增加配乐菜单：自动（默认延长版）、配乐 1、配乐 2（试听/未完成）和静音；选曲与静音保存在浏览器本地，音乐在开场离场后继续播放。MP3 副本迁入 Cards 源码，外部原型及 WAV 归档不改。`?bgm=split` 只用于开发时对比「自动」门前使用配乐 2、进门后切回延长版。
 - 门场景沿用现有 `OpeningMusicProvider`，不移植原型音频引擎或选曲 UI。门前音乐持续到推门后 2.1 秒的闪白起始点，再切到进门后段落；时机常量位于 `src/gate/DoorScene.tsx` 的 `DOOR_MUSIC_SWITCH_MS`，需要人耳确认。
 - 初始化种族图、头像框与字体来自已验收原型及用户提供的《罗小黑战记》参考资料，保留原型 SVG/PNG 表现，没有生成新占位几何图形。
-- 门庭森林图复用 `shared/shared-ui/lxh/scenes/deep-forest-moss.png`；浅滩背景和三灵息玩法来自原型 `world-screen.js` / `media/bg.png`。
+- 门庭森林图复用 `packages/shared-ui/lxh/scenes/deep-forest-moss.png`；浅滩背景和三灵息玩法来自原型 `world-screen.js` / `media/bg.png`。
 - 沿用既有 React、Vite、Lucide、Three 等依赖；没有新增框架、路由库或身份系统。
 - 此次素材迁入不等于取得第三方素材再许可；主仓库仍 private，不独立公开这些素材。Connections 的既有作者鸣谢不在本轮重做。
 

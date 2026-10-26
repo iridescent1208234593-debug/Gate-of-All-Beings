@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { WebSocket, WebSocketServer } from 'ws';
 import { DEFAULT_SPIRIT_SETTINGS, validateSpiritSettings } from '../src/games/spirit-playground/settings.js';
 import { SpiritRoomPhysics } from '../src/multiplayer/room-physics.js';
-import siteDomains from '../../../../../shared/site-domains.mjs';
+import siteDomains from '../../../../../packages/site-domains/index.mjs';
 
 export const SPIRIT_ROOM_WS = '/api/spirit-room/ws';
 const MAX_PAYLOAD = 8 * 1024;

@@ -15,7 +15,7 @@
 
   规则：旧前缀替换 → 候选（`images\` 嵌套）→ 唯一文件名匹配；`http(s)` 外链与真实缺失项不动。
 
-- 导出事实给前端：`shared/shared-data/export_worldview.py` → `worldview.json`。
+- 导出事实给前端：`packages/shared-data/export_worldview.py` → `worldview.json`。
 
 ## 2. 会馆用户库 · SQLite
 
@@ -28,7 +28,7 @@
 
 ## 3. 共同旅途 · 浏览器 IndexedDB
 
-- 统一库 `iridescently-game-v1`，对象仓 `records`：`profile` 存公共余额/角色进度，`mode:<key>` 存各模式完整快照，`receipt:<mode>:<event-id>` 保存结算去重回执。实现为 `shared/shared-session/game.js`。
+- 统一库 `iridescently-game-v1`，对象仓 `records`：`profile` 存公共余额/角色进度，`mode:<key>` 存各模式完整快照，`receipt:<mode>:<event-id>` 保存结算去重回执。实现为 `packages/shared-session/game.js`。
 - Cards 的 run、meta、生态个体与交换队列（最多 512/100）整体存入 `mode:cards`；Slay 的原生存储通过持久待写队列进入 `mode:slay`。
 - 旧 `zszm-adventure-v1/saves/current` 为只读迁入来源，`m:cards:summary` 为摘要。均不会覆盖统一主档。
 - 当前是同源设备进度，不自动归属于登录账户，也不提供云同步。迁移、资源事务及其他小游戏接入见 [共同旅途](ai-handoff/README.md)。

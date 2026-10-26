@@ -1,2 +1,2 @@
-import './site-domains.js';
+import './index.js';
 export default globalThis.IridescentlyDomains;

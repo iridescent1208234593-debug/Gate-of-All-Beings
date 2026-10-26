@@ -34,7 +34,7 @@ PlayerProfileProvider
 - 会馆发出的 `session` 与 `hx_sso` 均为 `.iridescently.xyz` 域 Cookie，`HttpOnly`、`SameSite=Lax`，生产配置使用 `Secure`。共享 SSO 期限为 7 天；会馆真实会话另由 `sessions_db` 校验。
 - 主站、OC 的 `/api/sso-user` 使用 `hx_sso.read_cookie`；返回 `uid`。会馆和 Cards 自己的接口通常返回 `user_id`。正式 portal 路由把 `zszm` 根路径的 `/api/sso-user` 交给主站 Handler，其余 `/api/*` 代理到 Cards，因此同一页面可能同时遇到两种字段名。
 - 本轮 `PlayerProfile.tsx` 将 `user.user_id ?? user.uid` 转为字符串后统一放入 `account.user_id`。前端 scope 使用 `kind:user_id`，后端 owner 使用 `{kind, user_id}`；不能只比较裸 uid。
-- `shared/shared-session/session.js` 只是同源 `/api/sso-user` 的 fetch / 内存缓存；没有单独登录服务，也不会自动将 localStorage 同步到其他子域。
+- `packages/shared-session/session.js` 只是同源 `/api/sso-user` 的 fetch / 内存缓存；没有单独登录服务，也不会自动将 localStorage 同步到其他子域。
 - `localhost` / `127.0.0.1` 不会获得 `.iridescently.xyz` Cookie。本地匿名 smoke 不能证明真实跨子域登录成功；代理或本地测试账号须单独配置，不能把“本地有存档”当作已登录。
 
 主要源码：`server/hx_sso.py`、`portal/huiguan/server_huiguan.py`、`portal/www/server.py`、`portal/oc/server.py`、`server/portal_server.py`、`server/account_profile.py`。
@@ -78,7 +78,7 @@ PlayerProfileProvider
 | Softie 云存档（客户端未改） | `users.db.game_saves` 的 `(kind, uid, 'softie')`；API `?scope=softie` | 与经营槽独立，不再回退读取经营存档；源码已迁移，未发布 |
 | 灵境生态 | namespace 内 `m:ecology:zszm-ecology-v2`；`ecology/src/core/persistence.js` | 同源 localStorage；无账户 scope、无云同步；生态交换包和卡牌收获队列有自己的校验，不等于账户存档 |
 | 聚灵 | `juling/server.js` 的 `globalSoul` / `currentRun`；`data/save.db` 的 `save_state` 或 JSON fallback 的 `soul` | 当前是服务进程的全局玩法状态，不是每个账户的私人存档；统一入口未改变这一点 |
-| 统一壳 / 其他 localStorage 模块 | `shared/shared-session/save.js` / `kv.js` → `iridescently.save.v1`，模块前缀 `m:<module>:` | 标准化本地命名空间和旧 key 迁移；不自动带 owner，不自动云同步 |
+| 统一壳 / 其他 localStorage 模块 | `packages/shared-session/save.js` / `kv.js` → `iridescently.save.v1`，模块前缀 `m:<module>:` | 标准化本地命名空间和旧 key 迁移；不自动带 owner，不自动云同步 |
 | 主站 Gallery Appearance | 同一 namespace 内 `homepage.appearance.v1:account:<kind>:<uid>` 或匿名 key | 当前 `appearance-controls.js` 依赖的是本地 `get/set`；按账户键隔离当前 origin 的偏好，**尚无服务器云 preference 接口**；不能宣称跨设备同步 |
 
 `BroadcastChannel('iridescently')` / fallback event bus 只覆盖同源页面/iframe。主站、会馆、zszm 是不同 origin，即使它们共享 Cookie，也不会共享 localStorage、sessionStorage、IndexedDB 或 BroadcastChannel。跨端资料恢复必须依赖服务端接口，不可只改键名。
@@ -111,7 +111,7 @@ PlayerProfileProvider
 - `server/hx_sso.py`、`server/account_profile.py`、`server/portal_server.py`
 - `portal/www/server.py`、`portal/www/scripts/appearance-controls.js`
 - `portal/huiguan/server_huiguan.py`、`portal/huiguan/account.html`、`portal/oc/server.py`
-- `shared/shared-session/session.js`、`save.js`、`kv.js`、`bus.js`
+- `packages/shared-session/session.js`、`save.js`、`kv.js`、`bus.js`
 - `server/app/src/cards/server.py`
 - `server/app/src/cards/src/game/PlayerProfile.tsx`、`PlayerIdentity.tsx`、`PlayerAvatar.tsx`、`GameApp.tsx`、`storage.ts`、`ShoreMode.tsx`
 - `server/app/src/cards/src/onboarding/PlayerOnboarding.tsx`、`player-profile.js`

@@ -1,5 +1,5 @@
-import { get, set } from "../../../shared/shared-session/save.js";
-import { refreshSession } from "../../../shared/shared-session/session.js";
+import { get, set } from "../../../packages/shared-session/save.js";
+import { refreshSession } from "../../../packages/shared-session/session.js";
 
 const PREFERENCE_NAMESPACE = "homepage.appearance.v1";
 const ANONYMOUS_KEY = `${PREFERENCE_NAMESPACE}:anonymous`;

@@ -2,7 +2,7 @@
  * 全站主题内核：light / dark / auto 三态，cookie 跨子站同步。
  *
  *   - 偏好存在 cookie `hx_theme`（light|dark|auto，缺省 auto = 跟随系统），
- *     在同一批准根域（见 shared/site-domains.json）的子站间共享；本地开发时退化为当前域 cookie。
+ *     在同一批准根域（见 packages/site-domains/domains.json）的子站间共享；本地开发时退化为当前域 cookie。
  *   - 最终生效主题写到 <html data-theme="light|dark">，CSS 侧沿用
  *     `[data-theme="dark"]` 令牌覆盖（见 world-map/style.css、connections.css）。
  *   - auto 状态监听 prefers-color-scheme 变化，实时跟随系统。

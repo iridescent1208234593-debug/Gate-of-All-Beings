@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<script src="/shared/site-domains.js"></script>
+<script src="/shared/site-domains/index.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- 字体改用本地 CJK 衬线字体栈，不再外部请求 Google Fonts -->
@@ -773,7 +773,7 @@
   <span class="sign">故事与角色档案</span>
 </nav>
 
-<!-- 兜底：外部统一导航（shared/shared-ui/site-nav.js）若仍注入"配色海报"入口，页面层隐藏 -->
+<!-- 兜底：外部统一导航（packages/shared-ui/site-nav.js）若仍注入"配色海报"入口，页面层隐藏 -->
 <script>
 (function() {
   var hideHbEntry = function() {
@@ -1582,7 +1582,7 @@ async function submitAuth() {
       msg.className = 'auth-msg ok';
       msg.textContent = d.registered ? '已自动注册并登录' : '登录成功';
       document.getElementById('authPassword').value = '';
-      // Re-validated at use: exact approved host on this page's own root (shared/site-domains.js).
+      // Re-validated at use: exact approved host on this page's own root (packages/site-domains/index.js).
       const next = window.__AUTH_NEXT && window.safeAuthNext(window.__AUTH_NEXT);
       if (next) {
         msg.textContent += '，正在返回…';

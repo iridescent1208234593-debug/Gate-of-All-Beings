@@ -65,7 +65,7 @@
 
 v2 的接入位：
 
-- **`ui` 组件**：把 `shared/shared-ui` 的发布形态封存成版本，按内容哈希提供，路径 `/ui/<release-id>/...`，可长期缓存。各站点的 manifest 写明自己依赖的 `ui` 版本，页面引用由构建注入，不再硬编码跨子域 URL。
+- **`ui` 组件**：把 `packages/shared-ui` 的发布形态封存成版本，按内容哈希提供，路径 `/ui/<release-id>/...`，可长期缓存。各站点的 manifest 写明自己依赖的 `ui` 版本，页面引用由构建注入，不再硬编码跨子域 URL。
 - **`design-system` 组件（后端）**：作为一个独立服务组件接入管家（自己的端口与 `services[]`）。它对外提供 token / 组件注册等数据，**产出** `ui` 组件的内容。站点只消费 `ui` 版本，不在运行时依赖后端可用。后端停机不影响已发布页面。
 - **契约**：`design-system` 的 `provides` 写 token schema 版本（例如 `tokens: 1`）；`ui` 的 manifest 写自己由哪个 token schema 生成。站点 `requires` 只依赖 `ui`。这样后端演进不会直接破坏站点。
 

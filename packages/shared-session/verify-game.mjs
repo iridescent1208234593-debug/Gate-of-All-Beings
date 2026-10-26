@@ -15,7 +15,7 @@ const server=createServer(async(req,res)=>{
     if(pathname==='/'){res.setHeader('Content-Type','text/html');res.end('<!doctype html><body>Unified game verification</body>');return;}
     if(pathname==='/storage.js'){res.setHeader('Content-Type','text/javascript');res.end(compiled.outputFiles[0].text);return;}
     if(!pathname.startsWith('/shared/')&&!pathname.startsWith('/server/app/src/slay-the-web/public/'))throw Error('Route unavailable');
-    const file=path.resolve(root,'.'+pathname);
+    const file=pathname.startsWith('/shared/')?path.resolve(root,'packages',pathname.slice(8)):path.resolve(root,'.'+pathname);
     if(!file.startsWith(root))throw Error('Invalid path');
     res.setHeader('Content-Type',file.endsWith('.json')?'application/json':'text/javascript');res.end(await readFile(file));
   }catch{res.writeHead(404);res.end();}

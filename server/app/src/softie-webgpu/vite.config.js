@@ -1,4 +1,4 @@
-const siteDomains = createRequire(import.meta.url)('../../../../shared/site-domains.js');
+const siteDomains = createRequire(import.meta.url)('../../../../packages/site-domains/index.js');
 import { createRequire } from 'node:module';
 import { defineConfig } from 'vite';
 import { spiritSettingsPlugin } from './server/spirit-settings.js';

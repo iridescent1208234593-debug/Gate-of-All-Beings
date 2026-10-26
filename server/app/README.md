@@ -60,4 +60,4 @@ $env:IRIDESCENTLY_MODULE_CODE_MAX_AGE = "14400"   # 秒；0 或不设 = 每次�
 
 共享游戏导航使用路径 / hash 判断当前入口，不按 Host 同时高亮多个模块；在壳内所有导航节点和样式属于当前模块容器。
 
-PC 新版的 `/app/shell/m/<key>` 必须回到 `server/app/shell/index.html`，不能使用 `server/app/index.html`。所有玩法仍由同一 `portal.json` 和既有模块壳加载。错误页统一提供换服务器、重新加载、返回门庭，保留真实 HTTP 状态；API 与静态资源错误不替换成游戏页面。共享组件规则见 [server-recovery.md](../../shared/shared-ui/server-recovery.md)，本轮验收和待发布状态见 [报告](../../docs/access-and-bandwidth-20261019.md)。
+PC 新版的 `/app/shell/m/<key>` 必须回到 `server/app/shell/index.html`，不能使用 `server/app/index.html`。所有玩法仍由同一 `portal.json` 和既有模块壳加载。错误页统一提供换服务器、重新加载、返回门庭，保留真实 HTTP 状态；API 与静态资源错误不替换成游戏页面。共享组件规则见 [server-recovery.md](../../packages/shared-ui/server-recovery.md)，本轮验收和待发布状态见 [报告](../../docs/access-and-bandwidth-20261019.md)。

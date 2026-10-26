@@ -1,4 +1,4 @@
-import siteDomains from '../../../../../../shared/site-domains.mjs';
+import siteDomains from '../../../../../../packages/site-domains/index.mjs';
 export function mountEcologyImport(dispatch){
  const bar=document.createElement('div');bar.id='ecology-import';
  bar.innerHTML=`<a href="${siteDomains.url('zszm', '/#ecosystem')}" target="_blank" rel="noreferrer">灵境生态 ↗</a><label>导入生态收获 ＋<input type="file" aria-label="导入生态收获" accept=".json,application/json"></label><span role="status"></span>`;

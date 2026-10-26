@@ -1,4 +1,4 @@
-/* Homepage account extras inside the shared site bar (shared/shared-ui/site-nav.js). */
+/* Homepage account extras inside the shared site bar (packages/shared-ui/site-nav.js). */
 (function () {
   'use strict';
   var nav = document.getElementById('qc-nav');

@@ -1,4 +1,4 @@
-const siteDomains = createRequire(import.meta.url)('../../../../shared/site-domains.js');
+const siteDomains = createRequire(import.meta.url)('../../../../packages/site-domains/index.js');
 import { createRequire } from 'node:module';
 import { defineConfig } from 'vite';
 import { realpathSync } from 'node:fs';
@@ -22,7 +22,7 @@ export default defineConfig({
     },
   }],
   server: {
-    fs: { allow: ['.', '../../../../shared', '../../../../shared/shared-types', '../../../../shared/shared-ui'].map(p => realpathSync(fileURLToPath(new URL(p, import.meta.url)))) },
+    fs: { allow: ['.', '../../../../packages', '../../../../packages/shared-types', '../../../../packages/shared-ui'].map(p => realpathSync(fileURLToPath(new URL(p, import.meta.url)))) },
     allowedHosts: siteDomains.allowedHosts,
       port: 5179,
     open: false,

@@ -20,7 +20,7 @@
     var self = document.currentScript;
     if (!self || 'domainRetry' in self.dataset) return;
     var map = document.createElement('script');
-    map.src = '/shared/site-domains.js';
+    map.src = '/shared/site-domains/index.js';
     map.onload = function () {
       var again = document.createElement('script');
       Object.keys(self.dataset).forEach(function (key) { again.dataset[key] = self.dataset[key]; });

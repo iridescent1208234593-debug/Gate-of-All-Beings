@@ -1,4 +1,4 @@
-const siteDomains = createRequire(import.meta.url)('../../../../shared/site-domains.js');
+const siteDomains = createRequire(import.meta.url)('../../../../packages/site-domains/index.js');
 import { createRequire } from 'node:module';
 // 重生之门：纯静态项目，vite 仅用作静态服务器（未装依赖，走 npx 缓存）
 // root 指向 public，/ 直接命中 index.html
@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..')
 const huiguanRoot = path.join(projectRoot, 'portal/huiguan')
-const sharedUiRoot = path.join(projectRoot, 'shared/shared-ui')
+const sharedUiRoot = path.join(projectRoot, 'packages/shared-ui')
 
 export default {
   root: 'public',

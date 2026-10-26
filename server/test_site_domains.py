@@ -61,7 +61,7 @@ def isolated_python(code, **environment):
 
 class HostAllowlist(unittest.TestCase):
     def test_every_service_host_of_each_approved_root_is_accepted(self):
-        services = json.loads((ROOT / "shared/site-domains.json").read_text(encoding="utf-8"))["services"]
+        services = json.loads((ROOT / "packages/site-domains/domains.json").read_text(encoding="utf-8"))["services"]
         self.assertEqual(site_domains.ALLOWED_ROOTS, ROOTS)
         for root in ROOTS:
             for prefix in services.values():
@@ -249,7 +249,7 @@ class BrowserAndNodeParity(unittest.TestCase):
 
     def test_return_urls_and_request_context_stay_within_one_root(self):
         script = r"""
-const d = require('./shared/site-domains.js');
+const d = require('./packages/site-domains/index.js');
 const socket = remoteAddress => ({ remoteAddress });
 const ctx = (headers, rawHeaders, remote = '127.0.0.1') => d.requestContext({ headers, rawHeaders, socket: socket(remote) });
 console.log(JSON.stringify({

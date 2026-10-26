@@ -6,7 +6,7 @@ import "./style.css";
 type Theme = "light" | "dark";
 type MarkerBinding = { button: HTMLButtonElement; railButton?: HTMLButtonElement };
 
-// shared/shared-ui/theme.js 提供的全站主题内核（cookie 跨子站 + 跟随系统）。
+// packages/shared-ui/theme.js 提供的全站主题内核（cookie 跨子站 + 跟随系统）。
 declare global {
   interface Window {
     XTheme?: {

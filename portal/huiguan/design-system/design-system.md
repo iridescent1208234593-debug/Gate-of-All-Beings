@@ -64,9 +64,9 @@
 
 - 组件 ↔ 代码：所有页面引用 `design-system/design-system.css`，类名即契约。
 - 样式指南/演示：`design-system/index.html`（可视化全部 token 与组件）。
-- 游戏界面组件库：`/design-system/components.html`（第十节）展示共享 `shared/shared-ui/lxh-ui.css`、`lxh-ui.js` 的全部组件、状态与用法；`/design-system/assets-library.html` 只展示接入素材库头像后的效果；它们参照的界面截图在 `docs/design-reference/lxh/`（不公开、不发布）。`shared/shared-ui/lxh/` 只放运行时引用的图片。
-- 站点导航、加载状态、品牌标：`shared/shared-ui/site-nav.js`、`lxh-ui.css` 的 `.qc-loading`、`shared/shared-ui/brand/`；接法见 `shared/shared-ui/README.md`，规则见下文第七节。
-- 开场进度与跳过控件：`shared/shared-ui/intro-controls.css` 和 `lxh-intro.js`；样式指南中的 Intro Controls 示例展示实际共享样式。会馆与众生之门各自保留场景状态，仅复用控件契约。
+- 游戏界面组件库：`/design-system/components.html`（第十节）展示共享 `packages/shared-ui/lxh-ui.css`、`lxh-ui.js` 的全部组件、状态与用法；`/design-system/assets-library.html` 只展示接入素材库头像后的效果；它们参照的界面截图在 `docs/design-reference/lxh/`（不公开、不发布）。`packages/shared-ui/lxh/` 只放运行时引用的图片。
+- 站点导航、加载状态、品牌标：`packages/shared-ui/site-nav.js`、`lxh-ui.css` 的 `.qc-loading`、`packages/shared-ui/brand/`；接法见 `packages/shared-ui/README.md`，规则见下文第七节。
+- 开场进度与跳过控件：`packages/shared-ui/intro-controls.css` 和 `lxh-intro.js`；样式指南中的 Intro Controls 示例展示实际共享样式。会馆与众生之门各自保留场景状态，仅复用控件契约。
 - 管理入口：管理员通过审核中心顶部“设计系统”进入样式指南。入口仅在 `/api/user` 确认管理员后显示。
 
 ## 六、布局约束
@@ -78,7 +78,7 @@
 
 ### 站点导航（全局栏）
 
-三站与所有游戏模块共用一条 48px 全局栏，代码只有 `shared/shared-ui/site-nav.js` 一份。
+三站与所有游戏模块共用一条 48px 全局栏，代码只有 `packages/shared-ui/site-nav.js` 一份。
 
 | 区域 | 内容 | 规则 |
 | --- | --- | --- |
@@ -109,7 +109,7 @@
 
 ### 品牌标
 
-像素直角坐标系：三条墨色坐标轴从原点伸出，+Y 端红球、+X 端绿球、+Z（左下斜）端蓝球，对应 RGB ↔ XYZ。16×16 网格，只能整数倍缩放并加 `image-rendering: pixelated`；放在深色底上时垫宣纸色圆角方块。源文件 `shared/shared-ui/brand/iridescently-mark.svg`，PNG 副本 `portal/www/assets/iridescently-mark.png`（开场角标、旧页面）。
+像素直角坐标系：三条墨色坐标轴从原点伸出，+Y 端红球、+X 端绿球、+Z（左下斜）端蓝球，对应 RGB ↔ XYZ。16×16 网格，只能整数倍缩放并加 `image-rendering: pixelated`；放在深色底上时垫宣纸色圆角方块。源文件 `packages/shared-ui/brand/iridescently-mark.svg`，PNG 副本 `portal/www/assets/iridescently-mark.png`（开场角标、旧页面）。
 
 ## 八、交互状态基线（2026-10-19）
 
@@ -177,7 +177,7 @@
 
 ## 十、游戏界面组件库 lxh-ui（2026-10-20）
 
-众生之门、各游戏模块和会馆页面共用的游戏画面组件，与本文件的 `qc-` 站点组件并列。真身在 `shared/shared-ui/lxh-ui.css` / `lxh-ui.js`，组件库页面 `design-system/components.html`（样式指南首页有入口）。接法见 `shared/shared-ui/README.md`。
+众生之门、各游戏模块和会馆页面共用的游戏画面组件，与本文件的 `qc-` 站点组件并列。真身在 `packages/shared-ui/lxh-ui.css` / `lxh-ui.js`，组件库页面 `design-system/components.html`（样式指南首页有入口）。接法见 `packages/shared-ui/README.md`。
 
 ### 两层 token
 

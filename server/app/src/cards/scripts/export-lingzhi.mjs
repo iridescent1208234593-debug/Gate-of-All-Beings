@@ -13,7 +13,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '../../../../..');
 const slay = resolve(root, 'server/app/src/slay-the-web/public');
-register('data:text/javascript,' + encodeURIComponent(`export async function resolve(s,c,n){return s.startsWith('/shared/')?n(${JSON.stringify(pathToFileURL(root).href)}+s,c):n(s,c);}`));
+register('data:text/javascript,' + encodeURIComponent(`export async function resolve(s,c,n){return s.startsWith('/shared/')?n(${JSON.stringify(pathToFileURL(root).href)}+'/packages/'+s.slice(8),c):n(s,c);}`));
 const mod = p => import(pathToFileURL(resolve(slay, p)).href);
 
 const { lingzhiCharacters, lingzhiCards } = await mod('content/lingzhi-xiuxing.js');

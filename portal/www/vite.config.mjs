@@ -1,4 +1,4 @@
-const siteDomains = createRequire(import.meta.url)('../../shared/site-domains.js');
+const siteDomains = createRequire(import.meta.url)('../../packages/site-domains/index.js');
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";

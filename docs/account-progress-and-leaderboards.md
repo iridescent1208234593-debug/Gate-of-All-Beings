@@ -60,7 +60,7 @@
 - `GET /api/progress/me`：等级、升级进度、今日积分 / 上限、每日任务、各玩法最佳。
 - `POST /api/progress/report`：`{game, score, finished?, won?, ref?}`；`finished`/`won` 必须带 `ref`。要求 `Content-Type: application/json`、Origin 为 `*.iridescently.xyz` 或本机，身份只认 `hx_sso`（经 `resolve_sso_identity` 复核账户状态，封禁/失效 = 访客）。
 
-客户端：`shared/shared-session/progress.js`（`reportResult` 一局结束、`reportProgress` 持续型玩法自带 5 分钟节流、局末小提示链接到排行榜）。会馆 `/api/user` 与设表保存的 `points/level` 字段改由本模块计算，并新增 `next_level_at`。
+客户端：`packages/shared-session/progress.js`（`reportResult` 一局结束、`reportProgress` 持续型玩法自带 5 分钟节流、局末小提示链接到排行榜）。会馆 `/api/user` 与设表保存的 `points/level` 字段改由本模块计算，并新增 `next_level_at`。
 
 排行榜页面：`/shared/shared-ui/leaderboard/index.html?board=<key>`，各站点都可访问。入口：模块壳顶栏"排行榜"（默认当前玩法）、局末提示、会馆账户页"查看排行榜"。
 

@@ -19,7 +19,7 @@ def send_recovery(handler, code):
         return False
     if not path.startswith(('/app/', '/playtest/')) or '/api/' in path:
         return False
-    content = (Path(__file__).resolve().parents[1] / 'shared/shared-ui/server-unavailable.html').read_bytes()
+    content = (Path(__file__).resolve().parents[1] / 'packages/shared-ui/server-unavailable.html').read_bytes()
     content = content.replace(b'HTTP_STATUS', str(code).encode('ascii'))
     handler.send_response(code)
     handler.send_header('Content-Type', 'text/html; charset=utf-8')

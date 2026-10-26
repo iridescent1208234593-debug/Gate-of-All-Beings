@@ -256,7 +256,7 @@ try {
   };
 
   const customizer = document.querySelector(".gallery-customizer");
-  // The shared site bar (shared/shared-ui/site-nav.js) mounts before this module runs.
+  // The shared site bar (packages/shared-ui/site-nav.js) mounts before this module runs.
   const siteChrome = document.getElementById("qc-nav") ?? document.createElement("nav");
   syncAutoplayButton();
 

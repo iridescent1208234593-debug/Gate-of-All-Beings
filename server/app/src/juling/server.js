@@ -7,7 +7,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const engine = require('./engine');
-const siteDomains = require('../../../../shared/site-domains.js');
+const siteDomains = require('../../../../packages/site-domains/index.js');
 const { dataPath, requireReady } = require('../../../runtime-paths.cjs');
 
 const PORT = process.env.PORT || 8080;

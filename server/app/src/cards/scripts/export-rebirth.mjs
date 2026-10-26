@@ -13,7 +13,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '../../../../..');
 const slay = resolve(root, 'server/app/src/slay-the-web/public');
 
-// 浏览器绝对路径 /shared/... 映射到仓库；敌人构造函数替换为保留原始参数的桩，避免在导入时就把随机区间掷成定值。
+// 浏览器绝对路径 /shared/... 映射到仓库 packages/；敌人构造函数替换为保留原始参数的桩，避免在导入时就把随机区间掷成定值。
 const stubs = {
   'dungeon-rooms.js': 'export const Monster=p=>({...p});export const MonsterRoom=(...monsters)=>({type:"monster",monsters});',
   'utils.js': 'export const random=(min,max)=>({min,max});export const shuffle=a=>a;export const range=(n,s=0)=>[...Array(n).keys()].map(i=>i+s);',
@@ -22,7 +22,7 @@ const stubs = {
 register('data:text/javascript,' + encodeURIComponent(`
 const stubs=${JSON.stringify(stubs)};
 export async function resolve(specifier,context,next){
-  if(specifier.startsWith('/shared/'))return next(${JSON.stringify(pathToFileURL(root).href)}+specifier,context);
+  if(specifier.startsWith('/shared/'))return next(${JSON.stringify(pathToFileURL(root).href)}+'/packages/'+specifier.slice(8),context);
   for(const name of Object.keys(stubs))if(specifier.endsWith('/game/'+name))return {url:'data:text/javascript,'+encodeURIComponent(stubs[name]),shortCircuit:true};
   return next(specifier,context);
 }`));
@@ -44,7 +44,7 @@ const { characterEvents } = await mod('character-events.js');
 const { characterImages } = await mod('character-images.js');
 const { relations } = await mod('relations-data.js');
 const shopModule = await mod('shop.js');
-const catalogue = JSON.parse(readFileSync(resolve(root, 'shared/shared-data/cards.json'), 'utf8'));
+const catalogue = JSON.parse(readFileSync(resolve(root, 'packages/shared-data/cards.json'), 'utf8'));
 
 const ELEMENT_RESISTANCE = { 土: 12, 金: 9, 水: 6, 木: 3, 火: 0 };
 const ELEMENT_POTENCY = { 火: 12, 木: 9, 水: 6, 金: 3, 土: 0 };

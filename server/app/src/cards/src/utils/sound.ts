@@ -1,4 +1,4 @@
-import siteDomains from '../../../../../../shared/site-domains.mjs';
+import siteDomains from '../../../../../../packages/site-domains/index.mjs';
 // Web Audio API Synthesizer for high-quality sound effects
 
 let audioCtx: AudioContext | null = null;

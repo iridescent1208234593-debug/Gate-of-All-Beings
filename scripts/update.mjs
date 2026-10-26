@@ -14,7 +14,7 @@ const manifestScript = path.join(root, "scripts", "assets-manifest.mjs");
 const wranglerScript = path.join(root, "node_modules/wrangler/bin/wrangler.js");
 const bucket = "iridescently-assets";
 // The R2 custom domain is configured beside the site roots; it is not an application ingress host.
-const assetHost = JSON.parse(await readFile(path.join(root, "shared/site-domains.json"), "utf8")).assetHost;
+const assetHost = JSON.parse(await readFile(path.join(root, "packages/site-domains/domains.json"), "utf8")).assetHost;
 const command = process.argv[2] || "full";
 const startedAt = new Date();
 const reportPath = path.join(

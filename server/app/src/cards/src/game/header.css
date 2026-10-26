@@ -1,5 +1,5 @@
 /* 众生之门 local bar: the app's tabs and player actions, one row under the shared site bar
-   (shared/shared-ui/site-nav.js owns brand, sites and account). Same pattern as the module shell. */
+   (packages/shared-ui/site-nav.js owns brand, sites and account). Same pattern as the module shell. */
 .zszm-game .game-header{position:sticky;top:var(--qc-nav-h,48px);z-index:50;display:flex;flex-wrap:nowrap;align-items:stretch;gap:12px;box-sizing:border-box;height:46px;min-height:0;max-width:none;margin:0;padding:0 clamp(8px,3vw,40px);border-bottom:1px solid #2a3a3126;background:var(--paper,#f5f0e8)}
 .zszm-game .game-header nav{position:relative;order:0;display:flex;flex:1;justify-content:flex-start;min-width:0;flex-wrap:nowrap;align-items:stretch;gap:2px;height:auto;margin:0;padding:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .zszm-game .game-header nav::-webkit-scrollbar{display:none}

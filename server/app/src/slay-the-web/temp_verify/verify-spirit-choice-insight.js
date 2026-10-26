@@ -7,11 +7,11 @@ import {fileURLToPath, pathToFileURL} from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const repo = path.resolve(__dirname, '../../../../..')
-// 浏览器里 /shared/ 由门户映射到仓库根目录；Node 里用 resolve hook 做同样的映射
+// 浏览器里 /shared/ 由门户映射到仓库 packages/；Node 里用 resolve hook 做同样的映射
 register(
 	'data:text/javascript,' +
 		encodeURIComponent(
-			`export async function resolve(s,c,n){return s.startsWith('/shared/')?n(${JSON.stringify(pathToFileURL(repo).href)}+s,c):n(s,c)}`
+			`export async function resolve(s,c,n){return s.startsWith('/shared/')?n(${JSON.stringify(pathToFileURL(repo).href)}+'/packages/'+s.slice(8),c):n(s,c)}`
 		)
 )
 
