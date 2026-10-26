@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Check, Clapperboard, ImagePlus, Import, LoaderCircle, PenLine, Plus, Save, Trash2, X } from 'lucide-react';
 import { PlayerAvatar } from './PlayerAvatar';
 import { usePlayerProfile, identityAssetUrl, IDENTITY_LIMIT, type Account, type GateIdentity } from './PlayerProfile';
+import { assetIdFromUrl } from './core/identityAssets';
 import { FAMILY_SUGGESTIONS, HUMAN, composeSpecies, SUB_SUGGESTIONS, YAOJING, speciesFields, speciesFromOC, speciesParts, type SpeciesParts } from './species';
 
 type OC = { id: string; name: string; species_type: string; species_detail: string; avatar_asset_id: string; avatar_url?: string; images: string[] };
@@ -145,7 +146,7 @@ export function PlayerIdentity({ account, onClose, onCreateWithOpening }: { acco
           {identity.source_oc_id === selectedOC && selectedOC && ocs.find(oc => oc.id === selectedOC)?.images.length ? <div className="identity-candidates"><span>从该 OC 的已有图片中选择头像</span>{ocs.find(oc => oc.id === selectedOC)!.images.map((src,index) => <button type="button" key={`${src}-${index}`} onClick={() => void crop(src)} aria-label={`裁切已有图片 ${index+1}`}><img src={src} alt=""/></button>)}</div> : null}
         </section>}
         <div className="identity-fields"><div className="identity-avatar"><div className="identity-avatar__preview">{<PlayerAvatar identity={{ ...identity, avatar_asset_id: avatarUrl }}/> }</div><button type="button" className="secondary" onClick={() => { markAvatarPick(true); document.getElementById('gateAvatarFile')?.click(); }}><ImagePlus size={15}/>上传并裁切头像</button><input id="gateAvatarFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden onChange={event => { markAvatarPick(false); const file=event.target.files?.[0];event.target.value='';if(file)void crop(file); }}/>
-          {account.account_avatar_url && <button type="button" className="text-button" onClick={() => { const url=new URL(account.account_avatar_url!);setIdentity(current=>({...current,avatar_asset_id:url.pathname,avatar_mode:'account'}));setAvatarDraft(null);setPreviewDraftUrl('');setSaved(''); }}>使用账户头像</button>}
+          {account.account_avatar_url && <button type="button" className="text-button" onClick={() => { setIdentity(current=>({...current,avatar_asset_id:assetIdFromUrl(account.account_avatar_url!,window.location.href),avatar_mode:'account'}));setAvatarDraft(null);setPreviewDraftUrl('');setSaved(''); }}>使用账户头像</button>}
         </div><div className="identity-text">
           <label>显示名称<input required maxLength={60} value={identity.display_name} onChange={event => { setIdentity(current => ({ ...current, display_name: event.target.value })); setSaved(''); }} placeholder="例如：小苔"/></label>
           <fieldset className="identity-species"><legend>种族</legend>

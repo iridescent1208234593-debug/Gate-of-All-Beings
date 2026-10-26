@@ -126,8 +126,10 @@ function render(){
   document.getElementById('stat').textContent=`共 ${users.length} 位用户（站内 ${locals} · USSO ${users.length-locals}）· 有设表 ${withChars} · 显示 ${list.length}`;
   if(!list.length){box.innerHTML='<div class="state-box">没有匹配的成员。</div>';return;}
   const sheetTh=myScope==='all'?'<th>人设表</th>':'';
-  box.innerHTML='<table><thead><tr><th>来源</th><th>昵称</th><th>角色</th><th>编辑</th><th>状态</th><th>最近登录</th>'+sheetTh+'<th>身份</th><th>操作</th></tr></thead><tbody>'+
-    list.map(u=>{
+  box.innerHTML='<table><thead><tr><th>来源</th><th>昵称</th><th>角色</th><th>编辑</th><th>状态</th><th>最近登录</th>'+sheetTh+'<th>身份</th><th>操作</th></tr></thead><tbody>'+'</tbody></table>';
+  // ---- 分批渲染：首屏 40 条，仅手动下滑才继续加载 ----
+  const __list=list, __tb=box.querySelector('tbody'), BATCH=40;
+  const ROW=u=>{
       const key=u.kind==='local'?'local:'+u.uid:String(u.uid);
       const sheets=charMap[key]||[];
       const isOpen=expanded.has(key);
@@ -141,10 +143,38 @@ function render(){
       const sheetTd=myScope==='all'?`<td><span class="expander" onclick="toggleSheets('${key}')">${isOpen?'▾':'▸'} <span class="cnt">${sheets.length}</span> 份</span></td>`:'';
       const schemes=u.schemes||[], posters=u.posters||[];
       const schemeHtml=schemes.length?schemes.map(c=>`<span class="scheme-chip"><span class="scheme-dot" style="background:${escAttr(c.primary_color)}"></span><span class="scheme-dot" style="background:${escAttr(c.accent_color)}"></span>${esc(c.primary_name||'主色')}×${esc(c.accent_name||'辅色')} <span class="dim">${esc((c.name||'').slice(0,10))}</span> <span class="dim">${esc((c.created_at||'').slice(0,10))}</span></span>`).join(''):'<span class="dim">暂无自定义配色</span>';
-      const posterHtml=posters.length?posters.map(p=>`<span class="poster-chip">${p.img_ref?`<img src="${escAttr(p.img_ref)}" alt="">`:''}<span class="p-info"><span class="p-title">${esc(p.title)}</span><span class="p-sub">${p.char_name?'关联：'+esc(p.char_name):'未关联人设'} · ${p.is_public?'已共享画廊':'私有'} · ${esc((p.updated_at||'').slice(0,10))}</span></span><button class="del-sheet" data-id="${p.id}" data-title="${escAttr(p.title)}" onclick="delPoster(this.dataset.id,this.dataset.title)" title="删除该海报">✕</button></span>`).join(''):'<span class="dim">暂无配色海报</span>';
+      const posterHtml=posters.length?posters.map(p=>`<span class="poster-chip">${p.img_ref?`<img loading="lazy" decoding="async" src="${escAttr(p.img_ref)}" alt="">`:''}<span class="p-info"><span class="p-title">${esc(p.title)}</span><span class="p-sub">${p.char_name?'关联：'+esc(p.char_name):'未关联人设'} · ${p.is_public?'已共享画廊':'私有'} · ${esc((p.updated_at||'').slice(0,10))}</span></span><button class="del-sheet" data-id="${p.id}" data-title="${escAttr(p.title)}" onclick="delPoster(this.dataset.id,this.dataset.title)" title="删除该海报">✕</button></span>`).join(''):'<span class="dim">暂无配色海报</span>';
       const sheetRow=(isOpen&&myScope==='all')?`<tr class="sheet-row"><td colspan="9">${sheets.length?sheets.map(s=>`<span class="sheet-chip">◈ <a href="/show.html?code=${encodeURIComponent(s.code)}" target="_blank" style="color:inherit;text-decoration:none">${esc(s.name)}</a><button class="del-sheet" data-key="${escAttr(key)}" data-code="${escAttr(s.code)}" data-name="${escAttr(s.name)}" onclick="delSheet(this.dataset.key,this.dataset.code,this.dataset.name)" title="删除该设表">✕</button></span>`).join(''):'<span class="dim">暂无人设表</span>'}<div class="mgr-block"><div class="mgr-title">自定义配色（与 /haibao 互通）</div>${schemeHtml}</div><div class="mgr-block"><div class="mgr-title">配色海报（${posters.length}）</div>${posterHtml}</div></td></tr>`:'';
       return `<tr><td class="dim">${u.kind==='local'?'站内':'USSO'}</td><td>${esc(u.nickname||u.name)}</td><td>${roleSel}</td><td>${scribeSel}</td><td>${u.status==='banned'?'<span class="tag banned">已封禁</span>':'<span class="dim">正常</span>'}</td><td class="dim">${esc((u.last_login||'').replace('T',' ').substring(0,16))}</td>${sheetTd}<td><span class="tag ${u.role==='admin'?'admin':u.role==='elder'?'elder':''}">${roleName[u.role]||'执行者'}</span> ${u.edit_role==='scribe'?'<span class="tag scribe">编辑</span>':''}</td><td>${statusBtn}</td></tr>${sheetRow}`;
-    }).join('')+'</tbody></table>';
+    };
+  let __i=0;
+  function __setSentinel(on){
+    let s=document.getElementById('msent');
+    if(on && !s){
+      s=document.createElement('tr'); s.id='msent';
+      s.innerHTML='<td colspan="9" style="text-align:center;color:var(--dim);padding:12px">向下滑动加载更多…</td>';
+      __tb.appendChild(s);
+    } else if(!on && s){ s.remove(); }
+  }
+  function __add(n){
+    let h='';
+    for(let k=0;k<n && __i<__list.length;k++,__i++) h+=ROW(__list[__i]);
+    if(h){
+      const s=document.getElementById('msent');
+      if(s) s.insertAdjacentHTML('beforebegin', h); else __tb.insertAdjacentHTML('beforeend', h);
+    }
+    __setSentinel(__i<__list.length);
+  }
+  __add(BATCH);
+  if(__list.length>BATCH && 'IntersectionObserver' in window){
+    const io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting) __add(BATCH); });
+    }, {rootMargin:'160px'});
+    const watch=function(){ var s=document.getElementById('msent'); if(s) io.observe(s); };
+    watch();
+    setInterval(watch, 800);
+  }
+
 }
 function toggleSheets(key){ if(expanded.has(key))expanded.delete(key);else expanded.add(key); render(); }
 function escAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -182,3 +212,4 @@ init();
 </script>
 </body>
 </html>
+

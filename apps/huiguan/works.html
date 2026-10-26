@@ -93,7 +93,7 @@ h1{font-size:var(--qc-fs-xl);letter-spacing:3px;margin-bottom:var(--qc-sp-1)}
       <p class="qc-hint">这里是公开档案图廊，所有访客都能看到。请上传你自己的作品或已获授权的作品，不要上传隐私信息、他人肖像或违规内容。</p>
       <label class="qc-label">图片 *
         <span class="qc-upload" id="pick" tabindex="0" role="button" aria-label="选择图片">
-          <img id="pickPreview" alt="" hidden>
+          <img loading="lazy" decoding="async" id="pickPreview" alt="" hidden>
           <span id="pickText">点击选择图片（JPG / PNG / WebP / GIF，≤8MB）</span>
         </span>
         <input type="file" id="pickFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden>

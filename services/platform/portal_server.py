@@ -56,7 +56,9 @@ MODULES_DIR = Path(os.environ.get("IRIDESCENTLY_MODULES_ROOT", CODE_ROOT / "dist
 # Unhashed JS/CSS under modules/: 0 = always revalidate (default). Rollback to the old 4-hour cache:
 # set IRIDESCENTLY_MODULE_CODE_MAX_AGE=14400 and restart portal (see apps/README.md).
 MODULE_CODE_MAX_AGE = max(0, int(os.environ.get("IRIDESCENTLY_MODULE_CODE_MAX_AGE", "0") or 0))
-PROXY_PORTS = {"cards": 5174, "card-balance": 5178, "softie": 4173, "juling": 5177}
+# The juling page embedded under 灵境会馆 posts its relative api/action to
+# /app/modules/management/api/action; juling is the only backend implementing it.
+PROXY_PORTS = {"cards": 5174, "card-balance": 5178, "softie": 4173, "juling": 5177, "management": 5177}
 
 API_RE = re.compile(r"^/app/modules/([^/]+)/api/")
 
