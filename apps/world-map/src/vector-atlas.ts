@@ -79,6 +79,7 @@ export async function createVectorAtlas(radius: number, height: number, seam: nu
   const border = lineLayer(data.borders, 0x739d94, 1.05);
   return {
     group, regionCount: data.regions.length, triangleCount,
+    sourceSha256: data.sourceSha256,
     setTheme(dark: boolean) {
       for (const [color, material] of materials) {
         material.color.set(color);

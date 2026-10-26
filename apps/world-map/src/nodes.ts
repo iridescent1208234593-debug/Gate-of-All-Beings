@@ -1,5 +1,5 @@
-export const MAP_SIZE = { width: 9216, height: 1900 } as const;
-const SOURCE_MAP_SIZE = { width: 8192, height: 1900 } as const;
+import { MAP_SIZE, SOURCE_MAP_SIZE } from './map-coordinates.ts';
+export { MAP_SIZE } from './map-coordinates.ts';
 const LEGACY_MAP_SIZE = { width: 4684, height: 1080 } as const;
 
 export type AtlasNode = {
@@ -54,7 +54,9 @@ function fromLegacy(x: number, y: number) {
 // Add hand-checked points here. Open the site with `?editNodes=1`, click the
 // map, and paste the copied object into this array.
 const manual: AtlasNode[] = [
-  // { code: "U60", name: "未命名节点 60", kind: "unnamed", x: 4096, y: 950, note: "等待补充档案。" },
+  // Registered against the supplied 2026-10-25 red-8 reference, in source pixels.
+  { code: "08", name: "西木会馆", kind: "named", x: 2389, y: 842,
+    note: "馆长还没有填写介绍哦。\n\n馆长：待补充\n执行者：待补充" },
 ];
 
 const promotedNodes: Record<string, {
@@ -62,14 +64,7 @@ const promotedNodes: Record<string, {
   name: string;
   note: string;
 }> = {
-  "U24": {
-    code: "08",
-    name: "西木会馆",
-    note: `馆长还没有填写介绍哦。
-
-馆长：待补充
-执行者：待补充`,
-  },
+  // A named marker is not interchangeable with a nearby unnamed black mark.
 };
 
 export const ATLAS_NODES: AtlasNode[] = [
@@ -77,7 +72,7 @@ export const ATLAS_NODES: AtlasNode[] = [
     code,
     name,
     kind: "named" as const,
-    ...fromLegacy(x, y),
+    ...(code === "07" ? { x: 2574, y: 750 } : fromLegacy(x, y)),
     note: ({
   "01": `龙游会馆是妖灵会馆的一个分会馆，出入口位于龙游。
 

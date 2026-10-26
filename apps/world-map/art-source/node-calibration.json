@@ -1,0 +1,31 @@
+{
+  "matrix": [
+    [
+      0.9333645864635693,
+      0.0021011188097966003,
+      2145.393845265369
+    ],
+    [
+      -0.0021011188097966003,
+      0.9333645864635693,
+      681.3893457575613
+    ]
+  ],
+  "matches": 17,
+  "inliers": 9,
+  "transformed": [
+    [
+      [
+        2574.89501953125,
+        748.5584716796875
+      ],
+      [
+        2389.36328125,
+        841.379638671875
+      ]
+    ]
+  ],
+  "method": "SIFT initialization, ECC affine refinement against the existing unmarked source raster; red centers sampled at (460,73), (261,172) in the supplied 569x436 reference.",
+  "referenceSha256": "c2f3eaa935dc9c7306b62d21cccf2355fe674ec8dc52223835322b75b5f57eb2",
+  "scope": "Only named nodes 07 and 08; not a global transform applied to unverified nodes."
+}
