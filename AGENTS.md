@@ -1,6 +1,31 @@
+## Start here
+
+- Repository layout: `docs/repository-layout.md`. Local engineering workspace (repo, worktrees,
+  runtime storage, operations, originals, evidence, archive): `docs/workspace.md`. Branch rules:
+  `docs/development/BRANCH_STRATEGY.md`. Local services and HK publishing: `docs/operations.md`.
+  Recovery: `docs/recovery.md`.
+- Re-check the live Git and disk state before acting; documents and handoffs record the state when
+  they were written.
+
+## Boundaries
+
+- Production (Hong Kong data, uploads, nginx, systemd, releases), Cloudflare, DNS, Tunnels and
+  production OAuth registrations are changed only with the owner's explicit authorization.
+- Code never selects data: storage comes from `IRIDESCENTLY_STORAGE_ROOT` /
+  `IRIDESCENTLY_ENVIRONMENT` or the workspace manifest; tests use temporary `test` storage only.
+- Keep the Host/Origin/CSP/WebSocket model: one explicit domain map, per-root sessions and cookies,
+  no wildcard or suffix host checks, no global Origin gate on navigation.
+- No force-push or history rewrite on shared branches; collaborators' branches are not merged,
+  deleted or rewritten before review.
+
 ## File deletion and cleanup policy
 
-When the user explicitly identifies files, directories, assets, compatibility code,
+This policy covers files tracked by Git in this repository. Runtime data, uploads, databases,
+secrets, original artwork and music, collaborators' originals, evidence, and anything outside the
+repository are never deleted as "cleanup": move them to the workspace `archive/` with a verified
+inventory, or leave them and record the question for the owner.
+
+When the user explicitly identifies tracked files, directories, assets, compatibility code,
 experiments, test data, generated output, or old implementations as obsolete or
 requests that they be removed:
 

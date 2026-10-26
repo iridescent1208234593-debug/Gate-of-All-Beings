@@ -39,6 +39,13 @@ def main():
             results.append({"check": name, "passed": result.returncode == 0,
                             "seconds": round(time.monotonic() - started, 2)})
 
+        # The sealed-runtime test bundles Cards and Softie services with their own dependencies;
+        # without them it fails with an esbuild resolve error that hides the real cause.
+        missing = [p for p in ("node_modules", "apps/cards/node_modules", "apps/softie/node_modules") if not (ROOT / p).is_dir()]
+        if missing:
+            print("\n[dependencies] missing: " + ", ".join(missing) + " -> run npm ci in each (see README)", flush=True)
+            results.append({"check": "dependencies installed (" + ", ".join(missing) + ")", "passed": False, "seconds": 0})
+
         # Separate processes avoid modules leaking import caches/environment fixtures.
         for directory in (ROOT / "services/platform/tests", ROOT / "apps/huiguan/tests", ROOT / "apps/cards/tests"):
             for file in sorted(directory.glob("test_*.py")):
