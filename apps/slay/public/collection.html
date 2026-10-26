@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+<script src="/shared/site-domains/index.js"></script>
+	<meta charset="utf-8" />
+	<meta name="description" content="罗小黑战记·重生之门 · 世界观图鉴" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+	<title>罗小黑战记·重生之门 · 世界观图鉴</title>
+	<link rel="manifest" href="manifest.webmanifest" />
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="theme-color" content="#116f54" />
+	<meta name="msapplication-TileColor" content="#116f54">
+	<link rel="icon" type="image/png" href="/ui/images/spoder.png" sizes="512x512" />
+	<link rel="shortcut icon" href="/ui/images/spoder.png">
+	<link rel="apple-touch-icon" href="/ui/images/spoder.png" />
+	<link rel="stylesheet" href="ui/index.css" />
+	<style>
+		body {
+			overflow: auto;
+			background: var(--bg, #f7f2e7);
+			color: var(--text, #3a3326);
+			margin: 0;
+			padding: 1.5rem;
+			font-family: "Heliotrope", "PingFang SC", "Microsoft YaHei", sans-serif;
+			line-height: 1.6;
+		}
+		.Collection {
+			max-width: 68em;
+			margin: 0 auto;
+		}
+		.Collection-top {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 0.6rem;
+			margin-bottom: 0.5rem;
+		}
+		.Collection-bonus {
+			margin-top: 0.6rem;
+			padding: 0.9rem 1rem;
+			border: 1px dashed rgba(122, 99, 60, 0.35);
+			border-radius: 10px;
+			background: rgba(17, 111, 84, 0.06);
+		}
+		.Collection-bonusLine {
+			margin: 0.3rem 0;
+			color: #d8c9a3;
+			line-height: 1.5;
+		}
+		.Collection-top h1 {
+			margin: 0;
+			font-size: 1.6rem;
+		}
+		.Collection-nav {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 0.4rem;
+			margin: 1rem 0 1.5rem;
+			padding: 0;
+			list-style: none;
+		}
+		.Collection-nav a {
+			color: var(--teal, #116f54);
+			text-decoration: none;
+			border: 1px solid rgba(17, 111, 84, 0.5);
+			border-radius: 999px;
+			padding: 0.2rem 0.8rem;
+			font-size: 0.9em;
+		}
+		.Collection-nav a:hover {
+			background: rgba(17, 111, 84, 0.2);
+		}
+		.Collection-section {
+			margin: 2.2rem 0 0.8rem;
+			border-bottom: 1px solid rgba(122, 99, 60, 0.18);
+			padding-bottom: 0.4rem;
+			scroll-margin-top: 1rem;
+		}
+		.Collection-section small {
+			color: var(--color-content-2, #8a7a5f);
+			font-weight: normal;
+			font-size: 0.85em;
+		}
+		.Grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(15em, 1fr));
+			gap: 0.8rem;
+			margin-bottom: 1.5rem;
+		}
+		.LoreCard {
+			background: #fffdf6;
+			border: 1px solid rgba(122, 99, 60, 0.22);
+			border-radius: 8px;
+			padding: 0.7rem 0.9rem;
+			font-size: 0.9em;
+		}
+		.LoreCard h3 {
+			margin: 0 0 0.25rem;
+			font-size: 1.05em;
+			color: var(--teal, #116f54);
+		}
+		.LoreCard h3 small {
+			color: var(--color-content-2, #8a7a5f);
+			font-size: 0.75em;
+			font-weight: normal;
+			margin-left: 0.4em;
+		}
+		.LoreCard .SourceBadge {
+			display: inline-block;
+			font-style: normal;
+			font-size: 0.7em;
+			font-weight: 600;
+			line-height: 1;
+			padding: 0.22em 0.55em;
+			margin-left: 0.45em;
+			border-radius: 999px;
+			vertical-align: 0.18em;
+			letter-spacing: 0.03em;
+		}
+		.LoreCard .SourceBadge.is-official { color: #0d5c46; background: rgba(17, 111, 84, 0.12); border: 1px solid rgba(17, 111, 84, 0.35); }
+		.LoreCard .SourceBadge.is-dubious { color: #8a4b2a; background: rgba(178, 96, 55, 0.12); border: 1px solid rgba(178, 96, 55, 0.4); }
+		.LoreCard .SourceBadge.is-mixed { color: #7a6a3a; background: rgba(170, 145, 60, 0.12); border: 1px solid rgba(170, 145, 60, 0.4); }
+		.LoreCard .SourceBadge.is-fan { color: #7a5c33; background: rgba(213, 178, 122, 0.16); border: 1px solid rgba(213, 178, 122, 0.45); }
+.LoreCard .SourceBadge.owned { color: #0d5c46; background: rgba(17, 111, 84, 0.12); border: 1px solid rgba(17, 111, 84, 0.35); }
+		.LoreCard .LockBadge, .LockBadge {
+			display: inline-block;
+			font-size: 0.68em;
+			font-weight: 600;
+			line-height: 1;
+			padding: 0.24em 0.6em;
+			margin: 0 0 0.4em;
+			border-radius: 999px;
+			color: #9a8a6f;
+			background: rgba(122, 99, 60, 0.1);
+			border: 1px solid rgba(122, 99, 60, 0.3);
+			letter-spacing: 0.05em;
+		}
+		.LoreCard.is-locked {
+			background: rgba(255, 253, 246, 0.55);
+			border-style: dashed;
+			opacity: 0.88;
+		}
+		.LoreCard.is-locked h3 { color: #9a8a6f; }
+		.EndingCard.is-unlocked { border-color: rgba(170, 145, 60, 0.45); background: linear-gradient(180deg, rgba(232, 163, 61, 0.07), rgba(255, 253, 246, 0.9)); }
+		.EndingCard.is-unlocked h3 { color: #9a6a1f; }
+.Collection-hint { color: var(--muted, #6b7a72); font-size: 0.85em; margin: 0 0 0.8rem; max-width: 60rem; }
+		.LoreCard p {
+			margin: 0.15em 0;
+		}
+		.LoreCard .Tag {
+			display: inline-block;
+			font-size: 0.75em;
+			color: #116f54;
+			border: 1px solid rgba(17, 111, 84, 0.45);
+			border-radius: 4px;
+			padding: 0 0.35em;
+			margin: 0 0.3em 0.2em 0;
+			background: rgba(17, 111, 84, 0.06);
+		}
+		.LoreCard .Summary {
+			color: var(--color-content-2, #8a7a5f);
+			font-size: 0.9em;
+		}
+		.LoreCard.is-expandable { cursor: pointer; transition: box-shadow 0.15s ease, border-color 0.15s ease; }
+		.LoreCard.is-expandable:hover { border-color: rgba(17, 111, 84, 0.45); box-shadow: 0 2px 8px rgba(17, 111, 84, 0.08); }
+		.LoreCard.is-expandable.is-open { border-color: rgba(17, 111, 84, 0.55); background: #fbfcf4; }
+		.LoreCard .ExpandHint {
+			display: inline-block;
+			font-style: normal;
+			font-size: 0.7em;
+			font-weight: 600;
+			line-height: 1;
+			padding: 0.22em 0.5em;
+			margin-left: 0.45em;
+			border-radius: 999px;
+			color: #116f54;
+			background: rgba(17, 111, 84, 0.1);
+			border: 1px solid rgba(17, 111, 84, 0.3);
+			vertical-align: 0.18em;
+			letter-spacing: 0.03em;
+		}
+		.LoreCard .LoreDetail {
+			display: none;
+			margin: 0.5rem 0 0.15rem;
+			padding: 0.5rem 0.6rem;
+			border-left: 3px solid rgba(17, 111, 84, 0.4);
+			background: rgba(17, 111, 84, 0.05);
+			border-radius: 0 6px 6px 0;
+			color: var(--color-content-2, #6b5a3f);
+			font-size: 0.88em;
+			line-height: 1.65;
+		}
+		.LoreCard.is-open .LoreDetail { display: block; }
+		.LoreCard .Portrait {
+			width: 100%;
+			height: 11em;
+			object-fit: cover;
+			object-position: top center;
+			border-radius: 6px;
+			margin-bottom: 0.5rem;
+			display: block;
+			background: rgba(0, 0, 0, 0.3);
+		}
+		.Cards--grid .Card {
+			font-size: 0.85em;
+		}
+		.LyricsBox {
+			margin-top: 0.4rem;
+			border-top: 1px dashed rgba(207, 195, 178, 0.2);
+			padding-top: 0.35rem;
+		}
+		.EventsBox {
+			margin-top: 0.4rem;
+			border-top: 1px dashed rgba(207, 195, 178, 0.2);
+			padding-top: 0.3rem;
+		}
+		.EventsBox summary {
+			cursor: pointer;
+			color: var(--teal, #116f54);
+			font-size: 0.85em;
+			user-select: none;
+			list-style: none;
+		}
+		.EventsBox summary::before {
+			content: "▸ ";
+			color: var(--teal, #116f54);
+		}
+		.EventsBox[open] summary::before {
+			content: "▾ ";
+		}
+		.EventList {
+			margin: 0.35rem 0 0;
+			padding-left: 1.15rem;
+			color: var(--color-content-2, #8a7a5f);
+			font-size: 0.85em;
+			line-height: 1.5;
+			max-height: 13em;
+			overflow: auto;
+		}
+		.EventList li {
+			margin: 0.1em 0;
+		}
+		.LyricsBox summary {
+			cursor: pointer;
+			color: var(--teal, #116f54);
+			font-size: 0.85em;
+			user-select: none;
+		}
+		.LyricsBox pre {
+			white-space: pre-wrap;
+			word-break: break-word;
+			font-family: inherit;
+			font-size: 0.82em;
+			line-height: 1.55;
+			color: var(--color-content-2, #8a7a5f);
+			background: rgba(0, 0, 0, 0.3);
+			border-radius: 6px;
+			padding: 0.5rem 0.6rem;
+			margin: 0.4rem 0 0;
+			max-height: 16em;
+			overflow: auto;
+		}
+	</style>
+  <script src="/design-system/game-nav.js" defer></script>
+</head>
+
+<body>
+	<div id="Collection"></div>
+	<script type="module">
+import {initializeSharedProgress} from './game/shared-progress.js';
+await initializeSharedProgress();
+		import {html, render, Component} from './web_modules/htm/preact/standalone.module.js'
+		import cards from './content/cards.js'
+		import {Card} from './ui/cards.js'
+		import {
+			characters,
+			locations,
+			organizations,
+			artifacts,
+			abilitySystems,
+			dualSkills,
+			spiritLifecycle,
+		} from './content/worldview-data.js'
+		import {skillCategories} from './content/skills-data.js'
+		import {abilityBranches} from './content/ability-branches.js'
+		import {extraCharacters} from './content/characters-full.js'
+		import {characterEvents, characterEventStats, eventsForCharacter} from './content/character-events.js'
+		import {characterProfiles, profileStats, profileFor} from './content/character-profiles.js'
+		import {relations, relationTypes} from './content/relations-data.js'
+		import {easyMonsters, monsters, elites, bosses, MONSTER_REGIONS} from './content/dungeon-encounters.js'
+		import {enemyProfiles, enemyProfileByName} from './content/enemy-profiles.js'
+		import {spiritSpacePool} from './content/spirit-spaces.js'
+		import {lingzhiSpaces} from './content/lingzhi-spaces.js'
+		import {golems} from './content/golem-craft.js'
+		import {branchMembers, organizationMembers, orgStats, branchStats, totalBranchMembers} from './content/organization-members.js'
+		import {worldviewEventPool} from './content/worldview-events.js'
+		import {elementMasteries, ELEMENTS, SHENG, KE} from './content/element-mastery.js'
+		import {realms, treasures} from './content/cultivation.js'
+		import {SOUL_REALMS} from './content/soul-legacy.js'
+		import {bonds} from './content/bonds.js'
+		import {timelineEras, characterStorylines, timelineStats, timelineV2, timelineV2Stats} from './content/timeline-data.js'
+		import {REGION_ECHOES, timelineEchoStats} from './content/timeline-echoes.js'
+		import {episodeChapters, episodeList, episodeStats} from './content/episodes-data.js'
+		import {appearancesForCharacter, appearanceStats} from './content/episode-appearances.js'
+		import {characterSources, sourceSiteOrder, sourcesStats} from './content/sources-data.js'
+		import {characterImages, characterImageCount} from './content/character-images.js'
+		import {musicList, musicStats} from './content/music-data.js'
+		import {seriesWorks, staffList, worksStats} from './content/works-data.js'
+		import {lxzChapters, lxzEpisodeList, lxzStats} from './content/lxz-chapters.js'
+		import {lxzEventPool, lxzEventStats} from './content/lxz-events.js'
+		import {articles, articleStats, articleByName} from './content/articles-data.js'
+		import {ocCharacter, ocAbilities, ocArtifacts, ocCards, ocSpiritSpaces, ocEvents, ocEggFacts, ocStats} from './content/oc-rainbow.js'
+		import {lingzhiCharacters, lingzhiCards, lingzhiRelics} from './content/lingzhi-xiuxing.js'
+		import {loadProgress} from './game/lingzhi-progress.js'
+		import {getCollection, getProgress, isCollected, resetCollection} from './content/collection-progress.js'
+		import {currentCollectionBonus} from './content/collection-bonus.js'
+		// 轮回结局图鉴：跨局解锁记录（content/endings.js）
+		import {ENDINGS, getUnlockedEndings, unlockedEndingCount} from './content/endings.js'
+
+		const LoreCard = ({title, subtitle, tags, lines, summary, image, locked, badge, detail, children}) => html`
+			<article class=${`LoreCard${locked ? ' is-locked' : ''}${detail ? ' is-expandable' : ''}`} onclick=${detail ? (e) => e.currentTarget.classList.toggle('is-open') : null}>
+				${locked ? html`<span class="LockBadge">未收录</span>` : ''}
+				${image ? html`<img class="Portrait" src=${image} alt=${title} loading="lazy" />` : ''}
+				<h3>${title}${subtitle ? html`<small>${subtitle}</small>` : ''}${badge ? html`<em class="SourceBadge ${badge.cls}">${badge.text}</em>` : ''}${detail ? html`<em class="ExpandHint">展开设定</em>` : ''}</h3>
+				${tags && tags.length
+					? html`<p>${tags.map((tag) => html`<span class="Tag">${tag}</span>`)}</p>`
+					: ''}
+				${lines && lines.length ? lines.map((line) => html`<p>${line}</p>`) : ''}
+				${summary ? html`<p class="Summary">${summary}</p>` : ''}
+				${detail ? html`<p class="LoreDetail">${detail}</p>` : ''}
+				${children || ''}
+			</article>
+		`
+
+		// —— 收集进度组件 ——
+		const ProgressBar = ({ratio}) => html`<div class="ProgressBar"><div class="ProgressBar-fill" style="width:${Math.round(Math.max(0, Math.min(1, ratio)) * 100)}%"></div></div>`
+
+		const CollectionProgress = () => {
+			const enemyTotal = [...new Set([...Object.values(easyMonsters), ...Object.values(monsters), ...Object.values(elites), ...Object.values(bosses)].flatMap((r) => r.monsters?.map((m) => m.name) || []).filter(Boolean))].length
+			const stats = [
+				['卡牌', 'cards', cards.length],
+				['角色', 'characters', characters.length + extraCharacters.length],
+				['地点', 'locations', locations.length],
+				['法宝', 'artifacts', artifacts.length],
+				['敌人', 'enemies', enemyTotal],
+				['灵质空间', 'spaces', spiritSpacePool.length + lingzhiSpaces.length],
+				['事件', 'events', worldviewEventPool.length],
+				['灵偶', 'golems', golems.length],
+				['剧集', 'stories', episodeList.length],
+				['羁绊', 'bonds', bonds.length],
+				['词条', 'articles', articleStats.total],
+				['灵质修行', 'lingzhi', lingzhiCharacters.length + lingzhiCards.length + lingzhiRelics.length],
+				['幕后', 'staff', staffList.length],
+			]
+			const lzCollectedCount = (() => {
+				const lzp = loadProgress()
+				return lzp.unlockedCharacters.length + lzp.unlockedCards.length + lzp.unlockedRelics.length
+			})()
+			const items = stats.map(([label, type, total]) => {
+				const p = type === 'lingzhi' ? {collected: Math.min(lzCollectedCount, total), total, ratio: total ? Math.min(lzCollectedCount / total, 1) : 0} : getProgress(type, total)
+				return html`<div class="ProgressItem">
+					<div class="ProgressItem-head"><b>${label}</b><span>${p.collected} / ${total}</span></div>
+					<${ProgressBar} ratio=${p.ratio} />
+				</div>`
+			})
+			const collectedSum = stats.reduce((s, [, type]) => s + (type === 'lingzhi' ? lzCollectedCount : getCollection()[type].length), 0)
+			const totalSum = stats.reduce((s, [, , total]) => s + total, 0)
+			const cb = currentCollectionBonus()
+			const bonusLine = cb.tier
+				? `当前档位「${cb.tier.name}」—— ${cb.tier.desc}`
+				: `尚未入门：收录 ${cb.next ? cb.next.threshold : 10} 条见闻后开启灵藏第一档`
+			const bonusTotal = cb.total && Object.keys(cb.total).length
+				? `生命+${cb.total.maxHealth || 0} · 机缘+${cb.total.fortune || 0} · 道心+${cb.total.daoHeart || 0}`
+				: '暂无跨局加成'
+			const bonusNext = cb.next
+				? html`<div class="ProgressItem"><div class="ProgressItem-head"><b>距「${cb.next.name}」</b><span>还需 ${Math.max(0, cb.next.threshold - cb.count)} 条见闻</span></div><${ProgressBar} ratio=${Math.min(1, cb.count / cb.next.threshold)} /></div>`
+				: ''
+			return html`
+				<div class="Collection-total">
+					已收录 ${collectedSum} / ${totalSum}（${Math.round((totalSum ? collectedSum / totalSum : 0) * 100)}%）· 在爬塔中遇见敌人、事件、灵质空间、剧情与法宝即可解锁对应图鉴条目
+					<button class="ResetButton" onclick=${() => { if (confirm('确定清空全部收集记录？')) { resetCollection(); location.reload() } }}>重置收集</button>
+				</div>
+				<div class="Collection-progress">${items}</div>
+				<div class="Collection-bonus">
+					<h3 class="Collection-section" id="collection-bonus">万灵归藏 · 灵藏档位 <small>累计见闻 ${cb.count} 条 · 跨局生效</small></h3>
+					<p class="Collection-bonusLine">${bonusLine}</p>
+					<p class="Collection-bonusLine">跨局加成：${bonusTotal}</p>
+					${bonusNext}
+				</div>
+			`
+		}
+
+		const CardsSection = () => {
+			const p = getProgress('cards', cards.length)
+			return html`
+				<section>
+					<h2 class="Collection-section" id="cards">卡牌图鉴 <small>${cards.length} 张 · 已收录 ${p.collected}/${p.total}</small></h2>
+					<div class="Cards Cards--grid">
+						${cards.map((card) => {
+							const el = Card(card)
+							return isCollected('cards', card.name) ? el : html`<div style="position:relative;opacity:0.5;filter:grayscale(0.7)"><span class="LockBadge">未收录</span>${el}</div>`
+						})}
+					</div>
+				</section>
+			`
+		}
+
+		const CharacterCards = (list) =>
+			list.map(
+				(c) => {
+					const prof = profileFor(c.name)
+					return html`<${LoreCard}
+					title=${c.name}
+					subtitle=${c.aliases && c.aliases.length ? c.aliases.join(' / ') : ''}
+					tags=${[c.species, c.affiliation].filter(Boolean)}
+					lines=${[
+						c.abilities ? html`<strong>能力：</strong>${c.abilities}` : null,
+						prof?.identity ? html`<strong>身份：</strong>${prof.identity}` : null,
+						prof?.personality ? html`<strong>性格：</strong>${prof.personality}` : null,
+						prof?.appearance ? html`<strong>外貌：</strong>${prof.appearance}` : null,
+						prof?.voice ? html`<strong>声优：</strong>${prof.voice}` : null,
+						html`${SkillDetails(c.name)}`,
+						html`${EventTimeline(c.name)}`,
+						html`${Appearances(c.name)}`,
+						html`${SourceRefs(c.name)}`,
+					].filter(Boolean)}
+					summary=${c.summary}
+					image=${characterImages[c.name] || ''}
+					locked=${!isCollected('characters', c.name)}
+				/>`
+				}
+			)
+
+		// 技能明细：命中 skills-data.js 技能大全的角色，卡片内展示可折叠技能清单（名称/描述/来源）
+		const SkillDetails = (name) => {
+			const found = []
+			const norm = (s) => (s || '').replace(/[（(].*?[）)]/g, '').trim()
+			const seen = new Set()
+			for (const cat of skillCategories) {
+				for (const sk of cat.skills || []) {
+					const hs = sk.holders || []
+					if (!(hs.includes(name) || hs.some((h) => norm(h) === norm(name)))) continue
+					if (seen.has(sk.name)) continue
+					seen.add(sk.name)
+					found.push({cat: cat.name, ...sk})
+				}
+			}
+			if (!found.length) return ''
+			return html`<details class="EventsBox">
+				<summary>技能明细（${found.length} 条）</summary>
+				<ul class="EventList">
+					${found.map(
+						(f) => html`<li><strong>${f.name}</strong>${f.desc ? ` — ${f.desc}` : ''}${f.source ? html` <em style="color: var(--color-content-2, #8a7a5f); font-style: normal; font-size: 0.85em">· ${f.source}</em>` : ''}</li>`
+					)}
+				</ul>
+			</details>`
+		}
+
+		// 技能联动角色数：角色图鉴标题统计用
+		const SKILL_HIT_COUNT = (() => {
+			const norm = (s) => (s || '').replace(/[（(].*?[）)]/g, '').trim()
+			let n = 0
+			for (const c of [...characters, ...extraCharacters]) {
+				const hit = skillCategories.some((cat) =>
+					(cat.skills || []).some((sk) => {
+						const hs = sk.holders || []
+						return hs.includes(c.name) || hs.some((h) => norm(h) === norm(c.name))
+					})
+				)
+				if (hit) n++
+			}
+			return n
+		})()
+
+		// 角色生平大事记：命中 character-events.js 的角色在卡片内展示可折叠时间线
+		const EventTimeline = (name) => {
+			const events = eventsForCharacter(name)
+			if (!events || !events.length) return ''
+			return html`<details class="EventsBox" open>
+				<summary>生平大事记（${events.length} 条）</summary>
+				<ol class="EventList">
+					${events.map((e) => html`<li>${e}</li>`)}
+				</ol>
+			</details>`
+		}
+
+		// 角色登场记录：命中 episode-appearances.js 的角色展示可折叠集数列表（反向视图，来源 episode_characters 表）
+		const Appearances = (name) => {
+			const list = appearancesForCharacter(name)
+			if (!list || !list.length) return ''
+			return html`<details class="EventsBox">
+				<summary>登场记录（${list.length} 集）</summary>
+				<ul class="EventList">
+					${list.map((a) => html`<li>CAT.${a.num}${a.title ? ` — ${a.title}` : ''}</li>`)}
+				</ul>
+			</details>`
+		}
+
+		// 考据来源：命中 sources-data.js 的角色展示资料出处站点分布（来源 worldview_luoxiaohei_v4.db 的 character_sources 表，3298 条）
+		const SourceRefs = (name) => {
+			const src = characterSources[name]
+			if (!src || !src.total) return ''
+			const sites = sourceSiteOrder
+				.filter((s) => src.sites[s] && s !== '其他')
+				.map((s) => html`<li><strong>${s}</strong> ×${src.sites[s]}</li>`)
+			if (!sites.length) return ''
+			return html`<details class="EventsBox">
+				<summary>考据来源（${src.total} 处 · ${sites.length} 站点）</summary>
+				<ul class="EventList">${sites}</ul>
+			</details>`
+		}
+
+		const CharactersSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="characters">角色图鉴 <small>${characters.length + extraCharacters.length} 位（核心 ${characters.length} + 数据库补充 ${extraCharacters.length}）· 配图 ${characterImageCount} 位 · 技能 ${SKILL_HIT_COUNT} 位 · 生平 ${characterEventStats.total} 条 · 详设档案 ${profileStats.total} 位 · 登场记录 ${appearanceStats.characters} 位 / ${appearanceStats.total} 集次 · 考据来源 ${sourcesStats.totalRows} 条 / ${sourcesStats.characters} 角色</small></h2>
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">核心角色</h3>
+				<div class="Grid">${CharacterCards(characters)}</div>
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">数据库补充角色</h3>
+				<div class="Grid">${CharacterCards(extraCharacters)}</div>
+			</section>
+		`
+
+		const LocationsSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="locations">地点图鉴 <small>${locations.length} 处 · 点击卡片展开详细设定</small></h2>
+				<div class="Grid">
+					${locations.map(
+						(l) => html`<${LoreCard}
+							title=${l.name}
+							subtitle=${l.type}
+							summary=${l.desc}
+							detail=${l.flavor || ''}
+						/>`
+					)}
+				</div>
+			</section>
+		`
+
+		const MembersBox = ({members}) => html`
+			<details class="EventsBox">
+				<summary>成员名单（${members.length} 人）</summary>
+				<ul class="EventList">
+					${members.map((m) => html`<li>${m}</li>`)}
+				</ul>
+			</details>
+		`
+
+		const OrganizationsSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="organizations">组织图鉴 <small>${organizations.length} 个 · 已聚合 ${organizationMembers.length} 个组织 / ${branchMembers.length} 个分馆成员</small></h2>
+				<div class="Grid">
+					${organizationMembers.map(
+						(o) => {
+							const orgCard = organizations.find((x) => x.name === o.org)
+							return html`<${LoreCard}
+								title=${o.org}
+								tags=${orgCard && orgCard.branches ? orgCard.branches : []}
+								summary=${orgCard ? orgCard.desc : `与 ${o.keywords.join('、')} 相关的组织成员`}
+								lines=${[`已聚合成员 ${o.members.length} 人`]}
+							><${MembersBox} members=${o.members} /></${LoreCard}>`
+						}
+					)}
+				</div>
+				<h3 style="color: var(--teal, #116f54); margin: 0.8rem 0 0.3rem">妖灵会馆 · 分馆成员分布
+					<small style="color: var(--color-content-2, #8a7a5f); font-weight: normal; font-size: 0.8em">共 ${totalBranchMembers} 人次</small>
+				</h3>
+				<div class="Grid">
+					${branchMembers.map(
+						(b) => html`<${LoreCard}
+							title=${b.branch}
+							subtitle="分馆"
+							lines=${[`成员 ${b.members.length} 人`]}
+						><${MembersBox} members=${b.members} /></${LoreCard}>`
+					)}
+				</div>
+			</section>
+		`
+
+		const ArtifactsSection = () => {
+			const p = getProgress('artifacts', artifacts.length)
+			return html`
+				<section>
+					<h2 class="Collection-section" id="artifacts">法宝图鉴 <small>${artifacts.length} 件 · 已收录 ${p.collected}/${p.total}</small></h2>
+					<div class="Grid">
+						${artifacts.map(
+							(a) => html`<${LoreCard}
+								title=${a.name}
+								subtitle=${a.holder}
+								summary=${a.desc}
+								locked=${!isCollected('artifacts', a.name)}
+							/>`
+						)}
+					</div>
+				</section>
+			`
+		}
+
+		const AbilitySection = () => html`
+			<section>
+				<h2 class="Collection-section" id="abilities">能力体系 <small>${abilitySystems.length} 系</small></h2>
+				<div class="Grid">
+					${abilitySystems.map(
+						(a) => html`<${LoreCard}
+							title=${a.name}
+							tags=${a.element || []}
+							summary=${a.desc}
+						/>`
+					)}
+					${dualSkills.map(
+						(d) => html`<${LoreCard}
+							title=${d.name}
+							subtitle="双系合技"
+							summary=${d.desc}
+						/>`
+					)}
+					${abilityBranches.map(
+						(b) => html`<${LoreCard}
+							title=${b.name}
+							subtitle=${b.dualSkill ? `灵质天赋 · 觉醒合技「${b.dualSkill}」` : '灵质天赋'}
+							tags=${[b.title, b.element].filter(Boolean)}
+							summary=${`${b.flavor} 被动：${Object.entries(b.passive).map(([k, v]) => `${k} +${v}`).join('、') || '无'}；开局卡「${b.starterCard}」${b.starterTreasure ? `；开局法宝「${b.starterTreasure}」` : ''}；代表：${b.representative}`}
+						/>`
+					)}
+				</div>
+			</section>
+		`
+
+
+		const SkillsSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="skills">技能图鉴 <small>${skillCategories.reduce((n, c) => n + c.skills.length, 0)} 项 · 按系别归类</small></h2>
+				${skillCategories.map(
+					(cat) => html`
+						<h3 style="color: var(--teal, #116f54); margin: 0.8rem 0 0.3rem">${cat.name}
+							<small style="color: var(--color-content-2, #8a7a5f); font-weight: normal; font-size: 0.8em">${cat.skills.length} 项</small>
+						</h3>
+						<div class="Grid">
+							${cat.skills.map(
+								(s) => html`<${LoreCard}
+									title=${s.name}
+									badge=${s.source === '官方' ? {text: '官方', cls: 'is-official'} : s.source === '待核实' ? {text: '待核实', cls: 'is-dubious'} : s.source === '同人' ? {text: '同人', cls: 'is-fan'} : {text: '官方/待核实', cls: 'is-mixed'}}
+									tags=${s.holders.length > 6 ? s.holders.slice(0, 6).concat('等' + s.holders.length + '人') : s.holders}
+									summary=${s.desc || `持有者：${s.holders.join('、')}`}
+								/>`
+							)}
+						</div>
+					`
+				)}
+			</section>
+		`
+
+		const SpiritCard = ({s}) => {
+			const paras = (t) => (t || '').split('\n').filter(Boolean)
+			return html`
+				<article class="LoreCard">
+					<h3>${s.term}<small>${s.category}</small></h3>
+					${s.definition ? html`<p class="Summary">${s.definition}</p>` : ''}
+					${s.detailed ? paras(s.detailed).map((line) => html`<p>${line}</p>`) : ''}
+					${s.related && s.related.length ? html`<p>${s.related.map((tag) => html`<span class="Tag">${tag}</span>`)}</p>` : ''}
+					${s.source ? html`<p class="Summary" style="color:var(--teal,#116f54)">出处：${s.source}</p>` : ''}
+					${s.animation ? html`
+						<details style="margin-top:0.4rem"><summary style="cursor:pointer;color:var(--teal,#116f54);font-size:0.85em">特效与视觉设计规范</summary>
+							<div style="margin-top:0.4rem">${paras(s.animation).map((line) => html`<p>${line}</p>`)}</div>
+						</details>
+					` : ''}
+				</article>
+			`
+		}
+
+		const SpiritSection = () => {
+			const groups = {}
+			spiritLifecycle.forEach((s) => {
+				;(groups[s.category] = groups[s.category] || []).push(s)
+			})
+			return html`
+				<section>
+					<h2 class="Collection-section" id="spirit">灵质循环概念 <small>${spiritLifecycle.length} 条 · ${Object.keys(groups).length} 类 · 详设全收录（含特效规范）</small></h2>
+					${Object.entries(groups).map(
+						([category, items]) => html`
+							<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">${category}</h3>
+							<div class="Grid">
+								${items.map((s) => html`<${SpiritCard} s=${s} />`)}
+							</div>
+						`
+					)}
+				</section>
+			`
+		}
+
+		const ArticlesSection = () => {
+			const groups = {}
+			articles.forEach((a) => {
+				;(groups[a.category] = groups[a.category] || []).push(a)
+			})
+			const p = getProgress('articles', articleStats.total)
+			return html`
+				<section>
+					<h2 class="Collection-section" id="articles">世界观词条 <small>${articleStats.total} 条 · 已收录 ${p.collected}/${p.total} · ${articleStats.categories} 类 · 关联法宝 ${articleStats.withTreasure} · 关联卡牌 ${articleStats.withCard} · 关联概念 ${articleStats.withTerm}</small></h2>
+					<p class="Collection-hint">法宝/卡牌词条：获得对应物品后自动收录；概念法则词条：每次探索灵质空间会随机洞悉一条。词条与法宝/卡牌/概念一一印证，是理解「重生之门」世界观的关键。</p>
+					${Object.entries(groups).map(
+						([category, items]) => html`
+							<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">${category}</h3>
+							<div class="Grid">
+								${items.map(
+									(a) => {
+										const collected = isCollected('articles', a.name)
+										return html`<${LoreCard}
+											title=${a.name}
+											subtitle=${a.category}
+											summary=${a.description}
+											locked=${!collected}
+											badge=${collected ? {text: '已收录', cls: 'owned'} : null}
+											tags=${[
+												...(a.tags || []),
+												...(a.relatedTreasure ? ['宝·' + a.relatedTreasure] : []),
+												...(a.relatedCard ? ['卡·' + a.relatedCard] : []),
+												...(a.relatedTerm ? ['念·' + a.relatedTerm] : []),
+											]}
+										/>`
+									}
+								)}
+							</div>
+						`
+					)}
+				</section>
+			`
+		}
+
+		const RelationCard = ({r}) => {
+			const typeColor =
+				r.type === '师门'
+					? 'var(--yellow, #ffc107)'
+					: r.type === '羁绊'
+						? 'var(--teal, #116f54)'
+						: r.type === '恩怨'
+							? '#e06c5b'
+							: 'var(--color-content-2, #cfc3b2)'
+			return html`
+				<article class="LoreCard">
+					<h3>
+						${r.a}
+						<span style="color: ${typeColor}; font-weight: normal">↔</span>
+						${r.b}
+						<small>${r.type}</small>
+					</h3>
+					${r.desc ? html`<p>${r.desc}</p>` : ''}
+				</article>
+			`
+		}
+
+
+		const summarizeIntents = (intents) => {
+			if (!Array.isArray(intents) || !intents.length) return ''
+			return intents
+				.slice(0, 6)
+				.map((i) => {
+					if (i.damage) return `攻${i.damage}`
+					if (i.block) return `守${i.block}`
+					if (i.regen) return `愈${i.regen}`
+					if (i.weak) return `弱${i.weak}`
+					if (i.vulnerable) return `易${i.vulnerable}`
+					if (i.strength) return `力${i.strength}`
+					if (i.buff) return '增'
+					if (i.debuff) return '减'
+					return '?'
+				})
+				.join(' ')
+		}
+
+		// 怪物出没区域标签：根据 MONSTER_REGIONS 反查怪物所属世界观区域，
+		// 未登记区域的怪物视为全域可出（与 dungeon.js 的区域抽取回退逻辑一致）。
+		const REGION_LABELS = {
+			longyou: '龙游',
+			lidao: '离岛',
+			beiyu: '北域',
+			laojunge: '老君阁',
+			huiguan: '苍南会馆',
+		}
+		const regionsForMonster = (name) => {
+			const hits = []
+			for (const [region, names] of Object.entries(MONSTER_REGIONS)) {
+				if (names.includes(name)) hits.push(region)
+			}
+			return hits.length ? [...new Set(hits)] : null // null = 全域
+		}
+
+		const EnemyCard = ([roomKey, room]) => {
+			const firstProfile = enemyProfileByName(room.monsters?.[0]?.name)
+			const roomRegions = [
+				...new Set(
+					room.monsters.flatMap((m) => {
+						const rs = regionsForMonster(m.name)
+						return rs ? rs.map((r) => REGION_LABELS[r] || r) : []
+					})
+				),
+			]
+			const regionTag = roomRegions.length
+				? `出没·${roomRegions.join('/')}`
+				: '出没·全域'
+			return html`
+				<${LoreCard}
+					title=${roomKey}
+					subtitle=${room.monsters.length > 1 ? `群战 ${room.monsters.length} 只` : '单敌'}
+					tags=${[
+						firstProfile?.affiliation ? firstProfile.affiliation : null,
+						firstProfile?.species ? firstProfile.species : null,
+						regionTag,
+						room.monsters.some((m) => m.phase2) ? '半血转段' : null,
+					].filter(Boolean)}
+					lines=${room.monsters.map(
+						(m) => {
+							const prof = enemyProfileByName(m.name)
+							return html`<p><strong>${m.name}</strong> · 生命 ${m.currentHealth ?? m.hp ?? '?'}${m.phase2 ? ' · 转段' : ''}<br/><span class="Summary">意图：${summarizeIntents(m.intents)}</span>${prof?.desc ? html`<br/><span class="Summary">${prof.desc}</span>` : ''}</p>`
+						}
+					)}
+					locked=${!room.monsters.some((m) => isCollected('enemies', m.name))}
+				/>
+			`
+		}
+
+		const EnemiesSection = () => {
+			const groups = [
+				['小妖（前段）', easyMonsters],
+				['中段妖众', monsters],
+				['精英', elites],
+				['守门首领', bosses],
+			]
+			const total = groups.reduce((n, [, g]) => n + Object.keys(g).length, 0)
+			const enemyNames = groups.flatMap(([, g]) => Object.values(g).flatMap((r) => r.monsters?.map((m) => m.name) || []))
+			const uniqueNames = [...new Set(enemyNames.filter(Boolean))]
+			const collectedCount = uniqueNames.filter((n) => isCollected('enemies', n)).length
+			return html`
+				<section>
+					<h2 class="Collection-section" id="enemies">敌人图鉴 <small>${total} 组 · 已收录 ${collectedCount}/${uniqueNames.length} 种</small></h2>
+					${groups.map(
+						([label, g]) => {
+							const rooms = Object.entries(g)
+							return rooms.length
+								? html`<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">${label}</h3><div class="Grid">${rooms.map((room) => EnemyCard(room))}</div>`
+								: ''
+						}
+					)}
+				</section>
+			`
+		}
+
+		const SpiritSpacesSection = () => {
+			const totalSpaces = spiritSpacePool.length + lingzhiSpaces.length
+			const p = getProgress('spaces', totalSpaces)
+			return html`
+				<section>
+					<h2 class="Collection-section" id="spaces">灵质空间图鉴 <small>${totalSpaces} 处 · 已收录 ${p.collected}/${p.total}</small></h2>
+					<div class="Grid">
+						${spiritSpacePool.map(
+							(s) => html`<${LoreCard}
+								title=${s.name}
+								subtitle=${s.owner || ''}
+								tags=${s.theme ? [s.theme] : []}
+								lines=${[
+									s.desc ? html`<p>${s.desc}</p>` : null,
+									s.choices ? html`<p class="Summary">抉择：${[s.choices.left, s.choices.center, s.choices.right].filter(Boolean).map((c) => c.text).join(' / ')}</p>` : null,
+								].filter(Boolean)}
+								locked=${!isCollected('spaces', s.name)}
+							/>`
+						)}
+					</div>
+					<h3 class="Collection-section">灵质修行空间 <small>${lingzhiSpaces.length} 处 · 灵质修行中进入后收录</small></h3>
+					<div class="Grid">
+						${lingzhiSpaces.map(
+							(s) => html`<${LoreCard}
+								title=${s.name}
+								subtitle=${s.owner || ''}
+								tags=${s.theme ? [s.theme] : []}
+								lines=${[
+									s.desc ? html`<p>${s.desc}</p>` : null,
+									s.options ? html`<p class="Summary">抉择：${s.options.map((o) => o.label).join(' / ')}</p>` : null,
+								].filter(Boolean)}
+								locked=${!isCollected('spaces', s.name)}
+							/>`
+						)}
+					</div>
+				</section>
+			`
+		}
+
+		const EventsSection = () => {
+			const p = getProgress('events', worldviewEventPool.length)
+			return html`
+				<section>
+					<h2 class="Collection-section" id="events">世界观事件图鉴 <small>${worldviewEventPool.length} 起 · 已收录 ${p.collected}/${p.total}</small></h2>
+					<div class="Grid">
+						${worldviewEventPool.map(
+							(e) => html`<${LoreCard}
+								title=${e.title}
+								lines=${e.description ? [html`<p>${e.description}</p>`] : []}
+								tags=${e.choices ? Object.values(e.choices).map((c) => c.text) : []}
+								locked=${!isCollected('events', e.title)}
+							/>`
+						)}
+					</div>
+				</section>
+			`
+		}
+
+		const GolemsSection = () => {
+			const p = getProgress('golems', golems.length)
+			const realmNames = ['初阶造物', '入门造物', '精造灵偶', '类生命造物']
+			return html`
+				<section>
+					<h2 class="Collection-section" id="golems">灵偶图鉴 <small>${golems.length} 只 · 已收录 ${p.collected}/${p.total} · 造物台铸造后解锁</small></h2>
+					<div class="Grid">
+						${golems.map(
+							(g) => html`<${LoreCard}
+								title=${g.name}
+								subtitle=${realmNames[g.realm] || `铸造阶 ${g.realm}`}
+								tags=${[
+									`铸造需求：生灵 ${g.shenglingNeed} · 物质灵 ${g.wuzhiNeed}`,
+									`被动：${g.passiveText || ''}`,
+								]}
+								lines=${[
+									html`<p>${g.desc}</p>`,
+									html`<p class="Summary">设定出处：${g.source || ''}</p>`,
+								].filter(Boolean)}
+								locked=${!isCollected('golems', g.name)}
+							/>`
+						)}
+					</div>
+				</section>
+			`
+		}
+
+		const ElementsSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="elements">五行御灵图鉴 <small>${elementMasteries.length} 系</small></h2>
+				<div class="Grid">
+					${elementMasteries.map(
+						(m) => html`<${LoreCard}
+							title=${m.element + ' · ' + m.title}
+							subtitle=${m.role}
+							tags=${[`相生：${SHENG[m.element] || '-'}`, `相克：${KE[m.element] || '-'}`]}
+							summary=${m.flavor}
+							lines=${m.passive ? [html`<p class="Summary">本命被动：${Object.entries(m.passive).map(([k, v]) => `${k} +${v}`).join('，')}</p>`] : []}
+						/>`
+					)}
+				</div>
+			</section>
+		`
+
+		const CultivationSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="cultivation">修仙境界与魂灵传承 <small>${realms.length} 境 · ${SOUL_REALMS.length} 级 · 法宝 ${Object.keys(treasures).length} 件</small></h2>
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">修仙境界</h3>
+				<div class="Grid">
+					${realms.map(
+						(r, i) => html`<${LoreCard}
+							title=${r.name}
+							subtitle=${r.chapter || ''}
+							summary=${r.desc}
+							lines=${[html`<p class="Summary">第 ${i} 重 · 寿命加成 ${r.lifespanBonus || 0}</p>`]}
+						/>`
+					)}
+				</div>
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">魂灵等级（跨世传承）</h3>
+				<div class="Grid">
+					${SOUL_REALMS.map(
+						(s) => html`<${LoreCard}
+							title=${s.name}
+							subtitle=${s.soul > 0 ? `魂灵 ≥ ${s.soul}` : '初始'}
+							summary=${s.desc}
+						/>`
+					)}
+				</div>
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">传承法宝（魂灵携带）</h3>
+				<div class="Grid">
+					${Object.entries(treasures).map(
+						([tid, t]) => html`<${LoreCard}
+							title=${tid}
+							summary=${t.desc}
+							tags=${t.passive ? Object.entries(t.passive).map(([k, v]) => `${k} +${v}`) : []}
+						/>`
+					)}
+				</div>
+			</section>
+		`
+
+		// 轮回结局图鉴：展示全部结局，未解锁的只露判定条件（content/endings.js）
+		const EndingsSection = () => {
+			const unlocked = getUnlockedEndings()
+			const count = unlockedEndingCount()
+			const fmtTime = (ts) => (ts ? new Date(ts).toLocaleDateString('zh-CN', {year: 'numeric', month: '2-digit', day: '2-digit'}) : '')
+			return html`
+				<section>
+					<h2 class="Collection-section" id="endings">轮回结局图鉴 <small>${ENDINGS.length} 种 · 已解锁 ${count}/${ENDINGS.length} · 通关「重生之门」时按本局道心 / 魂灵种子 / 羁绊 / 境界 / 法宝 / 灵偶 / 化形判定走向</small></h2>
+					<p class="Collection-hint">每一次轮回都是一种重生。换一种活法，再入轮回，去集齐不同的结局——已解锁的结局会永久记录于此。</p>
+					<div class="Grid">
+						${ENDINGS.map((e) => {
+							const rec = unlocked[e.id]
+							const isUnlocked = !!rec
+							return html`<${LoreCard}
+								title=${isUnlocked ? e.name : '？？？'}
+								subtitle=${isUnlocked ? e.subtitle : '未解锁结局'}
+								badge=${isUnlocked ? {text: `已解锁${rec.count > 1 ? ' ×' + rec.count : ''}`, cls: 'owned'} : null}
+								lines=${isUnlocked
+									? [
+											html`<p>${e.desc}</p>`,
+											html`<p class="Summary">判定条件：${e.conditionDesc}</p>`,
+											rec.unlockedAt ? html`<p class="Summary">最近解锁：${fmtTime(rec.unlockedAt)}</p>` : null,
+										].filter(Boolean)
+									: [
+											html`<p class="Summary">达成条件：${e.conditionDesc}</p>`,
+											html`<p class="Summary" style="color: var(--qc-dim, #9a8a6f)">这一世的你尚未走到这里，结局仍是未知数。</p>`,
+										]}
+								locked=${!isUnlocked}
+							/>`
+						})}
+					</div>
+				</section>
+			`
+		}
+
+		const RelationsSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="relations">角色关系网 <small>${relations.length} 条核心关系</small></h2>
+				${relationTypes.map(
+					(type) => html`
+						<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">${type}</h3>
+						<div class="Grid">
+							${relations
+								.filter((r) => r.type === type)
+								.map((r) => html`<${RelationCard} r=${r} />`)}
+						</div>
+					`
+				)}
+			</section>
+		`
+
+		const bondPassiveText = (passive) => {
+			if (!passive) return ''
+			const labels = {
+				atkBonus: '攻击 +',
+				defBonus: '格挡 +',
+				hpRegen: '回复 +',
+				fortune: '福缘 +',
+				maxHealth: '生命 +',
+				daoHeart: '道心 +',
+			}
+			return Object.entries(passive)
+				.map(([k, v]) => `${labels[k] || k}${v}`)
+				.join(' · ')
+		}
+
+		const BondsSection = () => {
+			const p = getProgress('bonds', bonds.length)
+			const groups = {}
+			bonds.forEach((b) => {
+				;(groups[b.type] = groups[b.type] || []).push(b)
+			})
+			return html`
+				<section>
+					<h2 class="Collection-section" id="bonds">羁绊图鉴 <small>${bonds.length} 条 · 已收录 ${p.collected}/${p.total} · 爬塔中通过羁绊事件/灵质空间与角色结缘后解锁</small></h2>
+					${Object.entries(groups).map(
+						([type, items]) => html`
+							<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">${type} <small style="color: var(--color-content-2, #8a7a5f); font-weight: normal; font-size: 0.8em">${items.length} 条</small></h3>
+							<div class="Grid">
+								${items.map(
+									(b) => html`<${LoreCard}
+										title=${b.name}
+										subtitle=${b.partner}
+										tags=${[b.type, bondPassiveText(b.passive)].filter(Boolean)}
+										lines=${[html`<p>${b.desc}</p>`]}
+										summary="结缘后本局永久生效"
+										locked=${!isCollected('bonds', b.name)}
+									/>`
+								)}
+							</div>
+						`
+					)}
+				</section>
+			`
+		}
+
+		const TimelineSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="timeline">纪元年表 <small>${timelineStats.eraCount} 纪元 · ${timelineStats.eventCount} 件大事 · ${timelineStats.storylineCount} 条剧情线</small></h2>
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">官方详实纪年 <small>${timelineV2Stats.count} 条 · 无限纪年法 · 涉及 ${timelineV2Stats.characters.length} 位角色 · 考据自灰机wiki</small></h3>
+				${timelineV2.map(
+					(t) => html`
+						<article class="LoreCard" style="margin-bottom: 0.5rem">
+							<h3>
+								${t.era}
+								${t.related && t.related.length
+									? html`<small style="font-weight: normal; margin-left: 0.5em">${t.related.map((r) => html`<span class="Tag" style="margin-right: 0.3em">${r}</span>`)}</small>`
+									: ''}
+							</h3>
+							<p style="margin: 0.2rem 0 0.2rem">${t.event}</p>
+							${t.desc && t.desc !== t.event ? html`<p class="Summary" style="margin: 0 0 0.2rem">${t.desc}</p>` : ''}
+							${t.source ? html`<em class="SourceBadge source">${t.source}</em>` : ''}
+						</article>
+					`
+				)}
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">纪元大事记</h3>
+				${timelineEras.map(
+					(era) => html`
+						<article class="LoreCard" style="margin-bottom: 0.6rem">
+							<h3>${era.era}</h3>
+							${era.note ? html`<p class="Summary">${era.note}</p>` : ''}
+							<ul style="margin: 0.4rem 0 0; padding-left: 1.2rem; color: var(--color-content-2, #8a7a5f);">
+								${era.events.map((ev) => html`<li>${ev}</li>`)}
+							</ul>
+						</article>
+					`
+				)}
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">角色剧情线 <small>${characterStorylines.length} 位角色</small></h3>
+				<div class="Grid">
+					${characterStorylines.map(
+						(s) => html`<${LoreCard}
+							title=${s.name}
+							lines=${s.events.map((ev) => html`<p>${ev}</p>`)}
+						/>`
+					)}
+				</div>
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">区域纪年回响 <small>${timelineEchoStats.count} 处区域 · 覆盖 ${timelineEchoStats.eras.join(' / ')}</small></h3>
+				<div class="Grid">
+					${REGION_ECHOES.map(
+						(r) => html`<${LoreCard}
+							title=${`${r.regionName} · ${r.era}`}
+							badge=${{text: `入口楼层 ${r.floor}`, cls: 'source'}}
+							lines=${[
+								html`<p class="Summary">${r.note}</p>`,
+								...r.events.map((ev) => html`<p>「${ev}」</p>`),
+								html`<p class="Summary">踏入${r.regionName}时，事件房有几率重历这段纪年，获得修炼/道心或福缘/气血奖励。</p>`,
+							]}
+						/>`
+					)}
+				</div>
+			</section>
+		`
+
+		const EpisodesSection = () => {
+			const p = getProgress('stories', episodeList.length)
+			return html`
+				<section>
+					<h2 class="Collection-section" id="episodes">剧集剧情线 <small>${episodeStats.chapterCount} 篇 · ${episodeStats.total} 集 · 剧情概述 ${episodeStats.withOverview} 集 · 已收录 ${p.collected}/${p.total}</small></h2>
+					${episodeChapters.map(
+						(ch) => html`
+							<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">${ch.name} <small style="font-weight: normal">第 ${ch.range[0]} - ${ch.range[1]} 集 · ${ch.note}</small></h3>
+							<div class="Grid">
+								${episodeList
+									.filter((e) => (ch.name === '番外篇' ? !Number.isInteger(e.num) : Number.isInteger(e.num)))
+									.filter((e) => e.num >= ch.range[0] && e.num <= ch.range[1])
+									.map(
+										(e) => html`<${LoreCard}
+											title=${`第 ${e.num} 集 · ${e.title}`}
+											tags=${e.cast && e.cast.length ? e.cast.slice(0, 6).map((c) => c) : []}
+											lines=${e.overview ? [html`<p class="Summary">${e.overview}</p>`] : [html`<p class="Summary">剧情概述暂缺</p>`]}
+											locked=${!isCollected('stories', `第 ${e.num} 集 · ${e.title}`)}
+										/>`
+									)}
+							</div>
+						`
+					)}
+				</section>
+			`
+		}
+
+		const MusicCard = (m) => html`
+			<article class="LoreCard">
+				<h3>${m.title}<small>${m.artist}</small></h3>
+				${m.usage ? html`<p class="Summary">${m.usage}</p>` : ''}
+				<p>
+					${m.lyricist ? html`<span class="Tag">作词 ${m.lyricist}</span>` : ''}
+					${m.composer ? html`<span class="Tag">作曲 ${m.composer}</span>` : ''}
+					${m.arranger ? html`<span class="Tag">编曲 ${m.arranger}</span>` : ''}
+					${m.album ? html`<span class="Tag">${m.album}</span>` : ''}
+					${m.publisher ? html`<span class="Tag">${m.publisher}</span>` : ''}
+				</p>
+				${m.lyrics
+					? html`
+							<details class="LyricsBox">
+								<summary>查看歌词</summary>
+								<pre>${m.lyrics}</pre>
+							</details>
+						`
+					: ''}
+			</article>
+		`
+
+		const MusicSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="music">音乐图鉴 <small>${musicStats.total} 首 · ${musicStats.withLyrics} 首含歌词 · ${musicStats.artistCount} 位演唱者</small></h2>
+				<div class="Grid">${musicList.map((m) => MusicCard(m))}</div>
+			</section>
+		`
+
+		const WorksSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="works">作品与幕后 <small>${worksStats.workCount} 部作品（TV ${worksStats.tvCount} · 电影 ${worksStats.movieCount}）· 制作人员 ${worksStats.staffCount} 位 · 配音 ${worksStats.voiceCount} 位</small></h2>
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">系列作品</h3>
+				<div class="Grid">
+					${seriesWorks.map(
+						(w) => html`<${LoreCard}
+							title=${w.title}
+							subtitle=${w.aliases && w.aliases.length ? w.aliases.join(' / ') : ''}
+							tags=${[w.type, w.status].filter(Boolean)}
+							lines=${[
+								w.episodes ? html`<p class="Summary">集数：${w.episodes}</p>` : null,
+								w.director ? html`<p class="Summary">导演：${w.director}</p>` : null,
+								w.writer ? html`<p class="Summary">编剧：${w.writer}</p>` : null,
+								w.production ? html`<p class="Summary">制作：${w.production}</p>` : null,
+								html`<p class="Summary">时间：${w.release}</p>`,
+							].filter(Boolean)}
+						/>`
+					)}
+				</div>
+				<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">制作人员</h3>
+				<div class="Grid">
+					${staffList.map(
+						(s) => html`<${LoreCard}
+							title=${s.name}
+							subtitle=${s.aliases && s.aliases.length ? s.aliases.join(' / ') : ''}
+							tags=${[s.role, s.affiliation].filter(Boolean)}
+							badge=${s.voicedRoles && s.voicedRoles.length ? {cls: 'owned', text: '声演 ' + s.voicedRoles.length + ' 角'} : null}
+							lines=${[
+								s.gender ? html`<p class="Summary">${s.gender === '男' ? '♂' : s.gender === '女' ? '♀' : ''} ${s.gender}</p>` : null,
+								s.desc ? html`<p class="Summary">${s.desc}</p>` : null,
+							].filter(Boolean)}
+							children=${s.voicedRoles && s.voicedRoles.length
+								? html`<p class="Summary">声演角色：${s.voicedRoles.map((r) => html`<span class="Tag">${r}</span>`)}</p>`
+								: ''}
+						/>`
+					)}
+				</div>
+			</section>
+		`
+
+		const LxzSection = () => html`
+			<section>
+				<h2 class="Collection-section" id="lxz">蓝溪镇漫画篇章 <small>${lxzStats.chapterCount} 篇 · ${lxzStats.total} 话（${lxzStats.fromDate} 至 ${lxzStats.toDate}）· 共 ${lxzStats.pageTotal} 页</small></h2>
+				${lxzChapters.map(
+					(ch) => html`
+						<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">${ch.name} <small style="font-weight: normal">第 ${ch.range[0]} - ${ch.range[1]} 话 · ${ch.note}</small></h3>
+						<div class="Grid">
+							${lxzEpisodeList
+								.filter((e) => e.num >= ch.range[0] && e.num <= ch.range[1])
+								.map(
+									(e) => html`<${LoreCard}
+										title=${`第 ${e.num} 话 · ${e.title}`}
+										tags=${[e.date, e.platform, e.pages ? `${e.pages} 页` : ''].filter(Boolean)}
+										lines=${[]}
+									/>`
+								)}
+						</div>
+					`
+				)}
+			</section>
+		`
+
+		const LxzEventsSection = () => {
+			const realmNames = ['炼气', '筑基', '金丹', '元婴', '化神']
+			const p = getProgress('events', lxzEventPool.length)
+			return html`
+				<section>
+					<h2 class="Collection-section" id="lxz-events">蓝溪镇篇章剧情事件 <small>${lxzEventStats.total} 起（爬塔事件房可触发）· 已收录 ${p.collected}/${p.total}</small></h2>
+					<div class="Grid">
+						${lxzEventPool.map(
+							(e) => html`<${LoreCard}
+								title=${e.title}
+								subtitle=${realmNames[e.realm] || `境界 ${e.realm}`}
+								lines=${e.description ? [html`<p>${e.description}</p>`] : []}
+								tags=${e.choices ? Object.values(e.choices).map((c) => c.text) : []}
+								locked=${!isCollected('events', e.title)}
+							/>`
+						)}
+					</div>
+				</section>
+			`
+		}
+
+		const OcSection = () => {
+			const realmNames = ['炼气', '筑基', '金丹', '元婴', '化神']
+			return html`
+				<section>
+					<h2 class="Collection-section" id="oc">馆主彩蛋 · 三足乌「虹」 <small>同人原创角色（非官方）· ${ocStats.abilities} 项能力 · ${ocStats.artifacts} 件法宝 · ${ocStats.cards} 张专属卡牌 · ${ocStats.spiritSpaces} 处灵质空间 · ${ocStats.events} 起事件 · ${ocStats.eggFacts} 条隐藏设定</small></h2>
+					<div class="Grid">
+						<${LoreCard}
+							title=${ocCharacter.name}
+							subtitle=${ocCharacter.species}
+							tags=${[`${ocCharacter.gender} · ${ocCharacter.age}岁`, ocCharacter.faction, ...ocCharacter.abilityTags]}
+							lines=${[
+								html`<p class="Summary">身高：${ocCharacter.height} · 所属：${ocCharacter.affiliation} · 食物：${ocCharacter.food}</p>`,
+								html`<p>${ocCharacter.personality}</p>`,
+								html`<p>${ocCharacter.appearance}</p>`,
+								html`<p>${ocCharacter.background}</p>`,
+								html`<p class="Summary">喜欢：${ocCharacter.likes.join('、')} ｜ 讨厌：${ocCharacter.dislikes.join('、')}</p>`,
+							]}
+						/>
+						${ocAbilities.map(
+							(a) => html`<${LoreCard} title=${a.name} subtitle=${a.system} lines=${[html`<p>${a.desc}</p>`]} />`
+						)}
+						${Object.values(ocArtifacts).map(
+							(t) => html`<${LoreCard} title=${t.id} subtitle=${`法宝 · ${t.rarity} 星`} lines=${[html`<p>${t.desc}</p>`]} />`
+						)}
+						${ocCards.map(
+							(c) => html`<${LoreCard}
+								title=${c.name}
+								subtitle=${`专属卡牌 · ${c.element} · ${c.type}`}
+								tags=${[`${c.energy} 费`]}
+								lines=${[html`<p>${c.description}</p>`]}
+							/>`
+						)}
+						${ocSpiritSpaces.map(
+							(s) => html`<${LoreCard}
+								title=${s.name}
+								subtitle=${`灵质空间 · ${s.owner}`}
+								tags=${[s.theme]}
+								lines=${[html`<p>${s.desc}</p>`]}
+							/>`
+						)}
+						${ocEvents.map(
+							(e) => html`<${LoreCard}
+								title=${e.title}
+								subtitle=${realmNames[e.realm] || `境界 ${e.realm}`}
+								tags=${e.choices ? Object.values(e.choices).map((c) => c.text) : []}
+								lines=${[html`<p>${e.description}</p>`]}
+							/>`
+						)}
+					</div>
+					<h3 style="color: var(--teal, #116f54); margin: 0.6rem 0 0.3rem">隐藏设定 · ${ocEggFacts.length} 条彩蛋</h3>
+					<details class="EggBlock">
+						<summary style="cursor: pointer; color: var(--gold, #e8a33d);">点击展开全部彩蛋</summary>
+						<div style="margin-top: 0.6rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.6rem;">
+							${ocEggFacts.map(
+								(f, i) => html`<div class="LoreCard" style="padding: 0.6rem 0.8rem;">
+									<p><strong>${String(i + 1).padStart(2, '0')} · ${f.title}</strong></p>
+									<p class="Summary">${f.content}</p>
+								</div>`
+							)}
+						</div>
+					</details>
+				</section>
+			`
+		}
+
+		const LingzhiSection = () => {
+			const lzProgress = loadProgress()
+			const total = lingzhiCharacters.length + lingzhiCards.length + lingzhiRelics.length
+			const p = getProgress('lingzhi', total)
+			const isUnlocked = (id) =>
+				lzProgress.unlockedCharacters.includes(id) || lzProgress.unlockedCards.includes(id) || lzProgress.unlockedRelics.includes(id)
+			const typeLabel = (t) => ({attack: '攻击', skill: '技能', power: '能力'}[t] || t)
+			return html`
+				<section>
+					<h2 class="Collection-section" id="lingzhi">灵质修行图鉴 <small>${total} 项 · 已收录 ${p.collected}/${p.total} · 在灵质空间修行解锁，解锁后同步登记本图鉴</small></h2>
+					<p class="Collection-bonusLine">残片 ${lzProgress.shards} · 修行 ${lzProgress.runs || 0} 次 · 通关 ${lzProgress.wins || 0} 次 · 已领成就 ${lzProgress.claimedAchievements ? Object.keys(lzProgress.claimedAchievements).length : 0} 个</p>
+					<h3 class="Collection-section">修行角色 <small>${lingzhiCharacters.length} 名</small></h3>
+					<div class="LoreCards">
+						${lingzhiCharacters.map((c) => html`
+							<${LoreCard}
+								title=${c.name}
+								subtitle=${c.passive ? `被动 · ${c.passive.name}` : ''}
+								locked=${!isUnlocked(c.id)}
+								badge=${isUnlocked(c.id) ? {cls: 'owned', text: '已解锁'} : null}
+								lines=${[c.desc]}
+							/>
+						`)}
+					</div>
+					<h3 class="Collection-section">灵术卡 <small>${lingzhiCards.length} 张</small></h3>
+					<div class="LoreCards">
+						${lingzhiCards.map((c) => html`
+							<${LoreCard}
+								title=${c.name}
+								subtitle=${`${typeLabel(c.type)} · 费用 ${c.energy}`}
+								locked=${!isUnlocked(c.cardId)}
+								badge=${isUnlocked(c.cardId) ? {cls: 'owned', text: '已解锁'} : null}
+								lines=${[c.desc]}
+							/>
+						`)}
+					</div>
+					<h3 class="Collection-section">遗物 <small>${lingzhiRelics.length} 件</small></h3>
+					<div class="LoreCards">
+						${lingzhiRelics.map((r) => html`
+							<${LoreCard}
+								title=${r.name}
+								locked=${!isUnlocked(r.id)}
+								badge=${isUnlocked(r.id) ? {cls: 'owned', text: '已解锁'} : null}
+								lines=${[r.desc]}
+							/>
+						`)}
+					</div>
+				</section>
+			`
+		}
+
+		const Collection = () => html`
+			<article class="Collection">
+				<div class="Collection-top">
+					<h1>罗小黑战记·重生之门 · 世界观图鉴</h1>
+					<p>
+						<a href="stats.html" class="Button">修行总览</a>
+						<a href="/" class="Button">返回游戏</a>
+					</p>
+				</div>
+				<ul class="Collection-nav">
+					<li><a href="#cards">卡牌</a></li>
+					<li><a href="#characters">角色</a></li>
+					<li><a href="#locations">地点</a></li>
+					<li><a href="#organizations">组织</a></li>
+					<li><a href="#artifacts">法宝</a></li>
+					<li><a href="#abilities">能力</a></li>
+					<li><a href="#skills">技能</a></li>
+					<li><a href="#spirit">灵质概念</a></li>
+					<li><a href="#enemies">敌人</a></li>
+					<li><a href="#spaces">灵质空间</a></li>
+					<li><a href="#events">事件</a></li>
+					<li><a href="#golems">灵偶</a></li>
+					<li><a href="#elements">五行</a></li>
+					<li><a href="#cultivation">境界</a></li>
+					<li><a href="#endings">结局</a></li>
+					<li><a href="#relations">关系网</a></li>
+					<li><a href="#bonds">羁绊</a></li>
+					<li><a href="#timeline">纪年</a></li>
+					<li><a href="#episodes">剧情线</a></li>
+					<li><a href="#music">音乐</a></li>
+					<li><a href="#works">作品与幕后</a></li>
+					<li><a href="#lxz">漫画篇章</a></li>
+					<li><a href="#lxz-events">蓝溪镇事件</a></li>
+					<li><a href="#articles">世界观词条</a></li>
+					<li><a href="#oc">馆主彩蛋</a></li>
+					<li><a href="#lingzhi">灵质修行</a></li>
+				</ul>
+				<${CollectionProgress} />
+				<${CardsSection} />
+				<${LingzhiSection} />
+				<${CharactersSection} />
+				<${LocationsSection} />
+				<${OrganizationsSection} />
+				<${ArtifactsSection} />
+				<${AbilitySection} />
+				<${SkillsSection} />
+				<${SpiritSection} />
+				<${EnemiesSection} />
+				<${SpiritSpacesSection} />
+				<${EventsSection} />
+				<${GolemsSection} />
+				<${ElementsSection} />
+				<${CultivationSection} />
+				<${EndingsSection} />
+				<${RelationsSection} />
+				<${BondsSection} />
+				<${TimelineSection} />
+				<${EpisodesSection} />
+				<${MusicSection} />
+				<${WorksSection} />
+				<${LxzSection} />
+				<${LxzEventsSection} />
+				<${ArticlesSection} />
+				<${OcSection} />
+			</article>
+		`
+
+		render(html`<${Collection} />`, document.querySelector('#Collection'))
+	</script>
+</body>
+
+</html>

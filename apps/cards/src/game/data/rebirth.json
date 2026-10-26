@@ -1,0 +1,8339 @@
+{
+ "source": "apps/slay/public (content/cards.js via shared cards.json, content/dungeon-encounters.js, content/skill-effects.js, game/actions.js STARTER_DECKS)",
+ "cards": [
+  {
+   "id": "rebirth:金刃",
+   "name": "金刃",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "金",
+   "target": "single",
+   "school": "yuling",
+   "element": "jin",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "造成 6 点伤害。",
+   "effect": {
+    "damage": 6
+   },
+   "upgrade": {
+    "name": "金刃+",
+    "cost": 1,
+    "text": "造成 9 点伤害。",
+    "effect": {
+     "damage": 9
+    }
+   }
+  },
+  {
+   "id": "rebirth:土盾",
+   "name": "土盾",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "土",
+   "target": "self",
+   "school": "yuling",
+   "element": "tu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "获得 5 点格挡。",
+   "effect": {
+    "block": 5
+   },
+   "upgrade": {
+    "name": "土盾+",
+    "cost": 1,
+    "text": "获得 8 点格挡。",
+    "effect": {
+     "block": 8
+    }
+   }
+  },
+  {
+   "id": "rebirth:御金击",
+   "name": "御金击",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "金",
+   "target": "single",
+   "school": "yuling",
+   "element": "jin",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "造成 8 点伤害。施加 2 层易伤。",
+   "effect": {
+    "damage": 8,
+    "vulnerable": 2
+   },
+   "upgrade": {
+    "name": "御金击+",
+    "cost": 2,
+    "text": "造成 10 点伤害。施加 3 层易伤。",
+    "effect": {
+     "damage": 10,
+     "vulnerable": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:雷灵闪",
+   "name": "雷灵闪",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "金",
+   "target": "all",
+   "school": "yuling",
+   "element": "jin",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "对所有敌人造成 4 点伤害并施加 1 层易伤。",
+   "effect": {
+    "damage": 4,
+    "vulnerable": 1
+   },
+   "upgrade": {
+    "name": "雷灵闪+",
+    "cost": 1,
+    "text": "对所有敌人造成 6 点伤害并施加 1 层易伤。",
+    "effect": {
+     "damage": 6,
+     "vulnerable": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:追毫",
+   "name": "追毫",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "生",
+   "target": "single",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "施加 2 层易伤并抽 1 张牌。（鹿野·感知组追迹秘术）",
+   "effect": {
+    "vulnerable": 2,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "追毫+",
+    "cost": 1,
+    "text": "施加 3 层易伤并抽 1 张牌。（鹿野·感知组追迹秘术）",
+    "effect": {
+     "vulnerable": 3,
+     "draw": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:木缠暗击",
+   "name": "木缠暗击",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "木",
+   "target": "single",
+   "school": "yuling",
+   "element": "mu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "造成 7 点伤害。施加 1 层虚弱。",
+   "effect": {
+    "damage": 7,
+    "weak": 1
+   },
+   "upgrade": {
+    "name": "木缠暗击+",
+    "cost": 1,
+    "text": "造成 8 点伤害。施加 2 层虚弱。",
+    "effect": {
+     "damage": 8,
+     "weak": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:木愈回春",
+   "name": "木愈回春",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "木",
+   "target": "self",
+   "school": "yuling",
+   "element": "mu",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "获得 5 层回灵。仅当生命值低于 50% 时才能打出。",
+   "effect": {
+    "regen": 5
+   },
+   "conditionPct": 50,
+   "condition": "belowPct",
+   "upgrade": {
+    "name": "木愈回春+",
+    "cost": 2,
+    "text": "获得 5 层回灵。仅当生命值低于 75% 时才能打出。",
+    "effect": {
+     "regen": 5
+    },
+    "conditionPct": 75,
+    "condition": "belowPct"
+   }
+  },
+  {
+   "id": "rebirth:木缚藤蔓",
+   "name": "木缚藤蔓",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "木",
+   "target": "single",
+   "school": "yuling",
+   "element": "mu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "造成 5 点伤害。施加 1 层虚弱。（风息·操纵植物藤蔓）",
+   "effect": {
+    "damage": 5,
+    "weak": 1
+   },
+   "upgrade": {
+    "name": "木缚藤蔓+",
+    "cost": 1,
+    "text": "造成 7 点伤害。施加 2 层虚弱。（风息·操纵植物藤蔓）",
+    "effect": {
+     "damage": 7,
+     "weak": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:铁浪",
+   "name": "铁浪",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "水",
+   "target": "single",
+   "school": "yuling",
+   "element": "shui",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "造成 5 点伤害。获得 5 点格挡。",
+   "effect": {
+    "damage": 5,
+    "block": 5
+   },
+   "upgrade": {
+    "name": "铁浪+",
+    "cost": 1,
+    "text": "造成 7 点伤害。获得 7 点格挡。",
+    "effect": {
+     "damage": 7,
+     "block": 7
+    }
+   }
+  },
+  {
+   "id": "rebirth:冰封千里",
+   "name": "冰封千里",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "水",
+   "target": "single",
+   "school": "yuling",
+   "element": "shui",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "造成 8 点伤害。施加 2 层虚弱。（阿根·操纵水与冰）",
+   "effect": {
+    "damage": 8,
+    "weak": 2
+   },
+   "upgrade": {
+    "name": "冰封千里+",
+    "cost": 2,
+    "text": "造成 11 点伤害。施加 2 层虚弱。（阿根·操纵水与冰）",
+    "effect": {
+     "damage": 11,
+     "weak": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:水御·寒潮",
+   "name": "水御·寒潮",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "水",
+   "target": "self",
+   "school": "yuling",
+   "element": "shui",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "获得 5 点格挡并抽 1 张牌。（水系·柔韧绵长）",
+   "effect": {
+    "block": 5,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "水御·寒潮+",
+    "cost": 1,
+    "text": "获得 8 点格挡并抽 1 张牌。（水系·柔韧绵长）",
+    "effect": {
+     "block": 8,
+     "draw": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:紫云焰",
+   "name": "紫云焰",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "火",
+   "target": "single",
+   "school": "yuling",
+   "element": "huo",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "造成 11 点伤害。施加 1 层虚弱。（谛听·紫云焰）",
+   "effect": {
+    "damage": 11,
+    "weak": 1
+   },
+   "upgrade": {
+    "name": "紫云焰+",
+    "cost": 2,
+    "text": "造成 14 点伤害。施加 1 层虚弱。（谛听·紫云焰）",
+    "effect": {
+     "damage": 14,
+     "weak": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:玄离·炽焰",
+   "name": "玄离·炽焰",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "火",
+   "target": "single",
+   "school": "yuling",
+   "element": "huo",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "造成 5 点伤害。施加 1 层易伤。（玄离·炎帝之徒，炽焰灼敌）",
+   "effect": {
+    "damage": 5,
+    "vulnerable": 1
+   },
+   "upgrade": {
+    "name": "玄离·炽焰+",
+    "cost": 1,
+    "text": "造成 7 点伤害。施加 2 层易伤。（玄离·炎帝之徒，炽焰灼敌）",
+    "effect": {
+     "damage": 7,
+     "vulnerable": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:炎爆术",
+   "name": "炎爆术",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "火",
+   "target": "single",
+   "school": "yuling",
+   "element": "huo",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "引爆烈焰，造成 14 点伤害。（火系·爆发之术，一鼓作气）",
+   "effect": {
+    "damage": 14
+   },
+   "upgrade": {
+    "name": "炎爆术+",
+    "cost": 2,
+    "text": "引爆烈焰，造成 17 点伤害。（火系·爆发之术，一鼓作气）",
+    "effect": {
+     "damage": 17
+    }
+   }
+  },
+  {
+   "id": "rebirth:金刚撞",
+   "name": "金刚撞",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "土",
+   "target": "single",
+   "school": "yuling",
+   "element": "tu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "造成等同于你格挡值的伤害。",
+   "effect": {
+    "damageFromBlock": 1
+   },
+   "upgrade": {
+    "name": "金刚撞+",
+    "cost": 0,
+    "text": "造成等同于你格挡值的伤害。",
+    "effect": {
+     "damageFromBlock": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:土灵护体",
+   "name": "土灵护体",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "土",
+   "target": "self",
+   "school": "yuling",
+   "element": "tu",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "大地厚载，获得 12 点格挡。（土系·厚重防御）",
+   "effect": {
+    "block": 12
+   },
+   "upgrade": {
+    "name": "土灵护体+",
+    "cost": 2,
+    "text": "大地厚载，获得 16 点格挡。（土系·厚重防御）",
+    "effect": {
+     "block": 16
+    }
+   }
+  },
+  {
+   "id": "rebirth:御金·锋锐",
+   "name": "御金·锋锐",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "金",
+   "target": "single",
+   "school": "yuling",
+   "element": "jin",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "御金之锋，造成 6 点伤害并施加 1 层易伤。（御灵系·金之分支）",
+   "effect": {
+    "damage": 6,
+    "vulnerable": 1
+   },
+   "upgrade": {
+    "name": "御金·锋锐+",
+    "cost": 1,
+    "text": "御金之锋，造成 8 点伤害并施加 2 层易伤。（御灵系·金之分支）",
+    "effect": {
+     "damage": 8,
+     "vulnerable": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:御木·生长",
+   "name": "御木·生长",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "木",
+   "target": "self",
+   "school": "yuling",
+   "element": "mu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "御木生发，获得 4 点格挡与 2 层回灵。（御灵系·木之分支）",
+   "effect": {
+    "block": 4,
+    "regen": 2
+   },
+   "upgrade": {
+    "name": "御木·生长+",
+    "cost": 1,
+    "text": "御木生发，获得 6 点格挡与 3 层回灵。（御灵系·木之分支）",
+    "effect": {
+     "block": 6,
+     "regen": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:御水·流转",
+   "name": "御水·流转",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "水",
+   "target": "single",
+   "school": "yuling",
+   "element": "shui",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "御水流转，造成 4 点伤害并获得 4 点格挡。（御灵系·水之分支）",
+   "effect": {
+    "damage": 4,
+    "block": 4
+   },
+   "upgrade": {
+    "name": "御水·流转+",
+    "cost": 1,
+    "text": "御水流转，造成 6 点伤害并获得 6 点格挡。（御灵系·水之分支）",
+    "effect": {
+     "damage": 6,
+     "block": 6
+    }
+   }
+  },
+  {
+   "id": "rebirth:御火·爆发",
+   "name": "御火·爆发",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "火",
+   "target": "single",
+   "school": "yuling",
+   "element": "huo",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "御火引爆，造成 13 点伤害并施加 1 层易伤。（御灵系·火之分支）",
+   "effect": {
+    "damage": 13,
+    "vulnerable": 1
+   },
+   "upgrade": {
+    "name": "御火·爆发+",
+    "cost": 2,
+    "text": "御火引爆，造成 16 点伤害并施加 2 层易伤。（御灵系·火之分支）",
+    "effect": {
+     "damage": 16,
+     "vulnerable": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:御土·厚德",
+   "name": "御土·厚德",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "土",
+   "target": "self",
+   "school": "yuling",
+   "element": "tu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "御土厚载，获得 7 点格挡与 1 层回灵。（御灵系·土之分支）",
+   "effect": {
+    "block": 7,
+    "regen": 1
+   },
+   "upgrade": {
+    "name": "御土·厚德+",
+    "cost": 1,
+    "text": "御土厚载，获得 10 点格挡与 2 层回灵。（御灵系·土之分支）",
+    "effect": {
+     "block": 10,
+     "regen": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:全攻突进",
+   "name": "全攻突进",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "通",
+   "target": "single",
+   "source": "重生之门",
+   "cost": 0,
+   "text": "仅当手牌全为攻击牌时才能打出。造成 14 点伤害。",
+   "effect": {
+    "damage": 14
+   },
+   "condition": "attacksOnly",
+   "upgrade": {
+    "name": "全攻突进+",
+    "cost": 0,
+    "text": "仅当手牌全为攻击牌时才能打出。造成 17 点伤害。",
+    "effect": {
+     "damage": 17
+    },
+    "condition": "attacksOnly"
+   }
+  },
+  {
+   "id": "rebirth:横扫",
+   "name": "横扫",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "通",
+   "target": "all",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "对所有敌人造成 8 点伤害。",
+   "effect": {
+    "damage": 8
+   },
+   "upgrade": {
+    "name": "横扫+",
+    "cost": 1,
+    "text": "对所有敌人造成 11 点伤害。",
+    "effect": {
+     "damage": 11
+    }
+   }
+  },
+  {
+   "id": "rebirth:回春术",
+   "name": "回春术",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "生",
+   "target": "self",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "恢复 1 点生命。若生命值低于 50%，抽 2 张牌。",
+   "effect": {
+    "heal": 1,
+    "drawBelow": 2,
+    "drawBelowPct": 50
+   },
+   "upgrade": {
+    "name": "回春术+",
+    "cost": 1,
+    "text": "恢复 2 点生命。若生命值低于 50%，抽 2 张牌。",
+    "effect": {
+     "heal": 2,
+     "drawBelow": 2,
+     "drawBelowPct": 50
+    }
+   }
+  },
+  {
+   "id": "rebirth:治愈灵光",
+   "name": "治愈灵光",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "生",
+   "target": "self",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "恢复 4 点生命并获得 3 点格挡。（清凝·极致治愈）",
+   "effect": {
+    "block": 3,
+    "heal": 4
+   },
+   "upgrade": {
+    "name": "治愈灵光+",
+    "cost": 1,
+    "text": "恢复 4 点生命并获得 5 点格挡。（清凝·极致治愈）",
+    "effect": {
+     "block": 5,
+     "heal": 4
+    }
+   }
+  },
+  {
+   "id": "rebirth:眷灵",
+   "name": "眷灵",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "生",
+   "target": "self",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "获得 2 层回灵并抽 1 张牌。（老君·吸收空间逸散之灵）",
+   "effect": {
+    "regen": 2,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "眷灵+",
+    "cost": 1,
+    "text": "获得 3 层回灵并抽 1 张牌。（老君·吸收空间逸散之灵）",
+    "effect": {
+     "regen": 3,
+     "draw": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:噬灵术",
+   "name": "噬灵术",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "生",
+   "target": "all",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 3,
+   "text": "对所有敌人造成 2 点伤害，并将其转化为生命。",
+   "effect": {
+    "damage": 2,
+    "regenFromAllDamage": 1
+   },
+   "upgrade": {
+    "name": "高等噬灵术",
+    "cost": 3,
+    "text": "对所有敌人造成 3 点伤害，并将其转化为生命。",
+    "effect": {
+     "damage": 3,
+     "regenFromAllDamage": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:净灵之雨",
+   "name": "净灵之雨",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "生",
+   "target": "self",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "移除自身的虚弱与易伤。",
+   "effect": {
+    "clearSelfDebuffs": 1
+   },
+   "upgrade": {
+    "name": "终焉净雨",
+    "cost": 2,
+    "text": "移除自身的虚弱与易伤。获得 10 点格挡。",
+    "effect": {
+     "block": 10,
+     "clearSelfDebuffs": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:豪夺",
+   "name": "豪夺",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "生",
+   "target": "single",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "造成 8 点伤害并获得 2 层回灵。（风息·掠夺性最强之术）",
+   "effect": {
+    "damage": 8,
+    "regen": 2
+   },
+   "upgrade": {
+    "name": "豪夺+",
+    "cost": 2,
+    "text": "造成 10 点伤害并获得 3 层回灵。（风息·掠夺性最强之术）",
+    "effect": {
+     "damage": 10,
+     "regen": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:散灵诀",
+   "name": "散灵诀",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "生",
+   "target": "single",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "造成 5 点伤害，削减目标 3 层回灵与 2 层力量。（虹·散灵秘术，克制吐纳回灵之敌）",
+   "effect": {
+    "damage": 5,
+    "reduceTargetRegen": 3,
+    "reduceTargetStrength": 2
+   },
+   "upgrade": {
+    "name": "散灵诀+",
+    "cost": 1,
+    "text": "造成 7 点伤害，削减目标 4 层回灵与 3 层力量。（虹·散灵秘术，克制吐纳回灵之敌）",
+    "effect": {
+     "damage": 7,
+     "reduceTargetRegen": 4,
+     "reduceTargetStrength": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:巨力",
+   "name": "巨力",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "生",
+   "target": "single",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "造成 5 点伤害并获得 2 层力量。（强化系·巨力，越战越强）",
+   "effect": {
+    "damage": 5,
+    "strength": 2
+   },
+   "upgrade": {
+    "name": "巨力+",
+    "cost": 1,
+    "text": "造成 7 点伤害并获得 3 层力量。（强化系·巨力，越战越强）",
+    "effect": {
+     "damage": 7,
+     "strength": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:摄魂术",
+   "name": "摄魂术",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "心",
+   "target": "all",
+   "school": "xinling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "消耗自身 3 点生命，对所有敌人施加虚弱与易伤。",
+   "effect": {
+    "damage": 0,
+    "weak": 3,
+    "vulnerable": 3,
+    "selfDamage": 3
+   },
+   "upgrade": {
+    "name": "深层摄魂术",
+    "cost": 1,
+    "text": "消耗自身 4 点生命，对所有敌人施加虚弱与易伤。",
+    "effect": {
+     "damage": 0,
+     "weak": 4,
+     "vulnerable": 4,
+     "selfDamage": 4
+    }
+   }
+  },
+  {
+   "id": "rebirth:咒术化解",
+   "name": "咒术化解",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "心",
+   "target": "single",
+   "school": "xinling",
+   "source": "重生之门",
+   "cost": 0,
+   "text": "造成等同于目标易伤与虚弱层数的伤害，随后移除这些减益。",
+   "effect": {
+    "loseHpFromWeak": 1,
+    "loseHpFromVulnerable": 1,
+    "clearTargetDebuffs": 1
+   },
+   "upgrade": {
+    "name": "咒术馈赠",
+    "cost": 0,
+    "text": "造成等同于目标易伤与虚弱层数的伤害，且不移除减益。",
+    "effect": {
+     "loseHpFromWeak": 1,
+     "loseHpFromVulnerable": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:灵誓",
+   "name": "灵誓",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "心",
+   "target": "single",
+   "school": "xinling",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "宣读灵誓束缚敌人：施加 3 层虚弱与 3 层易伤。接誓者必须遵从。（老君·双系合技）",
+   "effect": {
+    "weak": 3,
+    "vulnerable": 3
+   },
+   "upgrade": {
+    "name": "灵誓+",
+    "cost": 2,
+    "text": "宣读灵誓束缚敌人：施加 4 层虚弱与 4 层易伤。接誓者必须遵从。（老君·双系合技）",
+    "effect": {
+     "weak": 4,
+     "vulnerable": 4
+    }
+   }
+  },
+  {
+   "id": "rebirth:无相面具",
+   "name": "无相面具",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "造",
+   "target": "self",
+   "school": "zaowu",
+   "source": "重生之门",
+   "cost": 0,
+   "text": "获得 1 点能量。",
+   "effect": {
+    "energy": 1
+   },
+   "upgrade": {
+    "name": "无相双面",
+    "cost": 0,
+    "text": "获得 1 点能量和 5 点格挡。",
+    "effect": {
+     "block": 5,
+     "energy": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:画灵",
+   "name": "画灵",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "造",
+   "target": "single",
+   "school": "zaowu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "以灵造物：造成 6 点伤害并获得 3 点格挡。（生灵系+造物系·双系合技）",
+   "effect": {
+    "damage": 6,
+    "block": 3
+   },
+   "upgrade": {
+    "name": "画灵+",
+    "cost": 1,
+    "text": "以灵造物：造成 8 点伤害并获得 4 点格挡。（生灵系+造物系·双系合技）",
+    "effect": {
+     "damage": 8,
+     "block": 4
+    }
+   }
+  },
+  {
+   "id": "rebirth:瞬移",
+   "name": "瞬移",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "空",
+   "target": "self",
+   "school": "kongjian",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "空间传送：抽 2 张牌。（小黑·传送）",
+   "effect": {
+    "draw": 2
+   },
+   "upgrade": {
+    "name": "瞬移+",
+    "cost": 0,
+    "text": "空间传送：抽 2 张牌。（小黑·传送）",
+    "effect": {
+     "draw": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:吞噬之域",
+   "name": "吞噬之域",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "空",
+   "target": "single",
+   "school": "kongjian",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "展开吞噬：造成 5 点伤害并获得 5 点格挡。（无限·空间系吞噬）",
+   "effect": {
+    "damage": 5,
+    "block": 5
+   },
+   "upgrade": {
+    "name": "吞噬之域+",
+    "cost": 2,
+    "text": "展开吞噬：造成 7 点伤害并获得 7 点格挡。（无限·空间系吞噬）",
+    "effect": {
+     "damage": 7,
+     "block": 7
+    }
+   }
+  },
+  {
+   "id": "rebirth:领域·展开",
+   "name": "领域·展开",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "空",
+   "target": "self",
+   "school": "kongjian",
+   "source": "重生之门",
+   "cost": 3,
+   "text": "展开灵质领域：获得 8 点格挡与 3 层回灵。（领域·灵质空间庇护）",
+   "effect": {
+    "block": 8,
+    "regen": 3
+   },
+   "upgrade": {
+    "name": "领域·固守",
+    "cost": 3,
+    "text": "展开灵质领域：获得 12 点格挡与 3 层回灵。（领域·灵质空间庇护）",
+    "effect": {
+     "block": 12,
+     "regen": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:定心镜",
+   "name": "定心镜",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "锁",
+   "target": "self",
+   "school": "suoyu",
+   "source": "重生之门",
+   "cost": 0,
+   "text": "法宝定心：获得 4 点格挡，并移除自身的虚弱与易伤。（谛听·老君所赐）",
+   "effect": {
+    "block": 4,
+    "clearSelfDebuffs": 1
+   },
+   "upgrade": {
+    "name": "定心镜·守",
+    "cost": 0,
+    "text": "法宝定心：获得 7 点格挡，并移除自身的虚弱与易伤。（谛听·老君所赐）",
+    "effect": {
+     "block": 7,
+     "clearSelfDebuffs": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:蓝玉盘",
+   "name": "蓝玉盘",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "空",
+   "target": "self",
+   "school": "kongjian",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "法宝位移：获得 8 点格挡并抽 1 张牌。（罗小白·老君所赠空间系法宝）",
+   "effect": {
+    "block": 8,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "蓝玉盘+",
+    "cost": 2,
+    "text": "法宝位移：获得 10 点格挡并抽 1 张牌。（罗小白·老君所赠空间系法宝）",
+    "effect": {
+     "block": 10,
+     "draw": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:黑咻·分身",
+   "name": "黑咻·分身",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "生",
+   "target": "self",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "尾巴化作黑咻护主：获得 4 点格挡并抽 1 张牌。（罗小黑·分身黑咻）",
+   "effect": {
+    "block": 4,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "黑咻·分身+",
+    "cost": 1,
+    "text": "尾巴化作黑咻护主：获得 6 点格挡并抽 1 张牌。（罗小黑·分身黑咻）",
+    "effect": {
+     "block": 6,
+     "draw": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:剑域·斩",
+   "name": "剑域·斩",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "金",
+   "target": "single",
+   "school": "yuling",
+   "element": "jin",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "金系剑光一闪，造成 7 点伤害。（执行者·无限）",
+   "effect": {
+    "damage": 7
+   },
+   "upgrade": {
+    "name": "剑域·斩+",
+    "cost": 1,
+    "text": "金系剑光一闪，造成 10 点伤害。（执行者·无限）",
+    "effect": {
+     "damage": 10
+    }
+   }
+  },
+  {
+   "id": "rebirth:风息·金缚",
+   "name": "风息·金缚",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "金",
+   "target": "single",
+   "school": "yuling",
+   "element": "jin",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "金系缚阵困敌，造成 9 点伤害并施加 2 层易伤。（风息）",
+   "effect": {
+    "damage": 9,
+    "vulnerable": 2
+   },
+   "upgrade": {
+    "name": "风息·金缚+",
+    "cost": 2,
+    "text": "金系缚阵困敌，造成 11 点伤害并施加 3 层易伤。（风息）",
+    "effect": {
+     "damage": 11,
+     "vulnerable": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:火尖枪·破",
+   "name": "火尖枪·破",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "火",
+   "target": "single",
+   "school": "yuling",
+   "element": "huo",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "火尖枪直刺，造成 8 点伤害。（哪吒）",
+   "effect": {
+    "damage": 8
+   },
+   "upgrade": {
+    "name": "火尖枪·破+",
+    "cost": 1,
+    "text": "火尖枪直刺，造成 11 点伤害。（哪吒）",
+    "effect": {
+     "damage": 11
+    }
+   }
+  },
+  {
+   "id": "rebirth:冰火双域",
+   "name": "冰火双域",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "火",
+   "target": "single",
+   "school": "yuling",
+   "element": "huo",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "冰火双域交替压制，造成 8 点伤害并施加 1 层虚弱。（玄离）",
+   "effect": {
+    "damage": 8,
+    "weak": 1
+   },
+   "upgrade": {
+    "name": "冰火双域+",
+    "cost": 2,
+    "text": "冰火双域交替压制，造成 10 点伤害并施加 2 层虚弱。（玄离）",
+    "effect": {
+     "damage": 10,
+     "weak": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:清凝仙术",
+   "name": "清凝仙术",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "生",
+   "target": "self",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "仙家医术温养，回复 12 点生命。（李清凝·治愈系）",
+   "effect": {
+    "heal": 12
+   },
+   "upgrade": {
+    "name": "清凝仙术+",
+    "cost": 2,
+    "text": "仙家医术温养，回复 16 点生命。（李清凝·治愈系）",
+    "effect": {
+     "heal": 16
+    }
+   }
+  },
+  {
+   "id": "rebirth:团鼠·吞灵",
+   "name": "团鼠·吞灵",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "生",
+   "target": "single",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "团鼠吞下灵质：造成 6 点伤害并护住自身 3 点格挡。（比丢）",
+   "effect": {
+    "damage": 6,
+    "block": 3
+   },
+   "upgrade": {
+    "name": "团鼠·吞灵+",
+    "cost": 1,
+    "text": "团鼠吞下灵质：造成 8 点伤害并护住自身 4 点格挡。（比丢）",
+    "effect": {
+     "damage": 8,
+     "block": 4
+    }
+   }
+  },
+  {
+   "id": "rebirth:七星锁",
+   "name": "七星锁",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "锁",
+   "target": "single",
+   "school": "suoyu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "锁御七星封印敌妖，施加 2 层虚弱。（七臂·锁御系）",
+   "effect": {
+    "weak": 2
+   },
+   "upgrade": {
+    "name": "七星锁+",
+    "cost": 1,
+    "text": "锁御七星封印敌妖，施加 3 层虚弱。（七臂·锁御系）",
+    "effect": {
+     "weak": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:时滞·加速",
+   "name": "时滞·加速",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "空",
+   "target": "self",
+   "school": "kongjian",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "加快自身时间流速：回复 1 点能量并抽 1 张牌。（东东·空间时滞）",
+   "effect": {
+    "energy": 1,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "时滞·加速+",
+    "cost": 2,
+    "text": "加快自身时间流速：回复 1 点能量并抽 2 张牌。（东东·空间时滞）",
+    "effect": {
+     "energy": 1,
+     "draw": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:白虎·啸",
+   "name": "白虎·啸",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "金",
+   "target": "single",
+   "school": "yuling",
+   "element": "jin",
+   "source": "重生之门",
+   "cost": 3,
+   "text": "上古神兽咆哮，造成 20 点伤害。（白虎·创世级神兽）",
+   "effect": {
+    "damage": 20
+   },
+   "upgrade": {
+    "name": "白虎·啸+",
+    "cost": 3,
+    "text": "上古神兽咆哮，造成 26 点伤害。（白虎·创世级神兽）",
+    "effect": {
+     "damage": 26
+    }
+   }
+  },
+  {
+   "id": "rebirth:木灵愈生",
+   "name": "木灵愈生",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "木",
+   "target": "self",
+   "school": "yuling",
+   "element": "mu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "催生木灵滋养自身：获得 3 层回灵并抽 1 张牌。（木系·生机生长）",
+   "effect": {
+    "regen": 3,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "木灵愈生+",
+    "cost": 1,
+    "text": "催生木灵滋养自身：获得 4 层回灵并抽 1 张牌。（木系·生机生长）",
+    "effect": {
+     "regen": 4,
+     "draw": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:古树盘根",
+   "name": "古树盘根",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "木",
+   "target": "single",
+   "school": "yuling",
+   "element": "mu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "古树根须破土缠敌：获得 5 点格挡并施加 1 层虚弱。（风息·操纵植物藤蔓）",
+   "effect": {
+    "block": 5,
+    "weak": 1
+   },
+   "upgrade": {
+    "name": "古树盘根+",
+    "cost": 1,
+    "text": "古树根须破土缠敌：获得 8 点格挡并施加 2 层虚弱。（风息·操纵植物藤蔓）",
+    "effect": {
+     "block": 8,
+     "weak": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:冰晶·玄离",
+   "name": "冰晶·玄离",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "水",
+   "target": "single",
+   "school": "yuling",
+   "element": "shui",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "凝水成冰掷向敌人，造成 6 点伤害并施加 1 层虚弱。（玄离·御灵系冰）",
+   "effect": {
+    "damage": 6,
+    "weak": 1
+   },
+   "upgrade": {
+    "name": "冰晶·玄离+",
+    "cost": 1,
+    "text": "凝水成冰掷向敌人，造成 8 点伤害并施加 2 层虚弱。（玄离·御灵系冰）",
+    "effect": {
+     "damage": 8,
+     "weak": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:清泉·双刃",
+   "name": "清泉·双刃",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "水",
+   "target": "single",
+   "school": "yuling",
+   "element": "shui",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "双刀如水流连绵，造成 5 点伤害并抽 1 张牌。（清泉·御灵系水·双刀）",
+   "effect": {
+    "damage": 5,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "清泉·双刃+",
+    "cost": 1,
+    "text": "双刀如水流连绵，造成 7 点伤害并抽 1 张牌。（清泉·御灵系水·双刀）",
+    "effect": {
+     "damage": 7,
+     "draw": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:芷清·土壁",
+   "name": "芷清·土壁",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "土",
+   "target": "self",
+   "school": "yuling",
+   "element": "tu",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "引大地厚土筑起壁垒，获得 14 点格挡。（芷清·御灵系土）",
+   "effect": {
+    "block": 14
+   },
+   "upgrade": {
+    "name": "芷清·土壁+",
+    "cost": 2,
+    "text": "引大地厚土筑起壁垒，获得 18 点格挡。（芷清·御灵系土）",
+    "effect": {
+     "block": 18
+    }
+   }
+  },
+  {
+   "id": "rebirth:叶子·地刺",
+   "name": "叶子·地刺",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "土",
+   "target": "single",
+   "school": "yuling",
+   "element": "tu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "大地裂开刺出岩锥，造成 7 点伤害并施加 1 层易伤。（叶子·御灵系土）",
+   "effect": {
+    "damage": 7,
+    "vulnerable": 1
+   },
+   "upgrade": {
+    "name": "叶子·地刺+",
+    "cost": 1,
+    "text": "大地裂开刺出岩锥，造成 9 点伤害并施加 2 层易伤。（叶子·御灵系土）",
+    "effect": {
+     "damage": 9,
+     "vulnerable": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:池年·重塑",
+   "name": "池年·重塑",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "土",
+   "target": "self",
+   "school": "yuling",
+   "element": "tu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "大地之力重塑躯体，获得 4 点格挡与 2 层回灵。（池年·御灵系土·自我修复）",
+   "effect": {
+    "block": 4,
+    "regen": 2
+   },
+   "upgrade": {
+    "name": "池年·重塑+",
+    "cost": 1,
+    "text": "大地之力重塑躯体，获得 6 点格挡与 3 层回灵。（池年·御灵系土·自我修复）",
+    "effect": {
+     "block": 6,
+     "regen": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:龙岩·岩崩",
+   "name": "龙岩·岩崩",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "土",
+   "target": "single",
+   "school": "yuling",
+   "element": "tu",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "兽形态引动岩崩，造成 13 点伤害。（龙岩·土/岩系能力）",
+   "effect": {
+    "damage": 13
+   },
+   "upgrade": {
+    "name": "龙岩·岩崩+",
+    "cost": 2,
+    "text": "兽形态引动岩崩，造成 17 点伤害。（龙岩·土/岩系能力）",
+    "effect": {
+     "damage": 17
+    }
+   }
+  },
+  {
+   "id": "rebirth:读心",
+   "name": "读心",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "心",
+   "target": "single",
+   "school": "xinling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "窥探敌人心思，施加 2 层虚弱并抽 1 张牌。（心灵系·读心）",
+   "effect": {
+    "weak": 2,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "读心+",
+    "cost": 1,
+    "text": "窥探敌人心思，施加 3 层虚弱并抽 1 张牌。（心灵系·读心）",
+    "effect": {
+     "weak": 3,
+     "draw": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:傀儡术",
+   "name": "傀儡术",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "心",
+   "target": "single",
+   "school": "xinling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "以丝线牵制敌人，造成 5 点伤害并施加 2 层虚弱。（心灵系·傀儡）",
+   "effect": {
+    "damage": 5,
+    "weak": 2
+   },
+   "upgrade": {
+    "name": "傀儡术+",
+    "cost": 1,
+    "text": "以丝线牵制敌人，造成 7 点伤害并施加 3 层虚弱。（心灵系·傀儡）",
+    "effect": {
+     "damage": 7,
+     "weak": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:戏梦",
+   "name": "戏梦",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "心",
+   "target": "single",
+   "school": "xinling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "以幻梦惑敌，施加 2 层易伤与 2 层虚弱。（心灵系·戏梦）",
+   "effect": {
+    "vulnerable": 2,
+    "weak": 2
+   },
+   "upgrade": {
+    "name": "戏梦+",
+    "cost": 1,
+    "text": "以幻梦惑敌，施加 3 层易伤与 3 层虚弱。（心灵系·戏梦）",
+    "effect": {
+     "vulnerable": 3,
+     "weak": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:重构",
+   "name": "重构",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "造",
+   "target": "self",
+   "school": "zaowu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "重构物质化守为攻，获得 6 点格挡并抽 1 张牌。（造物系·重构）",
+   "effect": {
+    "block": 6,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "重构+",
+    "cost": 1,
+    "text": "重构物质化守为攻，获得 9 点格挡并抽 1 张牌。（造物系·重构）",
+    "effect": {
+     "block": 9,
+     "draw": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:无中生有",
+   "name": "无中生有",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "造",
+   "target": "self",
+   "school": "zaowu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "以物质灵凭空造物，获得 1 点能量并抽 1 张牌。（造物系·无中生有）",
+   "effect": {
+    "energy": 1,
+    "draw": 1
+   },
+   "upgrade": {
+    "name": "无中生有+",
+    "cost": 1,
+    "text": "以物质灵凭空造物，获得 1 点能量并抽 2 张牌。（造物系·无中生有）",
+    "effect": {
+     "energy": 1,
+     "draw": 2
+    }
+   }
+  },
+  {
+   "id": "rebirth:封灵阵",
+   "name": "封灵阵",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "锁",
+   "target": "all",
+   "school": "suoyu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "以阵法压制全场敌人，施加 2 层虚弱与 2 层易伤。（锁御系·阵法）",
+   "effect": {
+    "weak": 2,
+    "vulnerable": 2
+   },
+   "upgrade": {
+    "name": "封灵阵+",
+    "cost": 1,
+    "text": "以阵法压制全场敌人，施加 3 层虚弱与 3 层易伤。（锁御系·阵法）",
+    "effect": {
+     "weak": 3,
+     "vulnerable": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:御灵环",
+   "name": "御灵环",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "锁",
+   "target": "self",
+   "school": "suoyu",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "以御灵法器护体，获得 7 点格挡与 1 层回灵。（锁御系·灵御）",
+   "effect": {
+    "block": 7,
+    "regen": 1
+   },
+   "upgrade": {
+    "name": "御灵环+",
+    "cost": 1,
+    "text": "以御灵法器护体，获得 10 点格挡与 1 层回灵。（锁御系·灵御）",
+    "effect": {
+     "block": 10,
+     "regen": 1
+    }
+   }
+  },
+  {
+   "id": "rebirth:拾遗",
+   "name": "拾遗",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "生",
+   "target": "self",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "吸收散灵余韵。获得 6 点格挡。",
+   "effect": {
+    "block": 6
+   },
+   "upgrade": {
+    "name": "拾遗+",
+    "cost": 1,
+    "text": "吸收散灵余韵。获得 9 点格挡。",
+    "effect": {
+     "block": 9
+    }
+   }
+  },
+  {
+   "id": "rebirth:衔光",
+   "name": "衔光",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "生",
+   "target": "single",
+   "school": "shengling",
+   "source": "重生之门",
+   "cost": 1,
+   "text": "牵起一缕光丝，令敌人虚弱 2 层。",
+   "effect": {
+    "weak": 2
+   },
+   "upgrade": {
+    "name": "衔光+",
+    "cost": 1,
+    "text": "牵起一缕光丝，令敌人虚弱 3 层。",
+    "effect": {
+     "weak": 3
+    }
+   }
+  },
+  {
+   "id": "rebirth:金乌展翅",
+   "name": "金乌展翅",
+   "owner": "all",
+   "type": "攻击",
+   "glyph": "火",
+   "target": "single",
+   "school": "yuling",
+   "element": "huo",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "展翅时翅缘淌虹光。造成 12 点伤害。",
+   "effect": {
+    "damage": 12
+   },
+   "upgrade": {
+    "name": "金乌展翅+",
+    "cost": 2,
+    "text": "展翅时翅缘淌虹光。造成 16 点伤害。",
+    "effect": {
+     "damage": 16
+    }
+   }
+  },
+  {
+   "id": "rebirth:虹间安魂",
+   "name": "虹间安魂",
+   "owner": "all",
+   "type": "技能",
+   "glyph": "空",
+   "target": "self",
+   "school": "kongjian",
+   "source": "重生之门",
+   "cost": 2,
+   "text": "展开「虹之间」收容残魂。获得 12 点格挡。",
+   "effect": {
+    "block": 12
+   },
+   "upgrade": {
+    "name": "虹间安魂+",
+    "cost": 2,
+    "text": "展开「虹之间」收容残魂。获得 16 点格挡。",
+    "effect": {
+     "block": 16
+    }
+   }
+  }
+ ],
+ "starters": {
+  "金": [
+   "rebirth:金刃",
+   "rebirth:金刃",
+   "rebirth:金刃",
+   "rebirth:剑域·斩",
+   "rebirth:剑域·斩",
+   "rebirth:御金击",
+   "rebirth:雷灵闪",
+   "rebirth:土盾",
+   "rebirth:土盾",
+   "rebirth:定心镜"
+  ],
+  "木": [
+   "rebirth:木缠暗击",
+   "rebirth:木缠暗击",
+   "rebirth:木缠暗击",
+   "rebirth:木愈回春",
+   "rebirth:回春术",
+   "rebirth:回春术",
+   "rebirth:眷灵",
+   "rebirth:金刃",
+   "rebirth:土盾",
+   "rebirth:土盾"
+  ],
+  "水": [
+   "rebirth:铁浪",
+   "rebirth:铁浪",
+   "rebirth:铁浪",
+   "rebirth:金刃",
+   "rebirth:金刃",
+   "rebirth:团鼠·吞灵",
+   "rebirth:团鼠·吞灵",
+   "rebirth:黑咻·分身",
+   "rebirth:土盾",
+   "rebirth:治愈灵光"
+  ],
+  "火": [
+   "rebirth:火尖枪·破",
+   "rebirth:火尖枪·破",
+   "rebirth:炎爆术",
+   "rebirth:炎爆术",
+   "rebirth:金刃",
+   "rebirth:金刃",
+   "rebirth:横扫",
+   "rebirth:土盾",
+   "rebirth:土盾",
+   "rebirth:无相面具"
+  ],
+  "土": [
+   "rebirth:土盾",
+   "rebirth:土盾",
+   "rebirth:土盾",
+   "rebirth:土灵护体",
+   "rebirth:土灵护体",
+   "rebirth:金刃",
+   "rebirth:金刃",
+   "rebirth:铁浪",
+   "rebirth:定心镜",
+   "rebirth:黑咻·分身"
+  ]
+ },
+ "encounters": {
+  "easy": {
+   "离岛小妖": [
+    {
+     "name": "离岛小妖",
+     "skill": "藤蔓缠绕",
+     "element": "木",
+     "hp": [
+      8,
+      13
+     ],
+     "intents": [
+      {
+       "damage": 7
+      },
+      {
+       "damage": 11
+      },
+      {
+       "damage": 7
+      },
+      {
+       "block": 9
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 3,
+     "potency": 9
+    }
+   ],
+   "离岛小妖 x2": [
+    {
+     "name": "离岛小妖",
+     "skill": "藤蔓缠绕",
+     "element": "木",
+     "hp": [
+      8,
+      13
+     ],
+     "intents": [
+      {
+       "damage": 7
+      },
+      {
+       "damage": 11
+      },
+      {
+       "damage": 7
+      },
+      {
+       "block": 9
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 3,
+     "potency": 9
+    },
+    {
+     "name": "离岛小妖",
+     "skill": "藤蔓缠绕",
+     "element": "木",
+     "hp": [
+      8,
+      13
+     ],
+     "intents": [
+      {
+       "damage": 6
+      },
+      {
+       "damage": 11
+      },
+      {
+       "damage": 5
+      },
+      {
+       "block": 5
+      }
+     ],
+     "spread": 1,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 3,
+     "potency": 9
+    }
+   ],
+   "灵偶·木人": [
+    {
+     "name": "灵偶·木人",
+     "skill": "催生",
+     "element": "木",
+     "hp": [
+      10,
+      14
+     ],
+     "intents": [
+      {
+       "damage": 6
+      },
+      {
+       "regen": 2
+      },
+      {
+       "damage": 6
+      },
+      {
+       "damage": 3
+      },
+      {
+       "block": 4
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 3,
+     "potency": 9
+    }
+   ],
+   "团鼠·暴走": [
+    {
+     "name": "团鼠·暴走",
+     "skill": "地陷",
+     "element": "土",
+     "hp": [
+      9,
+      13
+     ],
+     "intents": [
+      {
+       "damage": 5
+      },
+      {
+       "damage": 8
+      },
+      {
+       "damage": 5
+      },
+      {
+       "block": 5
+      }
+     ],
+     "spread": 1,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 12,
+     "potency": 0
+    },
+    {
+     "name": "团鼠·暴走",
+     "skill": "地陷",
+     "element": "土",
+     "hp": [
+      7,
+      11
+     ],
+     "intents": [
+      {
+       "damage": 6
+      },
+      {
+       "block": 4
+      },
+      {
+       "damage": 7
+      }
+     ],
+     "spread": 1,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 12,
+     "potency": 0
+    }
+   ]
+  },
+  "normal": {
+   "天虎": [
+    {
+     "name": "天虎",
+     "skill": "烈焰",
+     "element": "火",
+     "hp": [
+      33,
+      37
+     ],
+     "intents": [
+      {
+       "vulnerable": 1
+      },
+      {
+       "strength": 2
+      },
+      {
+       "damage": 10
+      },
+      {
+       "damage": 6
+      },
+      {
+       "weak": 1
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 0,
+     "potency": 12
+    }
+   ],
+   "洛竹": [
+    {
+     "name": "洛竹",
+     "skill": "缚灵",
+     "element": "木",
+     "hp": [
+      28,
+      32
+     ],
+     "intents": [
+      {
+       "weak": 1
+      },
+      {
+       "damage": 9
+      },
+      {
+       "damage": 6
+      },
+      {},
+      {
+       "weak": 1
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 3,
+     "potency": 9
+    },
+    {
+     "name": "离岛小妖",
+     "skill": "藤蔓缠绕",
+     "element": "木",
+     "hp": [
+      13,
+      17
+     ],
+     "intents": [
+      {
+       "damage": 7
+      },
+      {
+       "block": 4,
+       "damage": 8
+      },
+      {
+       "damage": 6
+      },
+      {},
+      {
+       "block": 6
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 3,
+     "potency": 9
+    }
+   ],
+   "黑咻": [
+    {
+     "name": "黑咻",
+     "skill": "雾隐",
+     "element": "水",
+     "hp": [
+      20,
+      24
+     ],
+     "intents": [
+      {
+       "damage": 8
+      },
+      {
+       "block": 5
+      },
+      {
+       "damage": 8,
+       "block": 4
+      },
+      {
+       "damage": 10
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 6,
+     "potency": 6
+    },
+    {
+     "name": "黑咻·分裂体",
+     "skill": "分裂",
+     "element": "木",
+     "hp": [
+      10,
+      14
+     ],
+     "intents": [
+      {
+       "damage": 5
+      },
+      {
+       "damage": 7
+      },
+      {
+       "block": 3
+      }
+     ],
+     "spread": 1,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 3,
+     "potency": 9
+    }
+   ],
+   "破老": [
+    {
+     "name": "破老",
+     "skill": "岩壁",
+     "element": "土",
+     "hp": [
+      45,
+      50
+     ],
+     "intents": [
+      {
+       "weak": 1
+      },
+      {
+       "block": 10,
+       "damage": 10
+      },
+      {
+       "damage": 16
+      }
+     ],
+     "spread": 0,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 12,
+     "potency": 0
+    }
+   ],
+   "青丘": [
+    {
+     "name": "青丘",
+     "skill": "烈焰",
+     "element": "火",
+     "hp": [
+      26,
+      30
+     ],
+     "intents": [
+      {
+       "vulnerable": 1
+      },
+      {
+       "damage": 6
+      },
+      {
+       "damage": 9
+      },
+      {
+       "block": 10
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 0,
+     "potency": 12
+    },
+    {
+     "name": "团鼠·暴走",
+     "skill": "地陷",
+     "element": "土",
+     "hp": [
+      12,
+      15
+     ],
+     "intents": [
+      {
+       "damage": 6
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 12,
+     "potency": 0
+    }
+   ],
+   "恶妖·缠藤": [
+    {
+     "name": "恶妖·缠藤",
+     "skill": "缠藤",
+     "element": "木",
+     "hp": [
+      28,
+      32
+     ],
+     "intents": [
+      {
+       "damage": 8
+      },
+      {
+       "weak": 1
+      },
+      {
+       "strength": 1
+      },
+      {
+       "block": 8,
+       "damage": 6
+      },
+      {
+       "damage": 10
+      }
+     ],
+     "spread": 3,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 3,
+     "potency": 9
+    }
+   ],
+   "虚淮": [
+    {
+     "name": "虚淮",
+     "skill": "寒潮",
+     "element": "水",
+     "hp": [
+      30,
+      34
+     ],
+     "intents": [
+      {
+       "damage": 8
+      },
+      {
+       "weak": 1,
+       "damage": 7
+      },
+      {
+       "block": 6,
+       "damage": 9
+      },
+      {
+       "damage": 12
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 6,
+     "potency": 6
+    }
+   ],
+   "兆岳": [
+    {
+     "name": "兆岳",
+     "skill": "地陷",
+     "element": "土",
+     "hp": [
+      36,
+      40
+     ],
+     "intents": [
+      {
+       "block": 8
+      },
+      {
+       "damage": 10
+      },
+      {
+       "strength": 2
+      },
+      {
+       "block": 6,
+       "damage": 8
+      },
+      {
+       "damage": 13
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 12,
+     "potency": 0
+    }
+   ],
+   "谛听·侦查鹰犬": [
+    {
+     "name": "谛听·侦查鹰犬",
+     "skill": "烈焰",
+     "element": "火",
+     "hp": [
+      24,
+      28
+     ],
+     "intents": [
+      {
+       "damage": 7
+      },
+      {
+       "block": 6,
+       "damage": 5
+      },
+      {
+       "damage": 9
+      },
+      {
+       "weak": 1,
+       "damage": 6
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 0,
+     "potency": 12
+    },
+    {
+     "name": "谛听·侦查鹰犬",
+     "skill": "烈焰",
+     "element": "火",
+     "hp": [
+      22,
+      26
+     ],
+     "intents": [
+      {
+       "damage": 6
+      },
+      {
+       "damage": 8
+      },
+      {
+       "block": 5
+      },
+      {
+       "damage": 9,
+       "block": 3
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 0,
+     "potency": 12
+    }
+   ],
+   "卡里·灵植守卫": [
+    {
+     "name": "卡里·灵植守卫",
+     "skill": "催生",
+     "element": "木",
+     "hp": [
+      30,
+      34
+     ],
+     "intents": [
+      {
+       "regen": 3
+      },
+      {
+       "damage": 8
+      },
+      {
+       "block": 7,
+       "damage": 6
+      },
+      {
+       "regen": 2,
+       "damage": 7
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 3,
+     "potency": 9
+    }
+   ],
+   "大爽·定点转移": [
+    {
+     "name": "大爽·定点转移",
+     "skill": "转移",
+     "element": "水",
+     "hp": [
+      28,
+      32
+     ],
+     "intents": [
+      {
+       "block": 12
+      },
+      {
+       "damage": 8
+      },
+      {
+       "block": 6,
+       "damage": 6
+      },
+      {
+       "damage": 10
+      },
+      {
+       "block": 10
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 6,
+     "potency": 6
+    }
+   ],
+   "山新·游戏玩家": [
+    {
+     "name": "山新·游戏玩家",
+     "skill": "烈焰",
+     "element": "火",
+     "hp": [
+      24,
+      28
+     ],
+     "intents": [
+      {
+       "damage": 7
+      },
+      {
+       "weak": 1,
+       "damage": 5
+      },
+      {
+       "damage": 9
+      },
+      {
+       "block": 4,
+       "damage": 6
+      },
+      {
+       "damage": 11
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 0,
+     "potency": 12
+    },
+    {
+     "name": "罗小白·蓝玉盘",
+     "skill": "蓝玉盘",
+     "element": "金",
+     "hp": [
+      22,
+      26
+     ],
+     "intents": [
+      {
+       "block": 6
+      },
+      {
+       "damage": 6
+      },
+      {
+       "damage": 8,
+       "block": 4
+      },
+      {
+       "damage": 10
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 9,
+     "potency": 3
+    }
+   ],
+   "三叔·横扫千军": [
+    {
+     "name": "三叔·横扫千军",
+     "skill": "横扫",
+     "element": "土",
+     "hp": [
+      42,
+      46
+     ],
+     "intents": [
+      {
+       "block": 8
+      },
+      {
+       "damage": 12
+      },
+      {
+       "block": 5,
+       "damage": 8
+      },
+      {
+       "damage": 15
+      },
+      {
+       "strength": 1
+      }
+     ],
+     "spread": 3,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 12,
+     "potency": 0
+    }
+   ]
+  },
+  "elite": {
+   "风息·豪夺": [
+    {
+     "name": "风息·豪夺",
+     "skill": "豪夺",
+     "element": "木",
+     "hp": [
+      46,
+      46
+     ],
+     "intents": [
+      {
+       "damage": 12
+      },
+      {
+       "strength": 3,
+       "damage": 10
+      },
+      {
+       "block": 5,
+       "damage": 16
+      },
+      {},
+      {
+       "block": 6
+      }
+     ],
+     "spread": 0,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 3,
+     "potency": 9
+    }
+   ],
+   "那伽·灵主": [
+    {
+     "name": "那伽·灵主",
+     "skill": "渊啸",
+     "element": "水",
+     "hp": [
+      60,
+      60
+     ],
+     "intents": [
+      {
+       "damage": 12
+      },
+      {
+       "damage": 11,
+       "weak": 1
+      },
+      {
+       "strength": 2
+      },
+      {
+       "damage": 4,
+       "block": 6
+      }
+     ],
+     "spread": 6,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 6,
+     "potency": 6
+    }
+   ],
+   "千针": [
+    {
+     "name": "千针",
+     "skill": "针雨",
+     "element": "金",
+     "hp": [
+      52,
+      52
+     ],
+     "intents": [
+      {
+       "damage": 9
+      },
+      {
+       "block": 8
+      },
+      {
+       "damage": 11
+      },
+      {
+       "vulnerable": 2
+      },
+      {
+       "damage": 14
+      }
+     ],
+     "spread": 0,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 9,
+     "potency": 3
+    }
+   ],
+   "灵质守卫": [
+    {
+     "name": "灵质守卫",
+     "skill": "岩壁",
+     "element": "土",
+     "hp": [
+      70,
+      70
+     ],
+     "intents": [
+      {
+       "block": 5
+      },
+      {
+       "damage": 16
+      }
+     ],
+     "spread": 0,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 12,
+     "potency": 0
+    }
+   ],
+   "三妖众": [
+    {
+     "name": "府先生·酒仙",
+     "skill": "烈焰",
+     "element": "火",
+     "hp": [
+      39,
+      46
+     ],
+     "intents": [
+      {
+       "weak": 1
+      },
+      {
+       "damage": 10
+      }
+     ],
+     "spread": 0,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 0,
+     "potency": 12
+    },
+    {
+     "name": "府先生·千针",
+     "skill": "针雨",
+     "element": "金",
+     "hp": [
+      39,
+      46
+     ],
+     "intents": [
+      {
+       "damage": 10
+      },
+      {
+       "weak": 1
+      }
+     ],
+     "spread": 0,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 9,
+     "potency": 3
+    },
+    {
+     "name": "府先生·破老",
+     "skill": "岩壁",
+     "element": "土",
+     "hp": [
+      39,
+      46
+     ],
+     "intents": [
+      {
+       "weak": 1
+      },
+      {
+       "damage": 10
+      }
+     ],
+     "spread": 0,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 12,
+     "potency": 0
+    }
+   ],
+   "执行者·剑与土": [
+    {
+     "name": "执行者·白宜",
+     "skill": "剑阵",
+     "element": "土",
+     "hp": [
+      42,
+      48
+     ],
+     "intents": [
+      {
+       "damage": 11
+      },
+      {
+       "damage": 9,
+       "block": 4
+      },
+      {
+       "damage": 14
+      },
+      {
+       "block": 8
+      }
+     ],
+     "spread": 3,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 12,
+     "potency": 0
+    },
+    {
+     "name": "执行者·乙",
+     "skill": "岩壁",
+     "element": "土",
+     "hp": [
+      38,
+      44
+     ],
+     "intents": [
+      {
+       "damage": 8
+      },
+      {
+       "block": 9
+      },
+      {
+       "regen": 3
+      },
+      {
+       "damage": 10
+      },
+      {
+       "block": 6,
+       "damage": 6
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 12,
+     "potency": 0
+    }
+   ],
+   "鹿野·追毫锁定": [
+    {
+     "name": "鹿野·追毫锁定",
+     "skill": "追毫",
+     "element": "金",
+     "hp": [
+      58,
+      58
+     ],
+     "intents": [
+      {
+       "vulnerable": 2,
+       "damage": 8
+      },
+      {
+       "damage": 12
+      },
+      {
+       "block": 8,
+       "damage": 10
+      },
+      {
+       "vulnerable": 1,
+       "damage": 14
+      },
+      {
+       "damage": 16
+      }
+     ],
+     "spread": 3,
+     "phase2": [
+      {
+       "vulnerable": 2,
+       "damage": 12
+      },
+      {
+       "damage": 16
+      },
+      {
+       "vulnerable": 2
+      },
+      {
+       "damage": 12,
+       "block": 8
+      },
+      {
+       "damage": 20
+      },
+      {
+       "weak": 1,
+       "damage": 14
+      }
+     ],
+     "quote": "追毫已锁定，你跑不掉的。",
+     "phase2Quote": "全图锁定！感知组的追迹，无人可逃。",
+     "resistance": 9,
+     "potency": 3
+    }
+   ],
+   "鸠老·造物仿生": [
+    {
+     "name": "鸠老·造物仿生",
+     "skill": "仿生",
+     "element": "金",
+     "hp": [
+      62,
+      62
+     ],
+     "intents": [
+      {
+       "block": 10
+      },
+      {
+       "damage": 10
+      },
+      {
+       "regen": 3
+      },
+      {
+       "damage": 13
+      },
+      {
+       "block": 8,
+       "damage": 8
+      }
+     ],
+     "spread": 3,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 9,
+     "potency": 3
+    },
+    {
+     "name": "鸠老·仿生兽",
+     "skill": "冲撞",
+     "element": "金",
+     "hp": [
+      24,
+      28
+     ],
+     "intents": [
+      {
+       "damage": 8
+      },
+      {
+       "damage": 10
+      },
+      {
+       "block": 4,
+       "damage": 6
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": null,
+     "phase2Quote": null,
+     "resistance": 9,
+     "potency": 3
+    }
+   ],
+   "哪吒·三头六臂": [
+    {
+     "name": "哪吒·三头六臂",
+     "skill": "三头六臂",
+     "element": "火",
+     "hp": [
+      70,
+      70
+     ],
+     "intents": [
+      {
+       "damage": 10
+      },
+      {
+       "damage": 8,
+       "block": 6
+      },
+      {
+       "damage": 13
+      },
+      {
+       "vulnerable": 2,
+       "damage": 8
+      },
+      {
+       "damage": 15
+      }
+     ],
+     "spread": 3,
+     "phase2": [
+      {
+       "damage": 14
+      },
+      {
+       "damage": 12,
+       "block": 6
+      },
+      {
+       "vulnerable": 2,
+       "damage": 12
+      },
+      {
+       "damage": 18
+      },
+      {
+       "weak": 2,
+       "damage": 10
+      },
+      {
+       "damage": 22
+      }
+     ],
+     "quote": "三头六臂一开，你接得住几招？",
+     "phase2Quote": "三头六臂全开——接招！",
+     "resistance": 0,
+     "potency": 12
+    }
+   ],
+   "昊天·斗帅宫妖王": [
+    {
+     "name": "昊天·斗帅宫妖王",
+     "skill": "妖王怒",
+     "element": "金",
+     "hp": [
+      78,
+      78
+     ],
+     "intents": [
+      {
+       "strength": 2
+      },
+      {
+       "block": 10
+      },
+      {
+       "damage": 12
+      },
+      {
+       "strength": 2,
+       "damage": 8
+      },
+      {
+       "damage": 16
+      }
+     ],
+     "spread": 4,
+     "phase2": [
+      {
+       "strength": 3
+      },
+      {
+       "damage": 16
+      },
+      {
+       "block": 8,
+       "damage": 14
+      },
+      {
+       "strength": 2,
+       "damage": 12
+      },
+      {
+       "damage": 24
+      },
+      {
+       "vulnerable": 2,
+       "damage": 16
+      },
+      {
+       "damage": 30
+      }
+     ],
+     "quote": "斗帅宫一败，今日来讨回来。",
+     "phase2Quote": "妖王暴怒！斗帅宫之威，今日讨还！",
+     "resistance": 9,
+     "potency": 3
+    }
+   ],
+   "木落仙人·巨灵阵": [
+    {
+     "name": "木落仙人·巨灵阵",
+     "skill": "巨灵阵",
+     "element": "木",
+     "hp": [
+      66,
+      66
+     ],
+     "intents": [
+      {
+       "weak": 2,
+       "damage": 8
+      },
+      {
+       "block": 12
+      },
+      {
+       "damage": 12
+      },
+      {
+       "vulnerable": 2,
+       "damage": 10
+      },
+      {
+       "block": 8,
+       "damage": 12
+      },
+      {
+       "damage": 18
+      }
+     ],
+     "spread": 3,
+     "phase2": [
+      {
+       "weak": 2,
+       "damage": 12
+      },
+      {
+       "block": 10,
+       "damage": 10
+      },
+      {
+       "vulnerable": 2,
+       "damage": 14
+      },
+      {
+       "damage": 20
+      },
+      {
+       "weak": 2,
+       "damage": 16
+      },
+      {
+       "damage": 26
+      }
+     ],
+     "quote": "巨灵阵下，万物皆可化小。",
+     "phase2Quote": "巨灵阵·尽收——变小吧！",
+     "resistance": 3,
+     "potency": 9
+    }
+   ],
+   "冬冬·时滞": [
+    {
+     "name": "冬冬·时滞",
+     "skill": "时滞",
+     "element": "水",
+     "hp": [
+      58,
+      58
+     ],
+     "intents": [
+      {
+       "damage": 8
+      },
+      {
+       "damage": 6,
+       "block": 4
+      },
+      {
+       "damage": 12
+      },
+      {
+       "damage": 8
+      },
+      {
+       "damage": 6
+      },
+      {
+       "block": 8
+      },
+      {
+       "damage": 16
+      }
+     ],
+     "spread": 3,
+     "phase2": [
+      {
+       "damage": 12
+      },
+      {
+       "damage": 10,
+       "block": 4
+      },
+      {
+       "damage": 14
+      },
+      {
+       "damage": 10
+      },
+      {
+       "damage": 8
+      },
+      {
+       "block": 6,
+       "damage": 12
+      },
+      {
+       "damage": 20
+      }
+     ],
+     "quote": "我的时间，比你的快。",
+     "phase2Quote": "时滞加速——我的时间，你追不上！",
+     "resistance": 6,
+     "potency": 6
+    }
+   ],
+   "孙悟空·斗帅妖王": [
+    {
+     "name": "孙悟空·斗帅妖王",
+     "skill": "三昧火",
+     "element": "火",
+     "hp": [
+      84,
+      84
+     ],
+     "intents": [
+      {
+       "strength": 2
+      },
+      {
+       "damage": 14
+      },
+      {
+       "block": 10
+      },
+      {
+       "damage": 12,
+       "vulnerable": 1
+      },
+      {
+       "damage": 18
+      },
+      {
+       "weak": 1,
+       "damage": 12
+      }
+     ],
+     "spread": 4,
+     "phase2": [
+      {
+       "strength": 3
+      },
+      {
+       "damage": 18
+      },
+      {
+       "block": 8,
+       "damage": 14
+      },
+      {
+       "vulnerable": 2,
+       "damage": 16
+      },
+      {
+       "damage": 24
+      },
+      {
+       "strength": 2,
+       "damage": 18
+      },
+      {
+       "damage": 32
+      }
+     ],
+     "quote": "俺老孙，也来闯一闯这重生之门。",
+     "phase2Quote": "金箍镇灵！俺老孙认真了！",
+     "resistance": 0,
+     "potency": 12
+    }
+   ],
+   "西木子·戏梦": [
+    {
+     "name": "西木子·戏梦",
+     "skill": "戏梦",
+     "element": "木",
+     "hp": [
+      66,
+      66
+     ],
+     "intents": [
+      {
+       "weak": 2
+      },
+      {
+       "damage": 10
+      },
+      {
+       "vulnerable": 2,
+       "damage": 8
+      },
+      {
+       "block": 10,
+       "damage": 8
+      },
+      {
+       "damage": 14
+      },
+      {
+       "weak": 2,
+       "damage": 10
+      }
+     ],
+     "spread": 3,
+     "phase2": [
+      {
+       "weak": 2,
+       "damage": 12
+      },
+      {
+       "vulnerable": 2,
+       "damage": 10
+      },
+      {
+       "block": 8,
+       "damage": 12
+      },
+      {
+       "weak": 3
+      },
+      {
+       "damage": 18
+      },
+      {
+       "vulnerable": 2,
+       "damage": 16
+      },
+      {
+       "damage": 24
+      }
+     ],
+     "quote": "此间是梦，醒来便忘了。",
+     "phase2Quote": "戏梦锁魂——醒来前，把梦做完！",
+     "resistance": 3,
+     "potency": 9
+    }
+   ]
+  },
+  "boss": {
+   "离岛首领·风息": [
+    {
+     "name": "离岛首领·风息",
+     "skill": "豪夺",
+     "element": "木",
+     "hp": [
+      100,
+      140
+     ],
+     "intents": [
+      {
+       "damage": 16
+      },
+      {
+       "block": 6
+      },
+      {
+       "damage": 16
+      },
+      {
+       "damage": 7
+      },
+      {
+       "weak": 2
+      }
+     ],
+     "spread": 5,
+     "phase2": [
+      {
+       "damage": 18,
+       "block": 8
+      },
+      {
+       "vulnerable": 2,
+       "damage": 12
+      },
+      {
+       "damage": 26
+      },
+      {
+       "strength": 2,
+       "damage": 10
+      },
+      {
+       "weak": 2,
+       "damage": 12
+      },
+      {
+       "damage": 30
+      }
+     ],
+     "quote": "人类夺走了我们的家园……我只是，想要回家。",
+     "phase2Quote": "豪夺！你的灵质空间……归我了！",
+     "resistance": 3,
+     "potency": 9
+    }
+   ],
+   "那伽·领域": [
+    {
+     "name": "那伽·领域",
+     "skill": "渊啸",
+     "element": "水",
+     "hp": [
+      62,
+      62
+     ],
+     "intents": [
+      {
+       "damage": 5
+      },
+      {
+       "damage": 8
+      },
+      {
+       "damage": 12
+      },
+      {
+       "damage": 17
+      },
+      {
+       "damage": 23
+      },
+      {
+       "damage": 30
+      },
+      {
+       "damage": 38
+      },
+      {
+       "damage": 45
+      }
+     ],
+     "spread": 0,
+     "phase2": [
+      {
+       "damage": 10
+      },
+      {
+       "damage": 15
+      },
+      {
+       "block": 10,
+       "damage": 14
+      },
+      {
+       "damage": 22
+      },
+      {
+       "weak": 2,
+       "damage": 16
+      },
+      {
+       "damage": 30
+      },
+      {
+       "damage": 40
+      },
+      {
+       "damage": 52
+      }
+     ],
+     "quote": "踏进吾的领域，生死便由吾说了算。",
+     "phase2Quote": "渊啸！北域三百年的寒，尽数沸腾！",
+     "resistance": 6,
+     "potency": 6
+    }
+   ],
+   "重生之门·门灵": [
+    {
+     "name": "重生之门·门灵",
+     "skill": "聚灵",
+     "element": "金",
+     "hp": [
+      120,
+      120
+     ],
+     "intents": [
+      {
+       "damage": 14
+      },
+      {
+       "vulnerable": 2
+      },
+      {
+       "heal": 15,
+       "strength": 3
+      },
+      {
+       "block": 12,
+       "damage": 10
+      },
+      {
+       "damage": 18
+      }
+     ],
+     "spread": 4,
+     "phase2": [
+      {
+       "damage": 20
+      },
+      {
+       "vulnerable": 2,
+       "damage": 10
+      },
+      {
+       "heal": 20,
+       "strength": 4
+      },
+      {
+       "block": 8,
+       "damage": 16
+      },
+      {
+       "weak": 3,
+       "damage": 14
+      },
+      {
+       "damage": 28
+      }
+     ],
+     "quote": "聚灵而生，散灵而归——穿过此门，窥见轮回。",
+     "phase2Quote": "门扉已开——聚灵者归于我，散灵者亦归于我。",
+     "resistance": 9,
+     "potency": 3
+    },
+    {
+     "name": "门灵·回响",
+     "skill": "回响",
+     "element": "金",
+     "hp": [
+      40,
+      40
+     ],
+     "intents": [
+      {
+       "weak": 2
+      },
+      {
+       "regen": 3
+      },
+      {
+       "block": 10
+      },
+      {
+       "damage": 12
+      }
+     ],
+     "spread": 2,
+     "phase2": null,
+     "quote": "门扉之后，皆是回响……",
+     "phase2Quote": null,
+     "resistance": 9,
+     "potency": 3
+    }
+   ],
+   "灵遥·流石之影": [
+    {
+     "name": "灵遥·流石之影",
+     "skill": "断金阵",
+     "element": "土",
+     "hp": [
+      110,
+      130
+     ],
+     "intents": [
+      {
+       "damage": 12
+      },
+      {
+       "block": 14
+      },
+      {
+       "damage": 10,
+       "weak": 1
+      },
+      {
+       "damage": 18
+      },
+      {
+       "block": 10,
+       "damage": 8
+      }
+     ],
+     "spread": 3,
+     "phase2": [
+      {
+       "damage": 16
+      },
+      {
+       "vulnerable": 2,
+       "damage": 10
+      },
+      {
+       "block": 12,
+       "damage": 12
+      },
+      {
+       "strength": 3
+      },
+      {
+       "damage": 22
+      },
+      {
+       "weak": 2,
+       "damage": 14
+      },
+      {
+       "damage": 30
+      }
+     ],
+     "quote": "妖精的未来，不该由人类的战争来决定。",
+     "phase2Quote": "断金阵起！人类，此路不通。",
+     "resistance": 12,
+     "potency": 0
+    }
+   ],
+   "老君·灵誓试炼": [
+    {
+     "name": "老君·灵誓试炼",
+     "skill": "灵誓",
+     "element": "火",
+     "hp": [
+      130,
+      160
+     ],
+     "intents": [
+      {
+       "block": 12
+      },
+      {
+       "damage": 10
+      },
+      {
+       "heal": 12
+      },
+      {
+       "vulnerable": 2
+      },
+      {
+       "damage": 16
+      }
+     ],
+     "spread": 3,
+     "phase2": [
+      {
+       "weak": 2,
+       "damage": 12
+      },
+      {
+       "heal": 16,
+       "strength": 2
+      },
+      {
+       "block": 14
+      },
+      {
+       "damage": 18
+      },
+      {
+       "vulnerable": 2,
+       "damage": 14
+      },
+      {
+       "damage": 24
+      }
+     ],
+     "quote": "小友莫急，先陪老朽论一论灵誓。",
+     "phase2Quote": "眷灵缚魂——孩子，你的道心，可曾动摇？",
+     "resistance": 0,
+     "potency": 12
+    }
+   ],
+   "执行者·无限": [
+    {
+     "name": "执行者·无限",
+     "skill": "剑域",
+     "element": "金",
+     "hp": [
+      120,
+      150
+     ],
+     "intents": [
+      {
+       "damage": 12
+      },
+      {
+       "block": 8,
+       "damage": 8
+      },
+      {
+       "damage": 14
+      },
+      {
+       "vulnerable": 1
+      },
+      {
+       "damage": 10
+      },
+      {
+       "block": 12
+      }
+     ],
+     "spread": 3,
+     "phase2": [
+      {
+       "damage": 16
+      },
+      {
+       "strength": 2
+      },
+      {
+       "block": 10,
+       "damage": 12
+      },
+      {
+       "damage": 20
+      },
+      {
+       "vulnerable": 2,
+       "damage": 14
+      },
+      {
+       "damage": 26
+      }
+     ],
+     "quote": "会馆的安危，由我来守。亮剑吧。",
+     "phase2Quote": "剑域已开。这一课，叫做守住灵质空间。",
+     "resistance": 9,
+     "potency": 3
+    }
+   ],
+   "玄离·冰火双域": [
+    {
+     "name": "玄离·冰火双域",
+     "skill": "冰火双域",
+     "element": "水",
+     "hp": [
+      110,
+      135
+     ],
+     "intents": [
+      {
+       "damage": 9,
+       "weak": 1
+      },
+      {
+       "damage": 11
+      },
+      {
+       "block": 8
+      },
+      {
+       "damage": 12,
+       "vulnerable": 1
+      },
+      {
+       "damage": 14
+      }
+     ],
+     "spread": 2,
+     "phase2": [
+      {
+       "damage": 14
+      },
+      {
+       "vulnerable": 2,
+       "damage": 10
+      },
+      {
+       "damage": 18
+      },
+      {
+       "block": 6,
+       "damage": 12
+      },
+      {
+       "damage": 22
+      },
+      {
+       "weak": 2,
+       "damage": 16
+      }
+     ],
+     "quote": "冰与火，我都试过了。你要不要也试试？",
+     "phase2Quote": "炎域圣火！冰火双域，尽归我身！",
+     "resistance": 6,
+     "potency": 6
+    }
+   ],
+   "那伽·北域之主": [
+    {
+     "name": "那伽·北域之主",
+     "skill": "植灵",
+     "element": "水",
+     "hp": [
+      100,
+      130
+     ],
+     "intents": [
+      {
+       "weak": 1,
+       "damage": 10
+      },
+      {
+       "heal": 10,
+       "regen": 2
+      },
+      {
+       "damage": 14
+      },
+      {
+       "vulnerable": 1,
+       "damage": 8
+      },
+      {
+       "block": 10
+      },
+      {
+       "damage": 16
+      }
+     ],
+     "spread": 3,
+     "phase2": [
+      {
+       "heal": 14,
+       "strength": 2
+      },
+      {
+       "weak": 2,
+       "damage": 12
+      },
+      {
+       "damage": 18
+      },
+      {
+       "block": 8,
+       "damage": 10
+      },
+      {
+       "regen": 3
+      },
+      {
+       "damage": 24
+      }
+     ],
+     "quote": "区区闯入者，也敢踏足北域？",
+     "phase2Quote": "北域万灵，皆为我所用！",
+     "resistance": 6,
+     "potency": 6
+    }
+   ],
+   "明王·阎罗噬魂": [
+    {
+     "name": "明王·阎罗噬魂",
+     "skill": "噬魂",
+     "element": "火",
+     "hp": [
+      140,
+      170
+     ],
+     "intents": [
+      {
+       "weak": 2
+      },
+      {
+       "damage": 14
+      },
+      {
+       "heal": 15,
+       "strength": 2
+      },
+      {
+       "block": 12
+      },
+      {
+       "damage": 12,
+       "vulnerable": 1
+      },
+      {
+       "damage": 18
+      }
+     ],
+     "spread": 3,
+     "phase2": [
+      {
+       "heal": 20,
+       "strength": 3
+      },
+      {
+       "weak": 2,
+       "damage": 14
+      },
+      {
+       "damage": 20
+      },
+      {
+       "block": 10,
+       "damage": 12
+      },
+      {
+       "vulnerable": 2,
+       "damage": 16
+      },
+      {
+       "damage": 28
+      }
+     ],
+     "quote": "孩子，你的魂灵……我收下了。",
+     "phase2Quote": "魂灵俱归我身——这便是明王的道！",
+     "resistance": 0,
+     "potency": 12
+    }
+   ]
+  }
+ },
+ "regions": {
+  "pools": {
+   "longyou": [
+    "天虎",
+    "洛竹",
+    "黑咻",
+    "卡里·灵植守卫",
+    "大爽·定点转移",
+    "山新·游戏玩家",
+    "恶妖·缠藤"
+   ],
+   "lidao": [
+    "洛竹",
+    "青丘",
+    "恶妖·缠藤",
+    "离岛小妖",
+    "风息·豪夺"
+   ],
+   "beiyu": [
+    "虚淮",
+    "兆岳",
+    "黑咻",
+    "恶妖·缠藤",
+    "那伽·灵主"
+   ],
+   "laojunge": [
+    "谛听·侦查鹰犬",
+    "昊天·斗帅宫妖王",
+    "木落仙人·巨灵阵",
+    "孙悟空·斗帅妖王",
+    "冬冬·时滞",
+    "西木子·戏梦"
+   ],
+   "huiguan": [
+    "天虎",
+    "谛听·侦查鹰犬",
+    "执行者·剑与土",
+    "鹿野·追毫锁定",
+    "鸠老·造物仿生",
+    "哪吒·三头六臂",
+    "木落仙人·巨灵阵"
+   ]
+  },
+  "floors": {
+   "1": null,
+   "2": null,
+   "3": "longyou",
+   "4": "longyou",
+   "5": "lidao",
+   "6": "beiyu",
+   "7": "laojunge",
+   "8": "laojunge",
+   "9": "huiguan",
+   "10": null
+  },
+  "finalBoss": [
+   "重生之门·门灵",
+   "老君·灵誓试炼",
+   "执行者·无限",
+   "玄离·冰火双域",
+   "灵遥·流石之影"
+  ],
+  "names": {
+   "longyou": "龙游",
+   "lidao": "离岛",
+   "beiyu": "北域",
+   "laojunge": "老君阁",
+   "huiguan": "苍南会馆"
+  }
+ },
+ "skills": {
+  "藤蔓缠绕": {
+   "playerWeak": 1,
+   "desc": "藤蔓缠身，削弱敌人攻势（每回合使玩家虚弱 1 层）"
+  },
+  "缠藤": {
+   "playerWeak": 1,
+   "desc": "缠藤束缚，削弱敌人攻势（每回合使玩家虚弱 1 层）"
+  },
+  "催生": {
+   "selfRegen": 1,
+   "desc": "催生草木，生机不息（每回合获得 1 层回灵）"
+  },
+  "植灵": {
+   "selfRegen": 2,
+   "desc": "植灵汲取大地生机（每回合获得 2 层回灵）"
+  },
+  "仿生": {
+   "selfHeal": 3,
+   "desc": "仿生造物，自我修复（立即回复 3 点生命）"
+  },
+  "地陷": {
+   "selfBlock": 4,
+   "desc": "地陷为垒，土系护体（每回合获得 4 点格挡）"
+  },
+  "岩壁": {
+   "selfBlock": 5,
+   "desc": "岩壁高耸，坚不可摧（每回合获得 5 点格挡）"
+  },
+  "巨灵阵": {
+   "selfBlock": 6,
+   "desc": "巨灵法阵，厚土镇守（每回合获得 6 点格挡）"
+  },
+  "转移": {
+   "selfBlock": 4,
+   "desc": "转移攻势，借力卸劲（每回合获得 4 点格挡）"
+  },
+  "雾隐": {
+   "selfBlock": 5,
+   "desc": "雾隐迷踪，水幕护身（每回合获得 5 点格挡）"
+  },
+  "寒潮": {
+   "playerWeak": 1,
+   "desc": "寒潮刺骨，冻僵筋骨（每回合使玩家虚弱 1 层）"
+  },
+  "缚灵": {
+   "playerWeak": 1,
+   "desc": "缚灵锁魂，水缚周身（每回合使玩家虚弱 1 层）"
+  },
+  "渊啸": {
+   "playerVulnerable": 1,
+   "desc": "渊底长啸，震慑心神（每回合使玩家易伤 1 层）"
+  },
+  "冰火双域": {
+   "playerVulnerable": 1,
+   "selfBlock": 4,
+   "desc": "冰火双域，攻守兼备（每回合易伤玩家 1 层并获 4 点格挡）"
+  },
+  "烈焰": {
+   "playerVulnerable": 1,
+   "desc": "烈焰灼烧，破甲焚身（每回合使玩家易伤 1 层）"
+  },
+  "三昧火": {
+   "playerVulnerable": 1,
+   "selfStrength": 1,
+   "desc": "三昧真火，愈战愈烈（每回合易伤玩家 1 层并获 1 层力量）"
+  },
+  "妖王怒": {
+   "selfStrength": 2,
+   "desc": "妖王震怒，气势磅礴（每回合获得 2 层力量）"
+  },
+  "三头六臂": {
+   "selfStrength": 2,
+   "desc": "三头六臂，攻势如潮（每回合获得 2 层力量）"
+  },
+  "剑阵": {
+   "selfStrength": 1,
+   "desc": "剑阵齐发，锋芒毕露（每回合获得 1 层力量）"
+  },
+  "剑域": {
+   "selfStrength": 1,
+   "selfBlock": 3,
+   "desc": "剑域展开，攻守一体（每回合获 1 层力量与 3 点格挡）"
+  },
+  "断金阵": {
+   "playerVulnerable": 1,
+   "desc": "断金之阵，锋锐破防（每回合使玩家易伤 1 层）"
+  },
+  "针雨": {
+   "playerVulnerable": 1,
+   "desc": "针雨如瀑，无孔不入（每回合使玩家易伤 1 层）"
+  },
+  "追毫": {
+   "playerWeak": 1,
+   "selfStrength": 1,
+   "desc": "追毫锁定，弱点毕现（每回合虚弱玩家 1 层并获 1 层力量）"
+  },
+  "聚灵": {
+   "selfRegen": 1,
+   "desc": "聚拢天地灵气（每回合获得 1 层回灵）"
+  },
+  "回响": {
+   "selfStrength": 1,
+   "desc": "轮回回响，门灵渐强（每回合获得 1 层力量）"
+  },
+  "灵誓": {
+   "selfStrength": 1,
+   "playerWeak": 1,
+   "desc": "灵誓镇压，双重压制（每回合虚弱玩家 1 层并获 1 层力量）"
+  },
+  "豪夺": {
+   "selfHeal": 3,
+   "playerVulnerable": 1,
+   "desc": "豪夺生机，噬敌养己（每回合回复 3 点生命并使玩家易伤 1 层）"
+  },
+  "时滞": {
+   "playerWeak": 1,
+   "selfBlock": 2,
+   "desc": "时滞凝滞，攻速迟缓（每回合虚弱玩家 1 层并获 2 点格挡）"
+  },
+  "戏梦": {
+   "playerWeak": 2,
+   "desc": "戏梦迷离，神志恍惚（每回合使玩家虚弱 2 层）"
+  },
+  "噬魂": {
+   "selfHeal": 3,
+   "playerVulnerable": 1,
+   "desc": "噬魂夺魄，愈战愈勇（每回合回复 3 点生命并使玩家易伤 1 层）"
+  },
+  "分裂": {
+   "selfStrength": 1,
+   "desc": "分裂增生，分身作战（每回合获得 1 层力量）"
+  },
+  "冲撞": {
+   "playerVulnerable": 1,
+   "desc": "蛮力冲撞，撞碎防线（每回合使玩家易伤 1 层）"
+  },
+  "横扫": {
+   "playerWeak": 1,
+   "desc": "横扫千军，势大力沉（每回合使玩家虚弱 1 层）"
+  },
+  "蓝玉盘": {
+   "selfBlock": 6,
+   "desc": "蓝玉宝盘，护体灵光（每回合获得 6 点格挡）"
+  }
+ },
+ "bonus": {
+  "base": {
+   "maxHealth": 72,
+   "maxEnergy": 3,
+   "daoHeart": 20,
+   "fortune": 5
+  },
+  "rewardBase": {
+   "easy": 14,
+   "normal": 22,
+   "elite": 38,
+   "boss": 60
+  },
+  "masteries": [
+   {
+    "element": "金",
+    "title": "锋锐金系",
+    "role": "攻击·锋锐克木",
+    "flavor": "金属操控，锋锐肃杀。御灵系中最善攻伐的分支，一往无前。",
+    "passive": {
+     "atkBonus": 1
+    }
+   },
+   {
+    "element": "木",
+    "title": "生机木系",
+    "role": "生长·生机克土",
+    "flavor": "万物生发，生机盎然。催生草木、愈疗生灵，御灵系中生机最盛。",
+    "passive": {
+     "hpRegen": 1
+    }
+   },
+   {
+    "element": "水",
+    "title": "柔韧水系",
+    "role": "控制·柔韧克火",
+    "flavor": "藏渊若水，变化无形。控水驭冰，柔韧绵长，福缘自来。",
+    "passive": {
+     "fortune": 2
+    }
+   },
+   {
+    "element": "火",
+    "title": "炽烈火系",
+    "role": "爆发·炽烈克金",
+    "flavor": "炽烈爆发，焚尽八荒。御灵系中爆发最强，一鼓作气，势不可挡。",
+    "passive": {
+     "atkBonus": 1
+    }
+   },
+   {
+    "element": "土",
+    "title": "厚重土系",
+    "role": "防御·厚重克水",
+    "flavor": "大地厚载，稳若磐石。御灵系中最善防御，不动如山。",
+    "passive": {
+     "defBonus": 1
+    }
+   }
+  ],
+  "sheng": {
+   "木": "火",
+   "火": "土",
+   "土": "金",
+   "金": "水",
+   "水": "木"
+  },
+  "ke": {
+   "木": "土",
+   "火": "金",
+   "土": "水",
+   "金": "木",
+   "水": "火"
+  },
+  "weatherOrder": [
+   "木",
+   "火",
+   "土",
+   "金",
+   "水"
+  ],
+  "weatherPhases": [
+   {
+    "element": "木",
+    "name": "天时·生发",
+    "flavor": "万物生发，生灵活跃",
+    "shengling": 5,
+    "wuzhi": 2,
+    "decay": 1
+   },
+   {
+    "element": "火",
+    "name": "天时·旺盛",
+    "flavor": "能量鼎盛，灵潮澎湃",
+    "shengling": 4,
+    "wuzhi": 4,
+    "decay": 2
+   },
+   {
+    "element": "土",
+    "name": "天时·中和",
+    "flavor": "中和稳定，大地厚载",
+    "shengling": 3,
+    "wuzhi": 5,
+    "decay": 1
+   },
+   {
+    "element": "金",
+    "name": "天时·肃杀",
+    "flavor": "肃杀收敛，物质凝练",
+    "shengling": 1,
+    "wuzhi": 6,
+    "decay": 4
+   },
+   {
+    "element": "水",
+    "name": "天时·收藏",
+    "flavor": "收藏归藏，生灵潜息",
+    "shengling": 4,
+    "wuzhi": 3,
+    "decay": 3
+   }
+  ],
+  "daily": {
+   "elements": [
+    {
+     "element": "金",
+     "name": "金气当值",
+     "flavor": "肃杀收敛，锋芒自生"
+    },
+    {
+     "element": "木",
+     "name": "木气当值",
+     "flavor": "万物生发，生机盎然"
+    },
+    {
+     "element": "水",
+     "name": "水气当值",
+     "flavor": "流转不息，福泽绵长"
+    },
+    {
+     "element": "火",
+     "name": "火气当值",
+     "flavor": "灵潮澎湃，灼灼其华"
+    },
+    {
+     "element": "土",
+     "name": "土气当值",
+     "flavor": "厚德载物，稳如泰山"
+    }
+   ],
+   "blessings": [
+    {
+     "id": "lingchao",
+     "name": "灵潮初涌",
+     "desc": "天地生灵流转不息，福缘自至。",
+     "passive": {
+      "fortune": 3
+     }
+    },
+    {
+     "id": "houtu",
+     "name": "厚土承灵",
+     "desc": "大地厚载，灵质空间稳固。",
+     "passive": {
+      "maxHealth": 6
+     }
+    },
+    {
+     "id": "jinfeng",
+     "name": "金锋淬炼",
+     "desc": "锋芒内敛，御灵之力凝练。",
+     "passive": {
+      "atkBonus": 2
+     }
+    },
+    {
+     "id": "mulin",
+     "name": "木灵回春",
+     "desc": "回春之力缠绕周身，生生不息。",
+     "passive": {
+      "hpRegen": 1
+     }
+    },
+    {
+     "id": "huoyan",
+     "name": "火灵激涌",
+     "desc": "灵潮澎湃，攻守兼备。",
+     "passive": {
+      "atkBonus": 1,
+      "maxHealth": 3
+     }
+    },
+    {
+     "id": "lingjue",
+     "name": "灵觉通明",
+     "desc": "灵觉澄澈，道心稳固。",
+     "passive": {
+      "daoHeart": 4
+     }
+    },
+    {
+     "id": "juling",
+     "name": "聚灵之泽",
+     "desc": "灵泽汇聚，福缘与生机同至。",
+     "passive": {
+      "fortune": 2,
+      "maxHealth": 3
+     }
+    },
+    {
+     "id": "wanwu",
+     "name": "万物生发",
+     "desc": "生灵萌动，周而复始。",
+     "passive": {
+      "hpRegen": 1,
+      "fortune": 1
+     }
+    },
+    {
+     "id": "lingcang",
+     "name": "灵藏微启",
+     "desc": "灵藏微启，见闻化为底蕴。",
+     "passive": {
+      "daoHeart": 2,
+      "fortune": 1
+     }
+    },
+    {
+     "id": "guben",
+     "name": "固本培元",
+     "desc": "固本培元，稳守灵台。",
+     "passive": {
+      "maxHealth": 5,
+      "defBonus": 1
+     }
+    }
+   ]
+  },
+  "branches": [
+   {
+    "id": "yuling",
+    "name": "御灵系",
+    "title": "御灵·攻伐",
+    "element": "金",
+    "flavor": "最基本的能力，分支为金木水火土。金（攻击）、木（生长）、水（控制/冰）、火（爆发）、土（防御）。你的灵质空间五行之气格外精纯，攻伐凌厉——开局按本命五行额外觉醒一张五行分支卡（御金·锋锐/御木·生长/御水·流转/御火·爆发/御土·厚德）。",
+    "representative": "天虎、无限（最强御灵系）",
+    "passive": {
+     "atkBonus": 1
+    },
+    "starterCard": "rebirth:雷灵闪",
+    "dualSkill": null,
+    "branchCards": {
+     "金": "rebirth:御金·锋锐",
+     "木": "rebirth:御木·生长",
+     "水": "rebirth:御水·流转",
+     "火": "rebirth:御火·爆发",
+     "土": "rebirth:御土·厚德"
+    },
+    "starterTreasure": null
+   },
+   {
+    "id": "shengling",
+    "name": "生灵系",
+    "title": "生灵·愈生",
+    "element": "木",
+    "flavor": "与生命相关的能力：洞察、观灵、豪夺、隐匿、治愈、追毫。代表：鹿野（追毫）、清凝（治愈）、风息（豪夺）。生命链接——与其他生命共享生命力。",
+    "representative": "清凝、鹿野、风息",
+    "passive": {
+     "hpRegen": 1
+    },
+    "starterCard": "rebirth:眷灵",
+    "dualSkill": null,
+    "branchCards": null,
+    "starterTreasure": null
+   },
+   {
+    "id": "zaowu",
+    "name": "造物系",
+    "title": "造物·重构",
+    "element": "土",
+    "flavor": "重构物体，改变物体性质与样貌，可依靠灵质空间中的物质灵无中生有。代表角色：鸠老。",
+    "representative": "鸠老",
+    "passive": {
+     "defBonus": 1
+    },
+    "starterCard": "rebirth:重构",
+    "dualSkill": "rebirth:画灵",
+    "branchCards": null,
+    "starterTreasure": null
+   },
+   {
+    "id": "kongjian",
+    "name": "空间系",
+    "title": "空间·觉性",
+    "element": "水",
+    "flavor": "空间上的不连续变化，或时间上的加速/减缓。特殊能力为「领域」。常见：吞噬、传送、转移、蕴藏。代表：小黑（传送+领域）、无限（吞噬）。空间系附着于灵质空间，无法后天习得——你的空间觉性是与生俱来的天赋。",
+    "representative": "小黑、无限、阿根",
+    "passive": {
+     "fortune": 2
+    },
+    "starterCard": "rebirth:瞬移",
+    "dualSkill": null,
+    "branchCards": null,
+    "starterTreasure": null
+   },
+   {
+    "id": "xinling",
+    "name": "心灵系",
+    "title": "心灵·洞察",
+    "element": "火",
+    "flavor": "与精神力相关：读心、心灵操纵、傀儡等。你的灵识敏锐，道心坚固，能窥见人心与妖念。",
+    "representative": "老君（灵誓）、阎明（摄魂）",
+    "passive": {
+     "daoHeart": 5
+    },
+    "starterCard": "rebirth:读心",
+    "dualSkill": "rebirth:灵誓",
+    "branchCards": null,
+    "starterTreasure": null
+   },
+   {
+    "id": "suoyu",
+    "name": "锁御系",
+    "title": "锁御·御器",
+    "element": "土",
+    "flavor": "与法宝、法器相关的能力，如灵御、制灵。你与法器亲和，开局即有一件法宝随行。",
+    "representative": "鸠老（灵御）、七臂（七星锁）",
+    "passive": {
+     "defBonus": 1
+    },
+    "starterCard": "rebirth:御灵环",
+    "dualSkill": null,
+    "branchCards": null,
+    "starterTreasure": "定心镜"
+   },
+   {
+    "id": "qianghua",
+    "name": "强化系",
+    "title": "强化·体魄",
+    "element": "火",
+    "flavor": "生灵系分支，强化自身或他人的体质与力量，技能有巨力、强化、爆力、迅身等。代表：电影《不再流浪》中的强化系使用者。你以肉身横渡灵质空间，越战越强——每层力量使伤害+1，开局即觉醒「巨力」。",
+    "representative": "《不再流浪》强化系使用者",
+    "passive": {
+     "atkBonus": 2
+    },
+    "starterCard": "rebirth:巨力",
+    "dualSkill": null,
+    "branchCards": null,
+    "starterTreasure": null
+   },
+   {
+    "id": "zhiyu",
+    "name": "治愈系",
+    "title": "治愈·回春",
+    "element": "木",
+    "flavor": "生灵系分支，极其罕见，以治疗为主。代表：李清凝、阎明。你的灵质天生蕴养生机，每回合持续回春，开局即觉醒「治愈灵光」。",
+    "representative": "李清凝、阎明",
+    "passive": {
+     "hpRegen": 2
+    },
+    "starterCard": "rebirth:治愈灵光",
+    "dualSkill": null,
+    "branchCards": null,
+    "starterTreasure": null
+   }
+  ],
+  "guilds": [
+   {
+    "id": "cangnan",
+    "name": "苍南总馆",
+    "title": "馆训·执法威仪",
+    "flavor": "妖灵会馆总馆，由上古无主灵质空间改造而成，五大长老坐镇，执行者中枢。出身于此，执法者的威仪与灵识的坚固刻入魂灵——道心 +5。",
+    "desc": "上古无主灵质空间改造而成的主会馆，妖灵会馆的总部。长老与执行者云集，是维护人妖平衡的最强后盾。",
+    "representative": "西木子（五大长老）、无限（最强执行者）",
+    "passive": {
+     "daoHeart": 5
+    }
+   },
+   {
+    "id": "lingxi",
+    "name": "灵溪分馆",
+    "title": "馆训·溪畔灵秀",
+    "flavor": "罗小白家所在的小镇，人妖共居的灵秀之地，馆长卡里。溪畔灵气汇聚，机缘自来——福缘 +2。",
+    "desc": "位于罗小白家所在的小镇，人妖和谐共居。馆长卡里，四小只也活跃于此。",
+    "representative": "卡里（馆长）、山新、涅帕、秃贝",
+    "passive": {
+     "fortune": 2
+    }
+   },
+   {
+    "id": "longyou",
+    "name": "龙游分馆",
+    "title": "馆训·生灵绵长",
+    "flavor": "风息诞生地，出入口位于龙游市，馆长潘靖。龙游森林生灵浓郁，滋养体魄——最大生命 +5。",
+    "desc": "龙游市中的妖灵会馆分馆。风息曾在此展开领域，馆长潘靖，执行者团队活跃。",
+    "representative": "潘靖（馆长）、花轮、冠萱、东东",
+    "passive": {
+     "maxHealth": 5
+    }
+   },
+   {
+    "id": "liushi",
+    "name": "流石分馆",
+    "title": "馆训·馆殇不屈",
+    "flavor": "馆长大松，第二部电影中遭人类袭击全员遇难。悲壮之馆的遗志化作锐意——攻击 +1。",
+    "desc": "妖灵会馆分馆之一。馆长大松，清泉、明月等皆为馆中成员。曾遭人类袭击，全员遇难。",
+    "representative": "大松（馆长）、清泉、明月、小玉",
+    "passive": {
+     "atkBonus": 1
+    }
+   },
+   {
+    "id": "dongqiao",
+    "name": "洞桥分馆",
+    "title": "馆训·守桥如心",
+    "flavor": "山间守桥分馆，往来妖精与行旅皆受其护。守桥如守心，御守见长——格挡 +1。",
+    "desc": "妖灵会馆分馆之一，郑信毅等馆员驻守，守护一方通路。",
+    "representative": "郑信毅",
+    "passive": {
+     "defBonus": 1
+    }
+   },
+   {
+    "id": "yuedong",
+    "name": "粤东分馆",
+    "title": "馆训·海阔心宽",
+    "flavor": "南海之滨的分馆，往来商旅与妖精汇聚。海阔天空，心性豁达，灵识澄明——道心 +3。",
+    "desc": "妖灵会馆分馆之一，位于南海之滨，往来通达。",
+    "representative": "空空",
+    "passive": {
+     "daoHeart": 3
+    }
+   },
+   {
+    "id": "hanmu",
+    "name": "寒木分馆",
+    "title": "馆训·寒木凌霜",
+    "flavor": "北境寒木之地的分馆。寒木凌霜，生机内敛，战后缓缓回灵——每回合回复 1 点生命。",
+    "desc": "妖灵会馆分馆之一，地处寒木之地，馆员体魄坚韧。",
+    "representative": "大志",
+    "passive": {
+     "hpRegen": 1
+    }
+   }
+  ],
+  "difficulties": [
+   {
+    "id": "trial",
+    "name": "试炼 · 灵质初醒",
+    "desc": "适合初入众生之门的修行者：妖气稀薄，敌人孱弱，战利品更为丰厚，开局生命上限提升。",
+    "icon": "🌱",
+    "hpMult": 0.75,
+    "bossHpMult": 1,
+    "rewardMult": 1.3,
+    "startingHealthBonus": 12
+   },
+   {
+    "id": "normal",
+    "name": "历练 · 众生之门",
+    "desc": "众生之门试炼的正常强度，妖与人皆全力相搏，胜负全凭修为与抉择。",
+    "icon": "⛩️",
+    "hpMult": 1,
+    "bossHpMult": 1,
+    "rewardMult": 1,
+    "startingHealthBonus": 0
+   },
+   {
+    "id": "rebirth",
+    "name": "轮回 · 无间之狱",
+    "desc": "轮回压迫濒临极限，妖物狂暴嗜血（敌人血量大幅提升、Boss 更为致命），战利品随之削减，唯有强者可渡。",
+    "icon": "🌀",
+    "hpMult": 1.4,
+    "bossHpMult": 1.5,
+    "rewardMult": 0.75,
+    "startingHealthBonus": 0
+   }
+  ],
+  "treasures": [
+   {
+    "id": "灵泉葫芦",
+    "type": "accessory",
+    "rarity": 2,
+    "realm": 0,
+    "passive": {
+     "hpRegen": 2
+    },
+    "desc": "永远温热的葫芦，装的是灵泉之水。装备后每回合回复少量生命。"
+   },
+   {
+    "id": "玄铁甲",
+    "type": "armor",
+    "rarity": 2,
+    "realm": 1,
+    "passive": {
+     "defBonus": 3
+    },
+    "desc": "玄铁锻造的护甲。格挡更加坚实，打出的防御牌额外+3格挡。"
+   },
+   {
+    "id": "剑心佩",
+    "type": "weapon",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "atkBonus": 3
+    },
+    "desc": "青云剑宗内门弟子的信物。每张攻击牌额外造成+3伤害。"
+   },
+   {
+    "id": "天机罗盘",
+    "type": "accessory",
+    "rarity": 4,
+    "realm": 3,
+    "passive": {
+     "fortune": 10
+    },
+    "desc": "天机道院的星象法器。福缘+10，秘境与机缘更青睐你。"
+   },
+   {
+    "id": "天明珠",
+    "type": "accessory",
+    "rarity": 4,
+    "realm": 2,
+    "passive": {
+     "fortune": 8
+    },
+    "desc": "老君至宝，存放于老君阁灵质空间。福缘+8，机缘更青睐你。"
+   },
+   {
+    "id": "定心镜",
+    "type": "armor",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "defBonus": 4
+    },
+    "desc": "老君所赐法宝，定心守神。防御牌额外+4格挡。"
+   },
+   {
+    "id": "蓝玉盘",
+    "type": "accessory",
+    "rarity": 5,
+    "realm": 3,
+    "passive": {
+     "hpRegen": 3
+    },
+    "desc": "老君所赠顶级空间系法宝，可定点空间位移（冷却三十日）。每回合回复3点生命。"
+   },
+   {
+    "id": "琼圆盾",
+    "type": "armor",
+    "rarity": 4,
+    "realm": 3,
+    "passive": {
+     "defBonus": 6
+    },
+    "desc": "老君所赐，用作最后防御。防御牌额外+6格挡。"
+   },
+   {
+    "id": "若木",
+    "type": "weapon",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "atkBonus": 4
+    },
+    "desc": "能伤害妖精的特殊材料，制成子弹曾用于袭击流石会馆。每张攻击牌额外造成+4伤害。"
+   },
+   {
+    "id": "拾贰集",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "fortune": 8
+    },
+    "desc": "老君曾因无聊立下诸多誓言，被众妖精整理成十二本书。福缘+8。"
+   },
+   {
+    "id": "众生之门",
+    "type": "accessory",
+    "rarity": 4,
+    "realm": 3,
+    "passive": {
+     "atkBonus": 5
+    },
+    "desc": "人气极高的VR游戏，妖精和人类都可参与，山新等人在其中习得御灵系、心灵系能力。每张攻击牌额外造成+5伤害。"
+   },
+   {
+    "id": "黑咻",
+    "type": "accessory",
+    "rarity": 4,
+    "realm": 3,
+    "passive": {
+     "defBonus": 5
+    },
+    "desc": "小黑尾巴分裂出的独立意识生命体，可变成翅膀、小鸟或绳子，也能互相传送。防御牌额外+5格挡。"
+   },
+   {
+    "id": "八卦镜盘",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "fortune": 6
+    },
+    "desc": "镜背饰有八卦凸纹，可用于远程观察。福缘+6，提前看破凶兆。"
+   },
+   {
+    "id": "辟火珠",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "atkBonus": 4
+    },
+    "desc": "老君所炼避火之珠，曾借予一凡尝试接近太阳。每张攻击牌额外造成+4伤害。"
+   },
+   {
+    "id": "碧玉甲",
+    "type": "armor",
+    "rarity": 4,
+    "realm": 3,
+    "passive": {
+     "defBonus": 6
+    },
+    "desc": "可抵挡攻击，穿着时可贴身移动；失去意识时会自行触发护主。防御牌额外+6格挡。"
+   },
+   {
+    "id": "方寸盒",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "hpRegen": 2
+    },
+    "desc": "小小方寸，内藏乾坤，可收纳灵药温养己身。每回合回复2点生命。"
+   },
+   {
+    "id": "魂灯",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "hpRegen": 3
+    },
+    "desc": "老君以魂力点亮的灯盏，可温养神魂。每回合回复3点生命。"
+   },
+   {
+    "id": "碎叶",
+    "type": "weapon",
+    "rarity": 4,
+    "realm": 3,
+    "passive": {
+     "atkBonus": 6
+    },
+    "desc": "以无限旧剑重铸而成，赠还无限。每一击都带着旧日锋芒，攻击牌额外造成+6伤害。"
+   },
+   {
+    "id": "预蝉",
+    "type": "accessory",
+    "rarity": 4,
+    "realm": 3,
+    "passive": {
+     "defBonus": 5
+    },
+    "desc": "可感知周围的危险，蝉鸣先至、灾祸后至。防御牌额外+5格挡。"
+   },
+   {
+    "id": "天灵丹",
+    "type": "accessory",
+    "rarity": 5,
+    "realm": 3,
+    "passive": {
+     "hpRegen": 5
+    },
+    "desc": "肉体受伤，只要没死即可激发，瞬间恢复伤势。每回合回复5点生命。"
+   },
+   {
+    "id": "风息之种",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 3,
+    "passive": {
+     "hpRegen": 2
+    },
+    "desc": "离岛一战，风息散灵化树后遗留的种子。木系生机凝而不散，每回合回复2点生命。"
+   },
+   {
+    "id": "北域寒晶",
+    "type": "armor",
+    "rarity": 3,
+    "realm": 3,
+    "passive": {
+     "defBonus": 5
+    },
+    "desc": "北域之主那伽镇守千年的冰晶，蕴含凛冬寒意。防御牌额外+5格挡。"
+   },
+   {
+    "id": "灵誓契",
+    "type": "accessory",
+    "rarity": 4,
+    "realm": 4,
+    "passive": {
+     "fortune": 8
+    },
+    "desc": "老君阁试炼所获，一页出自拾贰集的灵誓残页，言出法随。福缘+8。"
+   },
+   {
+    "id": "冰火玄晶",
+    "type": "weapon",
+    "rarity": 4,
+    "realm": 4,
+    "passive": {
+     "atkBonus": 4
+    },
+    "desc": "玄离冰火双域交锋后凝成的晶石，寒焰同存。每张攻击牌额外造成+4伤害。"
+   },
+   {
+    "id": "阎罗令",
+    "type": "weapon",
+    "rarity": 4,
+    "realm": 4,
+    "passive": {
+     "atkBonus": 5
+    },
+    "desc": "明王镇守蓝溪镇酆都所持之令，可号令魂灵、噬敌心神。每张攻击牌额外造成+5伤害。"
+   },
+   {
+    "id": "流石令",
+    "type": "accessory",
+    "rarity": 5,
+    "realm": 5,
+    "passive": {
+     "fortune": 10
+    },
+    "desc": "流石会馆执行者信物，印有妖灵会馆徽记，得妖灵认可者方可得见。福缘+10。"
+   },
+   {
+    "id": "门灵之钥",
+    "type": "accessory",
+    "rarity": 5,
+    "realm": 5,
+    "passive": {
+     "hpRegen": 4
+    },
+    "desc": "重生之门·门灵消散后凝成的钥匙，是轮回边界的凭证。每回合回复4点生命。"
+   },
+   {
+    "id": "护灵丹",
+    "type": "accessory",
+    "rarity": 2,
+    "realm": 0,
+    "passive": {
+     "hpRegen": 1
+    },
+    "desc": "老君炼制的护体丹药，身体出现中毒症状时使用，失去意识便会自行触发。每回合回复1点生命。"
+   },
+   {
+    "id": "涪灵丹",
+    "type": "accessory",
+    "rarity": 2,
+    "realm": 0,
+    "passive": {
+     "maxHealth": 4
+    },
+    "desc": "老君炼制的疗伤丹，TV21话特别附送给小黑疗伤，并托纸条向无限问好。服用后最大生命+4。"
+   },
+   {
+    "id": "青灵果",
+    "type": "accessory",
+    "rarity": 2,
+    "realm": 0,
+    "passive": {
+     "maxHealth": 5
+    },
+    "desc": "誓言录中记载的灵果，进入锁御宫方可获得。服用后最大生命+5。"
+   },
+   {
+    "id": "指灵戒",
+    "type": "accessory",
+    "rarity": 2,
+    "realm": 0,
+    "passive": {
+     "fortune": 5
+    },
+    "desc": "老君戴在指间的灵戒，可导引灵气。福缘+5，机缘更青睐你。"
+   },
+   {
+    "id": "乾坤袋",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 1,
+    "passive": {
+     "fortune": 6
+    },
+    "desc": "空间法器，内含由生物死后处理形成的无主灵质空间，可收纳物品（电影2中出现）。福缘+6。"
+   },
+   {
+    "id": "流石甲",
+    "type": "armor",
+    "rarity": 3,
+    "realm": 1,
+    "passive": {
+     "defBonus": 4
+    },
+    "desc": "流石会馆护甲，妖灵会馆徽记暗藏甲内。防御牌额外+4格挡。"
+   },
+   {
+    "id": "百药柜",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 1,
+    "passive": {
+     "hpRegen": 2
+    },
+    "desc": "老君存放丹药的柜子，与炼丹息息相关。每回合回复2点生命。"
+   },
+   {
+    "id": "唤灵石",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 1,
+    "passive": {
+     "atkBonus": 2
+    },
+    "desc": "可唤醒灵石之力的法器，与灵质空间共鸣。每张攻击牌额外造成+2伤害。"
+   },
+   {
+    "id": "空间简片",
+    "type": "armor",
+    "rarity": 4,
+    "realm": 2,
+    "passive": {
+     "defBonus": 5
+    },
+    "desc": "老君持有的空间系法宝，薄如竹简，可直接转移攻击。防御牌额外+5格挡。"
+   },
+   {
+    "id": "盏铃对戒",
+    "type": "accessory",
+    "rarity": 4,
+    "realm": 2,
+    "passive": {
+     "fortune": 8
+    },
+    "desc": "定点传送法宝，实现两地互换，原属百丰山，经无限争夺后获得。福缘+8。"
+   },
+   {
+    "id": "飞去来",
+    "type": "weapon",
+    "rarity": 4,
+    "realm": 2,
+    "passive": {
+     "atkBonus": 3
+    },
+    "desc": "可回旋飞出的神器，一去一来皆有杀机。每张攻击牌额外造成+3伤害。"
+   },
+   {
+    "id": "本命灵石",
+    "type": "accessory",
+    "rarity": 4,
+    "realm": 2,
+    "passive": {
+     "maxHealth": 8
+    },
+    "desc": "与妖精本命关联的灵石，本命所系、生机所依。最大生命+8。"
+   },
+   {
+    "id": "风火乾坤圈",
+    "type": "weapon",
+    "rarity": 5,
+    "realm": 3,
+    "passive": {
+     "atkBonus": 4
+    },
+    "desc": "哪吒的法宝：乾坤圈与风火轮实为相同的三个环，尺寸可变、可分可合，化为手环藏于衣下。每张攻击牌额外造成+4伤害。"
+   },
+   {
+    "id": "玄清丹",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 1,
+    "passive": {
+     "maxHealth": 6
+    },
+    "desc": "老君丹药，收入誓言录中，条件是有人能逼老君出手。服用后最大生命+6。"
+   },
+   {
+    "id": "虚灵草",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 1,
+    "passive": {
+     "hpRegen": 2
+    },
+    "desc": "蕴含虚灵之力的灵草，形态飘忽不定。每回合回复2点生命。"
+   },
+   {
+    "id": "大御镜盘",
+    "type": "armor",
+    "rarity": 4,
+    "realm": 2,
+    "passive": {
+     "defBonus": 5
+    },
+    "desc": "与八卦镜盘相似的镜面法器，用途未明，可折射来敌攻势。防御牌额外+5格挡。"
+   },
+   {
+    "id": "灵珠",
+    "type": "accessory",
+    "rarity": 5,
+    "realm": 3,
+    "passive": {
+     "fortune": 10
+    },
+    "desc": "上古灵器，蕴含精纯灵质力，机缘自会寻来。福缘+10。"
+   },
+   {
+    "id": "游地简",
+    "type": "weapon",
+    "rarity": 5,
+    "realm": 3,
+    "passive": {
+     "atkBonus": 5
+    },
+    "desc": "可游走大地的神器简牍，来历神秘，一击即走、行踪难觅。每张攻击牌额外造成+5伤害。"
+   },
+   {
+    "id": "斥冰焰",
+    "type": "weapon",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "atkBonus": 4
+    },
+    "desc": "冰焰类法器，寒焰相生、焚而不灼。每张攻击牌额外造成+4伤害。"
+   },
+   {
+    "id": "焚焰火",
+    "type": "weapon",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "atkBonus": 4
+    },
+    "desc": "火焰类法器，黑面罩与独角兽曾用以克冰，焰势炽烈。每张攻击牌额外造成+4伤害。"
+   },
+   {
+    "id": "巨灵阵",
+    "type": "armor",
+    "rarity": 4,
+    "realm": 2,
+    "passive": {
+     "defBonus": 5
+    },
+    "desc": "大型战斗阵法/法器，聚灵成阵、以阵御敌。防御牌额外+5格挡。"
+   },
+   {
+    "id": "木系灵核",
+    "type": "accessory",
+    "rarity": 5,
+    "realm": 3,
+    "passive": {
+     "hpRegen": 4
+    },
+    "desc": "木系神器灵核，与木落仙人相关，蕴含生生不息之力。每回合回复4点生命。"
+   },
+   {
+    "id": "凝天丹",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 1,
+    "passive": {
+     "maxHealth": 6
+    },
+    "desc": "凝聚天地灵气的丹药，服之可凝练灵质力。服用后最大生命+6。"
+   },
+   {
+    "id": "清丹",
+    "type": "accessory",
+    "rarity": 2,
+    "realm": 1,
+    "passive": {
+     "maxHealth": 4
+    },
+    "desc": "清灵涤浊的丹药，可净化体内浊气。服用后最大生命+4。"
+   },
+   {
+    "id": "闭气丸",
+    "type": "accessory",
+    "rarity": 2,
+    "realm": 1,
+    "passive": {
+     "fortune": 6
+    },
+    "desc": "老君所持丹药，服后可在水下呼吸、避水通气。福缘+6。"
+   },
+   {
+    "id": "噬灵药",
+    "type": "accessory",
+    "rarity": 4,
+    "realm": 2,
+    "passive": {
+     "fortune": 8
+    },
+    "desc": "可吞噬灵质力的药物，用途成谜，似能暗中夺取他人灵质。福缘+8。"
+   },
+   {
+    "id": "风灵草",
+    "type": "accessory",
+    "rarity": 2,
+    "realm": 0,
+    "passive": {
+     "hpRegen": 2
+    },
+    "desc": "风属性灵草，随风摇曳、聚风成息，身轻如风。每回合回复2点生命。"
+   },
+   {
+    "id": "灵心草",
+    "type": "accessory",
+    "rarity": 2,
+    "realm": 1,
+    "passive": {
+     "hpRegen": 2
+    },
+    "desc": "养护心神之灵草，可安定灵识、稳固道心。每回合回复2点生命。"
+   },
+   {
+    "id": "曲晶方",
+    "type": "armor",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "defBonus": 4
+    },
+    "desc": "晶体类法器，可折射灵质力、偏转来敌攻势。防御牌额外+4格挡。"
+   },
+   {
+    "id": "千音石",
+    "type": "accessory",
+    "rarity": 3,
+    "realm": 2,
+    "passive": {
+     "fortune": 6
+    },
+    "desc": "音类灵石，可传千音、辨万声，耳聪目明、洞察先机。福缘+6。"
+   },
+   {
+    "id": "乌木",
+    "type": "weapon",
+    "rarity": 2,
+    "realm": 1,
+    "passive": {
+     "atkBonus": 3
+    },
+    "desc": "灵木材料，质坚而蕴灵，锻为兵刃锋锐内蕴。每张攻击牌额外造成+3伤害。"
+   },
+   {
+    "id": "锁灵枷",
+    "type": "armor",
+    "rarity": 4,
+    "realm": 2,
+    "passive": {
+     "defBonus": 6
+    },
+    "desc": "束缚/封锁类法器，可锁灵、禁锢灵质力，攻守兼备。防御牌额外+6格挡。"
+   },
+   {
+    "id": "断金阵",
+    "type": "weapon",
+    "rarity": 4,
+    "realm": 3,
+    "passive": {
+     "atkBonus": 5
+    },
+    "desc": "金属性阵法，锋锐破敌，可断金裂石。每张攻击牌额外造成+5伤害。"
+   },
+   {
+    "id": "扶桑枝",
+    "type": "weapon",
+    "rarity": 5,
+    "realm": 3,
+    "passive": {
+     "atkBonus": 3,
+     "fortune": 5
+    },
+    "desc": "东方汤谷太阳栖息的神树之枝，持之可掌握御灵系·木。三足乌从东方起飞，不在西方落脚——日出之树与他的血脉同频。"
+   }
+  ],
+  "bossLoot": {
+   "离岛首领·风息": "风息之种",
+   "那伽·领域": "北域寒晶",
+   "那伽·北域之主": "北域寒晶",
+   "老君·灵誓试炼": "灵誓契",
+   "玄离·冰火双域": "冰火玄晶",
+   "明王·阎罗噬魂": "阎罗令",
+   "执行者·无限": "流石令",
+   "灵遥·流石之影": "流石令",
+   "重生之门·门灵": "门灵之钥"
+  }
+ },
+ "rooms": {
+  "nodeTypes": {
+   "lowFloors": 2,
+   "early": {
+    "below": 3,
+    "types": "MVCZST"
+   },
+   "late": {
+    "above": 6,
+    "types": "MMEECZVST"
+   },
+   "middle": "MMVCEZST"
+  },
+  "roomKind": {
+   "M": "battle",
+   "E": "elite",
+   "C": "rest",
+   "S": "shop",
+   "V": "event",
+   "Z": "space",
+   "T": "battle"
+  },
+  "regionBossFloors": [
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "regionBossPools": [
+   [
+    "离岛首领·风息"
+   ],
+   [
+    "那伽·领域",
+    "那伽·北域之主"
+   ],
+   [
+    "老君·灵誓试炼",
+    "玄离·冰火双域"
+   ],
+   [
+    "明王·阎罗噬魂"
+   ],
+   [
+    "执行者·无限",
+    "灵遥·流石之影"
+   ]
+  ],
+  "realmByFloor": {
+   "0": 0,
+   "1": 0,
+   "2": 0,
+   "3": 1,
+   "4": 1,
+   "5": 2,
+   "6": 2,
+   "7": 3,
+   "8": 4,
+   "9": 4,
+   "10": 4,
+   "11": 4,
+   "12": 4
+  },
+  "events": [
+   {
+    "id": "e_wv_cat_talk",
+    "source": "worldview",
+    "realm": 0,
+    "title": "会说话的猫",
+    "description": "在灵溪镇的屋檐下，一只通体漆黑的小猫忽然开口说话：\"你身上……有妖精的味道。\"它歪着头打量你，尾巴尖轻轻晃动。猫妖并不多见，你更没想到它会主动搭话。",
+    "owner": null,
+    "theme": null,
+    "portrait": "罗小黑",
+    "choices": [
+     {
+      "side": "left",
+      "text": "交个朋友",
+      "effects": {
+       "addCard": "rebirth:金刃"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_bidiu_rampage",
+    "source": "worldview",
+    "realm": 0,
+    "title": "团鼠暴走",
+    "description": "深山里传来一声巨响——被放生的团鼠比丢不知从哪吞了一块金属，圆滚滚的身子瞬间巨大化，皮毛泛着危险的蓝光。它一看到你便横冲直撞过来，只有碰上它的眉心才能让它安静下来。",
+    "owner": null,
+    "theme": null,
+    "portrait": "比丢",
+    "choices": [
+     {
+      "side": "right",
+      "text": "以灵制服",
+      "effects": {
+       "addCard": "rebirth:木缚藤蔓"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_luojiashan_home",
+    "source": "worldview",
+    "realm": 0,
+    "title": "罗家岙夜话",
+    "description": "你借宿在罗家岙——罗小白的老家，爷爷和阿根生活的地方。夜里村外传来异响，小白的三叔抄起扁担就要出门：\"都别慌，有我呢！\"月光下，你隐约看见村口站着一个浑身寒气的身影。",
+    "owner": null,
+    "theme": null,
+    "portrait": "罗小白",
+    "choices": [
+     {
+      "side": "left",
+      "text": "随三叔守村",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_guild_invite",
+    "source": "worldview",
+    "realm": 1,
+    "title": "灵溪会馆",
+    "description": "灵溪会馆的馆长卡里站在树苗前，手里捏着一根新催生的枝条。他笑眯眯地递来一块会馆令牌：\"入会吗？会馆管饭，还管维护人妖平衡。\"在他身后，会馆的屋檐下挂着风铃，风一吹便叮当作响。",
+    "owner": null,
+    "theme": null,
+    "portrait": "卡里",
+    "choices": [
+     {
+      "side": "left",
+      "text": "加入妖灵会馆",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_liushi_fall",
+    "source": "worldview",
+    "realm": 1,
+    "title": "流石残碑",
+    "description": "你路过一座残破的会馆——门匾上\"流石\"二字依稀可辨。馆长大松与全馆同僚，曾在一夜之间尽数倒在人类袭击之下。青石阶上还留着当年搏斗的痕迹，风穿过空荡的厅堂，呜咽如泣。",
+    "owner": null,
+    "theme": null,
+    "portrait": "大松",
+    "choices": [
+     {
+      "side": "left",
+      "text": "祭拜亡者",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_kali_tree",
+    "source": "worldview",
+    "realm": 1,
+    "title": "灵溪会馆·树商",
+    "description": "灵溪会馆馆长卡里又在街角卖树了——他催生树木的手艺一绝，树枝上挂满了新结的灵果。\"帮我把这批树苗送到老君阁，工钱好说。\"他笑眯眯地看着你，尾巴尖愉快地晃了晃。",
+    "owner": null,
+    "theme": null,
+    "portrait": "卡里",
+    "choices": [
+     {
+      "side": "right",
+      "text": "讨教木系之术",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_lanxi_ruins",
+    "source": "worldview",
+    "realm": 3,
+    "title": "蓝溪镇遗梦",
+    "description": "老君灵质空间深处，一座被时光遗忘的城镇静静矗立——蓝溪镇，曾受老君庇护的人类城镇，迁镇后已成废墟。街角的医馆匾额还写着\"三和堂\"，清凝的故事似乎还留在每一块青石板上。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "祭拜先人",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_qingning_legend",
+    "source": "worldview",
+    "realm": 3,
+    "title": "清凝的传说",
+    "description": "你在一卷旧札记上读到蓝溪镇的传说：天生治愈之力的清凝，可消耗自身灵力以生灵修补魂灵、起死回生。她曾用这份力量救过整座城镇，也因这份力量被那伽觊觎三百年。",
+    "owner": null,
+    "theme": null,
+    "portrait": "清凝",
+    "choices": [
+     {
+      "side": "left",
+      "text": "寻访治愈之术",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_heal_legacy",
+    "source": "worldview",
+    "realm": 3,
+    "title": "三和堂遗方",
+    "description": "蓝溪镇的废墟里，你从三和堂医馆的残柜中翻出一卷泛黄的药方——清凝所留。天生治愈之力的她，可消耗自身灵力以生灵修补魂灵、起死回生。卷尾一行小字：\"医者，以己身渡人。\"",
+    "owner": null,
+    "theme": null,
+    "portrait": "清凝",
+    "choices": [
+     {
+      "side": "left",
+      "text": "研习治愈之术",
+      "effects": {
+       "maxHealth": 8
+      }
+     },
+     {
+      "side": "branch",
+      "text": "以治愈之灵补全遗方",
+      "effects": {
+       "maxHealth": 12
+      },
+      "branch": [
+       "zhiyu"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "e_wv_lanyupan_gift",
+    "source": "worldview",
+    "realm": 3,
+    "title": "蓝玉盘·空间传承",
+    "description": "老君阁的藏室深处，一枚泛着幽蓝光泽的玉盘悬于阵心——那是老君所赠罗小白的顶级空间系法宝蓝玉盘，可定点空间位移，三十日方能用上一次。守阁的灵偶静静看你良久，缓缓让开道路：\"有缘者，自可取之。\"",
+    "owner": null,
+    "theme": null,
+    "portrait": "罗小白",
+    "choices": [
+     {
+      "side": "left",
+      "text": "承接蓝玉盘",
+      "effects": {
+       "treasure": "蓝玉盘"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_qiongyuan_guard",
+    "source": "worldview",
+    "realm": 3,
+    "title": "琼圆盾·最后防御",
+    "description": "北域边界，一名失控的妖精正在暴走。感知组组长鹿野以金属丝线缠住它，腕间一面圆盾泛着微光——老君所赐的琼圆盾，是她留作最后防御的底牌。\"我挡正面，你断它后路！\"她头也不回地朝你喊。",
+    "owner": null,
+    "theme": null,
+    "portrait": "鹿野",
+    "choices": [
+     {
+      "side": "left",
+      "text": "合力制伏",
+      "effects": {
+       "treasure": "琼圆盾",
+       "health": -10
+      }
+     },
+     {
+      "side": "right",
+      "text": "旁观金系战法",
+      "effects": {
+       "addCard": "rebirth:金刃"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_bond_laojun",
+    "source": "worldview",
+    "realm": 3,
+    "title": "老君阁茶会",
+    "description": "老君阁的庭院里，一位白发老者正侍弄一株灵茶——老君，妖界声望极高的上古大妖，年龄超一千四百岁。他看你一眼，随手推过一盏茶：\"坐。赶路的人，也该喝口热的。\"",
+    "owner": null,
+    "theme": null,
+    "portrait": "老君",
+    "choices": [
+     {
+      "side": "right",
+      "text": "求一枚灵果",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_rebirth_gate",
+    "source": "worldview",
+    "realm": 4,
+    "title": "重生之门",
+    "description": "你在一处古老遗迹前停步——门上刻着聚灵与散灵的纹路：生命在孕育时吸收生灵凝成魂灵，死亡时生灵回归天地，而妖精则聚灵而生。这扇门，据说通往魂灵轮回的源头，是\"重生之门\"的由来。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "left",
+      "text": "踏入轮回",
+      "effects": {
+       "maxHealth": 8
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_wuxian_trial",
+    "source": "worldview",
+    "realm": 4,
+    "title": "无限试炼",
+    "description": "一道人影负手立在断崖之巅，白衣猎猎——无限，妖灵会馆最强执行者，已成仙的世界至强。当年他一人一剑破城，使罗城不战而降。此刻他低头看你：\"走到这里，也算不易。接我一剑，或是转身。\"",
+    "owner": null,
+    "theme": null,
+    "portrait": "无限",
+    "choices": [
+     {
+      "side": "left",
+      "text": "接下这一剑",
+      "effects": {
+       "health": -15,
+       "addCard": "rebirth:御金击"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_diting_fire",
+    "source": "worldview",
+    "realm": 4,
+    "title": "谛听·酆都夜行",
+    "description": "夜色浓得化不开，你误入酆都地界——上古神兽谛听正蹲在幽冥入口处打盹，紫云焰在它周身明灭。它睁开眼：\"小家伙，走错了地方。要么让我的紫云焰送你一程，要么听我说个故事。\"",
+    "owner": null,
+    "theme": null,
+    "portrait": "谛听",
+    "choices": [
+     {
+      "side": "left",
+      "text": "求借定心镜",
+      "effects": {
+       "treasure": "定心镜"
+      }
+     },
+     {
+      "side": "right",
+      "text": "参悟紫云焰",
+      "effects": {
+       "addCard": "rebirth:紫云焰"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_hualing_art",
+    "source": "worldview",
+    "realm": 4,
+    "title": "画灵之技",
+    "description": "一位造物系妖精在溪边闭目凝神，指尖虚点，凭空绘出一只振翅的灵鸟——画灵，生灵系与造物系的双系合技。生灵赋予其魂，造物赋予其形。她睁开眼，将手诀缓缓演给你看。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "left",
+      "text": "参悟画灵",
+      "effects": {
+       "addCard": "rebirth:画灵"
+      }
+     },
+     {
+      "side": "branch",
+      "text": "以重构印证画灵",
+      "effects": {
+       "addCard": "rebirth:无中生有"
+      },
+      "branch": [
+       "zaowu"
+      ]
+     }
+    ]
+   },
+   {
+    "id": "e_wv_bond_luyeshi",
+    "source": "worldview",
+    "realm": 4,
+    "title": "追毫之约",
+    "description": "苍南总馆，感知组组长鹿野倚着栏杆，腕间金属丝线随指尖翻飞——金系感知型妖精，擅长以丝线追踪妖灵力。她挑眉看你：\"站那么远做什么？过来，教你一手追毫术。妖灵力会骗眼睛，但骗不了这根线。\"",
+    "owner": null,
+    "theme": null,
+    "portrait": "鹿野",
+    "choices": [
+     {
+      "side": "right",
+      "text": "请教金系战法",
+      "effects": {
+       "addCard": "rebirth:金刃"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_bond_qingning",
+    "source": "worldview",
+    "realm": 3,
+    "title": "三和堂的医者",
+    "description": "蓝溪镇废墟的三和堂，一个白衣女子在残垣间整理药柜——清凝，老君入室弟子，天生治愈之力。她指尖流过温润的灵光，修补着旧伤与断壁：\"医者以己身渡人。你若不赶路，我帮你看看旧伤。\"",
+    "owner": null,
+    "theme": null,
+    "portrait": "清凝",
+    "choices": [
+     {
+      "side": "left",
+      "text": "承其疗愈",
+      "effects": {
+       "maxHealth": 3
+      }
+     },
+     {
+      "side": "right",
+      "text": "辞别研习",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_zszm_mt",
+    "source": "worldview",
+    "realm": 0,
+    "title": "游戏向导的问候",
+    "description": "你打盹的功夫，眼前忽然亮起一片光幕——一个圆滚滚的虚拟向导从光幕里蹦出来，绕着圈打量你：\"检测到灵力波动，欢迎来到众生之门！\"它是 MT，众生之门 VR 的向导，据说名字取自木头老师英文名的前两个字母。它眨眨眼：\"玩家等级为零，要现在开始吗？\"",
+    "owner": null,
+    "theme": null,
+    "portrait": "MT",
+    "choices": [
+     {
+      "side": "right",
+      "text": "婉拒下线",
+      "effects": {
+       "health": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_zszm_sansan",
+    "source": "worldview",
+    "realm": 1,
+    "title": "三三阵营的招募",
+    "description": "众生之门服务器的公会广场上，一支人类小队正在招人——领头的是冷静果断的三三，身后站着攻守兼备的弓手阿显。他们打算去刷一个高难副本，缺个能打能扛的帮手。三三打量你一番：\"跟不跟？出了事我兜底。\"",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "left",
+      "text": "加入小队",
+      "effects": {
+       "addCard": "rebirth:追毫"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_zszm_folan",
+    "source": "worldview",
+    "realm": 2,
+    "title": "妖王佛岚的赞赏",
+    "description": "VR 世界的中央浮空岛上，妖王佛岚的虚影缓缓浮现，声如洪钟：\"终极任务，妖王佛岚的赞赏——从零升至两百级且不红名、六十级后击杀若干红名玩家、通关全部副本、集齐全部专属道具。\"它顿了顿：\"此任务只能接一次，失败即失去唯一通关机会。\"你忽然想起，小黑曾猜测这或许是执行者的考核。",
+    "owner": null,
+    "theme": null,
+    "portrait": "佛岚",
+    "choices": [
+     {
+      "side": "left",
+      "text": "接下任务",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_zszm_redname",
+    "source": "worldview",
+    "realm": 3,
+    "title": "红名堵截",
+    "description": "众生之门的野外小径上，一个头顶红名的玩家拦住了你。他周身灵力凝实，显然是个以猎杀玩家为乐的狠角色——在 VR 里被击败虽不会真死，但一身修为会跌得很难看，还要背上装备损失。他舔了舔嘴角：\"借你的等级一用。\"",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "left",
+      "text": "正面迎战",
+      "effects": {
+       "addCard": "rebirth:金刃"
+      }
+     },
+     {
+      "side": "right",
+      "text": "传送脱身",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_wv_zszm_kuein",
+    "source": "worldview",
+    "realm": 4,
+    "title": "规则失序者",
+    "description": "众生之门的世界忽然出现一片无法渲染的灰白空洞——规则失序者奎恩东特从空洞中走出。它不受游戏规则约束，所过之处副本崩塌、任务失效。它瞥了你一眼，声音像坏掉的音轨：\"这个世界……不该只有一套规则。\"远处，似乎还有更庞大的阴影在窥视。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "退回现实",
+      "effects": {
+       "maxHealth": 7
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_oc_rainbow_huiguan",
+    "source": "worldview",
+    "realm": 2,
+    "title": "西木会馆的旧客",
+    "description": "路过一座挂着陌生牌匾的会馆，门边坐着个青年，正盯着招牌发呆。他回头看你：「这馆子……以前叫西木会馆来着？我叫虹，三百年没回来了，馆子怕是连名字都换了。」",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "邀他同行走一程",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_lxz_qingning",
+    "source": "lxz",
+    "realm": 0,
+    "title": "蓝溪镇·序章·初遇",
+    "description": "战乱之年，你随一队流民逃入深山。溪边躺着个昏迷的小女孩——她所在的村落刚被洗劫，孤女李清凝却天生治愈系，灵光极旺。一位灰袍老者蹲在她身边，掌心聚起淡金色的生灵：「这孩子的灵……很特别。」他抬眼看向你：「年轻人，可愿搭把手？」",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "left",
+      "text": "救人要紧",
+      "effects": {
+       "addCard": "rebirth:治愈灵光"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_lxz_beihe_infinite",
+    "source": "lxz",
+    "realm": 1,
+    "title": "蓝溪镇·归途·无限",
+    "description": "蓝溪镇里来了个重伤的青年——一人一剑破罗城，随后力竭昏迷。老君把他托付给神医程北河。北河嘴上嫌弃，手上却细致入微：「躺着别动，你这条命，我救定了。」青年醒来，目光锐利如剑：「……我叫无限。」",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "left",
+      "text": "请教剑术",
+      "effects": {
+       "addCard": "rebirth:金刃"
+      }
+     },
+     {
+      "side": "right",
+      "text": "陪北河照料",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_lxz_starry",
+    "source": "lxz",
+    "realm": 4,
+    "title": "蓝溪镇·新章·星夜",
+    "description": "多年后你重返蓝溪镇旧址。老君已迁走居民、封闭空间，废墟间却仍有灵光浮沉。星夜之下，一棵老树新芽萌发——有人在此埋下过约定，也有人在此学会离别。「重生之门」的传说，或许就藏在这片故土之下。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "left",
+      "text": "参悟生死",
+      "effects": {
+       "maxHealth": 5
+      }
+     },
+     {
+      "side": "right",
+      "text": "拾取旧物",
+      "effects": {
+       "treasure": "定心镜"
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_guild_longyou",
+    "source": "guild",
+    "realm": 0,
+    "title": "龙游护林",
+    "description": "龙游森林深处，馆长潘靖正带人巡林，一眼认出你腰间的会馆令，递来一枚护林符：\"森林会记住每一个会馆的孩子。\"符上缠着生机勃勃的藤须。",
+    "owner": null,
+    "theme": null,
+    "portrait": "潘靖",
+    "choices": [
+     {
+      "side": "left",
+      "text": "随队巡林",
+      "effects": {
+       "maxHealth": 4
+      }
+     },
+     {
+      "side": "right",
+      "text": "讨教御木之道",
+      "effects": {
+       "addCard": "rebirth:木缚藤蔓"
+      }
+     }
+    ],
+    "guild": "longyou"
+   },
+   {
+    "id": "e_guild_liushi",
+    "source": "guild",
+    "realm": 0,
+    "title": "遗志相托",
+    "description": "流石分馆的旧址废墟上，大松的旧部认出你的出身，沉默良久，从怀中取出一盏旧灯：\"馆没了，馆训还在。这盏魂灯，替流石照一段路。\"",
+    "owner": null,
+    "theme": null,
+    "portrait": "大松",
+    "choices": [
+     {
+      "side": "left",
+      "text": "接过魂灯",
+      "effects": {
+       "treasure": "魂灯"
+      }
+     }
+    ],
+    "guild": "liushi"
+   },
+   {
+    "id": "e_guild_dongqiao",
+    "source": "guild",
+    "realm": 0,
+    "title": "守桥人",
+    "description": "山间桥头，郑信毅拄着长刀值夜，见你风尘仆仆，让出半张草席：\"守桥人最懂路人的脚程。歇一晚，天亮再走。\"桥下溪水潺潺，篝火正旺。",
+    "owner": null,
+    "theme": null,
+    "portrait": "郑信毅",
+    "choices": [
+     {
+      "side": "left",
+      "text": "歇脚借火",
+      "effects": {
+       "health": 14
+      }
+     }
+    ],
+    "guild": "dongqiao"
+   },
+   {
+    "id": "e_guild_hanmu",
+    "source": "guild",
+    "realm": 0,
+    "title": "寒木暖炉",
+    "description": "北境寒木林，大雪封路。大志在雪地里支起一口热汤锅，远远招呼你：\"寒木馆的人，饿着肚子过不了冬。\"汤锅里咕嘟咕嘟冒着白汽。",
+    "owner": null,
+    "theme": null,
+    "portrait": "大志",
+    "choices": [
+     {
+      "side": "left",
+      "text": "喝碗热汤",
+      "effects": {
+       "health": 15
+      }
+     },
+     {
+      "side": "right",
+      "text": "讨教体魄之术",
+      "effects": {
+       "maxHealth": 6,
+       "addCard": "rebirth:土盾"
+      }
+     }
+    ],
+    "guild": "hanmu"
+   }
+  ],
+  "relations": [
+   {
+    "id": "e_rel_10",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：罗小黑与罗小白",
+    "description": "前路的烟火气里传来一阵笑闹——罗小黑与罗小白正并肩而行。在灵溪收养他的女孩，最好的朋友，一起上学。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_11",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：罗小白与山新",
+    "description": "前路的烟火气里传来一阵笑闹——罗小白与山新正并肩而行。朋友兼邻居。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_12",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：罗小黑与山新",
+    "description": "前路的烟火气里传来一阵笑闹——罗小黑与山新正并肩而行。小白的朋友，邻居。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_13",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：罗小黑与阿根",
+    "description": "前路的烟火气里传来一阵笑闹——罗小黑与阿根正并肩而行。好友，实际是玄离转世/化身。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_14",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：无限与老君",
+    "description": "前路的烟火气里传来一阵笑闹——无限与老君正并肩而行。至交好友，老君是无限的救命恩人。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_15",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：无限与潘靖",
+    "description": "前路的烟火气里传来一阵笑闹——无限与潘靖正并肩而行。龙游会馆馆长，好友。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_16",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：老君与玄离",
+    "description": "前路的烟火气里传来一阵笑闹——老君与玄离正并肩而行。朝夕相处的故人，后因故决裂。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_17",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：老君与谛听",
+    "description": "前路的烟火气里传来一阵笑闹——老君与谛听正并肩而行。友人兼助手，上古神兽随老君。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_18",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：老君与罗小白",
+    "description": "前路的烟火气里传来一阵笑闹——老君与罗小白正并肩而行。赠其蓝玉盘，忘年交。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_19",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：玄离与清凝",
+    "description": "前路的烟火气里传来一阵笑闹——玄离与清凝正并肩而行。亲密故人，被昵称「狗哥」；清凝被迫去北域后决裂并刻苦修炼。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_20",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：玄离与阿根",
+    "description": "前路的烟火气里传来一阵笑闹——玄离与阿根正并肩而行。化身/转世，共生关系。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_21",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：比丢与罗小白",
+    "description": "前路的烟火气里传来一阵笑闹——比丢与罗小白正并肩而行。被收养并取名的家人，感情深厚。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_22",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：风息与洛竹/虚淮/天虎",
+    "description": "前路的烟火气里传来一阵笑闹——风息与洛竹/虚淮/天虎正并肩而行。同伴，同为来自森林的妖精。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_23",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：风息与呓/哈哈/吟酒",
+    "description": "前路的烟火气里传来一阵笑闹——风息与呓/哈哈/吟酒正并肩而行。千年前的伙伴，共同立志夺回适合妖精生存的土地。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_24",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：虚淮与洛竹/风息/天虎",
+    "description": "前路的烟火气里传来一阵笑闹——虚淮与洛竹/风息/天虎正并肩而行。同伴，同为来自森林的妖精。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_25",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：虚淮与谛听",
+    "description": "前路的烟火气里传来一阵笑闹——虚淮与谛听正并肩而行。好友。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_26",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：谛听与清凝",
+    "description": "前路的烟火气里传来一阵笑闹——谛听与清凝正并肩而行。朋友，蓝溪镇篇中协助老君管理事务。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_27",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：皇受与山新",
+    "description": "前路的烟火气里传来一阵笑闹——皇受与山新正并肩而行。主人，在街头捡回的流浪猫。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_28",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：皇受与罗小黑",
+    "description": "前路的烟火气里传来一阵笑闹——皇受与罗小黑正并肩而行。暗恋对象，被小黑救下后穷追不舍，被称为「小黑的克星」。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_29",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：卡里与潘靖",
+    "description": "前路的烟火气里传来一阵笑闹——卡里与潘靖正并肩而行。好友，常约酒但都不胜酒力。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_36",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：罗小黑与老君",
+    "description": "一桩与罗小黑、老君有关的旧事在风中传来。天明珠任务相关，老君曾为他疗伤。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_37",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：罗小黑与皇受",
+    "description": "一桩与罗小黑、皇受有关的旧事在风中传来。被小黑救下后穷追不舍，称小黑「喵」声都动听。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_38",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：罗小白与老君",
+    "description": "一桩与罗小白、老君有关的旧事在风中传来。获赠蓝玉盘。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_39",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：罗小白与虚淮",
+    "description": "一桩与罗小白、虚淮有关的旧事在风中传来。虚淮因迷路被罗小白帮助，从此对人类产生好感。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_40",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：罗小白与比丢",
+    "description": "一桩与罗小白、比丢有关的旧事在风中传来。收养并取名，感情深厚。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_41",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：无限与泽宇",
+    "description": "一桩与无限、泽宇有关的旧事在风中传来。徒孙。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_42",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：无限与苟浩瀚",
+    "description": "一桩与无限、苟浩瀚有关的旧事在风中传来。同事，执行者。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_43",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：无限与天虎",
+    "description": "一桩与无限、天虎有关的旧事在风中传来。同事，执行者。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_44",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：老君与炎帝",
+    "description": "一桩与老君、炎帝有关的旧事在风中传来。故友。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_45",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：老君与哪吒",
+    "description": "一桩与老君、哪吒有关的旧事在风中传来。故友。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_46",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：虚淮与罗小黑",
+    "description": "一桩与虚淮、罗小黑有关的旧事在风中传来。战友。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_47",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：虚淮与无限",
+    "description": "一桩与虚淮、无限有关的旧事在风中传来。战友。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_48",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：山新与皇受",
+    "description": "一桩与山新、皇受有关的旧事在风中传来。在街头捡回的宠物猫。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_49",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：山新与清凝",
+    "description": "一桩与山新、清凝有关的旧事在风中传来。互动对象，互相调戏/傲娇对峙。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_50",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：比丢与罗小黑",
+    "description": "一桩与比丢、罗小黑有关的旧事在风中传来。唯一能制服它的妖精，小黑可用黑咻变绳子抓它。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_51",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：比丢与山新",
+    "description": "一桩与比丢、山新有关的旧事在风中传来。曾喂它吃精灵变的羽毛球导致暴走。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_52",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：闵翔与风息",
+    "description": "一桩与闵翔、风息有关的旧事在风中传来。龙游时期伙伴。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_55",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：罗小黑与洛竹",
+    "description": "前路的烟火气里传来一阵笑闹——罗小黑与洛竹正并肩而行。旧友，风息一伙同伴，同为森林妖精。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_56",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：玄离与谛听",
+    "description": "前路的烟火气里传来一阵笑闹——玄离与谛听正并肩而行。旧识，上古神兽；谛听唤阿根为玄离。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_57",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：卡里与老君",
+    "description": "前路的烟火气里传来一阵笑闹——卡里与老君正并肩而行。旧识，老君托卡里给玄离通行证。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_58",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：卡里与无限",
+    "description": "前路的烟火气里传来一阵笑闹——卡里与无限正并肩而行。旧识，同为会馆相关者。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_59",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：青丘与府先生",
+    "description": "前路的烟火气里传来一阵笑闹——青丘与府先生正并肩而行。同伙，为救友人而抢夺天明珠。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_60",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：青丘与千针",
+    "description": "前路的烟火气里传来一阵笑闹——青丘与千针正并肩而行。同伙，抢天明珠团伙。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_61",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：青丘与酒仙",
+    "description": "前路的烟火气里传来一阵笑闹——青丘与酒仙正并肩而行。同伙，抢天明珠团伙。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_62",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：青丘与破老",
+    "description": "前路的烟火气里传来一阵笑闹——青丘与破老正并肩而行。同伙，抢天明珠团伙。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_63",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：府先生与千针",
+    "description": "前路的烟火气里传来一阵笑闹——府先生与千针正并肩而行。同伙，抢天明珠团伙。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_64",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：府先生与酒仙",
+    "description": "前路的烟火气里传来一阵笑闹——府先生与酒仙正并肩而行。同伙，抢天明珠团伙。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_65",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：府先生与破老",
+    "description": "前路的烟火气里传来一阵笑闹——府先生与破老正并肩而行。同伙，抢天明珠团伙。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_66",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：千针与酒仙",
+    "description": "前路的烟火气里传来一阵笑闹——千针与酒仙正并肩而行。同伙，抢天明珠团伙。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_67",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：千针与破老",
+    "description": "前路的烟火气里传来一阵笑闹——千针与破老正并肩而行。同伙，抢天明珠团伙。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_68",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：酒仙与破老",
+    "description": "前路的烟火气里传来一阵笑闹——酒仙与破老正并肩而行。同伙，抢天明珠团伙。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_69",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：白虎与青龙",
+    "description": "前路的烟火气里传来一阵笑闹——白虎与青龙正并肩而行。兄弟/搭档，上古四大神兽，一同游历维持平衡。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_70",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：云飞与罗小白",
+    "description": "前路的烟火气里传来一阵笑闹——云飞与罗小白正并肩而行。祖孙，小白的爷爷。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_71",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：小白妈妈与罗小白",
+    "description": "前路的烟火气里传来一阵笑闹——小白妈妈与罗小白正并肩而行。母女。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_72",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：小白爸爸与罗小白",
+    "description": "前路的烟火气里传来一阵笑闹——小白爸爸与罗小白正并肩而行。父女。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_73",
+    "source": "relation",
+    "realm": 0,
+    "title": "旧友重逢：阿根与老君",
+    "description": "前路的烟火气里传来一阵笑闹——阿根与老君正并肩而行。旧识，与老君是旧识。。看见你，他们停下来，像老友一样招呼你一起歇脚。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "赠礼告别",
+      "effects": {
+       "maxHealth": 4
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_74",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：风息与叶子",
+    "description": "一桩与风息、叶子有关的旧事在风中传来。反人类助手。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_75",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：风息与阿赫",
+    "description": "一桩与风息、阿赫有关的旧事在风中传来。反人类助手。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_76",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：哪吒与明王",
+    "description": "一桩与哪吒、明王有关的旧事在风中传来。同为创始神。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_77",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：哪吒与无限",
+    "description": "一桩与哪吒、无限有关的旧事在风中传来。会馆核心战力，奉命看守被诬陷的无限时暗中予以便利。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_78",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：玄离与无限",
+    "description": "一桩与玄离、无限有关的旧事在风中传来。对无限实力感兴趣，曾主动提出比试。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_79",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：东东与罗小黑",
+    "description": "一桩与东东、罗小黑有关的旧事在风中传来。战友/同僚，会馆执行者之间的交集。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_80",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：东东与龙游会馆馆长",
+    "description": "一桩与东东、龙游会馆馆长有关的旧事在风中传来。上级，馆长对其失踪高度重视。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_81",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：白虎与老君",
+    "description": "一桩与白虎、老君有关的旧事在风中传来。同级强者，同为顶级强者，彼此尊重。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_82",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：龙岩与大志",
+    "description": "一桩与龙岩、大志有关的旧事在风中传来。TV40话结尾与大志同行。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_83",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：龙岩与罗小黑",
+    "description": "一桩与龙岩、罗小黑有关的旧事在风中传来。同僚，会馆任务中有过配合。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_84",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：龙岩与无限",
+    "description": "一桩与龙岩、无限有关的旧事在风中传来。同僚，会馆任务中有过配合。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_85",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：极光与逆鳞",
+    "description": "一桩与极光、逆鳞有关的旧事在风中传来。旧交，与会馆高阶执行者有旧交。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_86",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：极光与颜如婴",
+    "description": "一桩与极光、颜如婴有关的旧事在风中传来。旧交，与会馆高阶执行者有旧交。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   {
+    "id": "e_rel_87",
+    "source": "relation",
+    "realm": 1,
+    "title": "因缘一瞥：涅帕与罗小黑",
+    "description": "一桩与涅帕、罗小黑有关的旧事在风中传来。关注，因一次事件而开始在意小黑。。你虽未亲历，却从这缕因缘中嗅到了命运交错的气息。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "修心养气",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   }
+  ],
+  "echoes": {
+   "3": {
+    "id": "e_echo_longyou",
+    "source": "echo",
+    "realm": 1,
+    "title": "纪年回响 · 龙游",
+    "description": "踏入龙游，灵质空间泛起电影1（约4年前）的纪年回响——龙游事件 · 风息之乱与小黑拜师。往事如烟：「小黑家园被毁，流落城市」「风息利用小黑后被无限追击」「无限收小黑为徒」「风息夺走小黑的灵质空间」「小黑与无限联手击败风息」。你驻足良久，这段历史的分量缓缓沉入你的灵识。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "汲取回响",
+      "effects": {
+       "maxHealth": 3
+      }
+     }
+    ]
+   },
+   "5": {
+    "id": "e_echo_lidao",
+    "source": "echo",
+    "realm": 2,
+    "title": "纪年回响 · 离岛",
+    "description": "踏入离岛，灵质空间泛起电影1（约4年前）的纪年回响——离岛 · 风息的老家。往事如烟：「在离岛建立据点，拉拢反人类妖精」「展开领域报复人类，被小黑和无限击败」「自裁化作巨树，成为风息公园」。你驻足良久，这段历史的分量缓缓沉入你的灵识。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "汲取回响",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   "6": {
+    "id": "e_echo_beiyu",
+    "source": "echo",
+    "realm": 2,
+    "title": "纪年回响 · 北域",
+    "description": "踏入北域，灵质空间泛起古代的纪年回响——北域 · 那伽与清凝的旧事。往事如烟：「那伽威胁清凝，老君联合众神击败那伽」「清凝被送往北域三百年」「老君救回清凝，诈称已死，立誓百年不出君阁」。你驻足良久，这段历史的分量缓缓沉入你的灵识。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "汲取回响",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   "7": {
+    "id": "e_echo_laojunge",
+    "source": "echo",
+    "realm": 3,
+    "title": "纪年回响 · 老君阁",
+    "description": "踏入老君阁，灵质空间泛起古代的纪年回响——蓝溪镇 · 老君与清凝的旧事。往事如烟：「老君创立蓝溪镇，收留战争难民」「老君收清凝为徒」「老君救回清凝，诈称已死，立誓百年不出君阁」。你驻足良久，这段历史的分量缓缓沉入你的灵识。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "汲取回响",
+      "effects": {
+       "maxHealth": 5
+      }
+     }
+    ]
+   },
+   "9": {
+    "id": "e_echo_huiguan",
+    "source": "echo",
+    "realm": 4,
+    "title": "纪年回响 · 苍南会馆",
+    "description": "踏入苍南会馆，灵质空间泛起电影2（约2年前）的纪年回响——流石事件 · 无限蒙冤与洗冤。往事如烟：「流石会馆被人类袭击」「无限被诬陷软禁」「小黑与鹿野一起为无限洗冤」。你驻足良久，这段历史的分量缓缓沉入你的灵识。",
+    "owner": null,
+    "theme": null,
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "汲取回响",
+      "effects": {
+       "maxHealth": 7
+      }
+     }
+    ]
+   }
+  },
+  "memory": {
+   "title": "回忆·{name}",
+   "description": "灵质空间的罅隙间忽然浮起一段旧日回响——那是{name}的生平一瞬：{text}。往事如烟，却在你心头留下灼痕。你驻足良久，那缕记忆的余温缓缓没入你的灵识。",
+   "entries": [
+    {
+     "name": "东东",
+     "text": "TV25话：用能力指挥鸟类搬运飞机零件，救下故障客机"
+    },
+    {
+     "name": "东东",
+     "text": "TV35话：察觉被跟踪"
+    },
+    {
+     "name": "东东",
+     "text": "TV40话：放学路上被绑架失踪，龙游会馆馆长高度重视"
+    },
+    {
+     "name": "东东",
+     "text": "大电影：参与对战洛竹"
+    },
+    {
+     "name": "山新",
+     "text": "第三集带皇受来小白家做客，用狗尾草逗小黑"
+    },
+    {
+     "name": "山新",
+     "text": "第七集在罗家岙与阿根打羽毛球（实为小精灵），不小心喂给比丢致其暴走，十分自责"
+    },
+    {
+     "name": "山新",
+     "text": "与小白坐车去市区参加漫展，打游戏打败三人获得限量版《众生之门》游戏机"
+    },
+    {
+     "name": "山新",
+     "text": "与小黑、小白、阿根一起进入《众生之门》游戏"
+    },
+    {
+     "name": "无限",
+     "text": "离岛追捕风息，意外带走小黑"
+    },
+    {
+     "name": "无限",
+     "text": "收小黑为徒，教他金属操控和读书"
+    },
+    {
+     "name": "无限",
+     "text": "与风息在领域内决战，联手小黑击败风息"
+    },
+    {
+     "name": "无限",
+     "text": "第二部电影中被诬陷为袭击会馆的嫌疑人，后被洗冤"
+    },
+    {
+     "name": "比丢",
+     "text": "因觅食结识阿根和小白，被取名'比丢'并收养"
+    },
+    {
+     "name": "比丢",
+     "text": "被山新喂食精灵变的羽毛球而暴走"
+    },
+    {
+     "name": "比丢",
+     "text": "因安全考虑被放归森林，一直在原地等待小白等人"
+    },
+    {
+     "name": "比丢",
+     "text": "第十二集中被罗小白接回，接受'只吃木头'的饮食训练"
+    },
+    {
+     "name": "玄离",
+     "text": "上古时期在斗帅宫以战斗为乐，性格急躁好斗"
+    },
+    {
+     "name": "玄离",
+     "text": "跟随老君参与平息战乱，护送李清凝及村民前往蓝溪镇"
+    },
+    {
+     "name": "玄离",
+     "text": "随老君清凝游历罗城、月宫等地，在罗城遇见无限"
+    },
+    {
+     "name": "玄离",
+     "text": "在清凝建议下去学堂学识字（两年才认识四十个字）"
+    },
+    {
+     "name": "玄离",
+     "text": "在清凝的建议下去学堂读书，花了两年认识了四十个字"
+    },
+    {
+     "name": "玄离",
+     "text": "前往燕京参加兴朝开国典礼，并与无限约定斗帅宫比武"
+    },
+    {
+     "name": "玄离",
+     "text": "北域战争无意染上那伽的灵；那伽以妖精性命要挟老君时试图攻击被阻"
+    },
+    {
+     "name": "玄离",
+     "text": "清凝被迫随那伽去北域后情绪失控，与老君决裂，后刻苦修炼"
+    },
+    {
+     "name": "玄离",
+     "text": "看管老君宝物天明珠，在斗帅宫屡胜前来索要的妖精，于无限三十一年成仙"
+    },
+    {
+     "name": "玄离",
+     "text": "隐居深山被村民尊为\"山神\"；重伤被罗云飞救起"
+    },
+    {
+     "name": "玄离",
+     "text": "灵体寄居罗小白堂哥阿根体内，双魂一体共存休养"
+    },
+    {
+     "name": "玄离",
+     "text": "在北域南界迎战八位圣王，觉醒冰系技能并杀死三位"
+    },
+    {
+     "name": "玄离",
+     "text": "无限三十一年正式成仙"
+    },
+    {
+     "name": "玄离",
+     "text": "因清凝被迫前往北域，与老君决裂，离开蓝溪镇刻苦修炼"
+    },
+    {
+     "name": "玄离",
+     "text": "后因不明原因寄宿在罗根（阿根）体内，隐居乡下"
+    },
+    {
+     "name": "皇受",
+     "text": "原本是流浪猫，被六岁的山新捡回收养"
+    },
+    {
+     "name": "皇受",
+     "text": "初见黑咻时害怕逃跑，被小黑从大狗SATAN身边救下后喜欢上小黑"
+    },
+    {
+     "name": "皇受",
+     "text": "与比丢一起在家日常玩耍（蹭泥、摔下阳台等）"
+    },
+    {
+     "name": "罗小白",
+     "text": "收养流浪猫妖并取名罗小黑"
+    },
+    {
+     "name": "罗小白",
+     "text": "获老君赠送顶级空间系法宝蓝玉盘"
+    },
+    {
+     "name": "罗小白",
+     "text": "带领小黑、山新、阿根一起玩《众生之门》游戏"
+    },
+    {
+     "name": "罗小黑",
+     "text": "家园被毁，流落城市"
+    },
+    {
+     "name": "罗小黑",
+     "text": "被风息欺骗利用，灵质空间被夺（白发）"
+    },
+    {
+     "name": "罗小黑",
+     "text": "拜无限为师，修炼四年"
+    },
+    {
+     "name": "罗小黑",
+     "text": "盗取天明珠被谛听打伤，被小白收养"
+    },
+    {
+     "name": "罗小黑",
+     "text": "蓝溪镇冒险，与老君结识"
+    },
+    {
+     "name": "罗小黑",
+     "text": "众生之门游戏中完成任务"
+    },
+    {
+     "name": "罗小黑",
+     "text": "跟随鹿野为无限洗冤（第二部电影）"
+    },
+    {
+     "name": "罗小黑",
+     "text": "大电影II中，小黑戴上无限的抑制空间系能力手环会变回黑发，取下则变回白发"
+    },
+    {
+     "name": "罗小黑",
+     "text": "正式拜师后四年期间，一直在适应新的灵质空间（第一部电影结束时从未使用过）"
+    },
+    {
+     "name": "罗小黑",
+     "text": "尾巴可分裂成黑咻，具有独立意识，幼年时只能分裂一只，随妖力增长可更多（一般四只）"
+    },
+    {
+     "name": "罗小黑",
+     "text": "小黑其实不知道确切生日，11月1日是师父无限定的"
+    },
+    {
+     "name": "老君",
+     "text": "创立蓝溪镇，收留战乱中无家可归之人"
+    },
+    {
+     "name": "老君",
+     "text": "收清凝为徒，教授治愈系能力"
+    },
+    {
+     "name": "老君",
+     "text": "联合众神击败那伽，救回清凝"
+    },
+    {
+     "name": "老君",
+     "text": "立誓百年不出君阁，诈称清凝已死"
+    },
+    {
+     "name": "老君",
+     "text": "发布天明珠誓言录任务"
+    },
+    {
+     "name": "谛听",
+     "text": "看护天明珠不力致其被猫妖小黑盗走，主动请缨捉拿"
+    },
+    {
+     "name": "谛听",
+     "text": "追踪附近最强妖气（阿根）找到了小黑"
+    },
+    {
+     "name": "风息",
+     "text": "森林被毁后开始仇视人类"
+    },
+    {
+     "name": "风息",
+     "text": "在离岛建立据点，拉拢反人类妖精"
+    },
+    {
+     "name": "风息",
+     "text": "利用并夺取小黑的灵质空间"
+    },
+    {
+     "name": "风息",
+     "text": "展开领域报复人类，被小黑和无限击败"
+    },
+    {
+     "name": "风息",
+     "text": "自裁化作巨树，成为风息公园"
+    },
+    {
+     "name": "风息",
+     "text": "工业时代来临、森林被砍伐后开始厌恨人类，破坏过工厂和火车"
+    },
+    {
+     "name": "风息",
+     "text": "在城市小巷发现流浪的小黑，派人攻击再自导自演赶走以赢得信任"
+    },
+    {
+     "name": "风息",
+     "text": "夺取罗小黑的领域能力后，身体化为巨树而死，死后地点成为'风息公园'"
+    },
+    {
+     "name": "鹿野",
+     "text": "幼年家园被毁，亲友惨死，在废墟中被无限救出"
+    },
+    {
+     "name": "鹿野",
+     "text": "为复仇主动拜师学艺，成为无限关门弟子"
+    },
+    {
+     "name": "鹿野",
+     "text": "加入妖灵会馆成为执行者，收泽宇为徒"
+    },
+    {
+     "name": "鹿野",
+     "text": "罗小黑战记2中与小黑共同调查无限被诬陷事件"
+    },
+    {
+     "name": "龙岩",
+     "text": "TV33话：首次登场，妖灵会馆成员"
+    },
+    {
+     "name": "龙岩",
+     "text": "TV40话：结尾彩蛋与大志同行"
+    }
+   ],
+   "choices": {
+    "0": {
+     "realm": 0,
+     "choices": [
+      {
+       "side": "right",
+       "text": "赠一线善缘",
+       "effects": {
+        "maxHealth": 3
+       }
+      }
+     ]
+    },
+    "1": {
+     "realm": 1,
+     "choices": [
+      {
+       "side": "right",
+       "text": "赠一线善缘",
+       "effects": {
+        "maxHealth": 3
+       }
+      }
+     ]
+    },
+    "2": {
+     "realm": 2,
+     "choices": [
+      {
+       "side": "right",
+       "text": "赠一线善缘",
+       "effects": {
+        "maxHealth": 5
+       }
+      }
+     ]
+    },
+    "3": {
+     "realm": 3,
+     "choices": [
+      {
+       "side": "right",
+       "text": "赠一线善缘",
+       "effects": {
+        "maxHealth": 5
+       }
+      }
+     ]
+    },
+    "4": {
+     "realm": 4,
+     "choices": [
+      {
+       "side": "right",
+       "text": "赠一线善缘",
+       "effects": {
+        "maxHealth": 7
+       }
+      }
+     ]
+    },
+    "5": {
+     "realm": 4,
+     "choices": [
+      {
+       "side": "right",
+       "text": "赠一线善缘",
+       "effects": {
+        "maxHealth": 7
+       }
+      }
+     ]
+    }
+   }
+  },
+  "spaces": [
+   {
+    "id": "ss_awaken",
+    "source": "space",
+    "realm": 0,
+    "title": "领域·初绽",
+    "description": "你的灵质空间在沉睡多年后第一次完全展开——空间内部灰蒙蒙的，生灵如萤火般漂浮。传说高阶妖精可在此开辟独立领域，而你的空间，正传来微弱的、属于「重生之门」的回响。",
+    "owner": "你自身",
+    "theme": "空间系·领域",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "感应空间",
+      "effects": {
+       "addCard": "rebirth:领域·展开"
+      }
+     },
+     {
+      "side": "right",
+      "text": "扩张边界",
+      "effects": {
+       "maxHealth": 6
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_lixi_grove",
+    "source": "space",
+    "realm": 0,
+    "title": "灵植温床",
+    "description": "灵溪会馆后院有一片卡里用木系御灵催生的小树林。他笑眯眯地站在树苗前：「进来坐坐？我这空间养树最好——木系妖精的灵质空间，生灵最旺。」树根下隐约埋着旧物。",
+    "owner": "卡里（灵溪会馆馆长）",
+    "theme": "御灵系·木",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "掘出旧物",
+      "effects": {
+       "treasure": "灵泉葫芦"
+      }
+     },
+     {
+      "side": "right",
+      "text": "取一根灵枝",
+      "effects": {
+       "addCard": "rebirth:木缚藤蔓"
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_game_gate",
+    "source": "space",
+    "realm": 0,
+    "title": "众生之门·游戏空间",
+    "description": "山新拉着你钻进《众生之门》——号称\"真实到不可思议\"的御灵游戏。灵质空间在这里以玩家身份出现：有数值面板、技能树、复活点，也有满地乱跑的小妖。山新拍拍胸脯：「别怕，死了还能复活——不过痛感可是真的哦！」",
+    "owner": "山新（灵溪·四小只）",
+    "theme": "虚拟空间·游戏世界",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "领取新手礼包",
+      "effects": {
+       "treasure": "剑心佩"
+      }
+     },
+     {
+      "side": "right",
+      "text": "挑战隐藏Boss",
+      "effects": {
+       "addCard": "rebirth:全攻突进",
+       "health": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_longyou_remnant",
+    "source": "space",
+    "realm": 1,
+    "title": "龙游·领域残迹",
+    "description": "风息在龙游展开领域失败后，生灵散尽却未完全消散，化为一片茂密林木留在城中。树冠间仍残留着领域规则的痕迹——你若踏入，会被这片土地短暂接纳。",
+    "owner": "风息（散灵后的遗留）",
+    "theme": "御灵系·木 · 领域残留",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "摘取灵果",
+      "effects": {
+       "maxHealth": 5
+      }
+     },
+     {
+      "side": "right",
+      "text": "顺着树根探秘",
+      "effects": {
+       "addCard": "rebirth:木愈回春",
+       "health": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_park_spirit",
+    "source": "space",
+    "realm": 1,
+    "title": "风息公园·新生灵域",
+    "description": "龙游市内，风息散灵后建立的风息公园。无数生灵在林木间流转、聚散，形成一个极罕见的「自发灵质场」——没有开辟者，却自成规则。此地的生灵格外温和。",
+    "owner": "散灵生灵",
+    "theme": "生灵汇聚",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "引灵入体",
+      "effects": {
+       "maxHealth": 4
+      }
+     },
+     {
+      "side": "right",
+      "text": "捕捉游离灵偶",
+      "effects": {
+       "addCard": "rebirth:眷灵"
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_bookshop_dream",
+    "source": "space",
+    "realm": 1,
+    "title": "龙游·画中书境",
+    "description": "龙游街角的书店由松鼠妖精画虎经营。他打了个响指，你脚下的地板化作墨迹，四周书架坍缩成一张宣纸——「欢迎来到我的画里。这里的规则很简单：能画出什么，就有什么。」",
+    "owner": "画虎",
+    "theme": "造物系·画灵 · 书境",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "习得画灵之术",
+      "effects": {
+       "addCard": "rebirth:画灵"
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_lidao_base",
+    "source": "space",
+    "realm": 2,
+    "title": "离岛·据点空间",
+    "description": "离岛是风息一伙的据点，通过桥梁下的传送门可达。岛上的灵质空间由同伴共同维护：洛竹的藤蔓盘绕墙壁，虚淮留下传送印记，天虎在角落蜷成一团。这里对陌生来客并不友善。",
+    "owner": "风息一伙",
+    "theme": "空间系·传送门 · 木",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "探查传送印记",
+      "effects": {
+       "addCard": "rebirth:瞬移"
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_mulun_lingfeng",
+    "source": "space",
+    "realm": 2,
+    "title": "灵风山·巨灵阵",
+    "description": "灵风山深处，树精灵七果与花精灵粉末守着一段扭曲的空间。木落仙人留下的巨灵阵仍在运转：踏入阵中万物都会缩小，连你的灵质空间也被压成掌心大小。粉末骑着虎妞远远喊：「小心别踩到树苗！」",
+    "owner": "木落仙人（灵风山）",
+    "theme": "空间系·巨灵阵 · 变小",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "搜罗迷你遗物",
+      "effects": {
+       "treasure": "若木"
+      }
+     },
+     {
+      "side": "right",
+      "text": "硬闯阵心",
+      "effects": {
+       "addCard": "rebirth:瞬移",
+       "health": -6
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_laojunge",
+    "source": "space",
+    "realm": 3,
+    "title": "老君阁",
+    "description": "老君闭关的灵质空间，内有锁御宫、斗帅宫等殿宇。空间规则由老君亲自制定：外来者不可飞行、不可喧哗、不可妄动法宝。传说天明珠曾存放于此，引来府先生一伙觊觎。",
+    "owner": "老君",
+    "theme": "空间系·独立空间 · 锁御",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "寻访旧藏",
+      "effects": {
+       "treasure": "定心镜"
+      }
+     },
+     {
+      "side": "right",
+      "text": "偷学空间规则",
+      "effects": {
+       "addCard": "rebirth:吞噬之域"
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_lanxizhen",
+    "source": "space",
+    "realm": 3,
+    "title": "蓝溪镇·遗墟",
+    "description": "曾受老君庇护的人类城镇，迁入他的灵质空间后一度繁华：三和堂医馆的灯火、清凝问诊的身影、谛听镇守的街巷。迁镇后这里便废弃了，唯余空间残影与淡淡的治愈灵力。",
+    "owner": "老君（曾庇护）",
+    "theme": "空间系·迁镇 · 治愈",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "收集残存灵药",
+      "effects": {
+       "addCard": "rebirth:治愈灵光"
+      }
+     },
+     {
+      "side": "right",
+      "text": "修复一处结界",
+      "effects": {
+       "maxHealth": 8
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_xuanli_shenshan",
+    "source": "space",
+    "realm": 3,
+    "title": "深山·炎域",
+    "description": "深山腹地，犬形妖精玄离静静蹲坐在雪线上。他的灵质空间一半冰封、一半燃烧——冰火双系在他体内共存数百年，如今化作「山神」的领域。炎域圣火在他掌心跳跃：「想取暖，还是想冷静？」",
+    "owner": "玄离（山神）",
+    "theme": "御灵系·冰火双空间",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "拾取炎域余烬",
+      "effects": {
+       "treasure": "玄铁甲"
+      }
+     },
+     {
+      "side": "right",
+      "text": "感受炎域圣火",
+      "effects": {
+       "addCard": "rebirth:冰封千里",
+       "health": -8
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_yifan_moon",
+    "source": "space",
+    "realm": 3,
+    "title": "月宫·星途",
+    "description": "老君阁深处悬着一幅《奔月图》，画中残留着一凡仙人瞬身远行的空间印记。你触碰印记，顷刻间被抛上星空——脚下是月面，远处是地球，更远处是这位仙人追寻了数百年的「宇宙尽头」。",
+    "owner": "一凡仙人",
+    "theme": "空间系·瞬身 · 星际",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "right",
+      "text": "追逐星轨",
+      "effects": {
+       "addCard": "rebirth:雷灵闪"
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_cangnan",
+    "source": "space",
+    "realm": 4,
+    "title": "苍南会馆",
+    "description": "由上古无主灵质空间改造而成的妖灵会馆总馆。无数执行者的灵质印记在此叠加：鹿野的追毫、鸠老的洞察、兆岳的凌荆。这里是妖精世界的秩序中枢，也是你踏入重生之门前最后的补给地。",
+    "owner": "妖灵会馆（上古无主灵质空间）",
+    "theme": "空间系·无主空间 · 秩序",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "请求执行者赐宝",
+      "effects": {
+       "treasure": "琼圆盾"
+      }
+     },
+     {
+      "side": "right",
+      "text": "观摩御灵图谱",
+      "effects": {
+       "addCard": "rebirth:豪夺"
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_mingwang_fengdu",
+    "source": "space",
+    "realm": 4,
+    "title": "酆都·索灵地界",
+    "description": "妖灵会馆创始人明王的灵质空间——酆都。地界索灵之所：无数魂灵在此等待重生，是「重生之门」在人间的倒影。明王端坐于幽都深处，语气平静：「走错路的魂灵，会被我收走。你，也要进来吗？」",
+    "owner": "明王",
+    "theme": "治愈系·索灵 · 地界",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "求得魂灵碎片",
+      "effects": {
+       "treasure": "黑咻"
+      }
+     },
+     {
+      "side": "right",
+      "text": "感悟索灵之力",
+      "effects": {
+       "addCard": "rebirth:摄魂术",
+       "health": -8
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_rebirth_gate",
+    "source": "space",
+    "realm": 4,
+    "title": "重生之门·灵质边界",
+    "description": "传说中聚灵与散灵的边界。这里的灵质空间规则彻底紊乱：生灵与物质灵互相渗透，空间壁如薄纸般颤动。门的另一侧，隐约可见无数前世魂灵的回响——它们正在等待重生。",
+    "owner": "？",
+    "theme": "空间系·轮回边界",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "吸纳散灵余烬",
+      "effects": {
+       "maxHealth": 10
+      }
+     },
+     {
+      "side": "right",
+      "text": "触摸门扉",
+      "effects": {
+       "addCard": "rebirth:领域·展开",
+       "health": -8
+      }
+     }
+    ]
+   },
+   {
+    "id": "ss_oc_hongzhijian",
+    "source": "space",
+    "realm": 2,
+    "title": "虹之间",
+    "description": "你误入一处藏在虹光里的灵质空间——无数发光石头悬浮其间，每块都收容着一段残魂记忆。主人是三足乌后裔「虹」，正细心擦拭一块刻着太阳鸟纹的河姆渡骨器残片。他抬头看你，琥珀色的眼睛里闪过高天流云：「迷路了吗？坐坐吧，我这儿……收留了很多回不去家的魂。」",
+    "owner": "虹（佳霖）· 三足乌",
+    "theme": "空间系 · 安魂收藏",
+    "portrait": null,
+    "choices": [
+     {
+      "side": "center",
+      "text": "泡一泡恒温温泉",
+      "effects": {
+       "maxHealth": 6
+      }
+     },
+     {
+      "side": "right",
+      "text": "请他拨亮一缕光丝",
+      "effects": {
+       "addCard": "rebirth:金刃"
+      }
+     }
+    ]
+   }
+  ],
+  "shop": {
+   "themes": {
+    "0": {
+     "floors": [
+      0,
+      1
+     ],
+     "name": "灵溪镇·集市",
+     "owner": "灵溪镇摊贩",
+     "desc": "罗小白家所在的小镇，妖灵会馆分馆就在镇口。摊贩们见惯了来往的妖精与执行者，只要灵石够数，什么都卖。"
+    },
+    "1": {
+     "floors": [
+      0,
+      1
+     ],
+     "name": "灵溪镇·集市",
+     "owner": "灵溪镇摊贩",
+     "desc": "罗小白家所在的小镇，妖灵会馆分馆就在镇口。摊贩们见惯了来往的妖精与执行者，只要灵石够数，什么都卖。"
+    },
+    "2": {
+     "floors": [
+      2,
+      3
+     ],
+     "name": "龙游分会·补给站",
+     "owner": "妖灵会馆龙游分会",
+     "desc": "风息诞生的地方，分会在此驻守。执行者出任务前都来这里补充干粮与灵材。"
+    },
+    "3": {
+     "floors": [
+      2,
+      3
+     ],
+     "name": "龙游分会·补给站",
+     "owner": "妖灵会馆龙游分会",
+     "desc": "风息诞生的地方，分会在此驻守。执行者出任务前都来这里补充干粮与灵材。"
+    },
+    "4": {
+     "floors": [
+      4,
+      5
+     ],
+     "name": "离岛·黑市",
+     "owner": "神秘行商",
+     "desc": "离岛与北域之间的黑市，买卖不问来路。那伽领地附近的行商胆子极大，也最会抬价。"
+    },
+    "5": {
+     "floors": [
+      4,
+      5
+     ],
+     "name": "离岛·黑市",
+     "owner": "神秘行商",
+     "desc": "离岛与北域之间的黑市，买卖不问来路。那伽领地附近的行商胆子极大，也最会抬价。"
+    },
+    "6": {
+     "floors": [
+      6,
+      7
+     ],
+     "name": "老君阁·货摊",
+     "owner": "老君阁弟子",
+     "desc": "老君灵质空间内的货摊，蓝溪镇的居民也常来采买。货架上摆着老君炼制的器物。"
+    },
+    "7": {
+     "floors": [
+      6,
+      7
+     ],
+     "name": "老君阁·货摊",
+     "owner": "老君阁弟子",
+     "desc": "老君灵质空间内的货摊，蓝溪镇的居民也常来采买。货架上摆着老君炼制的器物。"
+    },
+    "8": {
+     "floors": [
+      8,
+      9
+     ],
+     "name": "苍南会馆·藏库",
+     "owner": "苍南会馆执事",
+     "desc": "妖灵会馆总部的藏库，只有得到认可的执行者才能入内选购。守卫森严，货真价实。"
+    },
+    "9": {
+     "floors": [
+      8,
+      9
+     ],
+     "name": "苍南会馆·藏库",
+     "owner": "苍南会馆执事",
+     "desc": "妖灵会馆总部的藏库，只有得到认可的执行者才能入内选购。守卫森严，货真价实。"
+    },
+    "10": {
+     "floors": [
+      8,
+      9
+     ],
+     "name": "苍南会馆·藏库",
+     "owner": "苍南会馆执事",
+     "desc": "妖灵会馆总部的藏库，只有得到认可的执行者才能入内选购。守卫森严，货真价实。"
+    }
+   },
+   "cardPrice": {
+    "0": 16,
+    "1": 24,
+    "2": 34,
+    "3": 46,
+    "4": 24,
+    "5": 24
+   },
+   "treasurePrice": {
+    "1": 46,
+    "2": 36,
+    "3": 46,
+    "4": 56,
+    "5": 72,
+    "6": 46
+   },
+   "heal": {
+    "id": "shop_heal",
+    "kind": "heal",
+    "name": "疗伤温养",
+    "price": 30,
+    "ratio": 0.25,
+    "desc": "灵泉温养，恢复最大生命的 25%。"
+   },
+   "treasures": [
+    "灵泉葫芦",
+    "玄铁甲",
+    "剑心佩",
+    "定心镜",
+    "蓝玉盘",
+    "琼圆盾",
+    "若木",
+    "众生之门",
+    "黑咻",
+    "辟火珠",
+    "碧玉甲",
+    "方寸盒",
+    "魂灯",
+    "碎叶",
+    "预蝉",
+    "天灵丹",
+    "护灵丹",
+    "涪灵丹",
+    "青灵果",
+    "流石甲",
+    "百药柜",
+    "唤灵石",
+    "空间简片",
+    "飞去来",
+    "本命灵石",
+    "风火乾坤圈",
+    "玄清丹",
+    "虚灵草",
+    "大御镜盘",
+    "游地简",
+    "斥冰焰",
+    "焚焰火",
+    "巨灵阵",
+    "木系灵核",
+    "凝天丹",
+    "清丹",
+    "风灵草",
+    "灵心草",
+    "曲晶方",
+    "乌木",
+    "锁灵枷",
+    "断金阵",
+    "扶桑枝"
+   ]
+  }
+ },
+ "deviations": [
+  "巨力：卡面为自身获得力量，原实现误加给目标敌人且不生效；迁移后按卡面给自身。",
+  "摄魂术：卡面为消耗自身生命，原实现把这次扣血改打到出牌目标（敌人）身上且自身不扣；迁移后按卡面扣自身。",
+  "豪夺：卡面为自身获得回灵，原实现误加给目标敌人且不生效；迁移后按卡面给自身。"
+ ]
+}

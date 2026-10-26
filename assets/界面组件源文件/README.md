@@ -1,8 +1,8 @@
 # 界面组件源文件 · 画师版
 
-把 `shared/shared-ui` 里的游戏界面组件库（lxh-ui）导成了图，画师可以直接在 Photoshop / Krita / Clip Studio / Affinity / GIMP 里打开修改。**这里的图都是自动从真实代码渲染出来的**，所以和线上看到的一致；重新跑一遍导出脚本就能更新。
+把 `packages/shared-ui` 里的游戏界面组件库（lxh-ui）导成了图，画师可以直接在 Photoshop / Krita / Clip Studio / Affinity / GIMP 里打开修改。**这里的图都是自动从真实代码渲染出来的**，所以和线上看到的一致；重新跑一遍导出脚本就能更新。
 
-> 这个目录不公开、不进站点发布包（`shared/shared-ui/lxh/` 才会发布）。
+> 这个目录不公开、不进站点发布包（`packages/shared-ui/lxh/` 才会发布）。
 
 ## 从哪里开始看
 
@@ -42,13 +42,13 @@
 
 - **文字是位图图层**，不是可编辑文字。字体是代码里的 `LXGW WenKai`（霞鹜文楷），这台机器没有这个字体，导出时回落成了 Noto Serif SC。想要原字体效果：装上文楷，重跑一遍导出；或者画师直接用文楷重打文字盖上去。
 - 状态图（悬停、按下、焦点）是用浏览器强制触发的，和真实交互一致。动画只导出静止的第一帧（提交中的扫光、闪烁状态）。
-- 头像用的是 `shared/shared-ui/lxh/ai-avatars` 里现有的 5 张占位头像，图层上是普通位图，可直接替换。
+- 头像用的是 `packages/shared-ui/lxh/ai-avatars` 里现有的 5 张占位头像，图层上是普通位图，可直接替换。
 - 种族网格、谱系树这类大组件，部件很多，图层也多（几十层）。
 - 站点全局栏（`site-nav.js`）和品牌标没做进 PSD：全局栏由脚本拼出来、含登录状态，品牌标 svg 已放在 `icons/svg/brand-iridescently-mark.svg`。
 
 ## 改完怎么回到产品里
 
-PSD / PNG 是**设计稿**，页面用的仍然是 `shared/shared-ui/lxh-ui.css`，改图不会自动改线上。回写有两条路：
+PSD / PNG 是**设计稿**，页面用的仍然是 `packages/shared-ui/lxh-ui.css`，改图不会自动改线上。回写有两条路：
 
 1. **只改了颜色**：改 `tokens/色板.psd` 里色块图层的颜色，然后运行
    ```powershell

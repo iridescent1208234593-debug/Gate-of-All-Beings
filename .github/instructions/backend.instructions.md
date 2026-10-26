@@ -1,5 +1,5 @@
 ---
-applyTo: "server/**/*.py,server/**/*.js,server/**/*.mjs,server/**/*.ts,server/**/*.tsx,portal/**/*.py,shared/**/*.py"
+applyTo: "services/**/*.py,services/**/*.cjs,apps/**/*.py,apps/*/server/**/*.js,apps/*/server/**/*.mjs,apps/*/server/**/*.ts,apps/juling/server.js,packages/**/*.py,tools/**/*.py"
 ---
 
 - Trace the real request route, authentication/session owner, persistence path, and mounted proxy before changing an endpoint.

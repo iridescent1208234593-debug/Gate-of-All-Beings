@@ -4,7 +4,7 @@
 
 ## 问题
 
-旧实现把会馆云存档写在 `portal/huiguan/game_saves.json`，键是裸 `uid`。
+旧实现把会馆云存档写在 `apps/huiguan/game_saves.json`，键是裸 `uid`。
 
 - 本地账户和 USSO 账户的编号空间各自独立。local `7` 与 usso `7` 会读写同一条记录。真实数据里 `7` 就同时存在于两种账户（usso `7` 是站长管理员）。
 - `scope=softie` 没有灵体存档时，会回退返回经营存档，造成跨玩法串档。
@@ -18,9 +18,9 @@
 | owner | 只接受 `kind ∈ {local, usso}` 且 uid 非空，否则 `ValueError`。之后新增账户种类须显式加入 `KINDS` |
 | scope | `SCOPES = ("management", "softie")`。API 不带 scope 时等于 `management`（兼容现有经营客户端）；未知 scope 返回 400；scope 之间不回退 |
 | 上限 | 单槽 8 MiB（与 `_read_json` 一致），超出返回 413 |
-| 代码 | `server/game_saves.py`（存储、迁移、CLI）；`portal/huiguan/server_huiguan.py` 的 `/api/game/save`、`/api/game/load` 只调用它 |
+| 代码 | `services/platform/game_saves.py`（存储、迁移、CLI）；`apps/huiguan/server_huiguan.py` 的 `/api/game/save`、`/api/game/load` 只调用它 |
 
-HTTP 契约不变：路径、`?scope=softie`、响应字段 `ok` / `savedAt` / `state`、404「暂无云存档」都保留。客户端（经营 `server/app/src/management/src/systems/account.js`、灵体 `softie-webgpu/src/games/spirit-playground/view.js`）无需修改；重生之门 slay 只用本地 `game/save-system.js`，不走云存档。
+HTTP 契约不变：路径、`?scope=softie`、响应字段 `ok` / `savedAt` / `state`、404「暂无云存档」都保留。客户端（经营 `apps/management/src/systems/account.js`、灵体 `apps/softie/src/games/spirit-playground/view.js`）无需修改；重生之门 slay 只用本地 `game/save-system.js`，不走云存档。
 
 ## 旧存档迁移
 
@@ -38,7 +38,7 @@ HTTP 契约不变：路径、`?scope=softie`、响应字段 `ok` / `savedAt` / `
 - **全量留痕**：每条旧记录（含解析结果与理由）都写入 `game_save_legacy`。
 - **冲突**：账户槽已有更新的存档（按解析后的时间比较，不是字符串比较）时保留新档，计入 `kept-newer`。
 
-2026-10-17 对真实数据的只读演练（`python server/game_saves.py plan`）：
+2026-10-17 对真实数据的只读演练（`python services/platform/game_saves.py plan`）：
 
 ```
        7 management -> local:7        collision-resolved-by-local-name
@@ -51,10 +51,10 @@ HTTP 契约不变：路径、`?scope=softie`、响应字段 `ok` / `savedAt` / `
 ## 运维与回滚
 
 ```powershell
-python server/game_saves.py plan      # 只读演练
-python server/game_saves.py import    # 手动导入（启动时也会自动执行）
-python server/game_saves.py status    # 计数、隔离项、迁移记录
-python server/game_saves.py export --out E:\backup\game_saves.rollback.json
+python services/platform/game_saves.py plan      # 只读演练
+python services/platform/game_saves.py import    # 手动导入（启动时也会自动执行）
+python services/platform/game_saves.py status    # 计数、隔离项、迁移记录
+python services/platform/game_saves.py export --out E:\backup\game_saves.rollback.json
 ```
 
 `IRIDESCENTLY_PROJECT_ROOT` 指定数据根目录。

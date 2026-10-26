@@ -1,5 +1,5 @@
 ---
-applyTo: "scripts/run-ops.mjs,scripts/publish-release.mjs,scripts/local-runtime.py,scripts/storage-migrate.py,scripts/backup-storage.py,docs/release-workflow.md"
+applyTo: "tools/ops/run-ops.mjs,tools/release/publish-release.mjs,tools/runtime/local-runtime.py,tools/runtime/storage-migrate.py,tools/runtime/backup-storage.py,docs/release-workflow.md"
 ---
 
 - Read-only status is the default for production inspection. Do not restart services, modify DNS, change proxy limits, publish candidates, or access database contents without explicit authorization.

@@ -1,0 +1,947 @@
+{
+ "source": "apps/slay/public/content/lingzhi-*.js",
+ "defaultCards": [
+  "yanji",
+  "tengji",
+  "lianji",
+  "lingmai",
+  "liexi"
+ ],
+ "characters": [
+  {
+   "id": "walker",
+   "name": "行者",
+   "cost": 0,
+   "desc": "修行者：战斗开始获得 1 层力量。以基础灵术稳步推进。",
+   "starter": [
+    "yanji",
+    "yanji",
+    "tengji",
+    "lianji",
+    "lingmai",
+    "liexi",
+    "liexi"
+   ],
+   "passive": {
+    "name": "修行者",
+    "desc": "战斗开始获得 1 层力量",
+    "strength": 1
+   }
+  },
+  {
+   "id": "summoner",
+   "name": "唤灵师",
+   "cost": 120,
+   "desc": "开战灵火仆；铺场后以聚灵/固灵养灵协同输出。",
+   "starter": [
+    "lingqun",
+    "lingqun",
+    "yanji",
+    "yanji",
+    "lingmai",
+    "lingmai",
+    "liexi"
+   ],
+   "passive": {
+    "name": "灵火仆",
+    "desc": "开战灵火仆助战，获得 1 层力量",
+    "strength": 1
+   }
+  },
+  {
+   "id": "vitalist",
+   "name": "生息师",
+   "cost": 150,
+   "desc": "以再生与即时治疗拉长续航。",
+   "starter": [
+    "dunyong",
+    "dunyong",
+    "tengji",
+    "tengji",
+    "lingmai",
+    "lingmai",
+    "liexi"
+   ],
+   "passive": {
+    "name": "再生",
+    "desc": "战斗开始获得 1 层回灵，每回合回复 1 生命",
+    "regen": 1
+   }
+  },
+  {
+   "id": "painter",
+   "name": "绘灵师",
+   "cost": 150,
+   "desc": "以灵墨速写造物，战斗开始多抽一张。",
+   "starter": [
+    "huiyong",
+    "huiyong",
+    "tengji",
+    "lianji",
+    "lingmai",
+    "lingmai",
+    "liexi"
+   ],
+   "passive": {
+    "name": "灵墨速写",
+    "desc": "战斗开始多抽 1 张牌",
+    "drawExtra": 1
+   }
+  },
+  {
+   "id": "riftwalker",
+   "name": "裂隙术士",
+   "cost": 150,
+   "desc": "操控裂隙折跃，开战法强+1，折壳/虚语逐步建立控场。",
+   "starter": [
+    "liexi",
+    "liexi",
+    "liexi",
+    "tengji",
+    "lingmai",
+    "lingmai",
+    "dunyong"
+   ],
+   "passive": {
+    "name": "折跃法强",
+    "desc": "开战法强+1，获得 1 层力量",
+    "strength": 1
+   }
+  },
+  {
+   "id": "mindreader",
+   "name": "读心者",
+   "cost": 150,
+   "desc": "读绪探心、削弱敌人意图。",
+   "starter": [
+    "tengji",
+    "tengji",
+    "lianji",
+    "lianji",
+    "lingmai",
+    "lingmai",
+    "liexi"
+   ],
+   "passive": {
+    "name": "读绪",
+    "desc": "读绪探心，洞察敌人意图",
+    "strength": 0
+   }
+  }
+ ],
+ "cards": [
+  {
+   "cardId": "yanji",
+   "name": "焰击",
+   "type": "attack",
+   "energy": 1,
+   "target": "enemy",
+   "damage": 7,
+   "desc": "造成 7 点伤害。",
+   "tags": [
+    "灵击"
+   ],
+   "cost": 0
+  },
+  {
+   "cardId": "tengji",
+   "name": "藤击",
+   "type": "attack",
+   "energy": 1,
+   "target": "enemy",
+   "damage": 5,
+   "desc": "造成 5 点伤害；对目标施加 1 层虚弱（2回合）。",
+   "tags": [
+    "灵击"
+   ],
+   "cost": 0,
+   "actions": [
+    {
+     "type": "lingzhiWeak",
+     "amount": 1
+    }
+   ]
+  },
+  {
+   "cardId": "lianji",
+   "name": "连击",
+   "type": "attack",
+   "energy": 1,
+   "target": "enemy",
+   "damage": 4,
+   "desc": "造成 4 点伤害；本战每使用过 1 张【灵击】【心流击】等攻击牌 +2 伤。",
+   "tags": [
+    "心流击"
+   ],
+   "cost": 0,
+   "actions": [
+    {
+     "type": "lingzhiCombo",
+     "base": 4,
+     "per": 2
+    }
+   ]
+  },
+  {
+   "cardId": "lingmai",
+   "name": "灵脉",
+   "type": "attack",
+   "energy": 1,
+   "target": "allEnemies",
+   "damage": 1,
+   "exhaust": true,
+   "desc": "对所有敌人造成 1 点伤害；抽 1 张牌；消耗。",
+   "tags": [
+    "灵脉"
+   ],
+   "cost": 0,
+   "actions": [
+    {
+     "type": "drawCards",
+     "amount": 1
+    }
+   ]
+  },
+  {
+   "cardId": "liexi",
+   "name": "裂隙",
+   "type": "attack",
+   "energy": 1,
+   "target": "enemy",
+   "damage": 9,
+   "desc": "造成 9 点伤害。",
+   "tags": [
+    "裂隙"
+   ],
+   "cost": 0
+  },
+  {
+   "cardId": "dunyong",
+   "name": "盾涌",
+   "type": "skill",
+   "energy": 1,
+   "target": "player",
+   "block": 14,
+   "desc": "获得 14 点格挡；格挡超过 12 的部分转伤。",
+   "tags": [
+    "盾涌"
+   ],
+   "cost": 70,
+   "actions": [
+    {
+     "type": "lingzhiShieldSurge",
+     "block": 14,
+     "cap": 12
+    }
+   ]
+  },
+  {
+   "cardId": "xinchao",
+   "name": "心潮",
+   "type": "power",
+   "energy": 1,
+   "target": "enemy",
+   "desc": "能力：每次行动开始时本牌伤害 +1。",
+   "tags": [
+    "心印"
+   ],
+   "cost": 80,
+   "actions": [
+    {
+     "type": "lingzhiHeartTide",
+     "base": 1
+    }
+   ]
+  },
+  {
+   "cardId": "lingqun",
+   "name": "灵群",
+   "type": "attack",
+   "energy": 1,
+   "target": "allEnemies",
+   "damage": 2,
+   "exhaust": true,
+   "desc": "对所有敌人造成 2 点伤害；卡组中每张【灵斩】【唤灵】【灵爆】等 +1 伤；消耗。",
+   "tags": [
+    "唤灵"
+   ],
+   "cost": 60,
+   "actions": [
+    {
+     "type": "lingzhiSwarm",
+     "base": 2
+    }
+   ]
+  },
+  {
+   "cardId": "huiyong",
+   "name": "绘涌",
+   "type": "attack",
+   "energy": 1,
+   "target": "enemy",
+   "damage": 6,
+   "exhaust": true,
+   "desc": "造成 6 点伤害；本战每使用过 1 张攻击牌 +1 伤；消耗。",
+   "tags": [
+    "造物击"
+   ],
+   "cost": 65,
+   "actions": [
+    {
+     "type": "lingzhiCombo",
+     "base": 6,
+     "per": 1
+    }
+   ]
+  },
+  {
+   "cardId": "jinfeng",
+   "name": "金锋",
+   "type": "attack",
+   "energy": 1,
+   "target": "enemy",
+   "damage": 8,
+   "desc": "以金系灵质凝成锋刃，造成 8 点伤害。",
+   "tags": [
+    "灵斩",
+    "金系"
+   ],
+   "cost": 60
+  },
+  {
+   "cardId": "tieyu",
+   "name": "铁羽",
+   "type": "attack",
+   "energy": 0,
+   "target": "enemy",
+   "damage": 4,
+   "desc": "驭铁化羽，造成 4 点伤害；本战每使用过 1 张攻击牌 +1 伤。",
+   "tags": [
+    "灵击",
+    "金系"
+   ],
+   "cost": 65,
+   "actions": [
+    {
+     "type": "lingzhiCombo",
+     "base": 4,
+     "per": 1
+    }
+   ]
+  },
+  {
+   "cardId": "tengfu",
+   "name": "藤缚",
+   "type": "attack",
+   "energy": 1,
+   "target": "enemy",
+   "damage": 4,
+   "desc": "催生藤蔓缠缚敌人，造成 4 点伤害；施加 2 层虚弱（2回合）。",
+   "tags": [
+    "灵击",
+    "木系"
+   ],
+   "cost": 55,
+   "actions": [
+    {
+     "type": "lingzhiWeak",
+     "amount": 2
+    }
+   ]
+  },
+  {
+   "cardId": "fansheng",
+   "name": "繁生",
+   "type": "skill",
+   "energy": 1,
+   "target": "player",
+   "block": 10,
+   "desc": "木灵蓬勃生长为盾，获得 10 点格挡。",
+   "tags": [
+    "木系",
+    "生长"
+   ],
+   "cost": 60
+  },
+  {
+   "cardId": "bingxin",
+   "name": "冰心",
+   "type": "skill",
+   "energy": 1,
+   "target": "player",
+   "block": 8,
+   "desc": "水灵凝冰护体，获得 8 点格挡；对敌人施加 1 层虚弱（2回合）。",
+   "tags": [
+    "水系",
+    "定绪"
+   ],
+   "cost": 65,
+   "actions": [
+    {
+     "type": "lingzhiWeak",
+     "amount": 1
+    }
+   ]
+  },
+  {
+   "cardId": "chaoyong",
+   "name": "潮涌",
+   "type": "attack",
+   "energy": 2,
+   "target": "allEnemies",
+   "damage": 7,
+   "desc": "灵潮奔涌，对所有敌人造成 7 点伤害。",
+   "tags": [
+    "灵斩",
+    "水系"
+   ],
+   "cost": 80
+  },
+  {
+   "cardId": "yanbao",
+   "name": "焰爆",
+   "type": "attack",
+   "energy": 2,
+   "target": "enemy",
+   "damage": 16,
+   "desc": "火灵聚于一点轰然爆开，造成 16 点伤害。",
+   "tags": [
+    "灵斩",
+    "火系"
+   ],
+   "cost": 75
+  },
+  {
+   "cardId": "yujin",
+   "name": "余烬",
+   "type": "attack",
+   "energy": 1,
+   "target": "enemy",
+   "damage": 5,
+   "desc": "爆燃后的余温，造成 5 点伤害；抽 1 张牌。",
+   "tags": [
+    "心流击",
+    "火系"
+   ],
+   "cost": 70,
+   "actions": [
+    {
+     "type": "drawCards",
+     "amount": 1
+    }
+   ]
+  },
+  {
+   "cardId": "yanlei",
+   "name": "岩垒",
+   "type": "skill",
+   "energy": 1,
+   "target": "player",
+   "block": 12,
+   "desc": "土灵凝岩成垒，获得 12 点格挡。",
+   "tags": [
+    "土系"
+   ],
+   "cost": 60
+  },
+  {
+   "cardId": "zheyue",
+   "name": "折跃",
+   "type": "skill",
+   "energy": 0,
+   "target": "player",
+   "exhaust": true,
+   "desc": "空间折跃，抽 2 张牌；消耗。",
+   "tags": [
+    "空间系",
+    "裂隙"
+   ],
+   "cost": 80,
+   "actions": [
+    {
+     "type": "drawCards",
+     "amount": 2
+    }
+   ]
+  },
+  {
+   "cardId": "xujie",
+   "name": "虚界",
+   "type": "power",
+   "energy": 1,
+   "target": "player",
+   "block": 8,
+   "desc": "外放灵质空间一角护体，获得 8 点格挡；抽 1 张牌。",
+   "tags": [
+    "空间系",
+    "心印"
+   ],
+   "cost": 85,
+   "actions": [
+    {
+     "type": "drawCards",
+     "amount": 1
+    }
+   ]
+  },
+  {
+   "cardId": "duxin",
+   "name": "读心",
+   "type": "skill",
+   "energy": 0,
+   "target": "player",
+   "desc": "静心读绪、洞察敌人，抽 1 张牌。",
+   "tags": [
+    "读绪",
+    "心灵系"
+   ],
+   "cost": 70,
+   "actions": [
+    {
+     "type": "drawCards",
+     "amount": 1
+    }
+   ]
+  },
+  {
+   "cardId": "lingshi",
+   "name": "灵誓",
+   "type": "attack",
+   "energy": 1,
+   "target": "enemy",
+   "damage": 6,
+   "desc": "宣读灵誓，令敌我皆受约束，造成 6 点伤害；施加 2 层虚弱（2回合）；抽 1 张牌。",
+   "tags": [
+    "心印",
+    "心灵系"
+   ],
+   "cost": 90,
+   "actions": [
+    {
+     "type": "lingzhiWeak",
+     "amount": 2
+    },
+    {
+     "type": "drawCards",
+     "amount": 1
+    }
+   ]
+  },
+  {
+   "cardId": "hualing",
+   "name": "画灵",
+   "type": "attack",
+   "energy": 1,
+   "target": "enemy",
+   "damage": 5,
+   "exhaust": true,
+   "desc": "以灵墨速写造物，造成 5 点伤害；本战每使用过 1 张攻击牌 +2 伤；消耗。",
+   "tags": [
+    "造物击",
+    "双系"
+   ],
+   "cost": 90,
+   "actions": [
+    {
+     "type": "lingzhiCombo",
+     "base": 5,
+     "per": 2
+    }
+   ]
+  }
+ ],
+ "monsters": [
+  {
+   "id": "lm_caomu_kui",
+   "name": "灵偶·草木傀儡",
+   "desc": "由生灵与物质灵强行捏合而成的仿生命体，形似草木扎成的偶人，动作僵硬，眼神空洞。它没有魂灵，只是被回路中的残余灵质力驱动着向你挥来。",
+   "element": "木",
+   "maxHealth": 15,
+   "intents": [
+    {
+     "damage": 4
+    },
+    {
+     "block": 3
+    },
+    {
+     "damage": 6
+    }
+   ],
+   "difficulty": "normal"
+  },
+  {
+   "id": "lm_wuzhi_tuan",
+   "name": "尘灵·物质灵团",
+   "desc": "一团暖金色的物质灵在地面蠕动成型，像被无形之手揉捏的泥塑。物质灵是构成万物的基石，这团灵没有意志，却在灵质回路的催化下不断重塑着外形。",
+   "element": "土",
+   "maxHealth": 14,
+   "intents": [
+    {
+     "damage": 5
+    },
+    {
+     "damage": 3,
+     "weak": 1
+    },
+    {
+     "block": 4
+    }
+   ],
+   "difficulty": "normal"
+  },
+  {
+   "id": "lm_youling_can",
+   "name": "游灵·散灵残响",
+   "desc": "一道半透明的灵影在林间游荡，是某位妖灵散灵后未能完全回归自然的残响。它没有敌意，只是循着生前的执念徘徊，见你靠近，却本能地发起攻击。",
+   "element": "水",
+   "maxHealth": 16,
+   "intents": [
+    {
+     "damage": 4
+    },
+    {
+     "block": 3
+    },
+    {
+     "damage": 6
+    }
+   ],
+   "difficulty": "normal"
+  },
+  {
+   "id": "lm_huanling_canying",
+   "name": "幻灵·幻化残影",
+   "desc": "一道淡青色的残影在灵光中不断变换轮廓，时而像飞鸟，时而像走兽。它是最初级的散灵，只会本能地用「幻化」模仿所见之形，试图让你在迷惑中露出破绽。",
+   "element": "水",
+   "maxHealth": 15,
+   "intents": [
+    {
+     "damage": 4
+    },
+    {
+     "block": 3
+    },
+    {
+     "damage": 5,
+     "weak": 1
+    }
+   ],
+   "difficulty": "normal"
+  },
+  {
+   "id": "lm_juling_jingling",
+   "name": "聚灵妖灵·初生精灵",
+   "desc": "生灵在回路深处大量汇聚，凝聚成一团无实体的发光精灵。它尚未与物质灵结合，形态在翠绿与碧蓝间流转，像一团有生命的光雾，本能地护住这片聚灵之地。",
+   "element": "木",
+   "maxHealth": 20,
+   "intents": [
+    {
+     "damage": 6
+    },
+    {
+     "block": 4
+    },
+    {
+     "damage": 8
+    }
+   ],
+   "difficulty": "normal"
+  },
+  {
+   "id": "lm_shiwei_kui",
+   "name": "灵偶·石卫傀儡",
+   "desc": "一具以岩石为骨、以物质灵为筋的傀儡，比草木傀儡结实得多。它守在回路岔口，像被设下防线的守卫，无论谁来都只会重复同一件事——击退闯入者。",
+   "element": "土",
+   "maxHealth": 22,
+   "intents": [
+    {
+     "block": 5
+    },
+    {
+     "damage": 5
+    },
+    {
+     "damage": 8,
+     "vulnerable": 1
+    }
+   ],
+   "difficulty": "normal"
+  },
+  {
+   "id": "lm_hunling_busan",
+   "name": "魂灵·凝而不散",
+   "desc": "一团比游灵凝实得多的光球悬在半空，核心明亮如灯。这是肉体消亡后凝而不散的强大魂灵，还残存着生前的意识，正用沉默的目光审视着你——若有机缘，它甚至想借新生命重生。",
+   "element": "火",
+   "maxHealth": 18,
+   "intents": [
+    {
+     "damage": 5
+    },
+    {
+     "damage": 3,
+     "weak": 1
+    },
+    {
+     "block": 3,
+     "damage": 4
+    }
+   ],
+   "difficulty": "normal"
+  },
+  {
+   "id": "lm_mengling_ximeng",
+   "name": "梦灵·戏梦者",
+   "desc": "一团幽紫色的灵雾悬在回路岔口，雾气中浮动着破碎的梦境画面。心灵系·戏梦——操控梦境，它把过往旅人的梦魇织成幻象，趁你恍惚时兜头罩下。",
+   "element": "心灵",
+   "maxHealth": 19,
+   "intents": [
+    {
+     "damage": 6
+    },
+    {
+     "damage": 3,
+     "weak": 1
+    },
+    {
+     "block": 4,
+     "damage": 3
+    }
+   ],
+   "difficulty": "normal"
+  },
+  {
+   "id": "lm_kui_leishi",
+   "name": "精英·傀儡师",
+   "desc": "一道淡紫色的虚影悬浮于空，指尖垂下无形的丝线，牵动数具草木傀儡缓缓站起。心灵系·傀儡——操控他人，是它唯一擅长的技艺，而你，成了它新的提线对象。",
+   "element": "心灵",
+   "maxHealth": 30,
+   "intents": [
+    {
+     "damage": 9
+    },
+    {
+     "block": 6,
+     "damage": 4
+    },
+    {
+     "damage": 11
+    }
+   ],
+   "difficulty": "elite"
+  },
+  {
+   "id": "lm_hun_shizhe",
+   "name": "精英·魂噬者",
+   "desc": "一团漆黑的灵影张开大口，贪婪地吸食着回路中逸散的灵质力。它走上了一条吞噬魂灵的道路——如同传闻中那位只能靠吞噬魂灵续命的明王，或是北域那伽的恶行。",
+   "element": "火",
+   "maxHealth": 28,
+   "intents": [
+    {
+     "block": 8
+    },
+    {
+     "damage": 8
+    },
+    {
+     "damage": 5,
+     "vulnerable": 1
+    }
+   ],
+   "difficulty": "elite"
+  },
+  {
+   "id": "lm_xiling_shizhi",
+   "name": "精英·时滞者",
+   "desc": "一道近乎透明的身影静立于裂隙之间，周身的时间仿佛慢了半拍。空间系·时滞——使目标时间停滞，是它最危险的手段：你以为还来得及防御，伤害却早已落在身上。",
+   "element": "空间",
+   "maxHealth": 30,
+   "intents": [
+    {
+     "block": 5,
+     "damage": 5
+    },
+    {
+     "damage": 9
+    },
+    {
+     "damage": 6,
+     "vulnerable": 1
+    }
+   ],
+   "difficulty": "elite"
+  },
+  {
+   "id": "lm_boss_zhongsheng",
+   "name": "守门·重生执念",
+   "desc": "灵质回路最深处的守门者——一道凝而不散的巨大魂灵，核心处如太阳般明亮。它已在此徘徊了不知多少岁月，等待一个有机缘的新生命，好让残存的意识借体重生。这正是「重生之门」的回响：散灵不是终结，而是另一种开始。",
+   "element": "空间",
+   "maxHealth": 70,
+   "intents": [
+    {
+     "damage": 10
+    },
+    {
+     "block": 6,
+     "damage": 6
+    },
+    {
+     "damage": 12
+    },
+    {
+     "strength": 1
+    }
+   ],
+   "difficulty": "boss",
+   "phase2Threshold": 0.4,
+   "phase2Name": "守门·重生觉醒",
+   "phase2Intents": [
+    {
+     "damage": 14
+    },
+    {
+     "block": 10,
+     "damage": 10
+    },
+    {
+     "damage": 8,
+     "vulnerable": 1
+    },
+    {
+     "strength": 2,
+     "block": 6
+    }
+   ]
+  },
+  {
+   "id": "lm_boss_xuanli",
+   "name": "守门·玄离试炼",
+   "desc": "灵质回路最深处寒气骤降，冰霜自地面向四周蔓延，一道巨兽虚影盘踞于极寒之中——上古神兽玄离的试炼幻影。它能操控冰与火，灵质空间是足球场大的极寒地狱，曾护守天明珠、坐镇斗帅宫试炼。凡过此门者，须先过冰火双关。",
+   "element": "水",
+   "maxHealth": 72,
+   "intents": [
+    {
+     "damage": 10
+    },
+    {
+     "block": 8
+    },
+    {
+     "damage": 12,
+     "vulnerable": 1
+    },
+    {
+     "damage": 6,
+     "weak": 1
+    }
+   ],
+   "difficulty": "boss",
+   "phase2Threshold": 0.4,
+   "phase2Name": "守门·玄离极寒觉醒",
+   "phase2Intents": [
+    {
+     "damage": 13
+    },
+    {
+     "block": 10,
+     "damage": 8
+    },
+    {
+     "damage": 9,
+     "vulnerable": 1
+    },
+    {
+     "strength": 2,
+     "block": 5
+    }
+   ]
+  },
+  {
+   "id": "lm_boss_naga",
+   "name": "守门·那伽侵域",
+   "desc": "灵质回路最深处被浓重的灵雾笼罩，雾中盘踞着一条巨大的蛇影——北域神明那伽的侵蚀幻影。它的领域具「侵占」特质，能令灵融入你的灵质空间，结合魂灵将你化作同感者。三百年的风雪与怨念，在此凝为守门之壁。",
+   "element": "空间",
+   "maxHealth": 75,
+   "intents": [
+    {
+     "block": 8,
+     "damage": 5
+    },
+    {
+     "damage": 11
+    },
+    {
+     "damage": 6,
+     "weak": 1
+    },
+    {
+     "strength": 1,
+     "block": 5
+    }
+   ],
+   "difficulty": "boss",
+   "phase2Threshold": 0.4,
+   "phase2Name": "守门·那伽领域侵占",
+   "phase2Intents": [
+    {
+     "damage": 13
+    },
+    {
+     "block": 12,
+     "damage": 7
+    },
+    {
+     "damage": 9,
+     "vulnerable": 1
+    },
+    {
+     "strength": 2,
+     "block": 6
+    }
+   ]
+  },
+  {
+   "id": "lm_boss_yandi",
+   "name": "守门·炎帝试炼",
+   "desc": "灵质回路最深处热浪翻涌，一座熔金火域铺展在回路尽头——上古火神炎帝的试炼幻影端坐其中。御灵系·火为最强御灵系，老君曾言「御灵系不如炎帝」；他更是玄离之师，炎域圣火由他亲授。须发皆燃、目如熔金，抬手间炎域圣火如江河奔涌而来。凡过此门者，须先经受火之极致的淬炼。",
+   "element": "火",
+   "maxHealth": 74,
+   "intents": [
+    {
+     "damage": 12
+    },
+    {
+     "block": 5,
+     "damage": 8
+    },
+    {
+     "damage": 10,
+     "vulnerable": 1
+    },
+    {
+     "strength": 1
+    }
+   ],
+   "difficulty": "boss",
+   "phase2Threshold": 0.4,
+   "phase2Name": "守门·炎帝圣火觉醒",
+   "phase2Intents": [
+    {
+     "damage": 15
+    },
+    {
+     "block": 8,
+     "damage": 10
+    },
+    {
+     "damage": 11,
+     "vulnerable": 1
+    },
+    {
+     "strength": 2,
+     "block": 5
+    }
+   ]
+  }
+ ]
+}

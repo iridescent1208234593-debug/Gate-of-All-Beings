@@ -1,6 +1,6 @@
 # Asset registry
 
-`server/asset_registry.py` indexes existing files in external `source`, `managed` and `cache` asset roots. SQLite lives under the persistent data root at `assets/registry.sqlite3`; metadata does not belong inside an asset tree.
+`services/platform/asset_registry.py` indexes existing files in external `source`, `managed` and `cache` asset roots. SQLite lives under the persistent data root at `assets/registry.sqlite3`; metadata does not belong inside an asset tree.
 
 Records contain a stable asset ID, metadata version, module/type, relative storage key, SHA-256, byte size, MIME, timestamps, provenance, author, license, content ID, access scope and optional original-asset reference. Content references are explicit `(reference_type, reference_id)` rows. Unknown rights remain unknown; importing files never infers a license or makes uploads public.
 
@@ -11,7 +11,7 @@ Records contain a stable asset ID, metadata version, module/type, relative stora
 The importer walks existing regular files, rejects symbolic links and records deterministic IDs per storage class, module and relative key. It copies, rewrites and deletes no assets. Repeating an interrupted import is safe. A changed file creates a metadata version. A manifest records every ID/hash/size and the total count/bytes.
 
 ```powershell
-python -X utf8 server/asset_registry.py import "$env:IRIDESCENTLY_ASSETS_ROOT/managed" `
+python -X utf8 services/platform/asset_registry.py import "$env:IRIDESCENTLY_ASSETS_ROOT/managed" `
   --database "$env:IRIDESCENTLY_DATA_ROOT/assets/registry.sqlite3" `
   --storage-class managed --module huiguan --asset-type original `
   --access-scope private --manifest "registry-managed-manifest.json"

@@ -2,7 +2,7 @@
 
 ## Git 与本地数据
 
-Git 保存源码、Design System、配置、文档、SVG/icons，以及目前被页面引用的小型资源。不要为了将来迁移 CDN 忽略仍在使用的文件。当前大于 1 MB 的已跟踪项目文件有 110 个，主要是 `shared/shared-ui/` 与 `portal/huiguan/design-system/ui/` 中正在使用的界面图片，以及设计验收图和少量源素材；其中没有大于 5 MB 的已跟踪文件。暂时保留这些文件。
+Git 保存源码、Design System、配置、文档、SVG/icons，以及目前被页面引用的小型资源。不要为了将来迁移 CDN 忽略仍在使用的文件。当前大于 1 MB 的已跟踪项目文件有 110 个，主要是 `packages/shared-ui/` 与 `apps/huiguan/design-system/ui/` 中正在使用的界面图片，以及设计验收图和少量源素材；其中没有大于 5 MB 的已跟踪文件。暂时保留这些文件。
 
 根目录 `assets/罗小黑战记数据库/` 是本机外部数据集，约 6.16 GiB、2,567 个文件；会馆和首页构建依赖其中的数据库与图片，仍需在本地/部署环境提供。该目录有 367 个大于 1 MB、31 个大于 5 MB、12 个大于 20 MB 的文件；12 个超 20 MB 文件都是视频，约 273–680 MB/个。保留原位置，不要删除或移动。本机 `assets/网站素材/` 是未被当前代码引用的快照和提取资料，也不纳入 Git。
 
@@ -16,7 +16,7 @@ Git 保存源码、Design System、配置、文档、SVG/icons，以及目前被
 
 ## `asset()`
 
-首页的 Vite 代码可从 `portal/www/scripts/asset.js` 导入：
+首页的 Vite 代码可从 `apps/www/scripts/asset.js` 导入：
 
 ```js
 import { asset } from "./asset.js";
@@ -27,7 +27,7 @@ const modelUrl = asset("models/example.glb");
 
 `VITE_ASSET_BASE_URL` 有值时，`asset(path)` 返回 CDN 根地址加相对路径；未配置时返回当前站点的 `/assets/<path>`，本地素材放在对应应用的 `assets/` 目录。首页品牌标志是首个接入点，其他既有资源引用保持原样。
 
-可将 `portal/www/.env.example` 复制为 `portal/www/.env.local` 进行本地配置；`.env.local` 已被忽略，不会进入 Git。留空或不设置 `VITE_ASSET_BASE_URL` 时使用本地路径。生产配置该变量前，先将相同相对路径对应的对象放到 CDN，例如 `iridescently-mark.png` 对应 `https://assets.iridescently.xyz/iridescently-mark.png`。
+可将 `apps/www/.env.example` 复制为 `apps/www/.env.local` 进行本地配置；`.env.local` 已被忽略，不会进入 Git。留空或不设置 `VITE_ASSET_BASE_URL` 时使用本地路径。生产配置该变量前，先将相同相对路径对应的对象放到 CDN，例如 `iridescently-mark.png` 对应 `https://assets.iridescently.xyz/iridescently-mark.png`。
 
 当前 helper 属于首页 Vite 应用。其他 Vite、Next.js 或服务端应用接入时，应在各自代码边界使用对应框架的公开环境变量前缀，并复用同一相对键约定；服务端密钥不得暴露为公开变量。
 
