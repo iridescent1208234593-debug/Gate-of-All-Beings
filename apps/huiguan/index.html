@@ -618,6 +618,7 @@
   .auth-input:focus { border-color: var(--accent); }
   .auth-msg { font-size: 12px; min-height: 16px; margin-top: 8px; color: #b3543f; }
   .auth-msg.ok { color: var(--accent); }
+  .auth-turnstile { margin: 10px 0 2px; min-height: 65px; }
   .auth-submit {
     width: 100%; margin-top: 14px; padding: 9px 0;
     font-size: 13px; letter-spacing: 4px; font-family: inherit; cursor: pointer;
@@ -868,6 +869,7 @@
     <input class="auth-input" id="authUsername" maxlength="16" autocomplete="username" placeholder="2-16 位中英文 / 数字 / 下划线">
     <label class="auth-label" for="authPassword">密码</label>
     <input class="auth-input" id="authPassword" type="password" maxlength="128" autocomplete="current-password" placeholder="登录使用已有密码；新注册需至少 12 位">
+    <div class="auth-turnstile" id="authTurnstile" hidden></div>
     <button type="button" class="auth-submit" id="authSubmit" onclick="submitAuth()">登录 / 注册</button>
     <div class="auth-hint">用户名不存在时将自动注册并登录。请使用注册用户名，不是昵称；密码区分大小写。新注册用户名不得使用官方世界观角色名。</div>
     <a class="auth-usso" href="/security.html?mode=recover">找回账号 / 密码（已验证邮箱或找回问题）</a>
@@ -1366,6 +1368,7 @@
 <script src="/avatar-cropper.js?v=20261024"></script>
 <script src="/character-colors.js?v=20261013"></script>
 <script src="/auth-next.js?v=20261025"></script>
+<script src="/turnstile-widget.js?v=20261027"></script>
 <script>
 const STORAGE_KEY = 'luoxiaohei_characters';
 
@@ -1555,6 +1558,9 @@ function openAuthModal(notice) {
   if (notice) { m.className = 'auth-msg ok'; m.textContent = notice; }
   else { m.className = 'auth-msg'; m.textContent = ''; }
   document.getElementById('authMask').hidden = false;
+  window.HuiguanTurnstile.mount(document.getElementById('authTurnstile'), 'auth').catch(() => {
+    m.className = 'auth-msg'; m.textContent = '人机验证加载失败，请检查网络后重新打开此窗口';
+  });
   const u = document.getElementById('authUsername');
   if (u) u.focus();
 }
@@ -1574,9 +1580,10 @@ async function submitAuth() {
     const r = await fetch('/api/auth', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password, turnstile: window.HuiguanTurnstile.token() })
     });
     const d = await r.json();
+    window.HuiguanTurnstile.reset();
     if (d.ok) {
       hideGuestReminder();
       msg.className = 'auth-msg ok';
@@ -1594,6 +1601,7 @@ async function submitAuth() {
       msg.textContent = d.error || '操作失败，请重试';
     }
   } catch(e) {
+    window.HuiguanTurnstile.reset();
     msg.textContent = '网络错误，请重试';
   }
   btn.disabled = false;

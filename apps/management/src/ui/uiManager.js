@@ -30,6 +30,7 @@ import { getTrait } from '../content/traits.js';
 import { GIFT_REPUTATION, GIFT_INTERVAL_TICKS } from '../systems/relations.js';
 import { saveGame, loadGame, hasSave } from '../systems/saveGame.js';
 import { login as accountLogin, logout as accountLogout, currentUser } from '../systems/account.js';
+import { mountTurnstile, turnstileToken, resetTurnstile } from '../systems/turnstile.js';
 import { COLOR_SCHEMES, getCurrentTheme, setTheme, applyThemeToDom } from '../core/theme.js';
 
 const MOOD_EMOJI = { green: '😊', yellow: '😐', red: '😫' };
@@ -155,6 +156,9 @@ export class UIManager {
       document.getElementById('settings-dialog').close();
       this.el.loginModal.classList.remove('hidden');
       this.el.loginError.textContent = '';
+      mountTurnstile(document.getElementById('login-turnstile'), 'auth').catch((err) => {
+        this.el.loginError.textContent = err.message;
+      });
       this.el.loginUsername.focus();
     });
     this.el.loginCancel.addEventListener('click', () => {
@@ -171,8 +175,10 @@ export class UIManager {
         return;
       }
       this.el.loginError.textContent = '登录中…';
+      const token = turnstileToken();
+      resetTurnstile();
       try {
-        const { user, registered } = await accountLogin(username, password);
+        const { user, registered } = await accountLogin(username, password, token);
         this.el.loginModal.classList.add('hidden');
         this.el.loginUsername.value = '';
         this.el.loginPassword.value = '';

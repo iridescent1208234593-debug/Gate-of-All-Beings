@@ -199,12 +199,12 @@ def csp_policy(root=None):
     sockets = " ".join("wss://" + host for host in hosts)
     return "; ".join((
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://static.cloudflareinsights.com " + origins + " https://*.paypal.com https://*.paypalobjects.com",
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://static.cloudflareinsights.com https://challenges.cloudflare.com " + origins + " https://*.paypal.com https://*.paypalobjects.com",
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net " + origins,
         "img-src 'self' data: blob: " + origins + " https://*.paypal.com https://*.paypalobjects.com",
         "font-src 'self' data: https://cdn.jsdelivr.net " + origins,
         "connect-src 'self' " + origins + " " + sockets + " https://static.cloudflareinsights.com https://*.paypal.com",
         "media-src 'self' data: blob: " + origins,
-        "frame-src 'self' " + origins + " https://*.paypal.com",
+        "frame-src 'self' " + origins + " https://challenges.cloudflare.com https://*.paypal.com",
         "worker-src 'self' blob:",
     ))
