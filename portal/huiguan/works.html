@@ -131,7 +131,7 @@ function setState(el, text, role, retry){
 let rolePage = 1, roleLoaded = 0, roleTotal = 0, roleQ = '', roleBusy = false, roleTimer = null;
 function roleHTML(c, s){
   const cover = s && s.cover
-    ? `<img >`
+    ? `<img src="${esc(s.cover)}" alt="${esc(c.name)} 的同人图" loading="lazy" decoding="async">`
     : `<span class="role-empty"><b>${esc((c.name || '?')[0])}</b>还没有同人图</span>`;
   const count = s && s.count ? `<span class="qc-tag qc-tag--gold">${s.count} 张同人图</span>` : '<span class="qc-tag">上传第一张</span>';
   return `<a class="qc-card qc-card--hover role" href="works.html?cid=${c.id}">
@@ -170,7 +170,7 @@ let artOffset = 0, artTotal = 0, artBusy = false, pickedFile = null;
 function artHTML(it){
   RFX.seed(it.id, it);  // 喜欢 / 点赞 / 踩 与主册角色页共用
   return `<article class="qc-card art" data-id="${it.id}">
-    <img >
+    <img class="art-img" data-original-image src="${esc(it.image_url)}" alt="${esc(it.caption || '同人图')}" loading="lazy" decoding="async">
     <div class="art-body">
       ${it.caption ? `<p class="art-cap">${esc(it.caption)}</p>` : ''}
       <div class="art-meta"><span>by ${esc(it.user_name)}</span><span>${esc(String(it.created_at || '').slice(0, 10))}</span></div>
