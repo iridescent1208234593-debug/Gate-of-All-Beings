@@ -1,5 +1,5 @@
 ---
-applyTo: "portal/**/*.html,portal/**/*.css,portal/**/*.js,portal/**/*.ts,portal/**/*.tsx,server/app/src/**/*.html,server/app/src/**/*.css,server/app/src/**/*.js,server/app/src/**/*.ts,server/app/src/**/*.tsx,shared/**/*.js,shared/**/*.ts,shared/**/*.tsx"
+applyTo: "apps/**/*.html,apps/**/*.css,apps/**/*.js,apps/**/*.ts,apps/**/*.tsx,packages/**/*.js,packages/**/*.ts,packages/**/*.tsx"
 ---
 
 - Trace the actual page entry, router/host mapping, shared navigation, theme tokens, and data/API contract before editing UI.

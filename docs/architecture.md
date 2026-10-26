@@ -8,9 +8,9 @@
        ├─ Host=huiguan.*        → apps/huiguan      （会馆，含账号/素材 API）
        ├─ Host=oc.*             → apps/oc           （人设站）
        ├─ Host=主域 /           → apps/www          （主站）
-       ├─ 路径 /app/shell/*     → 统一壳（SPA，回退 index.html）
-       ├─ 路径 /app/modules/<名>/* → 各游戏构建产物
-       ├─ 路径 /shared/*        → shared/*（设计系统、会话等）
+       ├─ 路径 /app/shell/*     → apps/shell（SPA，回退 index.html）
+       ├─ 路径 /app/modules/<名>/* → Release 内 dist/modules/<名>
+       ├─ 路径 /shared/*        → packages/*（设计系统、会话、域名映射等）
        └─ /app/modules/<名>/api/* → 反向代理到各游戏上游
 ```
 
@@ -44,18 +44,18 @@
 
 ## 构建管线
 
-`tools/build/build-modules.mjs` 把 `server/app/src/<名>` 构建/拷贝到 `dist/modules/<名>`：
+`tools/build/build-modules.mjs` 把 `apps/<名>` 构建/拷贝到 Release 根的 `candidate/modules/<名>`，封存后位于 Release 的 `dist/modules/<名>`：
 
 | 模块 | 方式 |
 | --- | --- |
 | management / ecology / cards / softie | Vite `--base /app/modules/<名>/` |
 | juling / slay / aeon | 静态拷贝；slay 额外修正根绝对 `/ui/` 图标；`ui/images`（场景图 / 光标 / 小图标）为可选美术，来源由 `tools/build/module-assets.json` 的 `slay.images` 或 `IRIDESCENTLY_SLAY_IMAGES_DIR` 指定，未配置时不带美术构建，缺图在页面中隐藏 |
 
-`dist/modules/` 为产物（gitignore），运行所需。
+`dist/modules/` 只存在于封存的 Release 中（不进 Git），运行所需。
 
 ## 公用包
 
-根 `package.json` workspaces 管理 `shared/*`：
+根 `package.json` workspaces 管理 `packages/shared-*`：
 
 - `@lxh/shared-ui`：设计系统（真身；`apps/huiguan/design-system/ui` 为反向 junction）。
 - `@lxh/shared-types`：JSON 契约与校验。
@@ -75,6 +75,6 @@
 - `IRIDESCENTLY_PROJECT_ROOT` 当前指向 `E:\Projects`，部分 SQLite 数据、上传目录和共享媒体因而与源码仓库同根。它们被 Git 忽略不代表物理隔离；禁止对该树运行会清除 ignored files 的清理命令。
 - 审计时香港发布控制器报告五个受管服务 active；本机未发现项目门户/应用服务进程。生产数据标记为香港权威维护，线上运行身份应以远端发布控制器为准。
 - `apps/cards/server.py` 从代码快照所在目录导入服务模块，而 `IRIDESCENTLY_PROJECT_ROOT` 用于数据路径；不要把工作区源码改动当成已部署代码。
-- 统一壳中 `embed: true` 模块需实现 dispose；非 embed 试玩仍使用 iframe。共享会话、设计系统和类型契约的 canonical 目录是 `shared/*`。
+- 统一壳中 `embed: true` 模块需实现 dispose；非 embed 试玩仍使用 iframe。共享会话、设计系统和类型契约的 canonical 目录是 `packages/*`。
 
 审计时本机发布清单、香港当前版本指针和候选构建记录存在时间及提交来源差异。发布前必须记录同一候选的 Git SHA、dirty 状态、逐文件校验和以及线上激活版本，不能依赖旧的本机指针推断线上版本。详见 [环境隔离审计](architecture/ENVIRONMENT_BOUNDARIES.md)、根 README 与 [release-workflow](release-workflow.md)。

@@ -27,13 +27,13 @@
 | board | 玩法 | 排名依据 | 上报位置 |
 | --- | --- | --- | --- |
 | `cards` | 众生牌录 · 入世历练 | 单次最深层数 | `cards/src/world/progressReport.ts`（由 `JournalApp.tsx` 的 commit 调用） |
-| `slay` | 重生之门（独立版 + 众生牌录内） | 最高层数 | `slay-the-web/public/ui/app.js`；牌录内由 progressReport（带 receipt 的导入结算不重复计） |
-| `lingzhi` | 灵质回路（独立版 + 众生牌录内） | 最高层数 | `slay-the-web/public/ui/lingzhi-xiuxing.js`；牌录内由 progressReport |
+| `slay` | 重生之门（独立版 + 众生牌录内） | 最高层数 | `apps/slay/public/ui/app.js`；牌录内由 progressReport（带 receipt 的导入结算不重复计） |
+| `lingzhi` | 灵质回路（独立版 + 众生牌录内） | 最高层数 | `apps/slay/public/ui/lingzhi-xiuxing.js`；牌录内由 progressReport |
 | `shore` | 雾隐浅滩 | 单次探索节点（全部 3 处 = 完成） | `cards/src/game/shore/world-screen.js` |
 | `juling` | 聚灵 | 修行评分 =（成仙 100 / 未成仙 20×境界序）× 难度 | `juling/public/index.html`（魂灵是全服共享值，不用作个人分） |
 | `management` | 灵境会馆经营 | 已建成建筑数 | `management/src/systems/saveGame.js` |
 | `ecology` | 灵境生态 | 同存物种数 | `ecology/src/ui/spacePanel.js` |
-| `softie` | 灵体互动 | 累计相处分钟（每天最多计 120） | `softie-webgpu/.../spirit-playground/view.js` |
+| `softie` | 灵体互动 | 累计相处分钟（每天最多计 120） | `apps/softie/.../spirit-playground/view.js` |
 | `aeon` | AEON | 最高演化代数 | `aeon/src/main.js` |
 | `shengsheng-shoot` | 省省海滩射击 | 最高得分 | `apps/www/playtest/shengsheng-shoot/game.js` |
 | `level` | 账户等级 | 积分 | — |

@@ -1,4 +1,6 @@
-# shared/ · 网站与游戏公用资源
+# packages/ · 网站与游戏公用资源
+
+浏览器经 `/shared/<路径>` 访问本目录（统一入口把 `/shared/*` 映射到 `packages/*`）。
 
 | 包 | 作用 | 版本控制 |
 | --- | --- | --- |
@@ -6,8 +8,9 @@
 | `shared-types` | 三系统 JSON 契约（world / exchange / models），`npm run verify` 28 项 | 本仓库（历史独立仓库已并入） |
 | `shared-data` | 世界观角色、旧 ID 跳转、演武模型、跨模式卡牌目录；详见其 README | 本仓库 |
 | `shared-session` | 统一会话 / 统一存档 / 事件总线 | 本仓库 |
+| `site-domains` | 批准根域与站点映射：`domains.json` 为唯一来源，`index.js` / `index.mjs` 由 `tools/domains/generate-domain-config.py` 生成，浏览器经 `/shared/site-domains/index.js` 读取 | 本仓库 |
 
-根 `package.json` 声明 workspaces（`shared/*`），导入用包名：
+根 `package.json` 把 `packages/shared-*` 声明为 workspaces，导入用包名（`@lxh/*` 未随目录改名）：
 
 ```js
 import { validateEcoExchange } from '@lxh/shared-types/exchange';

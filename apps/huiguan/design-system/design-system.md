@@ -207,7 +207,7 @@
 
 ### 规则
 
-1. **向后兼容。** 已有类名、token 名和 `LXHUI` 参数不删、不改含义，新造型用修饰类。改选择器前先搜消费者（`server/app/src`、`portal/`）。
+1. **向后兼容。** 已有类名、token 名和 `LXHUI` 参数不删、不改含义，新造型用修饰类。改选择器前先搜消费者（`apps/`）。
 2. **状态齐全。** 可点控件要有悬停、按下、`:focus-visible`、禁用（`:disabled` / `aria-disabled`）和提交中（`aria-busy`）；输入框要有校验失败（`aria-invalid` + `.lxh-field__err` + `aria-describedby`）。
 3. **触控与对比。** 可点区不小于 44px，视觉更小的钮用 `::before` 扩大触控区；正文对比不低于 4.5:1。焦点环浅底用青玉，深底用描金：库里的深色组件已自动切换，自定义深色容器加 `data-lxh-surface="dark"`。
 4. **文本转义。** 数据字段（`name`、`text`、`id`、头像 URL）自动转义；`title`、`hint`、`intro`、`abilities` 接受可信 HTML，不放用户输入。

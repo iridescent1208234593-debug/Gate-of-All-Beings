@@ -49,7 +49,7 @@
 | verify | 管家健康检查 + `verify_portal`（隔离数据根）+ 公网探测 | — | 同上 |
 | gc | `release gc` | 每组件保留最近 5 个版本；不删当前 / 上一个 / 任何运行中进程使用的版本 | 无 |
 
-- `modules` / `cards` / `homepage` 目前由门户按请求从 `dist/modules/<name>`、`apps/www/assets/homepage` 读取。**过渡期**让这些路径变成指向 `store` 版本的 junction。重新指向 junction 只需删除并重建这个链接，不需要移动正在被读取的目录。之后再让门户直接读取指针，用管家的 reload 信号刷新。
+- `modules` / `cards` / `homepage` 目前由门户按请求从 `server/app/modules/<name>`、`portal/www/assets/homepage` 读取。**过渡期**让这些路径变成指向 `store` 版本的 junction。重新指向 junction 只需删除并重建这个链接，不需要移动正在被读取的目录。之后再让门户直接读取指针，用管家的 reload 信号刷新。
 - **生产门槛**：`sourceDirty: true` 的版本默认拒绝切换。紧急情况用 `--allow-dirty --reason "<文字>"`，原因写入 history。手工 overlay 改为"从 hotfix 提交封存一个新版本"。
 - **回滚** = `release switch <component>@<上一个 id>`，加上管家重启。用户运行数据不随版本回滚（与现状一致）。
 
@@ -65,7 +65,7 @@
 
 v2 的接入位：
 
-- **`ui` 组件**：把 `packages/shared-ui` 的发布形态封存成版本，按内容哈希提供，路径 `/ui/<release-id>/...`，可长期缓存。各站点的 manifest 写明自己依赖的 `ui` 版本，页面引用由构建注入，不再硬编码跨子域 URL。
+- **`ui` 组件**：把 `shared/shared-ui` 的发布形态封存成版本，按内容哈希提供，路径 `/ui/<release-id>/...`，可长期缓存。各站点的 manifest 写明自己依赖的 `ui` 版本，页面引用由构建注入，不再硬编码跨子域 URL。
 - **`design-system` 组件（后端）**：作为一个独立服务组件接入管家（自己的端口与 `services[]`）。它对外提供 token / 组件注册等数据，**产出** `ui` 组件的内容。站点只消费 `ui` 版本，不在运行时依赖后端可用。后端停机不影响已发布页面。
 - **契约**：`design-system` 的 `provides` 写 token schema 版本（例如 `tokens: 1`）；`ui` 的 manifest 写自己由哪个 token schema 生成。站点 `requires` 只依赖 `ui`。这样后端演进不会直接破坏站点。
 

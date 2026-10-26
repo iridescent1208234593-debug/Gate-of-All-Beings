@@ -10,6 +10,7 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 | [api.md](api.md) | API 清单：会馆、卡牌、聚灵、软乎乎、统一入口代理 |
 | [hooks.md](hooks.md) | 钩子与约定：embed、dispose、portal.json、构建、扩展点 |
 | [networking.md](networking.md) | 联机：现状与预留接口设计 |
+| [repository-layout.md](repository-layout.md) | 仓库布局、2026-10-26 重构的旧→新路径对照、外部运维脚本需同步的路径 |
 | [operations.md](operations.md) | 部署运营：端口、网站管家、Cloudflare 隧道、排障 |
 | [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | 当前 GitHub / Cloudflare 状态、未提交现场和新对话接续入口 |
 
@@ -19,7 +20,7 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 - 壳：`apps/shell/index.html`，路径 `/app/shell/m/<名>`；embed 模块同页挂载，非 embed 试玩沿用 iframe，不能概括为全站无 iframe。
 - 公用包：`@lxh/shared-{ui,types,data,session}`。
 - 统一存档：`localStorage['iridescently.save.v1']`。
-- 数据库：世界观库 `assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db`；会馆 `apps/huiguan/users.db`；聚灵 `apps/juling/data/save.db`。
+- 数据库：世界观库 `assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db`；会馆、聚灵等持久数据在外部 data 根（`<data>/huiguan/users.db`、`<data>/juling/`），见 [存储与运行期写入方](storage-runtime-writers.md)。
 
 ## 维护与研发资料
 

@@ -20,7 +20,7 @@
 | 上限 | 单槽 8 MiB（与 `_read_json` 一致），超出返回 413 |
 | 代码 | `services/platform/game_saves.py`（存储、迁移、CLI）；`apps/huiguan/server_huiguan.py` 的 `/api/game/save`、`/api/game/load` 只调用它 |
 
-HTTP 契约不变：路径、`?scope=softie`、响应字段 `ok` / `savedAt` / `state`、404「暂无云存档」都保留。客户端（经营 `apps/management/src/systems/account.js`、灵体 `softie-webgpu/src/games/spirit-playground/view.js`）无需修改；重生之门 slay 只用本地 `game/save-system.js`，不走云存档。
+HTTP 契约不变：路径、`?scope=softie`、响应字段 `ok` / `savedAt` / `state`、404「暂无云存档」都保留。客户端（经营 `apps/management/src/systems/account.js`、灵体 `apps/softie/src/games/spirit-playground/view.js`）无需修改；重生之门 slay 只用本地 `game/save-system.js`，不走云存档。
 
 ## 旧存档迁移
 

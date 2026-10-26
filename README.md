@@ -10,14 +10,16 @@
 | `apps/www/gallery-engine` | 正式 Atmospheric Gallery 核心；保留上游 Git 来源，根仓库也追踪源码 |
 | `apps/huiguan` | 会馆、设表、官方/同人档案、海报 |
 | `apps/oc` | 佳霖馆长设定 |
-| `server` | Python 统一门户、SSO 与安全能力 |
-| `server/app/src` | 八个游戏模块源码 |
-| `apps/shell` / `portal.json` | 同页模块壳与导航清单；非 embed 试玩使用 iframe，不能概括为全站无 iframe |
-| `shared` | UI、账户/session/save、契约与只读事实的唯一公共源码 |
-| `scripts` / `docs` | 根目录运维入口、构建发布文档与维护索引；运维实现位于外部 Ops 目录 |
-| `.releases/candidate` | 未发布候选（Git 忽略） |
-| `.releases/production/site` | 已发布静态/Python 源码快照（Git 忽略） |
-| `dist/modules` / `apps/www/assets/homepage` | 已显式发布的构建产物（Git 忽略） |
+| `apps/<模块>` | 八个游戏模块源码（cards、management、ecology、juling、aeon、world-map、slay、softie） |
+| `apps/shell` | 同页模块壳与导航清单 `portal.json`；非 embed 试玩使用 iframe，不能概括为全站无 iframe |
+| `services/platform` | Python 统一入口、SSO、账户与安全能力、存储契约；测试在 `tests/` |
+| `packages` | UI、账户/session/save、契约、只读事实与域名映射的唯一公共源码（浏览器经 `/shared/*` 访问） |
+| `tools` | 构建（`build`）、发布（`release`）、本机运行与存储（`runtime`）、域名（`domains`）、回归（`checks`）、外部运维入口（`ops`） |
+| `infra` | 入口 Nginx/Tunnel 生成物与探针（`ingress`）；香港旧布局候选工具（`hk-legacy`） |
+| `docs` | 构建发布文档与维护索引；运维实现位于外部 Ops 目录 |
+| 外部 Release 根 | 候选、封存 Release 与其中的 `dist/modules`、首页产物（不进 Git） |
+
+旧目录（`portal/`、`server/`、`shared/`、`scripts/`、`ops/`）与新目录的对照、外部运维脚本需要同步的路径见 [仓库布局](docs/repository-layout.md)。
 
 研发与参考位于工作区外 `E:\External Projects\Iridescently Labs`，桌面壁纸工具位于 `E:\External Projects\url-wallpaper`；都不参与生产部署。例外：线上 `/ozmtree/` 直接读取 `E:\External Projects` 下的 OZtree 静态目录（见下文入口表）。Gallery 上游核心已经迁入生产目录，不再把参考区当构建链路。研究的冻结测试结果保留历史路径，不伪造重新验证。
 

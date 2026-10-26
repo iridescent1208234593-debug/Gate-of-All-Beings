@@ -7,7 +7,7 @@
 - 审查时间：2026-10-16 21:55–22:14（Asia/Singapore）。
 - `127.0.0.1:8080` 由现有正式 portal 进程处理。直连测量使用真实 Host 和 `X-Forwarded-Proto: https`，避免 HTTPS 重定向；没有修改该进程或发布快照。
 - 公网测量使用 `curl --compressed`；下表的 bytes 是传输字节，资源源码体积另列。单次请求受 DNS、链路和边缘缓存影响，不能当作所有用户的平均值或浏览器完整首屏耗时。
-- 现有正式会馆读取 `.releases/production/site/portal/huiguan`。该快照的 `index.html` / `homepage.js` 与当前工作源码不同，gate-scene bundle 相同；主站生成首页仍来自 `apps/www/index.html` / `assets/homepage`。本地源码改动不等于线上已优化。
+- 现有正式会馆读取 `.releases/production/site/portal/huiguan`。该快照的 `index.html` / `homepage.js` 与当前工作源码不同，gate-scene bundle 相同；主站生成首页仍来自 `portal/www/index.html` / `assets/homepage`。本地源码改动不等于线上已优化。
 
 | 请求 | TTFB | 总时间 | bytes / 结果 |
 | --- | ---: | ---: | --- |
@@ -39,9 +39,9 @@
 
 ## 已实施的窄修改
 
-1. `apps/huiguan/index.html` 在 head 预加载与实际 script 完全相同的 intro、gate-scene、homepage.js URL。
+1. `portal/huiguan/index.html` 在 head 预加载与实际 script 完全相同的 intro、gate-scene、homepage.js URL。
 2. core 的执行顺序调整为 intro → gate-scene → homepage.js，再加载导航 / chrome / 内容；播放器、模型时间轴和布局规则未改。导航和档案请求不再是开场 ready 的必要先决条件。
-3. `apps/huiguan/homepage.js` 的 ready 改为幂等。fallback 先监听再 load，最多等待 8 秒，失败/超时进入可浏览状态；后到的加载事件不会重新播放或复位页面。pagehide 清理 timeout。
+3. `portal/huiguan/homepage.js` 的 ready 改为幂等。fallback 先监听再 load，最多等待 8 秒，失败/超时进入可浏览状态；后到的加载事件不会重新播放或复位页面。pagehide 清理 timeout。
 4. `homepage.js` 的资源版本为 `20261016-1`，preload 与 script 一致，避免重复请求及旧缓存。
 
 ## 主站首屏发现
@@ -56,7 +56,7 @@
 
 ## 验证记录
 
-- `node --check apps/huiguan/homepage.js`：通过。
+- `node --check portal/huiguan/homepage.js`：通过。
 - HTMLParser 检查三条 preload 与实际脚本 URL 一致、core 先于共享导航、homepage.js 只初始化一次：通过。
 - 依赖复核：`homepage.js` 消费的表单函数和全部必要 DOM 在它之前已定义；`homepage-chrome.js` 只在共享导航插入后整理导航，`homepage-content.js` 通过既有事件连接首页状态，因此都不需要成为门景 ready 的前置脚本。`qc-nav` 的 ResizeObserver 是可选增强，缺少导航时不会阻止初始化。
 - 2026-10-17 增加隔离源码 smoke：`python "E:\External Projects\Iridescently Operations Archive\qa\qa\zszm-merge-20261017\huiguan-source-smoke.py" --port 5196`。`http://127.0.0.1:5196/?chrome_delay=12` 提供实际会馆源码及 gate bundle，仅在测试响应中将共享导航延后 12 秒，并记录 `window.__qaHuiguanBoot` 的遮罩移除 / 导航插入时间；`?chrome_delay=12&fallback=1&video_delay=15` 用实际 MP4 验证 fallback 的 8 秒退出。该服务只监听 loopback、API 返回匿名测试数据、不写正式账户或正式进程。源页、三个 core 脚本、共享导航、fallback MP4 的本地 HTTP smoke 均为 200。

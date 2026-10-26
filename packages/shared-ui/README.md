@@ -26,7 +26,7 @@
 
 React / Vite 模块用 `import '@lxh/shared-ui/lxh-ui.css'` 和 `import '@lxh/shared-ui/lxh-ui.js'`。模块的构建产物会把 CSS 打包进去，改了本目录后要重新构建该模块才会生效。
 
-- **类名是契约。** 现有类名、`--lxh-*` token 名和 `LXHUI` 的参数都不能删、不能改含义；要新造型就加修饰类。动选择器前先搜 `server/app/src` 和 `portal/` 里的消费者。目前模块只用到 token、`.qc-loading` 和 `LXHUI.ICONS`；组件类主要在样式指南和 slay 预览页里用。
+- **类名是契约。** 现有类名、`--lxh-*` token 名和 `LXHUI` 的参数都不能删、不能改含义；要新造型就加修饰类。动选择器前先搜 `apps/` 里的消费者。目前模块只用到 token、`.qc-loading` 和 `LXHUI.ICONS`；组件类主要在样式指南和 slay 预览页里用。
 - **两层 token。** `--qc-*` 属于会馆和站点页面（`design-system.css`），`--lxh-*` 属于游戏画面（`lxh-ui.css`）。危险色同源：`--lxh-danger` 引用 `--qc-danger`。组件里不写色值，新颜色先加 token。
 - **状态基线（2026-10-20）。** 可点控件都有悬停、按下、`:focus-visible` 焦点环（浅底青玉 `--lxh-focus`，深底描金 `--lxh-focus-on-dark`）、`:disabled` / `aria-disabled`、提交中 `aria-busy="true"`；输入框有 `aria-invalid` 校验失败。触控区不小于 `--lxh-tap`（44px）。开启「减少动态效果」时停掉闪烁和扫光。
 - **基础件。** `.lxh-btn`（`--yes` / `--no` / `--danger` / `--ghost` / `--sm`）、`.lxh-field` + `.lxh-input`（`--dark`）、`.qc-loading`（`--page` / `--inline` / `--dark`）。脚本：`LXHUI.button()`、`setBusy()`、`field()`、`loading()`、`confirm()`。

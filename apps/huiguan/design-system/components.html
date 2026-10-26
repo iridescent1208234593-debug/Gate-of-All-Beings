@@ -267,7 +267,7 @@ LXHUI.avaframe({ gold: true, avatar: url, onEdit: () =&gt; pickAvatar() });</pre
   <section id="rules">
     <h2 class="qc-h2">规则</h2>
     <div class="rules">
-      <div><strong>类名是契约</strong>旧类名和 <code>LXHUI</code> 的旧参数全部保留。要改造型就新增修饰类（<code>--danger</code>），不要改已有选择器的含义。动选择器前先在 <code>server/app/src</code> 与 <code>portal/</code> 里搜一遍消费者。</div>
+      <div><strong>类名是契约</strong>旧类名和 <code>LXHUI</code> 的旧参数全部保留。要改造型就新增修饰类（<code>--danger</code>），不要改已有选择器的含义。动选择器前先在 <code>apps/</code> 里搜一遍消费者。</div>
       <div><strong>只用 token</strong>组件里不写色值，新颜色先加成 <code>--lxh-*</code> token 再用。实心色块上的字用 <code>--lxh-on-fill</code>，亮橙色块上用 <code>--lxh-on-ochre</code>。</div>
       <div><strong>五种状态</strong>每个可点控件都要有悬停、按下、键盘焦点（<code>:focus-visible</code>）、禁用和提交中（<code>aria-busy</code>）；输入框要有校验失败（<code>aria-invalid</code>）。</div>
       <div><strong>44px 与对比度</strong>可点区不小于 44px，视觉更小的钮用 <code>::before</code> 扩大触控区。正文对比 ≥ 4.5:1；浅底焦点环用青玉，深底用描金（容器加 <code>data-lxh-surface="dark"</code>）。</div>

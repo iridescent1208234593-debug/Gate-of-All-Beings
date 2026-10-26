@@ -1,14 +1,16 @@
-# server/app · 统一前端壳与游戏模块
+# apps/ · 站点、统一前端壳与游戏模块
 
 总览见根 [README.md](../README.md) 与 [services/platform/README.md](../services/platform/README.md)。
 
 | 路径 | 作用 |
 | --- | --- |
+| `www/`、`huiguan/`、`oc/` | 主站、会馆、人设站（由统一入口按 Host 分发） |
+| `activation-core/` | 独立 Next.js 应用，不由门户启动 |
 | `shell/index.html` | 统一壳：History API 路径路由（`/app/shell/m/<名>`），七个 `embed: true` 模块挂入当前文档；世界地图等非 embed 入口用同域 iframe 隔离；`<base>` 按模块基址解析相对资源；`window.__iridescentlyDispose` 统一卸载 |
-| `portal.json` | 门户清单（站点/游戏分组、URL、图标、`embed` 标记），导航唯一数据源 |
-| `scripts/build-modules.mjs` | 把 `src/` 下各游戏构建/拷贝到 `.releases/candidate/modules/`，同时生成首页候选 |
-| `src/<名>/` | 游戏源码（由项目根目录 Git 统一管理） |
-| `modules/<名>/` | 构建产物（gitignore，运行所需） |
+| `shell/portal.json` | 门户清单（站点/游戏分组、URL、图标、`embed` 标记），导航唯一数据源 |
+| `<模块>/` | 游戏源码：cards、management、ecology、juling、aeon、world-map、slay、softie（目录名即模块 key） |
+| `../tools/build/build-modules.mjs` | 把各游戏构建/拷贝到外部 Release 根的 `candidate/modules/` |
+| Release 内 `dist/modules/<名>/` | 封存后的构建产物（不进 Git），`/app/modules/*` 从这里提供 |
 
 ## 模块与挂载方式
 
@@ -60,4 +62,4 @@ $env:IRIDESCENTLY_MODULE_CODE_MAX_AGE = "14400"   # 秒；0 或不设 = 每次�
 
 共享游戏导航使用路径 / hash 判断当前入口，不按 Host 同时高亮多个模块；在壳内所有导航节点和样式属于当前模块容器。
 
-PC 新版的 `/app/shell/m/<key>` 必须回到 `apps/shell/index.html`，不能使用 `server/app/index.html`。所有玩法仍由同一 `portal.json` 和既有模块壳加载。错误页统一提供换服务器、重新加载、返回门庭，保留真实 HTTP 状态；API 与静态资源错误不替换成游戏页面。共享组件规则见 [server-recovery.md](../packages/shared-ui/server-recovery.md)，本轮验收和待发布状态见 [报告](../docs/access-and-bandwidth-20261019.md)。
+`/app/shell/*` 只以 `apps/shell` 为根，无扩展名路径回到 `apps/shell/index.html`。所有玩法仍由同一 `portal.json` 和既有模块壳加载。错误页统一提供换服务器、重新加载、返回门庭，保留真实 HTTP 状态；API 与静态资源错误不替换成游戏页面。共享组件规则见 [server-recovery.md](../packages/shared-ui/server-recovery.md)，本轮验收和待发布状态见 [报告](../docs/access-and-bandwidth-20261019.md)。
