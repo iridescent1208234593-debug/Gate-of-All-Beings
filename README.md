@@ -56,6 +56,7 @@ npm run release:seal      # 三个候选须来自同一干净提交；生成不�
 npm run release:rollback -- <release-id>    # 只切换 channel，持久数据不变
 python tools/runtime/local-runtime.py start       # 只在本机回环启动已封存 Release，不启动 Tunnel、不改 DNS
 python tools/runtime/local-runtime.py status | stop
+python tools/checks/local-smoke.py                # 启动后只读冒烟：三根域页面/API、匿名原图拒绝、跨根 Origin 与 WebSocket 拒绝、未知 Host 421
 python tools/checks/regression.py --full --modules <candidate>/modules   # 回归，只使用临时 test 存储
 ```
 
