@@ -1,0 +1,42 @@
+--- a/server/security_ingress_test.py
++++ b/server/security_ingress_test.py
+@@ -38,6 +38,29 @@ PATHS =["/", "/app", "/app/shell/", "/api/sso-user", "/__server/select",
+          "/__server/select?return=%5C%5Cevil.example", "/a?b=1"]
+ 
+ 
++class CIHeaders(dict):
++    """Case-insensitive response headers.
++
++    HTTP/2 (and Cloudflare in front of it) lower-cases header names, so a plain
++    dict(response.getheaders()).get("Location") silently returns None and the
++    redirect checks report a false "missing Location".
++    """
++
++    def __init__(self, items):
++        super().__init__()
++        for key, value in items:
++            self[key.lower()] = value
++
++    def get(self, key, default=None):
++        return super().get(key.lower(), default)
++
++    def __getitem__(self, key):
++        return super().__getitem__(key.lower())
++
++    def __contains__(self, key):
++        return super().__contains__(key.lower())
++
++
+ def request(connect, scheme, path, host=HOST, headers=None, method="GET", sni=None):
+     conn = http.client.HTTPConnection(connect[0], connect[1], timeout=15)
+     try:
+@@ -50,7 +73,7 @@ def request(connect, scheme, path, host=HOST, headers=None, method="GET", sni=No
+         conn.request(method, path, headers={"Host": host, "Connection": "close", **(headers or {})})
+         response = conn.getresponse()
+         body = response.read(2 * 1024 * 1024)
+-        return response.status, dict(response.getheaders()), body, cert
++        return response.status, CIHeaders(response.getheaders()), body, cert
+     finally:
+         conn.close()
+ 
+

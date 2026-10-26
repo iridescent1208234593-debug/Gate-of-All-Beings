@@ -1,0 +1,27 @@
+tunnel: 6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7
+credentials-file: /etc/cloudflared/zszm-hk.json
+protocol: http2
+metrics: 127.0.0.1:20241
+ingress:
+  - hostname: iridescently.xyz
+    service: http://127.0.0.1:8080
+  - hostname: www.iridescently.xyz
+    service: http://127.0.0.1:8080
+  - hostname: huiguan.iridescently.xyz
+    service: http://127.0.0.1:8080
+  - hostname: oc.iridescently.xyz
+    service: http://127.0.0.1:8080
+  - hostname: spirit.iridescently.xyz
+    service: http://127.0.0.1:8080
+  - hostname: game.iridescently.xyz
+    service: http://127.0.0.1:8080
+  - hostname: juling.iridescently.xyz
+    service: http://127.0.0.1:8080
+  - hostname: lingjing.iridescently.xyz
+    service: http://127.0.0.1:8080
+  - hostname: zszm.iridescently.xyz
+    service: http://127.0.0.1:8080
+    originRequest:
+      httpHostHeader: zszm.iridescently.xyz
+  - service: http_status:404
+
