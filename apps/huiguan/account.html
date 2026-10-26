@@ -92,7 +92,7 @@ function render(u,emailState){
   document.getElementById('content').innerHTML=`
     <div class="qc-card">
       <h2 class="qc-h2">账户头像</h2>
-      <div class="account-avatar-row"><img id="accountAvatarPreview" src="${esc(u.account_avatar_url||u.picture||'')}" alt="账户头像" onerror="this.hidden=true"><div><strong>${esc(u.nickname||u.username||'账户')}</strong><div class="qc-hint">这是账户本人在网站中的通用头像，不会更改 OC 或众生之门形象。</div></div></div>
+      <div class="account-avatar-row"><img loading="lazy" decoding="async" id="accountAvatarPreview" src="${esc(u.account_avatar_url||u.picture||'')}" alt="账户头像" onerror="this.hidden=true"><div><strong>${esc(u.nickname||u.username||'账户')}</strong><div class="qc-hint">这是账户本人在网站中的通用头像，不会更改 OC 或众生之门形象。</div></div></div>
       <input id="accountAvatarFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden>
       <div class="account-avatar-actions"><button class="qc-btn qc-btn--ghost" id="accountAvatarChoose" type="button">选择并裁切</button><button class="qc-btn" id="accountAvatarSave" type="button" disabled>保存头像</button><button class="qc-btn qc-btn--ghost" id="accountAvatarRemove" type="button">移除自定义头像</button></div>
       <div class="qc-hint" id="accountAvatarHint">支持 JPG、PNG、WebP、GIF；保存为去除元数据的 1:1 头像。</div>

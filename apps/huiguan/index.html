@@ -946,7 +946,7 @@
           </button>
           <div class="archive-body" id="registrationMount">
             <a class="registration-poster" href="/haibao/">自定义角色配色海报 ↗</a>
-            <div class="registration-preview"><img src="/api/official/img?cid=1&n=0&t=1" alt="罗小黑" decoding="async"><p>名字、能力、经历。<br>从这里，留下你的角色档案。</p><span>在这一列向下滑，逐页写下角色。</span></div>
+            <div class="registration-preview"><img loading="lazy" src="/api/official/img?cid=1&n=0&t=1" alt="罗小黑" decoding="async"><p>名字、能力、经历。<br>从这里，留下你的角色档案。</p><span>在这一列向下滑，逐页写下角色。</span></div>
           </div>
         </section>
         <section class="archive-door" data-door="fan">
@@ -1141,7 +1141,7 @@
         </div>
         <div id="imgGallery" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
         <div class="oc-avatar-editor" aria-labelledby="ocAvatarHeading">
-          <div class="oc-avatar-editor__preview"><img id="ocAvatarPreview" alt="OC 头像预览" hidden><span id="ocAvatarFallback" aria-hidden="true">人设</span></div>
+          <div class="oc-avatar-editor__preview"><img loading="lazy" decoding="async" id="ocAvatarPreview" alt="OC 头像预览" hidden><span id="ocAvatarFallback" aria-hidden="true">人设</span></div>
           <div class="oc-avatar-editor__body">
             <strong id="ocAvatarHeading">这份 OC 的独立头像</strong>
             <p>从本 OC 的设定图中选择，或上传后裁切。不会使用或修改账户头像。</p>
@@ -1511,7 +1511,7 @@ function renderAuthBar(user) {
   if (bar) {
     if (user) {
       const accountAvatar = user.account_avatar_url || user.picture || '';
-      const avatar = accountAvatar ? `<img class="user-avatar" src="${escapeHtml(accountAvatar)}" alt="账户头像">` : '';
+      const avatar = accountAvatar ? `<img loading="lazy" decoding="async" class="user-avatar" src="${escapeHtml(accountAvatar)}" alt="账户头像">` : '';
       const accountLink = '<a class="btn-logout" href="/account.html">账户</a>';
       const memberLink = (user.is_admin || user.role === 'elder') ? '<a class="btn-logout" href="/member.html">成员管理</a>' : '';
       const roleTag = user.role && roleName[user.role] ? `<span class="role-tag">${roleName[user.role]}</span>` : '';
@@ -2461,7 +2461,7 @@ function renderGallery() {
   if (!g) return;
   g.innerHTML = imageList.map((src, i) =>
     '<div style="position:relative;display:inline-block;">' +
-      '<img src="' + src + '" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid var(--border);display:block;">' +
+      '<img loading="lazy" decoding="async" src="' + src + '" style="width:84px;height:84px;object-fit:cover;border-radius:6px;border:1px solid var(--border);display:block;">' +
       (i === 0 ? '<span style="position:absolute;left:0;bottom:0;background:var(--accent);color:#fff;font-size:10px;padding:1px 6px;border-radius:0 6px 0 6px;">主图</span>' : '') +
       '<button type="button" onclick="removeImage(' + i + ')" title="删除这张" style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:var(--panel,#fff);color:var(--danger,#b3543f);cursor:pointer;font-size:12px;line-height:1;">×</button>' +
     '</div>'
@@ -3609,12 +3609,12 @@ body.theme-transition, body.theme-transition * { transition: background-color 0.
       ${abilityTags.map(t => `<span>${escapeHtml(t)}</span>`).join('')}
     </div>
   </div>
-  ${data.avatar_asset_id ? `<img class="oc-profile-avatar" src="${escapeHtml(data.avatar_asset_id)}" alt="${escapeHtml(data.name)} 的人设头像" style="border-radius:${data.avatar_display_shape === 'square' ? '6px' : '50%'}">` : ''}
+  ${data.avatar_asset_id ? `<img loading="lazy" decoding="async" class="oc-profile-avatar" src="${escapeHtml(data.avatar_asset_id)}" alt="${escapeHtml(data.name)} 的人设头像" style="border-radius:${data.avatar_display_shape === 'square' ? '6px' : '50%'}">` : ''}
   ${(() => {
     const imgs = (data.images && data.images.length) ? data.images : (data.image ? [data.image] : []);
     if (!imgs.length) return '';
     return '<div class="reveal" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin:16px 4px;">' +
-      imgs.map((src, i) => '<img data-original-image src="' + src + '" alt="" class="lhx-img" onclick="lhxZoom(this)" style="max-width:' + (i === 0 ? 180 : 96) + 'px;max-height:' + (i === 0 ? 180 : 96) + 'px;width:auto;height:auto;object-fit:contain;border-radius:10px;border:1px solid rgba(0,0,0,.15);cursor:zoom-in;">').join('') +
+      imgs.map((src, i) => '<img loading="lazy" decoding="async" data-original-image src="' + src + '" alt="" class="lhx-img" onclick="lhxZoom(this)" style="max-width:' + (i === 0 ? 180 : 96) + 'px;max-height:' + (i === 0 ? 180 : 96) + 'px;width:auto;height:auto;object-fit:contain;border-radius:10px;border:1px solid rgba(0,0,0,.15);cursor:zoom-in;">').join('') +
       '</div>';
   })()}
   <div class="content">
@@ -3770,7 +3770,7 @@ body.theme-transition, body.theme-transition * { transition: background-color 0.
 (function () {
   var lb = document.createElement('div');
   lb.id = 'lhx-lightbox';
-  lb.innerHTML = '<img alt="">';
+  lb.innerHTML = '<img loading="lazy" decoding="async" alt="">';
   lb.addEventListener('click', function () { lb.classList.remove('show'); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') lb.classList.remove('show'); });
   document.body.appendChild(lb);
@@ -4113,7 +4113,7 @@ function renderList() {
   btn.style.display = all.length ? '' : 'none';
   let html = all.length ? all.map((c, i) => `
     <div class="char-card">
-      ${(c.avatar_asset_id || c.image) ? `<img data-original-image class="thumb" src="${escapeHtml(c.avatar_asset_id || c.image)}" alt="" data-fallback="${escapeHtml((c.name || c.code || '?')[0])}" onerror="thumbFallback(this)" style="object-fit:cover;${c.avatar_display_shape === 'circle' ? 'border-radius:50%;' : ''}">` : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:22px;">' + escapeHtml((c.name || c.code || '?')[0]) + '</div>'}
+      ${(c.avatar_asset_id || c.image) ? `<img loading="lazy" decoding="async" data-original-image class="thumb" src="${escapeHtml(c.avatar_asset_id || c.image)}" alt="" data-fallback="${escapeHtml((c.name || c.code || '?')[0])}" onerror="thumbFallback(this)" style="object-fit:cover;${c.avatar_display_shape === 'circle' ? 'border-radius:50%;' : ''}">` : '<div class="thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:22px;">' + escapeHtml((c.name || c.code || '?')[0]) + '</div>'}
       <div class="info">
         <div class="name">${escapeHtml(c.code)} · ${escapeHtml(c.name)}</div>
         <div class="meta">
