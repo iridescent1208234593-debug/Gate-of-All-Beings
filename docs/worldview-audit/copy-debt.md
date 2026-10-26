@@ -6,7 +6,7 @@
 
 | ID | 内容 | 现状 | 建议的唯一来源 | 严重度 |
 |---|---|---|---|---|
-| T01 | 能力系定义 | 至少 6 份：`packages/shared-types/world.js`、`packages/shared-data/worldview.json`、`apps/slay/public/content/worldview-data.js` + `ability-branches.js`、`apps/huiguan/index.html` 的 ABILITY_DETAIL、`apps/juling/engine.js`、`apps/management/src/content/loreCharacters.js`。数量（六/七/八）和持有者互相矛盾。 | `shared-types/world.js`（结构）+ `worldview.json`（描述） | P1 |
+| T01 | 能力系定义 | 至少 6 份：`packages/shared-types/world.js`、`packages/shared-data/worldview.json`、`apps/slay/public/content/worldview-data.js` + `ability-branches.js`、`apps/huiguan/index.html` 的 ABILITY_DETAIL、`apps/juling/engine.js`、`apps/management/src/content/loreCharacters.js`。数量（六/七/八）和持有者互相矛盾。 | 世界观基准为原作六大系；数据统一在 `worldview.json`，本作机制分类放在 `shared-types/world.js` 并标“本作分类” | P1 |
 | T02 | slay 世界观副本 | `apps/slay/public/content/worldview-data.js` 是手工维护的第二份世界观，写“六大系”，而 UI 写“八大系”。 | 从 `packages/shared-data` 生成 | P2 |
 | T05 | 重生之门双实现 | `apps/slay`（原版）和 `apps/cards` journal（移植版）各有一套文案。 | 主创决定以哪套为准 | P3 |
 | T10 | 玩法描述 | `apps/shell/portal.json` 是导航唯一数据源，`apps/cards/src/game/ModeHall.tsx` 又写了一份标题和描述。本 PR 两处都改了，但以后仍要手动同步。 | `portal.json` | P3 |

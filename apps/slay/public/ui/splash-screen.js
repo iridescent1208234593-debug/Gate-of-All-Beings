@@ -75,7 +75,7 @@ export default class SplashScreen extends Component {
 						: html`<p class="Splash-elementHint">不选则随机觉醒一个五行系。</p>`}
 				</div>
 				<div class="Splash-element Splash-branch">
-					<p class="Splash-elementTitle">灵质天赋 · 八大能力系（可跳过，无天赋偏向）</p>
+					<p class="Splash-elementTitle">灵质天赋 · 六大系与强化、治愈分支（本作分类，可跳过）</p>
 					<div class="Splash-elementGrid Splash-branchGrid">
 						${abilityBranches.map(
 							(b) => html`
@@ -93,10 +93,10 @@ export default class SplashScreen extends Component {
 					</div>
 					${state.branch
 						? html`<p class="Splash-elementHint">已选择「${abilityBranches.find((b) => b.id === state.branch).name}」：${abilityBranches.find((b) => b.id === state.branch).flavor}${abilityBranches.find((b) => b.id === state.branch).dualSkill ? ` 开局觉醒双系合技「${abilityBranches.find((b) => b.id === state.branch).dualSkill}」。` : ''}</p>`
-						: html`<p class="Splash-elementHint">八大系天赋为灵质空间先天的偏向，选择后获得对应被动与专属开局卡；不选则无天赋。</p>`}
+						: html`<p class="Splash-elementHint">灵质天赋为灵质空间先天的偏向。本作以原作六大系为基础，另把生灵系的强化、治愈单列为两支。选择后获得对应被动与专属开局卡；不选则无天赋。</p>`}
 				</div>
 				<div class="Splash-element Splash-guild">
-					<p class="Splash-elementTitle">出身会馆 · 苍南总馆与六处分馆（可跳过，随机出身）</p>
+					<p class="Splash-elementTitle">出身会馆 · 苍南总馆与六处可选分馆（可跳过，随机出身）</p>
 					<div class="Splash-elementGrid Splash-guildGrid">
 						${guildBranches.map(
 							(g) => html`

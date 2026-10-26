@@ -27,7 +27,7 @@
 | 聚灵 | 原作 / 原创玩法名 | — | — | Gathering | 原作指妖精诞生；同时是 apps/juling 玩法名 |
 | 灵质空间 | 原作 | 小天地、洞天 | — | Spirit Space | 每个生命固有的空间 |
 | 灵质力 | 原作 | 修为、灵力（指能力时） | — | Spirit Power | 能力统称 |
-| 能力系 | 原作 | 八大系、六大系（作数字时） | 系别 | Ability School | 以 shared-types/world.js 为准 |
+| 六大系 | 原作 | 八大系、七大系 | 能力系、系别 | Six Schools | 御灵、锁御、造物、生灵、心灵、空间；本作扩展分支须标“本作分类” |
 | 妖灵会馆 | 原作 | 宗门 | 会馆 | Yaoling Hall | |
 | 苍南总馆 | 原作 | 苍南分馆 | 总馆 | Cangnan Headquarters | 不算分馆 |
 | 执行者 | 原作 | — | — | Executor | |

@@ -92,7 +92,7 @@ function CultivationPanel({gameState, onBack}) {
 			${!branch && player.branch === undefined &&
 			html`<section class="PanelSection">
 				<h3>灵质天赋</h3>
-				<p class="PanelMuted">旧存档未觉醒灵质天赋。新开局时可选八大能力系天赋，获得天赋被动与专属卡牌。</p>
+				<p class="PanelMuted">旧存档未觉醒灵质天赋。新开局时可选灵质天赋（六大系与强化、治愈分支），获得天赋被动与专属卡牌。</p>
 			</section>`}
 
 			<section class="PanelSection">
