@@ -9,7 +9,8 @@ export const GUEST_ROSTER_KEY = 'zszm.gateIdentities.v1';
 export const IDENTITY_LIMIT = 6;
 export const accountScope = (account: Account) => account.logged_in ? `${account.kind}:${account.user_id ?? account.uid}` : 'anonymous';
 export const identityComplete = (identity: GateIdentity) => Boolean(identity.display_name.trim() && identity.species_name.trim() && (identity.avatar_asset_id || identity.avatar_frame_id));
-export const identityAssetUrl = (asset: string) => asset.startsWith('/assets/uploads/') ? `https://huiguan.iridescently.xyz${asset}` : asset;
+// Upload sources are served only through the preview route: the raw /assets/uploads/ path answers 404.
+export const identityAssetUrl = (asset: string) => asset.startsWith('/assets/uploads/') ? `https://huiguan.iridescently.xyz/api/uploads/preview?name=${asset.slice('/assets/uploads/'.length)}` : asset;
 export function readGuestIdentity(): GateIdentity {
   try {
     const saved = JSON.parse(sessionStorage.getItem(GUEST_IDENTITY_KEY) || 'null');
@@ -138,7 +139,10 @@ export function PlayerProfileProvider({ children }: { children: ReactNode }) {
       roster = current.some(item => item.id === next.id) ? current.map(item => item.id === next.id ? next : item) : [...current, next];
     }
     if (revision !== generation.current || expectedScope !== scope.current) throw new Error('账户已切换，请重新确认玩家资料。');
-    if (!account.logged_in) writeGuest(roster, next);
+    if (!account.logged_in) {
+      try { writeGuest(roster, next); }
+      catch { throw new Error('浏览器本地空间不足，头像没能保存；登录会馆账户后可以跨设备保存。'); }
+    }
     if (active.current) { setIdentity(next); setIdentities(roster); }
     return next;
     } finally { saving.current = false; }

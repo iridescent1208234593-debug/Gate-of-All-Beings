@@ -43,7 +43,16 @@ def valid_asset_url(value):
 
 
 def asset_public_url(value):
-    return "https://huiguan.iridescently.xyz" + value if valid_asset_url(value) else ""
+    """Public URL for a stored upload.
+
+    Upload sources are written under /assets/uploads/, but the static handler
+    deliberately never serves that prefix (原图不外链): the public route for
+    them is /api/uploads/preview?name=… . Pointing at the raw path produced
+    URLs that answer 404, which is why avatars stopped rendering.
+    """
+    if not valid_asset_url(value):
+        return ""
+    return "https://huiguan.iridescently.xyz/api/uploads/preview?name=" + value.rsplit("/", 1)[-1]
 
 
 def store_avatar_image(raw, mime, project_root=None):
