@@ -1,7 +1,7 @@
 """Cloud saves are owned by (kind, uid, scope); legacy bare-uid JSON is imported once.
 
 Runs against a temporary project root: IRIDESCENTLY_PROJECT_ROOT is set before the
-会馆 module is imported, so the real portal/huiguan/users.db is never opened.
+会馆 module is imported, so the real huiguan/users.db is never opened.
 """
 import hashlib
 import importlib
@@ -44,9 +44,9 @@ sys.path.insert(0, str(ROOT))
 # 且 USER_DB 在 import 时从环境变量解析。若同进程的其他测试（字母序更前的
 # test_gallery_interactions）已用它自己的临时根目录导入过该模块，模块缓存会让
 # 下面的 import 拿到旧实例，建表落进别人的临时目录。弹出缓存强制重导入。
-sys.modules.pop("portal.huiguan.server_huiguan", None)
+sys.modules.pop("apps.huiguan.server_huiguan", None)
 # Importing the 会馆 module creates the real schema in the empty temporary users.db.
-huiguan = importlib.import_module("portal.huiguan.server_huiguan")
+huiguan = importlib.import_module("apps.huiguan.server_huiguan")
 import game_saves  # noqa: E402  (same module instance the server uses)
 
 conn = sqlite3.connect(RUNTIME / "users.db")

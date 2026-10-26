@@ -15,13 +15,14 @@ class SourceExportTests(unittest.TestCase):
             source.mkdir()
             files = {
                 "services/platform/app.py": "print('committed')\n",
-                "portal/page.html": "<p>committed</p>",
+                "apps/www/page.html": "<p>committed</p>",
                 "packages/example.js": "export default 1;",
-                "server/users.db": "private database",
-                "server/registry.sqlite3": "private registry",
-                "portal/.env": "SECRET=private",
-                "portal/huiguan/assets/uploads/private.png": "private original",
-                "portal/huiguan/characters.json": "private characters",
+                "tools/build/build-only.mjs": "export default 'not deployed';",
+                "apps/cards/users.db": "private database",
+                "services/platform/registry.sqlite3": "private registry",
+                "apps/huiguan/.env": "SECRET=private",
+                "apps/huiguan/assets/uploads/private.png": "private original",
+                "apps/huiguan/characters.json": "private characters",
             }
             for name, content in files.items():
                 target = source / name
@@ -45,7 +46,7 @@ class SourceExportTests(unittest.TestCase):
             target = candidates[0]
             self.assertEqual((target / "services/platform/app.py").read_text(), "print('committed')\n")
             self.assertEqual(sorted(path.relative_to(target).as_posix() for path in target.rglob("*") if path.is_file()),
-                             ["packages/example.js", "portal/page.html", "services/platform/app.py"])
+                             ["apps/www/page.html", "packages/example.js", "services/platform/app.py"])
             self.assertFalse((source / ".releases").exists())
 
 

@@ -6,18 +6,18 @@
 
 | 目录 | 用途 |
 | --- | --- |
-| `portal/www` | 节气 Gallery 首页、Connections、已发布 DAY100/射击试玩 |
-| `portal/www/gallery-engine` | 正式 Atmospheric Gallery 核心；保留上游 Git 来源，根仓库也追踪源码 |
-| `portal/huiguan` | 会馆、设表、官方/同人档案、海报 |
-| `portal/oc` | 佳霖馆长设定 |
+| `apps/www` | 节气 Gallery 首页、Connections、已发布 DAY100/射击试玩 |
+| `apps/www/gallery-engine` | 正式 Atmospheric Gallery 核心；保留上游 Git 来源，根仓库也追踪源码 |
+| `apps/huiguan` | 会馆、设表、官方/同人档案、海报 |
+| `apps/oc` | 佳霖馆长设定 |
 | `server` | Python 统一门户、SSO 与安全能力 |
 | `server/app/src` | 八个游戏模块源码 |
-| `server/app/shell` / `portal.json` | 同页模块壳与导航清单；非 embed 试玩使用 iframe，不能概括为全站无 iframe |
+| `apps/shell` / `portal.json` | 同页模块壳与导航清单；非 embed 试玩使用 iframe，不能概括为全站无 iframe |
 | `shared` | UI、账户/session/save、契约与只读事实的唯一公共源码 |
 | `scripts` / `docs` | 根目录运维入口、构建发布文档与维护索引；运维实现位于外部 Ops 目录 |
 | `.releases/candidate` | 未发布候选（Git 忽略） |
 | `.releases/production/site` | 已发布静态/Python 源码快照（Git 忽略） |
-| `server/app/modules` / `portal/www/assets/homepage` | 已显式发布的构建产物（Git 忽略） |
+| `dist/modules` / `apps/www/assets/homepage` | 已显式发布的构建产物（Git 忽略） |
 
 研发与参考位于工作区外 `E:\External Projects\Iridescently Labs`，桌面壁纸工具位于 `E:\External Projects\url-wallpaper`；都不参与生产部署。例外：线上 `/ozmtree/` 直接读取 `E:\External Projects` 下的 OZtree 静态目录（见下文入口表）。Gallery 上游核心已经迁入生产目录，不再把参考区当构建链路。研究的冻结测试结果保留历史路径，不伪造重新验证。
 
@@ -61,22 +61,22 @@ python scripts/check-batch6.py --full --modules <candidate>/modules   # 回归�
 
 ## 数据与密钥
 
-`users.db`、`characters.json`、`game_saves.json`、上传与展示 store、Cards/聚灵/首页互动数据库、世界观可编辑库及 `secrets/server.env` 都只存在于外部 data / assets 根，不进入 Git、候选或 Release；Release 替换与回滚不会覆盖它们。`portal/activation-core/.env.local` 是本机独立 Next.js 应用配置，不删除、不提交，也不由门户启动。
+`users.db`、`characters.json`、`game_saves.json`、上传与展示 store、Cards/聚灵/首页互动数据库、世界观可编辑库及 `secrets/server.env` 都只存在于外部 data / assets 根，不进入 Git、候选或 Release；Release 替换与回滚不会覆盖它们。`apps/activation-core/.env.local` 是本机独立 Next.js 应用配置，不删除、不提交，也不由门户启动。
 
 `assets/source/罗小黑战记数据库` 是真实媒体原件（不纳入 Git），供 Gallery 构建与会馆使用；派生 WebP 预览、缩略图写入 cache 根，可随时重建。部署到其他机器需单独提供原件并确认素材许可。Git 不能恢复数据库和媒体，须单独备份。
 
-配置：会馆 USSO OAuth 使用 `USSO_CLIENT_SECRET`，众生之门 OAuth 使用 `ZSZM_CLIENT_SECRET`，均只从运行环境读取；`HX_SSO_SECRET` 环境优先，也可从外部 data 根的 `secrets/server.env` 读取。会馆 OAuth 的 Client ID 在 `portal/huiguan/server_huiguan.py` 配置；真实 OAuth 应用密钥需由 USSO 应用管理端签发，不能用站内账户密码代替。所有账户逻辑仍复用会馆和 `shared-session`，无第二套身份系统。
+配置：会馆 USSO OAuth 使用 `USSO_CLIENT_SECRET`，众生之门 OAuth 使用 `ZSZM_CLIENT_SECRET`，均只从运行环境读取；`HX_SSO_SECRET` 环境优先，也可从外部 data 根的 `secrets/server.env` 读取。会馆 OAuth 的 Client ID 在 `apps/huiguan/server_huiguan.py` 配置；真实 OAuth 应用密钥需由 USSO 应用管理端签发，不能用站内账户密码代替。所有账户逻辑仍复用会馆和 `shared-session`，无第二套身份系统。
 
 AI 协作指令与隔离边界见 [Copilot 仓库指令](.github/copilot-instructions.md)、[架构说明](docs/architecture.md) 和 [环境隔离审计](docs/architecture/ENVIRONMENT_BOUNDARIES.md)。分支治理当前为建议稿，尚未执行，见 [BRANCH_STRATEGY](docs/development/BRANCH_STRATEGY.md)；归档边界见 [ARCHIVE_POLICY](docs/development/ARCHIVE_POLICY.md)。
 
 ## 颜色与海报
 
-`portal/huiguan/character-colors.js` 统一以保存的 HEX 为真值，古色色板索引仅作缺值 fallback；界面背景派生色与主色分开。图片/海报采用 Blob + multipart 上传并在 JSON/HTML 中引用同源 URL，避免重复 Base64。普通业务 JSON 上限 8 MiB，图片/PNG 8 MiB、GIF 5 MiB；64 MiB 旧角色写入兼容范围仍有界限。详见 [会馆](portal/huiguan/README.md) 与 [海报](portal/huiguan/haibao/README.md)。
+`apps/huiguan/character-colors.js` 统一以保存的 HEX 为真值，古色色板索引仅作缺值 fallback；界面背景派生色与主色分开。图片/海报采用 Blob + multipart 上传并在 JSON/HTML 中引用同源 URL，避免重复 Base64。普通业务 JSON 上限 8 MiB，图片/PNG 8 MiB、GIF 5 MiB；64 MiB 旧角色写入兼容范围仍有界限。详见 [会馆](apps/huiguan/README.md) 与 [海报](apps/huiguan/haibao/README.md)。
 
 ## 开源与研究边界
 
 可独立运行的 Gallery 工程已公开：[iridescently-atmospheric-gallery](https://github.com/iridescent1208234593-debug/iridescently-atmospheric-gallery)。仅使用自行生成的样例图，保留 MIT/Codrops 来源。主站私有素材、音乐、用户内容、账户配置和研究原始资料不进入公开仓库。其他研究项目需要独立许可证、第三方/私有素材核查与迁移后资格验证，不能为了数量直接发布。
 
-文件维护入口：[首页](portal/www/README.md)、[应用模块](server/app/README.md)、[共享资源](packages/README.md)、[发布](docs/release-workflow.md)。
+文件维护入口：[首页](apps/www/README.md)、[应用模块](apps/README.md)、[共享资源](packages/README.md)、[发布](docs/release-workflow.md)。
 
 众生之门最新源码集成：正式门景 → 玩家初始化 → 统一门庭；原型浅滩独立为模式，成熟玩法保留原引擎和存档。开场新增可记忆的配乐选择与静音控制，配乐从开场延续到门庭。此轮仅本地工作源码，未发布。见 [流程与路由](docs/zszm-flow-integration.md)、[账户与存档边界](docs/zszm-identity-and-save-map.md)、[首屏加载审查](docs/zszm-loading-audit.md)。

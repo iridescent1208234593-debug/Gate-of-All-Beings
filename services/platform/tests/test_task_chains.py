@@ -1,7 +1,7 @@
 """Cross-game task chains: derived progress, idempotent claims, HTTP surface.
 
 Mirrors test_account_progress.py: runs against a temporary project root so the
-real portal/huiguan/users.db is never opened.
+real huiguan/users.db is never opened.
 """
 import http.client
 import json

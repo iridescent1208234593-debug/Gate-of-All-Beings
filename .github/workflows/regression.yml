@@ -38,16 +38,16 @@ jobs:
           cache: npm
           cache-dependency-path: |
             package-lock.json
-            portal/www/gallery-engine/package-lock.json
-            server/app/src/cards/package-lock.json
-            server/app/src/management/package-lock.json
-            server/app/src/ecology/package-lock.json
-            server/app/src/softie-webgpu/package-lock.json
+            apps/www/gallery-engine/package-lock.json
+            apps/cards/package-lock.json
+            apps/management/package-lock.json
+            apps/ecology/package-lock.json
+            apps/softie/package-lock.json
       - name: Install Node dependencies
         run: |
           npm ci
-          for module in cards management ecology softie-webgpu; do
-            npm ci --prefix "server/app/src/$module"
+          for module in cards management ecology softie; do
+            npm ci --prefix "apps/$module"
           done
       - run: npx playwright install --with-deps chromium
       - name: Install gallery preview encoder
@@ -100,9 +100,9 @@ jobs:
       - name: Audit production npm dependencies
         run: npm audit --omit=dev --audit-level=high
       - name: Audit Gallery Engine build dependencies
-        run: npm audit --prefix portal/www/gallery-engine --audit-level=high
+        run: npm audit --prefix apps/www/gallery-engine --audit-level=high
       - name: Audit Cards module dependencies
-        run: npm audit --prefix server/app/src/cards --audit-level=high
+        run: npm audit --prefix apps/cards --audit-level=high
       - name: Keep the regression report
         if: always()
         uses: actions/upload-artifact@v4

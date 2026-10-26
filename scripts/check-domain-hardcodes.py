@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ROOTS = json.loads((ROOT / "packages/site-domains/domains.json").read_text(encoding="utf-8"))["roots"]
 OWN_URL = re.compile(r"(?:https?|wss?)://(?:[a-z0-9-]+\.)*(?:" + "|".join(map(re.escape, ROOTS)) + r")\b", re.I)
 TEXT_SUFFIXES = {".py", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".html", ".css", ".json", ".svg", ".txt", ".env", ".example"}
-SOURCE_SCOPES = ("portal", "server", "services", "packages", "scripts")
+SOURCE_SCOPES = ("apps", "services", "packages", "scripts", "tools")
 EXCEPT_FILES = {
     "*.md": "documentation",
     "**/tests/**": "test fixtures exercise exact public hosts",
@@ -26,10 +26,10 @@ EXCEPT_FILES = {
     "services/platform/tests/test_ingress_security.py": "ingress regression fixtures for the deployed canonical host",
     "scripts/check-domain-hardcodes.py": "this scanner",
     "packages/shared-data/worldview.json": "historical export kept as a data record",
-    "portal/www/links.json": "editable homepage content seed; runtime copy is persistent data",
+    "apps/www/links.json": "editable homepage content seed; runtime copy is persistent data",
     "services/platform/.env.example": "example operator configuration",
-    "server/app/src/cards/scripts/inspect-sites.mjs": "operator inspection of the live canonical site",
-    "server/app/src/cards/scripts/verify-game.mjs": "operator inspection of the live canonical site",
+    "apps/cards/scripts/inspect-sites.mjs": "operator inspection of the live canonical site",
+    "apps/cards/scripts/verify-game.mjs": "operator inspection of the live canonical site",
 }
 EXCEPT_SNIPPETS = (
     re.compile(r'<link rel="canonical" href="https://iridescently\.xyz/[^"]*"'),

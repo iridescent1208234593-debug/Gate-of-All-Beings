@@ -74,7 +74,7 @@
 
 - canonical 与 `og:image` 元数据（见上）；
 - 世界观数据的角色来源字段 `sourceUrl`、历史导出 `packages/shared-data/worldview.json`；
-- 首页内容种子 `portal/www/links.json`（运行期副本是持久数据）与 `services/platform/.env.example`；
+- 首页内容种子 `apps/www/links.json`（运行期副本是持久数据）与 `services/platform/.env.example`；
 - 针对线上正式站的运维检查脚本 `cards/scripts/inspect-sites.mjs`、`verify-game.mjs`；
 - 文档、测试夹具与 `services/platform/tests/verify_portal.py` 的路由模板（运行时展开到每个批准根域）。
 
@@ -84,7 +84,7 @@
 python scripts/check-batch6.py --full --modules <releases>\candidate\modules
 ```
 
-覆盖：`services/platform/tests/test_site_domains.py`（入口主机、Origin、WebSocket、Cookie、SSO 令牌、OAuth 回调、CSP、Node/浏览器一致性、源码扫描）、`services/platform/tests/test_host_policy.py`、`services/platform/tests/test_huiguan_oauth_session.py`（会话按根域、未登记根域拒绝 OAuth、state 不可跨根域重放）、`services/platform/tests/test_runtime_services.py`（三个根域的 WebSocket Origin）、`services/platform/tests/verify_portal.py`（每个根域的路由、未知 Host 421、同根域跳转、CSP）、构建产物扫描、`portal/huiguan/tests/oauth-e2e.cjs`（本地模拟提供方的浏览器全流程）。
+覆盖：`services/platform/tests/test_site_domains.py`（入口主机、Origin、WebSocket、Cookie、SSO 令牌、OAuth 回调、CSP、Node/浏览器一致性、源码扫描）、`services/platform/tests/test_host_policy.py`、`services/platform/tests/test_huiguan_oauth_session.py`（会话按根域、未登记根域拒绝 OAuth、state 不可跨根域重放）、`services/platform/tests/test_runtime_services.py`（三个根域的 WebSocket Origin）、`services/platform/tests/verify_portal.py`（每个根域的路由、未知 Host 421、同根域跳转、CSP）、构建产物扫描、`apps/huiguan/tests/oauth-e2e.cjs`（本地模拟提供方的浏览器全流程）。
 
 ## 上线前置条件（未执行）
 

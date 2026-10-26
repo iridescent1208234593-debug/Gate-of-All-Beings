@@ -3,7 +3,7 @@
 ## 1. 世界观库（只读事实）· SQLite
 
 - 路径：`assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db`
-- 消费方：`portal/huiguan/server_huiguan.py`（`WV_DB`），只读直查；图片经 `/api/official/*`、`/api/assets/*` 分发。
+- 消费方：`apps/huiguan/server_huiguan.py`（`WV_DB`），只读直查；图片经 `/api/official/*`、`/api/assets/*` 分发。
 - 图片根：`assets/罗小黑战记数据库`（`WV_ROOT_DIR`），另允许 `assets/素材`。
 - 主要表（40 张）：`characters`、`character_images`、`images`、`unclassified_images`、`spirit_lifecycle(_images)`、`character_info`、`shared_assets`、`timeline_v2`、`episodes`、`staff`、`cultivation_realm` 等。
 - **路径列**存绝对路径（`image_path` / `file_path` / `path`）。目录搬移后需重链：
@@ -19,7 +19,7 @@
 
 ## 2. 会馆用户库 · SQLite
 
-- 路径：`portal/huiguan/users.db`（`STATIC_DIR/users.db`）。
+- 路径：`apps/huiguan/users.db`（`STATIC_DIR/users.db`）。
 - 表：
   - 账号：`users`（USSO 用户）、`local_users`（站内用户名/密码，`role`/`status`）、`sessions_db`（登录态持久化）、`user_flags`（封禁/管理员）。
   - 账号找回：`account_recovery`、`security_attempts`（`services/platform/account_security.py` 建表）。
@@ -35,12 +35,12 @@
 
 ## 4. 聚灵 · SQLite / JSON
 
-- `server/app/src/juling/data/save.db`（Node ≥22.5 `node:sqlite`），表 `save_state(key TEXT PRIMARY KEY, value TEXT)`；旧环境退回 JSON。
+- `apps/juling/data/save.db`（Node ≥22.5 `node:sqlite`），表 `save_state(key TEXT PRIMARY KEY, value TEXT)`；旧环境退回 JSON。
 - 前端把局内摘要镜像到 `m:juling:summary`。
 
 ## 5. 软乎乎 · 服务端 JSON + 统一偏好
 
-- 设置：`server/app/src/softie-webgpu/server/spirit-settings.js` 的 Vite 中间件（dev/preview），落 `spirit-settings.json`，接口 `/api/spirit-settings`。
+- 设置：`apps/softie/server/spirit-settings.js` 的 Vite 中间件（dev/preview），落 `spirit-settings.json`，接口 `/api/spirit-settings`。
 - 语言/音效/音量：`unifiedStorage('softie')`。
 
 ## 6. 统一存档 · localStorage
@@ -54,8 +54,8 @@
 | 存储 | 路径/键 | 只读/读写 |
 | --- | --- | --- |
 | 世界观库 | `assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db` | 只读（会馆） |
-| 会馆用户库 | `portal/huiguan/users.db` | 读写 |
+| 会馆用户库 | `apps/huiguan/users.db` | 读写 |
 | 卡牌/共同旅途存档 | 浏览器 IndexedDB `iridescently-game-v1` | 按模式版本和公共资源事务读写；旧 Cards 库只读迁入 |
-| 聚灵存档 | `server/app/src/juling/data/save.db` | 读写 |
+| 聚灵存档 | `apps/juling/data/save.db` | 读写 |
 | 软乎乎设置 | `spirit-settings.json`（preview 目录） | 读写 |
 | 统一存档 | `localStorage['iridescently.save.v1']` | 读写 |

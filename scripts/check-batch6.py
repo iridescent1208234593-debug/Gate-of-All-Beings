@@ -40,7 +40,7 @@ def main():
                             "seconds": round(time.monotonic() - started, 2)})
 
         # Separate processes avoid modules leaking import caches/environment fixtures.
-        for directory in (ROOT / "services/platform/tests", ROOT / "portal/huiguan/tests", ROOT / "server/app/src/cards/tests"):
+        for directory in (ROOT / "services/platform/tests", ROOT / "apps/huiguan/tests", ROOT / "apps/cards/tests"):
             for file in sorted(directory.glob("test_*.py")):
                 run(str(file.relative_to(ROOT)), [sys.executable, "-X", "utf8", str(file)])
         node = shutil.which("node")
@@ -51,13 +51,13 @@ def main():
         if args.full:
             npm = shutil.which("npm.cmd" if os.name == "nt" else "npm")
             commands = [
-                ("Cards frontend", [npm, "test", "--prefix", "server/app/src/cards"]),
-                ("Cards backend", [npm, "run", "test:backend", "--prefix", "server/app/src/cards"]),
-                ("Cards game types", [npm, "run", "check:game", "--prefix", "server/app/src/cards"]),
+                ("Cards frontend", [npm, "test", "--prefix", "apps/cards"]),
+                ("Cards backend", [npm, "run", "test:backend", "--prefix", "apps/cards"]),
+                ("Cards game types", [npm, "run", "check:game", "--prefix", "apps/cards"]),
                 ("World Map", [npm, "run", "check:world-map"]),
             ]
-            for module in ("management", "ecology", "softie-webgpu"):
-                commands.append((module, [npm, "test", "--prefix", "server/app/src/" + module]))
+            for module in ("management", "ecology", "softie"):
+                commands.append((module, [npm, "test", "--prefix", "apps/" + module]))
             commands.extend([
                 ("OAuth return allowlist", [npm, "run", "test:huiguan-auth-next"]),
                 ("OAuth mock browser", [npm, "run", "test:oauth-mock"]),

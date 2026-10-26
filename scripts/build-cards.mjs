@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { candidateRoot, projectRoot, recordCandidate } from './release-artifacts.mjs';
 
-const appRoot = path.join(projectRoot, 'server', 'app', 'src', 'cards');
+const appRoot = path.join(projectRoot, 'apps', 'cards');
 const output = path.join(candidateRoot, 'cards');
 const publicStage = path.join(candidateRoot, '.cards-public');
 const relative = path.relative(candidateRoot, output);
@@ -16,10 +16,10 @@ rmSync(output, { recursive: true, force: true });
 mkdirSync(output, { recursive: true });
 rmSync(publicStage, { recursive: true, force: true });
 mkdirSync(publicStage, { recursive: true });
-const trackedPublic = execFileSync('git', ['ls-files', '-z', 'server/app/src/cards/public'], { cwd: projectRoot, encoding: 'utf8' })
+const trackedPublic = execFileSync('git', ['ls-files', '-z', 'apps/cards/public'], { cwd: projectRoot, encoding: 'utf8' })
   .split('\0').filter(Boolean);
 for (const file of trackedPublic) {
-  const relative = file.slice('server/app/src/cards/public/'.length);
+  const relative = file.slice('apps/cards/public/'.length);
   const source = path.resolve(projectRoot, file);
   const target = path.resolve(publicStage, relative);
   const targetRelative = path.relative(publicStage, target);

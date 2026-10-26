@@ -16,7 +16,7 @@ target = releases / 'candidate' / 'site'
 if target.resolve().parent != (releases / 'candidate').resolve():
     raise RuntimeError('Site candidate escapes release root')
 # Deployable source roots; a checkout only needs the ones it has.
-SOURCE_DIRS = ('portal', 'server', 'services', 'packages')
+SOURCE_DIRS = ('apps', 'services', 'packages')
 present = set(subprocess.check_output(['git', 'ls-tree', '--name-only', 'HEAD'], cwd=root, text=True).split())
 archive = subprocess.check_output(['git', 'archive', '--format=zip', 'HEAD', *(d for d in SOURCE_DIRS if d in present)], cwd=root)
 if target.exists():
@@ -28,7 +28,7 @@ with zipfile.ZipFile(io.BytesIO(archive)) as source:
         parts = Path(name).parts
         if '..' in parts or Path(name).is_absolute():
             raise RuntimeError('Unsafe archive path')
-        if name.startswith(('server/app/modules/', 'portal/www/assets/homepage/', 'portal/www/gallery-engine/', 'portal/huiguan/design-system/ui/')):
+        if name.startswith(('apps/www/assets/homepage/', 'apps/www/gallery-engine/', 'apps/huiguan/design-system/ui/')):
             continue
         if any(part in ('node_modules', 'uploads', 'store', '__pycache__') or part.startswith('.env') for part in parts):
             continue

@@ -1,10 +1,9 @@
 # Dependencies, build output and caches
 node_modules/
 **/dist/
-server/app/modules/
-/portal/www/.homepage-build/
-/portal/www/.homepage-publish/
-/portal/www/assets/homepage/
+/apps/www/.homepage-build/
+/apps/www/.homepage-publish/
+/apps/www/assets/homepage/
 **/.next/
 **/.cache/
 **/.turbo/
@@ -36,11 +35,11 @@ server/app/modules/
 /assets/网站素材/
 /conversations.json
 /.codex-remote-attachments/
-portal/huiguan/assets/uploads/
-portal/huiguan/assets/thumbs/
-portal/huiguan/assets/previews/
-portal/huiguan/assets/store/
-portal/huiguan/assets/gate/__probe.html
+apps/huiguan/assets/uploads/
+apps/huiguan/assets/thumbs/
+apps/huiguan/assets/previews/
+apps/huiguan/assets/store/
+apps/huiguan/assets/gate/__probe.html
 
 # OS/editor
 .DS_Store
@@ -57,7 +56,13 @@ Desktop.ini
 **/.godot/
 
 # Canonical source and private runtime records
-/portal/huiguan/characters.json
-/portal/huiguan/game_saves.json
-/portal/huiguan/design-system/ui/
-/portal/www/index.html
+/apps/huiguan/characters.json
+/apps/huiguan/game_saves.json
+/apps/huiguan/design-system/ui/
+/apps/www/index.html
+
+# Pre-restructure locations. Nothing tracked lives here any more; keep leftovers in older
+# checkouts (local data, .env files, node_modules) ignored until they are moved by hand.
+/portal/
+/server/
+/shared/

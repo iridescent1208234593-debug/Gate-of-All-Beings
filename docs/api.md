@@ -3,7 +3,7 @@
 统一入口把各游戏 API 代理到其上游：`/app/modules/<名>/api/*` → 上游 `/api/*`
 （cards→`5174`、softie→`4173`、juling→`5177`）。会馆/主站/人设站按 Host 直达各自 Handler。
 
-## 1. 会馆 `portal/huiguan/server_huiguan.py`（8089）
+## 1. 会馆 `apps/huiguan/server_huiguan.py`（8089）
 
 登录/账号：
 `/api/register`、`/api/login`、`/api/logout`、`/api/user`、`/api/sso-user`、`/api/auth`、`/api/rename`、`/api/user/theme`、`/api/sso/role-theme`、`/api/security/<setup|question|change|reset|settings>`
@@ -26,23 +26,23 @@
 
 也接受前缀 `/api/huiguan/<同上>` 与 `/api/security/*`。
 
-## 2. 卡牌 OAuth `server/app/src/cards/server.py`（5174）
+## 2. 卡牌 OAuth `apps/cards/server.py`（5174）
 
 `GET /api/login`、`GET /api/callback`、`GET /api/user`、`GET /api/sso-user`、`GET /api/logout`
 
-## 3. 聚灵 `server/app/src/juling/server.js`（5177）
+## 3. 聚灵 `apps/juling/server.js`（5177）
 
 `GET /api/state`、`POST /api/start`、`POST /api/action`
 
-## 4. 软乎乎 `server/app/src/softie-webgpu/server/spirit-settings.js`（Vite dev/preview，4173）
+## 4. 软乎乎 `apps/softie/server/spirit-settings.js`（Vite dev/preview，4173）
 
 `GET /api/spirit-settings`、`PUT /api/spirit-settings`（JSON，服务端校验）
 
-## 5. 主站 `portal/www/server.py`（8088 → 统一入口主域）
+## 5. 主站 `apps/www/server.py`（8088 → 统一入口主域）
 
 `GET /api/sso-user`、`POST /api/admin/links`、`POST /api/admin/thanks`（同源 + 管理员）
 
-## 6. 人设站 `portal/oc/server.py`（8090）
+## 6. 人设站 `apps/oc/server.py`（8090）
 
 `GET /api/sso-user`
 

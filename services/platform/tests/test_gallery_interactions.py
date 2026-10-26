@@ -53,8 +53,8 @@ import hx_sso  # noqa: E402
 import gallery_interactions  # noqa: E402
 import scraping_observer  # noqa: E402
 
-sys.path.insert(0, str(ROOT / "portal" / "www"))
-spec = importlib.util.spec_from_file_location("portal_www_gallery_test", ROOT / "portal" / "www" / "server.py")
+sys.path.insert(0, str(ROOT / "apps" / "www"))
+spec = importlib.util.spec_from_file_location("portal_www_gallery_test", ROOT / "apps" / "www" / "server.py")
 www = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(www)
 

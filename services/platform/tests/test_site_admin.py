@@ -42,7 +42,7 @@ sys.path.insert(0, str(ROOT / "services" / "platform"))
 import hx_sso  # noqa: E402
 import site_admin  # noqa: E402
 
-spec = importlib.util.spec_from_file_location("portal_www_under_test", ROOT / "portal" / "www" / "server.py")
+spec = importlib.util.spec_from_file_location("portal_www_under_test", ROOT / "apps" / "www" / "server.py")
 www = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(www)
 

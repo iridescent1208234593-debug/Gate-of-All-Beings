@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url'
 import runtimePaths from '../services/platform/runtime-paths.cjs'
 
 const projectRoot = path.resolve(process.env.IRIDESCENTLY_PROJECT_ROOT || process.cwd())
-const { discoverGallery, previewName } = await import(pathToFileURL(path.join(projectRoot, 'portal/www/gallery-engine/gallery-plugin.js')))
+const { discoverGallery, previewName } = await import(pathToFileURL(path.join(projectRoot, 'apps/www/gallery-engine/gallery-plugin.js')))
 const source = path.resolve(process.env.GALLERY_DIR || path.join(runtimePaths.assetsRoot, 'source/罗小黑战记数据库/罗小黑节气贺图（gallery素材）'))
 const safeOutputRoot = path.join(runtimePaths.cacheRoot, 'homepage')
 const output = path.resolve(process.env.GALLERY_PREVIEW_DIR || path.join(safeOutputRoot, 'gallery-previews'))

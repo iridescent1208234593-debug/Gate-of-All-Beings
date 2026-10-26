@@ -12,7 +12,7 @@
 | Gate Identity：众生之门玩家形象 | 登录时 `account_profiles.gate_identity_json`；访客时当前源的会话存储 | `/api/gate/identity`；React `PlayerProfileProvider` | 众生之门玩家名称、种族、头像图片、头像框；入口、HUD、形象编辑器、浅滩共用 |
 | Game Save：玩法进度 | 各玩法已有存档 owner；见下表 | 卡牌、经营、生态、浅滩、聚灵各有现存存储 | 不等同于 Gate Identity；本轮整合入口没有将它们变成一套云存档 |
 
-`portal/oc` 本身是现有静态角色设定站；它的共享登录展示不意味着所有用户 OC 数据存放在该站。用户填写的设表和归属数据仍由会馆拥有。
+`apps/oc` 本身是现有静态角色设定站；它的共享登录展示不意味着所有用户 OC 数据存放在该站。用户填写的设表和归属数据仍由会馆拥有。
 
 头像应以 `avatarImage + avatarFrame overlay` 呈现。Account Avatar、OC Avatar、Gate Avatar 可以由用户明确复制或选择同一个资源，但不是同一可变字段，也不会自动双向同步。
 
@@ -37,11 +37,11 @@ PlayerProfileProvider
 - `packages/shared-session/session.js` 只是同源 `/api/sso-user` 的 fetch / 内存缓存；没有单独登录服务，也不会自动将 localStorage 同步到其他子域。
 - `localhost` / `127.0.0.1` 不会获得 `.iridescently.xyz` Cookie。本地匿名 smoke 不能证明真实跨子域登录成功；代理或本地测试账号须单独配置，不能把“本地有存档”当作已登录。
 
-主要源码：`services/platform/hx_sso.py`、`portal/huiguan/server_huiguan.py`、`portal/www/server.py`、`portal/oc/server.py`、`services/platform/portal_server.py`、`services/platform/account_profile.py`。
+主要源码：`services/platform/hx_sso.py`、`apps/huiguan/server_huiguan.py`、`apps/www/server.py`、`apps/oc/server.py`、`services/platform/portal_server.py`、`services/platform/account_profile.py`。
 
 ## 3. Gate Identity 的统一状态、字段与保存保护
 
-`server/app/src/cards/src/game/PlayerProfile.tsx` 是 React 流程中唯一的玩家资料 owner。入口和玩法读它的 Context；`onboarding/player-profile.js` 仅维护一次挂载的编辑草稿，不直接创建另一份持久化身份。
+`apps/cards/src/game/PlayerProfile.tsx` 是 React 流程中唯一的玩家资料 owner。入口和玩法读它的 Context；`onboarding/player-profile.js` 仅维护一次挂载的编辑草稿，不直接创建另一份持久化身份。
 
 | 字段 | 约束 / 含义 |
 | --- | --- |
@@ -55,7 +55,7 @@ PlayerProfileProvider
 
 持久化：
 
-- 登录：`GET/POST /api/gate/identity`，写入实际项目根目录 `portal/huiguan/users.db` 的 `account_profiles.gate_identity_json`；`(kind, uid)` 是组合主键。头像文件在会馆 `assets/uploads`，页面通过会馆域名读取资源。
+- 登录：`GET/POST /api/gate/identity`，写入实际项目根目录 `apps/huiguan/users.db` 的 `account_profiles.gate_identity_json`；`(kind, uid)` 是组合主键。头像文件在会馆 `assets/uploads`，页面通过会馆域名读取资源。
 - 访客：`sessionStorage['zszm.gateIdentity.v1']`；只在当前 origin、浏览器会话内恢复，不跨设备、不作为认证。访客上传使用裁切结果的 data URL，不能持久化临时 blob URL。
 - 登录后**不会自动把访客资料迁移到账户**；退出后也不会把刚才账户资料写成访客资料。原有访客会话可重新读回。已有账户资料优先，空账户会进入自己的初始化流程。
 - 读取账户变化时，前端清空前一 scope 的 identity 并增加 generation；`pageshow` / `focus` 重新读取。两条响应的登录状态或 owner 不一致时提示重试，不静默用别人的资料继续初始化。
@@ -87,7 +87,7 @@ PlayerProfileProvider
 
 以下是源码审查发现，未读取真实账户数据，也未在本轮修改账户实现。
 
-1. **主站管理员判定混用身份种类与权限。** `portal/www/server.py::_is_admin` 当前将裸 uid 与 USSO 白名单比较，未先要求 `kind == 'usso'`，并接受 `kind == 'admin'`。而真实身份种类为 local / usso，管理员是 role。若本地 uid 与白名单文本碰撞，可能发生错误授权；没有证据表明真实账户已经发生碰撞。下一轮应由统一、经数据库复核的 `(kind, uid)` 身份解析获取角色，至少先补齐种类约束并加本地/USSO 同号回归；不要直接凭同一数字或前端 `admin` 字段授权。
+1. **主站管理员判定混用身份种类与权限。** `apps/www/server.py::_is_admin` 当前将裸 uid 与 USSO 白名单比较，未先要求 `kind == 'usso'`，并接受 `kind == 'admin'`。而真实身份种类为 local / usso，管理员是 role。若本地 uid 与白名单文本碰撞，可能发生错误授权；没有证据表明真实账户已经发生碰撞。下一轮应由统一、经数据库复核的 `(kind, uid)` 身份解析获取角色，至少先补齐种类约束并加本地/USSO 同号回归；不要直接凭同一数字或前端 `admin` 字段授权。
 
 2. **（2026-10-17 源码已处理，未发布）历史经营 / Softie 云存档 owner 是 raw uid。** 已改为 `(kind, uid, scope)`，旧档按正面证据归属、不确定者隔离、可导出回滚，见 [game-save-ownership.md](game-save-ownership.md)。以下为原始记录：
    `_api_game_save/_load` 在通过会馆会话验证后使用 `str(ident['uid'])` 访问 `game_saves.json`，缺少 kind。不同身份源的同号用户可能读写同一档；客户端经营本地档也有同类键名问题。下一轮应先做只读 owner 冲突清点、制定可回滚迁移表，再改为复合 owner；不能直接把所有旧档重新归给当前登录者，也不能靠清空旧档解决。本轮只记录，未迁移或删除任何存档。
@@ -109,13 +109,13 @@ PlayerProfileProvider
 ## 核对文件
 
 - `services/platform/hx_sso.py`、`services/platform/account_profile.py`、`services/platform/portal_server.py`
-- `portal/www/server.py`、`portal/www/scripts/appearance-controls.js`
-- `portal/huiguan/server_huiguan.py`、`portal/huiguan/account.html`、`portal/oc/server.py`
+- `apps/www/server.py`、`apps/www/scripts/appearance-controls.js`
+- `apps/huiguan/server_huiguan.py`、`apps/huiguan/account.html`、`apps/oc/server.py`
 - `packages/shared-session/session.js`、`save.js`、`kv.js`、`bus.js`
-- `server/app/src/cards/server.py`
-- `server/app/src/cards/src/game/PlayerProfile.tsx`、`PlayerIdentity.tsx`、`PlayerAvatar.tsx`、`GameApp.tsx`、`storage.ts`、`ShoreMode.tsx`
-- `server/app/src/cards/src/onboarding/PlayerOnboarding.tsx`、`player-profile.js`
-- `server/app/src/management/src/systems/account.js`、`saveGame.js`
-- `server/app/src/ecology/src/core/persistence.js`、`server/app/src/juling/server.js`
+- `apps/cards/server.py`
+- `apps/cards/src/game/PlayerProfile.tsx`、`PlayerIdentity.tsx`、`PlayerAvatar.tsx`、`GameApp.tsx`、`storage.ts`、`ShoreMode.tsx`
+- `apps/cards/src/onboarding/PlayerOnboarding.tsx`、`player-profile.js`
+- `apps/management/src/systems/account.js`、`saveGame.js`
+- `apps/ecology/src/core/persistence.js`、`apps/juling/server.js`
 
 核对方式为源码与路由阅读；这是数据边界审查记录，不是账户渗透测试或跨设备云同步验收报告。

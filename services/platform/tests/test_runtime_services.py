@@ -77,7 +77,7 @@ class SealedRuntimeServices(unittest.TestCase):
             connection.close()
 
     def test_balance_api_persists_outside_sealed_release(self):
-        with self.service('server/app/src/cards/server/balance-service.mjs') as port:
+        with self.service('apps/cards/server/balance-service.mjs') as port:
             status, state = self.request(port, '/api/card-balance')
             self.assertEqual(status, 200)
             value = {'cost': 2, 'effect': {'damage': 17}, 'exhaust': False, 'target': 'single', 'condition': 'none'}
@@ -91,7 +91,7 @@ class SealedRuntimeServices(unittest.TestCase):
         self.assertEqual(stored['overrides']['claw']['effect']['damage'], 17)
 
     def test_spirit_settings_and_multidomain_websocket_boundary(self):
-        with self.service('server/app/src/softie-webgpu/server/spirit-service.mjs') as port:
+        with self.service('apps/softie/server/spirit-service.mjs') as port:
             status, defaults = self.request(port, '/api/spirit-settings')
             self.assertEqual(status, 200)
             defaults['name'] = 'Fixture'

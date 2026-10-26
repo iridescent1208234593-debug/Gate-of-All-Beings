@@ -4,7 +4,7 @@
 
 ## 真实入口与流程
 
-生产前端源码为 `server/app/src/cards`。`GameShell.tsx` 保留原有 `EntryGate.tsx` 与 760ms 退出，然后插入定稿门场景：
+生产前端源码为 `apps/cards`。`GameShell.tsx` 保留原有 `EntryGate.tsx` 与 760ms 退出，然后插入定稿门场景：
 
 `EntryGate 开场 → 760ms 退出 → 门场景 → 推门 / 灵逸散 / 闪白 → 资料完整者进入门庭，未完成者进入 PlayerOnboarding`
 
@@ -28,7 +28,7 @@
 
 ## 门庭与路由
 
-统一门庭在 `#home`，入口名称、描述与模块 key 来源仍是 `server/app/portal.json`。详细映射见 [MODES.md](../server/app/src/cards/src/game/MODES.md)。
+统一门庭在 `#home`，入口名称、描述与模块 key 来源仍是 `apps/shell/portal.json`。详细映射见 [MODES.md](../apps/cards/src/game/MODES.md)。
 
 | 类型 | 入口 |
 | --- | --- |
@@ -68,7 +68,7 @@
 | 已有高级编辑/OC 导入 | `src/game/PlayerIdentity.tsx` |
 | 门庭与移动布局 | `src/game/ModeHall.tsx` / `mode-hall.css` |
 | 浅滩玩法 | `src/game/ShoreMode.tsx` / `shore/` |
-| 模块清单 | `server/app/portal.json` |
+| 模块清单 | `apps/shell/portal.json` |
 | 主站/会馆加载发现 | [加载审查](zszm-loading-audit.md) |
 
 ## 验证记录

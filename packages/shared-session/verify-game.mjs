@@ -4,17 +4,17 @@ import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {chromium} from '../../server/app/src/management/node_modules/playwright/index.mjs';
-import {build} from '../../server/app/src/cards/node_modules/esbuild/lib/main.js';
+import {chromium} from '../../apps/management/node_modules/playwright/index.mjs';
+import {build} from '../../apps/cards/node_modules/esbuild/lib/main.js';
 
 const root=fileURLToPath(new URL('../../',import.meta.url));
-const compiled=await build({entryPoints:[path.join(root,'server/app/src/cards/src/game/storage.ts')],bundle:true,format:'esm',platform:'browser',target:'es2022',write:false});
+const compiled=await build({entryPoints:[path.join(root,'apps/cards/src/game/storage.ts')],bundle:true,format:'esm',platform:'browser',target:'es2022',write:false});
 const server=createServer(async(req,res)=>{
   try{
     const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);
     if(pathname==='/'){res.setHeader('Content-Type','text/html');res.end('<!doctype html><body>Unified game verification</body>');return;}
     if(pathname==='/storage.js'){res.setHeader('Content-Type','text/javascript');res.end(compiled.outputFiles[0].text);return;}
-    if(!pathname.startsWith('/shared/')&&!pathname.startsWith('/server/app/src/slay-the-web/public/'))throw Error('Route unavailable');
+    if(!pathname.startsWith('/shared/')&&!pathname.startsWith('/apps/slay/public/'))throw Error('Route unavailable');
     const file=pathname.startsWith('/shared/')?path.resolve(root,'packages',pathname.slice(8)):path.resolve(root,'.'+pathname);
     if(!file.startsWith(root))throw Error('Invalid path');
     res.setHeader('Content-Type',file.endsWith('.json')?'application/json':'text/javascript');res.end(await readFile(file));
@@ -59,11 +59,11 @@ try{
     localStorage.setItem('luoxiaohei-rebirth-soul-legacy',JSON.stringify({soul:100,runs:2,wins:1}));
     localStorage.setItem('lxz-lingzhi-xiuxing-v1',JSON.stringify({shards:50}));
     localStorage.setItem('lxhz-rebirth-collection',JSON.stringify({characters:['罗小黑','无限']}));
-    const bridge=await import('/server/app/src/slay-the-web/public/game/shared-progress.js');
+    const bridge=await import('/apps/slay/public/game/shared-progress.js');
     await bridge.initializeSharedProgress();
     check('Slay imports native balances and canonical discoveries',(await game.readGame()).resources.soul===100&&(await game.readGame()).characters[2].discovered);
-    const soul=await import('/server/app/src/slay-the-web/public/content/soul-legacy.js');
-    const runStorage=await import('/server/app/src/slay-the-web/public/game/save-system.js');
+    const soul=await import('/apps/slay/public/content/soul-legacy.js');
+    const runStorage=await import('/apps/slay/public/game/save-system.js');
     const state={player:{currentHealth:0,maxHealth:50,treasures:[],realmIndex:0},dungeon:{y:2,x:0,graph:[[{edges:new Set([1]),room:{type:'monster'}}]]},deck:[],drawPile:[]};
     runStorage.beginRun(state);
     check('Slay run saved with Set serialization',runStorage.saveRun(state)&&runStorage.loadRun().dungeon.graph[0][0].edges instanceof Set);
@@ -107,11 +107,11 @@ try{
     bridge.disposeSharedProgress();
     return checks;
   });
-  await page.evaluate(async()=>{await (await import('/server/app/src/slay-the-web/public/game/shared-progress.js')).initializeSharedProgress();});
+  await page.evaluate(async()=>{await (await import('/apps/slay/public/game/shared-progress.js')).initializeSharedProgress();});
   const other=await context.newPage();await other.goto(origin);
-  const blocked=await other.evaluate(async()=>{try{await (await import('/server/app/src/slay-the-web/public/game/shared-progress.js')).initializeSharedProgress();return false;}catch(error){return error.message.includes('其他窗口');}});
+  const blocked=await other.evaluate(async()=>{try{await (await import('/apps/slay/public/game/shared-progress.js')).initializeSharedProgress();return false;}catch(error){return error.message.includes('其他窗口');}});
   assert(blocked,'second Slay window acquired a concurrent writer lock');
-  await other.close();await page.evaluate(()=>import('/server/app/src/slay-the-web/public/game/shared-progress.js').then(m=>m.disposeSharedProgress()));
+  await other.close();await page.evaluate(()=>import('/apps/slay/public/game/shared-progress.js').then(m=>m.disposeSharedProgress()));
   report.push('a second Slay window cannot acquire the active writer lock');
   assert(report.length>=25);
   for(const check of report)console.log('PASS '+check);

@@ -156,7 +156,7 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
                 pass
             elif self.code_max_age is not None and ext in (".js", ".mjs", ".css") and not HASHED_ASSET.search(request_path):
                 # Unhashed game module code: browsers and the CDN must revalidate so a publish is visible at once.
-                # code_max_age > 0 is the rollback switch (see server/app/README.md).
+                # code_max_age > 0 is the rollback switch (see apps/README.md).
                 if self.code_max_age > 0:
                     super().send_header("Cache-Control", f"public, max-age={self.code_max_age}")
                 else:

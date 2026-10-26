@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { candidateRoot, projectRoot, recordCandidate } from './release-artifacts.mjs';
 
-const appRoot = path.join(projectRoot, 'server', 'app', 'src', 'world-map');
+const appRoot = path.join(projectRoot, 'apps', 'world-map');
 const output = path.join(candidateRoot, 'world-map');
 const viteEntry = path.join(projectRoot, 'node_modules', 'vite', 'dist', 'node', 'index.js');
 

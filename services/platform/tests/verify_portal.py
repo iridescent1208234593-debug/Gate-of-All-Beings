@@ -182,7 +182,7 @@ REDIRECTS = [("{root}", "/", "https://huiguan.{root}/"), ("game.{root}", "/", "h
 # A security overlay may intentionally preserve an older production module set.
 # Require world-map when the candidate registers it, without deploying it merely
 # because the operator's source checkout has moved ahead of production.
-if any(link.get("key") == "world-map" for link in json.loads((CODE_ROOT / "server/app/portal.json").read_text(encoding="utf-8"))["links"]):
+if any(link.get("key") == "world-map" for link in json.loads((CODE_ROOT / "apps/shell/portal.json").read_text(encoding="utf-8"))["links"]):
     CHECKS.append(("iridescently.xyz", "/app/modules/world-map/", 200))
 
 

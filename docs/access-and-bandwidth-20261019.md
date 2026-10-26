@@ -22,7 +22,7 @@
 
 ### 本机小游戏深层入口
 
-PC 网关把 `/app/shell/m/<key>` 映射到 `server/app`，但通用 SPA 回退总是使用该目录的 `index.html`。真正入口是 `server/app/shell/index.html`，因此包括省省射击在内的 8 个深层玩法入口都返回 404。香港统一门户原有映射正确。
+PC 网关把 `/app/shell/m/<key>` 映射到 `server/app`，但通用 SPA 回退总是使用该目录的 `index.html`。真正入口是 `apps/shell/index.html`，因此包括省省射击在内的 8 个深层玩法入口都返回 404。香港统一门户原有映射正确。
 
 修复明确让所有无扩展名的模块壳路径使用现有 `shell/index.html`；脚本、样式、玩法本体仍使用原部署目录。覆盖 Cards、Management、Ecology、Juling、Slay、Softie、AEON、省省射击。没有改游戏引擎、账户、存档或兑换规则。
 

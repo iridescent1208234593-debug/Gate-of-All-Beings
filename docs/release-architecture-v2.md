@@ -49,7 +49,7 @@
 | verify | 管家健康检查 + `verify_portal`（隔离数据根）+ 公网探测 | — | 同上 |
 | gc | `release gc` | 每组件保留最近 5 个版本；不删当前 / 上一个 / 任何运行中进程使用的版本 | 无 |
 
-- `modules` / `cards` / `homepage` 目前由门户按请求从 `server/app/modules/<name>`、`portal/www/assets/homepage` 读取。**过渡期**让这些路径变成指向 `store` 版本的 junction。重新指向 junction 只需删除并重建这个链接，不需要移动正在被读取的目录。之后再让门户直接读取指针，用管家的 reload 信号刷新。
+- `modules` / `cards` / `homepage` 目前由门户按请求从 `dist/modules/<name>`、`apps/www/assets/homepage` 读取。**过渡期**让这些路径变成指向 `store` 版本的 junction。重新指向 junction 只需删除并重建这个链接，不需要移动正在被读取的目录。之后再让门户直接读取指针，用管家的 reload 信号刷新。
 - **生产门槛**：`sourceDirty: true` 的版本默认拒绝切换。紧急情况用 `--allow-dirty --reason "<文字>"`，原因写入 history。手工 overlay 改为"从 hotfix 提交封存一个新版本"。
 - **回滚** = `release switch <component>@<上一个 id>`，加上管家重启。用户运行数据不随版本回滚（与现状一致）。
 

@@ -17,13 +17,13 @@
 ## 已完成并核实
 
 - 根仓库在 `master`。最新提交为 `f4004fdb`：`feat: refine homepage brand and gallery interactions`。
-- 已将 9 个 `portal/www/` Homepage 改动提交并推送到 `origin/master`；最新核对时 `HEAD` 与 `origin/master` 一致。
+- 已将 9 个 `apps/www/` Homepage 改动提交并推送到 `origin/master`；最新核对时 `HEAD` 与 `origin/master` 一致。
 - 该组改动覆盖品牌颜文字交互、Gallery 减少动态效果处理、相关样式和维护说明。提交前检查差异、密钥模式和 `git diff --check`；仅这 9 个目标文件进入提交。
 - `npm run build:homepage` 通过，报告 384 个图库资源且 SHA-256 匹配。构建给出 JS 分块超过 500 kB 的提示（非失败）。
 - `npm run test:portal` 通过，31/31。
 - Chrome 中可打开私有仓库 `iridescent1208234593-debug/iridescently`；GitHub 登录用户与仓库 owner 一致。
 - Cloudflare Dashboard 中 `iridescently.xyz` 出现在当前已登录账户下。R2 页面显示需先开通 R2 订阅；未开通、未创建 bucket、未上传对象、未变更 DNS。
-- R2 / 资源约定和当前 `asset()` 用法记录在 [assets.md](assets.md)。首页 helper 位于 `portal/www/scripts/asset.js`，公开环境变量是 `VITE_ASSET_BASE_URL`；未配置时使用本地路径。helper 已存在，不代表已完成全站迁移。
+- R2 / 资源约定和当前 `asset()` 用法记录在 [assets.md](assets.md)。首页 helper 位于 `apps/www/scripts/asset.js`，公开环境变量是 `VITE_ASSET_BASE_URL`；未配置时使用本地路径。helper 已存在，不代表已完成全站迁移。
 - 当前首页 Gallery 素材仍保留在本机原路径；未移动或删除大型素材。
 
 ## GitHub 连接器阻塞

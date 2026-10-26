@@ -1,7 +1,7 @@
 // Run with the Cards workspace's installed tsx loader; no new dependencies.
 import {writeFileSync} from 'node:fs';
-import {BASE_CARDS} from '../../server/app/src/cards/src/game/core/content.ts';
-import rebirth from '../../server/app/src/slay-the-web/public/content/cards.js';
+import {BASE_CARDS} from '../../apps/cards/src/game/core/content.ts';
+import rebirth from '../../apps/slay/public/content/cards.js';
 import {HERO_CHARACTER_IDS} from '../shared-types/world.js';
 const elements={金:'jin',木:'mu',水:'shui',火:'huo',土:'tu'};
 const systems={生灵:'shengling',造物:'zaowu',空间:'kongjian',心灵:'xinling',锁御:'suoyu'};

@@ -73,10 +73,10 @@ def launch_plan():
                  for name in ROOT_VARIABLES.values() if os.environ.get(f"IRIDESCENTLY_{name}_ROOT", "").strip()}
     specs = {
         "portal": ([sys.executable, "-X", "utf8", "-u", str(site / "services/platform/portal_server.py")], 8080, "/api/sso-user", "site"),
-        "zszm-oauth": ([sys.executable, "-X", "utf8", "-u", str(site / "server/app/src/cards/server.py")], 5174, "/api/user", "cards"),
-        "zszm-balance": ([node, str(site / "server/app/src/cards/server/balance-service.mjs")], 5178, "/healthz", "cards"),
-        "juling": ([node, str(site / "server/app/src/juling/server.js")], 5177, "/api/state", "juling"),
-        "softie": ([node, str(site / "server/app/src/softie-webgpu/server/spirit-service.mjs")], 4173, "/healthz", "spirit"),
+        "zszm-oauth": ([sys.executable, "-X", "utf8", "-u", str(site / "apps/cards/server.py")], 5174, "/api/user", "cards"),
+        "zszm-balance": ([node, str(site / "apps/cards/server/balance-service.mjs")], 5178, "/healthz", "cards"),
+        "juling": ([node, str(site / "apps/juling/server.js")], 5177, "/api/state", "juling"),
+        "softie": ([node, str(site / "apps/softie/server/spirit-service.mjs")], 4173, "/healthz", "spirit"),
     }
     common = {"IRIDESCENTLY_PROJECT_ROOT": str(site), "IRIDESCENTLY_STORAGE_ROOT": str(storage_parent),
               "IRIDESCENTLY_ENVIRONMENT": environment(), "PYTHONUTF8": "1", "PYTHONDONTWRITEBYTECODE": "1",

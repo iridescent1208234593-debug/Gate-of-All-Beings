@@ -35,7 +35,7 @@
 | `ecology` | 灵境生态 | 同存物种数 | `ecology/src/ui/spacePanel.js` |
 | `softie` | 灵体互动 | 累计相处分钟（每天最多计 120） | `softie-webgpu/.../spirit-playground/view.js` |
 | `aeon` | AEON | 最高演化代数 | `aeon/src/main.js` |
-| `shengsheng-shoot` | 省省海滩射击 | 最高得分 | `portal/www/playtest/shengsheng-shoot/game.js` |
+| `shengsheng-shoot` | 省省海滩射击 | 最高得分 | `apps/www/playtest/shengsheng-shoot/game.js` |
 | `level` | 账户等级 | 积分 | — |
 
 同分时按胜场多者、先达到者、owner 排序（"你的名次"与列表顺序一致）。访客可照常游玩，上报返回 `ranked:false`，服务器不写任何数据。

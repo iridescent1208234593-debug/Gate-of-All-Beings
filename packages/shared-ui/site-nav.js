@@ -9,7 +9,7 @@
  * Page code can put its own controls into IridescentlyNav.slot() (left of the account).
  * Pages that own their account UI set window.__HUIGUAN_OWN_AUTH and render into #authBar.
  * Inside the 众生之门 module shell (window.__iridescentlyEmbed) the shell already owns the bar.
- * Spec and do/don't: portal/huiguan/design-system/design-system.md「站点导航」.
+ * Spec and do/don't: apps/huiguan/design-system/design-system.md「站点导航」.
  */
 (function () {
   'use strict';

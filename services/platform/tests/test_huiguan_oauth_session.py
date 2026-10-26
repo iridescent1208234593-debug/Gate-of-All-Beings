@@ -16,7 +16,7 @@ os.environ["USSO_LOGIN_ENABLED"] = "1"
 os.environ["USSO_CLIENT_SECRET"] = "test-only-oauth-secret"
 os.environ["HX_SSO_SECRET"] = "test-only-hx-sso-secret"
 sys.path.insert(0, str(ROOT / "services" / "platform"))
-spec = importlib.util.spec_from_file_location("huiguan_oauth_session_test", ROOT / "portal" / "huiguan" / "server_huiguan.py")
+spec = importlib.util.spec_from_file_location("huiguan_oauth_session_test", ROOT / "apps" / "huiguan" / "server_huiguan.py")
 app = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = app
 spec.loader.exec_module(app)

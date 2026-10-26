@@ -1,0 +1,67 @@
+# 众生之门 · 聚灵
+
+融合《罗小黑战记》世界观的文字游戏。**灵分两种，交织成长，化形成妖，修炼成仙。**
+
+## 世界观核心
+
+- **灵分两种**：物质灵（分五行金木水火土，物质基石）+ 生灵（生命象征）
+- **聚灵**：汇聚两种灵；天时（五行相位）决定聚到哪一行物质灵
+- **成长有质变**：精灵（无实体）→ 化形妖精（实体，选御灵系五行）→ 成仙 → 成神
+- **灵质空间**：储存灵的容器，大小随修为增长（精灵80→妖精400），是"变强的证明"
+- **散灵轮回**：生灵耗尽则散灵；魂灵转世，越死越强，得道后转世觉醒前世物质灵
+
+## 玩法
+
+1. 开局你是森林中一颗透明精灵（点云聚灵）
+2. 每回合「聚灵」：生灵 + 天时对应五行物质灵增长
+3. 生灵 + 物质灵达标 → **化形**为妖精，选五行（获得御灵能力）+ 随机觉醒辅助系
+4. 化形后：继续聚灵 + 克伐/相生/豪夺（与其他妖精互动）
+5. 生灵与物质灵圆满 → **成仙**（一世成功）；生灵耗尽 → 散灵（轮回转世）
+
+## 能力体系（化形后生效）
+
+- **御灵系五行**：金(锋锐/克伐+8散逸+1) 木(生机/聚灵+2散逸-1) 水(柔韧/受击-2) 火(炽烈/克伐+12有代价) 土(厚重/受击-3聚灵+1)
+- **辅助系**（化形随机觉醒）：生灵系/造物系/心灵系/锁御系/**空间系(稀有,容量+50)**
+
+## 运行
+
+```bash
+node server.js   # 打开 http://localhost:8080
+```
+
+- 需要支持 `node:sqlite` 的 Node；存储损坏或未完成迁移时停止启动，不创建另一套 JSON 存档
+- 进度存 SQLite（`<storage>/<environment>/data/juling/save.db`），重启不丢
+
+## Docker 部署
+
+```bash
+docker compose up -d --build   # 本机 8091 端口；先配置外置存储并验证迁移
+```
+
+## 项目结构
+
+```
+wuxing-game/
+├── engine.js          # 规则引擎（两种灵/五行/化形/能力/散灵轮回）
+├── server.js          # 后端（SQLite 持久化 + API）
+├── public/index.html  # 前端（点云可视化 + 状态 + 动作）
+├── Dockerfile / docker-compose.yml
+└── mechanism-*.md     # 游戏机制设计文档
+```
+
+## 数值
+
+集中在 `engine.js` 的 `CFG`，一处改全局生效。
+
+---
+
+## 在统一工作区中的位置
+
+> 本仓库位于统一工作区 `apps/juling/`。总览见 [根 README](../../README.md)，架构/数据库/API 见 [docs/](../../docs/)。
+
+- 运行：`PORT=5177 node server.js`（或 docker compose，8091）。
+- 构建挂载：静态拷贝到 `/app/modules/juling/`；内联脚本包 IIFE 并以 `window.__iridescentlyDispose` 卸载。
+- 存档：`<storage>/<environment>/data/juling/save.db`（node:sqlite，表 `save_state`）；前端镜像 `m:juling:summary`。
+- API：`/api/state`、`/api/start`、`/api/action`（统一入口 `/app/modules/juling/api/*` 代理）。
+
+Batch 6：通过 `IRIDESCENTLY_STORAGE_ROOT` / `IRIDESCENTLY_ENVIRONMENT` 选择外置存储。旧 `save.json` 保留并幂等导入 SQLite。容器挂载 `/storage`，就绪标记必须绑定容器内的路径；不能直接复用 Windows 路径标记。

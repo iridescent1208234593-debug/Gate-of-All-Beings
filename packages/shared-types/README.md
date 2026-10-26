@@ -25,4 +25,4 @@
 
 这是单机、同一浏览器来源内的协议，不提供跨域共享存档、统一云账户账本或防篡改签名。旧站不同域名的 localStorage 不会自动搬进主站。
 
-验证：`npm run verify`；跨系统测试在 `../../server/app/src/cards/src/game/core/exchangeQueue.test.ts`。
+验证：`npm run verify`；跨系统测试在 `../../apps/cards/src/game/core/exchangeQueue.test.ts`。

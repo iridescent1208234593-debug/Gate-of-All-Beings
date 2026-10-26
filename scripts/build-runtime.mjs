@@ -4,10 +4,10 @@ import { projectRoot } from './release-artifacts.mjs';
 
 /** Bundle existing API factories so sealed releases need no workspace dependencies. */
 export async function buildRuntime(siteRoot) {
-  const { build } = createRequire(path.join(projectRoot, 'server/app/src/cards/package.json'))('esbuild');
+  const { build } = createRequire(path.join(projectRoot, 'apps/cards/package.json'))('esbuild');
   for (const [entry, output] of [
-    ['server/app/src/cards/server/balance-service.ts', 'server/app/src/cards/server/balance-service.mjs'],
-    ['server/app/src/softie-webgpu/server/spirit-service.js', 'server/app/src/softie-webgpu/server/spirit-service.mjs'],
+    ['apps/cards/server/balance-service.ts', 'apps/cards/server/balance-service.mjs'],
+    ['apps/softie/server/spirit-service.js', 'apps/softie/server/spirit-service.mjs'],
   ]) {
     await build({
       entryPoints: [path.join(projectRoot, entry)],

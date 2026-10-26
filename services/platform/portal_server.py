@@ -3,7 +3,8 @@
 
 - www / huiguan / oc：按 Host 复用各自 Handler。
 - 统一壳与游戏模块（内路径）：
-    /app/*                 -> server/app（壳 + modules）
+    /app/shell/*, /app/portal.json -> apps/shell（统一壳）
+    /app/modules/*         -> dist/modules（构建产物）
     /shared/*              -> packages/*（共享浏览器包，含 /shared/site-domains/index.js）
     /management/*,/ecology/* -> 兼容 cards 内嵌的根绝对路径
     /app/modules/<name>/api/*  -> 反向代理到各游戏自己的 API 上游
@@ -46,14 +47,14 @@ from storage_paths import data_root  # noqa: E402
 
 DATA_ROOT = data_root()
 
-www = _load("portal_www", CODE_ROOT / "portal" / "www" / "server.py")
-oc = _load("portal_oc", CODE_ROOT / "portal" / "oc" / "server.py")
-huiguan = _load("portal_huiguan", CODE_ROOT / "portal" / "huiguan" / "server_huiguan.py")
+www = _load("portal_www", CODE_ROOT / "apps" / "www" / "server.py")
+oc = _load("portal_oc", CODE_ROOT / "apps" / "oc" / "server.py")
+huiguan = _load("portal_huiguan", CODE_ROOT / "apps" / "huiguan" / "server_huiguan.py")
 
-APP_DIR = CODE_ROOT / "server" / "app"
-MODULES_DIR = Path(os.environ.get("IRIDESCENTLY_MODULES_ROOT", CODE_ROOT / "server" / "app" / "modules")).resolve()
+SHELL_DIR = CODE_ROOT / "apps" / "shell"
+MODULES_DIR = Path(os.environ.get("IRIDESCENTLY_MODULES_ROOT", CODE_ROOT / "dist" / "modules")).resolve()
 # Unhashed JS/CSS under modules/: 0 = always revalidate (default). Rollback to the old 4-hour cache:
-# set IRIDESCENTLY_MODULE_CODE_MAX_AGE=14400 and restart portal (see server/app/README.md).
+# set IRIDESCENTLY_MODULE_CODE_MAX_AGE=14400 and restart portal (see apps/README.md).
 MODULE_CODE_MAX_AGE = max(0, int(os.environ.get("IRIDESCENTLY_MODULE_CODE_MAX_AGE", "0") or 0))
 PROXY_PORTS = {"cards": 5174, "card-balance": 5178, "softie": 4173, "juling": 5177}
 
@@ -278,9 +279,9 @@ def route(host, path):
             "spa": "/index.html",
         }
     if p == "/app/shell" or p.startswith("/app/shell/"):
-        return StaticHandler, {"root": str(APP_DIR), "strip": "/app", "spa": "/shell/index.html"}
+        return StaticHandler, {"root": str(SHELL_DIR), "strip": "/app/shell", "spa": "/index.html"}
     if p == "/app/portal.json":
-        return StaticHandler, {"root": str(APP_DIR), "strip": "/app"}
+        return StaticHandler, {"root": str(SHELL_DIR), "strip": "/app"}
     if p == "/app/modules" or p.startswith("/app/modules/"):
         return StaticHandler, {"root": str(MODULES_DIR), "strip": "/app/modules"}
     # The shooter lives in the main site's static tree, not the Cards SPA.

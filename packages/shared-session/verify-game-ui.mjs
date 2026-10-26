@@ -4,7 +4,7 @@ import {createServer} from 'node:http';
 import {mkdir,readFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {chromium} from '../../server/app/src/management/node_modules/playwright/index.mjs';
+import {chromium} from '../../apps/management/node_modules/playwright/index.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const output=path.join(root,'work/cards-unification/qa');await mkdir(output,{recursive:true});
 const types={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.ttf':'font/ttf'};
@@ -15,7 +15,7 @@ const server=createServer(async(req,res)=>{
       res.setHeader('Content-Type','application/json');
       res.end(JSON.stringify(pathname.includes('card-balance')?{revision:0,overrides:{},editable:false}:{logged_in:false}));return;
     }
-    const routes=[['/app/modules/cards/',path.join(root,'.releases/candidate/cards')],['/app/modules/slay/',path.join(root,'server/app/src/slay-the-web/public')],['/shared/',path.join(root,'packages')]];
+    const routes=[['/app/modules/cards/',path.join(root,'.releases/candidate/cards')],['/app/modules/slay/',path.join(root,'apps/slay/public')],['/shared/',path.join(root,'packages')]];
     const route=routes.find(([prefix])=>pathname.startsWith(prefix));if(!route)throw Error('Unavailable route');
     const relative=pathname.slice(route[0].length)||'index.html',file=path.resolve(route[1],relative);
     if(path.relative(route[1],file).startsWith('..'))throw Error('Invalid path');

@@ -81,17 +81,17 @@ export async function sealRelease({ allowDirty = false } = {}) {
       const site = path.join(staging, 'site');
       mkdirSync(staging);
       cpSync(path.join(candidateRoot, 'site'), site, { recursive: true });
-      cpSync(path.join(candidateRoot, 'modules'), path.join(site, 'server', 'app', 'modules'), { recursive: true });
-      cpSync(path.join(candidateRoot, 'homepage'), path.join(site, 'portal', 'www'), { recursive: true });
+      cpSync(path.join(candidateRoot, 'modules'), path.join(site, 'dist', 'modules'), { recursive: true });
+      cpSync(path.join(candidateRoot, 'homepage'), path.join(site, 'apps', 'www'), { recursive: true });
       // The source candidates must still verify after copying; a concurrent build cannot be sealed accidentally.
       const after = await Promise.all(records.map(record => verifyCandidate(record.component)));
       if (JSON.stringify(after) !== JSON.stringify(records)) throw new Error('Candidate manifests changed during sealing');
       const files = hashes(site);
       for (const record of records) {
-        const prefix = { site: '', modules: 'server/app/modules/', homepage: 'portal/www/' }[record.component];
+        const prefix = { site: '', modules: 'dist/modules/', homepage: 'apps/www/' }[record.component];
         for (const [key, hash] of Object.entries(record.files)) {
           // Generated module/homepage output deliberately overlays the source snapshot.
-          if (record.component === 'site' && (key.startsWith('server/app/modules/') || key === 'portal/www/index.html' || key.startsWith('portal/www/assets/homepage/'))) continue;
+          if (record.component === 'site' && (key.startsWith('dist/modules/') || key === 'apps/www/index.html' || key.startsWith('apps/www/assets/homepage/'))) continue;
           if (files[prefix + key] !== hash) throw new Error(`Copied artifact hash mismatch: ${record.component}/${key}`);
         }
       }

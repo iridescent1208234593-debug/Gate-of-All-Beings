@@ -13,7 +13,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import runtimePaths from "../services/platform/runtime-paths.cjs";
 
 const root = path.resolve(process.env.IRIDESCENTLY_PROJECT_ROOT || process.cwd());
-const galleryRoot = path.join(root, "portal/www/gallery-engine");
+const galleryRoot = path.join(root, "apps/www/gallery-engine");
 const sourceDir = process.env.GALLERY_DIR || path.join(
   runtimePaths.assetsRoot,
   "source/罗小黑战记数据库/罗小黑节气贺图（gallery素材）",

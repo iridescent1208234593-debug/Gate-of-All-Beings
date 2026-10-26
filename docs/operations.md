@@ -5,22 +5,22 @@
 | 端口 | 服务 | 启动 |
 | --- | --- | --- |
 | 8080 | 统一入口（www + huiguan + oc + 壳 + 游戏模块 + API 代理） | `PORT=8080 python services/platform/portal_server.py` |
-| 8088 | 主站单站（可选，独立） | `cd portal/www && python server.py` |
-| 8089 | 会馆单站（可选，独立） | `cd portal/huiguan && python server_huiguan.py` |
-| 8090 | 人设站单站（可选，独立） | `cd portal/oc && python server.py` |
-| 5173 | 卡牌 dev | `cd server/app/src/cards && npm run dev` |
-| 5174 | 卡牌 OAuth 代理（统一入口 cards API 上游） | `cd server/app/src/cards && python server.py` |
-| 5176 | 旧卡牌入口重定向 | `cd server/app/src/cards && node scripts/legacy-redirect.mjs` |
-| 5177 | 聚灵（统一入口 juling API 上游） | `cd server/app/src/juling && PORT=5177 node server.js` |
-| 5179 | 灵境会馆 dev | `cd server/app/src/management && npm run dev` |
-| 4173 | 软乎乎 preview（统一入口 softie API 上游） | `cd server/app/src/softie-webgpu && npm run preview` |
+| 8088 | 主站单站（可选，独立） | `cd apps/www && python server.py` |
+| 8089 | 会馆单站（可选，独立） | `cd apps/huiguan && python server_huiguan.py` |
+| 8090 | 人设站单站（可选，独立） | `cd apps/oc && python server.py` |
+| 5173 | 卡牌 dev | `cd apps/cards && npm run dev` |
+| 5174 | 卡牌 OAuth 代理（统一入口 cards API 上游） | `cd apps/cards && python server.py` |
+| 5176 | 旧卡牌入口重定向 | `cd apps/cards && node scripts/legacy-redirect.mjs` |
+| 5177 | 聚灵（统一入口 juling API 上游） | `cd apps/juling && PORT=5177 node server.js` |
+| 5179 | 灵境会馆 dev | `cd apps/management && npm run dev` |
+| 4173 | 软乎乎 preview（统一入口 softie API 上游） | `cd apps/softie && npm run preview` |
 
 ## 生产架构
 
 - **Cloudflare 隧道**：`~/.cloudflared/config.yml` 把 `iridescently.xyz`、`www`、`huiguan`、`oc`、`spirit` 指向 `127.0.0.1:8080`（统一入口）；`zszm/game/juling/lingjing/psyche/psy/feather` 各自保留。
-- 灵体正式链接为 `https://spirit.iridescently.xyz/games/spirit-playground?room=forest`。页面由 `server/app/modules/softie/` 提供，房间服务使用 softie 上游 4173；账号云存档 API 由会馆提供。
+- 灵体正式链接为 `https://spirit.iridescently.xyz/games/spirit-playground?room=forest`。页面由 `dist/modules/softie/` 提供，房间服务使用 softie 上游 4173；账号云存档 API 由会馆提供。
 - **网站管家** `E:\External Projects\Iridescently Operations\网站恢复\website-manager.py`：按 `SITES` 一键恢复全部站点 + 隧道；`--smoke-test` 自检（不启动任何进程）。
-- **看门狗** `portal/huiguan/watchdog.py`：8080 不在则拉起统一入口（由计划任务每 5 分钟调用）。
+- **看门狗** `apps/huiguan/watchdog.py`：8080 不在则拉起统一入口（由计划任务每 5 分钟调用）。
 
 ### 一键恢复
 
@@ -44,7 +44,7 @@ cloudflared tunnel --config "%USERPROFILE%\.cloudflared\config.yml" run
 ## 数据库维护
 
 - 世界观库搬移后重链：`python "assets/罗小黑战记数据库/relink_db.py"`（预演）→ `--apply`（自动备份 `.bak-<时间戳>`）。
-- 会馆用户库 `portal/huiguan/users.db`、聚灵 `server/app/src/juling/data/save.db` 直接备份文件即可。
+- 会馆用户库 `apps/huiguan/users.db`、聚灵 `apps/juling/data/save.db` 直接备份文件即可。
 
 ## 排障
 

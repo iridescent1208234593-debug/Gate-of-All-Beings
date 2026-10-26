@@ -16,14 +16,14 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 ## 快速事实
 
 - 统一入口：`services/platform/portal_server.py`，端口 `8080`，生产由 Cloudflare 隧道接入。
-- 壳：`server/app/shell/index.html`，路径 `/app/shell/m/<名>`；embed 模块同页挂载，非 embed 试玩沿用 iframe，不能概括为全站无 iframe。
+- 壳：`apps/shell/index.html`，路径 `/app/shell/m/<名>`；embed 模块同页挂载，非 embed 试玩沿用 iframe，不能概括为全站无 iframe。
 - 公用包：`@lxh/shared-{ui,types,data,session}`。
 - 统一存档：`localStorage['iridescently.save.v1']`。
-- 数据库：世界观库 `assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db`；会馆 `portal/huiguan/users.db`；聚灵 `server/app/src/juling/data/save.db`。
+- 数据库：世界观库 `assets/罗小黑战记数据库/db/worldview_luoxiaohei_v4.db`；会馆 `apps/huiguan/users.db`；聚灵 `apps/juling/data/save.db`。
 
 ## 维护与研发资料
 
-- [卡牌数值后台与功能手册](../server/app/src/cards/docs/card-balance-admin.md)：图鉴卡牌数值编辑、权限、API、备份和恢复。
+- [卡牌数值后台与功能手册](../apps/cards/docs/card-balance-admin.md)：图鉴卡牌数值编辑、权限、API、备份和恢复。
 - [统一更新流程](update-system.md)
 - [众生之门新版流程集成](zszm-flow-integration.md)：单次开场、玩家初始化、门庭与小游戏入口；本地候选未发布。
 - [身份、头像与存档关系](zszm-identity-and-save-map.md)：Account / OC / Gate 的数据边界、跨站限制和后续风险。

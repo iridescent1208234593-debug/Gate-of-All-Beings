@@ -35,12 +35,12 @@ try {
   await assert.rejects(sealRelease(), /Commit changes and rebuild clean candidates/);
   const first = await sealRelease({ allowDirty: true });
   const firstVerified = verifyRelease(first.current);
-  assert.equal(readFileSync(path.join(firstVerified.directory, 'site', 'server', 'app', 'modules', 'cards', 'index.html'), 'utf8'), '<p>cards</p>');
+  assert.equal(readFileSync(path.join(firstVerified.directory, 'site', 'dist', 'modules', 'cards', 'index.html'), 'utf8'), '<p>cards</p>');
   writeFileSync(path.join(candidateRoot, 'homepage', 'index.html'), '<p>updated homepage</p>');
   await recordCandidate('homepage');
   const second = await sealRelease({ allowDirty: true });
   assert.equal(second.previous, first.current);
-  assert.equal(readFileSync(path.join(firstVerified.directory, 'site', 'portal', 'www', 'index.html'), 'utf8'), '<p>homepage</p>');
+  assert.equal(readFileSync(path.join(firstVerified.directory, 'site', 'apps', 'www', 'index.html'), 'utf8'), '<p>homepage</p>');
   const restored = await rollbackRelease(first.current);
   assert.equal(restored.current, first.current);
   assert.equal(restored.previous, second.current);

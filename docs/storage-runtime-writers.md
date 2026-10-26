@@ -64,7 +64,7 @@ Regression checks use synthetic identities/images and disposable storage:
 `services/platform/tests/test_game_save_scope.py`, `services/platform/tests/test_gallery_interactions.py`,
 `services/platform/tests/test_site_admin.py`, `services/platform/tests/test_huiguan_oauth_session.py`, `services/platform/tests/test_storage_paths.py`,
 `services/platform/tests/test_storage_migration.py`, `services/platform/tests/test_operations_tools.py`, `services/platform/tests/test_runtime_services.py`,
-`portal/huiguan/tests/test_original_image_access.py`, the remaining Huiguan API tests,
+`apps/huiguan/tests/test_original_image_access.py`, the remaining Huiguan API tests,
 Cards identity/balance tests and Spirit settings tests. Run Python fixture modules in
 separate processes: they deliberately configure their own environment and import-time
 service state.

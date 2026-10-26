@@ -1,7 +1,7 @@
 """Account points, level curve, daily caps, leaderboards and the points reset.
 
 Runs against a temporary project root: IRIDESCENTLY_PROJECT_ROOT is set before any
-server module is imported, so the real portal/huiguan/users.db is never opened.
+server module is imported, so the real huiguan/users.db is never opened.
 """
 import http.client
 import importlib
@@ -28,7 +28,7 @@ os.environ.setdefault("HX_SSO_SECRET", "test-secret-for-account-progress")
 sys.path.insert(0, str(ROOT / "services" / "platform"))
 sys.path.insert(0, str(ROOT))
 # Importing the 会馆 module creates the real schema (local_users, user_flags, ...) in the temp users.db.
-huiguan = importlib.import_module("portal.huiguan.server_huiguan")
+huiguan = importlib.import_module("apps.huiguan.server_huiguan")
 import account_progress as ap  # noqa: E402
 import hx_sso  # noqa: E402
 
