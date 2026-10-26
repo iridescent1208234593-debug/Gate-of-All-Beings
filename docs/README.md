@@ -12,8 +12,10 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 | [networking.md](networking.md) | 联机：现状与预留接口设计 |
 | [repository-layout.md](repository-layout.md) | 仓库布局、2026-10-26 重构的旧→新路径对照、外部运维入口的新旧路径 |
 | [workspace.md](workspace.md) | 本机工程工作区：目录角色、`iridescently-workspace.json`、存储根与运维根的解析、runtime 搬迁 |
-| [operations.md](operations.md) | 部署运营：端口、网站管家、Cloudflare 隧道、排障 |
-| [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | 当前 GitHub / Cloudflare 状态、未提交现场和新对话接续入口 |
+| [operations.md](operations.md) | 谁在哪里运行；本机唯一的服务启动路径、端口、香港发布、排障 |
+| [recovery.md](recovery.md) | 恢复手册：Git、退役分支、本机运行数据、迁移原件、Release 的副本位置与恢复/演练命令 |
+| [development/BRANCH_STRATEGY.md](development/BRANCH_STRATEGY.md) | 分支策略：trunk、短期分支、线上热修复移植、归档 tag 与删除规则 |
+| [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | 历史交接（写作时的 GitHub / Cloudflare 状态）；现行状态以上面各文档为准 |
 
 ## 快速事实
 

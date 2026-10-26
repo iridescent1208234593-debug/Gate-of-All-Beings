@@ -1,62 +1,63 @@
 # 部署与运维
 
-## 端口总表
+## 谁在哪里运行
 
-| 端口 | 服务 | 启动 |
-| --- | --- | --- |
-| 8080 | 统一入口（www + huiguan + oc + 壳 + 游戏模块 + API 代理） | `PORT=8080 python services/platform/portal_server.py` |
-| 8088 | 主站单站（可选，独立） | `cd apps/www && python server.py` |
-| 8089 | 会馆单站（可选，独立） | `cd apps/huiguan && python server_huiguan.py` |
-| 8090 | 人设站单站（可选，独立） | `cd apps/oc && python server.py` |
-| 5173 | 卡牌 dev | `cd apps/cards && npm run dev` |
-| 5174 | 卡牌 OAuth 代理（统一入口 cards API 上游） | `cd apps/cards && python server.py` |
-| 5176 | 旧卡牌入口重定向 | `cd apps/cards && node scripts/legacy-redirect.mjs` |
-| 5177 | 聚灵（统一入口 juling API 上游） | `cd apps/juling && PORT=5177 node server.js` |
-| 5179 | 灵境会馆 dev | `cd apps/management && npm run dev` |
-| 4173 | 软乎乎 preview（统一入口 softie API 上游） | `cd apps/softie && npm run preview` |
+| 环境 | 位置 | 代码来源 | 谁改动 |
+| --- | --- | --- | --- |
+| 生产 | 香港服务器，经 Cloudflare Tunnel 对外 | 香港自己的发布目录（旧布局 + 10-24 安全加固谱系 + 之后的线上热修复），不是本仓库的封存 Release | 只在负责人授权下发布；本机不承载生产流量 |
+| 本机 | 工程工作区（见 [工程工作区](workspace.md)） | 本仓库 trunk 封存出的 Release（`<runtime>/<environment>/releases/store/<id>`，由 channel 选择） | 本机开发与验证 |
+| 测试 | 临时目录 | 当前检出 | `tools/checks/regression.py`，只用临时 `test` 存储 |
 
-## 生产架构
+本机不再兼任生产源站：旧的"网站管家一键恢复全部站点 + 隧道"、把 `config.yml` 指向 8080 的切换/回滚、本机 `main` Tunnel 连接器，都是香港迁移之前的做法，已经退役。Tunnel、DNS 与 Cloudflare 设置属于生产配置，不在本机运维流程里改动。
 
-- **Cloudflare 隧道**：`~/.cloudflared/config.yml` 把 `iridescently.xyz`、`www`、`huiguan`、`oc`、`spirit` 指向 `127.0.0.1:8080`（统一入口）；`zszm/game/juling/lingjing/psyche/psy/feather` 各自保留。
-- 灵体正式链接为 `https://spirit.iridescently.xyz/games/spirit-playground?room=forest`。页面由 `dist/modules/softie/` 提供，房间服务使用 softie 上游 4173；账号云存档 API 由会馆提供。
-- **网站管家** `<工作区>\operations\网站恢复\website-manager.py`：按 `SITES` 一键恢复全部站点 + 隧道；`--smoke-test` 自检（不启动任何进程）。
-
-### 一键恢复
+## 本机服务：只有一条启动路径
 
 ```powershell
-& '<工作区>\operations\网站恢复\打开网站管家.vbs' # 图形界面，一键恢复全部
-python '<工作区>\operations\网站恢复\website-manager.py' --smoke-test # 自检
+python tools/runtime/local-runtime.py start     # 校验 channel 选中的封存 Release，只在 127.0.0.1 启动五个服务
+python tools/checks/local-smoke.py              # 只读冒烟（三根域页面/API、Origin 与 WebSocket 拒绝、421）
+python tools/runtime/local-runtime.py status | stop
 ```
 
-### 重启隧道
+`local-runtime.py` 不启动 Tunnel、不连香港、不改 DNS；数据来自外部存储，缺少就绪标记时拒绝启动。网站管家（工作区 `operations/网站恢复/website-manager.py`）是同一套启动逻辑的图形界面。要让本机跑新代码：`npm run build:site`、`npm run build:release`、`npm run release:seal`；回滚：`npm run release:rollback -- <release-id>`（只移动 channel）。封存前先 `python tools/runtime/backup-storage.py snapshot`。
 
-```bash
-cloudflared tunnel --config "%USERPROFILE%\.cloudflared\config.yml" run
-```
+### 端口
 
-## 统一入口切换 / 回滚
+| 端口 | 服务 | 本机启动方式 |
+| --- | --- | --- |
+| 8080 | 统一入口（www、huiguan、oc、壳、游戏模块、API 代理） | `local-runtime.py` |
+| 5174 | 卡牌 OAuth 代理 | `local-runtime.py` |
+| 5177 | 聚灵 | `local-runtime.py` |
+| 5178 | 卡牌数值配置 API | `local-runtime.py` |
+| 4173 | 软乎乎 / 灵体服务 | `local-runtime.py` |
+| 5173 / 5179 | 卡牌、灵境会馆的前端开发服务器 | `npm run dev`（各自目录），不属于本机 runtime |
+| 8088 / 8089 / 8090 | 主站、会馆、人设站单站 | 只用于单独调试；统一入口已在进程内提供 |
 
-- 切换：`config.yml` 把目标域名改到 8080 → 重启 cloudflared。
-- 回滚：改回 8088/8089/8090 → 重启 cloudflared；旧单站仍可独立运行。
-- 配置备份：`config.yml.bak-<时间戳>`。
+同一端口只能有一个占用者。登录时自动启动、并占用以上端口的旧任务会让 `local-runtime.py` 启动失败（例如 2026-10-26 前仍在的 `D:\Projects\zszm` 5178 预览任务）。
 
-## 数据库维护
+## 香港发布
 
+香港仍运行旧布局，发布工具在工作区 `operations/`（`hk-release.py`，以 `local-workspace.json` 的 `hkProjectRoot` 为旧布局根），不在本仓库。它的全量打包来自本机旧快照；香港当前版本不是本机构建的时候，`prepare` 会拒绝执行，避免回退在香港直接发布的修复。只替换指定文件时用 `--base-version` + `--overlay-list`，叠加内容由 `infra/hk-legacy/build_overlay_candidate.py` 从明确的 Git ref 读取。把本布局部署到香港是单独授权的阶段（先迁移香港数据到存储契约）。
+
+线上热修复必须同时进入 trunk，规则见 [分支策略](development/BRANCH_STRATEGY.md)。
+
+## 数据维护
+
+- 持久数据在外部 data 根（`<data>/huiguan/users.db`、`<data>/juling/` 等），不在源码树。一致性快照：`python tools/runtime/backup-storage.py snapshot`；校验：`… verify <快照目录>`。
 - 世界观库搬移后重链：`python "assets/罗小黑战记数据库/relink_db.py"`（预演）→ `--apply`（自动备份 `.bak-<时间戳>`）。
-- 会馆用户库、聚灵存档等持久数据在外部 data 根（`<data>/huiguan/users.db`、`<data>/juling/`），不在源码树；用 `python tools/runtime/backup-storage.py snapshot` 做一致性快照。
+- 恢复步骤见 [恢复手册](recovery.md)。
 
 ## 排障
 
 | 现象 | 处理 |
 | --- | --- |
+| `local-runtime.py start` 某服务不健康 | 看 `<cache>/logs/local-runtime/<服务>.log`；先查端口是否被别的进程占用：`netstat -ano | findstr :5178` |
+| 服务拒绝启动，提示 readiness marker | 存储根不对或被手工移动过；用 `tools/runtime/relocate-storage.py` 搬迁，不要手改标记 |
 | 模块页 css/js 大量 404 | 统一入口曾因 keep-alive 未重新分发；确认 `Dispatcher.handle_one_request` 保留 try/finally 恢复 |
 | 本地跨域资源 ERR_BLOCKED_BY_ORB / CORS | 会馆设计系统/SSO 走独立子域，本地跨 8080↔8089 会被拦，属预期 |
 | 会馆图片 404 | 世界观库路径失效 → 跑 `relink_db.py` |
 | 重复进入游戏出现双循环 | 模块未提供/未调用 `__iridescentlyDispose` |
-| 端口占用 | `netstat -ano | findstr :8080` → `taskkill /PID <pid> /T /F` |
 
 ## 日志
 
-- 统一入口：控制台 / 重定向文件；本机启动器的日志在 `<cache>/logs/local-runtime/`。
-- 网站管家：`<工作区>\operations\网站恢复/logs/<站点>.log`。
-- 各单站：站点目录内 `.log`（清理时可删）。
+- 本机服务：`<cache>/logs/local-runtime/<服务>.log`。
+- 网站管家：`<工作区>\operations\网站恢复\logs\<站点>.log`。
