@@ -369,6 +369,7 @@ class OAuthHandler(BaseStaticHandler):
             self.send_response(302)
             _set_cookie(self, "zszm_sid", session_id, max_age=SESSION_TIMEOUT)
             self.send_header("Location", "/")
+            self.send_header("Content-Length", "0")
             self.end_headers()
 
         elif path == "/api/user":
@@ -434,6 +435,7 @@ class OAuthHandler(BaseStaticHandler):
             self.send_response(302)
             _set_cookie(self, "zszm_sid", "", max_age=0)
             self.send_header("Location", "/")
+            self.send_header("Content-Length", "0")
             self.end_headers()
 
         else:

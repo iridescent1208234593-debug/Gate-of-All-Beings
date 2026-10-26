@@ -1704,6 +1704,7 @@ class Handler(BaseStaticHandler):
         if path == "/api/admin/poster/delete":
             return self._api_admin_poster_delete()
         self.send_response(404)
+        self.send_header("Content-Length", "0")
         self.end_headers()
 
     # ---------- 自命名配色（色环选色保存） ----------

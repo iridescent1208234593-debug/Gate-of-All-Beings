@@ -166,8 +166,23 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
                 super().send_header("Cache-Control", "public, max-age=31536000, immutable")
             elif max_age:
                 super().send_header("Cache-Control", f"public, max-age={max_age}")
+        self._close_if_unframed(headers_buffer)
         self._observe_public_response()
         super().end_headers()
+
+    def _close_if_unframed(self, headers_buffer):
+        """HTTP/1.1 keeps the connection open, so a reply with neither Content-Length nor chunked
+        encoding has no end: the client waits until the idle timeout. Such replies close instead."""
+        lines = [h.lower() for h in headers_buffer if isinstance(h, bytes)]
+        try:
+            status = int(lines[0].split(b" ", 2)[1])
+        except (IndexError, ValueError):
+            return
+        if status < 200 or status in (204, 304) or any(h.startswith((b"content-length:", b"transfer-encoding:")) for h in lines):
+            return
+        if not any(h.startswith(b"connection:") for h in lines):
+            super().send_header("Connection", "close")
+        self.close_connection = True
 
     # ---- 静态文件防护 ----
     def do_HEAD(self):
