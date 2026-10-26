@@ -21,6 +21,7 @@
       const ctx = stage.getContext('2d');
       const img = new Image();
       let scale = 1, x = 0, y = 0, base = 1, stageSize = 0, drag = null, active = true, objectUrl = null;
+      let sourceBytes = 0;   // 原图字节数，用于把输出压到约 30%
       const pointerMap = new Map();
       let pinchDistance = 0, pinchZoom = 1;
       const cleanup = () => {
@@ -86,15 +87,37 @@
         const out = document.createElement('canvas'); out.width = out.height = 512;
         const crop = cropRect();
         out.getContext('2d').drawImage(img, (0 - crop.left) / (base * scale), (0 - crop.top) / (base * scale), stageSize / (base * scale), stageSize / (base * scale), 0, 0, out.width, out.height);
-        out.toBlob(blob => blob ? finish(blob) : reject(new Error('头像裁切失败')), 'image/png');
+        // WebP keeps a 512px avatar small enough for guest session storage and slow mobile uploads;
+        // browsers without a WebP encoder hand back PNG, which every avatar endpoint also accepts.
+        //
+        // 体积目标：相比原图压到约 30%。质量档位从高到低试，取「画质最高且体积不超过目标」的那一档；
+        // 最低只降到 0.74——再低就能看出糊边，宁可不达标也不牺牲观感。
+        const target = sourceBytes ? Math.max(16 * 1024, Math.round(sourceBytes * 0.3)) : 0;
+        const qualities = [0.92, 0.88, 0.84, 0.80, 0.76, 0.74];
+        const done = blob => blob ? finish(blob) : (cleanup(), reject(new Error('头像裁切失败')));
+        const encode = quality => new Promise(resolve => out.toBlob(resolve, 'image/webp', quality));
+        (async () => {
+          let smallest = null;
+          for (const quality of qualities) {
+            const blob = await encode(quality);
+            if (!blob) break;
+            if (blob.type !== 'image/webp') { done(blob); return; }   // 无 WebP 编码器：退回 PNG
+            if (!smallest || blob.size < smallest.size) smallest = blob;
+            if (!target || blob.size <= target) { done(blob); return; }
+          }
+          if (smallest) done(smallest);
+          else out.toBlob(done, 'image/png');
+        })().catch(() => { cleanup(); reject(new Error('头像裁切失败')); });
       });
       window.addEventListener('keydown', onKey);
       const loadSource = async () => {
-        if (source instanceof Blob) objectUrl = URL.createObjectURL(source);
+        if (source instanceof Blob) { sourceBytes = source.size || 0; objectUrl = URL.createObjectURL(source); }
         else {
           const response = await fetch(source, { mode: 'cors', credentials: 'omit' });
           if (!response.ok) throw new Error('图片无法读取');
-          objectUrl = URL.createObjectURL(await response.blob());
+          const blob = await response.blob();
+          sourceBytes = blob.size || 0;
+          objectUrl = URL.createObjectURL(blob);
         }
         if (active) img.src = objectUrl;
       };
