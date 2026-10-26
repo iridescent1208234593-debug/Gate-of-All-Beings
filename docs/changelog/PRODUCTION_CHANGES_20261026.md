@@ -144,9 +144,39 @@ const qualities = [0.92, 0.88, 0.84, 0.80, 0.76, 0.74];
 
 ---
 
-## 四、尚未回推的 4 项（需独立处理）
+## 四、已回推（新增 2 项）
 
-### 4.1 深浅色主题接线
+### 4.0.a `infra/site-notice` — commit `b9c0b14e`
+
+**文件**：`infra/site-notice/notice.js`、`infra/site-notice/README.md`
+
+站点公告弹窗此前**完全不在仓库里**（只存在于服务器 `/srv/iridescently/control/public/notice.js` 与 nginx 注入），服务器重装即丢失。现已纳入版本管理。
+
+- 插画背景（美术组 · 海苔 老师作画）+ 水印
+- 设计系统配色（`--qc-panel` / `--qc-text` / `--qc-accent`）
+- 同一版本只弹一次（cookie `lxh_notice_<version>`，域 `.iridescently.xyz` 跨子站）
+- iframe 内不显示；改文案只需改 `CONFIG`
+
+### 4.0.b `perf/image-lazy-loading` — commit `4d264f8f`
+
+**文件**：7 个会馆页面
+
+给所有 `<img>` 加 `loading="lazy" decoding="async"`，视口外图片浏览器不再请求。
+
+| 文件 | 新增 lazy 图片 |
+|---|---|
+| `index.html` | 8 |
+| `char.html` | 3 |
+| `account/fan/member/stickers/works` | 各 1 |
+| 合计 | **16** |
+
+对 50 Mbps 带宽 / 30 GB 磁盘的生产环境收益明显：画廊 384 张图，首屏只拉可视区十几张。
+
+---
+
+## 四点五、尚未回推的 2 项（需等布局迁移）
+
+### 4.5.1 深浅色主题接线
 
 **位置**：13 个 `portal/**/*.html` 的导航脚本标签 + `server/app/src/cards/src/gate/GameShell.tsx`
 
@@ -157,7 +187,7 @@ GameShell：siteNav()?.mount({ theme: true })
 
 **为什么没推**：依赖 master 的主题提交（`f03d6c1`），与现有线纠缠，需基于该提交单独开分支。
 
-### 4.2 导航高亮修复（`moreActive`）
+### 4.5.2 导航高亮修复（`moreActive`）
 
 **位置**：`shared/shared-ui/site-nav.js`
 
@@ -171,21 +201,7 @@ if (site.host === host && !moreActive) link.classList.add('is-site');
 if (moreActive) menu.querySelector('summary').classList.add('is-site');
 ```
 
-### 4.3 站点通知弹窗
 
-**位置**：`/srv/iridescently/control/public/notice.js`（**不在仓库**，nginx 注入）
-
-**功能**：统一公告弹窗，插画背景 + 水印 + 设计系统配色，同一版本只弹一次（cookie 跨子站）。
-
-**建议**：应迁到 `infra/` 下纳入版本管理。
-
-### 4.4 图片懒加载
-
-**位置**：`portal/**/*.html` + `portal/**/*.js`（多个文件）
-
-**内容**：所有 `<img>` 加 `loading="lazy" decoding="async"`
-
-**效果**：视口外图片浏览器不请求，首屏传输量预计降 70~90%（对 50 Mbps 带宽很关键）
 
 ---
 
@@ -243,5 +259,38 @@ SSH_ORIGINAL_COMMAND=rollback /usr/local/sbin/iridescently-control
 
 # 单文件回滚（member.html 等直接改线上的）
 cp /tmp/member.html.bak /srv/iridescently/current/portal/huiguan/member.html
+```
+
+
+---
+
+## 九、已推送分支总览
+
+仓库：`git@github.com:iridescent1208234593-debug/Gate-of-All-Beings.git`
+基线：`zszm-batch-20261021` = `f31e7d82`
+
+| 分支 | Commit | 类型 | 内容 |
+|---|---|---|---|
+| `fix/portal-management-501` | `d7602c7a` | 修复 | 灵境会馆 API 501 |
+| `fix/avatar-preview-url` | `bbf31f8b` | 修复 | 头像全部不显示（2 文件） |
+| `fix/upload-preview-normalize` | `731cda45` | 修复 | 上传预览 URL 归一化 |
+| `feat/avatar-compression` | `e1d5f3c5` | 新功能 | 头像压缩到原图 30% |
+| `feat/member-pagination` | `ef85da7d` | 新功能 | 成员列表分批 + 滚动加载 |
+| `infra/site-notice` | `b9c0b14e` | 基础设施 | 公告弹窗纳入版本管理 |
+| `perf/image-lazy-loading` | `4d264f8f` | 性能 | 图片懒加载（16 个 img） |
+| `docs/production-changelog-20261026` | 本文档 | 文档 | 本变更记录 |
+
+**未改动任何主项目线**（`master`、`zszm-batch-20261021`、`batch/7-canonical-structure` 均保持原样）。
+
+### 合并优先级
+
+```
+1. fix/portal-management-501      用户「点了没反应」的根因
+2. fix/avatar-preview-url         头像全部不显示，影响面最大
+3. fix/upload-preview-normalize   与 2 同源，一起验证
+4. perf/image-lazy-loading        带宽优化，低风险
+5. infra/site-notice              独立文件，低风险
+6. feat/avatar-compression        纯增强
+7. feat/member-pagination         纯增强
 ```
 
