@@ -2,15 +2,15 @@
 
 ## 1. 跨站 SSO（hx_sso）
 
-- 实现：`server/hx_sso.py`（跨站共用）。
+- 实现：`services/platform/hx_sso.py`（跨站共用）。
 - Cookie：`hx_sso`，域 `.iridescently.xyz`，`HttpOnly; SameSite=Lax`；token 由 `make_token(uid,kind,name,color)` 签发、`verify_token` 校验、`read_cookie(headers)` 读取。
 - 会馆是签发方（登录后写 cookie）；主站 / 人设站 / 各游戏读 cookie 获取登录态。
 - 读取端点：各站 `/api/sso-user` 返回 `{logged_in,name,uid,kind,admin}`。
-- 管理白名单：`portal/www/server.py` 的 `ADMIN_USSO_IDS`（与会馆 `ADMIN_USSO_IDS` 一致）。
+- 管理白名单：`apps/www/server.py` 的 `ADMIN_USSO_IDS`（与会馆 `ADMIN_USSO_IDS` 一致）。
 
 ## 2. 会馆账号（站内）
 
-`portal/huiguan/server_huiguan.py`：
+`apps/huiguan/server_huiguan.py`：
 
 | 端点 | 作用 |
 | --- | --- |
@@ -29,7 +29,7 @@
 - 角色：`user` / `executor`（执行者）/ `elder`（长老）/ `admin`；`user_flags` 存封禁与管理标记。
 - 会话持久化：`sessions_db(sid,kind,uid,created_at,expires_at)`，重启不掉登录态。
 
-### 账号找回 / 安全（server/account_security.py）
+### 账号找回 / 安全（services/platform/account_security.py）
 
 动作（`/api/security/<action>`）：`setup`（设置提示问题）、`question`（取问题）、`change`（改密）、`reset`（凭答案重置）、`settings`。
 - 哈希答案 + 按账号与 IP 双维度限流（`security_attempts`），原子更新密码。
@@ -38,12 +38,12 @@
 
 ## 3. 卡牌 OAuth（USSO 客户端）
 
-`server/app/src/cards/server.py`，端口 `5174`：
+`apps/cards/server.py`，端口 `5174`：
 
 - `GET /api/login` → 跳 `https://sso.umrc.cn/authorize.php`（`client_id` + `redirect_uri`）。
 - `GET /api/callback` → 换 token、取 userinfo。
 - `GET /api/user` / `/api/sso-user` / `/api/logout`。
-- 用户落 `server/app/src/cards/users.db` 的 `users`。
+- 用户落 `apps/cards/users.db` 的 `users`。
 - 生产回调固定 `https://zszm.iridescently.xyz/api/callback`。
 - 前端 API 走 base 感知：`/app/modules/cards/api/*`，由统一入口代理到 `5174`。
 
@@ -51,8 +51,8 @@
 
 | 站 | 读取登录态 |
 | --- | --- |
-| 主站 `portal/www` | `/api/sso-user`（读 hx_sso） |
-| 人设站 `portal/oc` | `/api/sso-user` |
+| 主站 `apps/www` | `/api/sso-user`（读 hx_sso） |
+| 人设站 `apps/oc` | `/api/sso-user` |
 | 经营 `management` | `ACCOUNT_API = https://huiguan.iridescently.xyz`（dev 为 `localhost:8089`） |
 | 卡牌 | 自有 OAuth（`5174`） |
 

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<script src="/shared/site-domains/index.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>成员管理 · 西木会馆</title>
+<link rel="icon" href="favicon.png">
+<style>
+:root{--bg:#f5f0e8;--panel:#fbf8f2;--border:#d4cfbe;--text:#3a4a3e;--dim:#7a8a7e;--accent:#5a9e8f;--gold:#d4a840;--danger:#b3543f}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:"Noto Serif SC","Source Han Serif SC",serif;min-height:100vh;padding:48px 16px 60px}
+.wrap{max-width:1080px;margin:0 auto}
+h1{font-size:22px;letter-spacing:3px}
+h1 small{font-size:12px;color:var(--dim);margin-left:10px;letter-spacing:1px}
+.back{display:inline-block;margin-bottom:14px;color:var(--dim);font-size:13px;text-decoration:none}
+.back:hover{color:var(--accent)}
+.scope-note{margin:10px 0 16px;font-size:13px;color:var(--dim)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar input,.toolbar select{font-family:inherit;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--panel);color:var(--text);outline:none}
+.toolbar input{flex:1;min-width:160px}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--accent)}
+.stat{font-size:12px;color:var(--dim)}
+table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--border);border-radius:8px;overflow:hidden;font-size:13px}
+th,td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+th{background:rgba(212,168,64,.10);font-size:12px;letter-spacing:1px;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr.sheet-row td{background:rgba(212,168,64,.05)}
+.tag{display:inline-block;padding:1px 8px;border-radius:3px;font-size:11px;border:1px solid var(--border);color:var(--dim);white-space:nowrap}
+.tag.admin{background:rgba(212,168,64,.15);border-color:var(--gold);color:var(--gold)}
+.tag.elder{background:rgba(90,158,143,.12);border-color:var(--accent);color:var(--accent)}
+.tag.scribe{background:rgba(90,158,143,.12);border-color:var(--accent);color:var(--accent)}
+.tag.banned{background:rgba(179,84,63,.10);border-color:var(--danger);color:var(--danger)}
+select.ctl{font-family:inherit;font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:3px;background:var(--panel);color:var(--text)}
+.op{font-family:inherit;font-size:12px;cursor:pointer;padding:3px 10px;border-radius:3px;background:transparent;border:1px solid var(--border);color:var(--dim)}
+.op:hover{border-color:var(--accent);color:var(--accent)}
+.op.danger:hover{border-color:var(--danger);color:var(--danger)}
+.dim{color:var(--dim)}
+.expander{cursor:pointer;color:var(--accent);user-select:none}
+.cnt{color:var(--gold);font-weight:600}
+.err{color:var(--danger);font-size:13px;margin:10px 0;min-height:18px}
+.state-box{text-align:center;padding:60px;color:var(--dim)}
+.sheet-chip{display:inline-block;text-decoration:none;margin:2px;padding:2px 10px;border:1px solid var(--border);border-radius:4px;font-size:12px;color:var(--text);background:var(--panel)}
+.sheet-chip:hover{border-color:var(--accent);color:var(--accent)}
+.sheet-chip .del-sheet{margin-left:6px;border:none;background:none;color:var(--danger);cursor:pointer;font-size:12px;padding:0 2px}
+.sheet-chip .del-sheet:hover{filter:brightness(1.2)}
+.mgr-block{margin:10px 0;padding-top:8px;border-top:1px dashed var(--border)}
+.mgr-block:first-of-type{margin-top:4px;padding-top:0;border-top:none}
+.mgr-title{font-size:12px;color:var(--dim);letter-spacing:1px;margin-bottom:5px}
+.scheme-chip{display:inline-flex;align-items:center;gap:6px;margin:2px;padding:3px 10px;border:1px solid var(--border);border-radius:4px;font-size:12px;background:var(--panel)}
+.scheme-dot{width:11px;height:11px;border-radius:50%;border:1px solid rgba(0,0,0,.12);flex-shrink:0}
+.poster-chip{display:inline-flex;align-items:center;gap:8px;margin:3px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--panel);max-width:340px}
+.poster-chip img{width:26px;height:46px;object-fit:cover;border-radius:3px;border:1px solid var(--border);background:#eee;flex-shrink:0}
+.poster-chip .p-info{min-width:0}
+.poster-chip .p-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.poster-chip .p-sub{font-size:11px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+@media (max-width:760px){table{display:block;overflow-x:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← 返回会馆</a>
+  <h1>成员管理<small>西木会馆 · iridescently.xyz</small></h1>
+  <div class="scope-note" id="scopeNote"></div>
+  <div class="err" id="err"></div>
+  <div class="toolbar" id="toolbar" style="display:none;">
+    <input id="q" placeholder="搜索昵称 / 用户名…" oninput="state.q=this.value;render()">
+    <select id="fRole" onchange="state.fRole=this.value;render()"><option value="">角色·全部</option><option value="executor">执行者</option><option value="elder">长老</option><option value="admin">管理员</option></select>
+    <select id="fEdit" onchange="state.fEdit=this.value;render()"><option value="">编辑·全部</option><option value="scribe">是编辑</option><option value="none">非编辑</option></select>
+    <select id="fStatus" onchange="state.fStatus=this.value;render()"><option value="">状态·全部</option><option value="active">正常</option><option value="banned">已封禁</option></select>
+    <select id="sortBy" onchange="state.sortBy=this.value;render()"><option value="login">按最近登录</option><option value="sheets">按人设表数量</option><option value="name">按昵称</option></select>
+    <span class="stat" id="stat"></span>
+  </div>
+  <div id="content"><div class="state-box">加载中…</div></div>
+</div>
+<script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
+<script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+let myScope='', state={q:'',fRole:'',fEdit:'',fStatus:'',sortBy:'login'};
+let users=[], charMap={}, expanded=new Set(), loadedChars=false;
+const roleName={executor:'执行者',elder:'长老',admin:'管理员'};
+async function init(){
+  try{
+    const r=await fetch('/api/user'); const u=await r.json();
+    if(!u.logged_in){document.getElementById('content').innerHTML='<div class="state-box">请先登录。<br><a href="/" style="color:var(--gold)">回到会馆登录</a></div>';return;}
+    const isElder=u.role==='elder', isAdmin=u.is_admin;
+    if(!isElder&&!isAdmin){document.getElementById('content').innerHTML='<div class="state-box">需要长老或管理员权限。</div>';return;}
+    myScope=isAdmin?'all':'lower';
+    document.getElementById('scopeNote').innerHTML=isAdmin
+      ?'你是<strong>管理员</strong>，可管理全部成员 · <a href="/admin.html" style="color:var(--gold)">前往审核中心（补充/编辑/长老申请）</a>'
+      :'你是<strong>长老</strong>，可管理执行者与编辑（不能管理长老/管理员）。';
+    await loadUsers();
+    document.getElementById('toolbar').style.display='flex';
+  }catch(e){document.getElementById('content').innerHTML='<div class="state-box">加载失败，请刷新。</div>';}
+}
+async function loadUsers(){
+  const err=document.getElementById('err'); err.textContent='';
+  const r=await fetch('/api/member/users'); const d=await r.json();
+  if(!r.ok){err.textContent=d.error||'加载失败';return;}
+  users=d.users||[];
+  if(myScope==='all' && !loadedChars){
+    try{ const cr=await fetch('/api/admin/characters'); const cd=await cr.json();
+      charMap={}; (cd.characters||[]).forEach(c=>{(charMap[c.owner]=charMap[c.owner]||[]).push(c);}); loadedChars=true;
+    }catch(e){}
+  }
+  render();
+}
+function sheetCount(u){ const key=u.kind==='local'?'local:'+u.uid:String(u.uid); return (charMap[key]||[]).length; }
+function filtered(){
+  let list=users.slice();
+  if(state.q){const q=state.q.toLowerCase(); list=list.filter(u=>(u.nickname||u.name||'').toLowerCase().includes(q));}
+  if(state.fRole) list=list.filter(u=>u.role===state.fRole);
+  if(state.fEdit) list=list.filter(u=>(u.edit_role==='scribe')===(state.fEdit==='scribe'));
+  if(state.fStatus) list=list.filter(u=>u.status===state.fStatus);
+  if(state.sortBy==='sheets') list.sort((a,b)=>sheetCount(b)-sheetCount(a));
+  else if(state.sortBy==='name') list.sort((a,b)=>(a.nickname||a.name||'').localeCompare(b.nickname||b.name||'','zh'));
+  else list.sort((a,b)=>(b.last_login||'').localeCompare(a.last_login||''));
+  return list;
+}
+function render(){
+  const box=document.getElementById('content');
+  const list=filtered();
+  const locals=users.filter(u=>u.kind==='local').length;
+  const withChars=users.filter(u=>sheetCount(u)>0).length;
+  document.getElementById('stat').textContent=`共 ${users.length} 位用户（站内 ${locals} · USSO ${users.length-locals}）· 有设表 ${withChars} · 显示 ${list.length}`;
+  if(!list.length){box.innerHTML='<div class="state-box">没有匹配的成员。</div>';return;}
+  const sheetTh=myScope==='all'?'<th>人设表</th>':'';
+  box.innerHTML='<table><thead><tr><th>来源</th><th>昵称</th><th>角色</th><th>编辑</th><th>状态</th><th>最近登录</th>'+sheetTh+'<th>身份</th><th>操作</th></tr></thead><tbody>'+
+    list.map(u=>{
+      const key=u.kind==='local'?'local:'+u.uid:String(u.uid);
+      const sheets=charMap[key]||[];
+      const isOpen=expanded.has(key);
+      const roleSel=myScope==='all'
+        ?`<select class="ctl" onchange="upd('${u.kind}','${u.uid}','role',this.value)">${['executor','elder','admin'].map(x=>`<option value="${x}" ${u.role===x?'selected':''}>${roleName[x]}</option>`).join('')}</select>`
+        :'<span class="dim">执行者</span>';
+      const scribeSel=`<select class="ctl" onchange="upd('${u.kind}','${u.uid}','edit_role',this.value)"><option value="none" ${u.edit_role!=='scribe'?'selected':''}>否</option><option value="scribe" ${u.edit_role==='scribe'?'selected':''}>是</option></select>`;
+      const statusBtn=u.status==='banned'
+        ?`<button class="op" onclick="upd('${u.kind}','${u.uid}','status','active')">解封</button>`
+        :`<button class="op danger" onclick="upd('${u.kind}','${u.uid}','status','banned')">封禁</button>`;
+      const sheetTd=myScope==='all'?`<td><span class="expander" onclick="toggleSheets('${key}')">${isOpen?'▾':'▸'} <span class="cnt">${sheets.length}</span> 份</span></td>`:'';
+      const schemes=u.schemes||[], posters=u.posters||[];
+      const schemeHtml=schemes.length?schemes.map(c=>`<span class="scheme-chip"><span class="scheme-dot" style="background:${escAttr(c.primary_color)}"></span><span class="scheme-dot" style="background:${escAttr(c.accent_color)}"></span>${esc(c.primary_name||'主色')}×${esc(c.accent_name||'辅色')} <span class="dim">${esc((c.name||'').slice(0,10))}</span> <span class="dim">${esc((c.created_at||'').slice(0,10))}</span></span>`).join(''):'<span class="dim">暂无自定义配色</span>';
+      const posterHtml=posters.length?posters.map(p=>`<span class="poster-chip">${p.img_ref?`<img src="${escAttr(p.img_ref)}" alt="">`:''}<span class="p-info"><span class="p-title">${esc(p.title)}</span><span class="p-sub">${p.char_name?'关联：'+esc(p.char_name):'未关联人设'} · ${p.is_public?'已共享画廊':'私有'} · ${esc((p.updated_at||'').slice(0,10))}</span></span><button class="del-sheet" data-id="${p.id}" data-title="${escAttr(p.title)}" onclick="delPoster(this.dataset.id,this.dataset.title)" title="删除该海报">✕</button></span>`).join(''):'<span class="dim">暂无配色海报</span>';
+      const sheetRow=(isOpen&&myScope==='all')?`<tr class="sheet-row"><td colspan="9">${sheets.length?sheets.map(s=>`<span class="sheet-chip">◈ <a href="/show.html?code=${encodeURIComponent(s.code)}" target="_blank" style="color:inherit;text-decoration:none">${esc(s.name)}</a><button class="del-sheet" data-key="${escAttr(key)}" data-code="${escAttr(s.code)}" data-name="${escAttr(s.name)}" onclick="delSheet(this.dataset.key,this.dataset.code,this.dataset.name)" title="删除该设表">✕</button></span>`).join(''):'<span class="dim">暂无人设表</span>'}<div class="mgr-block"><div class="mgr-title">自定义配色（与 /haibao 互通）</div>${schemeHtml}</div><div class="mgr-block"><div class="mgr-title">配色海报（${posters.length}）</div>${posterHtml}</div></td></tr>`:'';
+      return `<tr><td class="dim">${u.kind==='local'?'站内':'USSO'}</td><td>${esc(u.nickname||u.name)}</td><td>${roleSel}</td><td>${scribeSel}</td><td>${u.status==='banned'?'<span class="tag banned">已封禁</span>':'<span class="dim">正常</span>'}</td><td class="dim">${esc((u.last_login||'').replace('T',' ').substring(0,16))}</td>${sheetTd}<td><span class="tag ${u.role==='admin'?'admin':u.role==='elder'?'elder':''}">${roleName[u.role]||'执行者'}</span> ${u.edit_role==='scribe'?'<span class="tag scribe">编辑</span>':''}</td><td>${statusBtn}</td></tr>${sheetRow}`;
+    }).join('')+'</tbody></table>';
+}
+function toggleSheets(key){ if(expanded.has(key))expanded.delete(key);else expanded.add(key); render(); }
+function escAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+async function delSheet(key,code,name){
+  if(!confirm('确定删除「'+(name||code)+'」的这张人设表？此操作不可恢复。'))return;
+  const err=document.getElementById('err'); err.textContent='';
+  try{
+    const r=await fetch('/api/admin/delete-character',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,code})});
+    const d=await r.json();
+    if(!d.ok){err.textContent=d.error||'删除失败';return;}
+    alert('✔ 已删除 '+d.removed+' 张设表');
+    loadUsers();
+  }catch(e){err.textContent='网络错误';}
+}
+async function delPoster(id,title){
+  if(!confirm('确定删除海报「'+(title||id)+'」？将同时从同人画廊移除，此操作不可恢复。'))return;
+  const err=document.getElementById('err'); err.textContent='';
+  try{
+    const r=await fetch('/api/admin/poster/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:Number(id)})});
+    const d=await r.json();
+    if(!r.ok||!d.ok){err.textContent=(d&&d.error)||'删除失败';return;}
+    loadUsers();
+  }catch(e){err.textContent='网络错误';}
+}
+async function upd(kind,uid,field,val){
+  const err=document.getElementById('err'); err.textContent='';
+  try{
+    const r=await fetch('/api/member/user/update',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind,uid,set:{[field]:val}})});
+    const d=await r.json();
+    if(!d.ok){err.textContent=d.error||'操作失败';return;}
+    loadUsers();
+  }catch(e){err.textContent='网络错误';}
+}
+init();
+</script>
+</body>
+</html>

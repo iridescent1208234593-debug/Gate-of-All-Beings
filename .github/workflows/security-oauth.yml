@@ -30,13 +30,13 @@ jobs:
           cache: npm
           cache-dependency-path: |
             package-lock.json
-            server/app/src/cards/package-lock.json
+            apps/cards/package-lock.json
       - run: npm ci
-      - run: npm ci --prefix server/app/src/cards
+      - run: npm ci --prefix apps/cards
       - run: npx playwright install --with-deps chromium
 
       - name: Python, storage, domain and release contract tests (one module per process)
-        run: python scripts/check-batch6.py --report "$RUNNER_TEMP/batch6-checks.json"
+        run: python tools/checks/regression.py --report "$RUNNER_TEMP/batch6-checks.json"
       - name: Install gallery preview encoder
         run: |
           sudo apt-get update
@@ -60,9 +60,9 @@ jobs:
       - name: Audit production npm dependencies
         run: npm audit --omit=dev --audit-level=high
       - name: Audit Gallery Engine build dependencies
-        run: npm audit --prefix portal/www/gallery-engine --audit-level=high
+        run: npm audit --prefix apps/www/gallery-engine --audit-level=high
       - name: Audit Cards module dependencies
-        run: npm audit --prefix server/app/src/cards --audit-level=high
+        run: npm audit --prefix apps/cards --audit-level=high
       - name: Verify release manifests and output hashes
         shell: bash
         run: |
@@ -78,7 +78,7 @@ jobs:
           }
           NODE
       - name: Built candidates contain no unreviewed own-domain URLs
-        run: python scripts/check-domain-hardcodes.py "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate"
+        run: python tools/domains/check-domain-hardcodes.py "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate"
       - name: Portal host routing and API regression on every approved root
         run: npm run test:portal
       - name: OAuth return URL allowlist
@@ -86,10 +86,10 @@ jobs:
       - name: OAuth mock provider browser E2E
         run: npm run test:oauth-mock
       - name: Cards frontend tests
-        run: npm test --prefix server/app/src/cards
+        run: npm test --prefix apps/cards
       - name: Cards backend tests
-        run: npm run test:backend --prefix server/app/src/cards
+        run: npm run test:backend --prefix apps/cards
       - name: Cards type and game checks
-        run: npm run check:game --prefix server/app/src/cards
+        run: npm run check:game --prefix apps/cards
       - name: World Map checks
         run: npm run check:world-map

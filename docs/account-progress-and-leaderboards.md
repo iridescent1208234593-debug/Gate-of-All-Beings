@@ -6,7 +6,7 @@
 
 **等级曲线**：第 1 级需要 1 分，之后每级比上一级多 1 分；第 n 级累计 `n(n+1)/2` 分（1、3、6、10、15……）。新账户 Lv.0，无上限。积分按 0.1 记账（库里存整数 `points_x10`）。
 
-**积分来源**（`server/account_progress.py` 的 `RULES`）：
+**积分来源**（`services/platform/account_progress.py` 的 `RULES`）：
 
 | 规则 | 积分 | 每天上限 |
 | --- | --- | --- |
@@ -35,7 +35,7 @@
 | `ecology` | 灵境生态 | 同存物种数 | `ecology/src/ui/spacePanel.js` |
 | `softie` | 灵体互动 | 累计相处分钟（每天最多计 120） | `softie-webgpu/.../spirit-playground/view.js` |
 | `aeon` | AEON | 最高演化代数 | `aeon/src/main.js` |
-| `shengsheng-shoot` | 省省海滩射击 | 最高得分 | `portal/www/playtest/shengsheng-shoot/game.js` |
+| `shengsheng-shoot` | 省省海滩射击 | 最高得分 | `apps/www/playtest/shengsheng-shoot/game.js` |
 | `level` | 账户等级 | 积分 | — |
 
 同分时按胜场多者、先达到者、owner 排序（"你的名次"与列表顺序一致）。访客可照常游玩，上报返回 `ranked:false`，服务器不写任何数据。
@@ -60,7 +60,7 @@
 - `GET /api/progress/me`：等级、升级进度、今日积分 / 上限、每日任务、各玩法最佳。
 - `POST /api/progress/report`：`{game, score, finished?, won?, ref?}`；`finished`/`won` 必须带 `ref`。要求 `Content-Type: application/json`、Origin 为 `*.iridescently.xyz` 或本机，身份只认 `hx_sso`（经 `resolve_sso_identity` 复核账户状态，封禁/失效 = 访客）。
 
-客户端：`shared/shared-session/progress.js`（`reportResult` 一局结束、`reportProgress` 持续型玩法自带 5 分钟节流、局末小提示链接到排行榜）。会馆 `/api/user` 与设表保存的 `points/level` 字段改由本模块计算，并新增 `next_level_at`。
+客户端：`packages/shared-session/progress.js`（`reportResult` 一局结束、`reportProgress` 持续型玩法自带 5 分钟节流、局末小提示链接到排行榜）。会馆 `/api/user` 与设表保存的 `points/level` 字段改由本模块计算，并新增 `next_level_at`。
 
 排行榜页面：`/shared/shared-ui/leaderboard/index.html?board=<key>`，各站点都可访问。入口：模块壳顶栏"排行榜"（默认当前玩法）、局末提示、会馆账户页"查看排行榜"。
 
@@ -76,9 +76,9 @@
 部署新代码后，所有账户读到的积分已经是新表里的 0；迁移负责清掉旧列并留档，保证没有旧值残留，也可回滚。
 
 ```bash
-python server/account_progress.py reset-legacy           # 预演：显示将清零的账户数与积分，不写入
-python server/account_progress.py reset-legacy --apply   # 归档旧积分 → 旧列清零 → 清空新积分与流水；重复执行会拒绝
-python server/account_progress.py restore-legacy --apply # 回滚：把归档的旧积分写回旧列（旧代码读的位置）
+python services/platform/account_progress.py reset-legacy           # 预演：显示将清零的账户数与积分，不写入
+python services/platform/account_progress.py reset-legacy --apply   # 归档旧积分 → 旧列清零 → 清空新积分与流水；重复执行会拒绝
+python services/platform/account_progress.py restore-legacy --apply # 回滚：把归档的旧积分写回旧列（旧代码读的位置）
 ```
 
 在 2026-10-20 的 `users.db` **临时副本**上预演 + 执行：254 个账户、合计 41,760 旧积分被归档并清零，第二次执行被拒绝；副本已删除。真实 `users.db` 未执行。玩法排行榜成绩（`game_scores`）不受重置影响。
@@ -87,5 +87,5 @@ python server/account_progress.py restore-legacy --apply # 回滚：把归档的
 
 ## 6. 测试
 
-- `python server/test_account_progress.py`（临时数据根）：等级曲线、发分与去重、每日上限与跨日、(kind, uid) 隔离、累计型上限、参数校验、同分名次、设表只计新表、重置/拒绝重复/回滚、HTTP 访客/封禁/伪造 cookie/跨站/非 JSON。
-- `python server/verify_portal.py`：新增 6 项（各站点 `/api/progress/*`、排行榜页、progress.js）。
+- `python services/platform/tests/test_account_progress.py`（临时数据根）：等级曲线、发分与去重、每日上限与跨日、(kind, uid) 隔离、累计型上限、参数校验、同分名次、设表只计新表、重置/拒绝重复/回滚、HTTP 访客/封禁/伪造 cookie/跨站/非 JSON。
+- `python services/platform/tests/verify_portal.py`：新增 6 项（各站点 `/api/progress/*`、排行榜页、progress.js）。

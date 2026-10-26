@@ -13,7 +13,7 @@
 
 模块侧实现：cards（React `createRoot`）、management（`__lingjing.dispose`）、ecology/aeon（循环闸门）、juling（IIFE + dispose）、slay（渲染进 `#SlayTheWeb`）、softie（`export mount/unmount`）。
 
-## 2. `server/app/portal.json`（导航唯一数据源）
+## 2. `apps/shell/portal.json`（导航唯一数据源）
 
 ```jsonc
 { "key": "cards", "group": "游戏", "name": "…", "desc": "…",
@@ -33,11 +33,11 @@
 - 新增上游：在 `PROXY_PORTS` 加 `<模块名>: <端口>`。
 - **keep-alive**：`Dispatcher.handle_one_request` 的 try/finally 保证每个请求都重新分发；改路由逻辑务必保留。
 
-## 4. 构建约定 `server/app/scripts/build-modules.mjs`
+## 4. 构建约定 `tools/build/build-modules.mjs`
 
-- Vite 模块：源码须能 `vite build --base /app/modules/<名>/`，产物落 `server/app/modules/<名>`。
+- Vite 模块：源码须能 `vite build --base /app/modules/<名>/`，产物落 `dist/modules/<名>`。
 - 静态模块：放 `src/<名>/public`（或整目录），必要时在脚本里修正根绝对路径。
-- `slay/ui/images`：可选美术，`build-modules.mjs` 按 `server/app/module-assets.json`（`slay.images`）或 `IRIDESCENTLY_SLAY_IMAGES_DIR` 复制真实文件；未配置时跳过，配置了但路径不存在则构建失败。旧来源 `shared/shared-ui/AI image` 已按复审删除。
+- `slay/ui/images`：可选美术，`build-modules.mjs` 按 `tools/build/module-assets.json`（`slay.images`）或 `IRIDESCENTLY_SLAY_IMAGES_DIR` 复制真实文件；未配置时跳过，配置了但路径不存在则构建失败。旧来源 `packages/shared-ui/AI image` 已按复审删除。
 - 后端共享：`sys.path` 指向 `server/` 以导入 `base_static`/`hx_sso`/`account_security`。
 
 ## 5. shared-session 钩子
@@ -50,7 +50,7 @@
 ## 6. 运维钩子
 
 - 网站管家 `E:\External Projects\Iridescently Operations\网站恢复/website-manager.py` 的 `SITES`：站点清单（名称/域名/端口/启动命令）。
-- 看门狗 `portal/huiguan/watchdog.py`：8080 不在则拉起 `server/portal_server.py`。
+- 看门狗 `apps/huiguan/watchdog.py`：8080 不在则拉起 `services/platform/portal_server.py`。
 - Cloudflare：`~/.cloudflared/config.yml` 的 ingress 与 `TUNNEL_SITE`。
 - 世界观库重链：`assets/罗小黑战记数据库/relink_db.py`（预演 / `--apply`）。
 

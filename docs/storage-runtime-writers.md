@@ -22,9 +22,9 @@ verified migration manifest.
 | Spirit local settings | `data/spirit/spirit-settings.json` | atomic `.tmp` sibling |
 | Scraping observation logs | — | `cache/logs/scraping/`, bounded rotating process logs |
 | Asset registry index | `data/assets/registry.sqlite3` | import manifests in the external backup/verification area |
-| Local launcher (`scripts/local-runtime.py`) | — | `cache/runtime/local-runtime.json`, per-service working directories under `cache/runtime/`, logs under `cache/logs/local-runtime/` |
-| Storage backups (`scripts/backup-storage.py`) | `backups/snapshots/<UTC stamp>/` with a hashed manifest | — |
-| Local data migration (`scripts/storage-migrate.py`) | `backups/<migration>/manifest.json`; detached originals under `backups/<migration>/original-source/` | — |
+| Local launcher (`tools/runtime/local-runtime.py`) | — | `cache/runtime/local-runtime.json`, per-service working directories under `cache/runtime/`, logs under `cache/logs/local-runtime/` |
+| Storage backups (`tools/runtime/backup-storage.py`) | `backups/snapshots/<UTC stamp>/` with a hashed manifest | — |
+| Local data migration (`tools/runtime/storage-migrate.py`) | `backups/<migration>/manifest.json`; detached originals under `backups/<migration>/original-source/` | — |
 | Private shared email/SSO configuration | `data/secrets/server.env` | — |
 
 `assets/source/` contains supplied originals. The editable worldview database is a
@@ -55,16 +55,16 @@ publish, verifier and migration commands are covered by the release/migration ru
   backups/   migration evidence, recovery originals, snapshots
 ```
 
-Checkout, `git clean`, builds, sealing and rollback only touch the source tree, `releases/candidate` or the channel pointer; none of them can reach `data/` or `assets/`. A rollback selects older code and keeps the current data, so schema changes stay additive (the Huiguan `sessions_db.audience` column defaults to the pre-existing root). `test` requires an explicit temporary `IRIDESCENTLY_STORAGE_ROOT`, and `scripts/check-batch6.py` and CI always create one; nothing in the test suites can select production data.
+Checkout, `git clean`, builds, sealing and rollback only touch the source tree, `releases/candidate` or the channel pointer; none of them can reach `data/` or `assets/`. A rollback selects older code and keeps the current data, so schema changes stay additive (the Huiguan `sessions_db.audience` column defaults to the pre-existing root). `test` requires an explicit temporary `IRIDESCENTLY_STORAGE_ROOT`, and `tools/checks/regression.py` and CI always create one; nothing in the test suites can select production data.
 
 The local `production` environment lives under `E:\External Projects\Iridescently Runtime`. Its migration copied 4,620 files (6.30 GiB, six SQLite databases via the SQLite backup API) from the former in-tree layout of `E:\Projects`, verified every file hash and each database's logical dump, and then detached the untracked originals into `backups/batch6-migration-20261025/original-source/`. `storage-migrate.py verify` re-checks targets against the manifest and the recovery originals; `restore-source` copies originals back without overwriting later data. Old build outputs and release snapshots still in `E:\Projects\.releases` are not runtime data and are left for the unchanged Hong Kong release tooling.
 
 Regression checks use synthetic identities/images and disposable storage:
-`server/test_account_progress.py`, `server/test_task_chains.py`,
-`server/test_game_save_scope.py`, `server/test_gallery_interactions.py`,
-`server/test_site_admin.py`, `server/test_huiguan_oauth_session.py`, `server/test_storage_paths.py`,
-`server/test_storage_migration.py`, `server/test_operations_tools.py`, `server/test_runtime_services.py`,
-`portal/huiguan/tests/test_original_image_access.py`, the remaining Huiguan API tests,
+`services/platform/tests/test_account_progress.py`, `services/platform/tests/test_task_chains.py`,
+`services/platform/tests/test_game_save_scope.py`, `services/platform/tests/test_gallery_interactions.py`,
+`services/platform/tests/test_site_admin.py`, `services/platform/tests/test_huiguan_oauth_session.py`, `services/platform/tests/test_storage_paths.py`,
+`services/platform/tests/test_storage_migration.py`, `services/platform/tests/test_operations_tools.py`, `services/platform/tests/test_runtime_services.py`,
+`apps/huiguan/tests/test_original_image_access.py`, the remaining Huiguan API tests,
 Cards identity/balance tests and Spirit settings tests. Run Python fixture modules in
 separate processes: they deliberately configure their own environment and import-time
 service state.

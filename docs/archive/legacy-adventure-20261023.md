@@ -7,8 +7,8 @@
 下线前的最后一个提交已打标签（本地标签，需要 push 标签才会出现在远端）：
 
 ```
-git show archive/legacy-adventure-20261023:server/app/src/cards/src/game/GameApp.tsx
-git checkout archive/legacy-adventure-20261023 -- server/app/src/cards/src/game/transport.ts
+git show archive/legacy-adventure-20261023:apps/cards/src/game/GameApp.tsx
+git checkout archive/legacy-adventure-20261023 -- apps/cards/src/game/transport.ts
 ```
 
 标签指向 `e263562`。

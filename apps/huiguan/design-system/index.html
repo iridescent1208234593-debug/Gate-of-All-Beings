@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<script src="/shared/site-domains/index.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>西木会馆 · 设计系统样式指南</title>
+<link rel="stylesheet" href="design-system.css?v=4">
+<link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261015-1">
+<link rel="stylesheet" href="/design-system/ui/lxh-ui.css?v=20261020">
+<style>
+  body{padding:48px 16px 80px;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-size:26px;letter-spacing:3px;margin-bottom:6px;}
+  .sub{color:var(--qc-dim);font-size:14px;margin-bottom:30px;}
+  section{margin-bottom:40px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0;}
+  .swatch{width:70px;height:52px;border-radius:8px;border:1px solid var(--qc-border);display:flex;align-items:flex-end;justify-content:center;font-size:10px;color:#fff;padding-bottom:3px;text-shadow:0 1px 2px rgba(0,0,0,.4);}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body class="qc-body">
+<div class="wrap">
+  <h1>西木会馆 · 设计系统</h1>
+  <p class="sub">design token + 组件库 + 规范 · 详见 design-system.md / design-system.css · <a href="colors.html" style="color:var(--qc-accent)">中国古色·五行色库 →</a> · <a href="assets-library.html" style="color:var(--qc-accent)">素材库 →</a></p>
+
+  <a class="qc-banner qc-banner--accent" href="components.html" style="text-decoration:none;color:inherit;">
+    <div style="flex:1;min-width:220px;"><strong style="color:var(--qc-accent);letter-spacing:2px;">游戏界面组件库 · lxh-ui</strong><br>
+    <span style="font-size:13px;">众生之门与各游戏模块的 HUD、面板、气泡、按钮、输入框、确认框和加载出错状态：实时示例、全部状态、token 与可复制用法。</span></div>
+    <span class="qc-btn">打开组件库</span>
+  </a>
+
+  <section>
+    <h2 class="qc-h2">色彩 Color</h2>
+    <div class="row">
+      <div class="swatch" style="background:var(--qc-bg);color:var(--qc-text);text-shadow:none;">bg</div>
+      <div class="swatch" style="background:var(--qc-panel);color:var(--qc-text);text-shadow:none;">panel</div>
+      <div class="swatch" style="background:var(--qc-text);">text</div>
+      <div class="swatch" style="background:var(--qc-dim);">dim</div>
+      <div class="swatch" style="background:var(--qc-accent);">accent</div>
+      <div class="swatch" style="background:var(--qc-gold);">gold</div>
+      <div class="swatch" style="background:var(--qc-danger);">danger</div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">按钮 Button</h2>
+    <div class="row">
+      <button class="qc-btn">主按钮</button>
+      <button class="qc-btn qc-btn--ghost">幽灵按钮</button>
+      <button class="qc-btn qc-btn--gold">描金按钮</button>
+      <button class="qc-btn qc-btn--gold-ghost">描金幽灵</button>
+      <button class="qc-btn qc-btn--danger">危险按钮</button>
+      <button class="qc-btn qc-btn--sm">小按钮</button>
+      <button class="qc-btn" disabled>禁用</button>
+      <button class="qc-btn" aria-busy="true">正在保存…</button>
+      <a class="qc-btn qc-btn--ghost" href="#">链接按钮</a>
+    </div>
+    <p style="color:var(--qc-dim);font-size:13px;">按 Tab 查看键盘焦点环；鼠标点击不显示。可点高度最小 36px，触屏 44px（小按钮 28 / 36px）。提交中设 <code>aria-busy="true"</code>，不只是 disabled。</p>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">标签 Tag</h2>
+    <div class="row">
+      <span class="qc-tag">默认</span>
+      <span class="qc-tag qc-tag--accent">长老</span>
+      <span class="qc-tag qc-tag--gold">管理员</span>
+      <span class="qc-tag qc-tag--danger">已封禁</span>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">卡片 Card</h2>
+    <div class="grid2">
+      <div class="qc-card"><strong>静态卡片</strong><p style="color:var(--qc-dim);font-size:13px;margin-top:6px;">信息块 / 列表项容器。</p></div>
+      <div class="qc-card qc-card--hover"><strong>悬浮卡片</strong><p style="color:var(--qc-dim);font-size:13px;margin-top:6px;">可点击，悬停上浮+阴影。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">表单 Form</h2>
+    <div class="grid2">
+      <div>
+        <label class="qc-label">名字 <span style="color:var(--qc-accent)">*</span></label>
+        <input class="qc-input" placeholder="输入名字">
+        <div class="qc-hint">提示文字</div>
+      </div>
+      <div>
+        <label class="qc-label">性别</label>
+        <select class="qc-select"><option>男</option><option>女</option></select>
+        <div class="qc-err">错误提示</div>
+      </div>
+      <div>
+        <label class="qc-label" for="demoInvalid">再次输入新密码</label>
+        <input class="qc-input" id="demoInvalid" value="两次不一致" aria-invalid="true" aria-describedby="demoInvalidErr">
+        <div class="qc-err" id="demoInvalidErr">两次输入的新密码不一致</div>
+      </div>
+      <div>
+        <label class="qc-label" for="demoDisabled">站内账号（不可改）</label>
+        <input class="qc-input" id="demoDisabled" value="jialin" disabled>
+        <div class="qc-hint">禁用：宣纸底 + 次级字色</div>
+      </div>
+    </div>
+    <textarea class="qc-textarea" rows="3" placeholder="多行输入" style="margin-top:12px;"></textarea>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">表格 Table</h2>
+    <table class="qc-table">
+      <thead><tr><th>昵称</th><th>角色</th><th>状态</th><th>操作</th></tr></thead>
+      <tbody>
+        <tr><td>佳霖</td><td><span class="qc-tag qc-tag--gold">管理员</span></td><td>正常</td><td><button class="qc-btn qc-btn--sm qc-btn--ghost">编辑</button></td></tr>
+        <tr><td>wuwuzi</td><td><span class="qc-tag qc-tag--accent">编辑</span></td><td>正常</td><td><button class="qc-btn qc-btn--sm qc-btn--danger">封禁</button></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">横幅 Banner</h2>
+    <div class="qc-banner qc-banner--gold"><div style="flex:1"><strong style="color:var(--qc-gold)">描金横幅</strong><br><span style="font-size:13px;">申请/引导入口。</span></div><button class="qc-btn qc-btn--gold">进入</button></div>
+    <div class="qc-banner qc-banner--accent"><div style="flex:1"><strong style="color:var(--qc-accent)">松绿横幅</strong><br><span style="font-size:13px;">公告/说明。</span></div><button class="qc-btn">查看</button></div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">弹窗 Modal</h2>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">行为脚本 <code>qc-modal.js</code>：打开后焦点进入弹窗，Tab 只在弹窗内循环，Esc 或点遮罩关闭，关闭后焦点回到触发按钮，背景不滚动。用 <code>data-qc-modal-open</code> / <code>data-qc-modal-close</code> 接线，或脚本调用 <code>QcModal.open()</code>。</p>
+    <button class="qc-btn" data-qc-modal-open="demoModal">打开弹窗</button>
+    <div class="qc-modal" id="demoModal">
+      <div class="qc-modal__panel">
+        <h3 class="qc-modal__title">确认操作</h3>
+        <p style="color:var(--qc-dim);font-size:13px;margin:12px 0;">弹窗用于确认/编辑/删除等覆盖式交互。</p>
+        <label class="qc-label" for="demoModalNote">备注</label><input class="qc-input" id="demoModalNote" placeholder="可选">
+        <div class="row" style="justify-content:flex-end;"><button class="qc-btn qc-btn--ghost" data-qc-modal-close>取消</button><button class="qc-btn" data-qc-modal-close>确认</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">头像节点 Avatar Node</h2>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">用于人物关系图：圆形头像 + 下方名称。头像取自角色设定图（缩略），无图时回退为首字母圆点。</p>
+    <div style="display:flex;gap:24px;align-items:flex-end;">
+      <div style="text-align:center;">
+        <img src="/api/official/img?cid=1&n=0&t=1" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--qc-accent);">
+        <div style="font-size:12px;margin-top:4px;">罗小黑</div>
+      </div>
+      <div style="text-align:center;">
+        <img src="/api/official/img?cid=2&n=0&t=1" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--qc-gold);">
+        <div style="font-size:12px;margin-top:4px;">无限</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:56px;height:56px;border-radius:50%;background:var(--qc-accent-glow);border:2px solid var(--qc-border);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--qc-dim);">鸠</div>
+        <div style="font-size:12px;margin-top:4px;">鸠老（无图回退）</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">折叠 Collapse</h2>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">用于主站"更多站点"等默认收纳的内容。点击展开/收起。</p>
+    <button class="qc-btn qc-btn--ghost" onclick="var g=document.getElementById('demoCollapse');var open=g.style.display!=='none';g.style.display=open?'none':'block';this.textContent=open?'展开 ▾':'收起 ▴';">展开 ▾</button>
+    <div id="demoCollapse" style="display:none;margin-top:12px;padding:14px;border:1px solid var(--qc-border);border-radius:var(--qc-r-lg);background:var(--qc-panel);color:var(--qc-dim);font-size:13px;">
+      被折叠的内容：oc人设 / 心理档案云 / 众生之门(beta) / 罗小黑战记 等次要站点。
+    </div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">Beta 标</h2>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">用于标注测试中的站点/功能，如"众生之门"。</p>
+    <span style="font-size:14px;">众生之门 <i class="qc-beta">beta</i></span>
+    <style>.qc-beta{font-style:normal;font-size:10px;color:#c9a96e;border:1px solid rgba(201,169,110,.5);background:rgba(201,169,110,.16);border-radius:6px;padding:0 5px;vertical-align:2px;margin-left:4px;}</style>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">色板 Swatch · 页签 Tabs · 选色槽 Slot</h2>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">配色场景组件：五行页签 + 古色色板 + 主色/辅色选色槽（配色海报页使用）。</p>
+    <div class="qc-tabs">
+      <button class="qc-tab is-active">金</button>
+      <button class="qc-tab">木</button>
+      <button class="qc-tab">水</button>
+      <button class="qc-tab">火</button>
+      <button class="qc-tab">土</button>
+    </div>
+    <div class="qc-swatch-grid" style="max-height:120px;">
+      <div class="qc-swatch is-picked"><span class="qc-swatch__chip" style="background:#D4A840"></span><span class="qc-swatch__name">缃色</span></div>
+      <div class="qc-swatch"><span class="qc-swatch__chip" style="background:#5a9e8f"></span><span class="qc-swatch__name">铜绿</span></div>
+      <div class="qc-swatch"><span class="qc-swatch__chip" style="background:#2E3A42"></span><span class="qc-swatch__name">玄青</span></div>
+      <div class="qc-swatch"><span class="qc-swatch__chip" style="background:#9D2933"></span><span class="qc-swatch__name">胭脂</span></div>
+      <div class="qc-swatch"><span class="qc-swatch__chip" style="background:#E4C6D0"></span><span class="qc-swatch__name">藕荷色</span></div>
+    </div>
+    <div class="qc-slots" style="margin-top:12px;">
+      <div class="qc-slot is-active"><span class="qc-slot__chip" style="background:#5a9e8f"></span><span class="qc-slot__col"><span class="qc-slot__label">主色</span><span class="qc-slot__name">铜绿</span></span></div>
+      <div class="qc-slot"><span class="qc-slot__chip" style="background:#D4A840"></span><span class="qc-slot__col"><span class="qc-slot__label">辅色</span><span class="qc-slot__name">缃色</span></span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">上传区 Upload</h2>
+    <div class="qc-upload">点击或拖拽上传角色图像（JPG / PNG，≤ 8MB）</div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">站点导航 Site Bar</h2>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">本页顶部就是真实组件。三站与模块共用一条 48px 全局栏：像素标 + 西木会馆 / 众生之门 / 节气画廊三站并列，当前站点金色下划线；右侧依次是页面插槽、语言、账户。代码：<code>packages/shared-ui/site-nav.js</code>。</p>
+    <div style="display:grid;gap:8px;max-width:640px;font-size:13px;line-height:1.8;">
+      <div><strong>普通页</strong>：<code>&lt;script src="/shared/shared-ui/site-nav.js"&gt;</code>，自动给 body 让出栏高。</div>
+      <div><strong>沉浸首屏</strong>（节气画廊）：加 <code>data-variant="overlay"</code>，透明叠在画面上，不让位。</div>
+      <div><strong>站内子导航</strong>（众生之门页签、模块壳）：在全局栏下方放一条米白本地栏，<code>top: var(--qc-nav-h)</code> 粘顶；不要再画第二条深色栏。</div>
+      <div><strong>页面自己的按钮</strong>：放进 <code>IridescentlyNav.slot()</code>，不要用 position:fixed 占角落。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">加载状态 Loading</h2>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">内容还没到时，在内容将出现的位置显示一条细进度线和一句说明；不要另起一个全屏加载页。出错时改 role="alert" 并给出重试。代码：<code>lxh-ui.css</code> 的 <code>.qc-loading</code>；恢复按钮放进 <code>.qc-loading__actions</code>，可以并排多个。真实页面：会馆「账户安全」。</p>
+    <div class="grid2">
+      <div class="qc-card"><div class="qc-loading" role="status" style="min-height:140px">正在读取旅途存档…</div></div>
+      <div class="qc-card"><div class="qc-loading" role="alert" style="min-height:140px">请先登录后再设置账户安全。<div class="qc-loading__actions"><a href="#">去登录</a><a href="#">忘记密码</a></div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">品牌标 Mark</h2>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">像素直角坐标系：三条坐标轴从原点伸出，端点是红、绿、蓝三颗球。16×16 网格，只能整数倍缩放（image-rendering: pixelated）；放在深色上时垫一块宣纸色底。文件：<code>packages/shared-ui/brand/iridescently-mark.svg</code>（PNG 副本 <code>apps/www/assets/iridescently-mark.png</code>）。</p>
+    <div class="row">
+      <img src="/shared/shared-ui/brand/iridescently-mark.svg" width="64" height="64" alt="Iridescently 像素标" style="image-rendering:pixelated">
+      <img src="/shared/shared-ui/brand/iridescently-mark.svg" width="32" height="32" alt="" style="image-rendering:pixelated">
+      <span style="display:inline-grid;place-items:center;width:44px;height:44px;border-radius:8px;background:#13241e"><img src="/shared/shared-ui/brand/iridescently-mark.svg" width="28" height="28" alt="" style="padding:3px;border-radius:6px;background:#f4eedf;image-rendering:pixelated"></span>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="qc-h2">开场控制 Intro Controls</h2>
+    <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">会馆与众生之门共用的细进度条和轻量跳过按钮；动画场景仍由各自页面控制。</p>
+    <div style="display:flex;align-items:center;gap:16px;max-width:440px;padding:12px 16px;background:#142b25;border-radius:8px;color:#fdf9e4;">
+      <input class="lxh-intro-range" type="range" min="0" max="100" value="38" aria-label="开场动画进度" style="flex:1;">
+      <button class="lxh-intro-skip" type="button">跳过 ↘</button>
+    </div>
+  </section>
+
+</div>
+<script src="qc-modal.js?v=20261019"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
+</body>
+</html>

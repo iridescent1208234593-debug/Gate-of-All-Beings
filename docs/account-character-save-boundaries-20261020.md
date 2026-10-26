@@ -15,10 +15,10 @@
 
 ## 现有源码证据
 
-- `portal/huiguan/users.db` 同时维护本地账户、USSO 用户、会话和账户资料；共享账户主键为 `(kind, uid)`。
-- `server/account_profile.py` 的 `account_profiles` 主键是 `(kind, uid)`，包含 `account_avatar_url`、`gate_identity_json`，并保留 Gate identity roster 字段。
-- `portal/huiguan/server_huiguan.py` 的角色保存路由先调用 `_require_ident()`，再以 `_data_key(ident)` 读写 `characters.json` 中的列表；角色保存和账户身份是有关联但不同的实体。
-- `server/game_saves.py` 已有 `(kind, uid, scope)` 主键和旧 JSON 归属演练；`docs/game-save-ownership.md` 记录了冲突隔离、迁移留痕和回滚规则。
+- `apps/huiguan/users.db` 同时维护本地账户、USSO 用户、会话和账户资料；共享账户主键为 `(kind, uid)`。
+- `services/platform/account_profile.py` 的 `account_profiles` 主键是 `(kind, uid)`，包含 `account_avatar_url`、`gate_identity_json`，并保留 Gate identity roster 字段。
+- `apps/huiguan/server_huiguan.py` 的角色保存路由先调用 `_require_ident()`，再以 `_data_key(ident)` 读写 `characters.json` 中的列表；角色保存和账户身份是有关联但不同的实体。
+- `services/platform/game_saves.py` 已有 `(kind, uid, scope)` 主键和旧 JSON 归属演练；`docs/game-save-ownership.md` 记录了冲突隔离、迁移留痕和回滚规则。
 - `docs/zszm-identity-and-save-map.md` 记录 Cards、生态、聚灵等仍属浏览器级或服务级的进度，不能假设它们已经是账户云存档。
 
 ## 建议的目标结构
