@@ -3,7 +3,8 @@
 - Repository layout: `docs/repository-layout.md`. Local engineering workspace (repo, worktrees,
   runtime storage, operations, originals, evidence, archive): `docs/workspace.md`. Branch rules:
   `docs/development/BRANCH_STRATEGY.md`. Local services and HK publishing: `docs/operations.md`.
-  Recovery: `docs/recovery.md`.
+  Recovery: `docs/recovery.md`. Security: `docs/security/README.md` (which documents are current
+  rules and which are dated history; live production state comes only from fresh read-only evidence).
 - Re-check the live Git and disk state before acting; documents and handoffs record the state when
   they were written.
 
