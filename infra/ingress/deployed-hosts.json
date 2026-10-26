@@ -5,7 +5,8 @@
   "sources": [
     "repository portal SITES.domains",
     "dns-records.json",
-    "Cloudflare Tunnel configuration snapshots 2026-10-24"
+    "Cloudflare Tunnel configuration snapshots 2026-10-24",
+    "2026-10-26: .cn/.dpdns.org ingress prepared from domains.json roots; DNS not yet created"
   ],
   "hosts": [
     {
@@ -36,6 +37,24 @@
       "service": null
     },
     {
+      "hostname": "game.iridescently.cn",
+      "node": "hk",
+      "application_host": "game.iridescently.cn",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "game.iridescently.dpdns.org",
+      "node": "hk",
+      "application_host": "game.iridescently.dpdns.org",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
       "hostname": "game.iridescently.xyz",
       "node": "hk",
       "application_host": "game.iridescently.xyz",
@@ -54,11 +73,47 @@
       "service": null
     },
     {
+      "hostname": "huiguan.iridescently.cn",
+      "node": "hk",
+      "application_host": "huiguan.iridescently.cn",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "huiguan.iridescently.dpdns.org",
+      "node": "hk",
+      "application_host": "huiguan.iridescently.dpdns.org",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
       "hostname": "huiguan.iridescently.xyz",
       "node": "hk",
       "application_host": "huiguan.iridescently.xyz",
       "registered": true,
       "dns_target": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7.cfargotunnel.com",
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "iridescently.cn",
+      "node": "hk",
+      "application_host": "iridescently.cn",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "iridescently.dpdns.org",
+      "node": "hk",
+      "application_host": "iridescently.dpdns.org",
+      "registered": true,
+      "dns_target": null,
       "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
       "service": "http://127.0.0.1:8080"
     },
@@ -72,6 +127,24 @@
       "service": "http://127.0.0.1:8080"
     },
     {
+      "hostname": "juling.iridescently.cn",
+      "node": "hk",
+      "application_host": "juling.iridescently.cn",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "juling.iridescently.dpdns.org",
+      "node": "hk",
+      "application_host": "juling.iridescently.dpdns.org",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
       "hostname": "juling.iridescently.xyz",
       "node": "hk",
       "application_host": "juling.iridescently.xyz",
@@ -81,11 +154,47 @@
       "service": "http://127.0.0.1:8080"
     },
     {
+      "hostname": "lingjing.iridescently.cn",
+      "node": "hk",
+      "application_host": "lingjing.iridescently.cn",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "lingjing.iridescently.dpdns.org",
+      "node": "hk",
+      "application_host": "lingjing.iridescently.dpdns.org",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
       "hostname": "lingjing.iridescently.xyz",
       "node": "hk",
       "application_host": "lingjing.iridescently.xyz",
       "registered": true,
       "dns_target": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7.cfargotunnel.com",
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "oc.iridescently.cn",
+      "node": "hk",
+      "application_host": "oc.iridescently.cn",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "oc.iridescently.dpdns.org",
+      "node": "hk",
+      "application_host": "oc.iridescently.dpdns.org",
+      "registered": true,
+      "dns_target": null,
       "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
       "service": "http://127.0.0.1:8080"
     },
@@ -109,81 +218,81 @@
     },
     {
       "hostname": "pc-game.iridescently.xyz",
-      "node": "pc",
+      "node": "retired-or-test",
       "application_host": "game.iridescently.xyz",
-      "registered": true,
+      "registered": false,
       "dns_target": "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com",
       "tunnel_id": "b79024ab-6d94-49f8-9583-5b32c8f55264",
       "service": "http://127.0.0.1:18190"
     },
     {
       "hostname": "pc-huiguan.iridescently.xyz",
-      "node": "pc",
+      "node": "retired-or-test",
       "application_host": "huiguan.iridescently.xyz",
-      "registered": true,
+      "registered": false,
       "dns_target": "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com",
       "tunnel_id": "b79024ab-6d94-49f8-9583-5b32c8f55264",
       "service": "http://127.0.0.1:18190"
     },
     {
       "hostname": "pc-juling.iridescently.xyz",
-      "node": "pc",
+      "node": "retired-or-test",
       "application_host": "juling.iridescently.xyz",
-      "registered": true,
+      "registered": false,
       "dns_target": "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com",
       "tunnel_id": "b79024ab-6d94-49f8-9583-5b32c8f55264",
       "service": "http://127.0.0.1:18190"
     },
     {
       "hostname": "pc-lingjing.iridescently.xyz",
-      "node": "pc",
+      "node": "retired-or-test",
       "application_host": "lingjing.iridescently.xyz",
-      "registered": true,
+      "registered": false,
       "dns_target": "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com",
       "tunnel_id": "b79024ab-6d94-49f8-9583-5b32c8f55264",
       "service": "http://127.0.0.1:18190"
     },
     {
       "hostname": "pc-oc.iridescently.xyz",
-      "node": "pc",
+      "node": "retired-or-test",
       "application_host": "oc.iridescently.xyz",
-      "registered": true,
+      "registered": false,
       "dns_target": "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com",
       "tunnel_id": "b79024ab-6d94-49f8-9583-5b32c8f55264",
       "service": "http://127.0.0.1:18190"
     },
     {
       "hostname": "pc-spirit.iridescently.xyz",
-      "node": "pc",
+      "node": "retired-or-test",
       "application_host": "spirit.iridescently.xyz",
-      "registered": true,
+      "registered": false,
       "dns_target": "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com",
       "tunnel_id": "b79024ab-6d94-49f8-9583-5b32c8f55264",
       "service": "http://127.0.0.1:18190"
     },
     {
       "hostname": "pc-www.iridescently.xyz",
-      "node": "pc",
+      "node": "retired-or-test",
       "application_host": "www.iridescently.xyz",
-      "registered": true,
+      "registered": false,
       "dns_target": "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com",
       "tunnel_id": "b79024ab-6d94-49f8-9583-5b32c8f55264",
       "service": "http://127.0.0.1:18190"
     },
     {
       "hostname": "pc-zszm.iridescently.xyz",
-      "node": "pc",
+      "node": "retired-or-test",
       "application_host": "zszm.iridescently.xyz",
-      "registered": true,
+      "registered": false,
       "dns_target": "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com",
       "tunnel_id": "b79024ab-6d94-49f8-9583-5b32c8f55264",
       "service": "http://127.0.0.1:18190"
     },
     {
       "hostname": "pc.iridescently.xyz",
-      "node": "pc",
+      "node": "retired-or-test",
       "application_host": "iridescently.xyz",
-      "registered": true,
+      "registered": false,
       "dns_target": "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com",
       "tunnel_id": "b79024ab-6d94-49f8-9583-5b32c8f55264",
       "service": "http://127.0.0.1:18190"
@@ -207,6 +316,24 @@
       "service": null
     },
     {
+      "hostname": "spirit.iridescently.cn",
+      "node": "hk",
+      "application_host": "spirit.iridescently.cn",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "spirit.iridescently.dpdns.org",
+      "node": "hk",
+      "application_host": "spirit.iridescently.dpdns.org",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
       "hostname": "spirit.iridescently.xyz",
       "node": "hk",
       "application_host": "spirit.iridescently.xyz",
@@ -216,11 +343,47 @@
       "service": "http://127.0.0.1:8080"
     },
     {
+      "hostname": "www.iridescently.cn",
+      "node": "hk",
+      "application_host": "www.iridescently.cn",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "www.iridescently.dpdns.org",
+      "node": "hk",
+      "application_host": "www.iridescently.dpdns.org",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
       "hostname": "www.iridescently.xyz",
       "node": "hk",
       "application_host": "www.iridescently.xyz",
       "registered": true,
       "dns_target": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7.cfargotunnel.com",
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "zszm.iridescently.cn",
+      "node": "hk",
+      "application_host": "zszm.iridescently.cn",
+      "registered": true,
+      "dns_target": null,
+      "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "zszm.iridescently.dpdns.org",
+      "node": "hk",
+      "application_host": "zszm.iridescently.dpdns.org",
+      "registered": true,
+      "dns_target": null,
       "tunnel_id": "6c9eb0eb-26d7-451c-9dbd-878e7c14f4a7",
       "service": "http://127.0.0.1:8080"
     },

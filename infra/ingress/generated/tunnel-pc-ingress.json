@@ -1,42 +1,6 @@
 {
   "ingress": [
     {
-      "hostname": "pc-game.iridescently.xyz",
-      "service": "http://127.0.0.1:18190"
-    },
-    {
-      "hostname": "pc-huiguan.iridescently.xyz",
-      "service": "http://127.0.0.1:18190"
-    },
-    {
-      "hostname": "pc-juling.iridescently.xyz",
-      "service": "http://127.0.0.1:18190"
-    },
-    {
-      "hostname": "pc-lingjing.iridescently.xyz",
-      "service": "http://127.0.0.1:18190"
-    },
-    {
-      "hostname": "pc-oc.iridescently.xyz",
-      "service": "http://127.0.0.1:18190"
-    },
-    {
-      "hostname": "pc-spirit.iridescently.xyz",
-      "service": "http://127.0.0.1:18190"
-    },
-    {
-      "hostname": "pc-www.iridescently.xyz",
-      "service": "http://127.0.0.1:18190"
-    },
-    {
-      "hostname": "pc-zszm.iridescently.xyz",
-      "service": "http://127.0.0.1:18190"
-    },
-    {
-      "hostname": "pc.iridescently.xyz",
-      "service": "http://127.0.0.1:18190"
-    },
-    {
       "service": "http_status:404"
     }
   ]
