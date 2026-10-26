@@ -12,7 +12,6 @@
 """
 import http.client
 import http.server
-import ipaddress
 import importlib.util
 import os
 import re
@@ -27,11 +26,6 @@ from pathlib import Path
 PORT = int(os.environ.get("PORT", "8080"))
 HOST = "127.0.0.1"
 ENVIRONMENT = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip().lower()
-PRODUCTION_HOSTS = frozenset({
-    "iridescently.xyz", "www.iridescently.xyz", "huiguan.iridescently.xyz",
-    "oc.iridescently.xyz", "spirit.iridescently.xyz", "zszm.iridescently.xyz",
-    "game.iridescently.xyz", "juling.iridescently.xyz", "lingjing.iridescently.xyz",
-})
 CODE_ROOT = Path(__file__).resolve().parents[1]
 ROOT = Path(os.environ.get("IRIDESCENTLY_PROJECT_ROOT", CODE_ROOT)).resolve()
 
@@ -46,6 +40,7 @@ def _load(name, path):
 
 sys.path.insert(0, str(CODE_ROOT / "server"))
 from base_static import BaseStaticHandler  # noqa: E402
+from host_policy import FORWARDING_HEADERS, PRODUCTION_HOSTS, enforce_request, normalize_host  # noqa: E402
 
 www = _load("portal_www", CODE_ROOT / "portal" / "www" / "server.py")
 oc = _load("portal_oc", CODE_ROOT / "portal" / "oc" / "server.py")
@@ -56,7 +51,8 @@ MODULES_DIR = ROOT / "server" / "app" / "modules"
 # Unhashed JS/CSS under modules/: 0 = always revalidate (default). Rollback to the old 4-hour cache:
 # set IRIDESCENTLY_MODULE_CODE_MAX_AGE=14400 and restart portal (see server/app/README.md).
 MODULE_CODE_MAX_AGE = max(0, int(os.environ.get("IRIDESCENTLY_MODULE_CODE_MAX_AGE", "0") or 0))
-PROXY_PORTS = {"cards": 5174, "card-balance": 5178, "softie": 4173, "juling": 5177}
+PROXY_PORTS = {"cards": 5174, "card-balance": 5178, "softie": 4173, "juling": 5177,# 灵境会馆内嵌聚灵页面，相对路径 api/action 会解析到 management，交给 juling 处理
+               "management": 5177}
 
 API_RE = re.compile(r"^/app/modules/([^/]+)/api/")
 
@@ -109,9 +105,9 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
             return
         body = self.rfile.read(length) if length else None
         headers = {k: v for k, v in self.headers.items()
-                   if k.lower() not in ("host", "connection", "content-length", "x-forwarded-host", "x-forwarded-proto")}
+                   if k.lower() not in ("host", "connection", "content-length") and k.lower() not in FORWARDING_HEADERS}
         # Replace, never forward client-supplied proxy identity headers.
-        headers["X-Forwarded-Host"] = self.headers.get("Host", "")
+        headers["X-Forwarded-Host"] = normalize_host(self.headers.get("Host", "")) or ""
         headers["X-Forwarded-Proto"] = "https" if self.headers.get("X-Forwarded-Proto") == "https" else "http"
         if body is not None:
             headers["Content-Length"] = str(len(body))
@@ -121,7 +117,9 @@ class ProxyHandler(http.server.BaseHTTPRequestHandler):
             conn.request(method, path, body=body, headers=headers)
             resp = conn.getresponse()
             data = resp.read()
-        except OSError as e:
+        except (OSError, http.client.HTTPException) as e:
+            # HTTPException：上游返回畸形响应（BadStatusLine 等）时抛出，
+            # 不捕获会击穿 BaseHTTPRequestHandler 直接炸掉处理线程。
             self.send_error(502, "upstream unavailable: %s" % e)
             return
         finally:
@@ -157,9 +155,9 @@ class WebSocketProxyHandler(ProxyHandler):
         try:
             upstream = socket.create_connection(("127.0.0.1", self.upstream_port), timeout=5)
             headers = {k: v for k, v in self.headers.items()
-                       if k.lower() not in ("host", "x-forwarded-host", "x-forwarded-proto")}
+                       if k.lower() != "host" and k.lower() not in FORWARDING_HEADERS}
             headers["Host"] = f"127.0.0.1:{self.upstream_port}"
-            headers["X-Forwarded-Host"] = self.headers.get("Host", "")
+            headers["X-Forwarded-Host"] = normalize_host(self.headers.get("Host", "")) or ""
             headers["X-Forwarded-Proto"] = "https" if self.headers.get("X-Forwarded-Proto") == "https" else "http"
             path = self.path[len(self.strip):] if self.strip and self.path.startswith(self.strip + "/") else self.path
             head = f"GET {path} HTTP/1.1\r\n" + "".join(f"{k}: {v}\r\n" for k, v in headers.items()) + "\r\n"
@@ -282,9 +280,6 @@ def route(host, path):
         return StaticHandler, {"root": str(APP_DIR), "strip": "/app"}
     if p == "/app/modules" or p.startswith("/app/modules/"):
         return StaticHandler, {"root": str(MODULES_DIR), "strip": "/app/modules"}
-    # Embedded modules and shared resources must win before the Cards SPA fallback.
-    if p.startswith("/shared/"):
-        return StaticHandler, {"root": str(CODE_ROOT / "shared"), "strip": "/shared"}
     # The shooter lives in the main site's static tree, not the Cards SPA.
     if p == "/playtest/shengsheng-shoot" or p.startswith("/playtest/shengsheng-shoot/"):
         return www.Handler, {}
@@ -327,19 +322,9 @@ class Dispatcher(www.Handler):
         ok = super().parse_request()
         if not ok:
             return ok
-        host = (self.headers.get("Host") or "").split(":", 1)[0].lower()
-        peer_is_loopback = False
-        try:
-            peer_is_loopback = ipaddress.ip_address(self.client_address[0]).is_loopback
-        except ValueError:
-            pass
-        trusted_https = peer_is_loopback and self.headers.get("X-Forwarded-Proto", "").strip().lower() == "https"
-        if ENVIRONMENT != "development" and host in PRODUCTION_HOSTS and not trusted_https:
-            target_url = "https://" + host + (self.path if (self.path or "").startswith("/") else "/")
-            self.__class__ = RedirectHandler
-            self.redirect_to = target_url
-            return ok
-
+        if not enforce_request(self, PRODUCTION_HOSTS, ENVIRONMENT == "development"):
+            return False
+        host = normalize_host(self.headers.get("Host", "")) or ""
         target, cfg = route(host, self.path or "")
         if target is not type(self):
             self.__class__ = target
