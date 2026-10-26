@@ -52,6 +52,50 @@ class API(unittest.TestCase):
         body = sheet(code, '角色'+code, '原始内容'); body.update(version=version, **extra)
         return client.call('/api/save-character', body)
 
+    def test_duplicate_public_code_keeps_first_owner_in_sql_mode(self):
+        code = 'review-shared-sql'
+        self.assertEqual(self.save(self.a, code, html='<html><head></head><body>FIRST OWNER</body></html>')[0], 200)
+        self.assertEqual(self.save(self.b, code, html='<html><head></head><body>SECOND OWNER</body></html>')[0], 200)
+        with urllib.request.urlopen(self.base + '/api/get-character?code=' + code) as response:
+            content = response.read().decode()
+            self.assertIn('FIRST OWNER', content)
+            self.assertNotIn('SECOND OWNER', content)
+
+    def test_duplicate_public_code_keeps_json_owner_order(self):
+        from unittest.mock import patch
+        file = Path(app.DATA_FILE)
+        previous = file.read_bytes() if file.exists() else None
+        try:
+            # Deliberately reverse lexical UID order; legacy resolution follows file order.
+            atomic_json(file, {'local:2':[{'code':'review-shared-json','data':{},'html':'<html>FIRST IN JSON</html>'}],
+                               'local:1':[{'code':'review-shared-json','data':{},'html':'<html>SECOND IN JSON</html>'}]})
+            atomic_json(Path(app.RUNTIME_DIR)/'characters-storage-state.json', {'schema':1,'backend':'json'})
+            with patch.dict(os.environ, {'IRIDESCENTLY_OC_BACKEND':'json'}):
+                with urllib.request.urlopen(self.base + '/api/get-character?code=review-shared-json') as response:
+                    self.assertIn('FIRST IN JSON', response.read().decode())
+        finally:
+            atomic_json(Path(app.RUNTIME_DIR)/'characters-storage-state.json', {'schema':1,'backend':'sqlite'})
+            if previous is None: file.unlink(missing_ok=True)
+            else: file.write_bytes(previous)
+
+    def test_admin_delete_uses_listed_revision_and_rejects_stale_delete(self):
+        admin = Client(self.base)
+        self.assertEqual(admin.call('/api/register', {'username':'review_admin','password':'test-only-password-123','nickname':'review_admin'})[0],200)
+        with closing(open_database(app.USER_DB)) as db:
+            db.execute("UPDATE local_users SET role='admin' WHERE username='review_admin'"); db.commit()
+        self.assertEqual(self.save(self.a,'review-admin-delete')[0],200)
+        status, listing = admin.call('/api/admin/characters')
+        self.assertEqual(status,200)
+        entry = next(row for row in listing['characters'] if row['code']=='review-admin-delete')
+        self.assertEqual(entry['version'],1)
+        self.assertEqual(self.save(self.a,'review-admin-delete',1)[0],200)
+        payload={'key':entry['owner'],'code':entry['code'],'version':entry['version']}
+        self.assertEqual(admin.call('/api/admin/delete-character',payload)[0],409)
+        self.assertEqual(self.a.call('/api/oc?code=review-admin-delete')[1]['character']['_oc_version'],2)
+        payload['version']=2
+        self.assertEqual(admin.call('/api/admin/delete-character',payload)[0],200)
+        self.assertEqual(self.a.call('/api/oc?code=review-admin-delete')[0],404)
+
     def test_a_points_failure_rolls_back_new_record_too(self):
         with closing(open_database(app.USER_DB)) as db:
             db.execute("CREATE TRIGGER fail_oc_points BEFORE INSERT ON account_point_events WHEN NEW.ref='sheet:points-failure' BEGIN SELECT RAISE(ABORT,'synthetic'); END");db.commit()

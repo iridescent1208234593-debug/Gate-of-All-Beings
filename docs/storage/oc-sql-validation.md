@@ -2,7 +2,7 @@
 
 状态 DEVELOPMENT COMPLETE。未执行生产数据迁移、未删除原始 JSON、未部署。源码基线 master 387c19d5a84a3da6fa224b490b49172028abf7a0。
 
-## 实际运行
+## 首轮实际运行（修复评审遗漏前）
 
 `python3 tools/checks/oc-storage-regression.py --report <报告路径>`
 
@@ -71,3 +71,25 @@
 ## 推荐合并审阅
 
 先审 SQL 模型、owner/code 语义、公开 HTML 契约、前端版本请求、切换/回滚与现有失更新修复分支的重叠。fix/characters-json-lost-update 未合并/改写；SQL 改造已提供 JSON 围栏适配，不能在整合时把旧的整份 JSON 写回路径重新带回来。生产切换需要另行人工批准。
+
+## 2026-10-26 评审修复复验
+
+佳霖指出的三个问题均已用代码和新增测试确认。首轮 99 项通过不代表覆盖了这些场景：公开同编号兼容性、member 页面删除请求以及环境变量缺省值均有测试遗漏。
+
+| 问题 | 修复与验证 |
+| --- | --- |
+| 不同 owner 使用相同公开编号时返回 409，包括默认 JSON 模式 | 恢复旧版首个可展示记录的选择行为。JSON 保留文件中的 owner 顺序；SQL 显式按迁移保留的 owner/记录顺序查询。新增 JSON、SQL 真实 HTTP 展示页回归；修改前两项均收到 409，修改后通过。私有资料仍检查 owner。 |
+| member.html 后台删除没有传 revision | 从后台列表记录绑定并发送对应 version；遇到 409/428 刷新列表并要求重新确认，绝不先获取最新版本自动重试删除。成功后同样清除列表缓存。新增实际页面函数的 Node 测试以及后台列表→编辑→旧版本删除拒绝→重新确认删除的 HTTP 测试。修复前 Node 测试确认缺少 version。 |
+| 未设置环境变量时绕过 SQLite WAL 引擎门槛 | 只有明确的 development/test 可以豁免；缺省、空白、未知值、staging、production 均检查引擎版本。新增缺省等场景回归，修复前其中四个子场景失败；测试夹具显式声明 test，修复后通过。 |
+
+复验命令仍为 `python3 tools/checks/oc-storage-regression.py --report <报告路径>`。本次 **19 组全部通过，105 项可计数测试通过**，静态安全脚本另以退出码验证。全部使用临时合成数据。容量样本仍为 5000 owner / 10000 OC / 4 进程 / 200 次更新，本次 0.194 秒、p95 4.27 ms；这不是生产吞吐量承诺。本次未进行真实移动端后台页面点击验证；Node 测试直接执行页面的删除函数并检查按钮传参，HTTP 测试执行后端实际接口。
+
+本轮修改位于独立 `fix/oc-sql-review` 分支，基于远程 `feat/oc-sql-storage` 的 f2caa3b36f78a50a5c35a4005cc6827b84907134；不覆盖原 SQL 分支。开发环境修复完成，生产仍以原 JSON 为事实源。没有执行生产迁移或部署。
+
+### PR #10 与后续整合
+
+检查时 PR #10 仍为 open、merged=false，head 为 cd8e9f351a0c4e58cfa8d807a62807ef9d5e579b；master 为 387c19d5a84a3da6fa224b490b49172028abf7a0。本轮没有合并 PR、变基、强制推送或改写其他分支。
+
+建议先由负责人完成 PR #10 的评审与合并，再读取新的主线 SHA，将 SQL 改造和本轮修复整合到新开发分支，或在获得对共享分支变基的明确授权后变基。重点处理 server_huiguan.py、migrate_characters.py、storage-runtime-writers.md 的重叠，并保留主线新的仓库约束和恢复文档。不得为了消除冲突恢复 Store 之外的整份 JSON 写回路径。整合后重跑 PR #10 的 JSON 并发回归、OC SQL 回归和全库 merge-gate；本轮测试不代表已经验证 PR #10 与 SQL 的组合。
+
+文件围栏只约束认识它的新进程。生产冻结时必须真正停止所有旧服务、脚本和计划任务写入者；`--confirm-stopped` 是操作员声明，不会检测或阻止旧进程。停写、备份、迁移、切换和恢复仍按操作手册由负责人分别确认。

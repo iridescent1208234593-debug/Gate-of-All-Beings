@@ -2,6 +2,8 @@
 from concurrent.futures import ProcessPoolExecutor
 from contextlib import closing
 import json
+import os
+from unittest.mock import patch
 from pathlib import Path
 import sqlite3
 import sys
@@ -24,7 +26,7 @@ def save_one(args):
 
 class Load(unittest.TestCase):
     def test_5000_owners_and_200_parallel_independent_updates(self):
-        with tempfile.TemporaryDirectory(prefix='oc-load-test-') as directory:
+        with patch.dict(os.environ,{'IRIDESCENTLY_ENVIRONMENT':'test'}), tempfile.TemporaryDirectory(prefix='oc-load-test-') as directory:
             root=Path(directory);payload=canonical({'code':'a','data':{'name':'synthetic','nested':{'text':'x'*8192}}})
             with closing(sqlite3.connect(root/'users.db')) as db:
                 db.execute('PRAGMA journal_mode=WAL');initialize_schema(db)

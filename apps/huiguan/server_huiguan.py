@@ -2323,8 +2323,6 @@ class Handler(BaseStaticHandler):
             return
         matches = character_store().public_records(code)
         data = {"public": matches}
-        if len(matches) > 1:
-            self._json(409, {"error": "ambiguous_public_oc_code"}); return
         for uid, chars in data.items():
             for c in chars:
                 if c.get("code") == code:

@@ -34,7 +34,7 @@
 
 本次本机运行 Python 3.13.15 / SQLite 3.50.4。官方确认 3.7.0–3.51.2 有罕见 WAL-reset 损坏风险，修复版本为 3.51.3+，另有 3.50.7 与 3.44.6 回补。本次功能和并发测试通过不能证明旧引擎没有该问题。
 
-`require_safe_wal()` 对 production/staging 的 SQL WAL 连接及 activate-sql 加门槛：未修复引擎返回 `oc_sqlite_wal_patch_required`，不继续 SQL 操作。开发/test 可运行回归；生产还必须核对实际发行版、Windows 兼容策略和所有同库服务的引擎版本，完成恢复演练。这不是自动升级任何机器。
+`require_safe_wal()` 对 SQL WAL 连接及 activate-sql 加门槛：仅明确设置 development/test 才允许开发测试豁免，未设置、空值、未知环境和 production/staging 都按严格门槛检查；未修复引擎返回 `oc_sqlite_wal_patch_required`，不继续 SQL 操作。开发/test 可运行回归；生产还必须核对实际发行版、Windows 兼容策略和所有同库服务的引擎版本，完成恢复演练。这不是自动升级任何机器。
 
 ## 模型和接口
 
@@ -56,10 +56,11 @@
 - 新增 `GET /api/oc?code=…` 或 `?id=…` 获取本人完整记录；`POST /api/delete-character` 删除本人记录。
 - SQL 读取附加 `_oc_id` 与 `_oc_version`，两者是传输元数据，不写入原 OC JSON。单条更新/删除提交 `version`，过期返回 409，漏传更新版本返回 428；创建可传 0。
 - 批量保存提交完整 `versions: {code: revision}` 快照。它必须与服务器当前名册完全一致，防止旧列表删除别人刚在另一个页面新建的 OC。整批修改、删除、投影同步是同一事务。
+- 后台 member.html 删除提交人设列表返回的 version；409/428 时刷新列表并要求重新确认，不自动改用新版本删除。
 - 海报绑定提交 `character_version`；海报 INSERT、OC 配色更新、公开投影刷新一起提交或回滚。
 - 登记积分使用现有 award_sheet 规则；只新增 SAVEPOINT 支持，让它参加外层 OC 事务，不改其他游戏积分数值。
 - Cards `_owned_ocs` 不再直接打开 JSON，同样使用 Store；OC 候选及 Gate 导入归属检查继续识别原 owner-local code。
-- 原 `/api/get-character?code=…` 是公开生成展示页接口，继续只返回既有公开 HTML，不提供私有 OC JSON。同编号跨 owner 的公开展示存在歧义时返回 409，不再任意返回第一位 owner 的页面。
+- 原 `/api/get-character?code=…` 是公开生成展示页接口，继续只返回既有公开 HTML，不提供私有 OC JSON。同编号跨 owner 时继续按原 owner 顺序返回第一份可读取的展示页；SQL 查询显式按保留的 owner 顺序排序。私有人设 JSON 仍严格按 owner 隔离。
 - 旧缓存页面在 JSON 模式继续运行；SQL 模式的旧客户端缺少版本时会被拒绝，绝不通过服务器补读最新版本后静默覆盖。部署前必须同时交付本次版本感知的 HTML/JS 并要求重新加载。
 
 SQL 下 OC、公开投影、海报与积分的数据库写入使用同一事务。上传和内容寻址 HTML 在事务前准备；失败可能保留未引用的资产文件，但不会删除共用资产或留下半条 OC。未引入后台双写。

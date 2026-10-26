@@ -51,8 +51,10 @@ def main():
     entry['synthetic_capacity']=json.loads(result.stdout.strip().splitlines()[-1])
    results.append(entry)
  node=shutil.which('node')
- result=subprocess.run([node,str(ROOT/'apps/huiguan/tests/oc-revisions.cjs')],capture_output=True,text=True) if node else None
- results.append({'module':'apps/huiguan/tests/oc-revisions.cjs','passed':bool(result and result.returncode==0),'tests':1,'seconds':0})
+ for relative in ('apps/huiguan/tests/oc-revisions.cjs','apps/huiguan/tests/oc-member-delete.cjs'):
+  result=subprocess.run([node,str(ROOT/relative)],capture_output=True,text=True) if node else None
+  if result and result.returncode: print(result.stdout+result.stderr,flush=True)
+  results.append({'module':relative,'passed':bool(result and result.returncode==0),'tests':1,'seconds':0})
  report={'passed':all(x['passed'] for x in results),'checks':results,'tests':sum(x['tests'] or 0 for x in results)}
  if args.report:
   args.report.parent.mkdir(parents=True,exist_ok=True);args.report.write_text(json.dumps(report,indent=2))

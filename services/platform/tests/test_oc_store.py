@@ -32,6 +32,9 @@ def process_save(args):
 
 class StoreTest(unittest.TestCase):
     def setUp(self):
+        from unittest.mock import patch
+        environment = patch.dict(os.environ, {"IRIDESCENTLY_ENVIRONMENT":"test"})
+        environment.start(); self.addCleanup(environment.stop)
         self.temp = tempfile.TemporaryDirectory(); self.root = Path(self.temp.name)
         self.path = self.root / "users.db"
         with closing(sqlite3.connect(self.path)) as db:
@@ -208,6 +211,21 @@ class StoreTest(unittest.TestCase):
         with patch.dict(os.environ, {'IRIDESCENTLY_ENVIRONMENT':'production'}), patch.object(sqlite3,'sqlite_version_info',(3,50,4)):
             with self.assertRaises(OCError) as error: self.store.list(A)
             self.assertEqual(error.exception.code,'oc_sqlite_wal_patch_required')
+
+    def test_unset_blank_or_unknown_environment_cannot_bypass_wal_guard(self):
+        from unittest.mock import patch
+        for mode in (None, '', ' ', 'unknown', 'staging', 'production'):
+            with self.subTest(mode=mode), patch.dict(os.environ), patch.object(sqlite3,'sqlite_version_info',(3,50,4)):
+                if mode is None: os.environ.pop('IRIDESCENTLY_ENVIRONMENT',None)
+                else: os.environ['IRIDESCENTLY_ENVIRONMENT']=mode
+                with self.assertRaises(OCError) as error: self.store.list(A)
+                self.assertEqual(error.exception.code,'oc_sqlite_wal_patch_required')
+
+    def test_wal_guard_exempts_only_explicit_development_and_test(self):
+        from unittest.mock import patch
+        for mode in ('development','test'):
+            with self.subTest(mode=mode), patch.dict(os.environ,{'IRIDESCENTLY_ENVIRONMENT':mode}), patch.object(sqlite3,'sqlite_version_info',(3,50,4)):
+                self.assertEqual(self.store.list(A),[])
 
 
 if __name__ == '__main__': unittest.main()
