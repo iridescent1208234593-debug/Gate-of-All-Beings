@@ -59,3 +59,9 @@
 | 聚灵存档 | `apps/juling/data/save.db` | 读写 |
 | 软乎乎设置 | `spirit-settings.json`（preview 目录） | 读写 |
 | 统一存档 | `localStorage['iridescently.save.v1']` | 读写 |
+
+## OC SQL 数据层 2026-10-26
+
+OC 已有可选的统一 SQLite 实现：`services/platform/oc_store.py`，复用环境内 `data/huiguan/users.db` 的 `oc_*` 表。默认配置仍为 JSON；生产切换以前 `characters.json` 继续是事实源。SQL 保存使用 owner 隔离与 record revision，不与 JSON 双写。Cards 的 OC 候选也通过同一个后端数据层读取。
+
+数据库比较、schema、HTTP 兼容及开发测试见 [OC SQL 存储](storage/oc-sql-storage.md)，人工备份、冻结、迁移、验证与回滚对账见 [迁移手册](storage/oc-sql-runbook.md)。生产/staging WAL 必须使用已包含官方 WAL-reset 修复的 SQLite；本次未执行生产切换。

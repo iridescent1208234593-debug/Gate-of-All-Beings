@@ -1711,6 +1711,7 @@ async function savePoster() {
   const imagePromise = HuiguanImages.canvasBlob(renderPosterCanvas());
   const body = {
     title,
+    character_version: (MY_CHARS.find(item => item.code === code) || {})._oc_version,
     char_code: code, char_name: cd ? (cd.name || '') : '',
     primary_name: (picked.primary && picked.primary.hex.toUpperCase() === colorA().toUpperCase()) ? (picked.primary.name || '') : '',
     accent_name: (picked.accent && picked.accent.hex.toUpperCase() === colorB().toUpperCase()) ? (picked.accent.name || '') : '',
@@ -1724,6 +1725,7 @@ async function savePoster() {
     msgEl.textContent = '✔ 已保存到云端（本地草稿也已保留）';
     if (state.charImg && layers.charImg.dataUrl === sourceImage) layers.charImg.dataUrl = state.charImg;
     queueDraftSave();
+    if (d.character && rec) rec._oc_version = d.character._oc_version;
     // The save endpoint confirms both the poster and its character's source colors.
     if (cd && code) {
       cd.colorPrimary = body.primary_color; cd.colorAccent = body.accent_color; cd.colorIndex = -1;

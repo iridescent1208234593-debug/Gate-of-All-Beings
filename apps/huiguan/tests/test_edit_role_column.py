@@ -23,7 +23,7 @@ class EditRoleColumnTest(unittest.TestCase):
                 env.pop(f"IRIDESCENTLY_{key}_ROOT", None)
             out = subprocess.run([sys.executable, "-c", INIT_TWICE, str(HERE)], env=env, capture_output=True, text=True, check=True)
             db_path = out.stdout.strip().splitlines()[-1]
-            self.assertTrue(db_path.startswith(root), db_path)
+            self.assertTrue(Path(db_path).resolve().is_relative_to(Path(root).resolve()), db_path)
             conn = sqlite3.connect(db_path)
             try:
                 for table in ("local_users", "user_flags"):

@@ -389,14 +389,16 @@ def award_sheet(conn, kind, uid, name, code, custom_color=False, now=None):
     """Points for registering a new character sheet in 会馆; edits of an existing code pay nothing."""
     kind, uid = _owner(kind, uid)
     day, awarded = today(now), []
-    conn.execute("BEGIN IMMEDIATE")
+    nested = conn.in_transaction
+    conn.execute("SAVEPOINT oc_sheet_award" if nested else "BEGIN IMMEDIATE")
     try:
         _award(conn, kind, uid, day, "sheet", "", "sheet:" + str(code), name, awarded)
         if custom_color and awarded:
             _award(conn, kind, uid, day, "sheet-color", "", "sheet:" + str(code), name, awarded)
-        conn.execute("COMMIT")
+        conn.execute("RELEASE oc_sheet_award" if nested else "COMMIT")
     except Exception:
-        conn.execute("ROLLBACK")
+        conn.execute("ROLLBACK TO oc_sheet_award" if nested else "ROLLBACK")
+        if nested: conn.execute("RELEASE oc_sheet_award")
         raise
     return awarded
 

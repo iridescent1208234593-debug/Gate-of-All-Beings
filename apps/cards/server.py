@@ -26,6 +26,8 @@ from base_static import BaseStaticHandler
 from site_domains import oauth_callback
 from storage_paths import project_root as resolve_project_root, data_root, cards_data_dir, huiguan_data_dir, require_ready
 import hx_sso
+import oc_store
+from functools import wraps
 from account_profile import open_db as open_profile_db, get_profile, resolve_sso_identity, set_gate_identity, set_gate_identities, valid_asset_url, asset_public_url, store_avatar_image as normalize_avatar_image, store_source_image
 
 PROJECT_ROOT = str(resolve_project_root())
@@ -46,7 +48,13 @@ PORT = int(os.environ.get("PORT", "5174"))
 
 USER_DB = str(cards_data_dir(DATA_ROOT) / "users.db")
 UPDATE_FEEDBACK_DB = str(cards_data_dir(DATA_ROOT) / "update-feedback.sqlite3")
-HUIGUAN_CHARACTERS = str(huiguan_data_dir(DATA_ROOT) / "characters.json")
+def _oc_api(function):
+    @wraps(function)
+    def guarded(self, *args, **kwargs):
+        try: return function(self, *args, **kwargs)
+        except oc_store.OCError as error: return self._json_resp(error.status, {"error": error.code})
+    return guarded
+
 
 def init_user_db():
     require_ready()
@@ -183,14 +191,12 @@ def _shared_user(handler):
 
 
 def _owned_ocs(user):
-    try:
-        with open(HUIGUAN_CHARACTERS, "r", encoding="utf-8") as source:
-            data = json.load(source)
-    except (OSError, ValueError):
-        return []
-    key = f"local:{user['uid']}" if user["kind"] == "local" else user["uid"]
+    directory = huiguan_data_dir(DATA_ROOT)
+    store = oc_store.Store(directory, lambda: oc_store.open_database(directory / "users.db"),
+                           os.environ.get("IRIDESCENTLY_OC_BACKEND", "json"))
+    records = store.list(user)
     result = []
-    for record in data.get(key, [])[:100]:
+    for record in records[:100]:
         card = record.get("data") if isinstance(record, dict) else None
         if not isinstance(card, dict):
             continue
@@ -286,6 +292,7 @@ class OAuthHandler(BaseStaticHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=os.path.dirname(os.path.abspath(__file__)), **kwargs)
 
+    @_oc_api
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
@@ -441,6 +448,7 @@ class OAuthHandler(BaseStaticHandler):
         else:
             return super().do_GET()
 
+    @_oc_api
     def do_POST(self):
         path = urllib.parse.urlparse(self.path).path
         if path == "/api/update-feedback":

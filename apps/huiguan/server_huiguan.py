@@ -36,6 +36,8 @@ from http.cookies import SimpleCookie
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "services", "platform"))
 import hx_sso
+import oc_store
+from functools import wraps
 from site_domains import (SITE_DOMAIN, PRODUCTION_HOSTS, cookie_domain, request_host, request_root,
                           request_origin_allowed, cors_headers, oauth_callback, site_url, OAuthUnavailable)
 from site_admin import is_site_owner
@@ -88,7 +90,6 @@ COOKIE_SECURE = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip()
 
 # 角色卡保存
 DATA_FILE = os.path.join(RUNTIME_DIR, "characters.json")
-DATA_LOCK = threading.Lock()
 
 # 云存档：users.db 的 game_saves 表，按 (kind, uid, scope) 隔离，见 services/platform/game_saves.py。
 # 旧 game_saves.json（裸 uid）只在启动时按内容哈希导入一次，不再写入，保留作回滚来源。
@@ -304,9 +305,13 @@ def db():
 
 
 def init_user_db():
+    if (os.environ.get("IRIDESCENTLY_OC_BACKEND", "json") == "sqlite"
+            or oc_store.state(RUNTIME_DIR)["backend"] == "sqlite") and not Path(USER_DB).is_file():
+        raise RuntimeError("active SQL OC database is missing; restore verified storage")
     os.makedirs(RUNTIME_DIR, exist_ok=True)
     with DB_LOCK:
         conn = db()
+        oc_store.initialize_schema(conn)
         # journal_mode 是持久属性，这里只设置一次（启动期，有 DB_LOCK 保护）。
         # 注意：本机 Windows 的 SQLite 构建（3.53.1）WAL 并发写有缺陷（-shm 映射
         # 竞态导致 "attempt to write a readonly database"，见 services/platform/gallery_interactions.py
@@ -871,22 +876,26 @@ def sync_fan_characters(conn, ident, code, cd, previous_code=None):
         [fields[col] for col in FAN_SYNC_COLUMNS] + [code, now_iso(), ident["kind"], ident["uid"]] + codes)
     return cur.rowcount
 
+def character_store():
+    return oc_store.Store(Path(DATA_FILE).parent, lambda: oc_store.open_database(USER_DB),
+                          os.environ.get("IRIDESCENTLY_OC_BACKEND", "json"))
+
+
 def load_data():
-    if not os.path.exists(DATA_FILE):
-        return {}
-    with DATA_LOCK:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+    """Compatibility read projection for admin/showcase/export consumers; never a write API."""
+    return character_store().snapshot()
 
 
-def save_data(data_dict):
-    with DATA_LOCK:
-        temporary = DATA_FILE + ".tmp"
-        with open(temporary, "w", encoding="utf-8") as f:
-            json.dump(data_dict, f, ensure_ascii=False, indent=2)
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(temporary, DATA_FILE)
+def oc_api(function):
+    @wraps(function)
+    def guarded(self, *args, **kwargs):
+        try:
+            return function(self, *args, **kwargs)
+        except oc_store.OCError as error:
+            self._json(error.status, {"error": error.code})
+        except sqlite3.Error:
+            self._json(503, {"error": "oc_database_unavailable"})
+    return guarded
 
 
 # ---------- 外置存储（展示页 HTML / 上传图），给 characters.json 瘦身 ----------
@@ -1019,39 +1028,11 @@ def get_record_html(rec):
     return ""
 
 
-# 管理用人设表投影缓存（mtime+size 失效），避免每次请求重读大 JSON
-ADMIN_CHARS_CACHE = {"mtime": None, "size": None, "out": None}
-ADMIN_CHARS_LOCK = threading.Lock()
-
+# Admin projection is read from the active repository, never JSON mtime.
 def get_admin_characters():
-    try:
-        st = os.stat(DATA_FILE)
-        mtime, size = st.st_mtime, st.st_size
-    except OSError:
-        return []
-    with ADMIN_CHARS_LOCK:
-        if (ADMIN_CHARS_CACHE["mtime"] == mtime and ADMIN_CHARS_CACHE["size"] == size
-                and ADMIN_CHARS_CACHE["out"] is not None):
-            return ADMIN_CHARS_CACHE["out"]
-    data = load_data()
-    out = []
-    for key, chars in data.items():
-        for c in chars:
-            d = c.get("data") or {}
-            code = c.get("code", "")
-            out.append({
-                "owner": key,
-                "code": code,
-                "name": d.get("name", "") or code,
-                "species": d.get("species_type", ""),
-                "has_show": bool(c.get("html") or c.get("html_ref")),
-                "url": f"/show.html?code={urllib.parse.quote(code)}",
-            })
-    with ADMIN_CHARS_LOCK:
-        ADMIN_CHARS_CACHE["mtime"] = mtime
-        ADMIN_CHARS_CACHE["size"] = size
-        ADMIN_CHARS_CACHE["out"] = out
-    return out
+    rows = character_store().admin_rows()
+    for row in rows: row["url"] = "/show.html?code=" + urllib.parse.quote(row["code"])
+    return rows
 
 
 OAUTH_STATES = {}
@@ -1490,6 +1471,8 @@ class Handler(BaseStaticHandler):
             return self._api_callback(qs)
         if path == "/api/user":
             return self._api_user()
+        if path == "/api/oc":
+            return self._api_owned_character(qs)
         if path == "/api/user/ocs":
             return self._api_user_ocs()
         if path == "/api/account/email":
@@ -1605,6 +1588,8 @@ class Handler(BaseStaticHandler):
             return self._api_auth()
         if path == "/api/register":
             return self._api_register()
+        if path == "/api/delete-character":
+            return self._api_delete_character()
         if path == "/api/save-character":
             return self._api_save_character()
         if path == "/api/save-all-characters":
@@ -2291,18 +2276,19 @@ class Handler(BaseStaticHandler):
     def _data_key(ident):
         return f"local:{ident['uid']}" if ident["kind"] == "local" else ident["uid"]
 
+    @oc_api
     def _api_get_characters(self):
         ident = self._require_ident()
         if not ident:
             return
-        data = load_data()
-        self._json(200, {"characters": data.get(self._data_key(ident), [])})
+        self._json(200, {"characters": character_store().list(ident), "storage_backend": character_store().backend})
 
+    @oc_api
     def _api_user_ocs(self):
         ident = self._require_ident()
         if not ident:
             return
-        characters = load_data().get(self._data_key(ident), [])
+        characters = character_store().list(ident)
         result = []
         for record in characters[:100]:
             data = record.get("data") if isinstance(record, dict) else None
@@ -2324,16 +2310,21 @@ class Handler(BaseStaticHandler):
                 "species_type": str(data.get("species_type") or "")[:40],
                 "species_detail": str(data.get("species_detail") or "")[:100],
                 "avatar_asset_id": str(data.get("avatar_asset_id") or ""),
+                "version": record.get("_oc_version"),
                 "images": candidates,
             })
         self._json(200, {"ocs": result})
 
+    @oc_api
     def _api_get_character(self, qs):
         code = qs.get("code", [None])[0]
         if not code:
             self._json(400, {"error": "缺少 code 参数"})
             return
-        data = load_data()
+        matches = character_store().public_records(code)
+        data = {"public": matches}
+        if len(matches) > 1:
+            self._json(409, {"error": "ambiguous_public_oc_code"}); return
         for uid, chars in data.items():
             for c in chars:
                 if c.get("code") == code:
@@ -2384,6 +2375,7 @@ class Handler(BaseStaticHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    @oc_api
     def _api_sso_role_theme(self, qs):
         """跨站 SSO 角色配色：供 psy 题库站用 hx_sso token 换取该用户
         「第一次填的角色」（createdAt 最早）的配色数据。
@@ -2402,8 +2394,7 @@ class Handler(BaseStaticHandler):
             self._json(401, {"error": "token 缺少 uid"})
             return
         ident = {"kind": payload.get("kind") or "local", "uid": uid}
-        data = load_data()
-        chars = data.get(self._data_key(ident), [])
+        chars = character_store().list(ident)
         if not chars:
             self._json(200, {"ok": True, "role": None})
             return
@@ -2448,6 +2439,7 @@ class Handler(BaseStaticHandler):
             "colorAccent": best.get("colorAccent") or "",
         }})
 
+    @oc_api
     def _api_save_character(self):
         ident = self._require_ident()
         if not ident:
@@ -2481,59 +2473,23 @@ class Handler(BaseStaticHandler):
             if isinstance(data_field.get("images"), list):
                 data_field["images"] = [store_data_uri(x) for x in data_field["images"]]
 
-        data = load_data()
-        key = self._data_key(ident)
-        chars = data.get(key, [])
-
-        # 编辑时改了编号：原位改名，而不是另存一份新记录
         previous_code = body.get("previous_code") or ""
-        if previous_code and previous_code != code and not any(c.get("code") == code for c in chars):
-            for c in chars:
-                if c.get("code") == previous_code:
-                    c["code"] = code
-                    break
-            else:
-                previous_code = ""
-
-        found = False
-        for c in chars:
-            if c.get("code") == code:
-                if html_ref:
-                    c["html_ref"] = html_ref
-                    c.pop("html", None)
-                c["data"] = data_field
-                found = True
-                break
-        if not found:
-            rec = {"code": code, "data": data_field}
-            if html_ref:
-                rec["html_ref"] = html_ref
-            chars.insert(0, rec)
-
-        data[key] = chars
-        save_data(data)
-
-        conn = db()
-        try:
-            sync_fan_characters(conn, ident, code, data_field, previous_code)
-            conn.commit()
-        finally:
-            conn.close()
-
-        # 等级积分：只有新登记的设表计分（修改已有设表不计），每日有上限，规则见 account_progress.RULES
+        rec = {"code": code, "data": data_field}
+        if html_ref: rec["html_ref"] = html_ref
         awarded = []
-        if not found:
-            custom = isinstance(data_field, dict) and bool(data_field.get("colorPrimary")) and (data_field.get("colorIndex") in (None, "", -1))
-            conn = account_progress.open_db(DATA_ROOT)
-            try:
-                awarded = account_progress.award_sheet(conn, ident["kind"], ident["uid"],
+        with character_store().transaction(write=True) as session:
+            saved, created = session.save(ident, rec, body.get("version"), previous_code)
+            sync_fan_characters(session.conn, ident, code, data_field, previous_code)
+            if created:
+                custom = bool(data_field.get("colorPrimary")) and data_field.get("colorIndex") in (None, "", -1)
+                awarded = account_progress.award_sheet(session.conn, ident["kind"], ident["uid"],
                                                        ident.get("nickname") or ident.get("username") or "", code, custom)
-            finally:
-                conn.close()
         self._json(200, {"ok": True, "url": f"/show.html?code={urllib.parse.quote(code)}",
+                         "character": saved, "version": saved.get("_oc_version"),
                          "earned": round(sum(a["amount"] for a in awarded), 1), "awarded": awarded,
                          **self._level_fields(ident)})
 
+    @oc_api
     def _api_save_all(self):
         ident = self._require_ident()
         if not ident:
@@ -2544,43 +2500,53 @@ class Handler(BaseStaticHandler):
             return
 
         chars = body.get("characters", [])
-        data = load_data()
-        key = self._data_key(ident)
-        old = data.get(key, [])
-        old_map = {c.get("code", ""): c for c in old}
+        if not isinstance(chars, list) or any(not isinstance(c, dict) for c in chars):
+            self._json(400, {"error": "invalid_oc_records"}); return
         new_chars = []
         for c in chars:
-            code = c.get("code", "")
-            entry_old = old_map.get(code, {})
-            if isinstance(c, dict):
-                try:
-                    normalize_oc_avatar(c)
-                    if isinstance(c.get("image"), str):
-                        c["image"] = _persist_preview_reference(c["image"])
-                    if isinstance(c.get("images"), list):
-                        c["images"] = [_persist_preview_reference(x) if isinstance(x, str) else x for x in c["images"]]
-                except ValueError as error:
-                    self._json(400, {"error": str(error)}); return
-                if c.get("image", "").startswith("data:"):
-                    c["image"] = store_data_uri(c["image"])
+            try:
+                normalize_oc_avatar(c)
+                if isinstance(c.get("image"), str): c["image"] = _persist_preview_reference(c["image"])
                 if isinstance(c.get("images"), list):
-                    c["images"] = [store_data_uri(x) for x in c["images"]]
-            rec = {"code": code, "data": c}
-            if entry_old.get("html_ref"):
-                rec["html_ref"] = entry_old["html_ref"]
-            elif entry_old.get("html"):
-                rec["html_ref"] = store_showcase_html(entry_old["html"])
-            new_chars.append(rec)
-        data[key] = new_chars
-        save_data(data)
-        conn = db()
-        try:
+                    c["images"] = [_persist_preview_reference(x) if isinstance(x, str) else x for x in c["images"]]
+            except ValueError as error:
+                self._json(400, {"error": str(error)}); return
+            if c.get("image", "").startswith("data:"): c["image"] = store_data_uri(c["image"])
+            if isinstance(c.get("images"), list): c["images"] = [store_data_uri(x) for x in c["images"]]
+            new_chars.append({"code": c.get("code", ""), "data": c})
+        with character_store().transaction(write=True) as session:
+            old = session.list(ident)
+            old_map = {c["code"]: c for c in old}
             for rec in new_chars:
-                sync_fan_characters(conn, ident, rec["code"], rec["data"])
-            conn.commit()
-        finally:
-            conn.close()
-        self._json(200, {"ok": True})
+                entry = old_map.get(rec["code"], {})
+                if entry.get("html_ref"): rec["html_ref"] = entry["html_ref"]
+                elif entry.get("html"): rec["html_ref"] = store_showcase_html(entry["html"])
+            saved = session.replace(ident, new_chars, body.get("versions"))
+            incoming = {c["code"] for c in saved}
+            for rec in old:
+                if rec["code"] not in incoming:
+                    session.conn.execute("UPDATE fan_characters SET is_public=0 WHERE user_kind=? AND user_uid=? AND code=? AND COALESCE(type,'')!='配色海报'", (ident["kind"], str(ident["uid"]), rec["code"]))
+            for rec in saved: sync_fan_characters(session.conn, ident, rec["code"], rec["data"])
+        self._json(200, {"ok": True, "characters": saved})
+
+    @oc_api
+    def _api_owned_character(self, qs):
+        ident = self._require_ident()
+        if not ident: return
+        record = character_store().get(ident, (qs.get("code") or [None])[0], (qs.get("id") or [None])[0])
+        if record is None: self._json(404, {"error": "oc_not_found"}); return
+        self._json(200, {"character": record})
+
+    @oc_api
+    def _api_delete_character(self):
+        ident = self._require_ident()
+        if not ident: return
+        body = self._read_json()
+        if body is None: return
+        with character_store().transaction(write=True) as session:
+            removed = session.delete(ident, body.get("code"), body.get("version"))
+            session.conn.execute("UPDATE fan_characters SET is_public=0 WHERE user_kind=? AND user_uid=? AND code=? AND COALESCE(type,'')!='配色海报'", (ident["kind"], str(ident["uid"]), body.get("code")))
+        self._json(200, {"ok": True, "removed": removed})
 
     # ---------- 管理员 ----------
     def _require_admin(self):
@@ -2626,19 +2592,20 @@ class Handler(BaseStaticHandler):
             })
         self._json(200, {"users": out, "self": {"kind": admin["kind"], "uid": admin["uid"]}})
 
+    @oc_api
     def _api_admin_characters(self):
         admin = self._require_admin()
         if not admin:
             return
         self._json(200, {"characters": get_admin_characters()})
 
+    @oc_api
     def _api_my_broken_characters(self):
         ident = self._require_ident()
         if not ident:
             return
-        data = load_data()
-        chars = data.get(self._data_key(ident), [])
-        out = [{"code": c.get("code", ""), "data": c.get("data") or {}} for c in chars if not c.get("html")]
+        chars = character_store().list(ident)
+        out = [{"code": c.get("code", ""), "data": c.get("data") or {}, "_oc_version": c.get("_oc_version")} for c in chars if not (c.get("html") or c.get("html_ref"))]
         self._json(200, {"characters": out})
 
     # ---------- 官方角色（直查世界观库） ----------
@@ -3093,6 +3060,7 @@ class Handler(BaseStaticHandler):
         destroy_user_sessions(kind, uid) if status == "banned" else None
         self._json(200, {"ok": True})
 
+    @oc_api
     def _api_admin_delete(self):
         admin = self._require_admin()
         if not admin:
@@ -3108,23 +3076,15 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "不能删除自己"})
             return
 
-        with DB_LOCK:
-            conn = db()
+        with DB_LOCK, character_store().transaction(write=True) as session:
+            conn = session.conn
             if kind == "local":
                 conn.execute("DELETE FROM local_users WHERE uid=?", (uid,))
             else:
                 conn.execute("DELETE FROM users WHERE user_id=?", (uid,))
                 conn.execute("DELETE FROM user_flags WHERE kind='usso' AND uid=?", (uid,))
             conn.execute("DELETE FROM sessions_db WHERE kind=? AND uid=?", (kind, uid))
-            conn.commit()
-            conn.close()
-
-        # 同时删除该用户的角色卡数据
-        key = f"local:{uid}" if kind == "local" else uid
-        data = load_data()
-        if key in data:
-            data.pop(key)
-            save_data(data)
+            session.delete_owner({"kind": kind, "uid": uid})
         self._json(200, {"ok": True})
 
     # ---------- 改名（昵称唯一 + 3 天一次） ----------
@@ -4358,6 +4318,7 @@ class Handler(BaseStaticHandler):
         destroy_user_sessions(row["user_kind"], row["user_uid"]) if approve else None
         self._json(200, {"ok": True, "approved": approve})
 
+    @oc_api
     def _api_admin_delete_character(self):
         admin = self._require_admin()
         if not admin:
@@ -4369,14 +4330,10 @@ class Handler(BaseStaticHandler):
         code = (body.get("code") or "").strip()
         if not key or not code:
             self._json(400, {"error": "缺少 owner / code"}); return
-        data = load_data()
-        chars = data.get(key, [])
-        before = len(chars)
-        data[key] = [c for c in chars if (c.get("code") or "").strip() != code]
-        removed = before - len(data[key])
-        if not data[key]:
-            data.pop(key, None)
-        save_data(data)
+        target = oc_store.parse_owner(key)
+        with character_store().transaction(write=True) as session:
+            removed = session.delete(target, code, body.get("version"))
+            session.conn.execute("UPDATE fan_characters SET is_public=0 WHERE user_kind=? AND user_uid=? AND code=?", (*oc_store.owner(target), code))
         self._json(200, {"ok": True, "removed": removed})
 
     def _api_admin_scribe_requests(self):
@@ -4596,6 +4553,7 @@ class Handler(BaseStaticHandler):
         d["is_public"] = bool(d["is_public"])
         self._json(200, {"poster": d})
 
+    @oc_api
     def _api_posters_save(self):
         body = self._read_image_form()
         if body is None:
@@ -4641,44 +4599,25 @@ class Handler(BaseStaticHandler):
                 img_ref = store_image(raw, mime)
             except (ValueError, TypeError):
                 self._json(400, {"error": "海报图片无效或超过8MB"}); return
-        # 绑定的人设必须属于本人，防止多个人设混淆
-        character_data = load_data()
-        character = None
-        if char_code:
-            character = next((c for c in character_data.get(self._data_key(ident), []) if c.get("code") == char_code), None)
-            if character is None:
-                self._json(400, {"error": "绑定的人设不存在或不属于你"}); return
         user_name = ident.get("nickname") or ident.get("username") or ""
-        conn = None
-        try:
-            with DB_LOCK:
-                conn = db()
-                conn.execute(
-                    """INSERT INTO posters
-                       (user_kind, user_uid, user_name, title, char_code, char_name,
-                        primary_name, accent_name, primary_color, accent_color,
-                        state_json, img_ref, is_public, created_at, updated_at)
-                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                    (ident["kind"], str(ident["uid"]), user_name, title, char_code, char_name,
-                     primary_name, accent_name, primary, accent, state_json, img_ref, 0,
-                     now_iso(), now_iso())
-                )
-                pid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
-                if character is not None:
-                    character_data = load_data()
-                    character = next(c for c in character_data.get(self._data_key(ident), []) if c.get("code") == char_code)
-                    saved = character.setdefault("data", {})
-                    saved.update(colorPrimary=primary, colorAccent=accent, colorIndex=-1)
-                    save_data(character_data)
-                conn.commit()
-        except Exception:
-            if conn is not None:
-                conn.rollback()
-            self._json(500, {"error": "保存海报失败"}); return
-        finally:
-            if conn is not None:
-                conn.close()
-        self._json(200, {"ok": True, "id": pid})
+        updated_character = None
+        with DB_LOCK, character_store().transaction(write=True) as session:
+            character = session.get(ident, char_code) if char_code else None
+            if char_code and character is None:
+                self._json(400, {"error": "绑定的人设不存在或不属于你"}); return
+            conn = session.conn
+            conn.execute("""INSERT INTO posters
+                (user_kind,user_uid,user_name,title,char_code,char_name,primary_name,accent_name,
+                 primary_color,accent_color,state_json,img_ref,is_public,created_at,updated_at)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (ident["kind"], str(ident["uid"]), user_name, title, char_code, char_name,
+                 primary_name, accent_name, primary, accent, state_json, img_ref, 0, now_iso(), now_iso()))
+            pid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+            if character is not None:
+                character["data"].update(colorPrimary=primary, colorAccent=accent, colorIndex=-1)
+                updated_character, _ = session.save(ident, character, body.get("character_version"))
+                sync_fan_characters(conn, ident, char_code, character["data"])
+        self._json(200, {"ok": True, "id": pid, "character": updated_character})
 
     def _api_posters_delete(self):
         ident = self._require_ident()
@@ -4914,14 +4853,14 @@ class Handler(BaseStaticHandler):
         conn.close()
         self._json(200, {"ok": True, "is_public": is_public})
 
+    @oc_api
     def _api_fan_check_suggest(self):
         """检查用户是否有人设登记但尚未公开到同人画廊"""
         ident = self._require_ident()
         if not ident:
             return
         # 检查 characters.json 中是否有该用户的角色
-        data = load_data()
-        chars = data.get(self._data_key(ident), [])
+        chars = character_store().list(ident)
         if not chars:
             self._json(200, {"suggest": False, "reason": "no_characters"})
             return
@@ -4949,58 +4888,57 @@ class Handler(BaseStaticHandler):
             codes = body.get("character_codes") or []
             if not codes:
                 self._json(400, {"error": "请选择要公开的角色"}); return
-            data = load_data()
-            chars = data.get(self._data_key(ident), [])
-            conn = db()
-            published = 0
-            skipped = 0
-            for c in chars:
-                cd = c.get("data") or c
-                code = cd.get("code")
-                if code not in codes:
-                    continue
-                fields = fan_fields(cd)
-                if not fields["name"]:
-                    continue
-                # 同一角色只保留一条画廊记录：先按编号找，旧记录（无编号）再按名字找
-                existing = conn.execute(
-                    "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND code=? AND COALESCE(type,'')!='配色海报' ORDER BY id LIMIT 1",
-                    (ident["kind"], ident["uid"], code)
-                ).fetchone() or conn.execute(
-                    "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND name=? AND COALESCE(code,'')='' ORDER BY id LIMIT 1",
-                    (ident["kind"], ident["uid"], fields["name"])
-                ).fetchone()
-                if existing:
-                    # 已公开：跳过；曾公开后取消：重新公开。两种情况都顺带刷新为最新资料
-                    sets = ", ".join(f"{col}=?" for col in FAN_SYNC_COLUMNS)
+            with character_store().transaction(write=True) as session:
+                chars = session.list(ident)
+                conn = session.conn
+                published = 0
+                skipped = 0
+                for c in chars:
+                    cd = c.get("data") or c
+                    code = cd.get("code")
+                    if code not in codes:
+                        continue
+                    fields = fan_fields(cd)
+                    if not fields["name"]:
+                        continue
+                    # 同一角色只保留一条画廊记录：先按编号找，旧记录（无编号）再按名字找
+                    existing = conn.execute(
+                        "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND code=? AND COALESCE(type,'')!='配色海报' ORDER BY id LIMIT 1",
+                        (ident["kind"], ident["uid"], code)
+                    ).fetchone() or conn.execute(
+                        "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND name=? AND COALESCE(code,'')='' ORDER BY id LIMIT 1",
+                        (ident["kind"], ident["uid"], fields["name"])
+                    ).fetchone()
+                    if existing:
+                        # 已公开：跳过；曾公开后取消：重新公开。两种情况都顺带刷新为最新资料
+                        sets = ", ".join(f"{col}=?" for col in FAN_SYNC_COLUMNS)
+                        conn.execute(
+                            f"UPDATE fan_characters SET {sets}, code=?, is_public=1, updated_at=? WHERE id=?",
+                            [fields[col] for col in FAN_SYNC_COLUMNS] + [to_str(code), now_iso(), existing["id"]]
+                        )
+                        if existing["is_public"]:
+                            skipped += 1
+                        else:
+                            published += 1
+                        continue
                     conn.execute(
-                        f"UPDATE fan_characters SET {sets}, code=?, is_public=1, updated_at=? WHERE id=?",
-                        [fields[col] for col in FAN_SYNC_COLUMNS] + [to_str(code), now_iso(), existing["id"]]
+                        """INSERT INTO fan_characters
+                           (user_kind, user_uid, user_name, name, type, species, gender, faction,
+                            ability, appearance, story, image_data, is_public, code, created_at, updated_at)
+                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                        (ident["kind"], ident["uid"],
+                         ident.get("nickname") or ident.get("username") or "",
+                         *[fields[col] for col in FAN_SYNC_COLUMNS],
+                         1,  # is_public
+                         to_str(code),
+                         now_iso(), now_iso())
                     )
-                    if existing["is_public"]:
-                        skipped += 1
-                    else:
-                        published += 1
-                    continue
-                conn.execute(
-                    """INSERT INTO fan_characters
-                       (user_kind, user_uid, user_name, name, type, species, gender, faction,
-                        ability, appearance, story, image_data, is_public, code, created_at, updated_at)
-                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                    (ident["kind"], ident["uid"],
-                     ident.get("nickname") or ident.get("username") or "",
-                     *[fields[col] for col in FAN_SYNC_COLUMNS],
-                     1,  # is_public
-                     to_str(code),
-                     now_iso(), now_iso())
-                )
-                published += 1
-            conn.commit()
-            conn.close()
+                    published += 1
             self._json(200, {"ok": True, "published": published, "skipped": skipped})
-        except Exception as e:
-            traceback.print_exc()
-            self._json(500, {"error": f"发布失败: {e}"})
+        except oc_store.OCError as error:
+            self._json(error.status, {"error": error.code})
+        except Exception:
+            self._json(500, {"error": "发布失败"})
 
     def _ensure_fan_reaction_tables(self, w):
         w.execute("CREATE TABLE IF NOT EXISTS fan_char_favorites (id INTEGER PRIMARY KEY AUTOINCREMENT, user_kind TEXT, user_uid TEXT, character_id INTEGER, created_at INTEGER, UNIQUE(user_kind, user_uid, character_id))")

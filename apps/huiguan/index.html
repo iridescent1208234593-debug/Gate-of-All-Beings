@@ -650,6 +650,7 @@
 <link rel="preload" as="script" href="/assets/gate/gate-scene.js?v=20261009-6">
 <link rel="preload" as="script" href="/homepage.js?v=20261016-1">
 <script>document.documentElement.classList.add('home-booting');</script>
+<script src="/oc-revisions.js?v=20261026"></script>
 </head>
 <body>
 <!-- ============================================
@@ -1496,9 +1497,9 @@ async function fixBrokenShowcase() {
         const html = generateShowcaseHTML(data, colorsFromData(data));
         const sr = await fetch('/api/save-character', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: item.code, html: html, data: data })
+          body: JSON.stringify({ code: item.code, html: html, data: data, version: item._oc_version })
         });
-        if (sr.ok) ok++;
+        if (sr.ok) { const saved = await sr.json(); OCRevisions.accept(saved.character); ok++; }
       } catch(e) {}
     }
     if (ok > 0) showToast('success', '已自动修复 ' + ok + ' 份人设的展示页（此前未成功生成）。', 7000);
@@ -1607,6 +1608,7 @@ async function syncFromServer() {
     const r = await fetch('/api/get-characters');
     if (!r.ok) return;
     const d = await r.json();
+    OCRevisions.reset(d.characters || []);
     const trashCodes = new Set(loadTrash().map(c => c.code));
     const serverChars = (d.characters || []).filter(c => !trashCodes.has(c.code || (c.data && c.data.code) || ''));
     const local = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -1639,9 +1641,11 @@ async function pushToServer(data) {
     const response = await fetch('/api/save-character', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: data.code, html: '', data: data })
+      body: JSON.stringify({ code: data.code, html: '', data: data, version: OCRevisions.version(data.code) })
     });
-    if (!response.ok) throw new Error('保存失败');
+    const saved = await response.json();
+    if (!response.ok) throw new Error(saved.error === 'oc_version_conflict' || response.status === 428 ? '这份人设已更新，请保留当前内容并重新读取服务器版本。' : '保存失败');
+    OCRevisions.accept(saved.character);
     const st = document.getElementById('syncStatus');
     if (st) { st.textContent = '已同步'; st.className = 'sync-status ok'; }
   } catch(e) {
@@ -1651,14 +1655,16 @@ async function pushToServer(data) {
 }
 
 async function saveCharactersToServer(characters) {
+  const versions = OCRevisions.snapshot();
   const normalized = [];
   for (const character of characters) normalized.push(await HuiguanImages.character(character));
   const response = await fetch('/api/save-all-characters', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ characters: normalized })
+    body: JSON.stringify({ characters: normalized, versions })
   });
   const result = await response.json();
   if (!response.ok || !result.ok) throw new Error(result.error || '同步失败');
+  OCRevisions.reset(result.characters || []);
   saveAll(normalized);
 }
 
@@ -3838,6 +3844,7 @@ function generateAndSave(data, colors) {
   // 保存到 localStorage：编辑模式原位替换，否则追加到头部
   const all = loadAll();
   let previousCode = '';
+  const version = editingIndex !== null ? editingOCVersion : OCRevisions.version(data.code);
   if (editingIndex !== null) {
     // 编辑时改了编号：带上原编号，服务端原位改名（画廊记录随之更新），不另存一份
     if (all[editingIndex] && all[editingIndex].code !== data.code) previousCode = all[editingIndex].code || '';
@@ -3849,16 +3856,16 @@ function generateAndSave(data, colors) {
   saveAll(all);
 
   if (currentUser && currentUser.logged_in) {
-    postSave(data, html, previousCode);
+    postSave(data, html, previousCode, version);
   } else {
     // 未登录：暂存并强制登录，登录后自动补交
-    pendingSave = { data, html, previousCode };
+    pendingSave = { data, html, previousCode, version };
     showToast('success', '✔ 展示页已生成！登录 / 注册后即可收录进会馆名册。', 5000);
     openAuthModal('登录 / 注册后，你的人设将自动保存并绑定到你的账户。');
   }
 }
 
-async function postSave(data, html, previousCode = '') {
+async function postSave(data, html, previousCode = '', version = OCRevisions.version(previousCode || data.code)) {
   const button = document.getElementById('btnSubmit');
   if (button.disabled) return false;
   button.disabled = true;
@@ -3869,13 +3876,14 @@ async function postSave(data, html, previousCode = '') {
     html = generateShowcaseHTML(data, colorsFromData(data));
     const r = await fetch('/api/save-character', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: data.code, previous_code: previousCode, html, data }), signal: AbortSignal.timeout(30000)
+      body: JSON.stringify({ code: data.code, previous_code: previousCode, html, data, version }), signal: AbortSignal.timeout(30000)
     });
     const result = await r.json().catch(() => ({}));
     if (!r.ok || !result.ok || !result.url) {
-      const messages = { 401: '登录已过期，请重新登录后提交。', 403: '当前账户无法登记，请联系馆长确认账户状态。', 413: '图片和展示页的总大小超出限制，请减少图片数量或压缩图片后重试。', 429: '提交太频繁，请稍等一会儿再试。' };
+      const messages = { 409: '这份人设已被另一个页面更新。请保留当前内容，重新读取服务器版本后再编辑。', 428: '请先重新读取服务器上的这份人设，再保存修改。', 401: '登录已过期，请重新登录后提交。', 403: '当前账户无法登记，请联系馆长确认账户状态。', 413: '图片和展示页的总大小超出限制，请减少图片数量或压缩图片后重试。', 429: '提交太频繁，请稍等一会儿再试。' };
       throw new Error(messages[r.status] || (r.status >= 500 ? '会馆保存服务暂时不可用，请稍后重试。' : '这次登记未被接受，请检查设表内容；仍有问题可联系馆长。'));
     }
+    if (result.character) OCRevisions.renamed(previousCode, result.character);
     document.getElementById('successMsg').classList.add('show');
     document.getElementById('successMsg').innerHTML = '登记成功！<a href="' + result.url + '" target="_blank">查看展示页</a>';
     showToast('success', '✔ 登记成功！「' + escapeHtml(data.name || data.code) + '」已收录至会馆名册。', 7000);
@@ -3901,7 +3909,7 @@ async function postSave(data, html, previousCode = '') {
 function flushPending() {
   if (pendingSave) {
     const p = pendingSave;
-    postSave(p.data, p.html, p.previousCode);
+    postSave(p.data, p.html, p.previousCode, p.version);
   }
 }
 
@@ -3942,6 +3950,7 @@ function resetForm() {
 
 // ========== 列表渲染 ==========
 let editingIndex = null;
+let editingOCVersion = 0;
 
 function fillFormFromData(c) {
   const f = document.getElementById('charForm');
@@ -4087,6 +4096,7 @@ function editChar(i) {
   fillFormFromData(c);
   // 进入编辑模式
   editingIndex = i;
+  editingOCVersion = OCRevisions.version(c.code);
   document.getElementById('btnSubmit').textContent = '更 新 登 记';
   const tip = document.getElementById('editTip');
   tip.style.display = '';

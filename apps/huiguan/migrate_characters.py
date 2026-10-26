@@ -1,43 +1,52 @@
 # -*- coding: utf-8 -*-
-"""把 characters.json 里的内联展示页 HTML 与 base64 图片外置成独立文件，
-JSON 只保留元数据 + 引用，实现 10MB -> <1MB。
-务必在【新代码的服务器】启动后运行（新代码读 html_ref / 图片 URL，旧代码只读内联 html）。
-幂等：可重复运行，已外置的自动跳过。运行前自动备份。"""
-import os
+"""Externalize OC image/HTML assets through the active Store; offline, never a SQL import.
+
+Stop ALL service writers first. Production use requires separate owner authorization.
+JSON source is backed up; SQL source requires a verified SQLite/storage backup before running.
+"""
+import argparse
+from pathlib import Path
 import shutil
 import time
 
-import server_huiguan as S
-
 
 def main():
-    src = S.DATA_FILE
-    bak = src + ".bak_" + time.strftime("%Y%m%d_%H%M%S")
-    shutil.copy2(src, bak)
-    print("备份:", bak)
-
-    data = S.load_data()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--confirm-stopped', action='store_true')
+    parser.add_argument('--allow-production', action='store_true')
+    args = parser.parse_args()
+    if not args.confirm_stopped: parser.error('stop all writers and pass --confirm-stopped')
+    from storage_paths import environment
+    if environment() == 'production' and not args.allow_production: parser.error('separate production authorization required')
+    import server_huiguan as S
+    from oc_store import parse_owner
+    store = S.character_store()
     moved_html = moved_img = 0
-    for owner, chars in data.items():
-        for rec in chars:
-            # 展示页 HTML 外置
-            if rec.get("html"):
-                ref = S.store_showcase_html(rec["html"])
-                rec["html_ref"] = ref
-                del rec["html"]
-                moved_html += 1
-            # 图片外置
-            d = rec.get("data") or {}
-            if d.get("image", "").startswith("data:"):
-                d["image"] = S.store_data_uri(d["image"]); moved_img += 1
-            if isinstance(d.get("images"), list):
-                d["images"] = [S.store_data_uri(x) for x in d["images"]]
-                moved_img += len(d["images"])
-    S.save_data(data)
+    with store.transaction(write=True) as session:
+        if store.backend == 'json' and Path(S.DATA_FILE).exists():
+            backup = S.DATA_FILE + '.bak_' + time.strftime('%Y%m%d_%H%M%S')
+            if Path(backup).exists(): raise FileExistsError('backup already exists')
+            shutil.copy2(S.DATA_FILE, backup)
+        for key in session.snapshot():
+            ident = parse_owner(key)
+            for record in session.list(ident):
+                changed = False
+                if record.get('html'):
+                    record['html_ref'] = S.store_showcase_html(record.pop('html'))
+                    moved_html += 1; changed = True
+                data = record.get('data') or {}
+                if isinstance(data.get('image'), str) and data['image'].startswith('data:'):
+                    data['image'] = S.store_data_uri(data['image']); moved_img += 1; changed = True
+                if isinstance(data.get('images'), list):
+                    for index, image in enumerate(data['images']):
+                        if isinstance(image, str) and image.startswith('data:'):
+                            data['images'][index] = S.store_data_uri(image); moved_img += 1; changed = True
+                if changed:
+                    session.save(ident, record, record.get('_oc_version'))
+    print({'externalized_html': moved_html, 'externalized_images': moved_img})
 
-    print(f"外置展示页 {moved_html} 个、图片 {moved_img} 张")
-    print("characters.json 现在: %.1f KB" % (os.path.getsize(src) / 1024))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'services/platform'))
     main()
