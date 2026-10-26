@@ -83,7 +83,7 @@ section h2{font-size:16px;letter-spacing:2px;border-bottom:2px solid var(--accen
 </head>
 <body>
 <div class="wrap" id="app"><div class="loading">加载中…</div></div>
-<div id="lightbox" onclick="this.classList.remove('show')"><img id="lbImg" alt=""></div>
+<div id="lightbox" onclick="this.classList.remove('show')"><img loading="lazy" decoding="async" id="lbImg" alt=""></div>
 <script src="/image-upload.js?v=20261023"></script>
 <script src="reactions-fx.js?v=20261021-fanart3"></script>
 <script>
@@ -293,7 +293,7 @@ async function init(){
       <div id="delModal" style="display:none;position:fixed;inset:0;z-index:9996;background:rgba(20,26,22,.55);align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeDelModal()">
         <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;max-width:420px;width:100%;padding:20px;">
           <strong style="font-size:15px;letter-spacing:1px;">确认删除这张图片？</strong>
-          <div style="text-align:center;margin:14px 0;"><img id="delPrevImg" src="" alt="" style="max-width:220px;max-height:220px;border-radius:8px;border:1px solid var(--border);object-fit:contain;background:#ece4d6;"></div>
+          <div style="text-align:center;margin:14px 0;"><img loading="lazy" decoding="async" id="delPrevImg" src="" alt="" style="max-width:220px;max-height:220px;border-radius:8px;border:1px solid var(--border);object-fit:contain;background:#ece4d6;"></div>
           <label style="display:flex;align-items:center;gap:6px;font-size:13px;margin-bottom:10px;"><input type="checkbox" id="delOtherChar"> 此图实为其他角色（删后请上传到正确角色）</label>
           <textarea id="delReason" rows="2" placeholder="删除原因（选填）" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;resize:vertical;"></textarea>
           <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
@@ -471,7 +471,7 @@ let _imgOrder=[]; let _dragIdx=null;
 function _imgCard(im,idx,cid){
   const isLast=idx===_charImages.length-1;
   return `<div draggable="true" ondragstart="dragStart(event,${idx})" ondragover="event.preventDefault()" ondragenter="event.preventDefault()" ondrop="dropImg(event,${idx},${cid})" style="position:relative;text-align:center;cursor:grab;padding:2px;border:1px dashed transparent;border-radius:8px;width:110px;">
-    <img src="/api/official/img-id?id=${im.id}&t=1" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--border);pointer-events:none;">
+    <img loading="lazy" decoding="async" src="/api/official/img-id?id=${im.id}&t=1" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--border);pointer-events:none;">
     <button type="button" onclick="askDelImg(${im.id},${cid})" title="删除该图" style="position:absolute;top:-6px;right:6px;width:18px;height:18px;border-radius:50%;border:none;background:var(--danger);color:#fff;font-size:11px;cursor:pointer;line-height:1;">×</button>
     <div style="margin-top:3px;display:flex;gap:2px;justify-content:center;">
       <button type="button" onclick="moveImg(${idx},-1,${cid})" ${idx===0?'disabled':''} style="font-size:10px;padding:0 5px;border:1px solid var(--border);background:var(--panel);border-radius:3px;cursor:pointer;">←</button>
