@@ -10,7 +10,7 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 | [api.md](api.md) | API 清单：会馆、卡牌、聚灵、软乎乎、统一入口代理 |
 | [hooks.md](hooks.md) | 钩子与约定：embed、dispose、portal.json、构建、扩展点 |
 | [networking.md](networking.md) | 联机：现状与预留接口设计 |
-| [operations.md](operations.md) | 部署运营：端口、网站管家、Cloudflare 隧道、看门狗、排障 |
+| [operations.md](operations.md) | 部署运营：端口、网站管家、Cloudflare 隧道、排障 |
 | [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | 当前 GitHub / Cloudflare 状态、未提交现场和新对话接续入口 |
 
 ## 快速事实

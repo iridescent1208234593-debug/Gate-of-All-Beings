@@ -1,12 +1,13 @@
 // Uses local build/source only; no requests reach production services.
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {mkdir,readFile} from 'node:fs/promises';
+import {mkdtemp,readFile} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {chromium} from '../../apps/management/node_modules/playwright/index.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
-const output=path.join(root,'work/cards-unification/qa');await mkdir(output,{recursive:true});
+const output=await mkdtemp(path.join(tmpdir(),'verify-game-ui-'));
 const types={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.ttf':'font/ttf'};
 const server=createServer(async(req,res)=>{
   try{

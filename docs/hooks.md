@@ -50,17 +50,16 @@
 ## 6. 运维钩子
 
 - 网站管家 `E:\External Projects\Iridescently Operations\网站恢复/website-manager.py` 的 `SITES`：站点清单（名称/域名/端口/启动命令）。
-- 看门狗 `apps/huiguan/watchdog.py`：8080 不在则拉起 `services/platform/portal_server.py`。
 - Cloudflare：`~/.cloudflared/config.yml` 的 ingress 与 `TUNNEL_SITE`。
 - 世界观库重链：`assets/罗小黑战记数据库/relink_db.py`（预演 / `--apply`）。
 
 ## 7. 新增一个游戏（清单）
 
-1. 源码放 `server/app/src/<名>/`（独立 git 仓库），可用 `@lxh/*` 公用包。
+1. 源码放 `apps/<名>/`，可用 `@lxh/*` 公用包。
 2. 需要无 iframe：暴露挂载/卸载（`createRoot` 或 `__iridescentlyDispose`）。
-3. `build-modules.mjs` 增加该模块的构建/拷贝。
-4. `portal.json` 增加条目（`embed: true`）。
+3. `tools/build/build-modules.mjs` 增加该模块的构建/拷贝。
+4. `apps/shell/portal.json` 增加条目（`embed: true`）。
 5. 若有 API，在 `portal_server.PROXY_PORTS` 加上游端口，并把前端调用改成 base 感知（`/app/modules/<名>/api/...`）。
-6. 跑 `verify_portal.py` 与对应测试。
+6. 跑 `services/platform/tests/verify_portal.py` 与对应测试（`python tools/checks/regression.py --full` 覆盖全部）。
 
 2026-10-14：Cards提供`window.__iridescentlyMount`，返回当前root的dispose；壳缓存factory并复用已加载React runtime，避免每次执行整份bundle重复安装document代理。未提供factory的模块仍按既有脚本挂载，但必须实现真实owner清理。壳使用shell前缀DOM/style，避免与模块topbar等id碰撞。切换由AbortController+generation串行化，旧fetch不能回写新页面。

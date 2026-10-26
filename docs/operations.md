@@ -20,7 +20,6 @@
 - **Cloudflare 隧道**：`~/.cloudflared/config.yml` 把 `iridescently.xyz`、`www`、`huiguan`、`oc`、`spirit` 指向 `127.0.0.1:8080`（统一入口）；`zszm/game/juling/lingjing/psyche/psy/feather` 各自保留。
 - 灵体正式链接为 `https://spirit.iridescently.xyz/games/spirit-playground?room=forest`。页面由 `dist/modules/softie/` 提供，房间服务使用 softie 上游 4173；账号云存档 API 由会馆提供。
 - **网站管家** `E:\External Projects\Iridescently Operations\网站恢复\website-manager.py`：按 `SITES` 一键恢复全部站点 + 隧道；`--smoke-test` 自检（不启动任何进程）。
-- **看门狗** `apps/huiguan/watchdog.py`：8080 不在则拉起统一入口（由计划任务每 5 分钟调用）。
 
 ### 一键恢复
 
@@ -44,7 +43,7 @@ cloudflared tunnel --config "%USERPROFILE%\.cloudflared\config.yml" run
 ## 数据库维护
 
 - 世界观库搬移后重链：`python "assets/罗小黑战记数据库/relink_db.py"`（预演）→ `--apply`（自动备份 `.bak-<时间戳>`）。
-- 会馆用户库 `apps/huiguan/users.db`、聚灵 `apps/juling/data/save.db` 直接备份文件即可。
+- 会馆用户库、聚灵存档等持久数据在外部 data 根（`<data>/huiguan/users.db`、`<data>/juling/`），不在源码树；用 `python tools/runtime/backup-storage.py snapshot` 做一致性快照。
 
 ## 排障
 
@@ -58,6 +57,6 @@ cloudflared tunnel --config "%USERPROFILE%\.cloudflared\config.yml" run
 
 ## 日志
 
-- 统一入口：控制台 / 重定向文件；看门狗写 `server/portal*.log`。
+- 统一入口：控制台 / 重定向文件；本机启动器的日志在 `<cache>/logs/local-runtime/`。
 - 网站管家：`E:\External Projects\Iridescently Operations\网站恢复/logs/<站点>.log`。
 - 各单站：站点目录内 `.log`（清理时可删）。
