@@ -19,9 +19,9 @@
 | `docs` | 构建发布文档与维护索引；运维实现位于外部 Ops 目录 |
 | 外部 Release 根 | 候选、封存 Release 与其中的 `dist/modules`、首页产物（不进 Git） |
 
-旧目录（`portal/`、`server/`、`shared/`、`scripts/`、`ops/`）与新目录的对照、外部运维脚本需要同步的路径见 [仓库布局](docs/repository-layout.md)。
+旧目录（`portal/`、`server/`、`shared/`、`scripts/`、`ops/`）与新目录的对照、外部运维入口的新旧路径见 [仓库布局](docs/repository-layout.md)；仓库之外的本机目录约定见 [工程工作区](docs/workspace.md)。
 
-研发与参考位于工作区外 `E:\External Projects\Iridescently Labs`，桌面壁纸工具位于 `E:\External Projects\url-wallpaper`；都不参与生产部署。例外：线上 `/ozmtree/` 直接读取 `E:\External Projects` 下的 OZtree 静态目录（见下文入口表）。Gallery 上游核心已经迁入生产目录，不再把参考区当构建链路。研究的冻结测试结果保留历史路径，不伪造重新验证。
+研发、原型与上游参考位于工程工作区的 `labs`（见 [工程工作区](docs/workspace.md)），不参与生产部署。Gallery 上游核心已经迁入生产目录，不再把参考区当构建链路。研究的冻结测试结果保留历史路径，不伪造重新验证。
 
 ## 运行与正式入口
 
@@ -40,7 +40,7 @@
 
 同一份代码同时接受 `iridescently.xyz`、`iridescently.cn`、`iridescently.dpdns.org` 三个批准根域下的上述子域（集中配置 `packages/site-domains/domains.json`）；每个根域独立登录、Cookie 与 CSP，`.xyz` 继续运行且不强制跳转。是否已有 DNS、证书与 OAuth 回调登记属于上线批次，见 [domain-readiness](docs/domain-readiness.md)。
 
-`/ozmtree/` 由 `services/platform/portal_server.py` 的 `OZTREE_STATIC` 直接提供工作区外的静态目录 `E:\External Projects\众生之门生物树可视化前端\OZtree\static`，不经构建、候选或 Release，也不在源码快照内；换机部署需单独提供该目录，或改为显式发布。OZtree 自身源码、数据与许可见其仓库 README。
+本仓库的统一入口不提供 `/ozmtree/`（发布线自 `c9b665a` 起移除了该路由）。OZtree 生物树是工作区 `labs` 下的独立实验项目，自身源码、数据与许可见其仓库 README；要重新上线需要单独决定，并改为显式发布而不是读取工作区外的目录。香港旧线是否仍提供该路径以其部署记录为准。
 
 API 上游：5174 Cards OAuth、5178 数值配置、5177 聚灵、4173 灵体 WebSocket/API。5178/4173 预览明确读取已发布模块；不是直接把源码 `dist` 上线。5173 的 Ecology 本地开发服务不属于生产，不能因端口存在就判为废弃。具体清单见网站管家 `SITES`。
 
@@ -59,7 +59,7 @@ python tools/runtime/local-runtime.py status | stop
 python tools/checks/regression.py --full --modules <candidate>/modules   # 回归，只使用临时 test 存储
 ```
 
-本机外部存储位于 `E:\External Projects\Iridescently Runtime\<environment>\{data,assets,cache,releases,backups}`。旧本地运行数据的迁移证据与可恢复原件在 `production\backups\batch6-migration-20261025`；只读复核：`python tools/runtime/storage-migrate.py verify --manifest <该目录>\manifest.json`。`python tools/runtime/backup-storage.py snapshot` 生成同盘快照，不等于异地备份。外部运维工具（`E:\External Projects\Iridescently Operations`）通过 `local-workspace.json` 选择源码与存储根；香港发布工具仍按其自身流程运行，本仓库不包含香港部署动作。
+本机的仓库、worktree、外部存储、运维工具、原件与证据都在一个工程工作区里，由根目录的 `iridescently-workspace.json` 登记，见 [工程工作区](docs/workspace.md)。在工作区内的检出里运行时，存储根默认取工作区的 `runtime`（`<runtime>\<environment>\{data,assets,cache,releases,backups}`），不必设置环境变量；搬迁存储只能用 `tools/runtime/relocate-storage.py`。旧本地运行数据的迁移证据与可恢复原件在 `<runtime>\production\backups\batch6-migration-20261025`；只读复核：`python tools/runtime/storage-migrate.py verify --manifest <该目录>\manifest.json`。`python tools/runtime/backup-storage.py snapshot` 生成同盘快照，不等于异地备份。外部运维工具位于工作区的 `operations`；香港发布工具仍按其自身流程运行，本仓库不包含香港部署动作。
 
 ## 数据与密钥
 

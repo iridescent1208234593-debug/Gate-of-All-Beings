@@ -19,13 +19,13 @@
 
 - **Cloudflare 隧道**：`~/.cloudflared/config.yml` 把 `iridescently.xyz`、`www`、`huiguan`、`oc`、`spirit` 指向 `127.0.0.1:8080`（统一入口）；`zszm/game/juling/lingjing/psyche/psy/feather` 各自保留。
 - 灵体正式链接为 `https://spirit.iridescently.xyz/games/spirit-playground?room=forest`。页面由 `dist/modules/softie/` 提供，房间服务使用 softie 上游 4173；账号云存档 API 由会馆提供。
-- **网站管家** `E:\External Projects\Iridescently Operations\网站恢复\website-manager.py`：按 `SITES` 一键恢复全部站点 + 隧道；`--smoke-test` 自检（不启动任何进程）。
+- **网站管家** `<工作区>\operations\网站恢复\website-manager.py`：按 `SITES` 一键恢复全部站点 + 隧道；`--smoke-test` 自检（不启动任何进程）。
 
 ### 一键恢复
 
 ```powershell
-& 'E:\External Projects\Iridescently Operations\网站恢复\打开网站管家.vbs' # 图形界面，一键恢复全部
-python 'E:\External Projects\Iridescently Operations\网站恢复\website-manager.py' --smoke-test # 自检
+& '<工作区>\operations\网站恢复\打开网站管家.vbs' # 图形界面，一键恢复全部
+python '<工作区>\operations\网站恢复\website-manager.py' --smoke-test # 自检
 ```
 
 ### 重启隧道
@@ -58,5 +58,5 @@ cloudflared tunnel --config "%USERPROFILE%\.cloudflared\config.yml" run
 ## 日志
 
 - 统一入口：控制台 / 重定向文件；本机启动器的日志在 `<cache>/logs/local-runtime/`。
-- 网站管家：`E:\External Projects\Iridescently Operations\网站恢复/logs/<站点>.log`。
+- 网站管家：`<工作区>\operations\网站恢复/logs/<站点>.log`。
 - 各单站：站点目录内 `.log`（清理时可删）。

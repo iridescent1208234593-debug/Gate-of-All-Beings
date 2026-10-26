@@ -36,7 +36,7 @@
 
 门庭复用共享 `lxh-ui.css` 的纸色与墨色规则及现有 `PlayerAvatar.tsx` 渲染器。门庭森林图来自 `packages/shared-ui/lxh/scenes/deep-forest-moss.png`，通过相对源码 import 由 Vite 构建。
 
-浅滩的三个热点、灵息、任务、日志、E/J 交互与背景来自用户验收的 `E:\External Projects\original-ui-version\src\world-screen.js` / `src/media/bg.png`。必要实现已复制进正式源码 `shore/`，运行时不依赖外部项目绝对路径。背景保留为真实图片，未重新生成简化场景。来源是项目现有素材复用，不因此宣称新增资产版权或发布授权。
+浅滩的三个热点、灵息、任务、日志、E/J 交互与背景来自用户验收的 `<工作区>\labs\original-ui-version\src\world-screen.js` / `src/media/bg.png`。必要实现已复制进正式源码 `shore/`，运行时不依赖外部项目绝对路径。背景保留为真实图片，未重新生成简化场景。来源是项目现有素材复用，不因此宣称新增资产版权或发布授权。
 
 正式开场由 `src/gate/EntryGate.tsx` 保留；原型的 `opening-animation.js`、重复门景、开场 DOM 和主入口 `main.js` 不进入这份模式实现。初始化组件另见 `src/onboarding/README.md`。
 

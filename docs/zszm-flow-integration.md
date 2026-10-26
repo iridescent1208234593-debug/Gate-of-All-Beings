@@ -16,7 +16,7 @@
 
 保持原型现有步骤顺序，没有为了接口名重新设计视觉。种族编号仅作素材 ID，不作为玩家的真实种族文字。账户资料请求失败可重试；返回开场不清空已经确认的玩家状态。
 
-初始化来自 `E:\External Projects\original-ui-version\src`，必要源码、字体与素材迁入 `src/onboarding`。正式构建没有外部项目绝对路径依赖。门场景由 `src/gate/DoorScene.tsx` 与 `door-scene.css` 从分层 React canvas/CSS 实现；仅从只读原型迁入定稿 `assets_final` 的 PNG，不加载外部路径、不带入原型整页或其音频引擎。原型文件本身未修改。
+初始化来自 `<工作区>\labs\original-ui-version\src`，必要源码、字体与素材迁入 `src/onboarding`。正式构建没有外部项目绝对路径依赖。门场景由 `src/gate/DoorScene.tsx` 与 `door-scene.css` 从分层 React canvas/CSS 实现；仅从只读原型迁入定稿 `assets_final` 的 PNG，不加载外部路径、不带入原型整页或其音频引擎。原型文件本身未修改。
 
 ## 数据与生命周期
 
@@ -75,11 +75,11 @@
 
 2026-10-23 本地候选接入「门」场景。`npm run check:game`、`npx tsc --noEmit` 和根目录 `npm run build:cards` 均通过；候选写入 `.releases/candidate/cards`，没有发布。浏览器实际验证新玩家（进入初始化）、完整资料玩家（推门后进门庭）、6 小时回访直接进门庭、开场 Skip、门场景 Skip、Esc、Enter、空格、减少动态效果、重看开场和“从开场走一遍”新形象。1440×900 与 390×844/844×390 无横向溢出；手机竖屏显示 opening 方向提示。门场景中目标页 `aria-hidden` / `inert`，站点栏隐藏；闪白起始约 2.1s，下一屏在 3.4s 开始于白光后显现，并随门场景淡出。控制台无 error。页面隐藏/恢复通过模拟 `visibilitychange` 验证：隐藏期间门场景暂停，恢复后续播并正常结束；切换到另一个本地浏览器页没有触发真实 `document.hidden`，因此真实后台标签页生命周期未计为已验证。后续发现宽屏横向锚点被 `clamp` 截断，现改为直接对齐门洞；1440×900 实测舞台左移 33px，图层覆盖视口两侧；修复版本地验收服务为 `http://127.0.0.1:5197/`。
 
-截图：`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/zszm-door-20261023/door-desktop.jpg`、`door-mobile-portrait.jpg`、`door-mobile-landscape.jpg`、`door-flash-desktop.jpg`、`door-fade-desktop.jpg`、`next-screen-desktop.jpg`。低端真机帧率、真实玩家账户跨设备资料、真实设备的方向锁、音频切换的人耳感受尚未测；候选构建仍报告既有 `gateEmbed` 超过 500 kB 警告。
+截图：`<工作区>/archive/operations-archive/qa/qa/zszm-door-20261023/door-desktop.jpg`、`door-mobile-portrait.jpg`、`door-mobile-landscape.jpg`、`door-flash-desktop.jpg`、`door-fade-desktop.jpg`、`next-screen-desktop.jpg`。低端真机帧率、真实玩家账户跨设备资料、真实设备的方向锁、音频切换的人耳感受尚未测；候选构建仍报告既有 `gateEmbed` 超过 500 kB 警告。
 
 2026-10-17 本地浏览器实际走通单次正式开场、改名、种族选择、自定义种族、设置头像、门庭与浅滩探索/返回。热更新重载后重新进入开场，直接恢复已确认头像和种族，未重复初始化。1440/390px 测量无整页横向溢出；手机导航保留原有横向滚动，玩家 HUD 窄屏为有无障碍名称的头像按钮。
 
-截图：`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/zszm-merge-20261017/hall-desktop.png`、`hall-mobile.png`、`shore-mobile.png`。构建/自动测试结果以本轮最终验收记录为准。没有把本地通过声称为线上通过，未完整回归每个独立玩法的 GPU/联网功能。
+截图：`<工作区>/archive/operations-archive/qa/qa/zszm-merge-20261017/hall-desktop.png`、`hall-mobile.png`、`shore-mobile.png`。构建/自动测试结果以本轮最终验收记录为准。没有把本地通过声称为线上通过，未完整回归每个独立玩法的 GPU/联网功能。
 
 最终检查：`npm run check:game` 与完整 `tsc --noEmit` 通过；初始化草稿测试 2/2，身份 API 隔离测试 7/7，既有卡牌核心测试 22/22（包含 90 次自动历练），门户测试 51/51。根目录 `npm run build:cards` 成功生成 71 个哈希资源。候选使用正式 `/app/modules/cards/` base 在本地 5197 预览，实际走通人类快捷确认、头像保存、门庭和刷新恢复，控制台 error 为空。
 

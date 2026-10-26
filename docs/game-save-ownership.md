@@ -70,7 +70,7 @@ python services/platform/game_saves.py export --out E:\backup\game_saves.rollbac
 
 ## 发布前检查
 
-1. 备份 `users.db` 与 `game_saves.json`（`E:\External Projects\Iridescently Operations\backups` 既有流程）。
+1. 备份 `users.db` 与 `game_saves.json`（`<工作区>\operations\backups` 既有流程）。
 2. 在生产数据副本上运行 `plan` 和 `status`，确认隔离项为 0 或已人工处理。
 3. 发布 site 快照（与 ZSZM 改动一起时，`publish:cards` 与 `publish:site` 需同步）。
 4. 启动后用 `status` 确认迁移记录存在。

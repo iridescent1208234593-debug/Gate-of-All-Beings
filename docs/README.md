@@ -10,7 +10,8 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 | [api.md](api.md) | API 清单：会馆、卡牌、聚灵、软乎乎、统一入口代理 |
 | [hooks.md](hooks.md) | 钩子与约定：embed、dispose、portal.json、构建、扩展点 |
 | [networking.md](networking.md) | 联机：现状与预留接口设计 |
-| [repository-layout.md](repository-layout.md) | 仓库布局、2026-10-26 重构的旧→新路径对照、外部运维脚本需同步的路径 |
+| [repository-layout.md](repository-layout.md) | 仓库布局、2026-10-26 重构的旧→新路径对照、外部运维入口的新旧路径 |
+| [workspace.md](workspace.md) | 本机工程工作区：目录角色、`iridescently-workspace.json`、存储根与运维根的解析、runtime 搬迁 |
 | [operations.md](operations.md) | 部署运营：端口、网站管家、Cloudflare 隧道、排障 |
 | [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | 当前 GitHub / Cloudflare 状态、未提交现场和新对话接续入口 |
 
@@ -31,5 +32,5 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 - [共同旅途数据合并](ai-handoff/README.md)：439 名有效角色、跨模式灵卡目录、公共资源事务、Cards/Slay 迁移与其他小游戏接入。
 - [主站与西木会馆加载审查](zszm-loading-audit.md)：真实测量、开场阻塞根因和源码优化边界。
 - [2026-10-10 目录整理](maintenance/repository-cleanup-2026-10-10.md)
-- [生命模拟研究](../../External%20Projects/Iridescently%20Labs/research/doc/zszm-life-research/00-index.md)：当前研发资料在 `E:/External Projects/Iridescently Labs/research/`，独立于生产工作区；此链接用于本机资料阅读。
-- [玩家与自主生命：Build-vs-Adopt](../../External%20Projects/Iridescently%20Labs/research/doc/zszm-life-research/33-gameplay-systems-build-vs-adopt.md)：玩法系统的源码筛选、复用边界与下一实验。
+- [生命模拟研究](../../labs/iridescently-labs/research/doc/zszm-life-research/00-index.md)：研发资料在工作区 `labs/iridescently-labs/research/`，不属于仓库；链接按 `repo/` 检出的位置写，只用于本机阅读。
+- [玩家与自主生命：Build-vs-Adopt](../../labs/iridescently-labs/research/doc/zszm-life-research/33-gameplay-systems-build-vs-adopt.md)：玩法系统的源码筛选、复用边界与下一实验。
