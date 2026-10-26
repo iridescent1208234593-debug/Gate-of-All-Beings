@@ -54,11 +54,8 @@ activeTooltip.className = "node-tooltip hud active-label";
 activeTooltip.setAttribute("aria-hidden", "true");
 screen.append(activeTooltip);
 const overlayObstacles = [...document.querySelectorAll<HTMLElement>(
-  '.masthead, .city-panel, .node-rail, .viewport-controls, .footer, .author-tools, .author-snippet',
+  '.map-legend, .viewport-controls, .author-tools, .author-snippet, .menu-panel',
 )];
-const connection = document.querySelector<SVGSVGElement>("#node-connection")!;
-const connectionPath = document.querySelector<SVGPathElement>("#node-connection-path")!;
-const connectionOrigin = document.querySelector<SVGCircleElement>("#node-connection-origin")!;
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
@@ -156,7 +153,7 @@ ring.add(tiles.group);
 canvas.dataset.mapRenderer = 'raster-tiles-with-authored-seam';
 canvas.dataset.sourceSha256 = tiles.sourceSha256;
 const footerNote = document.querySelector<HTMLElement>('.footer-note');
-if (footerNote) footerNote.textContent = `${ATLAS_NODES.filter(n => n.kind === 'named').length} NAMED · ${ATLAS_NODES.filter(n => n.kind === 'unnamed').length} UNNAMED · TILE MAP`;
+if (footerNote) footerNote.textContent = `${ATLAS_NODES.filter(n => n.kind === 'named').length} 座会馆 · ${ATLAS_NODES.filter(n => n.kind === 'unnamed').length} 处待归档地点`;
 
 const gridMaterial = new THREE.MeshBasicMaterial({
   map: makeGrid(), transparent: true, opacity: 0.32, depthWrite: false,
@@ -170,13 +167,14 @@ let theme: Theme = document.documentElement.dataset.theme === "dark" ? "dark" : 
 function applyTheme() {
   document.documentElement.dataset.theme = theme;
   const dark = theme === "dark";
-  renderer.setClearColor(dark ? 0x07100f : 0xe8f0ed, 1);
+  renderer.setClearColor(dark ? 0x142820 : 0xedf2e9, 1);
+  themeButton.textContent = dark ? "切换为浅色" : "切换为深色";
   mapMaterial.color.set(dark ? 0x101d1b : 0xffffff);
   atlas.setTheme(dark);
   tiles.setTheme(dark);
   gridMaterial.color.set(dark ? 0x9bb1aa : 0x355c51);
   gridMaterial.opacity = dark ? 0.14 : 0.1;
-  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", dark ? "#07100f" : "#e8f0ed");
+  document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", dark ? "#182b25" : "#f5f2e8");
   requestRender();
 }
 
@@ -249,7 +247,6 @@ let authorMode = new URLSearchParams(location.search).get("editNodes") === "1";
 let toastTimer = 0;
 let lastSnippet = "";
 let hoveredNode = -1;
-let activeScreenPoint = { x: 0, y: 0, visible: false };
 const screenPoints = bindings.map(() => ({ x: 0, y: 0, visible: false }));
 type Bounds = { left: number; top: number; right: number; bottom: number };
 
@@ -333,21 +330,30 @@ function updatePanelExpansion() {
 function updatePanel() {
   const node = ATLAS_NODES[active];
   const { u, v } = normalizedPosition(node);
-  const typeLabel = node.kind === "named" ? "NAMED NODE" : "UNNAMED SIGNAL";
   panel.dataset.kind = node.kind;
-  panel.innerHTML = `<button class="panel-toggle" type="button" aria-controls="panel-facts panel-description panel-actions" aria-expanded="${panelExpanded}"></button><header><span>${node.code} · ${typeLabel}</span><strong>${node.name}</strong><small>${node.kind === "named" ? "已命名区域节点" : "待归档观测节点"}</small></header><dl id="panel-facts"><div><dt>地图坐标</dt><dd>${Math.round(node.x)} / ${Math.round(node.y)}</dd></div><div><dt>地图位置</dt><dd>${u.toFixed(3)} / ${v.toFixed(3)}</dd></div></dl><p id="panel-description">${node.note}</p><footer id="panel-actions"><span>${node.kind === "named" ? "REFERENCE " + node.code : "REFERENCE POINT"}</span><button type="button" id="panel-reset">返回总览</button></footer>`;
-  panel.classList.remove("is-revealing");
-  void panel.offsetWidth;
-  if (!reducedMotion.matches) panel.classList.add("is-revealing");
-  panel.querySelector<HTMLButtonElement>("#panel-reset")?.addEventListener("click", resetView);
+  panel.innerHTML = `<header><span>${node.kind === "named" ? "会馆档案" : "地点档案"} / ${node.code}</span><h2>${node.name}</h2><small>${node.kind === "named" ? "山海之间，各有归处" : "这个地点的故事，等待补充"}</small></header><button class="panel-toggle" type="button" aria-controls="panel-body" aria-expanded="${panelExpanded}"></button><div id="panel-body"><div class="panel-description" id="panel-description"></div><footer><button type="button" id="panel-reset">返回地图总览</button></footer><details class="panel-facts"><summary>查看坐标</summary><dl><div><dt>原图坐标</dt><dd>${Math.round(node.x)} / ${Math.round(node.y)}</dd></div><div><dt>归一化位置</dt><dd>${u.toFixed(3)} / ${v.toFixed(3)}</dd></div></dl></details></div>`;
+  // Preserve the authored text; separate the introduction and roster for reading.
+  const description = panel.querySelector<HTMLElement>("#panel-description")!;
+  for (const paragraph of node.note.split(/\n\s*\n/).filter(text => text.trim())) {
+    const group = document.createElement("div");
+    if (/^(馆长|执行者|其他成员)[：:]/.test(paragraph.trim())) group.className = "people";
+    for (const line of paragraph.split("\n").filter(text => text.trim())) {
+      const p = document.createElement("p");
+      p.textContent = line;
+      group.append(p);
+    }
+    description.append(group);
+  }
+  panel.querySelector<HTMLButtonElement>("#panel-reset")?.addEventListener("click", () => {
+    resetView();
+    screen.focus({ preventScroll: true });
+  });
   panel.querySelector<HTMLButtonElement>(".panel-toggle")?.addEventListener("click", () => {
     panelExpanded = !panelExpanded;
-    panel.classList.remove("is-revealing");
     updatePanelExpansion();
   });
   panel.scrollTop = 0;
   updatePanelExpansion();
-  nodesRoot.classList.add("has-selection");
   const name = document.createElement("strong");
   name.textContent = node.name;
   const state = document.createElement("small");
@@ -374,9 +380,12 @@ function selectNode(index: number, focus = false) {
   if (changed) updatePanel();
   hideNodeTooltip();
   if (changed) {
-    connection.classList.remove("is-drawing");
-    void connection.getBoundingClientRect();
-    connection.classList.add("is-drawing");
+    const button = bindings[index].railButton;
+    if (button) {
+      const item = button.getBoundingClientRect(), list = rail.getBoundingClientRect();
+      rail.scrollTo({ left: rail.scrollLeft + item.left - list.left - (list.width - item.width) / 2,
+        behavior: reducedMotion.matches ? "instant" : "smooth" });
+    }
   }
   animate();
 }
@@ -388,7 +397,10 @@ function resetView() {
   targetFov = DEFAULT_FOV;
   velocityX = 0;
   panelExpanded = false;
-  updatePanelExpansion();
+  if (active !== 0) { active = 0; updatePanel(); }
+  else updatePanelExpansion();
+  rail.scrollTo({ left: 0, behavior: reducedMotion.matches ? "instant" : "smooth" });
+  hideNodeTooltip();
   animate();
 }
 
@@ -427,30 +439,12 @@ function projectNodes() {
     button.tabIndex = visible && !authorMode ? 0 : -1;
     button.setAttribute("aria-hidden", String(!visible || authorMode));
     screenPoints[index] = { x, y, visible };
-    if (index === active) activeScreenPoint = screenPoints[index];
   });
-  const panelRect = panel.getBoundingClientRect();
-  const startX = activeScreenPoint.x;
-  const startY = activeScreenPoint.y;
-  const left = panelRect.left - rect.left, right = panelRect.right - rect.left;
-  const top = panelRect.top - rect.top, bottom = panelRect.bottom - rect.top;
-  const px = THREE.MathUtils.clamp(startX, left + 20, right - 20);
-  const py = THREE.MathUtils.clamp(startY, top + 20, bottom - 20);
-  const ends = [{ x: left, y: py, nx: -1, ny: 0 }, { x: right, y: py, nx: 1, ny: 0 },
-    { x: px, y: top, nx: 0, ny: -1 }, { x: px, y: bottom, nx: 0, ny: 1 }];
-  ends.sort((a, b) => Math.hypot(a.x - startX, a.y - startY) - Math.hypot(b.x - startX, b.y - startY));
-  const end = ends[0];
-  const bend = Math.min(110, Math.hypot(end.x - startX, end.y - startY) * .35);
-  connectionPath.setAttribute("d", `M ${startX} ${startY} C ${startX + (end.x - startX) * .32} ${startY + (end.y - startY) * .32}, ${end.x + end.nx * bend} ${end.y + end.ny * bend}, ${end.x} ${end.y}`);
-  connectionOrigin.setAttribute("cx", `${startX}`);
-  connectionOrigin.setAttribute("cy", `${startY}`);
-  connection.toggleAttribute("data-visible", activeScreenPoint.visible && !authorMode);
   layoutNodeLabels(rect, obstacles);
 }
 
 function updateStatus() {
-  const wrappedDegrees = ((THREE.MathUtils.radToDeg(rotation) % 360) + 360) % 360;
-  status.textContent = `AZ ${wrappedDegrees.toFixed(1)}° · ZOOM ${Math.round((DEFAULT_FOV / fov) * 100)}% · TILES`;
+  status.textContent = `缩放 ${Math.round((DEFAULT_FOV / fov) * 100)}%`;
 }
 
 function resize() {
@@ -498,16 +492,6 @@ function tick(time: number) {
 function animate() { requestRender(); }
 function requestRender() { if (!animationFrame) { lastFrameTime = 0; animationFrame = requestAnimationFrame(tick); } }
 
-function updatePointerLight(clientX: number, clientY: number) {
-  const rect = screen.getBoundingClientRect();
-  const x = ((clientX - rect.left) / rect.width) * 2 - 1;
-  const y = ((clientY - rect.top) / rect.height) * 2 - 1;
-  screen.style.setProperty("--hud-x", `${x * 6}px`);
-  screen.style.setProperty("--hud-y", `${y * 4}px`);
-  screen.style.setProperty("--light-x", `${(x + 1) * 50}%`);
-  screen.style.setProperty("--light-y", `${(y + 1) * 50}%`);
-}
-
 const raycaster = new THREE.Raycaster();
 const pointerNdc = new THREE.Vector2();
 function mapCoordinateAt(clientX: number, clientY: number) {
@@ -523,7 +507,8 @@ function mapCoordinateAt(clientX: number, clientY: number) {
 function setAuthorMode(next: boolean) {
   authorMode = next;
   document.body.classList.toggle("author-mode", authorMode);
-  authorButton.textContent = authorMode ? "EXIT EDITOR" : "NODE EDITOR";
+  authorButton.textContent = authorMode ? "退出取坐标" : "节点取坐标";
+  authorButton.setAttribute("aria-pressed", String(authorMode));
   const url = new URL(location.href);
   if (authorMode) url.searchParams.set("editNodes", "1"); else url.searchParams.delete("editNodes");
   history.replaceState(null, "", url);
@@ -596,7 +581,6 @@ screen.addEventListener("pointerdown", (event) => {
 });
 
 screen.addEventListener("pointermove", (event) => {
-  updatePointerLight(event.clientX, event.clientY);
   const liveCoordinate = mapCoordinateAt(event.clientX, event.clientY);
   cursorStatus.textContent = liveCoordinate ? `X ${liveCoordinate.x} · Y ${liveCoordinate.y}` : "X — · Y —";
   if (authorMode) {
@@ -647,6 +631,7 @@ screen.addEventListener("dblclick", (event) => {
 });
 
 screen.addEventListener("keydown", (event) => {
+  if (event.target !== screen) return;
   if (event.key === "ArrowLeft" || event.key === "ArrowRight") targetRotation += event.key === "ArrowLeft" ? -0.24 : 0.24;
   else if (event.key === "+" || event.key === "=") setZoom(targetFov - 5);
   else if (event.key === "-" || event.key === "_") setZoom(targetFov + 5);
@@ -659,7 +644,24 @@ screen.addEventListener("keydown", (event) => {
 zoomInButton.addEventListener("click", () => setZoom(targetFov - 6));
 zoomOutButton.addEventListener("click", () => setZoom(targetFov + 6));
 resetButton.addEventListener("click", resetView);
-authorButton.addEventListener("click", () => setAuthorMode(!authorMode));
+authorButton.addEventListener("click", () => {
+  setAuthorMode(!authorMode);
+  document.querySelector<HTMLDetailsElement>("#map-options")!.open = false;
+  screen.focus({ preventScroll: true });
+});
+const menus = [...document.querySelectorAll<HTMLDetailsElement>(".map-menu")];
+menus.forEach(menu => menu.addEventListener("toggle", () => {
+  if (menu.open) menus.filter(other => other !== menu).forEach(other => { other.open = false; });
+  requestRender();
+}));
+document.addEventListener("pointerdown", event => {
+  if (!(event.target as HTMLElement).closest(".map-menu")) menus.forEach(menu => { menu.open = false; });
+});
+document.addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+  const open = menus.find(menu => menu.open);
+  if (open) { open.open = false; open.querySelector<HTMLElement>("summary")?.focus(); }
+});
 authorCopy.addEventListener("click", async () => {
   if (!lastSnippet) return;
   await copyText(lastSnippet);

@@ -33,3 +33,14 @@ npm run build:world-map   # 单独检查本模块构建
 ```
 
 本模块随 `npm run build:modules` 进入模块候选；与 `build:site`、`build:homepage` 候选一起经 `npm run release:seal` 封存为不可变 Release 后，再重启受影响的门户服务。修改 `portal.json` 或统一壳时同样走这一完整封存流程。
+
+## Map reading layout
+
+The map now uses a fixed header, a map viewport and a separate location dossier. On narrow screens the dossier collapses below the map; the hall index scrolls horizontally. Map dimensions continue to come from `#screen` via `ResizeObserver`, not the window.
+
+- Light and dark palettes share paper, ink, jade and brass tokens in `src/style.css`. Theme preferences still use the shared `XTheme` service.
+- Hall descriptions keep their authored text in `nodes.ts`; the view separates paragraphs and member lists. Coordinates are available under “查看坐标”.
+- “显示与工具” contains theme and coordinate-copy tools. Escape or clicking outside dismisses the menu. No server write is introduced.
+- Node positions, tile assets, source registration and rendering geometry are unchanged. “总览” restores the initial view and its matching selected dossier.
+
+For UI checks, build this module and serve its `dist/` at `/app/modules/world-map/`, with `packages/shared-ui/theme.js` served at `/shared/shared-ui/theme.js`. Check desktop and narrow widths, both themes, long descriptions, node/rail selection, drag, zoom, keyboard navigation and the collapsed dossier. Physical-device pinch gestures and the authenticated host shell should also be checked before release.
