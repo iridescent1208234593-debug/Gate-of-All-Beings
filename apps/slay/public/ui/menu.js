@@ -201,7 +201,7 @@ export default function Menu({game, gameState, onUndo, onForgeGolem}) {
 
 	return html`
 		<div class="Splash">
-			<h1 medium>罗小黑战记·重生之门</h1>
+			<h1 medium>重生之门 · 罗小黑战记同人</h1>
 
 			${legacy &&
 			html`<p class="SoulSettle">

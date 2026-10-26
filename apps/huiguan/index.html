@@ -9,10 +9,10 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="description" content="西木会馆 · 人设登记 - 你所登记的人设，将汇入罗小黑战记「众生之门」世界观。">
+<meta name="description" content="西木会馆 · 人设登记 - 你所登记的人设，将汇入「众生之门」——一个《罗小黑战记》同人世界。">
 <meta name="theme-color" content="#f5f0e8">
 <meta property="og:title" content="西木会馆 · 人设登记">
-<meta property="og:description" content="西木会馆 · 人设登记 - 你所登记的人设，将汇入罗小黑战记「众生之门」世界观。">
+<meta property="og:description" content="西木会馆 · 人设登记 - 你所登记的人设，将汇入「众生之门」——一个《罗小黑战记》同人世界。">
 <meta property="og:image" content="https://huiguan.iridescently.xyz/favicon.png">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
@@ -1038,7 +1038,7 @@
       <div class="row-flex">
         <div class="form-row" id="row-code">
           <label>代号 <span class="req">*</span></label>
-          <input type="text" name="code" placeholder="鹿野，妖灵会馆·感知组组长，无限的关门弟子，感知系能力，妖精">
+          <input type="text" name="code" placeholder="鹿野，妖灵会馆·感知组组长，无限的弟子，妖精">
           <div class="err"></div>
         </div>
         <div class="form-row" id="row-name">
@@ -1248,7 +1248,7 @@
       <h2>武器 / 法宝 <span style="color:var(--text-dim);font-size:11px">（选填）</span></h2>
       <div class="form-row" id="row-weapon">
         <div class="branch-custom-row combo-row" style="margin-top:0;">
-          <input type="text" id="weaponInput" placeholder="如：蓝玉盘、琼圆盾（抵挡攻击）、天明珠（打开灵质空间-成仙）" style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addWeapon()}">
+          <input type="text" id="weaponInput" placeholder="如：蓝玉盘、琼圆盾（抵挡攻击）" style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addWeapon()}">
           <button type="button" onclick="addWeapon()">添加</button>
         </div>
         <div id="weaponTags" style="margin-top:6px;"></div>
@@ -1407,7 +1407,7 @@ function maybeGroupReminder() {
     m.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(20,26,22,.6);display:flex;align-items:center;justify-content:center;padding:20px;';
     m.innerHTML = `<div style="background:var(--panel,#fbf8f2);border:1px solid var(--border,#d4cfbe);border-radius:12px;max-width:440px;width:100%;padding:22px;">
       <strong style="font-size:16px;letter-spacing:1px;">加入交流群 · 领取编辑权限</strong>
-      <p style="font-size:13px;color:var(--dim,#7a8a7e);line-height:1.8;margin:12px 0;">你已拥有<strong>长老/编辑</strong>权限，可修改、删除官方设定。为防止权限被滥用、便于协作与追责，请先加入交流群并填写你的群昵称：</p>
+      <p style="font-size:13px;color:var(--dim,#7a8a7e);line-height:1.8;margin:12px 0;">你已拥有<strong>长老/编辑</strong>权限，可修改、删除站内的官方角色资料。为防止权限被滥用、便于协作与追责，请先加入交流群并填写你的群昵称：</p>
       <div style="font-size:13px;margin-bottom:10px;">QQ群：<strong>878029597</strong>（微信群二维码见页脚/画廊）</div>
       <input id="groupNickInput" placeholder="填写你在群里的昵称" style="width:100%;padding:9px;border:1px solid var(--border,#d4cfbe);border-radius:6px;font-family:inherit;font-size:14px;margin-bottom:6px;">
       <div id="groupNickErr" style="color:var(--danger,#b3543f);font-size:12px;min-height:16px;margin-bottom:8px;"></div>
@@ -1910,7 +1910,7 @@ function ensureElderChooser() {
   m.innerHTML = `<div class="ec-box">
     <h3>突破年龄限制 · 选一条路</h3>
     <div class="ec-sub">三条路都能把年龄上限提升到 1500 岁。想要修改设定、管理成员的完整「长老」权限，需要馆长审核；其余两条路可以直接加冕～</div>
-    <button type="button" class="ec-opt" data-opt="elder"><strong>📜 申请长老 · 馆长审核</strong><span>拥有编辑 / 管理权限（可修改、删除官方设定），需经馆长批准。</span></button>
+    <button type="button" class="ec-opt" data-opt="elder"><strong>📜 申请长老 · 馆长审核</strong><span>拥有编辑 / 管理权限（可修改、删除站内的官方角色资料），需经馆长批准。</span></button>
     <button type="button" class="ec-opt" data-opt="honor"><strong>🌿 成为荣誉长老 · 免申请</strong><span>只需记得加入交流群，立刻生效。仅荣誉头衔与 1500 岁年龄上限，不含编辑权限。</span></button>
     <button type="button" class="ec-opt" data-opt="yaowang"><strong>👑 成为妖王 · 写下你的理由</strong><span>自述超过 50 字直接加冕；不足 50 字将交由馆长审核。还可以自定义妖王别称。</span></button>
     <div class="ec-form" id="ecYaowang">
@@ -1970,7 +1970,7 @@ async function claimHonor(honor, extra, done) {
   } catch (e) { showToast('error', '⚠ 网络错误，请稍后再试', 5000); }
 }
 async function applyElder() {
-  if (!confirm('申请【长老】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 长老/编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。\n确认继续申请？')) return;
+  if (!confirm('申请【长老】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 长老/编辑权限可修改、删除站内的官方角色资料，请务必谨慎，避免误删数据。\n确认继续申请？')) return;
   const msg = (prompt('申请长老的理由（选填，300 字内）：') || '').trim();
   try {
     const r = await fetch('/api/elder/apply', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: msg }) });

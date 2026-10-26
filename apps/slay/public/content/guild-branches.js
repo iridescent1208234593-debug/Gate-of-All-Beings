@@ -30,7 +30,7 @@ export const guildBranches = [
 		title: '馆训·溪畔灵秀',
 		flavor: '罗小白家所在的小镇，人妖共居的灵秀之地，馆长卡里。溪畔灵气汇聚，机缘自来——福缘 +2。',
 		desc: '位于罗小白家所在的小镇，人妖和谐共居。馆长卡里，四小只也活跃于此。',
-		representative: '卡里（馆长）、山新、涅帕、秃贝',
+		representative: '卡里（馆长）、涅帕、秃贝',
 		passive: {fortune: 2},
 	},
 	{

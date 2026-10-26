@@ -41,7 +41,7 @@ export function claimEcology(meta: MetaState, value: unknown): MetaState {
   const {packet,receipts}=receiveEcoExchange(meta,value);
   const individuals=new Map((meta.ecoIndividuals||[]).map(i=>[i.id,i]));
   for(const i of packet.individuals||[])if(!individuals.has(i.id))individuals.set(i.id,i);
-  if(individuals.size>512)throw new Error('当前手札最多收录 512 个生态个体，请先导出备份。');
+  if(individuals.size>512)throw new Error('当前存档最多收录 512 个生态个体，请先导出备份。');
   // Version 1 retains the old daily-hall behavior; version 2 sends goods exclusively to the 3D base.
   const legacy=packet.schemaVersion===1?packet.resources:{spirit:0,herb:0,food:0};
   return {...meta,ecoReceipts:receipts,spirit:meta.spirit+legacy.spirit,

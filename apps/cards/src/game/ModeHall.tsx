@@ -30,8 +30,8 @@ const auxiliary = [
   { view: 'world', title: '万灵志', caption: '查阅人物、地点与灵术', icon: BookOpen },
 ];
 
-/** Hall order: 门庭 (the 众生牌录, which replaced 入世历练 and 重生之门), 省省's beach, 聚灵, then the rest. */
-const ADVENTURE: Game = { key: 'cards', view: 'journal', title: '门庭', genre: '众生牌录 · 卡牌版众生之门', shots: [cardsBattle, slayBattle, cardsMap, slayMap],
+/** Hall order: 众生牌录 (the 众生牌录, which replaced 入世历练 and 重生之门), 省省's beach, 聚灵, then the rest. */
+const ADVENTURE: Game = { key: 'cards', view: 'journal', title: '众生牌录', genre: '卡牌 · 出行与重生之门', shots: [cardsBattle, slayBattle, cardsMap, slayMap],
   scene: <Forest className="game-card__scene"/>,
   desc: '入世历练与重生之门已并入众生牌录：与同行者出行、照料会馆、推开重生之门，每一次旅途都记在同一本牌录里。', points: ['出行 · 灵质修行', '同行者与会馆', '重生之门', '旅途见闻'] };
 const GAMES: Game[] = [
