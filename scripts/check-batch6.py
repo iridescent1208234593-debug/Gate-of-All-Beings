@@ -11,7 +11,7 @@ import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 from storage_paths import initialize_storage
 
 
@@ -40,10 +40,9 @@ def main():
                             "seconds": round(time.monotonic() - started, 2)})
 
         # Separate processes avoid modules leaking import caches/environment fixtures.
-        for directory in (ROOT / "server", ROOT / "portal/huiguan/tests", ROOT / "server/app/src/cards/tests"):
+        for directory in (ROOT / "services/platform/tests", ROOT / "portal/huiguan/tests", ROOT / "server/app/src/cards/tests"):
             for file in sorted(directory.glob("test_*.py")):
                 run(str(file.relative_to(ROOT)), [sys.executable, "-X", "utf8", str(file)])
-        run("ingress security regression", [sys.executable, "-X", "utf8", "server/security_ingress_test.py"])
         node = shutil.which("node")
         run("release boundary and hash contracts", [node, "scripts/test-release-artifacts.mjs"])
         publisher_check = ROOT / "scripts/test-publish-release.mjs"
@@ -69,7 +68,7 @@ def main():
                 modules = str(args.modules.resolve(strict=True))
                 run("Built modules contain no unreviewed own-domain URLs",
                     [sys.executable, "-X", "utf8", "scripts/check-domain-hardcodes.py", modules])
-                run("Portal routing on every approved root", [sys.executable, "-X", "utf8", "server/verify_portal.py"],
+                run("Portal routing on every approved root", [sys.executable, "-X", "utf8", "services/platform/tests/verify_portal.py"],
                     {"IRIDESCENTLY_MODULES_ROOT": modules})
             else:
                 results.append({"check": "Portal routing on every approved root", "passed": False, "seconds": 0,

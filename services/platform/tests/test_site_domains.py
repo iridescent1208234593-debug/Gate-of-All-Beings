@@ -9,7 +9,7 @@ import sys
 import tempfile
 import unittest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from testing_storage import configure
 
 _TEMP = tempfile.TemporaryDirectory(prefix="site-domains-")
@@ -21,7 +21,7 @@ import site_domains  # noqa: E402
 from base_static import BaseStaticHandler  # noqa: E402
 from host_policy import enforce_request  # noqa: E402
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 ROOTS = ("iridescently.xyz", "iridescently.cn", "iridescently.dpdns.org")
 
 
@@ -55,7 +55,7 @@ def isolated_python(code, **environment):
     env = {key: value for key, value in os.environ.items() if key not in ("SITE_DOMAIN", "IRIDESCENTLY_ALLOWED_DOMAINS",
                                                                            "IRIDESCENTLY_OAUTH_CALLBACK_ROOTS")}
     env.update(environment)
-    return subprocess.run([sys.executable, "-X", "utf8", "-c", "import sys; sys.path.insert(0, 'server')\n" + code],
+    return subprocess.run([sys.executable, "-X", "utf8", "-c", "import sys; sys.path.insert(0, 'services/platform')\n" + code],
                           cwd=ROOT, env=env, capture_output=True, text=True)
 
 

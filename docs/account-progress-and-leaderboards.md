@@ -6,7 +6,7 @@
 
 **等级曲线**：第 1 级需要 1 分，之后每级比上一级多 1 分；第 n 级累计 `n(n+1)/2` 分（1、3、6、10、15……）。新账户 Lv.0，无上限。积分按 0.1 记账（库里存整数 `points_x10`）。
 
-**积分来源**（`server/account_progress.py` 的 `RULES`）：
+**积分来源**（`services/platform/account_progress.py` 的 `RULES`）：
 
 | 规则 | 积分 | 每天上限 |
 | --- | --- | --- |
@@ -76,9 +76,9 @@
 部署新代码后，所有账户读到的积分已经是新表里的 0；迁移负责清掉旧列并留档，保证没有旧值残留，也可回滚。
 
 ```bash
-python server/account_progress.py reset-legacy           # 预演：显示将清零的账户数与积分，不写入
-python server/account_progress.py reset-legacy --apply   # 归档旧积分 → 旧列清零 → 清空新积分与流水；重复执行会拒绝
-python server/account_progress.py restore-legacy --apply # 回滚：把归档的旧积分写回旧列（旧代码读的位置）
+python services/platform/account_progress.py reset-legacy           # 预演：显示将清零的账户数与积分，不写入
+python services/platform/account_progress.py reset-legacy --apply   # 归档旧积分 → 旧列清零 → 清空新积分与流水；重复执行会拒绝
+python services/platform/account_progress.py restore-legacy --apply # 回滚：把归档的旧积分写回旧列（旧代码读的位置）
 ```
 
 在 2026-10-20 的 `users.db` **临时副本**上预演 + 执行：254 个账户、合计 41,760 旧积分被归档并清零，第二次执行被拒绝；副本已删除。真实 `users.db` 未执行。玩法排行榜成绩（`game_scores`）不受重置影响。
@@ -87,5 +87,5 @@ python server/account_progress.py restore-legacy --apply # 回滚：把归档的
 
 ## 6. 测试
 
-- `python server/test_account_progress.py`（临时数据根）：等级曲线、发分与去重、每日上限与跨日、(kind, uid) 隔离、累计型上限、参数校验、同分名次、设表只计新表、重置/拒绝重复/回滚、HTTP 访客/封禁/伪造 cookie/跨站/非 JSON。
-- `python server/verify_portal.py`：新增 6 项（各站点 `/api/progress/*`、排行榜页、progress.js）。
+- `python services/platform/tests/test_account_progress.py`（临时数据根）：等级曲线、发分与去重、每日上限与跨日、(kind, uid) 隔离、累计型上限、参数校验、同分名次、设表只计新表、重置/拒绝重复/回滚、HTTP 访客/封禁/伪造 cookie/跨站/非 JSON。
+- `python services/platform/tests/verify_portal.py`：新增 6 项（各站点 `/api/progress/*`、排行榜页、progress.js）。

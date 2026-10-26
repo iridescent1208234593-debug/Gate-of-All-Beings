@@ -2,7 +2,7 @@ const siteDomains = createRequire(import.meta.url)('../../packages/site-domains/
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
-const runtimePaths = createRequire(import.meta.url)("../../server/runtime-paths.cjs");
+const runtimePaths = createRequire(import.meta.url)("../../services/platform/runtime-paths.cjs");
 
 const homepageRoot = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(homepageRoot, "../..");

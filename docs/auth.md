@@ -2,7 +2,7 @@
 
 ## 1. 跨站 SSO（hx_sso）
 
-- 实现：`server/hx_sso.py`（跨站共用）。
+- 实现：`services/platform/hx_sso.py`（跨站共用）。
 - Cookie：`hx_sso`，域 `.iridescently.xyz`，`HttpOnly; SameSite=Lax`；token 由 `make_token(uid,kind,name,color)` 签发、`verify_token` 校验、`read_cookie(headers)` 读取。
 - 会馆是签发方（登录后写 cookie）；主站 / 人设站 / 各游戏读 cookie 获取登录态。
 - 读取端点：各站 `/api/sso-user` 返回 `{logged_in,name,uid,kind,admin}`。
@@ -29,7 +29,7 @@
 - 角色：`user` / `executor`（执行者）/ `elder`（长老）/ `admin`；`user_flags` 存封禁与管理标记。
 - 会话持久化：`sessions_db(sid,kind,uid,created_at,expires_at)`，重启不掉登录态。
 
-### 账号找回 / 安全（server/account_security.py）
+### 账号找回 / 安全（services/platform/account_security.py）
 
 动作（`/api/security/<action>`）：`setup`（设置提示问题）、`question`（取问题）、`change`（改密）、`reset`（凭答案重置）、`settings`。
 - 哈希答案 + 按账号与 IP 双维度限流（`security_attempts`），原子更新密码。

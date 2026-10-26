@@ -272,7 +272,7 @@ test('Vite plugin saves dev and preview settings in isolated external storage', 
     import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
     import {join} from 'node:path';
     import {createServer} from 'node:http';
-    const paths=createRequire(import.meta.url)(${JSON.stringify(fileURLToPath(new URL('../../../../runtime-paths.cjs', import.meta.url)))});
+    const paths=createRequire(import.meta.url)(${JSON.stringify(fileURLToPath(new URL('../../../../../services/platform/runtime-paths.cjs', import.meta.url)))});
     for(const directory of Object.values(paths.layout))mkdirSync(directory,{recursive:true});
     writeFileSync(join(paths.dataRoot,'.storage-ready.json'),JSON.stringify({schema:1,state:'ready',environment:'test',roots:paths.layout}));
     const {spiritSettingsPlugin}=await import(${JSON.stringify(new URL('../server/spirit-settings.js', import.meta.url).href)});

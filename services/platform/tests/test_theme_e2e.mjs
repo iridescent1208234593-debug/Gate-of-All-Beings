@@ -1,8 +1,8 @@
 /*
  * 主题系统端到端验证（手动工具，不在 unittest discover 范围内）。
- * 用法：先起服务（PORT=18099 python server/portal_server.py）和无头 Edge：
+ * 用法：先起服务（PORT=18099 python services/platform/portal_server.py）和无头 Edge：
  *   msedge --headless=new --remote-debugging-port=9223 --user-data-dir=<临时目录> about:blank
- * 然后 node server/test_theme_e2e.mjs（覆盖 cookie 三态、防闪烁、跟随系统、tone 联动）。
+ * 然后 node services/platform/tests/test_theme_e2e.mjs（覆盖 cookie 三态、防闪烁、跟随系统、tone 联动）。
  */
 /* 端到端验证主题系统：CDP 驱动无头 Edge 访问本地 connections 页。 */
 const CDP = 'http://127.0.0.1:9223';

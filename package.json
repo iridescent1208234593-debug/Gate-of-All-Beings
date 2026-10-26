@@ -23,7 +23,7 @@
     "build:world-map": "node scripts/build-world-map.mjs",
     "check:world-map": "npm run check --workspace=@iridescently/world-map",
     "build:modules": "node server/app/scripts/build-modules.mjs",
-    "test:portal": "python server/verify_portal.py",
+    "test:portal": "python services/platform/tests/verify_portal.py",
     "assets:manifest": "node scripts/assets-manifest.mjs",
     "update:status": "node scripts/update.mjs status",
     "update:check": "node scripts/update.mjs check",

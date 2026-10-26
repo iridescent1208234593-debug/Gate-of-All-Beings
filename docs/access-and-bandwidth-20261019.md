@@ -6,7 +6,7 @@
 
 候选由稳定版原始代码包叠加本轮补丁生成，仅改变 11 个代码文件。`file:///E:/External%20Projects/Iridescently%20Operations%20Archive/audits/access-audit-20261019/reviewed-hotfix.patch` 与 `hotfix-manifest.json` 记录逐文件前后 SHA256。没有重新构建或打包 Claude 正在修改的 Cards、Slay、共享数据、账户或设计系统。
 
-18:34 后检测到 Claude 的并行发布 `20261019T103413Z`，用户确认由她执行。本轮保留其发布，以这份真实代码包为基线补发 `20261019T103900Z`，仅修正 `server/access_recovery.py` 的原始路径判断。逐文件验证 1,519 个文件，除该文件外全部匹配 Claude 的发布清单；上一版本保留为 `20261019T103413Z`。未提交或推送 Git。
+18:34 后检测到 Claude 的并行发布 `20261019T103413Z`，用户确认由她执行。本轮保留其发布，以这份真实代码包为基线补发 `20261019T103900Z`，仅修正 `services/platform/access_recovery.py` 的原始路径判断。逐文件验证 1,519 个文件，除该文件外全部匹配 Claude 的发布清单；上一版本保留为 `20261019T103413Z`。未提交或推送 Git。
 
 ## 两类故障的真实根因
 

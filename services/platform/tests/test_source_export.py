@@ -14,7 +14,7 @@ class SourceExportTests(unittest.TestCase):
             source = base / "source"
             source.mkdir()
             files = {
-                "server/app.py": "print('committed')\n",
+                "services/platform/app.py": "print('committed')\n",
                 "portal/page.html": "<p>committed</p>",
                 "packages/example.js": "export default 1;",
                 "server/users.db": "private database",
@@ -32,20 +32,20 @@ class SourceExportTests(unittest.TestCase):
             git("init")
             git("add", ".")
             git("-c", "user.name=Fixture", "-c", "user.email=fixture@example.invalid", "commit", "-m", "fixture")
-            (source / "server/app.py").write_text("print('uncommitted')\n", encoding="utf-8")
+            (source / "services/platform/app.py").write_text("print('uncommitted')\n", encoding="utf-8")
             environment = {key: value for key, value in os.environ.items() if not key.startswith("IRIDESCENTLY_")}
             environment.update(IRIDESCENTLY_PROJECT_ROOT=str(source), IRIDESCENTLY_ENVIRONMENT="test",
                                IRIDESCENTLY_STORAGE_ROOT=str(base / "storage"), PYTHONDONTWRITEBYTECODE="1")
-            exporter = Path(__file__).resolve().parents[1] / "scripts" / "build-site.py"
+            exporter = Path(__file__).resolve().parents[3] / "scripts" / "build-site.py"
             result = subprocess.run([sys.executable, str(exporter)], cwd=source, env=environment,
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             candidates = list((base / "storage").rglob("candidate/site"))
             self.assertEqual(len(candidates), 1)
             target = candidates[0]
-            self.assertEqual((target / "server/app.py").read_text(), "print('committed')\n")
+            self.assertEqual((target / "services/platform/app.py").read_text(), "print('committed')\n")
             self.assertEqual(sorted(path.relative_to(target).as_posix() for path in target.rglob("*") if path.is_file()),
-                             ["packages/example.js", "portal/page.html", "server/app.py"])
+                             ["packages/example.js", "portal/page.html", "services/platform/app.py"])
             self.assertFalse((source / ".releases").exists())
 
 

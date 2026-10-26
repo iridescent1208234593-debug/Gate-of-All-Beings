@@ -1,4 +1,4 @@
-"""Stage 1.8.3 regression checks. Run: python -X utf8 server/test_stage183_release.py
+"""Stage 1.8.3 regression checks. Run: python -X utf8 services/platform/tests/test_stage183_release.py
 
 Temporary files only. Covers: Cards import/release boundary (R6), Cards session races (R1),
 immutable-cache rule and real response headers (R4).
@@ -14,11 +14,11 @@ import tempfile
 import threading
 import time
 
-SERVER_DIR = Path(__file__).resolve().parent
+SERVER_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SERVER_DIR))
 from base_static import BaseStaticHandler, HASHED_ASSET  # noqa: E402
 
-CARDS = SERVER_DIR / "app" / "src" / "cards" / "server.py"
+CARDS = SERVER_DIR.parents[1] / "server" / "app" / "src" / "cards" / "server.py"
 
 
 def load_cards(project_root):
@@ -77,7 +77,8 @@ def test_cards_import_boundary():
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
         (root / "server" / "app" / "src" / "cards").mkdir(parents=True)
-        (root / "server" / "base_static.py").write_text("raise RuntimeError('source-tree base_static imported')\n")
+        (root / "services" / "platform").mkdir(parents=True)
+        (root / "services" / "platform" / "base_static.py").write_text("raise RuntimeError('source-tree base_static imported')\n")
         module = load_cards(root)
         origin = Path(sys.modules["base_static"].__file__).resolve()
         assert origin == (SERVER_DIR / "base_static.py").resolve(), origin

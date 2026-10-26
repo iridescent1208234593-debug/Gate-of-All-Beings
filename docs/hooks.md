@@ -50,7 +50,7 @@
 ## 6. 运维钩子
 
 - 网站管家 `E:\External Projects\Iridescently Operations\网站恢复/website-manager.py` 的 `SITES`：站点清单（名称/域名/端口/启动命令）。
-- 看门狗 `portal/huiguan/watchdog.py`：8080 不在则拉起 `server/portal_server.py`。
+- 看门狗 `portal/huiguan/watchdog.py`：8080 不在则拉起 `services/platform/portal_server.py`。
 - Cloudflare：`~/.cloudflared/config.yml` 的 ingress 与 `TUNNEL_SITE`。
 - 世界观库重链：`assets/罗小黑战记数据库/relink_db.py`（预演 / `--apply`）。
 

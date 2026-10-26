@@ -4,11 +4,11 @@
 - www / huiguan / oc：按 Host 复用各自 Handler。
 - 统一壳与游戏模块（内路径）：
     /app/*                 -> server/app（壳 + modules）
-    /shared/shared-ui/*    -> packages/shared-ui
+    /shared/*              -> packages/*（共享浏览器包，含 /shared/site-domains/index.js）
     /management/*,/ecology/* -> 兼容 cards 内嵌的根绝对路径
     /app/modules/<name>/api/*  -> 反向代理到各游戏自己的 API 上游
 - 未接入生产（cloudflared / 网站管家）前：
-    PORT=8080 python server/portal_server.py
+    PORT=8080 python services/platform/portal_server.py
 """
 import http.client
 import http.server
@@ -27,7 +27,7 @@ PORT = int(os.environ.get("PORT", "8080"))
 ENVIRONMENT = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip().lower()
 # Production ingress must remain loopback-only; HOST is configurable only for local development.
 HOST = (os.environ.get("HOST", "127.0.0.1").strip() or "127.0.0.1") if ENVIRONMENT == "development" else "127.0.0.1"
-CODE_ROOT = Path(__file__).resolve().parents[1]
+CODE_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _load(name, path):
@@ -38,7 +38,7 @@ def _load(name, path):
     return mod
 
 
-sys.path.insert(0, str(CODE_ROOT / "server"))
+sys.path.insert(0, str(CODE_ROOT / "services" / "platform"))
 from base_static import BaseStaticHandler  # noqa: E402
 from host_policy import enforce_request, forwarded_headers  # noqa: E402
 from site_domains import service_name, site_url, cors_headers  # noqa: E402
@@ -216,7 +216,7 @@ class PublicStatusHandler(BaseStaticHandler):
 
 
 class ProgressHandler(BaseStaticHandler):
-    """/api/progress/*: account points, daily tasks and leaderboards (server/account_progress.py)."""
+    """/api/progress/*: account points, daily tasks and leaderboards (services/platform/account_progress.py)."""
 
     def _serve(self):
         import account_progress

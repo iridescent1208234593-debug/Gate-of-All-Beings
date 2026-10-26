@@ -15,7 +15,7 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 
 ## 快速事实
 
-- 统一入口：`server/portal_server.py`，端口 `8080`，生产由 Cloudflare 隧道接入。
+- 统一入口：`services/platform/portal_server.py`，端口 `8080`，生产由 Cloudflare 隧道接入。
 - 壳：`server/app/shell/index.html`，路径 `/app/shell/m/<名>`；embed 模块同页挂载，非 embed 试玩沿用 iframe，不能概括为全站无 iframe。
 - 公用包：`@lxh/shared-{ui,types,data,session}`。
 - 统一存档：`localStorage['iridescently.save.v1']`。

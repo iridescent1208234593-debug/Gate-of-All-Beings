@@ -5,7 +5,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import runtimePaths from "../server/runtime-paths.cjs";
+import runtimePaths from "../services/platform/runtime-paths.cjs";
 
 const root = path.resolve(process.env.IRIDESCENTLY_PROJECT_ROOT || process.cwd());
 const operationsRoot = path.resolve(process.env.IRIDESCENTLY_OPS_ROOT || "E:/External Projects/Iridescently Operations");

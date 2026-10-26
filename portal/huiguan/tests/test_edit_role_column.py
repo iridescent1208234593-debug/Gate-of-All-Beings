@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parents[1]
-INIT_TWICE = "import sys; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'server')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; s.init_user_db(); s.init_user_db(); print(s.USER_DB)"
+INIT_TWICE = "import sys; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'services' / 'platform')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; s.init_user_db(); s.init_user_db(); print(s.USER_DB)"
 
 
 class EditRoleColumnTest(unittest.TestCase):

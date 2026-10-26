@@ -1,9 +1,12 @@
-"""Run with python server/test_static_security.py; uses only temporary files."""
+"""Run with python services/platform/tests/test_static_security.py; uses only temporary files."""
 import http.client
 import http.server
 from pathlib import Path
+import sys
 import tempfile
 import threading
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from base_static import BaseStaticHandler, static_allowed
 
 

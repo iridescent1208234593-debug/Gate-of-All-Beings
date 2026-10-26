@@ -8,6 +8,7 @@ import subprocess
 import sys
 import json
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # services/platform
 from asset_registry import AssetRegistry
 
 
@@ -95,7 +96,7 @@ class AssetRegistryTests(unittest.TestCase):
     def test_cli_import_writes_verifiable_manifest_and_closes_database(self):
         manifest = Path(self.temp.name) / "manifest.json"
         result = subprocess.run([
-            sys.executable, str(Path(__file__).with_name("asset_registry.py")), "import", str(self.root),
+            sys.executable, str(Path(__file__).resolve().parents[1] / "asset_registry.py"), "import", str(self.root),
             "--database", str(self.db), "--module", "huiguan", "--manifest", str(manifest),
         ], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)

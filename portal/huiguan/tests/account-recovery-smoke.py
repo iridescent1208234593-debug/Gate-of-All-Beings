@@ -6,7 +6,7 @@ import tempfile
 import threading
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "server"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
 from account_email import init_schema as init_email_schema
 from account_recovery import handle_recovery, init_schema as init_recovery_schema
 

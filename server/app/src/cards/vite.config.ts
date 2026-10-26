@@ -7,7 +7,7 @@ import {defineConfig, type Plugin} from 'vite';
 import {cardBalancePlugin} from './server/cardBalanceServer';
 import {preloadManifestPlugin} from './server/preloadManifest';
 import {createRequire} from 'node:module';
-const runtimePaths = createRequire(import.meta.url)('../../../runtime-paths.cjs');
+const runtimePaths = createRequire(import.meta.url)('../../../../services/platform/runtime-paths.cjs');
 
 // index.html 在生产里引用已发布的会馆设计系统（稳定发布路径）；开发时改读工作区源码，改 design-system.css 立即生效。
 const designSystemDir = realpathSync(path.resolve(__dirname, '../../../../portal/huiguan/design-system'));

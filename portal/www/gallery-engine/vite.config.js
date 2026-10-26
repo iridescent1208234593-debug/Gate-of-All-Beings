@@ -5,7 +5,7 @@ import path from 'node:path'
 import glsl from 'vite-plugin-glsl'
 import { externalGallery } from './gallery-plugin.js'
 import { createRequire } from 'node:module'
-const runtimePaths = createRequire(import.meta.url)('../../../server/runtime-paths.cjs')
+const runtimePaths = createRequire(import.meta.url)('../../../services/platform/runtime-paths.cjs')
 
 export default defineConfig({
   server: { allowedHosts: siteDomains.allowedHosts },

@@ -60,10 +60,10 @@ Checkout, `git clean`, builds, sealing and rollback only touch the source tree, 
 The local `production` environment lives under `E:\External Projects\Iridescently Runtime`. Its migration copied 4,620 files (6.30 GiB, six SQLite databases via the SQLite backup API) from the former in-tree layout of `E:\Projects`, verified every file hash and each database's logical dump, and then detached the untracked originals into `backups/batch6-migration-20261025/original-source/`. `storage-migrate.py verify` re-checks targets against the manifest and the recovery originals; `restore-source` copies originals back without overwriting later data. Old build outputs and release snapshots still in `E:\Projects\.releases` are not runtime data and are left for the unchanged Hong Kong release tooling.
 
 Regression checks use synthetic identities/images and disposable storage:
-`server/test_account_progress.py`, `server/test_task_chains.py`,
-`server/test_game_save_scope.py`, `server/test_gallery_interactions.py`,
-`server/test_site_admin.py`, `server/test_huiguan_oauth_session.py`, `server/test_storage_paths.py`,
-`server/test_storage_migration.py`, `server/test_operations_tools.py`, `server/test_runtime_services.py`,
+`services/platform/tests/test_account_progress.py`, `services/platform/tests/test_task_chains.py`,
+`services/platform/tests/test_game_save_scope.py`, `services/platform/tests/test_gallery_interactions.py`,
+`services/platform/tests/test_site_admin.py`, `services/platform/tests/test_huiguan_oauth_session.py`, `services/platform/tests/test_storage_paths.py`,
+`services/platform/tests/test_storage_migration.py`, `services/platform/tests/test_operations_tools.py`, `services/platform/tests/test_runtime_services.py`,
 `portal/huiguan/tests/test_original_image_access.py`, the remaining Huiguan API tests,
 Cards identity/balance tests and Spirit settings tests. Run Python fixture modules in
 separate processes: they deliberately configure their own environment and import-time

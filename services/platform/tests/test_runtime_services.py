@@ -13,11 +13,11 @@ import time
 import unittest
 from contextlib import contextmanager
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from testing_storage import configure
 from storage_paths import release_root
 
-SOURCE = Path(__file__).resolve().parents[1]
+SOURCE = Path(__file__).resolve().parents[3]
 
 
 def file_hashes(root):
@@ -32,8 +32,8 @@ class SealedRuntimeServices(unittest.TestCase):
         cls.addClassCleanup(cls.temporary.cleanup)
         cls.data = configure(Path(cls.temporary.name) / 'storage')
         cls.site = release_root() / 'store' / 'fixture' / 'site'
-        cls.site.joinpath('server').mkdir(parents=True)
-        shutil.copy2(SOURCE / 'server' / 'runtime-paths.cjs', cls.site / 'server' / 'runtime-paths.cjs')
+        cls.site.joinpath('services', 'platform').mkdir(parents=True)
+        shutil.copy2(SOURCE / 'services' / 'platform' / 'runtime-paths.cjs', cls.site / 'services' / 'platform' / 'runtime-paths.cjs')
         build = 'import {buildRuntime} from "./scripts/build-runtime.mjs"; await buildRuntime(process.argv[1]);'
         subprocess.run(['node', '--input-type=module', '-e', build, str(cls.site)], cwd=SOURCE,
                        env=os.environ.copy(), check=True, capture_output=True, text=True)

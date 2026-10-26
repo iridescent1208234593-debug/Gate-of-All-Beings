@@ -22,7 +22,7 @@
 - 路径：`portal/huiguan/users.db`（`STATIC_DIR/users.db`）。
 - 表：
   - 账号：`users`（USSO 用户）、`local_users`（站内用户名/密码，`role`/`status`）、`sessions_db`（登录态持久化）、`user_flags`（封禁/管理员）。
-  - 账号找回：`account_recovery`、`security_attempts`（`server/account_security.py` 建表）。
+  - 账号找回：`account_recovery`、`security_attempts`（`services/platform/account_security.py` 建表）。
   - 内容：`elder_requests`、`exempt_requests`、`fan_characters`、`color_schemes`、`posters`、`sticker_uploads`、`char_favorites`、`char_votes` 等。
 - 云存档：`/api/game/save`、`/api/game/load`（management 使用）。
 

@@ -10,7 +10,7 @@ import threading
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 os.environ["USSO_LOGIN_ENABLED"] = "1"
 os.environ["USSO_CLIENT_SECRET"] = "test-only-oauth-secret"
 os.environ["HX_SSO_SECRET"] = "test-only-hx-sso-secret"

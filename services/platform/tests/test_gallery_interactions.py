@@ -14,9 +14,9 @@ import urllib.request
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 TEMP = tempfile.TemporaryDirectory(prefix="homepage-gallery-")
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 from testing_storage import configure
 from storage_paths import assets_root
 DATA = configure(TEMP.name)
@@ -48,7 +48,7 @@ legacy_public = DATA / "homepage" / "config" / "assets" / "homepage" / "gallery-
 legacy_public.parent.mkdir(parents=True, exist_ok=True)
 legacy_public.write_bytes(b"legacy public path")
 
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 import hx_sso  # noqa: E402
 import gallery_interactions  # noqa: E402
 import scraping_observer  # noqa: E402

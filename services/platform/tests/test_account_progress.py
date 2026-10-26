@@ -16,16 +16,16 @@ from datetime import datetime, timezone
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 TEMP = tempfile.TemporaryDirectory(prefix="account-progress-", ignore_cleanup_errors=True)
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 from testing_storage import configure
 from storage_paths import assets_root
 DATA = configure(TEMP.name)
 (DATA / "huiguan").mkdir(parents=True, exist_ok=True)
 os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(ROOT)
 os.environ.setdefault("HX_SSO_SECRET", "test-secret-for-account-progress")
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 sys.path.insert(0, str(ROOT))
 # Importing the 会馆 module creates the real schema (local_users, user_flags, ...) in the temp users.db.
 huiguan = importlib.import_module("portal.huiguan.server_huiguan")

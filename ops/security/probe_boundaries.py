@@ -8,7 +8,7 @@ from pathlib import Path
 import socket
 import ssl
 import sys
-sys.path.insert(0,str(Path(__file__).resolve().parents[2]/'server'))
+sys.path.insert(0,str(Path(__file__).resolve().parents[2] / "services" / "platform"))
 # Probe what is deployed, not every host the application would accept.
 PRODUCTION_HOSTS = frozenset(h['hostname'] for h in json.loads((Path(__file__).with_name('deployed-hosts.json')).read_text('utf-8'))['hosts']
                              if h['registered'] and h['node'] == 'hk')

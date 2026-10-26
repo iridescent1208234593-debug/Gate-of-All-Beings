@@ -12,10 +12,10 @@ browser; each game has a plausibility ceiling and points are capped per day, so 
 forged score can at most top one board, never farm levels.
 
 CLI (run from the project root; IRIDESCENTLY_STORAGE_ROOT and IRIDESCENTLY_ENVIRONMENT select isolated data):
-  python server/account_progress.py status                 # legacy points and new totals
-  python server/account_progress.py reset-legacy           # dry run: what the reset would change
-  python server/account_progress.py reset-legacy --apply   # archive + zero every account's points
-  python server/account_progress.py restore-legacy --apply # rollback: put archived legacy points back
+  python services/platform/account_progress.py status                 # legacy points and new totals
+  python services/platform/account_progress.py reset-legacy           # dry run: what the reset would change
+  python services/platform/account_progress.py reset-legacy --apply   # archive + zero every account's points
+  python services/platform/account_progress.py restore-legacy --apply # rollback: put archived legacy points back
 """
 import argparse
 from storage_paths import data_root, huiguan_data_dir, require_ready

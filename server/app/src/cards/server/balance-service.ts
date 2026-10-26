@@ -2,7 +2,7 @@ import {createServer} from 'node:http';
 import {createRequire} from 'node:module';
 import {createCardBalanceApi} from './cardBalanceServer';
 
-const paths = createRequire(import.meta.url)('../../../../runtime-paths.cjs');
+const paths = createRequire(import.meta.url)('../../../../../services/platform/runtime-paths.cjs');
 paths.requireReady('cards');
 const api = createCardBalanceApi(paths.dataPath('cards', 'card-balance'));
 const server = createServer((request, response) => {

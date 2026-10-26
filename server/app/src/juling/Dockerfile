@@ -1,6 +1,6 @@
 FROM node:24-alpine
 WORKDIR /app/server/app/src/juling
-COPY server/runtime-paths.cjs /app/server/runtime-paths.cjs
+COPY services/platform/runtime-paths.cjs /app/services/platform/runtime-paths.cjs
 COPY packages/site-domains/index.js packages/site-domains/domains.json /app/packages/site-domains/
 COPY server/app/src/juling/package.json ./
 COPY server/app/src/juling/server.js server/app/src/juling/engine.js ./

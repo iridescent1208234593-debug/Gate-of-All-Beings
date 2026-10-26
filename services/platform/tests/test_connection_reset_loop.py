@@ -5,8 +5,8 @@ ConnectionResetError but left close_connection False, so BaseHTTPRequestHandler.
 handle_one_request again; on Windows every further recv() on a reset socket raises again at once,
 giving a tight loop (~20 microseconds per turn, 50k+ socket calls/s, one thread per reset peer).
 
-Run:  python server/test_connection_reset_loop.py
-Check a different copy of base_static.py:  BASE_STATIC_PATH=<file> python server/test_connection_reset_loop.py
+Run:  python services/platform/tests/test_connection_reset_loop.py
+Check a different copy of base_static.py:  BASE_STATIC_PATH=<file> python services/platform/tests/test_connection_reset_loop.py
 """
 import http.server
 import importlib.util
@@ -19,7 +19,7 @@ import time
 import unittest
 from pathlib import Path
 
-SERVER_DIR = Path(__file__).resolve().parent
+SERVER_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SERVER_DIR))
 _path = Path(os.environ.get("BASE_STATIC_PATH", SERVER_DIR / "base_static.py"))
 _spec = importlib.util.spec_from_file_location("base_static_under_test", _path)

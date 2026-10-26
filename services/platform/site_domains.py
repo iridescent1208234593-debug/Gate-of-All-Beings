@@ -10,7 +10,7 @@ from pathlib import Path
 import re
 from urllib.parse import urlsplit
 
-CONFIG = json.loads((Path(__file__).resolve().parents[1] / "packages" / "site-domains" / "domains.json").read_text(encoding="utf-8"))
+CONFIG = json.loads((Path(__file__).resolve().parents[2] / "packages" / "site-domains" / "domains.json").read_text(encoding="utf-8"))
 ROOTS = tuple(CONFIG["roots"])
 SITE_DOMAIN = os.environ.get("SITE_DOMAIN", CONFIG["defaultRoot"]).strip()
 if SITE_DOMAIN not in ROOTS:

@@ -6,7 +6,7 @@ import json
 import os
 from pathlib import Path, PureWindowsPath
 
-_CODE_ROOT = Path(__file__).resolve().parents[1]
+_CODE_ROOT = Path(__file__).resolve().parents[2]
 ENVIRONMENTS = {"development", "staging", "production", "test"}
 ROOT_VARIABLES = {"data": "DATA", "assets": "ASSETS", "cache": "CACHE", "releases": "RELEASE", "backups": "BACKUP"}
 MARKER = ".storage-ready.json"

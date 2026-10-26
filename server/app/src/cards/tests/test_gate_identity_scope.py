@@ -42,7 +42,7 @@ class GateIdentityScopeTest(unittest.TestCase):
         cls.environment.start()
         cls.addClassCleanup(cls.environment.stop)
         cls.path_before = list(sys.path)
-        sys.path.insert(0, str(PROJECT / "server"))
+        sys.path.insert(0, str(PROJECT / "services" / "platform"))
         cls.addClassCleanup(lambda: sys.path.__setitem__(slice(None), cls.path_before))
         from testing_storage import configure
         configure(root)

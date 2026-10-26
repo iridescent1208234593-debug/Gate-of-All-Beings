@@ -1,8 +1,8 @@
 """Run local ingress regressions, or fail-closed public recovery checks.
 
-  python -X utf8 server/security_ingress_test.py
-  python -X utf8 server/security_ingress_test.py --public --edge-ip 104.21.6.184 --output pre-dns.json
-  python -X utf8 server/security_ingress_test.py --public --output result.json
+  python -X utf8 services/platform/tests/test_ingress_security.py
+  python -X utf8 services/platform/tests/test_ingress_security.py --public --edge-ip 104.21.6.184 --output pre-dns.json
+  python -X utf8 services/platform/tests/test_ingress_security.py --public --output result.json
 
 Public checks use validated DoH answers (or one pinned Cloudflare edge before DNS
 is restored) and normal TLS hostname/chain validation. They never restore DNS,
@@ -28,8 +28,8 @@ from urllib.parse import urljoin, urlsplit
 import urllib.request
 
 HOST = "zszm.iridescently.xyz"
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "server"))
+ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 from host_policy import PRODUCTION_HOSTS, PREVIEW_HOSTS, normalize_host
 APPROVED_HOSTS = PRODUCTION_HOSTS | PREVIEW_HOSTS.keys()
 # The only hostnames authorized for DNS restoration on 2026-10-24.

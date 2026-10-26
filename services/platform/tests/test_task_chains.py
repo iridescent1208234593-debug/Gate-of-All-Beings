@@ -14,16 +14,16 @@ import unittest
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 TEMP = tempfile.TemporaryDirectory(prefix="task-chains-", ignore_cleanup_errors=True)
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 from testing_storage import configure
 from storage_paths import assets_root
 DATA = configure(TEMP.name)
 (DATA / "huiguan").mkdir(parents=True, exist_ok=True)
 # Each test module runs in a separate process with disposable external storage.
 os.environ.setdefault("HX_SSO_SECRET", "test-secret-for-task-chains")
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 sys.path.insert(0, str(ROOT))
 import account_progress as ap  # noqa: E402
 import hx_sso  # noqa: E402

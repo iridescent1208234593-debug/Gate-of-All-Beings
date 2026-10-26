@@ -17,7 +17,7 @@ HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = r'''
 import sys, http.server
 sys.path.insert(0, sys.argv[1])
-sys.path.insert(0, str(__import__("pathlib").Path(sys.argv[1]).parents[1] / "server"))
+sys.path.insert(0, str(__import__("pathlib").Path(sys.argv[1]).parents[1] / "services" / "platform"))
 from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s
 s.init_user_db()
 conn=s.db()

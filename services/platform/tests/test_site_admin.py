@@ -16,9 +16,9 @@ import urllib.request
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 TEMP = tempfile.TemporaryDirectory(prefix="site-admin-", ignore_cleanup_errors=True)
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 from testing_storage import configure
 from storage_paths import assets_root
 DATA = configure(TEMP.name)
@@ -38,7 +38,7 @@ INSERT INTO user_flags VALUES ('usso', '1', 'active', 'admin');
 conn.commit()
 conn.close()
 
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 import hx_sso  # noqa: E402
 import site_admin  # noqa: E402
 

@@ -6,16 +6,16 @@ import tempfile
 import unittest
 from email.message import Message
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 _TEMP = tempfile.TemporaryDirectory(prefix="huiguan-oauth-unit-")
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 from testing_storage import configure
 configure(_TEMP.name)
 os.environ["IRIDESCENTLY_ENVIRONMENT"] = "test"
 os.environ["USSO_LOGIN_ENABLED"] = "1"
 os.environ["USSO_CLIENT_SECRET"] = "test-only-oauth-secret"
 os.environ["HX_SSO_SECRET"] = "test-only-hx-sso-secret"
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 spec = importlib.util.spec_from_file_location("huiguan_oauth_session_test", ROOT / "portal" / "huiguan" / "server_huiguan.py")
 app = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = app

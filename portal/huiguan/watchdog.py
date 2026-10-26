@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""统一入口看门狗：8080 无响应时自动拉起 server/portal_server.py
+"""统一入口看门狗：8080 无响应时自动拉起 services/platform/portal_server.py
 （原为 8089 会馆单站看门狗；生产已切换为统一入口）。
 用法：由计划任务每 5 分钟调用一次，或手动 `python watchdog.py`。
 只在端口无人监听时启动，避免与已有实例冲突。"""

@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const engine = require('./engine');
 const siteDomains = require('../../../../packages/site-domains/index.js');
-const { dataPath, requireReady } = require('../../../runtime-paths.cjs');
+const { dataPath, requireReady } = require('../../../../services/platform/runtime-paths.cjs');
 
 const PORT = process.env.PORT || 8080;
 const HOST = process.env.HOST || '127.0.0.1';

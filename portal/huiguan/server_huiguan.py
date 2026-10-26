@@ -34,7 +34,7 @@ import urllib.request
 from datetime import datetime, timezone, timedelta
 from http.cookies import SimpleCookie
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "server"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "services", "platform"))
 import hx_sso
 from site_domains import (SITE_DOMAIN, PRODUCTION_HOSTS, cookie_domain, request_host, request_root,
                           request_origin_allowed, cors_headers, oauth_callback, site_url, OAuthUnavailable)
@@ -90,7 +90,7 @@ COOKIE_SECURE = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip()
 DATA_FILE = os.path.join(RUNTIME_DIR, "characters.json")
 DATA_LOCK = threading.Lock()
 
-# 云存档：users.db 的 game_saves 表，按 (kind, uid, scope) 隔离，见 server/game_saves.py。
+# 云存档：users.db 的 game_saves 表，按 (kind, uid, scope) 隔离，见 services/platform/game_saves.py。
 # 旧 game_saves.json（裸 uid）只在启动时按内容哈希导入一次，不再写入，保留作回滚来源。
 GAME_SAVE_FILE = os.path.join(RUNTIME_DIR, "game_saves.json")
 
@@ -309,7 +309,7 @@ def init_user_db():
         conn = db()
         # journal_mode 是持久属性，这里只设置一次（启动期，有 DB_LOCK 保护）。
         # 注意：本机 Windows 的 SQLite 构建（3.53.1）WAL 并发写有缺陷（-shm 映射
-        # 竞态导致 "attempt to write a readonly database"，见 server/gallery_interactions.py
+        # 竞态导致 "attempt to write a readonly database"，见 services/platform/gallery_interactions.py
         # 中 _init_journal_mode 的注释）。注册/登录属于低频写、读多写少，
         # Windows 上退回回滚日志模式更稳；非 Windows 保留 WAL。
         import sys as _sys
@@ -427,7 +427,7 @@ def init_user_db():
                     conn.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} INTEGER DEFAULT 0")
                 except Exception:
                     pass
-        # 旧等级积分字段：已停用，现由 account_progress 的 account_points 表记账（见 server/account_progress.py）；
+        # 旧等级积分字段：已停用，现由 account_progress 的 account_points 表记账（见 services/platform/account_progress.py）；
         # 列保留供 reset-legacy 迁移归档与回滚。
         for tbl in ("local_users", "user_flags"):
             try:

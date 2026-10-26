@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """本地统一入口自检：拉起 portal_server，按 Host 校验三站关键端点后关闭。
 
-用法：python server/verify_portal.py      （默认 PORT=8080）
+用法：python services/platform/tests/verify_portal.py      （默认 PORT=8080）
 
 默认在初始化后的临时 test 存储下运行。不会读取或复制真实数据库、上传或密钥。
 模块从显式配置的外部候选目录只读接入，代码始终来自当前 checkout。
@@ -17,6 +17,8 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # services/platform
 from storage_paths import release_root, initialize_storage, storage_layout
 from site_domains import ALLOWED_ROOTS
 
@@ -25,7 +27,8 @@ if hasattr(sys.stdout, "reconfigure"):
 
 DEFAULT_PORT = 8080
 HERE = Path(__file__).resolve().parent
-CODE_ROOT = HERE.parent
+PLATFORM = HERE.parent
+CODE_ROOT = PLATFORM.parents[1]
 
 
 def isolated_root():
@@ -179,7 +182,7 @@ REDIRECTS = [("{root}", "/", "https://huiguan.{root}/"), ("game.{root}", "/", "h
 # A security overlay may intentionally preserve an older production module set.
 # Require world-map when the candidate registers it, without deploying it merely
 # because the operator's source checkout has moved ahead of production.
-if any(link.get("key") == "world-map" for link in json.loads((HERE / "app/portal.json").read_text(encoding="utf-8"))["links"]):
+if any(link.get("key") == "world-map" for link in json.loads((CODE_ROOT / "server/app/portal.json").read_text(encoding="utf-8"))["links"]):
     CHECKS.append(("iridescently.xyz", "/app/modules/world-map/", 200))
 
 
@@ -216,7 +219,7 @@ def req(host, path, full=False):
 def main():
     # The forced production stage command already runs this verifier. Keep Host
     # isolation mandatory here so a future release cannot silently omit it.
-    ingress = subprocess.run([sys.executable, "-X", "utf8", str(HERE / "security_ingress_test.py"), "--host-only"],
+    ingress = subprocess.run([sys.executable, "-X", "utf8", str(HERE / "test_ingress_security.py"), "--host-only"],
                              capture_output=True, text=True, encoding="utf-8", errors="replace")
     print(ingress.stdout, end="")
     if ingress.returncode:
@@ -237,7 +240,7 @@ def main():
     env = {**isolated[1], "PORT": str(PORT), "PYTHONIOENCODING": "utf-8", "PYTHONDONTWRITEBYTECODE": "1"}
     server_log = isolated[0] / "portal-server.log"
     log_stream = server_log.open("wb")
-    proc = subprocess.Popen([sys.executable, str(HERE / "portal_server.py")], env=env,
+    proc = subprocess.Popen([sys.executable, str(PLATFORM / "portal_server.py")], env=env,
                             stdout=log_stream, stderr=subprocess.STDOUT)
     total = len(CHECKS) * len(ROOTS) + len(REJECTED_HOSTS) + len(REDIRECTS) * len(ROOTS) + len(ROOTS) + 3
     fails = 0

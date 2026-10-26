@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import re
 import sys
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'server'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "services" / "platform"))
 from host_policy import IDENTITY_OVERRIDE_HEADERS, PRODUCTION_HOSTS
 
 # What DNS/Tunnel actually route today; the application allowlist (packages/site-domains/domains.json) may be wider.
@@ -29,7 +29,7 @@ mapping += ['}', 'map $http_x_forwarded_proto $iridescently_visitor_https {', ' 
 # Included from /etc/nginx/snippets/zszm-proxy.conf. It deliberately has no
 # X-Forwarded-Proto line: that snippet's single fixed "https" line is replaced
 # in place by $iridescently_visitor_proto (two values would loop every request).
-forwarding=['# Generated from server/host_policy.py IDENTITY_OVERRIDE_HEADERS; clears client overrides.']
+forwarding=['# Generated from services/platform/host_policy.py IDENTITY_OVERRIDE_HEADERS; clears client overrides.']
 forwarding +=['proxy_set_header '+'-'.join(p.capitalize() for p in h.split('-'))+' "";'
                for h in sorted(IDENTITY_OVERRIDE_HEADERS - {'x-forwarded-host','x-forwarded-proto'})]
 (args.output/'proxy-forwarding.conf').write_text('\n'.join(forwarding)+'\n',encoding='utf-8')

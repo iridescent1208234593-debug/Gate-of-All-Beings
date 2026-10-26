@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, openSync, closeSync, readFileSync, readdirSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import runtimePaths from '../server/runtime-paths.cjs';
+import runtimePaths from '../services/platform/runtime-paths.cjs';
 import { candidateRoot, releaseRoot, verifyCandidate } from './release-artifacts.mjs';
 
 const channel = path.join(releaseRoot, 'channels', `${runtimePaths.environment}.json`);

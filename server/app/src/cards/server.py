@@ -21,7 +21,7 @@ from contextlib import closing
 
 # Code and imports come from this checkout, independently of persistent storage.
 CODE_ROOT = str(__import__("pathlib").Path(__file__).resolve().parents[4])
-sys.path.insert(0, os.path.join(CODE_ROOT, "server"))
+sys.path.insert(0, os.path.join(CODE_ROOT, "services", "platform"))
 from base_static import BaseStaticHandler
 from site_domains import oauth_callback
 from storage_paths import project_root as resolve_project_root, data_root, cards_data_dir, huiguan_data_dir, require_ready

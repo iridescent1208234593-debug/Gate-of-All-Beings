@@ -17,7 +17,7 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 from storage_paths import storage_layout, environment, require_ready, ROOT_VARIABLES
 from site_domains import SITE_DOMAIN
 
@@ -72,7 +72,7 @@ def launch_plan():
     overrides = {f"IRIDESCENTLY_{name}_ROOT": os.environ[f"IRIDESCENTLY_{name}_ROOT"]
                  for name in ROOT_VARIABLES.values() if os.environ.get(f"IRIDESCENTLY_{name}_ROOT", "").strip()}
     specs = {
-        "portal": ([sys.executable, "-X", "utf8", "-u", str(site / "server/portal_server.py")], 8080, "/api/sso-user", "site"),
+        "portal": ([sys.executable, "-X", "utf8", "-u", str(site / "services/platform/portal_server.py")], 8080, "/api/sso-user", "site"),
         "zszm-oauth": ([sys.executable, "-X", "utf8", "-u", str(site / "server/app/src/cards/server.py")], 5174, "/api/user", "cards"),
         "zszm-balance": ([node, str(site / "server/app/src/cards/server/balance-service.mjs")], 5178, "/healthz", "cards"),
         "juling": ([node, str(site / "server/app/src/juling/server.js")], 5177, "/api/state", "juling"),

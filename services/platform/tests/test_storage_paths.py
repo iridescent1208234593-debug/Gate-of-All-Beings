@@ -6,7 +6,9 @@ import shutil
 import tempfile
 import unittest
 from unittest.mock import patch
+import sys
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # services/platform
 import storage_paths as paths
 NODE = shutil.which("node")
 SYSTEM_ENV = {k: v for k, v in os.environ.items() if k.upper() in {

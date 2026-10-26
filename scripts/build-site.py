@@ -8,14 +8,17 @@ import sys
 import zipfile
 
 root = Path(os.environ.get('IRIDESCENTLY_PROJECT_ROOT', Path.cwd())).resolve()
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'server'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "services" / "platform"))
 from storage_paths import release_root
 
 releases = release_root()
 target = releases / 'candidate' / 'site'
 if target.resolve().parent != (releases / 'candidate').resolve():
     raise RuntimeError('Site candidate escapes release root')
-archive = subprocess.check_output(['git', 'archive', '--format=zip', 'HEAD', 'portal', 'server', 'packages'], cwd=root)
+# Deployable source roots; a checkout only needs the ones it has.
+SOURCE_DIRS = ('portal', 'server', 'services', 'packages')
+present = set(subprocess.check_output(['git', 'ls-tree', '--name-only', 'HEAD'], cwd=root, text=True).split())
+archive = subprocess.check_output(['git', 'archive', '--format=zip', 'HEAD', *(d for d in SOURCE_DIRS if d in present)], cwd=root)
 if target.exists():
     shutil.rmtree(target)
 target.mkdir(parents=True)

@@ -1,6 +1,9 @@
-import unittest
 from email.message import Message
+from pathlib import Path
+import sys
+import unittest
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from host_policy import DEVELOPMENT_HOSTS, PRODUCTION_HOSTS, enforce_request, forwarded_headers, normalize_host
 
 

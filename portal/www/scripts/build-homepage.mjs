@@ -13,7 +13,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { candidateRoot, releaseRoot, recordCandidate } from "../../../scripts/release-artifacts.mjs";
-import runtimePaths from "../../../server/runtime-paths.cjs";
+import runtimePaths from "../../../services/platform/runtime-paths.cjs";
 
 const homepageRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),

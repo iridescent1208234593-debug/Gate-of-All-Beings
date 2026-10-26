@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import { createSpiritMultiplayer, SPIRIT_ROOM_WS } from './spirit-multiplayer.js';
 import { createSpiritSettingsMiddleware } from './spirit-settings.js';
 
-const paths = createRequire(import.meta.url)('../../../../runtime-paths.cjs');
+const paths = createRequire(import.meta.url)('../../../../../services/platform/runtime-paths.cjs');
 paths.requireReady('spirit');
 const settings = createSpiritSettingsMiddleware();
 const multiplayer = createSpiritMultiplayer();

@@ -16,7 +16,7 @@ from pathlib import Path
 
 HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = (
-    "import sys, http.server; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'server')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; "
+    "import sys, http.server; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'services' / 'platform')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; "
     "s.init_user_db(); http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()"
 )
 

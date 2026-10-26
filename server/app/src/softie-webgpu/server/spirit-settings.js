@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { DEFAULT_SPIRIT_SETTINGS, SPIRIT_SETTINGS_API, validateSpiritSettings } from '../src/games/spirit-playground/settings.js';
 import { createRequire } from 'node:module';
-const runtimePaths = createRequire(import.meta.url)('../../../../runtime-paths.cjs');
+const runtimePaths = createRequire(import.meta.url)('../../../../../services/platform/runtime-paths.cjs');
 
 export const MAX_SETTINGS_BODY_BYTES = 8 * 1024;
 const localHost = hostname => ['localhost', '127.0.0.1', '[::1]'].includes(hostname);

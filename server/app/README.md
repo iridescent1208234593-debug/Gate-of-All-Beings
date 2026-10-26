@@ -1,6 +1,6 @@
 # server/app · 统一前端壳与游戏模块
 
-总览见根 [README.md](../../README.md) 与 [server/README.md](../README.md)。
+总览见根 [README.md](../../README.md) 与 [services/platform/README.md](../../services/platform/README.md)。
 
 | 路径 | 作用 |
 | --- | --- |
@@ -38,7 +38,7 @@ node server/app/scripts/build-modules.mjs
 `/app/modules/` 下**未带内容哈希**的 JS / CSS（如 `slay/ui/cards.js`、`slay/service-worker.js`）默认返回
 `Cache-Control: no-cache, max-age=0, must-revalidate`：浏览器和 Cloudflare 每次先向源站验证（`Last-Modified` 命中则 304），
 所以切换到新 Release 之后用户下次打开即是新版，不必再手动清 CDN。Vite 带哈希的 `/assets/*-xxxxxxxx.js` 仍是一年 `immutable`，图片、字体缓存不变。
-实现：`server/portal_server.py` 的 `MODULE_CODE_MAX_AGE` 与 `server/base_static.py` 的 `code_max_age`。
+实现：`services/platform/portal_server.py` 的 `MODULE_CODE_MAX_AGE` 与 `services/platform/base_static.py` 的 `code_max_age`。
 
 **回退到旧的 4 小时缓存**（出现带宽/回源压力时）：给门户进程设环境变量后重启，不需要改代码。
 

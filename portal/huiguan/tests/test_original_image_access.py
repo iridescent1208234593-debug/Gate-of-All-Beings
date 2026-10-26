@@ -18,7 +18,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[3]
 TEMP = tempfile.TemporaryDirectory(prefix="huiguan-originals-")
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 from testing_storage import configure
 from storage_paths import assets_root
 DATA = configure(TEMP.name)
@@ -73,7 +73,7 @@ INSERT INTO local_users VALUES (7, 'owner', 'admin', 'active'), (8, 'member', 'e
 users.commit()
 users.close()
 
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 sys.path.insert(0, str(ROOT / "portal" / "huiguan"))
 import hx_sso  # noqa: E402
 import scraping_observer  # noqa: E402

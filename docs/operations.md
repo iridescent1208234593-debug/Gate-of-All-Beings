@@ -4,7 +4,7 @@
 
 | 端口 | 服务 | 启动 |
 | --- | --- | --- |
-| 8080 | 统一入口（www + huiguan + oc + 壳 + 游戏模块 + API 代理） | `PORT=8080 python server/portal_server.py` |
+| 8080 | 统一入口（www + huiguan + oc + 壳 + 游戏模块 + API 代理） | `PORT=8080 python services/platform/portal_server.py` |
 | 8088 | 主站单站（可选，独立） | `cd portal/www && python server.py` |
 | 8089 | 会馆单站（可选，独立） | `cd portal/huiguan && python server_huiguan.py` |
 | 8090 | 人设站单站（可选，独立） | `cd portal/oc && python server.py` |

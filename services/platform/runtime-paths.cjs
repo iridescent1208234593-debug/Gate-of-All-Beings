@@ -10,7 +10,7 @@ function absolute(value) {
   while (!fs.existsSync(parent)) { suffix.unshift(path.basename(parent)); const next = path.dirname(parent); if (next === parent) break; parent = next; }
   return path.join(fs.realpathSync(parent), ...suffix);
 }
-const codeRoot = absolute(path.resolve(__dirname, '..'));
+const codeRoot = absolute(path.resolve(__dirname, '..', '..'));
 const projectRoot = absolute(process.env.IRIDESCENTLY_PROJECT_ROOT || codeRoot);
 const storageRoot = absolute(process.env.IRIDESCENTLY_STORAGE_ROOT?.trim() || path.join(os.homedir(), '.local', 'share', 'iridescently'));
 const variables = {data:'DATA',assets:'ASSETS',cache:'CACHE',releases:'RELEASE',backups:'BACKUP'};

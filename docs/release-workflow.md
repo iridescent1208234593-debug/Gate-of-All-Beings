@@ -1,6 +1,6 @@
 # Source, build candidates and releases
 
-Batch 6 uses `server/storage_paths.py` and `server/runtime-paths.cjs` as one storage contract. `IRIDESCENTLY_PROJECT_ROOT` selects source code only; it never selects user databases, uploads or deployed output. `IRIDESCENTLY_STORAGE_ROOT` selects an external parent, with separate `development`, `staging`, `production` and `test` environments. Test mode requires an explicit temporary storage parent.
+Batch 6 uses `services/platform/storage_paths.py` and `services/platform/runtime-paths.cjs` as one storage contract. `IRIDESCENTLY_PROJECT_ROOT` selects source code only; it never selects user databases, uploads or deployed output. `IRIDESCENTLY_STORAGE_ROOT` selects an external parent, with separate `development`, `staging`, `production` and `test` environments. Test mode requires an explicit temporary storage parent.
 
 Each environment has sibling `data`, `assets`, `cache`, `releases` and `backups` roots. Explicit `IRIDESCENTLY_DATA_ROOT`, `IRIDESCENTLY_ASSETS_ROOT`, `IRIDESCENTLY_CACHE_ROOT`, `IRIDESCENTLY_RELEASE_ROOT` and `IRIDESCENTLY_BACKUP_ROOT` overrides must remain outside source and must not overlap each other. Service startup requires the verified storage readiness marker; a new empty production data directory does not become a healthy new installation.
 

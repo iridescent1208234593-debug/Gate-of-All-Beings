@@ -10,11 +10,11 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from testing_storage import configure
 import storage_paths
 
-SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
+SCRIPTS = Path(__file__).resolve().parents[3] / "scripts"
 
 
 def load(name, file):
@@ -108,7 +108,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 const { candidateRoot, recordCandidate } = await import('./scripts/release-artifacts.mjs');
 const { sealRelease } = await import('./scripts/publish-release.mjs');
-for (const [name, file] of [['site', 'server/portal_server.py'], ['modules', 'cards/index.html'], ['homepage', 'index.html']]) {
+for (const [name, file] of [['site', 'services/platform/portal_server.py'], ['modules', 'cards/index.html'], ['homepage', 'index.html']]) {
   mkdirSync(path.dirname(path.join(candidateRoot, name, file)), { recursive: true });
   writeFileSync(path.join(candidateRoot, name, file), name);
   await recordCandidate(name, { buildCommand: 'fixture' });
@@ -123,7 +123,7 @@ console.log(JSON.stringify(await sealRelease({ allowDirty: true })));
         self.assertEqual(selected["current"], channel["current"])
         self.assertEqual(site, (storage_paths.release_root() / channel["site"]).resolve())
         self.assertTrue(site.is_relative_to(storage_paths.release_root()))
-        (site / "server/portal_server.py").write_text("tampered", encoding="utf-8")
+        (site / "services/platform/portal_server.py").write_text("tampered", encoding="utf-8")
         with self.assertRaises(subprocess.CalledProcessError):
             self.runtime.selected_release()
 

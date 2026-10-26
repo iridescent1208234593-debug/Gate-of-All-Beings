@@ -17,9 +17,9 @@ import urllib.request
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[3]
 TEMP = tempfile.TemporaryDirectory(prefix="game-save-scope-", ignore_cleanup_errors=True)
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 from testing_storage import configure
 from storage_paths import assets_root
 DATA = configure(TEMP.name)
@@ -38,7 +38,7 @@ LEGACY = {
     "404": {"savedAt": "2026-10-01T10:00:00+01:00", "userName": "x", "state": {"management": "orphan"}},
 }
 os.environ["IRIDESCENTLY_PROJECT_ROOT"] = str(ROOT)
-sys.path.insert(0, str(ROOT / "server"))
+sys.path.insert(0, str(ROOT / "services" / "platform"))
 sys.path.insert(0, str(ROOT))
 # 会馆模块在 import 期就会执行 init_user_db()（见 server_huiguan.py 模块尾部），
 # 且 USER_DB 在 import 时从环境变量解析。若同进程的其他测试（字母序更前的

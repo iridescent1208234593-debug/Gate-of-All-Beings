@@ -6,10 +6,10 @@ by a bare uid shared between local and USSO accounts. The JSON file is only read
 docs/game-save-ownership.md for the resolution rules and rollback procedure.
 
 CLI (run from the project root; IRIDESCENTLY_STORAGE_ROOT and IRIDESCENTLY_ENVIRONMENT select isolated data):
-  python server/game_saves.py plan              # show how legacy keys resolve, no writes
-  python server/game_saves.py import            # import legacy JSON (idempotent)
-  python server/game_saves.py status            # row counts and quarantined records
-  python server/game_saves.py export --out FILE # write legacy-format JSON for rollback
+  python services/platform/game_saves.py plan              # show how legacy keys resolve, no writes
+  python services/platform/game_saves.py import            # import legacy JSON (idempotent)
+  python services/platform/game_saves.py status            # row counts and quarantined records
+  python services/platform/game_saves.py export --out FILE # write legacy-format JSON for rollback
 """
 import argparse
 from storage_paths import data_root, huiguan_data_dir, require_ready

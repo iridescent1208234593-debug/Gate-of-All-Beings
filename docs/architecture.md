@@ -4,7 +4,7 @@
 
 ```
 浏览器
-  └─ 统一入口 server/portal_server.py :8080   （按 Host / 路径分发）
+  └─ 统一入口 services/platform/portal_server.py :8080   （按 Host / 路径分发）
        ├─ Host=huiguan.*        → portal/huiguan      （会馆，含账号/素材 API）
        ├─ Host=oc.*             → portal/oc           （人设站）
        ├─ Host=主域 /           → portal/www          （主站）
@@ -14,7 +14,7 @@
        └─ /app/modules/<名>/api/* → 反向代理到各游戏上游
 ```
 
-各处理类由 `server/base_static.py` 的 `BaseStaticHandler` 派生，请求时按 `parse_request` 动态切换类；**每个 keep-alive 请求都会重新分发**（见 `Dispatcher.handle_one_request` 的 try/finally）。
+各处理类由 `services/platform/base_static.py` 的 `BaseStaticHandler` 派生，请求时按 `parse_request` 动态切换类；**每个 keep-alive 请求都会重新分发**（见 `Dispatcher.handle_one_request` 的 try/finally）。
 
 ## 统一壳（embed模块同页挂载）
 
@@ -70,7 +70,7 @@
 
 ## 当前入口与发布边界（2026-10-25 审计）
 
-- 正式域名由统一门户 `server/portal_server.py` 按 Host / 路径分发；网站管家配置的主门户端口为 8080。域名映射以 `portal.json` 和外置网站管家清单为准。
+- 正式域名由统一门户 `services/platform/portal_server.py` 按 Host / 路径分发；网站管家配置的主门户端口为 8080。域名映射以 `portal.json` 和外置网站管家清单为准。
 - 构建候选位于 `.releases/candidate`，本机发布快照位于 `.releases/production/site`，服务运行目录位于 `.releases/runtime`。只有显式发布流程会提升候选；本机快照不等同于香港当前线上版本。
 - `IRIDESCENTLY_PROJECT_ROOT` 当前指向 `E:\Projects`，部分 SQLite 数据、上传目录和共享媒体因而与源码仓库同根。它们被 Git 忽略不代表物理隔离；禁止对该树运行会清除 ignored files 的清理命令。
 - 审计时香港发布控制器报告五个受管服务 active；本机未发现项目门户/应用服务进程。生产数据标记为香港权威维护，线上运行身份应以远端发布控制器为准。

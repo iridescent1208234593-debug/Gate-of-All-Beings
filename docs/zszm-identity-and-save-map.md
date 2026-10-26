@@ -37,7 +37,7 @@ PlayerProfileProvider
 - `packages/shared-session/session.js` 只是同源 `/api/sso-user` 的 fetch / 内存缓存；没有单独登录服务，也不会自动将 localStorage 同步到其他子域。
 - `localhost` / `127.0.0.1` 不会获得 `.iridescently.xyz` Cookie。本地匿名 smoke 不能证明真实跨子域登录成功；代理或本地测试账号须单独配置，不能把“本地有存档”当作已登录。
 
-主要源码：`server/hx_sso.py`、`portal/huiguan/server_huiguan.py`、`portal/www/server.py`、`portal/oc/server.py`、`server/portal_server.py`、`server/account_profile.py`。
+主要源码：`services/platform/hx_sso.py`、`portal/huiguan/server_huiguan.py`、`portal/www/server.py`、`portal/oc/server.py`、`services/platform/portal_server.py`、`services/platform/account_profile.py`。
 
 ## 3. Gate Identity 的统一状态、字段与保存保护
 
@@ -108,7 +108,7 @@ PlayerProfileProvider
 
 ## 核对文件
 
-- `server/hx_sso.py`、`server/account_profile.py`、`server/portal_server.py`
+- `services/platform/hx_sso.py`、`services/platform/account_profile.py`、`services/platform/portal_server.py`
 - `portal/www/server.py`、`portal/www/scripts/appearance-controls.js`
 - `portal/huiguan/server_huiguan.py`、`portal/huiguan/account.html`、`portal/oc/server.py`
 - `packages/shared-session/session.js`、`save.js`、`kv.js`、`bus.js`

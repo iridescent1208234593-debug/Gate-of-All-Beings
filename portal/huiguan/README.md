@@ -1,6 +1,6 @@
 # 西木会馆
 
-正式入口：<https://huiguan.iridescently.xyz/>。`server/portal_server.py` 按 Host 直接提供本目录的静态页面；不需要把参考项目搬入或另建路由框架。
+正式入口：<https://huiguan.iridescently.xyz/>。`services/platform/portal_server.py` 按 Host 直接提供本目录的静态页面；不需要把参考项目搬入或另建路由框架。
 
 ## 首页维护入口
 
@@ -30,7 +30,7 @@
 
 `tests/homepage.smoke.cjs` 保留可选的 Chrome 运行检查，不向实际账户提交数据。按当前用户验收安排，最新调整仅做构建、语法检查与截图留存，实际观感和交互由用户验收。`tests/capture-homepage.cjs` 用于保存开场、框内状态、登记和移动端截图；截图不等于已完成详细交互验收。
 
-统一入口检查：在未占用端口设置 `PORT` 后运行 `python server/verify_portal.py`，避免把已有服务当成新启动的测试实例。公网检查与本地端点检查需分别报告。
+统一入口检查：在未占用端口设置 `PORT` 后运行 `python services/platform/tests/verify_portal.py`，避免把已有服务当成新启动的测试实例。公网检查与本地端点检查需分别报告。
 
 2026-10-11 登记修复：格式检查放在必填检查之后，避免错误提示被后续检查清空。提交失败保留输入和待提交内容；成功才清空表单。错误字段就地提示，提交区汇总可点击定位；请求失败区分登录过期、权限、图片总量、频率、服务异常和网络超时。
 
@@ -52,7 +52,7 @@
 
 本地未发布的首屏性能修正：head 精确预加载 intro / gate / homepage 脚本，先初始化门景再加载共享导航和内容；fallback 使用监听先于 load、幂等 ready 与 8 秒出口，未缩短模型动画时间轴。真实测量、延迟导航与视频 smoke 见 [加载审查](../../docs/zszm-loading-audit.md)。正式服务仍读取发布快照，源码通过不等于线上已生效。
 
-共享会话签名使用 `HX_SSO_SECRET`。邮箱验证邮件使用 `ACCOUNT_EMAIL_SMTP_*`；两者都支持环境变量优先、本机 Git 忽略的 `server/.env.local` 作为回退配置，样例在 `server/.env.example`。邮箱 SMTP 凭据应使用邮箱客户端授权码，不要复用邮箱网页登录密码。配置邮件后重启会馆服务；不要把真实密钥提交进 Git。
+共享会话签名使用 `HX_SSO_SECRET`。邮箱验证邮件使用 `ACCOUNT_EMAIL_SMTP_*`；两者都支持环境变量优先、本机 Git 忽略的 `server/.env.local` 作为回退配置，样例在 `services/platform/.env.example`。邮箱 SMTP 凭据应使用邮箱客户端授权码，不要复用邮箱网页登录密码。配置邮件后重启会馆服务；不要把真实密钥提交进 Git。
 
 站内账号可在个人账户页绑定并验证邮箱。只有 `account_emails` 中已验证的地址可用于找回账号名和重置密码；旧用户资料邮箱不会自动获得验证状态。找回邮件含一次性 30 分钟链接，成功重置后该账号的现有会话全部失效。提示问题找回仍作为兼容入口保留。
 
@@ -80,7 +80,7 @@
 
 ## 公开展示入口解析（2026-10-19）
 
-`show.html?code=...` 复用原有 `/api/get-character`（`/api/huiguan/get-character` 为合法别名）。OC 优先读取原始展示 HTML；`poster-<id>` 属于 SQLite 海报实体，不能当成 OC 的 `char_code`。海报按自己的 ID、公开状态和完整所有者身份读取，图片保持原始上传引用。原始 OC 已不存在但公开画廊保留的资料可作为明确标注的公开快照显示，不创建或覆盖用户设表。实现位于 `server/showcase_document.py`。
+`show.html?code=...` 复用原有 `/api/get-character`（`/api/huiguan/get-character` 为合法别名）。OC 优先读取原始展示 HTML；`poster-<id>` 属于 SQLite 海报实体，不能当成 OC 的 `char_code`。海报按自己的 ID、公开状态和完整所有者身份读取，图片保持原始上传引用。原始 OC 已不存在但公开画廊保留的资料可作为明确标注的公开快照显示，不创建或覆盖用户设表。实现位于 `services/platform/showcase_document.py`。
 
 读取失败须区分资料不存在与服务不可用，提供重试和节点选择，不能一律要求玩家重新生成、覆盖已有资料。本轮候选与线上状态见 [访问与带宽报告](../../docs/access-and-bandwidth-20261019.md)。
 # Images

@@ -23,12 +23,12 @@ from urllib.parse import urlparse
 PORT = 8088
 STATIC_DIR = os.path.dirname(os.path.abspath(__file__))
 RUNTIME_DIR = STATIC_DIR
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "server"))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "services", "platform"))
 import hx_sso
 from site_domains import (PRODUCTION_HOSTS, service_name, site_url, request_host,
                           request_origin_allowed, cors_headers)
 from base_static import BaseStaticHandler
-# 管理员：完整 (kind, uid) 站长账户 + 账户库状态复核，见 server/site_admin.py
+# 管理员：完整 (kind, uid) 站长账户 + 账户库状态复核，见 services/platform/site_admin.py
 from site_admin import is_site_owner
 import gallery_interactions
 from storage_paths import data_root, homepage_data_dir, require_ready
