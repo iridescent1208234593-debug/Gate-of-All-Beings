@@ -5,12 +5,12 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import runtimePaths from "../services/platform/runtime-paths.cjs";
+import runtimePaths from "../../services/platform/runtime-paths.cjs";
 
 const root = path.resolve(process.env.IRIDESCENTLY_PROJECT_ROOT || process.cwd());
 const operationsRoot = path.resolve(process.env.IRIDESCENTLY_OPS_ROOT || "E:/External Projects/Iridescently Operations");
 const manifestPath = path.join(runtimePaths.cacheRoot, "ops", "gallery-manifest.json");
-const manifestScript = path.join(root, "scripts", "assets-manifest.mjs");
+const manifestScript = path.join(root, "tools", "build", "assets-manifest.mjs");
 const wranglerScript = path.join(root, "node_modules/wrangler/bin/wrangler.js");
 const bucket = "iridescently-assets";
 // The R2 custom domain is configured beside the site roots; it is not an application ingress host.
@@ -212,7 +212,7 @@ async function runCode() {
   report.previousCommit = git("rev-parse", "HEAD");
   const allowlist = new Set([
     ".gitignore", "README.md", "docs/README.md", "docs/assets.md", "docs/update-system.md",
-    "package.json", "package-lock.json", "scripts/run-ops.mjs",
+    "package.json", "package-lock.json", "tools/ops/run-ops.mjs",
   ]);
   const changed = filesChanged();
   const unknown = changed.filter((file) => !allowlist.has(file.replaceAll("\\", "/")));

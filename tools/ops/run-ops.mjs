@@ -3,13 +3,13 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const operationsRoot = path.resolve(
   process.env.IRIDESCENTLY_OPS_ROOT || 'E:/External Projects/Iridescently Operations',
 );
 const entryName = process.argv[2];
 if (!entryName || !/^[\w./-]+\.(?:mjs|py)$/.test(entryName) || entryName.split(/[\\/]/).includes('..')) {
-  throw new Error('Usage: node scripts/run-ops.mjs <operations-entry.mjs|operations-entry.py> [args...]');
+  throw new Error('Usage: node tools/ops/run-ops.mjs <operations-entry.mjs|operations-entry.py> [args...]');
 }
 const entry = path.resolve(operationsRoot, entryName);
 if (entry !== operationsRoot && !entry.startsWith(`${operationsRoot}${path.sep}`)) {

@@ -12,7 +12,7 @@ import {
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { candidateRoot, releaseRoot, recordCandidate } from "../../../scripts/release-artifacts.mjs";
+import { candidateRoot, releaseRoot, recordCandidate } from "../../../tools/release/release-artifacts.mjs";
 import runtimePaths from "../../../services/platform/runtime-paths.cjs";
 
 const homepageRoot = path.resolve(
@@ -88,7 +88,7 @@ function runVite(args) {
 if (process.argv.includes("--dev")) {
   const previews = spawnSync(
     process.execPath,
-    [path.join(projectRoot, "scripts/build-gallery-previews.mjs")],
+    [path.join(projectRoot, "tools/build/build-gallery-previews.mjs")],
     { cwd: projectRoot, stdio: "inherit", env: operationsEnv },
   );
   if (previews.error) throw previews.error;
@@ -106,7 +106,7 @@ rmSync(homepageCandidate, { recursive: true, force: true });
 
 const previews = spawnSync(
   process.execPath,
-  [path.join(projectRoot, "scripts/build-gallery-previews.mjs")],
+  [path.join(projectRoot, "tools/build/build-gallery-previews.mjs")],
   { cwd: projectRoot, stdio: "inherit", env: operationsEnv },
 );
 if (previews.error) throw previews.error;

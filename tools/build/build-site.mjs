@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { candidateRoot, projectRoot, recordCandidate } from './release-artifacts.mjs';
+import { candidateRoot, projectRoot, recordCandidate } from '../release/release-artifacts.mjs';
 import { fileURLToPath } from 'node:url';
 import { buildRuntime } from './build-runtime.mjs';
 

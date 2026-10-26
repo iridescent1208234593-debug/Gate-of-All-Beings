@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { candidateRoot, projectRoot, recordCandidate } from './release-artifacts.mjs';
+import { candidateRoot, projectRoot, recordCandidate } from '../release/release-artifacts.mjs';
 
 const appRoot = path.join(projectRoot, 'apps', 'world-map');
 const output = path.join(candidateRoot, 'world-map');

@@ -16,7 +16,7 @@ import subprocess
 import sys
 import time
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "services" / "platform"))
 from storage_paths import storage_layout, environment, require_ready, ROOT_VARIABLES
 from site_domains import SITE_DOMAIN
@@ -34,7 +34,7 @@ def selected_release():
     # The publisher runs its CLI when argv[1] names it, so the module travels in the environment.
     code = "const p=await import(process.env.IRIDESCENTLY_PUBLISHER_URL);const v=p.verifyRelease(process.argv[1]);console.log(JSON.stringify({sha:v.manifestSha256,head:v.manifest.sourceHead}));"
     result = subprocess.run([shutil.which("node"), "--input-type=module", "-e", code, release_id],
-                            env={**os.environ, "IRIDESCENTLY_PUBLISHER_URL": (ROOT / "scripts/publish-release.mjs").as_uri()},
+                            env={**os.environ, "IRIDESCENTLY_PUBLISHER_URL": (ROOT / "tools/release/publish-release.mjs").as_uri()},
                             capture_output=True, text=True, encoding="utf-8", check=True, creationflags=NO_WINDOW)
     verified = json.loads(result.stdout)
     if verified["sha"] != channel.get("manifestSha256") or verified["head"] != channel.get("sourceHead"):

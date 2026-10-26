@@ -4,8 +4,8 @@ Code builds own-site URLs from packages/site-domains/domains.json or uses same-o
 The exceptions below are deliberate: search/social metadata stays on the current
 canonical root until a separately approved canonical switch, and provenance or
 content records are data, not routing. Usage:
-  python scripts/check-domain-hardcodes.py              # tracked source
-  python scripts/check-domain-hardcodes.py DIR [DIR...] # built candidates
+  python tools/domains/check-domain-hardcodes.py              # tracked source
+  python tools/domains/check-domain-hardcodes.py DIR [DIR...] # built candidates
 """
 from fnmatch import fnmatch
 import json
@@ -14,17 +14,17 @@ import re
 import subprocess
 import sys
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 ROOTS = json.loads((ROOT / "packages/site-domains/domains.json").read_text(encoding="utf-8"))["roots"]
 OWN_URL = re.compile(r"(?:https?|wss?)://(?:[a-z0-9-]+\.)*(?:" + "|".join(map(re.escape, ROOTS)) + r")\b", re.I)
 TEXT_SUFFIXES = {".py", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".html", ".css", ".json", ".svg", ".txt", ".env", ".example"}
-SOURCE_SCOPES = ("apps", "services", "packages", "scripts", "tools")
+SOURCE_SCOPES = ("apps", "services", "packages", "tools")
 EXCEPT_FILES = {
     "*.md": "documentation",
     "**/tests/**": "test fixtures exercise exact public hosts",
     "services/platform/tests/verify_portal.py": "route contract template, expanded to every approved root",
     "services/platform/tests/test_ingress_security.py": "ingress regression fixtures for the deployed canonical host",
-    "scripts/check-domain-hardcodes.py": "this scanner",
+    "tools/domains/check-domain-hardcodes.py": "this scanner",
     "packages/shared-data/worldview.json": "historical export kept as a data record",
     "apps/www/links.json": "editable homepage content seed; runtime copy is persistent data",
     "services/platform/.env.example": "example operator configuration",

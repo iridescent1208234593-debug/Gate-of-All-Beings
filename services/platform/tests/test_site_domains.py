@@ -243,7 +243,7 @@ class ContentSecurityPolicy(unittest.TestCase):
 
 class BrowserAndNodeParity(unittest.TestCase):
     def test_generated_browser_map_matches_shared_configuration(self):
-        result = subprocess.run([sys.executable, "-X", "utf8", "scripts/generate-domain-config.py", "--check"],
+        result = subprocess.run([sys.executable, "-X", "utf8", "tools/domains/generate-domain-config.py", "--check"],
                                 cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -279,7 +279,7 @@ console.log(JSON.stringify({
         self.assertIsNone(value["duplicate"])
 
     def test_source_has_no_unreviewed_absolute_own_domain_urls(self):
-        result = subprocess.run([sys.executable, "-X", "utf8", "scripts/check-domain-hardcodes.py"], cwd=ROOT,
+        result = subprocess.run([sys.executable, "-X", "utf8", "tools/domains/check-domain-hardcodes.py"], cwd=ROOT,
                                 env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 

@@ -37,7 +37,7 @@ class SourceExportTests(unittest.TestCase):
             environment = {key: value for key, value in os.environ.items() if not key.startswith("IRIDESCENTLY_")}
             environment.update(IRIDESCENTLY_PROJECT_ROOT=str(source), IRIDESCENTLY_ENVIRONMENT="test",
                                IRIDESCENTLY_STORAGE_ROOT=str(base / "storage"), PYTHONDONTWRITEBYTECODE="1")
-            exporter = Path(__file__).resolve().parents[3] / "scripts" / "build-site.py"
+            exporter = Path(__file__).resolve().parents[3] / "tools" / "build" / "build-site.py"
             result = subprocess.run([sys.executable, str(exporter)], cwd=source, env=environment,
                                     capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)

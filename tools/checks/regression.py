@@ -10,7 +10,7 @@ import sys
 import tempfile
 import time
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "services" / "platform"))
 from storage_paths import initialize_storage
 
@@ -44,8 +44,8 @@ def main():
             for file in sorted(directory.glob("test_*.py")):
                 run(str(file.relative_to(ROOT)), [sys.executable, "-X", "utf8", str(file)])
         node = shutil.which("node")
-        run("release boundary and hash contracts", [node, "scripts/test-release-artifacts.mjs"])
-        publisher_check = ROOT / "scripts/test-publish-release.mjs"
+        run("release boundary and hash contracts", [node, "tools/release/test-release-artifacts.mjs"])
+        publisher_check = ROOT / "tools/release/test-publish-release.mjs"
         if publisher_check.exists():
             run("immutable seal and rollback", [node, str(publisher_check)])
         if args.full:
@@ -67,7 +67,7 @@ def main():
             if args.modules:
                 modules = str(args.modules.resolve(strict=True))
                 run("Built modules contain no unreviewed own-domain URLs",
-                    [sys.executable, "-X", "utf8", "scripts/check-domain-hardcodes.py", modules])
+                    [sys.executable, "-X", "utf8", "tools/domains/check-domain-hardcodes.py", modules])
                 run("Portal routing on every approved root", [sys.executable, "-X", "utf8", "services/platform/tests/verify_portal.py"],
                     {"IRIDESCENTLY_MODULES_ROOT": modules})
             else:

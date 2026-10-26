@@ -1,6 +1,6 @@
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { projectRoot } from './release-artifacts.mjs';
+import { projectRoot } from '../release/release-artifacts.mjs';
 
 /** Bundle existing API factories so sealed releases need no workspace dependencies. */
 export async function buildRuntime(siteRoot) {

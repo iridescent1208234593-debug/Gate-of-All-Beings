@@ -14,11 +14,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from testing_storage import configure
 import storage_paths
 
-SCRIPTS = Path(__file__).resolve().parents[3] / "scripts"
+ROOT = Path(__file__).resolve().parents[3]
+RUNTIME_TOOLS = ROOT / "tools" / "runtime"
 
 
 def load(name, file):
-    spec = importlib.util.spec_from_file_location(name, SCRIPTS / file)
+    spec = importlib.util.spec_from_file_location(name, RUNTIME_TOOLS / file)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -106,8 +107,8 @@ class LocalRuntime(unittest.TestCase):
         seal = """
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-const { candidateRoot, recordCandidate } = await import('./scripts/release-artifacts.mjs');
-const { sealRelease } = await import('./scripts/publish-release.mjs');
+const { candidateRoot, recordCandidate } = await import('./tools/release/release-artifacts.mjs');
+const { sealRelease } = await import('./tools/release/publish-release.mjs');
 for (const [name, file] of [['site', 'services/platform/portal_server.py'], ['modules', 'cards/index.html'], ['homepage', 'index.html']]) {
   mkdirSync(path.dirname(path.join(candidateRoot, name, file)), { recursive: true });
   writeFileSync(path.join(candidateRoot, name, file), name);
@@ -115,7 +116,7 @@ for (const [name, file] of [['site', 'services/platform/portal_server.py'], ['mo
 }
 console.log(JSON.stringify(await sealRelease({ allowDirty: true })));
 """
-        result = subprocess.run(["node", "--input-type=module", "-e", seal], cwd=SCRIPTS.parent,
+        result = subprocess.run(["node", "--input-type=module", "-e", seal], cwd=ROOT,
                                 capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(result.returncode, 0, result.stderr)
         channel = json.loads(result.stdout.strip().splitlines()[-1])

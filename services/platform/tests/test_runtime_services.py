@@ -34,7 +34,7 @@ class SealedRuntimeServices(unittest.TestCase):
         cls.site = release_root() / 'store' / 'fixture' / 'site'
         cls.site.joinpath('services', 'platform').mkdir(parents=True)
         shutil.copy2(SOURCE / 'services' / 'platform' / 'runtime-paths.cjs', cls.site / 'services' / 'platform' / 'runtime-paths.cjs')
-        build = 'import {buildRuntime} from "./scripts/build-runtime.mjs"; await buildRuntime(process.argv[1]);'
+        build = 'import {buildRuntime} from "./tools/build/build-runtime.mjs"; await buildRuntime(process.argv[1]);'
         subprocess.run(['node', '--input-type=module', '-e', build, str(cls.site)], cwd=SOURCE,
                        env=os.environ.copy(), check=True, capture_output=True, text=True)
         cls.initial = file_hashes(cls.site)

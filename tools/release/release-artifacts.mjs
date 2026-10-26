@@ -4,10 +4,10 @@ import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import runtimePaths from '../services/platform/runtime-paths.cjs';
+import runtimePaths from '../../services/platform/runtime-paths.cjs';
 
 export const projectRoot = path.resolve(
-  process.env.IRIDESCENTLY_PROJECT_ROOT || path.join(path.dirname(fileURLToPath(import.meta.url)), '..'),
+  process.env.IRIDESCENTLY_PROJECT_ROOT || path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..'),
 );
 export const { releaseRoot } = runtimePaths;
 export const candidateRoot = path.join(releaseRoot, 'candidate');

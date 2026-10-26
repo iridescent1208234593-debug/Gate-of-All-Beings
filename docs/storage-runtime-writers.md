@@ -22,9 +22,9 @@ verified migration manifest.
 | Spirit local settings | `data/spirit/spirit-settings.json` | atomic `.tmp` sibling |
 | Scraping observation logs | — | `cache/logs/scraping/`, bounded rotating process logs |
 | Asset registry index | `data/assets/registry.sqlite3` | import manifests in the external backup/verification area |
-| Local launcher (`scripts/local-runtime.py`) | — | `cache/runtime/local-runtime.json`, per-service working directories under `cache/runtime/`, logs under `cache/logs/local-runtime/` |
-| Storage backups (`scripts/backup-storage.py`) | `backups/snapshots/<UTC stamp>/` with a hashed manifest | — |
-| Local data migration (`scripts/storage-migrate.py`) | `backups/<migration>/manifest.json`; detached originals under `backups/<migration>/original-source/` | — |
+| Local launcher (`tools/runtime/local-runtime.py`) | — | `cache/runtime/local-runtime.json`, per-service working directories under `cache/runtime/`, logs under `cache/logs/local-runtime/` |
+| Storage backups (`tools/runtime/backup-storage.py`) | `backups/snapshots/<UTC stamp>/` with a hashed manifest | — |
+| Local data migration (`tools/runtime/storage-migrate.py`) | `backups/<migration>/manifest.json`; detached originals under `backups/<migration>/original-source/` | — |
 | Private shared email/SSO configuration | `data/secrets/server.env` | — |
 
 `assets/source/` contains supplied originals. The editable worldview database is a
@@ -55,7 +55,7 @@ publish, verifier and migration commands are covered by the release/migration ru
   backups/   migration evidence, recovery originals, snapshots
 ```
 
-Checkout, `git clean`, builds, sealing and rollback only touch the source tree, `releases/candidate` or the channel pointer; none of them can reach `data/` or `assets/`. A rollback selects older code and keeps the current data, so schema changes stay additive (the Huiguan `sessions_db.audience` column defaults to the pre-existing root). `test` requires an explicit temporary `IRIDESCENTLY_STORAGE_ROOT`, and `scripts/check-batch6.py` and CI always create one; nothing in the test suites can select production data.
+Checkout, `git clean`, builds, sealing and rollback only touch the source tree, `releases/candidate` or the channel pointer; none of them can reach `data/` or `assets/`. A rollback selects older code and keeps the current data, so schema changes stay additive (the Huiguan `sessions_db.audience` column defaults to the pre-existing root). `test` requires an explicit temporary `IRIDESCENTLY_STORAGE_ROOT`, and `tools/checks/regression.py` and CI always create one; nothing in the test suites can select production data.
 
 The local `production` environment lives under `E:\External Projects\Iridescently Runtime`. Its migration copied 4,620 files (6.30 GiB, six SQLite databases via the SQLite backup API) from the former in-tree layout of `E:\Projects`, verified every file hash and each database's logical dump, and then detached the untracked originals into `backups/batch6-migration-20261025/original-source/`. `storage-migrate.py verify` re-checks targets against the manifest and the recovery originals; `restore-source` copies originals back without overwriting later data. Old build outputs and release snapshots still in `E:\Projects\.releases` are not runtime data and are left for the unchanged Hong Kong release tooling.
 

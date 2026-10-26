@@ -41,7 +41,7 @@ npm run release:seal # 与 site 候选一起封存为不可变 Release
 - 桌面导航、菜单、图库控制与横向设置带：`styles/chrome.css`；设置展开后有轻薄磨砂底层，提升鲜艳背景上的可读性
 - 平板与手机排布、图片尺寸、图库标题的移动端可读性：`styles/responsive.css` 与 `scripts/gallery.js`。手机端会再收窄贺图，并按横图宽高比限制画布占宽，保持完整图片可见；设置带默认折叠，展开时覆盖画面。
 - 上游 Gallery 源码路径、资源目录和 Vite 构建配置：`vite.config.mjs`
-- 资源校验与首页候选构建：`scripts/build-homepage.mjs`；封存与回滚由 `scripts/publish-release.mjs`（`npm run release:seal` / `release:rollback`）完成。
+- 资源校验与首页候选构建：`scripts/build-homepage.mjs`；封存与回滚由 `tools/release/publish-release.mjs`（`npm run release:seal` / `release:rollback`）完成。
 - Connections / Credits 页面结构与站内链接：`connections.html`；独立视觉样式与友站/鸣谢数据渲染：`styles/connections.css`、`scripts/connections.js`。动态友站和常规鸣谢数据来自 `links.json`、`thanks.json`；特别鸣谢与联系/讨论入口直接维护在 HTML 中。
 
 Connections 顶部项目足迹在 `connections.html` 的 `#project-history` 中追加节点；日期来自 `docs/项目鸣谢/感谢各位.md`，未补猜年份。每次有较大改动正式发布时，都在这里补一条日期和简短变更说明；同一发布周期内相关小提交合并为一条，随发布页面一同更新。特别感谢与可折叠的 13 位社区贡献者分别在 `#with-thanks`、`#community-thanks`，描述以用户确认版本为准。抖音与小红书分享链接归佳霖个人，在 `#contact`，不属于小黑窝社区。三张二维码为 `assets/wechat-personal-qr.png`、`assets/wechat-reward-qr.png`、`assets/wechat-group-qr.png`；旧群码已原路径替换，页面附版本参数刷新缓存，群码到期需要更换图片并更新有效期提示。二维码不裁切、不重绘，点击可查看原图。视觉样式仍在 `styles/connections.css`，未变更友站 / 常规鸣谢的管理接口。

@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { candidateRoot, projectRoot, recordCandidate } from './release-artifacts.mjs';
+import { candidateRoot, projectRoot, recordCandidate } from '../release/release-artifacts.mjs';
 
 const appRoot = path.join(projectRoot, 'apps', 'cards');
 const output = path.join(candidateRoot, 'cards');

@@ -15,7 +15,7 @@ import sqlite3
 import subprocess
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "services" / "platform"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "services" / "platform"))
 from storage_paths import storage_layout, environment, initialize_storage
 
 

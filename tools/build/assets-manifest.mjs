@@ -10,7 +10,7 @@ import {
 } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import runtimePaths from "../services/platform/runtime-paths.cjs";
+import runtimePaths from "../../services/platform/runtime-paths.cjs";
 
 const root = path.resolve(process.env.IRIDESCENTLY_PROJECT_ROOT || process.cwd());
 const galleryRoot = path.join(root, "apps/www/gallery-engine");

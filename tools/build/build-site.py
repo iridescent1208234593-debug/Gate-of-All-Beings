@@ -8,7 +8,7 @@ import sys
 import zipfile
 
 root = Path(os.environ.get('IRIDESCENTLY_PROJECT_ROOT', Path.cwd())).resolve()
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "services" / "platform"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "services" / "platform"))
 from storage_paths import release_root
 
 releases = release_root()

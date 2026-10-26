@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
-import runtimePaths from '../services/platform/runtime-paths.cjs'
+import runtimePaths from '../../services/platform/runtime-paths.cjs'
 
 const projectRoot = path.resolve(process.env.IRIDESCENTLY_PROJECT_ROOT || process.cwd())
 const { discoverGallery, previewName } = await import(pathToFileURL(path.join(projectRoot, 'apps/www/gallery-engine/gallery-plugin.js')))

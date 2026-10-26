@@ -6,7 +6,7 @@
 
 生产8080，OAuth5174，数值配置5178，聚灵5177，Softie4173。旧 game/lingjing/juling 前端域名转入众生之门；API仍留必要上游。源码公开下载 `/app/src` 不允许。
 
-`build:modules` / `build:site` / `build:homepage` 只生成外部 Release 根下的候选；`npm run release:seal` 封存不可变 Release，`python scripts/local-runtime.py start` 从 channel 启动本机回环服务。`IRIDESCENTLY_PROJECT_ROOT` 只选择代码；数据由 `storage_paths.py` / `runtime-paths.cjs` 从外部存储环境选择。无自动启动构建。详见 [发布流程](../../docs/release-workflow.md)。
+`build:modules` / `build:site` / `build:homepage` 只生成外部 Release 根下的候选；`npm run release:seal` 封存不可变 Release，`python tools/runtime/local-runtime.py start` 从 channel 启动本机回环服务。`IRIDESCENTLY_PROJECT_ROOT` 只选择代码；数据由 `storage_paths.py` / `runtime-paths.cjs` 从外部存储环境选择。无自动启动构建。详见 [发布流程](../../docs/release-workflow.md)。
 
 开发可 `python services/platform/portal_server.py`，生产用网站管家；`python services/platform/tests/verify_portal.py` 在临时 test 存储上使用未占用端口，对每个批准根域检查路径/JSON/真实模块内容、未知 Host 拒绝、同根域跳转与 CSP，不接受误连已有服务器。`python services/platform/tests/test_static_security.py` 检查编码/大小写敏感文件拦截。
 

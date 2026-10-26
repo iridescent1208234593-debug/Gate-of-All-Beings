@@ -1,7 +1,7 @@
 name: Regression
 
 # Every pushed branch runs the same suite a developer runs locally
-# (python scripts/check-batch6.py --full), plus clean release builds, manifest
+# (python tools/checks/regression.py --full), plus clean release builds, manifest
 # provenance and dependency audits. Pull requests show the head branch's run.
 on:
   push:
@@ -77,7 +77,7 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import { execFileSync } from 'node:child_process';
-          import { verifyCandidate } from './scripts/release-artifacts.mjs';
+          import { verifyCandidate } from './tools/release/release-artifacts.mjs';
           const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
           for (const name of ['modules', 'homepage', 'site']) {
             const record = await verifyCandidate(name);
@@ -89,12 +89,12 @@ jobs:
       - name: Built candidates contain no unreviewed own-domain URLs
         # The site candidate is committed source, which the suite scans with its reviewed exceptions.
         run: >-
-          python scripts/check-domain-hardcodes.py
+          python tools/domains/check-domain-hardcodes.py
           "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/modules"
           "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/homepage"
       - name: Regression suite (one module per process, disposable test storage)
         run: >-
-          python scripts/check-batch6.py --full
+          python tools/checks/regression.py --full
           --modules "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/modules"
           --report "$RUNNER_TEMP/regression-report.json"
       - name: Audit production npm dependencies

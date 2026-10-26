@@ -3,7 +3,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { cpSync, existsSync, mkdirSync, openSync, closeSync, readFileSync, readdirSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import runtimePaths from '../services/platform/runtime-paths.cjs';
+import runtimePaths from '../../services/platform/runtime-paths.cjs';
 import { candidateRoot, releaseRoot, verifyCandidate } from './release-artifacts.mjs';
 
 const channel = path.join(releaseRoot, 'channels', `${runtimePaths.environment}.json`);
@@ -113,7 +113,7 @@ export async function rollbackRelease(id) {
 export async function main(args = process.argv.slice(2)) {
   const [command, id, ...extra] = args;
   if (extra.length || !['all', 'rollback'].includes(command) || (command === 'all' && id) || (command === 'rollback' && !id)) {
-    throw new Error('Usage: node scripts/publish-release.mjs all | rollback RELEASE_ID. Partial source-tree publishing is retired; rebuild all three candidates.');
+    throw new Error('Usage: node tools/release/publish-release.mjs all | rollback RELEASE_ID. Partial source-tree publishing is retired; rebuild all three candidates.');
   }
   const result = command === 'all' ? await sealRelease() : await rollbackRelease(id);
   console.log(JSON.stringify(result, null, 2));

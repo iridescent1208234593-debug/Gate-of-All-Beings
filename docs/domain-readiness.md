@@ -17,7 +17,7 @@
 | `assetHost` | R2 自定义域名（当前仅 `assets.iridescently.xyz`），不是应用入口主机 |
 | `localPorts` | development / test 下允许的本机 Origin 端口 |
 
-消费方：`services/platform/site_domains.py`（Python 入口、Cookie、SSO、OAuth、CSP、CORS）、`packages/site-domains/index.js`（由 `scripts/generate-domain-config.py` 生成，浏览器与 Node 共用；`--check` 检查是否过期）和 `packages/site-domains/index.mjs`。部署时可用以下环境变量收窄或选择，但不能引入未批准的根域：
+消费方：`services/platform/site_domains.py`（Python 入口、Cookie、SSO、OAuth、CSP、CORS）、`packages/site-domains/index.js`（由 `tools/domains/generate-domain-config.py` 生成，浏览器与 Node 共用；`--check` 检查是否过期）和 `packages/site-domains/index.mjs`。部署时可用以下环境变量收窄或选择，但不能引入未批准的根域：
 
 - `SITE_DOMAIN`：该部署的首选根域，必须在批准列表内。
 - `IRIDESCENTLY_ALLOWED_DOMAINS`：逗号分隔，限定本部署接受的根域子集（须唯一并包含 `SITE_DOMAIN`）。
@@ -70,7 +70,7 @@
 
 ## 有意保留的硬编码
 
-`scripts/check-domain-hardcodes.py` 扫描源码与构建产物中的自有域名绝对 URL，以下例外经过审查：
+`tools/domains/check-domain-hardcodes.py` 扫描源码与构建产物中的自有域名绝对 URL，以下例外经过审查：
 
 - canonical 与 `og:image` 元数据（见上）；
 - 世界观数据的角色来源字段 `sourceUrl`、历史导出 `packages/shared-data/worldview.json`；
@@ -81,7 +81,7 @@
 ## 验证
 
 ```powershell
-python scripts/check-batch6.py --full --modules <releases>\candidate\modules
+python tools/checks/regression.py --full --modules <releases>\candidate\modules
 ```
 
 覆盖：`services/platform/tests/test_site_domains.py`（入口主机、Origin、WebSocket、Cookie、SSO 令牌、OAuth 回调、CSP、Node/浏览器一致性、源码扫描）、`services/platform/tests/test_host_policy.py`、`services/platform/tests/test_huiguan_oauth_session.py`（会话按根域、未登记根域拒绝 OAuth、state 不可跨根域重放）、`services/platform/tests/test_runtime_services.py`（三个根域的 WebSocket Origin）、`services/platform/tests/verify_portal.py`（每个根域的路由、未知 Host 421、同根域跳转、CSP）、构建产物扫描、`apps/huiguan/tests/oauth-e2e.cjs`（本地模拟提供方的浏览器全流程）。

@@ -13,7 +13,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # services/platform
 import storage_paths
 
-SPEC = importlib.util.spec_from_file_location("storage_migrate", Path(__file__).resolve().parents[3] / "scripts/storage-migrate.py")
+SPEC = importlib.util.spec_from_file_location("storage_migrate", Path(__file__).resolve().parents[3] / "tools/runtime/storage-migrate.py")
 migration = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(migration)
 

@@ -12,7 +12,7 @@ try {
   const { candidateRoot, recordCandidate, releaseRoot } = await import('./release-artifacts.mjs');
   const { sealRelease, rollbackRelease, verifyRelease } = await import('./publish-release.mjs');
   const fixtures = {
-    'site/server/app.py': 'print("fixture")',
+    'site/services/platform/app.py': 'print("fixture")',
     'modules/cards/index.html': '<p>cards</p>',
     'homepage/index.html': '<p>homepage</p>',
     'homepage/assets/homepage/homepage.js': 'console.log("homepage")',
@@ -45,7 +45,7 @@ try {
   assert.equal(restored.current, first.current);
   assert.equal(restored.previous, second.current);
   assert.equal(readFileSync(data, 'utf8'), 'persistent fixture bytes');
-  writeFileSync(path.join(firstVerified.directory, 'site', 'server', 'app.py'), 'tampered');
+  writeFileSync(path.join(firstVerified.directory, 'site', 'services', 'platform', 'app.py'), 'tampered');
   await assert.rejects(rollbackRelease(first.current), /verification failed/);
   await assert.rejects(rollbackRelease('../outside'), /Invalid release ID/);
   console.log('[release] immutable assembly, clean guard, pointer rollback, tamper rejection and data preservation passed');

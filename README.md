@@ -52,12 +52,12 @@ npm run build:site        # Git HEAD 源码快照 → <releases>/candidate/site�
 npm run build:release     # 八个模块 + 首页候选
 npm run release:seal      # 三个候选须来自同一干净提交；生成不可变 <releases>/store/<id> 并切换 channel
 npm run release:rollback -- <release-id>    # 只切换 channel，持久数据不变
-python scripts/local-runtime.py start       # 只在本机回环启动已封存 Release，不启动 Tunnel、不改 DNS
-python scripts/local-runtime.py status | stop
-python scripts/check-batch6.py --full --modules <candidate>/modules   # 回归，只使用临时 test 存储
+python tools/runtime/local-runtime.py start       # 只在本机回环启动已封存 Release，不启动 Tunnel、不改 DNS
+python tools/runtime/local-runtime.py status | stop
+python tools/checks/regression.py --full --modules <candidate>/modules   # 回归，只使用临时 test 存储
 ```
 
-本机外部存储位于 `E:\External Projects\Iridescently Runtime\<environment>\{data,assets,cache,releases,backups}`。旧本地运行数据的迁移证据与可恢复原件在 `production\backups\batch6-migration-20261025`；只读复核：`python scripts/storage-migrate.py verify --manifest <该目录>\manifest.json`。`python scripts/backup-storage.py snapshot` 生成同盘快照，不等于异地备份。外部运维工具（`E:\External Projects\Iridescently Operations`）通过 `local-workspace.json` 选择源码与存储根；香港发布工具仍按其自身流程运行，本仓库不包含香港部署动作。
+本机外部存储位于 `E:\External Projects\Iridescently Runtime\<environment>\{data,assets,cache,releases,backups}`。旧本地运行数据的迁移证据与可恢复原件在 `production\backups\batch6-migration-20261025`；只读复核：`python tools/runtime/storage-migrate.py verify --manifest <该目录>\manifest.json`。`python tools/runtime/backup-storage.py snapshot` 生成同盘快照，不等于异地备份。外部运维工具（`E:\External Projects\Iridescently Operations`）通过 `local-workspace.json` 选择源码与存储根；香港发布工具仍按其自身流程运行，本仓库不包含香港部署动作。
 
 ## 数据与密钥
 
