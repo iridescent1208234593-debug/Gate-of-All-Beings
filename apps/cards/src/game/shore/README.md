@@ -1,6 +1,6 @@
 # 雾隐浅滩
 
-众生之门内的轻量探索模式，入口 `#shore`，退出返回门庭 `#home`。迁自用户验收的 `E:\External Projects\original-ui-version\src\world-screen.js`；`shore-background.png` 是同一原型的 `src/media/bg.png`。本目录不包含原型开场和初始化流程。
+众生之门内的轻量探索模式，入口 `#shore`，退出返回门庭 `#home`。迁自用户验收的 `<工作区>\labs\original-ui-version\src\world-screen.js`；`shore-background.png` 是同一原型的 `src/media/bg.png`。本目录不包含原型开场和初始化流程。
 
 - `ShoreMode.tsx` 是 React owner，读取 `PlayerProfileProvider` 的 Gate Identity，经 `getProfile` 注入场景。
 - `world-screen.js` 保留三个灵息点、E 探索、J 日志、任务与本地进度；`dispose()` 中止 listener 并清除所有 timer。无 RAF、WebGL 或页面级字号修改。

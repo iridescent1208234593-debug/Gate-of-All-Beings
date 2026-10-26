@@ -18,7 +18,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "services" / "platform"))
-from storage_paths import storage_layout, environment, require_ready, ROOT_VARIABLES
+from storage_paths import storage_layout, storage_root, environment, require_ready, ROOT_VARIABLES
 from site_domains import SITE_DOMAIN
 
 NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
@@ -67,7 +67,8 @@ def launch_plan():
     layout = storage_layout()
     site, channel = selected_release()
     node = shutil.which("node")
-    storage_parent = os.environ.get("IRIDESCENTLY_STORAGE_ROOT", str(Path.home() / ".local/share/iridescently"))
+    # Resolved once here (explicit root, else the workspace's runtime) and handed to children verbatim.
+    storage_parent = storage_root()
     # Children must derive exactly this layout, so explicit root overrides travel with them.
     overrides = {f"IRIDESCENTLY_{name}_ROOT": os.environ[f"IRIDESCENTLY_{name}_ROOT"]
                  for name in ROOT_VARIABLES.values() if os.environ.get(f"IRIDESCENTLY_{name}_ROOT", "").strip()}

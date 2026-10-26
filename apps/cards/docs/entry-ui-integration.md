@@ -1,6 +1,6 @@
 # 众生之门入场 UI 集成记录
 
-Cards 正式入口仍是 `src/gate/GameShell.tsx` 与 `src/gate/EntryGate.tsx`，由项目现有 `/app/modules/cards/` 路由加载。外部 `E:\External Projects\original-ui-version` 是独立交互原型，不作为生产运行时依赖。
+Cards 正式入口仍是 `src/gate/GameShell.tsx` 与 `src/gate/EntryGate.tsx`，由项目现有 `/app/modules/cards/` 路由加载。外部 `<工作区>\labs\original-ui-version` 是独立交互原型，不作为生产运行时依赖。
 
 原型的全屏门景、单次播放、进度定位、配色切换和显式进入已经接到正式开场。场景使用 Cards 内的 `src/embed/gateEmbed.ts`，该文件与原型门景同源于 `sceneModel.ts`，不复制原型打包文件或引入外部绝对路径。`EntryGate.tsx` 将它作为单一动画时间轴运行；隐藏页面会暂停，离开时销毁 renderer，WebGL 不可用时使用现有 2D 场景。原型里的用户名创建、种族树、示例种族列表、头像流程和 MT 剧情不进入正式入口：它们与当前账户、存档和游戏流程没有数据/路由契约，照搬会产生第二套登录和开场业务。
 

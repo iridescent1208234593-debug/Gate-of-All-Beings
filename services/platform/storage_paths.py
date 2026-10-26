@@ -10,6 +10,9 @@ _CODE_ROOT = Path(__file__).resolve().parents[2]
 ENVIRONMENTS = {"development", "staging", "production", "test"}
 ROOT_VARIABLES = {"data": "DATA", "assets": "ASSETS", "cache": "CACHE", "releases": "RELEASE", "backups": "BACKUP"}
 MARKER = ".storage-ready.json"
+# The engineering workspace (repo, worktrees, runtime, operations, ...) describes itself with
+# this file at its root, using paths relative to that root (docs/workspace.md).
+WORKSPACE_MANIFEST = "iridescently-workspace.json"
 
 
 def environment():
@@ -34,12 +37,40 @@ def _within(value, parent):
     return value == parent or parent in value.parents
 
 
+def workspace_root():
+    """IRIDESCENTLY_WORKSPACE_ROOT, else the nearest ancestor of this checkout holding the manifest."""
+    configured = os.environ.get("IRIDESCENTLY_WORKSPACE_ROOT", "").strip()
+    if configured:
+        return _absolute(configured)
+    return next((directory for directory in _CODE_ROOT.parents if (directory / WORKSPACE_MANIFEST).is_file()), None)
+
+
+def workspace_path(key):
+    """A named workspace root (runtime, operations, ...); None outside a workspace or when not declared."""
+    root = workspace_root()
+    if root is None:
+        return None
+    manifest = json.loads((root / WORKSPACE_MANIFEST).read_text(encoding="utf-8"))
+    value = manifest.get("roots", {}).get(key) if manifest.get("schema") == 1 else None
+    if not isinstance(value, str) or not value:
+        return None
+    # Relative and inside the workspace, so the whole workspace can move without edits.
+    return _absolute(str(root.joinpath(*_parts((value,)))))
+
+
+def storage_root():
+    """Parent of the environment directories. Test storage is always an explicit temporary root."""
+    configured = os.environ.get("IRIDESCENTLY_STORAGE_ROOT", "").strip()
+    if configured:
+        return _absolute(configured)
+    if environment() == "test":
+        raise ValueError("test requires an explicit temporary IRIDESCENTLY_STORAGE_ROOT")
+    return workspace_path("runtime") or _absolute(str(Path.home() / ".local" / "share" / "iridescently"))
+
+
 def storage_layout():
     mode = environment()
-    configured = os.environ.get("IRIDESCENTLY_STORAGE_ROOT", "").strip()
-    if mode == "test" and not configured:
-        raise ValueError("test requires an explicit temporary IRIDESCENTLY_STORAGE_ROOT")
-    base = _absolute(configured or str(Path.home() / ".local" / "share" / "iridescently")) / mode
+    base = storage_root() / mode
     layout = {key: _absolute(os.environ.get("IRIDESCENTLY_" + variable + "_ROOT", "").strip() or str(base / key))
               for key, variable in ROOT_VARIABLES.items()}
     for key, value in layout.items():

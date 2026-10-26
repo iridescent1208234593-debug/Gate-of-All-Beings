@@ -66,11 +66,11 @@ Git 切换分支时只移动受版本控制的文件。被忽略的本地文件�
 - 旧目录下若还有数据库、上传或日志，先确认 Batch 6 迁移已把它们放进外部存储，再处理旧副本。`.gitignore` 继续忽略整个 `/portal/`、`/server/`、`/shared/`，防止误提交。
 - 调用旧仓库路径的计划任务或快捷方式（例如旧看门狗）需要停用或改路径。
 
-## 外部运维目录需要同步的路径
+## 外部运维目录
 
-运维目录不在 Git 中，本次重构没有修改它。项目根切到本布局之前，下列入口需要改为新路径：
+运维目录不在本仓库中，位置由工作区清单的 `operations` 登记（见 [工程工作区](workspace.md)）。2026-10-26 起它的入口按所选检出的布局选择路径：检出里有新路径就用新路径，否则用旧路径，因此同一套运维工具既能驱动本布局的检出，也能继续驱动香港旧线的旧布局根。对应关系：
 
-| 运维文件 | 现在引用 | 改为 |
+| 运维文件 | 旧布局 | 新布局 |
 | --- | --- | --- |
 | `assets-manifest.mjs`、`build-cards.mjs`、`build-gallery-previews.mjs`、`build-site.mjs`、`build-world-map.mjs` | `<项目根>/scripts/<同名>` | `<项目根>/tools/build/<同名>` |
 | `build-site.py` | `<项目根>/scripts/build-site.py` | `<项目根>/tools/build/build-site.py` |

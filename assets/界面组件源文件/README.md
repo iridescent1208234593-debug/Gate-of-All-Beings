@@ -52,7 +52,7 @@ PSD / PNG 是**设计稿**，页面用的仍然是 `packages/shared-ui/lxh-ui.cs
 
 1. **只改了颜色**：改 `tokens/色板.psd` 里色块图层的颜色，然后运行
    ```powershell
-   $env:IRIDESCENTLY_OPS_ROOT = 'E:\External Projects\Iridescently Operations'
+   $env:IRIDESCENTLY_OPS_ROOT = '<工作区>\operations'
    python "$env:IRIDESCENTLY_OPS_ROOT\lxh-ui-kit\token_diff.py" 改好的色板.psd
    ```
    会列出哪些 `--lxh-*` token 从什么色变成了什么色。把这个列表交给开发（或 AI），改 `lxh-ui.css` 顶部的 token 就行，所有组件跟着变。
@@ -61,9 +61,9 @@ PSD / PNG 是**设计稿**，页面用的仍然是 `packages/shared-ui/lxh-ui.cs
 ## 重新导出（开发用）
 
 ```powershell
-$env:IRIDESCENTLY_OPS_ROOT = 'E:\External Projects\Iridescently Operations'
+$env:IRIDESCENTLY_OPS_ROOT = '<工作区>\operations'
 python "$env:IRIDESCENTLY_OPS_ROOT\lxh-ui-kit\export.py"              # 全量，输出到本目录下的 lxh-ui/
 python "$env:IRIDESCENTLY_OPS_ROOT\lxh-ui-kit\export.py" --only 01 05 # 只导某几组
 ```
 
-需要：Python + `playwright`、`psd-tools`、`Pillow`、`numpy`，以及本机 Edge 或 Chrome。要加组件或状态，在 `E:\External Projects\Iridescently Operations\lxh-ui-kit\kit.html` 里加一行 `add(...)`。导出后看 `lxh-ui/导出报告.txt`：它把各层叠回去与整图逐像素比对，平均差 < 1 视为一致。
+需要：Python + `playwright`、`psd-tools`、`Pillow`、`numpy`，以及本机 Edge 或 Chrome。要加组件或状态，在 `<工作区>\operations\lxh-ui-kit\kit.html` 里加一行 `add(...)`。导出后看 `lxh-ui/导出报告.txt`：它把各层叠回去与整图逐像素比对，平均差 < 1 视为一致。
