@@ -87,7 +87,11 @@ jobs:
           }
           NODE
       - name: Built candidates contain no unreviewed own-domain URLs
-        run: python scripts/check-domain-hardcodes.py "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate"
+        # The site candidate is committed source, which the suite scans with its reviewed exceptions.
+        run: >-
+          python scripts/check-domain-hardcodes.py
+          "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/modules"
+          "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/homepage"
       - name: Regression suite (one module per process, disposable test storage)
         run: >-
           python scripts/check-batch6.py --full
