@@ -2,11 +2,15 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import runtimePaths from '../../services/platform/runtime-paths.cjs';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const operationsRoot = path.resolve(
-  process.env.IRIDESCENTLY_OPS_ROOT || 'E:/External Projects/Iridescently Operations',
-);
+// Explicit directory, else the enclosing workspace's `operations` root (docs/workspace.md).
+const configuredOperations = process.env.IRIDESCENTLY_OPS_ROOT?.trim() || runtimePaths.workspacePath('operations');
+if (!configuredOperations) {
+  throw new Error('Operations directory unknown: set IRIDESCENTLY_OPS_ROOT or work inside a workspace whose iridescently-workspace.json declares roots.operations.');
+}
+const operationsRoot = path.resolve(configuredOperations);
 const entryName = process.argv[2];
 if (!entryName || !/^[\w./-]+\.(?:mjs|py)$/.test(entryName) || entryName.split(/[\\/]/).includes('..')) {
   throw new Error('Usage: node tools/ops/run-ops.mjs <operations-entry.mjs|operations-entry.py> [args...]');

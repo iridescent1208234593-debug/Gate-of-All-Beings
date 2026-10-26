@@ -8,7 +8,6 @@ import { fileURLToPath } from "node:url";
 import runtimePaths from "../../services/platform/runtime-paths.cjs";
 
 const root = path.resolve(process.env.IRIDESCENTLY_PROJECT_ROOT || process.cwd());
-const operationsRoot = path.resolve(process.env.IRIDESCENTLY_OPS_ROOT || "E:/External Projects/Iridescently Operations");
 const manifestPath = path.join(runtimePaths.cacheRoot, "ops", "gallery-manifest.json");
 const manifestScript = path.join(root, "tools", "build", "assets-manifest.mjs");
 const wranglerScript = path.join(root, "node_modules/wrangler/bin/wrangler.js");

@@ -84,6 +84,37 @@ class StoragePathsTests(unittest.TestCase):
                 result = subprocess.run([NODE, "-e", "require(process.argv[1]).dataPath(process.argv[2])", str(helper), part], capture_output=True)
                 self.assertNotEqual(result.returncode, 0)
 
+    def test_workspace_manifest_selects_runtime_except_for_test_storage(self):
+        workspace = Path(self.temp.name) / "workspace"
+        workspace.mkdir()
+        (workspace / paths.WORKSPACE_MANIFEST).write_text(json.dumps(
+            {"schema": 1, "roots": {"runtime": "runtime", "operations": "operations", "escape": "../outside", "absolute": "C:\\elsewhere"}}))
+        helper = Path(paths.__file__).with_name("runtime-paths.cjs")
+        code = "const p=require(process.argv[1]);console.log(JSON.stringify({layout:p.layout,ops:p.workspacePath('operations'),missing:p.workspacePath('missing')}));"
+        env = {**SYSTEM_ENV, "IRIDESCENTLY_WORKSPACE_ROOT": str(workspace), "IRIDESCENTLY_ENVIRONMENT": "development"}
+        with patch.dict(os.environ, env, clear=True):
+            self.assertEqual(paths.storage_layout()["data"], (workspace / "runtime/development/data").resolve())
+            self.assertEqual(paths.workspace_path("operations"), (workspace / "operations").resolve())
+            self.assertIsNone(paths.workspace_path("missing"))
+            for key in ("escape", "absolute"):
+                with self.subTest(key=key), self.assertRaises(ValueError):
+                    paths.workspace_path(key)
+            node = subprocess.run([NODE, "-e", code, str(helper)], capture_output=True, text=True, env=env)
+            self.assertEqual(node.returncode, 0, node.stderr)
+            value = json.loads(node.stdout)
+            self.assertEqual(value["layout"], {k: str(v) for k, v in paths.storage_layout().items()})
+            self.assertEqual(value["ops"], str(paths.workspace_path("operations")))
+            self.assertIsNone(value["missing"])
+        # An explicit storage root still wins, and test storage never falls back to the workspace.
+        with patch.dict(os.environ, {**env, "IRIDESCENTLY_STORAGE_ROOT": self.temp.name}, clear=True):
+            self.assertEqual(paths.storage_layout()["data"], Path(self.temp.name) / "development/data")
+        with patch.dict(os.environ, {**env, "IRIDESCENTLY_ENVIRONMENT": "test"}, clear=True):
+            with self.assertRaises(ValueError):
+                paths.storage_layout()
+            node = subprocess.run([NODE, "-e", code, str(helper)], capture_output=True, text=True,
+                                  env={**env, "IRIDESCENTLY_ENVIRONMENT": "test"})
+            self.assertNotEqual(node.returncode, 0)
+
     def test_immutable_code_can_live_in_release_store(self):
         site = paths.release_root() / "store/version/site"
         with patch.dict(os.environ, {"IRIDESCENTLY_PROJECT_ROOT": str(site)}):

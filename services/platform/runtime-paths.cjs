@@ -12,7 +12,25 @@ function absolute(value) {
 }
 const codeRoot = absolute(path.resolve(__dirname, '..', '..'));
 const projectRoot = absolute(process.env.IRIDESCENTLY_PROJECT_ROOT || codeRoot);
-const storageRoot = absolute(process.env.IRIDESCENTLY_STORAGE_ROOT?.trim() || path.join(os.homedir(), '.local', 'share', 'iridescently'));
+const WORKSPACE_MANIFEST = 'iridescently-workspace.json';
+function findWorkspace() {
+  if (process.env.IRIDESCENTLY_WORKSPACE_ROOT?.trim()) return absolute(process.env.IRIDESCENTLY_WORKSPACE_ROOT.trim());
+  for (let directory = path.dirname(codeRoot); ; directory = path.dirname(directory)) {
+    if (fs.statSync(path.join(directory, WORKSPACE_MANIFEST), {throwIfNoEntry:false})?.isFile()) return directory;
+    if (path.dirname(directory) === directory) return null;
+  }
+}
+const workspaceRoot = findWorkspace();
+function workspacePath(key) {
+  if (!workspaceRoot) return null;
+  const manifest = JSON.parse(fs.readFileSync(path.join(workspaceRoot, WORKSPACE_MANIFEST), 'utf8'));
+  const value = manifest.schema === 1 ? manifest.roots?.[key] : undefined;
+  if (typeof value !== 'string' || !value) return null;
+  // Relative and inside the workspace, so the whole workspace can move without edits.
+  return absolute(path.join(workspaceRoot, ...parts([value])));
+}
+// An explicit root wins; test storage never falls back to the workspace (checked above).
+const storageRoot = absolute(process.env.IRIDESCENTLY_STORAGE_ROOT?.trim() || workspacePath('runtime') || path.join(os.homedir(), '.local', 'share', 'iridescently'));
 const variables = {data:'DATA',assets:'ASSETS',cache:'CACHE',releases:'RELEASE',backups:'BACKUP'};
 const layout = Object.fromEntries(Object.entries(variables).map(([key, variable]) => [key, absolute(process.env[`IRIDESCENTLY_${variable}_ROOT`]?.trim() || path.join(storageRoot, environment, key))]));
 function within(value, root) { const r = path.relative(root, value); return r === '' || (!r.startsWith(`..${path.sep}`) && r !== '..' && !path.isAbsolute(r)); }
@@ -42,4 +60,4 @@ function requireReady(service) {
   }
   return marker;
 }
-module.exports = {environment,projectRoot,storageRoot,layout,dataRoot:layout.data,assetsRoot:layout.assets,cacheRoot:layout.cache,releaseRoot:layout.releases,backupRoot:layout.backups,dataPath,cachePath,requireReady};
+module.exports = {environment,projectRoot,storageRoot,workspaceRoot,workspacePath,layout,dataRoot:layout.data,assetsRoot:layout.assets,cacheRoot:layout.cache,releaseRoot:layout.releases,backupRoot:layout.backups,dataPath,cachePath,requireReady};
