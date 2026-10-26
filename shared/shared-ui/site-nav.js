@@ -1,4 +1,4 @@
-/* Iridescently site navigation — the one global bar shared by 节气画廊, 西木会馆 and 众生之门.
+/* Iridescently site navigation — the one global bar shared by 西木会馆, 众生之门 and 节气画廊.
  *
  * Classic <script src=".../shared/shared-ui/site-nav.js"> mounts it immediately.
  *   data-variant="overlay"  lighter glass over an immersive first screen (gallery, hero)
@@ -17,9 +17,9 @@
   var ORIGIN = 'https://iridescently.xyz';
   var MARK = ORIGIN + '/shared/shared-ui/brand/iridescently-mark.svg';
   var SITES = [
-    { host: 'iridescently.xyz', label: '节气画廊', path: '/' },
     { host: 'huiguan.iridescently.xyz', label: '西木会馆', path: '/' },
-    { host: 'zszm.iridescently.xyz', label: '众生之门', path: '/', beta: true }
+    { host: 'zszm.iridescently.xyz', label: '众生之门', path: '/', beta: true },
+    { host: 'iridescently.xyz', label: '节气画廊', path: '/gallery.html' }
   ];
   var MORE = [
     { host: 'oc.iridescently.xyz', label: '佳霖馆长设定', path: '/' },
@@ -44,6 +44,8 @@
     '#qc-nav a,#qc-nav summary,#qc-nav button{color:inherit;text-decoration:none;font:inherit}',
     '#qc-nav .qc-brand{display:inline-flex;align-items:center;gap:9px;flex:none;white-space:nowrap;font-weight:600}',
     '#qc-nav .qc-brand img{width:28px;height:28px;padding:3px;border-radius:6px;background:var(--qc-nav-paper);image-rendering:pixelated}',
+    '#qc-nav .qc-mobile-toggle{display:none}',
+    '#qc-nav .qc-mobile-panel{display:contents}',
     '#qc-nav .qc-links{display:flex;align-items:stretch;align-self:stretch;gap:2px;min-width:0}',
     '#qc-nav .qc-links>a,#qc-nav .qc-more>summary{position:relative;display:inline-flex;align-items:center;height:100%;padding:0 10px;white-space:nowrap;color:var(--qc-fg-soft);transition:color .15s}',
     '#qc-nav .qc-links>a:hover,#qc-nav .qc-more>summary:hover{color:var(--qc-fg)}',
@@ -69,6 +71,20 @@
     '#qc-nav .auth-bar>a,#qc-nav .auth-bar>button,#qc-nav .auth-bar>span{display:inline-flex;align-items:center;min-height:32px;white-space:nowrap}',
     '#qc-nav .auth-bar>a:first-child:last-child{padding:0 12px;border:1px solid var(--qc-edge);border-radius:999px;background:var(--qc-hover);color:var(--qc-mark)}',
     '#qc-nav .site-language-toggle{min-height:30px;padding:0 10px;border:1px solid var(--qc-edge);border-radius:999px;background:transparent;color:inherit;font:12px/1 system-ui,sans-serif;cursor:pointer}',
+    '#qc-nav .qc-theme{position:relative;display:flex;align-items:center}',
+    '#qc-nav .qc-theme>button{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:1px solid var(--qc-edge);border-radius:999px;background:transparent;color:inherit;cursor:pointer;transition:background .15s}',
+    '#qc-nav .qc-theme>button:hover{background:var(--qc-hover)}',
+    '#qc-nav .qc-theme>button svg{width:16px;height:16px;display:block}',
+    '#qc-nav .qc-theme-panel{position:absolute;right:0;top:calc(100% + 8px);z-index:1;min-width:210px;padding:10px 12px;background:var(--qc-panel);border:1px solid var(--qc-edge);border-radius:12px;box-shadow:inset 0 1px 0 var(--qc-hi),0 14px 34px rgba(4,16,11,.22);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3);text-align:left}',
+    '#qc-nav .qc-theme-seg{display:flex;gap:6px}',
+    '#qc-nav .qc-theme-opt{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:0 10px;border:1px solid var(--qc-edge);border-radius:8px;background:transparent;color:inherit;font:inherit;font-size:13px;cursor:pointer;transition:background .15s,border-color .15s}',
+    '#qc-nav .qc-theme-opt:hover{background:var(--qc-hover)}',
+    '#qc-nav .qc-theme-opt.is-active{border-color:var(--qc-mark);background:var(--qc-hover)}',
+    '#qc-nav .qc-theme-opt svg{width:14px;height:14px}',
+    '#qc-nav .qc-theme-panel[hidden]{display:none}',
+    '#qc-nav .qc-theme-follow{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;white-space:nowrap}',
+    '#qc-nav .qc-theme-follow input{width:15px;height:15px;margin:0;accent-color:var(--qc-mark)}',
+    '#qc-nav .qc-theme-hint{margin:7px 0 0;color:var(--qc-sub);font-size:11px;line-height:1.6}',
     '#qc-nav :where(a,button,summary):focus-visible{outline:2px solid var(--qc-mark);outline-offset:2px;border-radius:4px}',
     '@media(max-width:720px){',
     '#qc-nav{gap:4px;padding:0 8px;font-size:13px}',
@@ -80,11 +96,41 @@
     '#qc-nav .qc-more>summary::after{margin:-4px 0 0;width:7px;height:7px}',
     '#qc-nav .qc-more-panel{position:fixed;left:8px;right:8px;top:calc(var(--qc-nav-h) + 4px);max-width:none}',
     '#qc-nav .qc-right{gap:6px}',
+    '#qc-nav .qc-theme-panel{position:fixed;right:8px;left:auto;top:calc(var(--qc-nav-h) + 4px);min-width:190px}',
     '#qc-nav .auth-bar :is(.role-tag,.lv-tag,.sync-status,.email-reminder){display:none}',
     '#qc-nav .auth-bar>span{display:none}',
     '#qc-nav .site-language-toggle{padding:0 8px}',
     '#qc-nav .qc-beta{display:none}',
     '#qc-nav .auth-bar>a:first-child:last-child{padding:0 10px}',
+    '/* 手机端：右侧抽屉 */',
+    '#qc-nav .qc-mobile-toggle{display:inline-flex;align-items:center;height:30px;margin-left:auto;padding:0 11px;border:1px solid var(--qc-edge);border-radius:999px;background:var(--qc-hover);color:var(--qc-fg);font-size:12.5px;cursor:pointer}',
+    '#qc-nav[data-mobile-open="true"] .qc-mobile-toggle{background:var(--qc-mark);color:var(--qc-nav-paper);border-color:var(--qc-mark)}',
+    '#qc-nav .qc-mobile-panel{display:flex;flex-direction:column;position:fixed;top:0;right:0;height:100vh;height:100dvh;width:min(82vw,308px);padding:calc(var(--qc-nav-h,56px) + 10px) 14px 16px;background:var(--qc-nav-paper,#fbf8f2);border-left:1px solid var(--qc-edge);box-shadow:-18px 0 48px rgba(20,30,26,.28);transform:translateX(104%);transition:transform .34s cubic-bezier(.16,1,.3,1),visibility 0s linear .34s;z-index:9998;overflow:hidden;visibility:hidden;will-change:transform}',
+    '#qc-nav[data-mobile-open="true"] .qc-mobile-panel{transform:none;visibility:visible;transition:transform .34s cubic-bezier(.16,1,.3,1),visibility 0s}',
+    '#qc-nav .qc-scrim{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;background:rgba(18,30,25,.44);opacity:0;pointer-events:none;transition:opacity .3s ease;z-index:9997}',
+    '#qc-nav[data-mobile-open="true"] .qc-scrim{opacity:1;pointer-events:auto}',
+    '#qc-nav .qc-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 2px 10px;border-bottom:1px solid var(--qc-edge);margin-bottom:8px}',
+    '#qc-nav .qc-drawer-title{font-size:13.5px;font-weight:600;letter-spacing:.04em;color:var(--qc-fg)}',
+    '#qc-nav .qc-drawer-close{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--qc-edge);border-radius:50%;background:var(--qc-hover);color:var(--qc-fg);cursor:pointer;font:16px/1 system-ui;padding:0}',
+    '#qc-nav .qc-drawer-close:hover{background:var(--qc-mark);color:var(--qc-nav-paper)}',
+    '/* 抽屉内导航：纵向、可滚动 */',
+    '#qc-nav .qc-links{flex-direction:column;align-items:stretch;align-self:stretch;overflow-y:auto;flex:1 1 auto;min-height:0;gap:2px;padding-bottom:4px;-webkit-overflow-scrolling:touch}',
+    '#qc-nav .qc-links>a,#qc-nav .qc-more>summary{height:auto;min-height:42px;padding:0 10px;border-radius:9px;justify-content:flex-start;font-size:14px}',
+    '#qc-nav .qc-links>a.is-site::after{display:none}',
+    '#qc-nav .qc-links>a.is-site{background:var(--qc-hover);font-weight:600}',
+    '#qc-nav .qc-more{position:static;display:block}',
+    '#qc-nav .qc-more>summary{font-size:14px}',
+    '#qc-nav .qc-more-panel{position:static;display:none;min-width:0;max-width:none;max-height:none;margin:2px 0 4px;padding:2px 0 2px 10px;background:transparent;border:0;box-shadow:none;overflow:visible}',
+    '#qc-nav .qc-more[open] .qc-more-panel{display:grid}',
+    '/* 抽屉底部：头像 + 登录/退出 + 语言/主题 */',
+    '#qc-nav .qc-right{margin-top:auto;flex-direction:column;align-items:stretch;gap:10px;padding-top:12px;border-top:1px solid var(--qc-edge);white-space:normal}',
+    '#qc-nav .qc-right .qc-nav-slot{justify-content:flex-start}',
+    '#qc-nav .qc-mobile-panel .auth-bar{flex-wrap:wrap;gap:8px;overflow:visible}',
+    '#qc-nav .qc-mobile-panel .auth-bar>a,#qc-nav .qc-mobile-panel .auth-bar>button{min-height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--qc-edge);justify-content:center}',
+    '#qc-nav .qc-mobile-panel .auth-bar>a:first-child:last-child{min-height:38px;width:100%;padding:0 14px;justify-content:center}',
+    '#qc-nav .qc-mobile-panel .auth-bar :is(.role-tag,.lv-tag,.sync-status,.email-reminder){display:none}',
+    '#qc-nav .qc-mobile-panel .auth-bar>span{display:inline-flex;min-width:0;font-size:12.5px}',
+    '#qc-nav .qc-mobile-panel .site-language-toggle{min-height:34px}',
     '}',
     '@media(max-width:380px){#qc-nav .qc-links>a{padding:0 5px}}',
     'body:has(#qc-nav) #QcAccountBar{display:none}',
@@ -118,15 +164,38 @@
     document.querySelectorAll('.topnav, .ip-footer').forEach(function (node) { node.remove(); });
     var nav = el('nav'); nav.id = 'qc-nav'; nav.setAttribute('aria-label', '站点导航');
     if (options.variant === 'overlay') nav.dataset.variant = 'overlay';
-    if (options.tone === 'light') nav.dataset.tone = 'light';
+    // 声明了 data-theme-enabled 的页面由主题控件接管 tone；未声明的保持手动指定（向后兼容）。
+    if (options.theme) nav.dataset.themeControl = '';
+    else if (options.tone === 'light') nav.dataset.tone = 'light';
     var brand = el('a', 'qc-brand'); brand.href = ORIGIN + '/'; brand.setAttribute('aria-label', 'Iridescently 节气画廊');
     brand.innerHTML = '<img src="' + MARK + '" width="26" height="26" alt=""><span>Iridescently</span>';
     nav.appendChild(brand);
+    var activeSite = SITES.find(function (site) { return site.host === host; });
+    var mobileToggle = el('button', 'qc-mobile-toggle', (activeSite ? activeSite.label + ' · ' : '') + '菜单');
+    mobileToggle.type = 'button'; mobileToggle.setAttribute('aria-expanded', 'false'); mobileToggle.setAttribute('aria-controls', 'qc-mobile-panel');
+    nav.appendChild(mobileToggle);
+    var mobilePanel = el('div', 'qc-mobile-panel'); mobilePanel.id = 'qc-mobile-panel';
+    var drawerHead = el('div', 'qc-drawer-head');
+    var drawerTitle = el('span', 'qc-drawer-title', activeSite ? activeSite.label : '导航');
+    var drawerClose = el('button', 'qc-drawer-close', '✕'); drawerClose.type = 'button';
+    drawerClose.setAttribute('aria-label', '关闭菜单');
+    drawerHead.appendChild(drawerTitle); drawerHead.appendChild(drawerClose);
+    mobilePanel.appendChild(drawerHead);
+
+    // 一级菜单高亮：当前页面属于「更多」里的条目时，把下划线交给「更多」，主菜单不再点亮。
+    var pagePath = location.pathname;
+    function pageMatches(item) {
+      if (item.host !== host || item.unpublished) return false;
+      var p = item.path || '/';
+      if (p === '/' || p === '') return true;
+      return pagePath.indexOf(p) === 0;
+    }
+    var moreActive = MORE.some(pageMatches);
 
     var links = el('div', 'qc-links');
     SITES.forEach(function (site) {
       var link = el('a', '', site.label); link.href = href(site); link.dataset.site = site.host;
-      if (site.host === host) link.classList.add('is-site');
+      if (site.host === host && !moreActive) link.classList.add('is-site');
       if (site.beta) link.appendChild(el('small', 'qc-beta', 'beta'));
       links.appendChild(link);
     });
@@ -143,14 +212,20 @@
     });
     var legal = el('details'); legal.innerHTML = LEGAL; panel.appendChild(legal);
     panel.appendChild(el('small', '', '© ' + new Date().getFullYear() + ' Iridescently'));
-    menu.appendChild(panel); links.appendChild(menu); nav.appendChild(links);
+    if (moreActive) menu.querySelector('summary').classList.add('is-site');
+    menu.appendChild(panel); links.appendChild(menu); mobilePanel.appendChild(links);
 
     var right = el('div', 'qc-right');
-    var slot = el('div', 'qc-nav-slot'); right.appendChild(slot);
+    var slot = el('div', 'qc-nav-slot qc-slot'); right.appendChild(slot);
     var auth = document.getElementById('authBar');
     if (!auth) { auth = el('div', 'auth-bar'); auth.id = 'authBar'; }
     else auth.classList.add('auth-bar');
-    right.appendChild(auth); nav.appendChild(right);
+    right.appendChild(auth); mobilePanel.appendChild(right); nav.appendChild(mobilePanel);
+    // 抽屉遮罩：点它关闭
+    var scrim = el('div', 'qc-scrim'); scrim.setAttribute('aria-hidden', 'true');
+    scrim.addEventListener('click', function () { setMobileOpen(false, true); });
+    drawerClose.addEventListener('click', function (event) { event.preventDefault(); setMobileOpen(false, true); });
+    nav.appendChild(scrim);
     document.body.prepend(nav);
     document.body.classList.remove('has-topnav');
 
@@ -160,12 +235,26 @@
     function click(event) {
       var link = event.target.closest('a[href]');
       if (link && link.getAttribute('aria-current') === 'page' && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) event.preventDefault();
+      if (link) setMobileOpen(false);
     }
-    function closeMenu(event) {
+    function setMobileOpen(open, restoreFocus) {
+      if (open) { nav.dataset.mobileOpen = 'true'; document.body.style.overflow = 'hidden'; }
+      else { delete nav.dataset.mobileOpen; document.body.style.overflow = ''; }
+      mobileToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!open && menu.open) menu.open = false;
+      if (!open && restoreFocus) mobileToggle.focus();
+    }
+    function toggleMobileMenu() { setMobileOpen(nav.dataset.mobileOpen !== 'true'); }
+    mobileToggle.addEventListener('click', function (event) { event.preventDefault(); event.stopPropagation(); toggleMobileMenu(); });
+    function closeMenus(event) {
       if (event.type === 'keydown' && event.key !== 'Escape') return;
-      if (event.type === 'pointerdown' && menu.contains(event.target)) return;
-      if (menu.open) { menu.open = false; if (event.type === 'keydown') menu.firstElementChild.focus(); }
+      if (event.type === 'pointerdown' && nav.contains(event.target)) return;
+      var mobileWasOpen = nav.dataset.mobileOpen === 'true';
+      var moreWasOpen = menu.open;
+      setMobileOpen(false, event.type === 'keydown' && mobileWasOpen);
+      if (event.type === 'keydown' && !mobileWasOpen && moreWasOpen) menu.firstElementChild.focus();
     }
+    function closeOnDesktop() { if (window.innerWidth > 720) setMobileOpen(false); }
     var overlay = options.variant === 'overlay';
     var previousPadding = document.body.style.paddingTop;
     function measure() {
@@ -174,11 +263,11 @@
     }
     var observer = new ResizeObserver(measure); observer.observe(nav); measure();
     nav.addEventListener('click', click);
-    document.addEventListener('pointerdown', closeMenu);
-    document.addEventListener('keydown', closeMenu);
-    state = { nav: nav, slot: slot, cleanup: function () {
+    document.addEventListener('pointerdown', closeMenus);
+    document.addEventListener('keydown', closeMenus);
+    state = { nav: nav, slot: slot, right: right, cleanup: function () {
       observer.disconnect(); nav.removeEventListener('click', click);
-      document.removeEventListener('pointerdown', closeMenu); document.removeEventListener('keydown', closeMenu);
+      document.removeEventListener('pointerdown', closeMenus); document.removeEventListener('keydown', closeMenus);
       if (!overlay) document.body.style.paddingTop = previousPadding;
       document.documentElement.style.removeProperty('--qc-nav-h');
     } };
@@ -186,6 +275,22 @@
     if (!document.querySelector('script[data-site-language]')) {
       var language = el('script'); language.src = ORIGIN + '/assets/site-language.js?v=20261017-nav';
       language.dataset.siteLanguage = ''; document.head.appendChild(language);
+    }
+    // 主题控件等 theme.js 加载完成再挂（脚本注入是异步的，直接挂会拿不到 window.XTheme）。
+    // 先试同源（主站/众生之门都部署了 shared/），404 再回退主域集中资源（会馆等子站）。
+    if (options.theme) {
+      var themeReady = function () { if (state && state.right === right) buildThemeControl(right, nav); };
+      if (window.XTheme) themeReady();
+      else {
+        var THEME_SRC = '/shared/shared-ui/theme.js?v=20261025';
+        var loadTheme = function (src, fallback) {
+          var tag = el('script'); tag.src = src; tag.dataset.siteTheme = '';
+          tag.addEventListener('load', themeReady);
+          if (fallback) tag.addEventListener('error', function () { tag.remove(); loadTheme(fallback, null); });
+          document.head.appendChild(tag);
+        };
+        loadTheme(THEME_SRC, ORIGIN + THEME_SRC);
+      }
     }
     if (host === 'iridescently.xyz') showStatus(nav);
     if (!window.__HUIGUAN_OWN_AUTH) loadAccount(auth);
@@ -195,6 +300,59 @@
   function unmount() {
     if (!state) return;
     state.cleanup(); state.nav.remove(); state = null;
+  }
+
+  var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>';
+  var MOON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.6 14.8A8.9 8.9 0 0 1 9.2 3.4a.5.5 0 0 0-.65-.6 9.4 9.4 0 1 0 12.65 12.65.5.5 0 0 0-.6-.65z"/></svg>';
+
+  /** 主题设置弹层（仅声明 data-theme-enabled 的页面挂载）：
+   *  按钮打开面板 → 两态分段选择（浅色/深色）+ “跟随系统”开关；nav 玻璃 tone 跟随生效主题。 */
+  function buildThemeControl(right, nav) {
+    if (!window.XTheme) return;
+    var wrap = el('div', 'qc-theme');
+    var button = el('button'); button.type = 'button';
+    button.innerHTML = MOON;
+    var panel = el('div', 'qc-theme-panel'); panel.hidden = true;
+    var seg = el('div', 'qc-theme-seg');
+    var light = el('button', 'qc-theme-opt'); light.type = 'button';
+    light.innerHTML = SUN + '<span>浅色</span>';
+    var dark = el('button', 'qc-theme-opt'); dark.type = 'button';
+    dark.innerHTML = MOON + '<span>深色</span>';
+    seg.appendChild(light); seg.appendChild(dark);
+    var label = el('label', 'qc-theme-follow');
+    var checkbox = el('input'); checkbox.type = 'checkbox';
+    label.appendChild(checkbox); label.appendChild(el('span', '', '跟随系统'));
+    panel.appendChild(seg); panel.appendChild(label);
+    panel.appendChild(el('p', 'qc-theme-hint', '手动选择会覆盖系统偏好，设置在所有子站生效。'));
+    function render(event) {
+      var payload = event && event.detail;
+      var effective = payload ? payload.resolved : window.XTheme.resolved();
+      var darkNow = effective === 'dark';
+      button.innerHTML = darkNow ? MOON : SUN;
+      button.setAttribute('aria-label', '主题设置（当前' + (darkNow ? '深色' : '浅色') + '）');
+      light.classList.toggle('is-active', !darkNow);
+      dark.classList.toggle('is-active', darkNow);
+      light.setAttribute('aria-pressed', String(!darkNow));
+      dark.setAttribute('aria-pressed', String(darkNow));
+      checkbox.checked = window.XTheme.stored() === 'auto';
+      if (darkNow) delete nav.dataset.tone; else nav.dataset.tone = 'light';
+    }
+    light.addEventListener('click', function () { window.XTheme.set('light'); });
+    dark.addEventListener('click', function () { window.XTheme.set('dark'); });
+    checkbox.addEventListener('change', function () {
+      window.XTheme.set(checkbox.checked ? 'auto' : window.XTheme.resolved());
+    });
+    button.addEventListener('click', function () { panel.hidden = !panel.hidden; });
+    function closePanel(event) {
+      if (event.type === 'keydown' && event.key !== 'Escape') return;
+      if (panel.hidden || wrap.contains(event.target)) return;
+      panel.hidden = true;
+    }
+    document.addEventListener('pointerdown', closePanel);
+    document.addEventListener('keydown', closePanel);
+    document.addEventListener('xthemechange', render);
+    wrap.appendChild(button); wrap.appendChild(panel); right.appendChild(wrap);
+    render(null);
   }
 
   /** Online dots next to the other two sites; only the main host serves /api/site-status. */
@@ -236,7 +394,7 @@
   };
   var script = document.currentScript;
   if (script && !('manual' in script.dataset)) {
-    var start = function () { mount({ variant: script.dataset.variant, tone: script.dataset.tone }); };
+    var start = function () { mount({ variant: script.dataset.variant, tone: script.dataset.tone, theme: 'themeEnabled' in script.dataset }); };
     if (document.body) start(); else document.addEventListener('DOMContentLoaded', start, { once: true });
   }
 })();
