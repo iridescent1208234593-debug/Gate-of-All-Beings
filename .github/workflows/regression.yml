@@ -2,10 +2,13 @@ name: Regression
 
 # Every pushed branch runs the same suite a developer runs locally
 # (python tools/checks/regression.py --full), plus clean release builds, manifest
-# provenance and dependency audits. Pull requests show the head branch's run.
+# provenance and dependency audits. Pull requests run it again as `merge-gate` on
+# GitHub's merge of the head into the current base, so the check a merge waits on
+# covers the merged result, not the head alone.
 on:
   push:
     branches: ['**']
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -17,6 +20,8 @@ concurrency:
 
 jobs:
   regression:
+    # A distinct name keeps the merge result's check apart from the head branch's push run.
+    name: ${{ github.event_name == 'pull_request' && 'merge-gate' || 'regression' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     # Every build and test step uses disposable storage; CI never sees production data.
@@ -24,6 +29,10 @@ jobs:
       IRIDESCENTLY_ENVIRONMENT: test
     steps:
       - uses: actions/checkout@v4
+      - name: Name the merge checkout
+        # The merge commit is checked out detached; release manifests must record a branch.
+        if: github.event_name == 'pull_request'
+        run: git checkout -B "${GITHUB_REF#refs/}"
       - name: Select disposable storage
         # The runner context is not available in job-level env, so it is set here.
         run: echo "IRIDESCENTLY_STORAGE_ROOT=$RUNNER_TEMP/iridescently-storage" >> "$GITHUB_ENV"
