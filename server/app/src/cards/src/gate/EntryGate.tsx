@@ -31,7 +31,8 @@ function markFirstFrame() {
   if (!performance.getEntriesByName(FIRST_FRAME_MARK, 'mark').length) performance.mark(FIRST_FRAME_MARK);
 }
 
-export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEnter: () => void; onSkip: () => void }) {
+// paused: held while something covers the intro (the phone rotate prompt), resumed where it stopped.
+export function EntryGate({ leaving, paused = false, onEnter, onSkip }: { leaving: boolean; paused?: boolean; onEnter: () => void; onSkip: () => void }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<GateSceneHandle | null>(null);
   const fallbackPlaying = useRef(true);
@@ -41,6 +42,9 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
   const skipRef = useRef<HTMLButtonElement>(null);
   const themeRef = useRef<ThemeMode>('original');
   const lastUiUpdate = useRef(0);
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
+  const syncPlayback = useRef(() => {});
   const [clock, setClock] = useState(0);
   const [sceneReady, setSceneReady] = useState(false);
   const [using3D, setUsing3D] = useState(false);
@@ -71,7 +75,7 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
 
     const fallbackTick = (time: number) => {
       fallbackRaf = 0;
-      if (cancelled || document.hidden || !fallbackPlaying.current) return;
+      if (cancelled || document.hidden || pausedRef.current || !fallbackPlaying.current) return;
       if (!lastTime) lastTime = time;
       elapsed += (time - lastTime) / 1000;
       lastTime = time;
@@ -86,8 +90,10 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
       if (fallbackPlaying.current) fallbackRaf = requestAnimationFrame(fallbackTick);
     };
 
+    let fallbackStarted = false;
     const startFallback = () => {
       if (cancelled) return;
+      fallbackStarted = true;
       markFirstFrame();
       setSceneReady(true);
       setUsing3D(false);
@@ -98,23 +104,24 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
         setGateOpen(true);
       } else {
         fallbackPlaying.current = true;
-        fallbackRaf = requestAnimationFrame(fallbackTick);
+        if (!pausedRef.current) fallbackRaf = requestAnimationFrame(fallbackTick);
       }
     };
 
     const onVisibilityChange = () => {
       const scene = sceneRef.current;
-      if (document.hidden) {
+      if (document.hidden || pausedRef.current) {
         scene?.pause();
         if (fallbackRaf) cancelAnimationFrame(fallbackRaf);
         fallbackRaf = 0;
       } else if (scene) {
         if (!reducedMotion.matches && scene.getTime() < DURATION) scene.play();
-      } else if (fallbackPlaying.current) {
+      } else if (fallbackStarted && fallbackPlaying.current && !fallbackRaf) {
         lastTime = 0;
         fallbackRaf = requestAnimationFrame(fallbackTick);
       }
     };
+    syncPlayback.current = onVisibilityChange;
 
     const onMotionChange = (event: MediaQueryListEvent) => {
       if (!event.matches) return;
@@ -166,7 +173,7 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
           scene.seek(DURATION);
           setClock(DURATION);
           setGateOpen(true);
-        } else if (!document.hidden) {
+        } else if (!document.hidden && !pausedRef.current) {
           scene.play();
         }
       } catch (error) {
@@ -185,8 +192,15 @@ export function EntryGate({ leaving, onEnter, onSkip }: { leaving: boolean; onEn
       if (fallbackRaf) cancelAnimationFrame(fallbackRaf);
       sceneRef.current?.destroy();
       sceneRef.current = null;
+      syncPlayback.current = () => {};
     };
   }, []);
+  const wasPaused = useRef(paused);
+  useEffect(() => {
+    if (wasPaused.current === paused) return;
+    wasPaused.current = paused;
+    syncPlayback.current();
+  }, [paused]);
 
   const seconds = Math.min(DURATION, clock);
   useEffect(() => { window.LXHIntro.syncProgress(rangeRef.current, seconds, DURATION); }, [seconds]);
