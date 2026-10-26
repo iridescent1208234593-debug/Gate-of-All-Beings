@@ -19,7 +19,7 @@ args=parser.parse_args()
 args.output.mkdir(parents=True,exist_ok=True)
 hosts=[h for h in INVENTORY['hosts'] if h['registered'] and h['node']=='hk']
 names=[h['hostname'] for h in hosts]
-mapping=['# http context; generated from ops/security/deployed-hosts.json',
+mapping=['# http context; generated from infra/ingress/deployed-hosts.json',
          'map $http_host $iridescently_registered_host {', '    default "";']
 mapping += ['    ~*^'+re.escape(h)+'(?::(?:80|443))?$ '+h+';' for h in names]
 mapping += ['}', 'map $http_x_forwarded_proto $iridescently_visitor_https {', '    default 0;', '    https 1;', '}',

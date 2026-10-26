@@ -262,7 +262,7 @@ def local_checks(chooser=True):
         if not chooser:
             return
         # Execute the existing chooser script; do not alter its return filtering.
-        select = (ROOT / "ops/server-public/select").read_text("utf-8")
+        select = (ROOT / "infra/ingress/server-public/select").read_text("utf-8")
         script = select.split("<script>", 1)[1].split("</script>", 1)[0]
         js = """const vm=require('node:vm'),assert=require('node:assert/strict');
 const source=JSON.parse(process.argv[1]);
@@ -419,7 +419,7 @@ def public_checks(hosts, edge_ip, evidence):
                 _, _, body, _ = request((ip, 443), "https", "/__server/select", host=host)
                 assert b"if(!dest.startsWith('/')||dest.startsWith('//')||dest.includes('\\\\'))dest='/';" in body, "chooser filter"
                 evidence["checks"].append({"ip": ip, "host": host, "chooser_sha256": hashlib.sha256(body).hexdigest(),
-                    "chooser_matches_repository": body == (ROOT / "ops/server-public/select").read_bytes()})
+                    "chooser_matches_repository": body == (ROOT / "infra/ingress/server-public/select").read_bytes()})
 
 
 if __name__ == "__main__":

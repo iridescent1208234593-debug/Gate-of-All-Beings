@@ -8,9 +8,10 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--before", type=Path, required=True)
 parser.add_argument("--control", type=Path, required=True)
 parser.add_argument("--output", type=Path, required=True)
+parser.add_argument("--website-manager", type=Path, required=True,
+                    help="网站恢复/website-manager.py in the Operations directory (outside Git)")
 args = parser.parse_args()
-root = Path(__file__).resolve().parents[2]
-tree = ast.parse((root / "ops/网站恢复/website-manager.py").read_text("utf-8-sig"))
+tree = ast.parse(args.website_manager.read_text("utf-8-sig"))
 portal = next(node for node in ast.walk(tree) if isinstance(node, ast.Call) and
               any(k.arg == 'key' and isinstance(k.value, ast.Constant) and k.value.value == 'portal' for k in node.keywords))
 repo_hosts = set(ast.literal_eval(next(k.value for k in portal.keywords if k.arg == 'domains')))

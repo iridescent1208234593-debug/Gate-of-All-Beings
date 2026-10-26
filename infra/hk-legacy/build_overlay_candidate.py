@@ -7,9 +7,13 @@ file's CRLF convention, so a per-file diff shows only intended lines. The archiv
 is deterministic (fixed gzip/tar metadata): rebuilding the same ref on the same
 base must reproduce the same SHA-256.
 
-  python -X utf8 ops/security/build_overlay_candidate.py \
+  python -X utf8 infra/hk-legacy/build_overlay_candidate.py \
       --releases E:/Projects/.releases/hk-code-publish --base 20261023T184556Z \
-      --overlay-list ops/security/candidate-overlays.json --ref HEAD [--compare 20261024T044733Z]
+      --overlay-list infra/hk-legacy/candidate-overlays.json --ref <HK line commit> [--compare 20261024T044733Z]
+
+HK still runs the pre-restructure layout (server/, portal/, shared/). --ref must name a
+commit on the HK production line that has that layout; the overlay list and the base
+archive use those paths, so this tool is not run against the apps/ layout.
 """
 import argparse
 from datetime import datetime, timezone
