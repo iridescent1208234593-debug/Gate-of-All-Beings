@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { createVectorAtlas } from "./vector-atlas";
+import { createTiledAtlas } from './tiled-atlas';
+import { MAP_SEAM_U, SURFACE_INSET, mapPoint, mapPixelFromUV } from './map-coordinates';
 import { ATLAS_NODES, MAP_SIZE, normalizedPosition, type AtlasNode } from "./nodes";
 import "./style.css";
 
@@ -28,7 +30,6 @@ const MAX_FOV = 78;
 const DEFAULT_FOV = 71;
 // Coordinate origin; the added 1024-pixel vector strip closes the actual
 // source edge cut. Moving this origin alone would not have repaired the seam.
-const MAP_SEAM_U = 0.79;
 
 const canvas = document.querySelector<HTMLCanvasElement>("#scene")!;
 const screen = document.querySelector<HTMLElement>("#screen")!;
@@ -136,10 +137,26 @@ const mapMaterial = new THREE.MeshBasicMaterial({
 });
 const baseMesh = new THREE.Mesh(ringGeometry(RADIUS, 1024, 1), mapMaterial);
 ring.add(baseMesh);
+// Picking follows the visible surface, while the background stays behind it
+// to avoid z-fighting with the authored vector extension.
+const pickSurface = new THREE.Mesh(ringGeometry(RADIUS - SURFACE_INSET, 1024, 1), mapMaterial);
+pickSurface.visible = false;
+ring.add(pickSurface);
 const atlas = await createVectorAtlas(RADIUS, HEIGHT, MAP_SEAM_U);
 ring.add(atlas.group);
 canvas.dataset.vectorRegions = String(atlas.regionCount);
 canvas.dataset.vectorTriangles = String(atlas.triangleCount);
+let tilesReady = false;
+const tiles = await createTiledAtlas(RADIUS, HEIGHT, () => { if (tilesReady) requestRender(); });
+if (tiles.sourceSha256 !== atlas.sourceSha256) {
+  tiles.dispose();
+  throw new Error('Raster tiles and vector extension belong to different atlas editions');
+}
+ring.add(tiles.group);
+canvas.dataset.mapRenderer = 'raster-tiles-with-authored-seam';
+canvas.dataset.sourceSha256 = tiles.sourceSha256;
+const footerNote = document.querySelector<HTMLElement>('.footer-note');
+if (footerNote) footerNote.textContent = `${ATLAS_NODES.filter(n => n.kind === 'named').length} NAMED · ${ATLAS_NODES.filter(n => n.kind === 'unnamed').length} UNNAMED · TILE MAP`;
 
 const gridMaterial = new THREE.MeshBasicMaterial({
   map: makeGrid(), transparent: true, opacity: 0.32, depthWrite: false,
@@ -156,6 +173,7 @@ function applyTheme() {
   renderer.setClearColor(dark ? 0x07100f : 0xe8f0ed, 1);
   mapMaterial.color.set(dark ? 0x101d1b : 0xffffff);
   atlas.setTheme(dark);
+  tiles.setTheme(dark);
   gridMaterial.color.set(dark ? 0x9bb1aa : 0x355c51);
   gridMaterial.opacity = dark ? 0.14 : 0.1;
   document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')?.setAttribute("content", dark ? "#07100f" : "#e8f0ed");
@@ -185,10 +203,7 @@ if (xtheme) {
 }
 
 function nodeVector(node: AtlasNode) {
-  const { u, v } = normalizedPosition(node);
-  const displayU = (u - MAP_SEAM_U + 1) % 1;
-  const angle = (displayU - 0.5) * TAU;
-  return new THREE.Vector3((RADIUS - 0.028) * Math.sin(angle), (0.5 - v) * HEIGHT, -(RADIUS - 0.028) * Math.cos(angle));
+  return new THREE.Vector3(...mapPoint(node.x, node.y, RADIUS - SURFACE_INSET, HEIGHT));
 }
 
 const nodePoints = ATLAS_NODES.map(nodeVector);
@@ -435,7 +450,7 @@ function projectNodes() {
 
 function updateStatus() {
   const wrappedDegrees = ((THREE.MathUtils.radToDeg(rotation) % 360) + 360) % 360;
-  status.textContent = `AZ ${wrappedDegrees.toFixed(1)}° · ZOOM ${Math.round((DEFAULT_FOV / fov) * 100)}% · VECTOR`;
+  status.textContent = `AZ ${wrappedDegrees.toFixed(1)}° · ZOOM ${Math.round((DEFAULT_FOV / fov) * 100)}% · TILES`;
 }
 
 function resize() {
@@ -453,6 +468,7 @@ function render() {
   ring.updateMatrixWorld(true);
   camera.fov = fov;
   camera.updateProjectionMatrix();
+  tiles.update(camera, screen.clientHeight * renderer.getPixelRatio());
   renderer.render(scene, camera);
   projectNodes();
   updateStatus();
@@ -498,10 +514,10 @@ function mapCoordinateAt(clientX: number, clientY: number) {
   const rect = screen.getBoundingClientRect();
   pointerNdc.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
   raycaster.setFromCamera(pointerNdc, camera);
-  const hit = raycaster.intersectObject(baseMesh, false)[0];
+  const hit = raycaster.intersectObject(pickSurface, false)[0];
   if (!hit?.uv) return null;
-  const sourceU = (hit.uv.x + MAP_SEAM_U) % 1;
-  return { x: Math.round(sourceU * MAP_SIZE.width), y: Math.round((1 - hit.uv.y) * MAP_SIZE.height) };
+  const pixel = mapPixelFromUV(hit.uv.x, hit.uv.y);
+  return { x: Math.round(pixel.x), y: Math.round(pixel.y) };
 }
 
 function setAuthorMode(next: boolean) {
@@ -658,6 +674,8 @@ document.addEventListener("visibilitychange", () => {
   else if (!document.hidden) animate();
 });
 
+tilesReady = true;
+window.addEventListener('pagehide', event => { if (!event.persisted) tiles.dispose(); });
 new ResizeObserver(resize).observe(screen);
 new ResizeObserver(requestRender).observe(panel);
 setAuthorMode(authorMode);
