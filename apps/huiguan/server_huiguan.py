@@ -802,6 +802,23 @@ def rate_add(key):
         RATE.setdefault(key, []).append(now)
 
 
+# Failed password checks are counted three ways: one account from one IP, one IP across every
+# account (credential stuffing sweeps many usernames from one address), and one account across
+# every IP (distributed guessing against a single account).
+LOGIN_FAILURE_LIMITS = (("login:{user}|{ip}", 8, 600), ("login-ip:{ip}", 30, 600), ("login-user:{user}", 20, 3600))
+
+
+def login_throttled(username, ip):
+    user = username.lower()
+    return any(rate_blocked(key.format(user=user, ip=ip), max_n, window) for key, max_n, window in LOGIN_FAILURE_LIMITS)
+
+
+def login_failed(username, ip):
+    user = username.lower()
+    for key, _, _ in LOGIN_FAILURE_LIMITS:
+        rate_add(key.format(user=user, ip=ip))
+
+
 # ---------- USSO ----------
 
 def sso_post(url, data):
@@ -2014,14 +2031,13 @@ class Handler(BaseStaticHandler):
         username = (body.get("username") or "").strip()
         password = body.get("password") or ""
         ip = self._client_ip()
-        rkey = f"login:{username.lower()}|{ip}"
-        if rate_blocked(rkey, 8, 600):
+        if login_throttled(username, ip):
             self._json(429, {"error": "尝试次数过多，请 10 分钟后再试"})
             return
 
         u = get_local_user_by_name(username)
         if not u or not verify_password(password, u["pass_hash"]):
-            rate_add(rkey)
+            login_failed(username, ip)
             self._json(401, {"error": "用户名或密码错误"})
             return
         if u.get("status") != "active":
@@ -2050,12 +2066,11 @@ class Handler(BaseStaticHandler):
         u = get_local_user_by_name(username) if username else None
         if u:
             # —— 登录 ——
-            rkey = f"login:{username.lower()}|{ip}"
-            if rate_blocked(rkey, 8, 600):
+            if login_throttled(username, ip):
                 self._json(429, {"error": "尝试次数过多，请 10 分钟后再试"})
                 return
             if not verify_password(password, u["pass_hash"]):
-                rate_add(rkey)
+                login_failed(username, ip)
                 self._json(401, {"error": "密码错误"})
                 return
             if u.get("status") != "active":
