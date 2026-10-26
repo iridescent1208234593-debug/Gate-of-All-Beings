@@ -1,0 +1,56 @@
+.door-scene {
+  --door-vh: 100vh;
+  position: fixed;
+  z-index: 1100;
+  inset: 0;
+  overflow: hidden;
+  color: #e9e2c8;
+  background: #0b1410;
+  font-family: "Noto Serif SC", "Songti SC", serif;
+}
+@supports (height: 100dvh) { .door-scene { --door-vh: 100dvh; } }
+.door-view { position: absolute; inset: 0; overflow: hidden; transition: opacity 1.3s ease; }
+.door-stage {
+  --door-w: max(100vw, calc(var(--door-vh) * 1.627));
+  --door-h: max(61.46vw, var(--door-vh));
+  position: absolute;
+  /* 竖屏时以门洞为水平锚点；夹在 [视口宽 - 舞台宽, 0] 内，宽屏时左右都不露出画面外 */
+  left: clamp(calc(100vw - var(--door-w)), calc(50vw - var(--door-w) * .469), 0px);
+  top: calc((var(--door-vh) - var(--door-h)) * .2);
+  width: var(--door-w);
+  height: var(--door-h);
+}
+.door-world { position: absolute; inset: 0; transform-origin: 46.9% 51.7%; transition: transform 3.2s cubic-bezier(.45,0,.2,1) .5s; }
+.door-filters { position: absolute; width: 0; height: 0; }
+/* max-width: none —— Tailwind preflight 给所有 img 加了 max-width:100%，会把 109.375% 宽的分层压回舞台宽，右侧露出门后底色 */
+.door-layer { position: absolute; left: -4.6875%; top: 0; width: 109.375%; max-width: none; height: 110.17%; transform: scale(1.06); pointer-events: none; }
+.door-portal { position: absolute; inset: 0; width: 100%; height: 100%; transform: scale(1.06); pointer-events: none; }
+.door-water { filter: url(#door-ripple); }
+.door-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 45% 50%, transparent 45%, rgba(4,10,8,.55) 100%); }
+.door-shade { position: absolute; inset: 0; pointer-events: none; background: #4a4a4a; mix-blend-mode: multiply; opacity: 0; -webkit-mask-image: radial-gradient(ellipse 34% 40% at 46.9% 51.7%, transparent 25%, #000 100%); mask-image: radial-gradient(ellipse 34% 40% at 46.9% 51.7%, transparent 25%, #000 100%); transition: opacity .8s ease; }
+.door-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.door-hit { position: absolute; left: 37%; top: 36%; width: 20%; height: 34%; padding: 0; border: 0; border-radius: 40% 40% 4% 4%; color: transparent; background: transparent; cursor: pointer; }
+.door-hit:focus-visible { outline: 2px dashed rgba(255,252,236,.85); outline-offset: 5px; }
+.door-hint { position: absolute; left: 46.9%; top: 78%; transform: translateX(-50%); padding: 6px 16px 6px 22px; border-radius: 999px; font-size: clamp(15px,1.4vw,18px); font-weight: 600; letter-spacing: .5em; color: #26301d; background: rgba(248,246,230,.62); box-shadow: 0 0 18px 8px rgba(248,246,230,.45); opacity: 0; transition: opacity 1.2s; pointer-events: none; white-space: nowrap; }
+.door-scene.is-ready:not(.is-entering) .door-hint { opacity: 1; animation: door-hint-breathe 4s ease-in-out infinite; }
+.door-flash { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; background: radial-gradient(circle at 46.9% 51.7%, rgba(250,249,240,1), rgba(250,249,240,.95) 50%, rgba(250,249,240,.55) 100%); transition: opacity 1.5s cubic-bezier(.45,0,.55,1) 2.1s; }
+.door-scene.is-entering .door-world { transform: scale(3.2); }
+.door-scene.is-entering .door-shade { opacity: .42; transition: opacity 1.8s ease .1s; }
+.door-scene.is-entering .door-flash { opacity: 1; }
+.door-scene.is-revealing .door-flash { opacity: 0; transition: opacity .9s ease; }
+.door-scene.is-revealing .door-view { opacity: 0; }
+.door-scene.is-revealing .door-credit,.door-scene.is-revealing .door-skip { opacity: 0; pointer-events: none; transition: opacity .35s ease; }
+.door-scene.is-entering .door-hit,.door-scene.is-entering .door-hint { opacity: 0; pointer-events: none; animation: none; transition: opacity .4s; }
+.door-credit { position: fixed; z-index: 4; right: max(14px,env(safe-area-inset-right)); bottom: max(10px,env(safe-area-inset-bottom)); margin: 0; font-size: 11px; letter-spacing: .15em; opacity: .6; text-align: right; line-height: 1.7; text-shadow: 0 0 6px rgba(0,0,0,.6); }
+.door-skip { position: fixed; z-index: 5; top: max(14px,env(safe-area-inset-top)); right: max(16px,env(safe-area-inset-right)); padding: 7px 16px; border: 1px solid rgba(233,226,200,.38); border-radius: 999px; color: #e9e2c8; background: rgba(8,16,12,.45); font: inherit; cursor: pointer; backdrop-filter: blur(4px); }
+.door-skip:hover,.door-skip:focus-visible { background: rgba(8,16,12,.75); outline: 2px solid rgba(255,252,236,.7); outline-offset: 2px; }
+.door-scene.is-entering .door-credit { color: #5b5236; text-shadow: none; transition: color 1s 3.4s; }
+@keyframes door-hint-breathe { 50% { opacity: .7; } }
+@media (max-width: 520px) { .door-credit { bottom: calc(max(10px,env(safe-area-inset-bottom)) + 40px); } }
+@media (prefers-reduced-motion: reduce) {
+  .door-world,.door-flash,.door-shade,.door-hit,.door-hint { transition-duration: .01ms !important; transition-delay: 0s !important; }
+  .door-view,.door-credit,.door-skip { transition-duration: .4s !important; }
+  .door-scene.is-entering .door-world { transform: scale(1.06); }
+  .door-scene.is-entering .door-flash { opacity: 1; transition: opacity .4s ease !important; }
+  .door-scene.is-entering .door-hint { animation: none !important; }
+}

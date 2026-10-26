@@ -12,7 +12,7 @@
 | Gate Identity：众生之门玩家形象 | 登录时 `account_profiles.gate_identity_json`；访客时当前源的会话存储 | `/api/gate/identity`；React `PlayerProfileProvider` | 众生之门玩家名称、种族、头像图片、头像框；入口、HUD、形象编辑器、浅滩共用 |
 | Game Save：玩法进度 | 各玩法已有存档 owner；见下表 | 卡牌、经营、生态、浅滩、聚灵各有现存存储 | 不等同于 Gate Identity；本轮整合入口没有将它们变成一套云存档 |
 
-`portal/oc` 本身是现有静态角色设定站；它的共享登录展示不意味着所有用户 OC 数据存放在该站。用户填写的设表和归属数据仍由会馆拥有。
+`apps/oc` 本身是现有静态角色设定站；它的共享登录展示不意味着所有用户 OC 数据存放在该站。用户填写的设表和归属数据仍由会馆拥有。
 
 头像应以 `avatarImage + avatarFrame overlay` 呈现。Account Avatar、OC Avatar、Gate Avatar 可以由用户明确复制或选择同一个资源，但不是同一可变字段，也不会自动双向同步。
 
@@ -34,14 +34,14 @@ PlayerProfileProvider
 - 会馆发出的 `session` 与 `hx_sso` 均为 `.iridescently.xyz` 域 Cookie，`HttpOnly`、`SameSite=Lax`，生产配置使用 `Secure`。共享 SSO 期限为 7 天；会馆真实会话另由 `sessions_db` 校验。
 - 主站、OC 的 `/api/sso-user` 使用 `hx_sso.read_cookie`；返回 `uid`。会馆和 Cards 自己的接口通常返回 `user_id`。正式 portal 路由把 `zszm` 根路径的 `/api/sso-user` 交给主站 Handler，其余 `/api/*` 代理到 Cards，因此同一页面可能同时遇到两种字段名。
 - 本轮 `PlayerProfile.tsx` 将 `user.user_id ?? user.uid` 转为字符串后统一放入 `account.user_id`。前端 scope 使用 `kind:user_id`，后端 owner 使用 `{kind, user_id}`；不能只比较裸 uid。
-- `shared/shared-session/session.js` 只是同源 `/api/sso-user` 的 fetch / 内存缓存；没有单独登录服务，也不会自动将 localStorage 同步到其他子域。
+- `packages/shared-session/session.js` 只是同源 `/api/sso-user` 的 fetch / 内存缓存；没有单独登录服务，也不会自动将 localStorage 同步到其他子域。
 - `localhost` / `127.0.0.1` 不会获得 `.iridescently.xyz` Cookie。本地匿名 smoke 不能证明真实跨子域登录成功；代理或本地测试账号须单独配置，不能把“本地有存档”当作已登录。
 
-主要源码：`server/hx_sso.py`、`portal/huiguan/server_huiguan.py`、`portal/www/server.py`、`portal/oc/server.py`、`server/portal_server.py`、`server/account_profile.py`。
+主要源码：`services/platform/hx_sso.py`、`apps/huiguan/server_huiguan.py`、`apps/www/server.py`、`apps/oc/server.py`、`services/platform/portal_server.py`、`services/platform/account_profile.py`。
 
 ## 3. Gate Identity 的统一状态、字段与保存保护
 
-`server/app/src/cards/src/game/PlayerProfile.tsx` 是 React 流程中唯一的玩家资料 owner。入口和玩法读它的 Context；`onboarding/player-profile.js` 仅维护一次挂载的编辑草稿，不直接创建另一份持久化身份。
+`apps/cards/src/game/PlayerProfile.tsx` 是 React 流程中唯一的玩家资料 owner。入口和玩法读它的 Context；`onboarding/player-profile.js` 仅维护一次挂载的编辑草稿，不直接创建另一份持久化身份。
 
 | 字段 | 约束 / 含义 |
 | --- | --- |
@@ -55,7 +55,7 @@ PlayerProfileProvider
 
 持久化：
 
-- 登录：`GET/POST /api/gate/identity`，写入实际项目根目录 `portal/huiguan/users.db` 的 `account_profiles.gate_identity_json`；`(kind, uid)` 是组合主键。头像文件在会馆 `assets/uploads`，页面通过会馆域名读取资源。
+- 登录：`GET/POST /api/gate/identity`，写入实际项目根目录 `apps/huiguan/users.db` 的 `account_profiles.gate_identity_json`；`(kind, uid)` 是组合主键。头像文件在会馆 `assets/uploads`，页面通过会馆域名读取资源。
 - 访客：`sessionStorage['zszm.gateIdentity.v1']`；只在当前 origin、浏览器会话内恢复，不跨设备、不作为认证。访客上传使用裁切结果的 data URL，不能持久化临时 blob URL。
 - 登录后**不会自动把访客资料迁移到账户**；退出后也不会把刚才账户资料写成访客资料。原有访客会话可重新读回。已有账户资料优先，空账户会进入自己的初始化流程。
 - 读取账户变化时，前端清空前一 scope 的 identity 并增加 generation；`pageshow` / `focus` 重新读取。两条响应的登录状态或 owner 不一致时提示重试，不静默用别人的资料继续初始化。
@@ -78,7 +78,7 @@ PlayerProfileProvider
 | Softie 云存档（客户端未改） | `users.db.game_saves` 的 `(kind, uid, 'softie')`；API `?scope=softie` | 与经营槽独立，不再回退读取经营存档；源码已迁移，未发布 |
 | 灵境生态 | namespace 内 `m:ecology:zszm-ecology-v2`；`ecology/src/core/persistence.js` | 同源 localStorage；无账户 scope、无云同步；生态交换包和卡牌收获队列有自己的校验，不等于账户存档 |
 | 聚灵 | `juling/server.js` 的 `globalSoul` / `currentRun`；`data/save.db` 的 `save_state` 或 JSON fallback 的 `soul` | 当前是服务进程的全局玩法状态，不是每个账户的私人存档；统一入口未改变这一点 |
-| 统一壳 / 其他 localStorage 模块 | `shared/shared-session/save.js` / `kv.js` → `iridescently.save.v1`，模块前缀 `m:<module>:` | 标准化本地命名空间和旧 key 迁移；不自动带 owner，不自动云同步 |
+| 统一壳 / 其他 localStorage 模块 | `packages/shared-session/save.js` / `kv.js` → `iridescently.save.v1`，模块前缀 `m:<module>:` | 标准化本地命名空间和旧 key 迁移；不自动带 owner，不自动云同步 |
 | 主站 Gallery Appearance | 同一 namespace 内 `homepage.appearance.v1:account:<kind>:<uid>` 或匿名 key | 当前 `appearance-controls.js` 依赖的是本地 `get/set`；按账户键隔离当前 origin 的偏好，**尚无服务器云 preference 接口**；不能宣称跨设备同步 |
 
 `BroadcastChannel('iridescently')` / fallback event bus 只覆盖同源页面/iframe。主站、会馆、zszm 是不同 origin，即使它们共享 Cookie，也不会共享 localStorage、sessionStorage、IndexedDB 或 BroadcastChannel。跨端资料恢复必须依赖服务端接口，不可只改键名。
@@ -87,7 +87,7 @@ PlayerProfileProvider
 
 以下是源码审查发现，未读取真实账户数据，也未在本轮修改账户实现。
 
-1. **主站管理员判定混用身份种类与权限。** `portal/www/server.py::_is_admin` 当前将裸 uid 与 USSO 白名单比较，未先要求 `kind == 'usso'`，并接受 `kind == 'admin'`。而真实身份种类为 local / usso，管理员是 role。若本地 uid 与白名单文本碰撞，可能发生错误授权；没有证据表明真实账户已经发生碰撞。下一轮应由统一、经数据库复核的 `(kind, uid)` 身份解析获取角色，至少先补齐种类约束并加本地/USSO 同号回归；不要直接凭同一数字或前端 `admin` 字段授权。
+1. **主站管理员判定混用身份种类与权限。** `apps/www/server.py::_is_admin` 当前将裸 uid 与 USSO 白名单比较，未先要求 `kind == 'usso'`，并接受 `kind == 'admin'`。而真实身份种类为 local / usso，管理员是 role。若本地 uid 与白名单文本碰撞，可能发生错误授权；没有证据表明真实账户已经发生碰撞。下一轮应由统一、经数据库复核的 `(kind, uid)` 身份解析获取角色，至少先补齐种类约束并加本地/USSO 同号回归；不要直接凭同一数字或前端 `admin` 字段授权。
 
 2. **（2026-10-17 源码已处理，未发布）历史经营 / Softie 云存档 owner 是 raw uid。** 已改为 `(kind, uid, scope)`，旧档按正面证据归属、不确定者隔离、可导出回滚，见 [game-save-ownership.md](game-save-ownership.md)。以下为原始记录：
    `_api_game_save/_load` 在通过会馆会话验证后使用 `str(ident['uid'])` 访问 `game_saves.json`，缺少 kind。不同身份源的同号用户可能读写同一档；客户端经营本地档也有同类键名问题。下一轮应先做只读 owner 冲突清点、制定可回滚迁移表，再改为复合 owner；不能直接把所有旧档重新归给当前登录者，也不能靠清空旧档解决。本轮只记录，未迁移或删除任何存档。
@@ -108,14 +108,14 @@ PlayerProfileProvider
 
 ## 核对文件
 
-- `server/hx_sso.py`、`server/account_profile.py`、`server/portal_server.py`
-- `portal/www/server.py`、`portal/www/scripts/appearance-controls.js`
-- `portal/huiguan/server_huiguan.py`、`portal/huiguan/account.html`、`portal/oc/server.py`
-- `shared/shared-session/session.js`、`save.js`、`kv.js`、`bus.js`
-- `server/app/src/cards/server.py`
-- `server/app/src/cards/src/game/PlayerProfile.tsx`、`PlayerIdentity.tsx`、`PlayerAvatar.tsx`、`GameApp.tsx`、`storage.ts`、`ShoreMode.tsx`
-- `server/app/src/cards/src/onboarding/PlayerOnboarding.tsx`、`player-profile.js`
-- `server/app/src/management/src/systems/account.js`、`saveGame.js`
-- `server/app/src/ecology/src/core/persistence.js`、`server/app/src/juling/server.js`
+- `services/platform/hx_sso.py`、`services/platform/account_profile.py`、`services/platform/portal_server.py`
+- `apps/www/server.py`、`apps/www/scripts/appearance-controls.js`
+- `apps/huiguan/server_huiguan.py`、`apps/huiguan/account.html`、`apps/oc/server.py`
+- `packages/shared-session/session.js`、`save.js`、`kv.js`、`bus.js`
+- `apps/cards/server.py`
+- `apps/cards/src/game/PlayerProfile.tsx`、`PlayerIdentity.tsx`、`PlayerAvatar.tsx`、`GameApp.tsx`、`storage.ts`、`ShoreMode.tsx`
+- `apps/cards/src/onboarding/PlayerOnboarding.tsx`、`player-profile.js`
+- `apps/management/src/systems/account.js`、`saveGame.js`
+- `apps/ecology/src/core/persistence.js`、`apps/juling/server.js`
 
 核对方式为源码与路由阅读；这是数据边界审查记录，不是账户渗透测试或跨设备云同步验收报告。

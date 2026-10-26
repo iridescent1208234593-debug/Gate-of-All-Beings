@@ -1,0 +1,801 @@
+{
+  "schemaVersion": 1,
+  "source": "zszm-cloudbase-single-file-export",
+  "itemDefs": {
+    "fish_crucian": {
+      "name": "鲫鱼肉",
+      "icon": "🐟",
+      "heal": 15,
+      "sellPrice": 2,
+      "imgId": 14
+    },
+    "fish_carp": {
+      "name": "鲤鱼肉",
+      "icon": "🐟",
+      "heal": 15,
+      "sellPrice": 2,
+      "imgId": 14
+    },
+    "fish_salmon": {
+      "name": "三文鱼肉",
+      "icon": "🍣",
+      "heal": 20,
+      "sellPrice": 3,
+      "imgId": 7
+    },
+    "fish_tuna": {
+      "name": "金枪鱼肉",
+      "icon": "🐡",
+      "heal": 25,
+      "sellPrice": 4,
+      "imgId": 2
+    },
+    "fruit": {
+      "name": "果实",
+      "icon": "🍎",
+      "heal": 5,
+      "sellPrice": 1,
+      "imgId": 10,
+      "satiation": 3
+    },
+    "wood": {
+      "name": "木材",
+      "icon": "🪵",
+      "heal": 0,
+      "sellPrice": 2,
+      "imgId": 5
+    },
+    "plank": {
+      "name": "木板",
+      "icon": "🪵",
+      "heal": 0,
+      "sellPrice": 0,
+      "imgId": 31
+    },
+    "wood_sword": {
+      "name": "木剑",
+      "icon": "🗡️",
+      "heal": 0,
+      "attackBonus": 5,
+      "target": "npc",
+      "imgId": 6,
+      "enchantable": true
+    },
+    "wood_axe": {
+      "name": "木斧",
+      "icon": "🪓",
+      "heal": 0,
+      "attackBonus": 5,
+      "target": "tree",
+      "imgId": 8
+    },
+    "wood_pickaxe": {
+      "name": "木锄",
+      "icon": "⛏️",
+      "heal": 0,
+      "attackBonus": 0,
+      "tool": "hoe",
+      "imgId": 12
+    },
+    "wood_pick": {
+      "name": "木镐",
+      "icon": "⛏️",
+      "heal": 0,
+      "sellPrice": 1,
+      "attackBonus": 1,
+      "target": "ore",
+      "imgId": 177
+    },
+    "wheat_seed": {
+      "name": "小麦种子",
+      "icon": "🌾",
+      "heal": 0,
+      "sellPrice": 1,
+      "imgId": 27
+    },
+    "wheat": {
+      "name": "小麦",
+      "icon": "🌾",
+      "heal": 0,
+      "sellPrice": 2,
+      "imgId": 20
+    },
+    "bread": {
+      "name": "面包",
+      "icon": "🍞",
+      "heal": 0,
+      "sellPrice": 5,
+      "imgId": 21,
+      "satiation": 4
+    },
+    "sapling": {
+      "name": "树苗",
+      "icon": "🌱",
+      "heal": 0,
+      "sellPrice": 2,
+      "imgId": 49
+    },
+    "meat": {
+      "name": "兽肉",
+      "icon": "🍖",
+      "heal": 0,
+      "sellPrice": 3,
+      "imgId": 11,
+      "satiation": 3
+    },
+    "land_tool": {
+      "name": "领地工具",
+      "icon": "✏️",
+      "heal": 0,
+      "tool": "land",
+      "imgId": 34
+    },
+    "core_rock": {
+      "name": "岩核",
+      "icon": "🪨",
+      "heal": 0,
+      "imgId": 48
+    },
+    "core_wood": {
+      "name": "木核",
+      "icon": "🌳",
+      "heal": 0,
+      "imgId": 37
+    },
+    "core_water": {
+      "name": "水核",
+      "icon": "💧",
+      "heal": 0,
+      "imgId": 38
+    },
+    "core_fire": {
+      "name": "火核",
+      "icon": "🔥",
+      "heal": 0,
+      "imgId": 36
+    },
+    "core_gold": {
+      "name": "金核",
+      "icon": "⭐",
+      "heal": 0,
+      "imgId": 39
+    },
+    "door": {
+      "name": "门",
+      "icon": "🚪",
+      "heal": 0,
+      "imgId": 29
+    },
+    "lingfeng_sword": {
+      "name": "灵风剑",
+      "icon": "⚔️",
+      "heal": 0,
+      "attackBonusPercent": 0.1
+    },
+    "luoxiaocao_sword": {
+      "name": "罗小草的剑",
+      "icon": "⚔️",
+      "heal": 0,
+      "attackBonusPercent": 0.1
+    },
+    "flower": {
+      "name": "花",
+      "icon": "🌸",
+      "heal": 0,
+      "sellPrice": 1,
+      "imgId": 26
+    },
+    "rice_seed": {
+      "name": "水稻种子",
+      "icon": "🌾",
+      "heal": 0,
+      "sellPrice": 1,
+      "imgId": 28
+    },
+    "rice": {
+      "name": "水稻",
+      "icon": "🌾",
+      "heal": 0,
+      "sellPrice": 2,
+      "imgId": 19
+    },
+    "cooked_meat": {
+      "name": "熟肉",
+      "icon": "🍖",
+      "heal": 0,
+      "sellPrice": 6,
+      "imgId": 17,
+      "satiation": 8
+    },
+    "cooked_rice": {
+      "name": "米饭",
+      "icon": "🍚",
+      "heal": 0,
+      "sellPrice": 4,
+      "imgId": 23,
+      "satiation": 5
+    },
+    "campfire": {
+      "name": "篝火",
+      "icon": "🔥",
+      "heal": 0,
+      "tool": "campfire",
+      "imgId": 16
+    },
+    "torch": {
+      "name": "火把",
+      "icon": "🔥",
+      "heal": 0,
+      "tool": "torch",
+      "imgId": 24
+    },
+    "fishing_rod": {
+      "name": "钓鱼竿",
+      "icon": "🎣",
+      "heal": 0,
+      "tool": "fishing",
+      "imgId": 35
+    },
+    "bed": {
+      "name": "床",
+      "icon": "🛏️",
+      "heal": 0,
+      "tool": "bed",
+      "imgId": 53
+    },
+    "iron_ore": {
+      "name": "铁矿",
+      "icon": "🪨",
+      "heal": 0,
+      "sellPrice": 50,
+      "imgId": 58
+    },
+    "gold_ore": {
+      "name": "金矿",
+      "icon": "🪨",
+      "heal": 0,
+      "sellPrice": 100,
+      "imgId": 59
+    },
+    "iron_ingot": {
+      "name": "铁锭",
+      "icon": "🔩",
+      "heal": 0,
+      "sellPrice": 50,
+      "imgId": 60
+    },
+    "gold_ingot": {
+      "name": "金锭",
+      "icon": "🏅",
+      "heal": 0,
+      "sellPrice": 100,
+      "imgId": 61
+    },
+    "furnace": {
+      "name": "熔炉",
+      "icon": "🔥",
+      "heal": 0,
+      "tool": "furnace",
+      "imgId": 62
+    },
+    "chest": {
+      "name": "箱子",
+      "icon": "📦",
+      "heal": 0,
+      "tool": "chest",
+      "imgId": 176
+    },
+    "pet_cookie": {
+      "name": "宠物饼干",
+      "icon": "🍪",
+      "heal": 0,
+      "sellPrice": 0,
+      "imgId": 63
+    },
+    "iron_sword": {
+      "name": "铁剑",
+      "icon": "⚔️",
+      "heal": 0,
+      "attackBonusPercent": 0.1,
+      "enchantable": true,
+      "imgId": 65
+    },
+    "gold_sword": {
+      "name": "金剑",
+      "icon": "⚔️",
+      "heal": 0,
+      "attackBonusPercent": 0.2,
+      "enchantable": true,
+      "imgId": 66
+    },
+    "lettuce_seed": {
+      "name": "生菜种子",
+      "icon": "🌱",
+      "heal": 0,
+      "sellPrice": 1,
+      "imgId": 69
+    },
+    "lettuce_plant": {
+      "name": "生菜",
+      "icon": "🥬",
+      "heal": 0,
+      "imgId": 68
+    },
+    "lettuce": {
+      "name": "生菜",
+      "icon": "🥬",
+      "heal": 0,
+      "sellPrice": 2,
+      "imgId": 90,
+      "satiation": 2
+    },
+    "carrot_seed": {
+      "name": "胡萝卜种子",
+      "icon": "🌱",
+      "heal": 0,
+      "sellPrice": 1,
+      "imgId": 70
+    },
+    "carrot_plant": {
+      "name": "胡萝卜",
+      "icon": "🥕",
+      "heal": 0,
+      "imgId": 72
+    },
+    "carrot": {
+      "name": "胡萝卜",
+      "icon": "🥕",
+      "heal": 0,
+      "sellPrice": 2,
+      "imgId": 71,
+      "satiation": 2
+    },
+    "tomato_seed": {
+      "name": "西红柿种子",
+      "icon": "🌱",
+      "heal": 0,
+      "sellPrice": 1,
+      "imgId": 73
+    },
+    "tomato_plant": {
+      "name": "西红柿",
+      "icon": "🍅",
+      "heal": 0,
+      "imgId": 74
+    },
+    "tomato": {
+      "name": "西红柿",
+      "icon": "🍅",
+      "heal": 0,
+      "sellPrice": 2,
+      "imgId": 75,
+      "satiation": 2
+    },
+    "pumpkin_seed": {
+      "name": "南瓜种子",
+      "icon": "🌱",
+      "heal": 0,
+      "sellPrice": 1,
+      "imgId": 77
+    },
+    "pumpkin_plant": {
+      "name": "南瓜",
+      "icon": "🎃",
+      "heal": 0,
+      "imgId": 78
+    },
+    "pumpkin": {
+      "name": "南瓜",
+      "icon": "🎃",
+      "heal": 0,
+      "sellPrice": 3,
+      "imgId": 76,
+      "satiation": 3
+    },
+    "egg": {
+      "name": "鸡蛋",
+      "icon": "🥚",
+      "heal": 0,
+      "sellPrice": 1,
+      "imgId": 80,
+      "satiation": 1
+    },
+    "hamburger": {
+      "name": "汉堡",
+      "icon": "🍔",
+      "heal": 0,
+      "sellPrice": 10,
+      "imgId": 79,
+      "foodEffect": "full_heal_speed",
+      "satiation": 10
+    },
+    "tomato_egg": {
+      "name": "西红柿炒鸡蛋",
+      "icon": "🍳",
+      "heal": 0,
+      "sellPrice": 8,
+      "imgId": 81,
+      "foodEffect": "half_heal_attack",
+      "satiation": 5
+    },
+    "fried_rice": {
+      "name": "蛋炒饭",
+      "icon": "🍚",
+      "heal": 0,
+      "sellPrice": 6,
+      "imgId": 82,
+      "foodEffect": "thirty_heal_speed",
+      "satiation": 6
+    },
+    "grilled_fish": {
+      "name": "烤鱼",
+      "icon": "🐟",
+      "heal": 0,
+      "sellPrice": 5,
+      "imgId": 83,
+      "foodEffect": "forty_heal_speed",
+      "satiation": 3
+    },
+    "salmon_sushi": {
+      "name": "三文鱼寿司",
+      "icon": "🍣",
+      "heal": 0,
+      "sellPrice": 8,
+      "imgId": 84,
+      "foodEffect": "forty_heal_attack",
+      "satiation": 3
+    },
+    "pumpkin_soup": {
+      "name": "南瓜胡萝卜浓汤",
+      "icon": "🥣",
+      "heal": 0,
+      "sellPrice": 7,
+      "imgId": 85,
+      "foodEffect": "forty_heal_attack",
+      "satiation": 5
+    },
+    "veg_bun": {
+      "name": "菜包",
+      "icon": "🥟",
+      "heal": 0,
+      "sellPrice": 2,
+      "imgId": 86,
+      "satiation": 3
+    },
+    "meat_bun": {
+      "name": "肉包",
+      "icon": "🥟",
+      "heal": 0,
+      "sellPrice": 3,
+      "imgId": 87,
+      "satiation": 5
+    },
+    "noodle_soup": {
+      "name": "清汤面",
+      "icon": "🍜",
+      "heal": 0,
+      "sellPrice": 3,
+      "imgId": 88,
+      "foodEffect": "ten_heal_speed",
+      "satiation": 6
+    },
+    "wuxian_food": {
+      "name": "无限做的饭",
+      "icon": "🍲",
+      "heal": 0,
+      "sellPrice": 1,
+      "imgId": 89,
+      "foodEffect": "wuxian_food",
+      "satiation": -3
+    },
+    "mooncake": {
+      "name": "月饼",
+      "icon": "🥮",
+      "heal": 0,
+      "sellPrice": 0,
+      "imgId": 165,
+      "foodEffect": "mooncake",
+      "satiation": 6
+    }
+  },
+  "avatarCats": [
+    {
+      "key": "skin",
+      "label": "皮肤",
+      "start": 92,
+      "end": 97,
+      "optional": false
+    },
+    {
+      "key": "ears",
+      "label": "耳朵",
+      "start": 98,
+      "end": 112,
+      "optional": false
+    },
+    {
+      "key": "eyes",
+      "label": "眼睛",
+      "start": 113,
+      "end": 125,
+      "extra": [
+        177
+      ],
+      "optional": false
+    },
+    {
+      "key": "hair",
+      "label": "头发",
+      "start": 126,
+      "end": 152,
+      "optional": false
+    },
+    {
+      "key": "wreath",
+      "label": "花环",
+      "start": 153,
+      "end": 153,
+      "optional": true
+    },
+    {
+      "key": "accessory",
+      "label": "发饰",
+      "start": 154,
+      "end": 154,
+      "optional": true
+    },
+    {
+      "key": "hat",
+      "label": "帽子",
+      "start": 155,
+      "end": 158,
+      "optional": true
+    }
+  ],
+  "creatureTypes": [
+    "野兔",
+    "野鸡",
+    "野狼",
+    "野猪",
+    "小鹿",
+    "狐狸",
+    "松鼠",
+    "浣熊",
+    "刺猬",
+    "猴子"
+  ],
+  "cookRecipes": {
+    "tomato_egg": {
+      "ingredients": {
+        "tomato": 1,
+        "egg": 1
+      },
+      "time": 10,
+      "result": "tomato_egg",
+      "label": "🍳 西红柿炒鸡蛋"
+    },
+    "grilled_fish": {
+      "ingredients": {
+        "anyFish": 1
+      },
+      "time": 10,
+      "result": "grilled_fish",
+      "label": "🐟 烤鱼"
+    },
+    "hamburger": {
+      "ingredients": {
+        "bread": 2,
+        "cooked_meat": 1,
+        "lettuce": 1
+      },
+      "time": 20,
+      "result": "hamburger",
+      "label": "🍔 汉堡"
+    },
+    "fried_rice": {
+      "ingredients": {
+        "egg": 1,
+        "cooked_rice": 1
+      },
+      "time": 10,
+      "result": "fried_rice",
+      "label": "🍚 蛋炒饭"
+    },
+    "salmon_sushi": {
+      "ingredients": {
+        "fish_salmon": 1,
+        "cooked_rice": 1
+      },
+      "time": 10,
+      "result": "salmon_sushi",
+      "label": "🍣 三文鱼寿司"
+    },
+    "pumpkin_soup": {
+      "ingredients": {
+        "pumpkin": 1,
+        "carrot": 1
+      },
+      "time": 20,
+      "result": "pumpkin_soup",
+      "label": "🥣 南瓜胡萝卜浓汤"
+    },
+    "veg_bun": {
+      "ingredients": {
+        "lettuce": 1,
+        "bread": 1
+      },
+      "time": 10,
+      "result": "veg_bun",
+      "label": "🥟 菜包"
+    },
+    "meat_bun": {
+      "ingredients": {
+        "meat": 1,
+        "bread": 1
+      },
+      "time": 10,
+      "result": "meat_bun",
+      "label": "🥟 肉包"
+    },
+    "noodle_soup": {
+      "ingredients": {
+        "wheat": 1,
+        "lettuce": 1
+      },
+      "time": 10,
+      "result": "noodle_soup",
+      "label": "🍜 清汤面"
+    },
+    "bread": {
+      "ingredients": {
+        "wheat": 1
+      },
+      "time": 10,
+      "result": "bread",
+      "label": "🍞 面包"
+    },
+    "cooked_rice": {
+      "ingredients": {
+        "rice": 1
+      },
+      "time": 10,
+      "result": "cooked_rice",
+      "label": "🍚 米饭"
+    },
+    "cooked_meat": {
+      "ingredients": {
+        "meat": 1
+      },
+      "time": 10,
+      "result": "cooked_meat",
+      "label": "🍖 熟肉"
+    },
+    "wuxian_food": {
+      "ingredients": {},
+      "time": 20,
+      "result": "wuxian_food",
+      "label": "🍲 无限做的饭",
+      "catchAll": true
+    }
+  },
+  "craftRecipes": {
+    "wood": [
+      {
+        "output": "plank",
+        "label": "木板",
+        "inputCount": 1,
+        "outputCount": 1
+      },
+      {
+        "output": "door",
+        "label": "门",
+        "inputCount": 6,
+        "outputCount": 1
+      },
+      {
+        "output": "campfire",
+        "label": "篝火",
+        "inputCount": 10,
+        "outputCount": 1
+      },
+      {
+        "output": "torch",
+        "label": "火把",
+        "inputCount": 2,
+        "outputCount": 1
+      },
+      {
+        "output": "bed",
+        "label": "床",
+        "inputCount": 6,
+        "outputCount": 1
+      },
+      {
+        "output": "furnace",
+        "label": "熔炉",
+        "inputCount": 10,
+        "outputCount": 1
+      },
+      {
+        "output": "chest",
+        "label": "箱子",
+        "inputCount": 8,
+        "outputCount": 1
+      }
+    ]
+  },
+  "achievements": [
+    {
+      "id": "chop_tree",
+      "icon": "🪓",
+      "desc": "砍一棵树",
+      "name": "致富开端"
+    },
+    {
+      "id": "wood_tool",
+      "icon": "🪚",
+      "desc": "兑换任意木质工具",
+      "name": "工具升级"
+    },
+    {
+      "id": "farmland",
+      "icon": "🌾",
+      "desc": "开垦耕地",
+      "name": "农耕时代"
+    },
+    {
+      "id": "kill_animal",
+      "icon": "🍖",
+      "desc": "杀死任意动物",
+      "name": "弱肉强食"
+    },
+    {
+      "id": "kill_npc",
+      "icon": "🗡️",
+      "desc": "杀死一个NPC",
+      "name": "凶手"
+    },
+    {
+      "id": "fish",
+      "icon": "🎣",
+      "desc": "成功钓上一条鱼",
+      "name": "钓鱼佬"
+    },
+    {
+      "id": "cook",
+      "icon": "🍳",
+      "desc": "进行烹饪",
+      "name": "美食家"
+    },
+    {
+      "id": "wuxian",
+      "icon": "🍲",
+      "desc": "烹饪出无限做的饭",
+      "name": "无限"
+    },
+    {
+      "id": "spend_1000",
+      "icon": "💰",
+      "desc": "在商人处花费1000金币",
+      "name": "有钱没处花"
+    },
+    {
+      "id": "torch",
+      "icon": "🔥",
+      "desc": "使用火把照明",
+      "name": "我怕黑"
+    },
+    {
+      "id": "sleep",
+      "icon": "🛏️",
+      "desc": "在床上睡觉",
+      "name": "梦"
+    },
+    {
+      "id": "pet",
+      "icon": "🐾",
+      "desc": "购买一只宠物",
+      "name": "忠诚的伙伴"
+    }
+  ]
+}

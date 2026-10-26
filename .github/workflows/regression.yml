@@ -1,0 +1,121 @@
+name: Regression
+
+# Every pushed branch runs the same suite a developer runs locally
+# (python tools/checks/regression.py --full), plus clean release builds, manifest
+# provenance and dependency audits. Pull requests run it again as `merge-gate` on
+# GitHub's merge of the head into the current base, so the check a merge waits on
+# covers the merged result, not the head alone.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: regression-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regression:
+    # A distinct name keeps the merge result's check apart from the head branch's push run.
+    name: ${{ github.event_name == 'pull_request' && 'merge-gate' || 'regression' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Every build and test step uses disposable storage; CI never sees production data.
+    env:
+      IRIDESCENTLY_ENVIRONMENT: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Name the merge checkout
+        # The merge commit is checked out detached; release manifests must record a branch.
+        if: github.event_name == 'pull_request'
+        run: git checkout -B "${GITHUB_REF#refs/}"
+      - name: Select disposable storage
+        # The runner context is not available in job-level env, so it is set here.
+        run: echo "IRIDESCENTLY_STORAGE_ROOT=$RUNNER_TEMP/iridescently-storage" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python test image dependency
+        run: python -m pip install Pillow==12.3.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            apps/www/gallery-engine/package-lock.json
+            apps/cards/package-lock.json
+            apps/management/package-lock.json
+            apps/ecology/package-lock.json
+            apps/softie/package-lock.json
+      - name: Install Node dependencies
+        run: |
+          npm ci
+          for module in cards management ecology softie; do
+            npm ci --prefix "apps/$module"
+          done
+      - run: npx playwright install --with-deps chromium
+      - name: Install gallery preview encoder
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes ffmpeg
+      - name: Create isolated gallery build fixture
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/gallery"
+          python - <<'PY'
+          import os, struct, zlib
+          from pathlib import Path
+          def chunk(kind, data):
+              return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data) & 0xffffffff)
+          png = (b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>2I5B', 1, 1, 8, 6, 0, 0, 0))
+                 + chunk(b'IDAT', zlib.compress(b'\x00\x80\x60\x40\xff')) + chunk(b'IEND', b''))
+          Path(os.environ['RUNNER_TEMP'], 'gallery', 'ci-fixture.png').write_bytes(png)
+          PY
+          echo "GALLERY_DIR=$RUNNER_TEMP/gallery" >> "$GITHUB_ENV"
+      - name: Build release candidates
+        run: |
+          npm run build:release
+          npm run build:site
+      - name: Verify release manifests and output hashes
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { verifyCandidate } from './tools/release/release-artifacts.mjs';
+          const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+          for (const name of ['modules', 'homepage', 'site']) {
+            const record = await verifyCandidate(name);
+            if (record.sourceHead !== head || record.sourceDirty !== false) throw new Error(`${name} manifest does not match the clean checkout`);
+            if (!record.sourceRepository || !record.sourceBranch || !record.buildCommand || !Object.keys(record.files).length) throw new Error(`${name} manifest lacks provenance or output hashes`);
+            console.log(`${name}: ${record.sourceRepository} ${record.sourceBranch}@${record.sourceHead} (${Object.keys(record.files).length} hashed files)`);
+          }
+          NODE
+      - name: Built candidates contain no unreviewed own-domain URLs
+        # The site candidate is committed source, which the suite scans with its reviewed exceptions.
+        run: >-
+          python tools/domains/check-domain-hardcodes.py
+          "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/modules"
+          "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/homepage"
+      - name: Regression suite (one module per process, disposable test storage)
+        run: >-
+          python tools/checks/regression.py --full
+          --modules "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/modules"
+          --report "$RUNNER_TEMP/regression-report.json"
+      - name: Audit production npm dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Audit Gallery Engine build dependencies
+        run: npm audit --prefix apps/www/gallery-engine --audit-level=high
+      - name: Audit Cards module dependencies
+        run: npm audit --prefix apps/cards --audit-level=high
+      - name: Keep the regression report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-report
+          path: ${{ runner.temp }}/regression-report.json
+          if-no-files-found: ignore

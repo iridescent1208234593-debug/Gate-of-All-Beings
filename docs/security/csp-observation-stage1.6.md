@@ -16,7 +16,7 @@ Observation date: 2026-10-16 (Asia/Singapore). Browser: installed Chrome 155.0.8
 | ZSZM | `https://zszm.iridescently.xyz/app/shell/` | 200 | Unified app shell |
 | Juling | `https://juling.iridescently.xyz/app/shell/m/juling` | 200 | Canonicalized to the ZSZM shell route |
 
-The full page result JSON is `work/security-stage1.6/csp-observation.json`; the WebSocket capture is `work/security-stage1.6/csp-spirit-websocket.json`. A stable room label was used only for this temporary anonymous connection; no account or persistent user data was created.
+The full page result JSON is `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/security-stage1.6/csp-observation.json`; the WebSocket capture is `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/security-stage1.6/csp-spirit-websocket.json`. A stable room label was used only for this temporary anonymous connection; no account or persistent user data was created.
 
 ## Deduplicated violations
 

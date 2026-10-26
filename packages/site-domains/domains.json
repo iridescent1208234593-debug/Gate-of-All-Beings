@@ -1,0 +1,21 @@
+{
+  "defaultRoot": "iridescently.xyz",
+  "roots": ["iridescently.xyz", "iridescently.cn", "iridescently.dpdns.org"],
+  "services": {
+    "main": "", "www": "www", "huiguan": "huiguan", "oc": "oc",
+    "zszm": "zszm", "spirit": "spirit", "game": "game",
+    "juling": "juling", "lingjing": "lingjing"
+  },
+  "legacy": {"game": "/#home", "lingjing": "/#management", "juling": "/app/shell/m/juling"},
+  "oauth": {
+    "huiguan": {"path": "/cb", "callbackRoots": ["iridescently.xyz"]},
+    "zszm": {"path": "/api/callback", "callbackRoots": ["iridescently.xyz"]}
+  },
+  "previewHosts": [
+    "pc.iridescently.xyz", "pc-www.iridescently.xyz", "pc-huiguan.iridescently.xyz",
+    "pc-oc.iridescently.xyz", "pc-spirit.iridescently.xyz", "pc-zszm.iridescently.xyz",
+    "pc-game.iridescently.xyz", "pc-juling.iridescently.xyz", "pc-lingjing.iridescently.xyz"
+  ],
+  "assetHost": "assets.iridescently.xyz",
+  "localPorts": [4173, 5173, 5174, 5176, 5177, 5178, 5179, 5180, 8080, 8088, 8089]
+}

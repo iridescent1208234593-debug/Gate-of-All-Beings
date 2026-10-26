@@ -1,0 +1,11 @@
+.door-audio-choice { position: fixed; z-index: 6; top: max(14px,env(safe-area-inset-top)); left: max(16px,env(safe-area-inset-left)); display: flex; align-items: center; gap: 5px; }
+.door-sound { display: inline-flex; width: 28px; height: 28px; padding: 0; align-items: center; justify-content: center; color: #e9e2c8; background: rgba(8,16,12,.45); border: 1px solid rgba(233,226,200,.3); border-radius: 50%; cursor: pointer; }
+.door-music-button { height: 28px; padding: 0 9px; color: #e9e2c8; background: rgba(8,16,12,.45); border: 1px solid rgba(233,226,200,.3); border-radius: 999px; font: inherit; font-size: 10px; letter-spacing: .08em; white-space: nowrap; cursor: pointer; backdrop-filter: blur(4px); }
+.door-sound:hover,.door-music-button:hover,.door-music-button[aria-expanded="true"] { background: rgba(8,16,12,.78); border-color: rgba(233,226,200,.65); }
+.door-music-menu { position: absolute; top: calc(100% + 8px); left: 0; z-index: 8; width: 270px; max-width: calc(100vw - 24px); padding: 6px; border: 1px solid rgba(233,226,200,.28); border-radius: 10px; background: rgba(10,20,15,.9); color: #e9e2c8; backdrop-filter: blur(10px); box-shadow: 0 10px 30px #0008; }
+.door-music-menu[hidden] { display: none; }
+.door-music-menu button { position: relative; display: flex; width: 100%; align-items: baseline; gap: 8px; padding: 8px 9px 8px 23px; color: inherit; background: transparent; border: 0; border-radius: 6px; font: inherit; font-size: 11px; letter-spacing: .04em; text-align: left; white-space: nowrap; cursor: pointer; }
+.door-music-menu button small { margin-left: auto; color: rgba(233,226,200,.65); font-size: 9px; letter-spacing: 0; white-space: nowrap; }
+.door-music-menu button:hover,.door-music-menu button:focus-visible { background: rgba(233,226,200,.12); outline: none; }
+.door-music-menu button[aria-checked="true"]::before { position: absolute; left: 8px; top: 50%; content: "●"; font-size: 7px; transform: translateY(-50%); }
+.door-music-menu p { margin: 4px 8px 1px; padding-top: 7px; border-top: 1px solid rgba(233,226,200,.12); color: rgba(233,226,200,.55); font-size: 9px; letter-spacing: .12em; }

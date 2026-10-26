@@ -1,6 +1,6 @@
 # Listener Baseline
 
-Observed 2026-10-16. The complete TCP LISTEN and UDP endpoint inventory, including PID/process/bind/owner/expected/risk/classification, is saved at `work/security-stage1.6/listeners.csv` (162 rows: 70 TCP listeners and 92 UDP endpoints). Windows exposes no UDP LISTEN state; UDP rows are bound endpoints and are not proof that each is receiving remote traffic.
+Observed 2026-10-16. The complete TCP LISTEN and UDP endpoint inventory, including PID/process/bind/owner/expected/risk/classification, is saved at `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/security/security-stage1.6/listeners.csv` (162 rows: 70 TCP listeners and 92 UDP endpoints). Windows exposes no UDP LISTEN state; UDP rows are bound endpoints and are not proof that each is receiving remote traffic.
 
 ## Project services expected on loopback
 

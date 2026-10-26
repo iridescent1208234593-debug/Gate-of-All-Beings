@@ -28,13 +28,13 @@ Captured fields: `code=EPERM`, `syscall=rename`, source `E:\Projects\.releases\p
 
 ## Diagnostic Change
 
-`ops/publish-release.mjs` now writes `[release-preflight]` and `[release-fs]` JSON lines to stderr. Entries include timestamp, operation, source/destination, attempt, phase, and native `errno`, `code`, `syscall`, `path`, and `dest` when an error exists. Site preflight records candidate verification, path existence, volume roots, write access, publisher working directory, whether that directory is under production, and explicitly reports `serviceLockState=NOT_QUERIED`.
+`E:\External Projects\Iridescently Operations\publish-release.mjs` now writes `[release-preflight]` and `[release-fs]` JSON lines to stderr. Entries include timestamp, operation, source/destination, attempt, phase, and native `errno`, `code`, `syscall`, `path`, and `dest` when an error exists. Site preflight records candidate verification, path existence, volume roots, write access, publisher working directory, whether that directory is under production, and explicitly reports `serviceLockState=NOT_QUERIED`.
 
 Diagnostics do not decide whether to publish, stop services, alter retry limits, change the atomic swap, or suppress errors. Logging failures are swallowed so they cannot change publication behavior.
 
 ## Simulation Evidence
 
-The copied publisher and candidate verifier ran under `work/publish-simulation-20261016/`, with independent fake project trees and small text files. Synthetic failures were injected by a test-only Node preload; its `errno=-4048` is simulated data and is not evidence for the historical failure.
+The copied publisher and candidate verifier ran under `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/publish-simulation-20261016`, with independent fake project trees and small text files. Synthetic failures were injected by a test-only Node preload; its `errno=-4048` is simulated data and is not evidence for the historical failure.
 
 | Scenario | Result |
 | --- | --- |
@@ -53,4 +53,4 @@ The simulations prove the diagnostics and exercise existing swap/rollback branch
 
 ## Scope and Worktree
 
-This stage changed only the publisher diagnostics, this report, and the isolated simulation fixture/logs under `work/publish-simulation-20261016/`. No files were staged or committed. Other dirty files, including Stage 1.8 anti-scraping work and unrelated project edits, were preserved. Cloudflare settings and anti-scraping controls were not changed; Stage 2 was not started.
+This stage changed only the publisher diagnostics, this report, and the isolated simulation fixture/logs under `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/releases/publish-simulation-20261016`. No files were staged or committed. Other dirty files, including Stage 1.8 anti-scraping work and unrelated project edits, were preserved. Cloudflare settings and anti-scraping controls were not changed; Stage 2 was not started.

@@ -1,0 +1,43 @@
+{
+  "ingress": [
+    {
+      "hostname": "game.iridescently.xyz",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "huiguan.iridescently.xyz",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "iridescently.xyz",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "juling.iridescently.xyz",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "lingjing.iridescently.xyz",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "oc.iridescently.xyz",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "spirit.iridescently.xyz",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "www.iridescently.xyz",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "hostname": "zszm.iridescently.xyz",
+      "service": "http://127.0.0.1:8080"
+    },
+    {
+      "service": "http_status:404"
+    }
+  ]
+}

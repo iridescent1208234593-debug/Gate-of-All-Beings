@@ -1,29 +1,38 @@
-# 候选、源码快照与显式发布
+# Source, build candidates and releases
 
-正式源码在 E:\Projects；实验/参考在 E:\External Projects\Iridescently Labs。生产服务与尚未发布的编辑分开。
+Batch 6 uses `services/platform/storage_paths.py` and `services/platform/runtime-paths.cjs` as one storage contract. `IRIDESCENTLY_PROJECT_ROOT` selects source code only; it never selects user databases, uploads or deployed output. `IRIDESCENTLY_STORAGE_ROOT` selects an external parent, with separate `development`, `staging`, `production` and `test` environments. Test mode requires an explicit temporary storage parent.
 
-| 命令 | 结果 |
+Each environment has sibling `data`, `assets`, `cache`, `releases` and `backups` roots. Explicit `IRIDESCENTLY_DATA_ROOT`, `IRIDESCENTLY_ASSETS_ROOT`, `IRIDESCENTLY_CACHE_ROOT`, `IRIDESCENTLY_RELEASE_ROOT` and `IRIDESCENTLY_BACKUP_ROOT` overrides must remain outside source and must not overlap each other. Service startup requires the verified storage readiness marker; a new empty production data directory does not become a healthy new installation.
+
+| Command | Output below the selected environment release root |
 | --- | --- |
-| `build:homepage` | `.releases/candidate/homepage` |
-| `build:cards` | `.releases/candidate/cards` |
-| `build:world-map` | `.releases/candidate/world-map` |
-| `build:modules` | 八个模块和首页候选 |
-| `publish:homepage` / `publish:modules` | 校验全文件 SHA-256 后提升构建输出 |
-| `publish:cards` | 校验 Cards 模块 SHA-256 后仅提升众生之门前端模块 |
-| `publish:world-map` | 校验世界地图 SHA-256 后仅提升地图模块 |
-| `build:site` | 从 Git HEAD 导出 portal/server/shared 源码快照到 candidate/site |
-| `publish:site` | 提升到 `.releases/production/site` |
+| `npm run build:homepage` | `candidate/homepage` |
+| `npm run build:cards` | `candidate/cards` |
+| `npm run build:world-map` | `candidate/world-map` |
+| `npm run build:modules` | `candidate/modules` |
+| `npm run build:release` | modules and homepage candidates |
+| `npm run build:site` | committed source snapshot in `candidate/site` |
 
-构建不等于上线。网站管家不再启动时自动构建；缺少发布产物则明确报错。源码快照不包含 node_modules、gallery-engine、上传/store、数据库、角色/存档 JSON、环境文件和生成模块。首页生成 HTML/assets 继续从显式发布输出读取。
+Build implementations live in the Git repository under `tools/build/`, `tools/release/` and `apps/www/scripts/`. The external Operations build entry points load these versioned scripts from the selected checkout (see `docs/repository-layout.md` for the paths they must use). Building does not require old local production directories or already deployed modules. Cards' optional historical nested copies of management/ecology are no longer copied from deployed output; these modules are built independently.
 
-Portal/OAuth 从已发布快照启动；`IRIDESCENTLY_PROJECT_ROOT` 指向原工作区的用户数据、共享媒体与本地 SSO secret。会馆公共 UI 使用 canonical shared/shared-ui，不需要另维护一份镜像。静态 HTML/CSS/JS/Python 源码的未发布修改不影响正在运行的快照。
+The homepage consumes originals from `assets/source/罗小黑战记数据库/罗小黑节气贺图（gallery素材）`, or explicit `GALLERY_DIR`. WebP previews are generated under `cache/homepage/gallery-previews`. Only previews enter the public homepage candidate; originals remain behind the authenticated original-image API. Builds may use temporary fixture originals without any production database. The optional Slay image input is declared in `tools/build/module-assets.json` or `IRIDESCENTLY_SLAY_IMAGES_DIR`; missing configured assets fail explicitly.
 
-候选 JSON 记录 sourceHead/sourceDirty、时间、文件 hash；production.json 仅在显式发布成功后合并组件记录。工作树有修改的模块构建不能声称是纯提交构建；最终发布时应使用审查提交或附有逐文件比对证明。site 始终取 HEAD。
+`build:site` exports Git HEAD for `apps`, `services` and `packages`. It excludes dependencies, generated modules/homepage output, gallery-engine, uploads/store, databases/SQLite sidecars, character/save data, environment secrets and logs. An uncommitted Python edit is not silently copied into the exported snapshot. Generated gate code is then built from the selected checkout, so `sourceDirty` still records whether that checkout has uncommitted changes. Release acceptance requires a final clean committed rebuild.
 
-顺序：审查并提交源码 → 构建候选 → 测试 → 显式发布 → 仅重启受影响服务 → 公网验收。只更新众生之门前端时用 `build:cards` / `publish:cards`，避免同时发布首页与其他模块。代码/数据库不一起覆盖；数据库及上传需要单独备份。门户、OAuth、API 上游和 Tunnel 的重启由现有网站管家完成，不引入新 CDN/DNS。
+Every candidate manifest records the repository URL without credentials, branch, source commit, dirty state, build command, Node/platform information, time and SHA-256 of every output file. Homepage also records its external source asset file count and a deterministic combined SHA-256. `verifyCandidate()` rejects changed file sets and changed bytes. Caller metadata cannot replace the source commit or hashes.
 
-世界地图与门庭入口一起更新时，定向执行 `build:cards` / `publish:cards`、`build:world-map` / `publish:world-map`、`build:site` / `publish:site`，然后重启 Portal 并验收 `/app/shell/m/world-map`。
+Building and recording a manifest do not activate a release. A deployment controller must select an immutable version from this external release root and pass the same external storage environment to all services. Replacing code, checkout or release pointers cannot replace persistent data. A code rollback selects older code and retains the current data roots; schema compatibility must be checked before activation. Production publishing, service restarts and traffic changes remain separate operational actions.
 
-publish 先复制、验证，再逐目录提升，异常逆序恢复；中断的 `.promotion` 会阻止覆盖，需要检查恢复。多目录发布不是零停机原子切换，维护窗口中完成一致切换。要回退版本，检出已知提交重新构建/发布，用户运行数据不回滚。
+For a local release, build `site`, `modules` and `homepage` from the same clean commit, then run `npm run release:seal`. The publisher verifies all candidates, copies source to `releases/store/<id>/site`, overlays modules/homepage, verifies copied bytes, and records a complete `manifest.json` beside the site directory. It then atomically updates `releases/channels/<environment>.json` with `current`, `previous`, a relative `site` path and the manifest SHA-256. It never renames an existing release or writes persistent data. A channel lock prevents concurrent activations; an orphan lock after interruption requires inspection before retrying.
 
-Cards/Softie Vite API 插件仍从正式源目录在进程启动时加载；其静态输出明确使用发布目录，开发修改不会热更新到 preview。改 API 插件同样要提交、测试和显式重启，不能声称所有 Node 源码已快照隔离。
+`npm run release:rollback -- <release-id>` verifies the stored file set and hashes, then selects that existing release by updating only the channel. The local launcher reads the channel and starts services separately; sealing/rollback do not restart services. The former partial `publish:*` commands, which overwrote source-tree output, were removed; build the three candidates and seal one complete release instead. The external Operations `publish-release.mjs` delegates to this same local implementation.
+
+The historical v2 pointer-switch proposal in `release-architecture-v2.md` describes release activation mechanics; its old `.releases` paths and source-root data contract are superseded by this storage contract. This Batch does not modify Hong Kong production routing or run a live domain migration.
+
+## Local runtime
+
+`python tools/runtime/local-runtime.py start` verifies storage readiness, the environment channel, the release ID format and the stored manifest hashes, then starts only loopback services from `releases/store/<id>/site`: portal 8080, Cards OAuth 5174, card balance 5178, Juling 5177 and Spirit 4173. Children receive the same storage environment, so each one re-checks readiness itself. It refuses occupied ports, partial runtimes and a running older release; `status` and `stop` act only on processes it recorded. It never starts tunnels, changes DNS or contacts Hong Kong. A production-environment portal accepts only approved hosts with a loopback `X-Forwarded-Proto: https`, so local checks send those headers, for example `curl -H "Host: zszm.iridescently.cn" -H "X-Forwarded-Proto: https" http://127.0.0.1:8080/api/sso-user`.
+
+Checks: `node tools/release/test-release-artifacts.mjs` verifies external test isolation, commit tracing and tamper rejection. `python services/platform/tests/test_source_export.py -v` proves snapshot export uses committed code and excludes fixture secrets/data.
+
+`node tools/release/test-publish-release.mjs` verifies clean-candidate enforcement, immutable assembly, current/previous pointer rollback, tamper rejection and preservation of external fixture data.

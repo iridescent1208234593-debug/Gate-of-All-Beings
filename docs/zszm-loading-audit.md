@@ -59,7 +59,7 @@
 - `node --check portal/huiguan/homepage.js`：通过。
 - HTMLParser 检查三条 preload 与实际脚本 URL 一致、core 先于共享导航、homepage.js 只初始化一次：通过。
 - 依赖复核：`homepage.js` 消费的表单函数和全部必要 DOM 在它之前已定义；`homepage-chrome.js` 只在共享导航插入后整理导航，`homepage-content.js` 通过既有事件连接首页状态，因此都不需要成为门景 ready 的前置脚本。`qc-nav` 的 ResizeObserver 是可选增强，缺少导航时不会阻止初始化。
-- 2026-10-17 增加隔离源码 smoke：`python work/qa/zszm-merge-20261017/huiguan-source-smoke.py --port 5196`。`http://127.0.0.1:5196/?chrome_delay=12` 提供实际会馆源码及 gate bundle，仅在测试响应中将共享导航延后 12 秒，并记录 `window.__qaHuiguanBoot` 的遮罩移除 / 导航插入时间；`?chrome_delay=12&fallback=1&video_delay=15` 用实际 MP4 验证 fallback 的 8 秒退出。该服务只监听 loopback、API 返回匿名测试数据、不写正式账户或正式进程。源页、三个 core 脚本、共享导航、fallback MP4 的本地 HTTP smoke 均为 200。
+- 2026-10-17 增加隔离源码 smoke：`python "E:\External Projects\Iridescently Operations Archive\qa\qa\zszm-merge-20261017\huiguan-source-smoke.py" --port 5196`。`http://127.0.0.1:5196/?chrome_delay=12` 提供实际会馆源码及 gate bundle，仅在测试响应中将共享导航延后 12 秒，并记录 `window.__qaHuiguanBoot` 的遮罩移除 / 导航插入时间；`?chrome_delay=12&fallback=1&video_delay=15` 用实际 MP4 验证 fallback 的 8 秒退出。该服务只监听 loopback、API 返回匿名测试数据、不写正式账户或正式进程。源页、三个 core 脚本、共享导航、fallback MP4 的本地 HTTP smoke 均为 200。
 - 本地浏览器验收与本轮集成结果由主任务补充；没有声称已获得线上性能改善。正式快照和线上进程保持原状。
 
 ### 2026-10-17 浏览器源码 smoke 结果
@@ -67,4 +67,4 @@
 - 导航响应人为延后 12 秒：`#homeBoot` 在 **650 ms** 隐藏；导航在 **12,601 ms** 插入，DOMContentLoaded 为 12,764 ms。实际门景正常呈现，控制台 error 列表为空，确认门景 ready 不再等待导航脚本。
 - 强制真实 fallback 分支、MP4 响应延后 15 秒：289 ms 已进入 `gate-fallback`，**8,292 ms** 遮罩隐藏，导航 12,263 ms 才插入。页面进入可浏览状态，不等待视频请求结束；这验证了 8 秒有界出口，不能用作默认 WebGL 分支耗时。
 - 初次测试发现 gate bundle 的导出为 getter-only，直接覆盖 `hasWebGL` 未生效；测试 harness 随后改为替换可写的 `window.LXHGate` 整体对象，并在可见 QA 面板记录 `fallback-forced` / `gate-fallback-branch` 后重测。没有把那次仍为 WebGL 的结果误报为 fallback 通过。
-- 截图与测试服务位于 `work/qa/zszm-merge-20261017/`；该 helper 只为源码 smoke，匿名 API 为隔离数据，不是完整会馆业务验收或公网测速。
+- 截图与测试服务位于 `file:///E:/External%20Projects/Iridescently%20Operations%20Archive/qa/qa/zszm-merge-20261017/`；该 helper 只为源码 smoke，匿名 API 为隔离数据，不是完整会馆业务验收或公网测速。

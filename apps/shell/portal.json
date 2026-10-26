@@ -1,0 +1,20 @@
+{
+  "title": "众生之门 · 统一门户",
+  "links": [
+    { "key": "main", "group": "站点", "name": "主站", "desc": "佳霖的首页", "service": "main", "path": "/", "icon": "🏠" },
+    { "key": "huiguan", "group": "站点", "name": "西木会馆", "desc": "故事与角色档案", "service": "huiguan", "path": "/", "icon": "🏛" },
+    { "key": "oc", "group": "站点", "name": "佳霖馆长设定", "desc": "原创角色设定页", "service": "oc", "path": "/", "icon": "🌟" },
+    { "key": "psyche", "group": "站点", "name": "心理档案云", "desc": "心灵探索项目", "status": "unpublished", "icon": "🔮" },
+    { "key": "spirit", "group": "站点", "name": "灵体互动", "desc": "进入林间灵域，与小灵体相遇", "service": "spirit", "path": "/games/spirit-playground?room=forest", "icon": "🌌" },
+
+    { "key": "cards", "group": "游戏", "name": "众生之门 · 卡牌", "desc": "入世历练 · 卡牌冒险", "url": "/app/modules/cards/", "icon": "🦊", "status": "beta", "embed": true },
+    { "key": "management", "group": "游戏", "name": "灵境会馆", "desc": "据点经营 · 建造 / 科技 / 远征", "url": "/app/modules/management/", "icon": "🏯", "embed": true },
+    { "key": "ecology", "group": "游戏", "name": "生态进化", "desc": "灵境生态模块", "url": "/app/modules/ecology/", "icon": "🌿", "embed": true },
+    { "key": "juling", "group": "游戏", "name": "聚灵", "desc": "五行聚灵 · 化形修炼", "url": "/app/modules/juling/", "icon": "🌀", "embed": true },
+    { "key": "slay", "group": "游戏", "name": "重生之门", "desc": "卡牌 roguelike 引擎", "url": "/app/modules/slay/", "icon": "⚔", "embed": true },
+    { "key": "softie", "group": "游戏", "name": "灵体互动", "desc": "自定义灵体与多人互动", "url": "/app/modules/softie/", "icon": "🌌", "embed": true },
+    { "key": "aeon", "group": "游戏", "name": "AEON", "desc": "神经演化文明模拟", "url": "/app/modules/aeon/", "icon": "🧠", "embed": true },
+    { "key": "world-map", "group": "游戏", "name": "罗小黑世界地图", "desc": "环形世界地图 · 地点档案与自由探索", "url": "/app/modules/world-map/", "icon": "🗺️", "embed": false },
+    { "key": "shengsheng-shoot", "group": "游戏", "name": "省省海滩射击试玩", "desc": "省省角色小游戏 · 海滩像素射击", "url": "/playtest/shengsheng-shoot/", "icon": "🎯" }
+  ]
+}

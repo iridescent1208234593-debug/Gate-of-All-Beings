@@ -1,0 +1,139 @@
+.mode-hall { --hall-ink: #f5efcf; --hall-gold: #e4b354; --hall-ease: cubic-bezier(.22,.8,.24,1); min-width: 0; color: var(--ink, #253c31); }
+.mode-hall__heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; padding: 8px 0 26px; }
+.mode-hall__heading>div { min-width: 0; }
+.mode-hall__eyebrow { margin: 0; font-size: 10px; letter-spacing: .18em; color: #7b713d; }
+.mode-hall__heading h1 { margin: 10px 0 6px; font-size: clamp(24px, 2.6vw, 38px); font-weight: 400; letter-spacing: .05em; }
+.mode-hall__heading p:last-child { margin: 0; font-size: 13px; line-height: 1.8; color: #617263; }
+
+.mode-hall__player { position: relative; display: flex; align-items: center; gap: 14px; flex: none; max-width: 100%; padding: 10px 40px 10px 10px; border: 1px solid #c9c1a0; border-radius: 16px; background: #fffaf099; color: inherit; text-align: left; cursor: pointer; transition: border-color 200ms ease, box-shadow 200ms ease; }
+.mode-hall__player:hover:not(:disabled) { border-color: #b58b43; box-shadow: 0 6px 18px #6b5a2a1a; }
+.mode-hall__player:disabled { cursor: default; padding-right: 16px; }
+.mode-hall__player>span:not(.gate-player-avatar) { display: grid; gap: 3px; min-width: 0; max-width: 220px; overflow-wrap: anywhere; }
+.mode-hall__player small { font-size: 10px; color: #6b785d; }
+.mode-hall__player strong { font-size: 19px; font-weight: 500; }
+.mode-hall__player em { color: #8a6932; font-size: 12px; font-style: normal; }
+.mode-hall__player i { color: #7d846f; font-size: 11px; font-style: normal; }
+.mode-hall__edit { position: absolute; top: 12px; right: 12px; color: #9a8a5e; }
+.mode-hall__avatar { width: 64px; height: 65px; --appearance-color: #b58b43; --appearance-surface: #e9dfbd; color: var(--appearance-color); }
+.mode-hall__avatar svg { display: block; width: 100%; height: 100%; }
+
+/* Rows open the hovered door wide; its siblings make room. */
+.mode-hall__row { display: flex; gap: 14px; height: 330px; margin-bottom: 14px; }
+.mode-hall__row--feature { height: 400px; }
+.mode-hall__row--compact { height: 280px; }
+
+.game-card { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; isolation: isolate; display: block; padding: 0; border: 1px solid #5f6d5466; border-radius: 18px; background: #1c2f29; color: var(--hall-ink)!important; font: inherit; text-align: left; text-decoration: none; cursor: pointer; transition: flex-grow 560ms var(--hall-ease), box-shadow 300ms ease, border-color 300ms ease; }
+.mode-hall__row:has(.is-active) .game-card { flex-grow: .78; }
+.mode-hall__row .game-card.is-active { flex-grow: 2.1; border-color: #e4b35499; box-shadow: 0 18px 36px #1c372330; }
+.game-card__shots { position: absolute; inset: 0; z-index: -2; }
+.game-card__shots img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; opacity: 0; transform: scale(1.02); transition: opacity 650ms ease, transform 6s linear; }
+.game-card__shots img.is-shown { opacity: 1; }
+.game-card.is-active .game-card__shots img.is-shown { transform: scale(1.09) translate(-1.5%, -1%); }
+.game-card::after { position: absolute; inset: 0; z-index: -1; content: ''; background: linear-gradient(180deg, #0a1a1f00 30%, #0a1d22b0 62%, #081a1ef2 100%); transition: background 400ms ease; }
+.game-card.is-active::after { background: linear-gradient(180deg, #0a1a1f00 22%, #0a1d22c4 55%, #081a1ef7 100%); }
+.game-card--management .game-card__shots img, .game-card--ecology .game-card__shots img, .game-card--softie .game-card__shots img { object-position: center; }
+.game-card.game-card--world-map { background: radial-gradient(circle at 72% 22%, #d4b66d40, transparent 24%), linear-gradient(145deg, #26463c, #111f24 70%); }
+.game-card__atlas { position: absolute; inset: 0; z-index: -2; overflow: hidden; color: #efd58c; }
+.game-card__atlas>svg { position: absolute; top: 15%; left: 50%; width: 45%; height: 45%; opacity: .76; filter: drop-shadow(0 12px 22px #06141099); transform: translateX(-28%) rotate(-8deg); transition: transform 6s linear; }
+.game-card__atlas>i { position: absolute; width: 9px; height: 9px; border: 1px solid #f1dfaa; border-radius: 50%; background: #9d3d31; box-shadow: 0 0 0 5px #f1dfaa1f; }
+.game-card__atlas>i:nth-of-type(1) { top: 25%; left: 24%; }
+.game-card__atlas>i:nth-of-type(2) { top: 39%; left: 68%; }
+.game-card__atlas>i:nth-of-type(3) { top: 17%; left: 78%; }
+.game-card--world-map.is-active .game-card__atlas>svg { transform: translateX(-28%) rotate(-2deg) scale(1.08); }
+
+/* 入世历练: the hero's forest scene is the door; gameplay floats in a window on hover. */
+.mode-hall__row--feature { position: relative; }
+.game-card__scene { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; transition: transform 6s linear; }
+.game-card--scene { background: #2c5745; }
+.game-card--scene::after { background: linear-gradient(90deg, #0d2a22e6 0%, #10302699 34%, #10302600 62%), linear-gradient(180deg, #0000 55%, #0b231cb3 100%); }
+.game-card--scene.is-active::after { background: linear-gradient(90deg, #0d2a22f0 0%, #103026b3 40%, #10302610 70%), linear-gradient(180deg, #0000 50%, #0b231cc4 100%); }
+.game-card--scene.is-active .game-card__scene { transform: scale(1.05); }
+.game-card--scene .game-card__body { right: auto; max-width: min(520px, 56%); }
+.game-card__window { position: absolute; top: 22px; right: 22px; width: min(36%, 400px); aspect-ratio: 16 / 10; overflow: hidden; border: 1px solid #f5efcf66; border-radius: 12px; background: #0b1c1e; box-shadow: 0 18px 40px #061410a0; opacity: 0; transform: translateY(10px) scale(.96); transition: opacity 420ms ease, transform 520ms var(--hall-ease); pointer-events: none; }
+.game-card__window img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; opacity: 0; transition: opacity 600ms ease; }
+.game-card__window img.is-shown { opacity: 1; }
+.game-card--scene.is-active .game-card__window { opacity: 1; transform: none; }
+.game-card--scene .game-card__dots { top: auto; bottom: 24px; right: auto; left: 22px; display: none; }
+.mode-hall__chapter { position: absolute; right: 22px; bottom: 22px; z-index: 2; display: grid; gap: 3px; min-width: 200px; padding: 12px 16px; border: 1px solid #f5efcf55; border-radius: 12px; background: #0e2620b8; backdrop-filter: blur(8px); color: #f5efcf!important; text-decoration: none; transition: border-color 220ms ease, background 220ms ease, transform 220ms ease; }
+.mode-hall__chapter small { color: #ebc77a; font-size: 10px; letter-spacing: .14em; }
+.mode-hall__chapter strong { color: #f5efcf; font-size: 18px; font-weight: 400; letter-spacing: .08em; }
+.mode-hall__chapter span { display: inline-flex; align-items: center; gap: 4px; color: #e9eddfbd; font-size: 11px; }
+.mode-hall__chapter:hover { border-color: var(--hall-gold); background: #0e2620e0; transform: translateY(-2px); }
+.game-card__number { position: absolute; top: 14px; left: 16px; padding: 3px 9px; border-radius: 999px; background: #0b1c1e99; backdrop-filter: blur(6px); font-size: 10px; letter-spacing: .14em; color: #f6edcfd0; }
+.game-card__dots { position: absolute; top: 18px; right: 18px; display: flex; gap: 5px; opacity: 0; transition: opacity 300ms ease; }
+.game-card.is-active .game-card__dots { opacity: 1; }
+.game-card__dots i { width: 6px; height: 6px; border-radius: 50%; background: #f5efcf66; transition: background 300ms ease, width 300ms ease; }
+.game-card__dots i.is-on { width: 16px; border-radius: 3px; background: var(--hall-gold); }
+
+.game-card__body { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: 8px; padding: 20px 22px 20px; }
+.game-card__body small { color: #ebc77a; font-size: 10px; letter-spacing: .14em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.game-card__body strong { font-weight: 400; font-size: clamp(21px, 2vw, 30px); letter-spacing: .08em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 12px #0008; }
+.game-card__more { display: grid; gap: 10px; max-width: 460px; max-height: 0; overflow: hidden; opacity: 0; transform: translateY(8px); transition: max-height 520ms var(--hall-ease), opacity 380ms ease, transform 420ms var(--hall-ease); }
+.game-card.is-active .game-card__more { max-height: 170px; opacity: 1; transform: none; transition-delay: 120ms; }
+.game-card__desc { font-size: 12.5px; line-height: 1.85; color: #eef1e4d9; }
+.game-card__points { display: flex; flex-wrap: wrap; gap: 6px; }
+.game-card__points em { padding: 2px 9px; border: 1px solid #f5efcf40; border-radius: 999px; background: #f5efcf14; font-size: 11px; font-style: normal; color: #f1ead0; }
+.game-card__body b { display: inline-flex; gap: 7px; align-items: center; color: var(--hall-gold); font-size: 11px; font-weight: 400; }
+.mode-hall__row--feature .game-card__body strong { font-size: clamp(26px, 2.6vw, 36px); }
+.mode-hall__row--compact .game-card__body { padding: 16px 18px; }
+.mode-hall__row--compact .game-card__body strong { font-size: clamp(19px, 1.7vw, 25px); }
+
+.mode-hall :where(button,a):focus-visible { outline: 3px solid #c4943f; outline-offset: 4px; }
+
+.mode-hall__desk { display: flex; gap: 40px; align-items: center; padding: 30px 0 18px; margin-top: 14px; border-top: 1px solid #88967966; }
+.mode-hall__desk>div { flex: 0 0 210px; }
+.mode-hall__desk h2 { margin: 9px 0; font-weight: 400; font-size: 24px; }
+.mode-hall__desk small { font-size: 10px; color: #65785f; }
+.mode-hall__desk nav { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px 28px; flex: 1; }
+.mode-hall__desk button, .mode-hall__desk nav>a { display: flex; gap: 11px; align-items: center; padding: 10px 0; border: 0; border-bottom: 1px solid #8391764d; background: transparent; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.mode-hall__desk button>span, .mode-hall__desk nav>a>span { display: grid; gap: 5px; flex: 1; }
+.mode-hall__desk nav>a { text-decoration: none; min-width: 0; }
+.mode-hall__desk strong { font-weight: 400; font-size: 13px; }
+.mode-hall__save-note { margin: 18px 0 0; color: #66765e; font-size: 10px; line-height: 1.8; }
+
+/* Without hover (touch) every card shows its introduction; there is nothing to expand. */
+@media (hover: none) {
+  .game-card__window { display: none; }
+  .game-card__more { max-height: none; opacity: 1; transform: none; }
+  .game-card__points { display: none; }
+  .game-card__desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}
+@media (max-width: 900px) {
+  .mode-hall__row, .mode-hall__row--feature, .mode-hall__row--compact { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; }
+  .game-card { height: 290px; }
+  .mode-hall__row--feature .game-card { height: 340px; }
+  .mode-hall__row--compact .game-card { height: 250px; }
+  .mode-hall__row>.game-card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .game-card__more { max-height: none; opacity: 1; transform: none; }
+  .game-card__points { display: none; }
+  .mode-hall__row--feature { grid-template-columns: 1fr; }
+  .game-card__window { display: none; }
+  .game-card--scene .game-card__body { max-width: none; right: 0; }
+  .mode-hall__chapter { position: static; grid-template-columns: auto 1fr; align-items: baseline; gap: 4px 14px; background: #1c3a30; }
+  .mode-hall__chapter span { grid-column: 1 / -1; }
+  .mode-hall__desk { align-items: flex-start; gap: 22px; }
+  .mode-hall__desk>div { flex-basis: 180px; }
+}
+@media (max-width: 600px) {
+  .mode-hall__heading { flex-direction: column; align-items: stretch; gap: 16px; padding-top: 0; }
+  .mode-hall__heading h1 { line-height: 1.5; }
+  .mode-hall__avatar { width: 52px; height: 53px; }
+  .mode-hall__player strong { font-size: 17px; }
+  .mode-hall__row, .mode-hall__row--feature, .mode-hall__row--compact { grid-template-columns: 1fr; gap: 12px; margin-bottom: 12px; }
+  .game-card, .mode-hall__row--feature .game-card, .mode-hall__row--compact .game-card { height: 230px; border-radius: 16px; }
+  .mode-hall__row--feature .game-card { height: 260px; }
+  .game-card__body, .mode-hall__row--compact .game-card__body { padding: 16px; gap: 6px; }
+  .mode-hall__desk { display: block; }
+  .mode-hall__desk nav { grid-template-columns: 1fr; margin-top: 18px; gap: 9px; }
+  .mode-hall__desk button, .mode-hall__desk nav>a { min-height: 58px; }
+}
+@media (prefers-reduced-motion: reduce) { .game-card, .game-card__shots img, .game-card__more, .game-card__atlas>svg { transition: none; } .game-card.is-active .game-card__shots img.is-shown { transform: scale(1.02); } }
+
+.mode-hall__chapter--vote { gap: 8px; }
+.mode-hall__vote { display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px solid #f5efcf33; font-size: 11px; color: #e9eddfbd; }
+.mode-hall__vote em { font-style: normal; margin-right: auto; }
+.mode-hall__vote-total { color: #e9eddf88; font-size: 9px; white-space: nowrap; }
+.mode-hall__vote button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 42px; height: 24px; padding: 0 6px; border: 1px solid #f5efcf55; border-radius: 8px; background: transparent; color: #f5efcf; cursor: pointer; font: inherit; font-variant-numeric: tabular-nums; }
+.mode-hall__vote button:disabled { cursor: wait; opacity: .7; }
+.mode-hall__vote button[aria-pressed="true"] { background: #ebc77a; border-color: #ebc77a; color: #0e2620; }
+.mode-hall__vote-message { color: #f1c98b; }

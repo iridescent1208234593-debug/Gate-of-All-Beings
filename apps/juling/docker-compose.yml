@@ -1,0 +1,16 @@
+services:
+  wuxing-game:
+    build:
+      context: ../..
+      dockerfile: apps/juling/Dockerfile
+    container_name: wuxing-game
+    restart: always
+    ports:
+      - "127.0.0.1:8091:8080"
+    volumes:
+      - ${IRIDESCENTLY_STORAGE_ROOT:?Set an external, verified container storage root}:/storage
+    environment:
+      - PORT=8080
+      - HOST=0.0.0.0
+      - IRIDESCENTLY_STORAGE_ROOT=/storage
+      - IRIDESCENTLY_ENVIRONMENT=production
