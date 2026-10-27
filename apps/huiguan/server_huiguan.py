@@ -717,17 +717,34 @@ def resolve_identity(kind, uid):
         }
 
 
+def security_email(kind, uid):
+    """账号的安全邮箱（用于收验证码等）：站内绑定优先，其次 USSO 自带。"""
+    conn = db()
+    row = conn.execute(
+        "SELECT email FROM account_emails WHERE kind=? AND uid=? ORDER BY verified_at DESC LIMIT 1",
+        (str(kind), str(uid)),
+    ).fetchone()
+    if not row and str(kind) == "usso":
+        row = conn.execute("SELECT email FROM users WHERE user_id=?", (str(uid),)).fetchone()
+    conn.close()
+    return (row["email"] if row and row["email"] else "")
+
 def find_usso_password_login(identifier):
     """按昵称或邮箱查找已设置登录密码的 USSO 账号；唯一匹配才返回。"""
     key = (identifier or "").strip()
     if not key:
         return None
     conn = db()
+    # 可用标识：昵称、USSO 自带邮箱、或站内重新绑定的已验证邮箱
     rows = conn.execute(
-        "SELECT u.user_id, u.nickname, u.email, p.pass_hash "
-        "FROM users u JOIN usso_passwords p ON p.user_id = u.user_id "
-        "WHERE lower(u.nickname)=lower(?) OR lower(u.email)=lower(?)",
-        (key, key),
+        "SELECT DISTINCT u.user_id, u.nickname, u.email, p.pass_hash "
+        "FROM users u "
+        "JOIN usso_passwords p ON p.user_id = u.user_id "
+        "LEFT JOIN account_emails e ON e.kind='usso' AND e.uid=CAST(u.user_id AS TEXT) "
+        "WHERE lower(u.nickname)=lower(?) "
+        "   OR lower(u.email)=lower(?) "
+        "   OR lower(e.email_norm)=lower(?)",
+        (key, key, key),
     ).fetchall()
     conn.close()
     return rows[0] if len(rows) == 1 else None
@@ -2090,6 +2107,23 @@ class Handler(BaseStaticHandler):
         password = body.get("password") or ""
         ip = self._client_ip()
 
+        # 邮箱形式标识：先尝试 USSO 密码登录（早于用户名格式校验）
+        if "@" in username:
+            usso_email = find_usso_password_login(username)
+            if usso_email and verify_password(password, usso_email["pass_hash"]):
+                with DB_LOCK:
+                    conn = db()
+                    conn.execute("UPDATE users SET last_login=? WHERE user_id=?", (now_iso(), usso_email["user_id"]))
+                    conn.commit(); conn.close()
+                session_id = create_session("usso", usso_email["user_id"], request_root(self))
+                ident = resolve_identity("usso", usso_email["user_id"])
+                self._json(200, {"ok": True, "registered": False, "user": ident},
+                           cookie=[self._session_cookie(session_id),
+                                   self._sso_cookie(usso_email["user_id"], "usso", ident.get("name") or "")])
+                return
+            if not get_local_user_by_name(username):
+                self._json(401, {"error": "用户名或密码错误"}); return
+
         u = get_local_user_by_name(username) if username else None
         if u:
             # —— 登录 ——
@@ -2113,6 +2147,23 @@ class Handler(BaseStaticHandler):
             ident = resolve_identity("local", u["uid"])
             self._json(200, {"ok": True, "registered": False, "user": ident},
                        cookie=[self._session_cookie(session_id), self._sso_cookie(u["uid"], "local", ident.get("name") or username)])
+            return
+
+        # —— USSO 账号的密码登录（避免把它当成新用户名去注册）——
+        usso = find_usso_password_login(username) if username else None
+        if usso and verify_password(password, usso["pass_hash"]):
+            rkey = f"login:{username.lower()}|{ip}"
+            if rate_blocked(rkey, 8, 600):
+                self._json(429, {"error": "尝试次数过多，请 10 分钟后再试"}); return
+            with DB_LOCK:
+                conn = db()
+                conn.execute("UPDATE users SET last_login=? WHERE user_id=?", (now_iso(), usso["user_id"]))
+                conn.commit(); conn.close()
+            session_id = create_session("usso", usso["user_id"], request_root(self))
+            ident = resolve_identity("usso", usso["user_id"])
+            self._json(200, {"ok": True, "registered": False, "user": ident},
+                       cookie=[self._session_cookie(session_id),
+                               self._sso_cookie(usso["user_id"], "usso", ident.get("name") or "")])
             return
 
         # —— 注册（用户名不存在） ——

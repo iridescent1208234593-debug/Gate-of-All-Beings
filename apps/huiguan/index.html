@@ -868,8 +868,11 @@
     <input class="auth-input" id="authUsername" maxlength="16" autocomplete="username" placeholder="2-16 位中英文 / 数字 / 下划线">
     <label class="auth-label" for="authPassword">密码</label>
     <input class="auth-input" id="authPassword" type="password" maxlength="128" autocomplete="current-password" placeholder="登录使用已有密码；新注册需至少 12 位">
-    <button type="button" class="auth-submit" id="authSubmit" onclick="submitAuth()">登录 / 注册</button>
-    <div class="auth-hint">用户名不存在时将自动注册并登录。请使用注册用户名，不是昵称；密码区分大小写。新注册用户名不得使用官方世界观角色名。</div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button type="button" class="auth-submit" id="authSubmit" onclick="submitAuth()" style="flex:2">登录</button>
+      <button type="button" class="auth-submit" id="authRegister" onclick="submitRegister()" style="flex:1;font-size:13px;background:transparent;border:1px solid rgba(242,239,230,.55);color:#f2efe6">注册账号</button>
+    </div>
+    <div class="auth-hint">登录仅校验已有账号，不会自动注册。需要新账号请点「注册账号」。密码区分大小写；新注册用户名不得使用官方世界观角色名。</div>
     <a class="auth-usso" href="/security.html?mode=recover">找回账号 / 密码（已验证邮箱或找回问题）</a>
     <details class="auth-legacy"><summary>其他登录方式</summary><div class="auth-hint">USSO 外部登录已暂停；既有账户资料与角色数据保留。请使用会馆站内账号登录。</div></details>
   </div>
@@ -1405,7 +1408,7 @@ function maybeGroupReminder() {
     m = document.createElement('div');
     m.id = 'groupModal';
     m.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(20,26,22,.6);display:flex;align-items:center;justify-content:center;padding:20px;';
-    m.innerHTML = `<div style="background:var(--panel,#fbf8f2);border:1px solid var(--border,#d4cfbe);border-radius:12px;max-width:440px;width:100%;padding:22px;">
+    m.innerHTML = `<div style="background:#fbf8f2;border:1px solid #d4cfbe;border-radius:12px;max-width:440px;width:100%;padding:22px;color:#3a4a3e;box-shadow:0 24px 60px rgba(20,30,26,.35);">
       <strong style="font-size:16px;letter-spacing:1px;">加入交流群 · 领取编辑权限</strong>
       <p style="font-size:13px;color:var(--dim,#7a8a7e);line-height:1.8;margin:12px 0;">你已拥有<strong>长老/编辑</strong>权限，可修改、删除官方设定。为防止权限被滥用、便于协作与追责，请先加入交流群并填写你的群昵称：</p>
       <div style="font-size:13px;margin-bottom:10px;">QQ群：<strong>878029597</strong>（微信群二维码见页脚/画廊）</div>
@@ -1440,11 +1443,11 @@ function maybeFanGalleryReminder() {
     m.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(20,26,22,.6);display:flex;align-items:center;justify-content:center;padding:20px;';
     const count = d.character_count || 0;
     m.innerHTML = `<div style="background:var(--panel,#fbf8f2);border:1px solid var(--border,#d4cfbe);border-radius:12px;max-width:440px;width:100%;padding:22px;">
-      <strong style="font-size:16px;letter-spacing:1px;">你有 ${count} 个已登记角色</strong>
-      <p style="font-size:13px;color:var(--dim,#7a8a7e);line-height:1.8;margin:12px 0;">你的人设已收录进会馆名册，要不要把它们公开到<strong>同人角色画廊</strong>，让更多同好看到？</p>
+      <strong style="display:block;font-size:16px;letter-spacing:1px;color:#3a4a3e;">你有 ${count} 个已登记角色</strong>
+      <p style="font-size:13px;color:#5a6b5f;line-height:1.8;margin:12px 0;">你的人设已收录进会馆名册，要不要把它们公开到<strong style="color:#3a4a3e;">同人角色画廊</strong>，让更多同好看到？</p>
       <div style="display:flex;gap:10px;">
-        <button type="button" id="fanSuggestGo" style="flex:1;padding:10px;border:none;border-radius:6px;background:var(--gold,#d4a840);color:#fff;font-size:14px;font-family:inherit;cursor:pointer;">去同人画廊</button>
-        <button type="button" id="fanSuggestClose" style="flex:1;padding:10px;border:1px solid var(--border,#d4cfbe);border-radius:6px;background:transparent;color:var(--dim,#7a8a7e);font-size:14px;font-family:inherit;cursor:pointer;">暂时不用</button>
+        <button type="button" id="fanSuggestGo" style="flex:1;padding:10px;border:none;border-radius:6px;background:#c99a2e;color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">去同人画廊</button>
+        <button type="button" id="fanSuggestClose" style="flex:1;padding:10px;border:1px solid #d4cfbe;border-radius:6px;background:transparent;color:#5a6b5f;font-size:14px;font-family:inherit;cursor:pointer;">暂时不用</button>
       </div>
     </div>`;
     document.body.appendChild(m);
@@ -1562,6 +1565,34 @@ function closeAuthModal() {
   document.getElementById('authMask').hidden = true;
   showGuestReminder();
 }
+async function submitRegister() {
+  const username = document.getElementById('authUsername').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const msg = document.getElementById('authMsg');
+  const btn = document.getElementById('authRegister');
+  msg.className = 'auth-msg';
+  if (!username || !password) { msg.textContent = '请填写用户名和密码'; return; }
+  if (password.length < 12) { msg.textContent = '密码至少 12 位'; return; }
+  if (!confirm('确定用「' + username + '」注册账号？\n注册后请到账户页绑定邮箱，以便找回密码。')) return;
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      hideGuestReminder();
+      msg.className = 'auth-msg ok';
+      msg.textContent = '注册成功，正在进入…';
+      document.getElementById('authPassword').value = '';
+      setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 400);
+    } else {
+      msg.textContent = d.error || '注册失败';
+    }
+  } catch (e) { msg.textContent = '网络错误，请重试'; }
+  btn.disabled = false;
+}
 async function submitAuth() {
   const username = document.getElementById('authUsername').value.trim();
   const password = document.getElementById('authPassword').value;
@@ -1571,7 +1602,7 @@ async function submitAuth() {
   if (!username || !password) { msg.textContent = '请填写用户名和密码'; return; }
   btn.disabled = true;
   try {
-    const r = await fetch('/api/auth', {
+    const r = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
@@ -1580,7 +1611,7 @@ async function submitAuth() {
     if (d.ok) {
       hideGuestReminder();
       msg.className = 'auth-msg ok';
-      msg.textContent = d.registered ? '已自动注册并登录' : '登录成功';
+      msg.textContent = '登录成功';
       document.getElementById('authPassword').value = '';
       // Re-validated at use: exact approved host on this page's own root (packages/site-domains/index.js).
       const next = window.__AUTH_NEXT && window.safeAuthNext(window.__AUTH_NEXT);
@@ -1591,7 +1622,7 @@ async function submitAuth() {
       }
       setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 300);
     } else {
-      msg.textContent = d.error || '操作失败，请重试';
+      msg.textContent = (d.error || '操作失败，请重试') + (r.status === 401 ? '（如需新账号，请点「注册账号」）' : '');
     }
   } catch(e) {
     msg.textContent = '网络错误，请重试';

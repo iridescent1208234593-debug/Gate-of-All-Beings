@@ -56,14 +56,14 @@ def handle_recovery(handler, action, api):
             try:
                 conn.execute("BEGIN IMMEDIATE")
                 conn.execute("DELETE FROM account_email_attempts WHERE at<?", (now - 3600,))
-                too_soon = any(
-                    conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=? AND at>?", (key, now - 60)).fetchone()[0]
-                    for key in buckets
-                )
-                hourly = any(
-                    conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=?", (key,)).fetchone()[0] >= 5
-                    for key in buckets
-                )
+                # 邮箱维度从严：60 秒冷却 + 每小时 5 次
+                email_too_soon = conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=? AND at>?", (buckets[0], now - 60)).fetchone()[0] > 0
+                email_hourly = conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=?", (buckets[0],)).fetchone()[0] >= 5
+                # IP 维度放宽：2 秒防抖 + 每小时 30 次
+                ip_too_soon = conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=? AND at>?", (buckets[1], now - 2)).fetchone()[0] > 0
+                ip_hourly = conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=?", (buckets[1],)).fetchone()[0] >= 30
+                too_soon = email_too_soon or ip_too_soon
+                hourly = email_hourly or ip_hourly
                 if too_soon or hourly:
                     conn.rollback()
                     return reply(429, {"error": "操作过于频繁，请稍后再试"})

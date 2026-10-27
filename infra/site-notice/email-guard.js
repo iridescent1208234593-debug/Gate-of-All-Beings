@@ -18,6 +18,8 @@
 
   var POLL_MS = 20000;      // 每 20 秒查一次验证状态
   var COOLDOWN = 60;        // 与服务端一致：60 秒
+  var SNOOZE_MS = 5 * 60000; // 关闭后 5 分钟再弹
+  var SNOOZE_KEY = "lxh_email_guard_snooze_until";
 
   var CSS = [
     "#__lh_guard{position:fixed;inset:0;z-index:2147483100;display:none;align-items:center;justify-content:center;",
@@ -44,6 +46,10 @@
     "#__lh_guard .lg-msg.err{color:#b3543f}",
     "#__lh_guard .lg-msg.ok{color:#5a9e8f}",
     "#__lh_guard .lg-tip{margin-top:12px;font-size:11px;line-height:1.7;color:#7a8a7e;border-top:1px solid #e8e3d6;padding-top:10px}",
+    "#__lh_guard .lg-close{position:absolute;top:10px;right:10px;width:30px;height:30px;display:grid;place-items:center;",
+    "border:1px solid #d4cfbe;border-radius:50%;background:#fbf8f2;color:#5a6b5f;cursor:pointer;font:15px/1 system-ui;padding:0}",
+    "#__lh_guard .lg-close:hover{background:#5a9e8f;border-color:#5a9e8f;color:#fff}",
+    "#__lh_guard .lg-card{position:relative}",
     "@media(max-width:480px){#__lh_guard .lg-card{padding:16px 15px 13px}#__lh_guard h2{font-size:16.5px}}"
   ].join("");
 
@@ -55,7 +61,7 @@
   }
 
   var guard, card, input, sendBtn, checkBtn, msg, mailHint;
-  var cooldownLeft = 0, cooldownTimer = null, pollTimer = null;
+  var cooldownLeft = 0, cooldownTimer = null, pollTimer = null, snoozeTimer = null;
 
   function api(path, body) {
     var opt = body === undefined ? { credentials: "same-origin" }
@@ -93,9 +99,17 @@
   function show() {
     if (!document.body) return;
     if (guard) { guard.classList.add("on"); return; }
+    if (snoozeLeft() > 0) { scheduleSnooze(snoozeLeft()); return; }
 
     guard = el("div"); guard.id = "__lh_guard";
     card = el("div", "lg-card");
+
+    var closeBtn = el("button", "lg-close", "✕");
+    closeBtn.type = "button";
+    closeBtn.setAttribute("aria-label", "关闭（5 分钟后再提醒）");
+    closeBtn.title = "关闭，5 分钟后再提醒";
+    closeBtn.onclick = function () { snooze(); };
+    card.appendChild(closeBtn);
 
     card.appendChild(el("h2", null, "请先绑定邮箱"));
     card.appendChild(el("div", "lg-sub", "西木会馆 · 账号安全"));
@@ -162,11 +176,32 @@
     clearInterval(cooldownTimer); cooldownTimer = null;
   }
 
+  // ---------- 关闭后 5 分钟再提醒 ----------
+  function snoozeLeft() {
+    try {
+      var until = parseInt(localStorage.getItem(SNOOZE_KEY) || "0", 10) || 0;
+      return Math.max(0, until - Date.now());
+    } catch (e) { return 0; }
+  }
+
+  function scheduleSnooze(ms) {
+    clearTimeout(snoozeTimer);
+    snoozeTimer = setTimeout(function () { refresh(false); show(); }, Math.max(1000, ms));
+  }
+
+  function snooze() {
+    try { localStorage.setItem(SNOOZE_KEY, String(Date.now() + SNOOZE_MS)); } catch (e) {}
+    hide();
+    scheduleSnooze(SNOOZE_MS);
+  }
+
   function refresh(manual) {
     api("/api/account/email").then(function (res) {
       if (res.status !== 200 || !res.data) { if (manual) say("检测失败，请稍后再试", "err"); return; }
       var d = res.data;
       if (d.verified) {
+        try { localStorage.removeItem(SNOOZE_KEY); } catch (e) {}
+        clearTimeout(snoozeTimer); snoozeTimer = null;
         say("邮箱已验证，谢谢配合", "ok");
         hide();
         setTimeout(function () { if (guard && guard.parentNode) guard.parentNode.removeChild(guard); }, 400);
@@ -185,6 +220,7 @@
         if (r2.status === 401) return;                 // 会话失效
         if (r2.status !== 200) return;
         if (!r2.data || !r2.data.verified) {
+          if (snoozeLeft() > 0) { scheduleSnooze(snoozeLeft()); return; }
           if (!document.getElementById("__lh_guard_css")) {
             var st = el("style"); st.id = "__lh_guard_css"; st.textContent = CSS;
             document.head.appendChild(st);

@@ -129,9 +129,13 @@ def handle_email(handler, action, api):
             conn = api["db"]()
             conn.execute("BEGIN IMMEDIATE")
             conn.execute("DELETE FROM account_email_attempts WHERE at<?", (now - 3600,))
-            too_soon = any(conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=? AND at>?", (bucket, now - 60)).fetchone()[0] for bucket in buckets)
+            # 用户维度从严：60 秒冷却 + 每小时 5 次
+            user_too_soon = conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=? AND at>?", (buckets[0], now - 60)).fetchone()[0] > 0
             user_hourly = conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=?", (buckets[0],)).fetchone()[0] >= 5
-            ip_hourly = conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=?", (buckets[1],)).fetchone()[0] >= 5
+            # IP 维度放宽：只做 2 秒防抖 + 每小时 30 次，避免同出口用户互相阻断
+            ip_too_soon = conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=? AND at>?", (buckets[1], now - 2)).fetchone()[0] > 0
+            ip_hourly = conn.execute("SELECT count(*) FROM account_email_attempts WHERE bucket=?", (buckets[1],)).fetchone()[0] >= 30
+            too_soon = user_too_soon or ip_too_soon
             owner = conn.execute("SELECT kind,uid FROM account_emails WHERE email_norm=?", (normalized,)).fetchone()
             if too_soon or user_hourly or ip_hourly:
                 conn.rollback(); conn.close()
