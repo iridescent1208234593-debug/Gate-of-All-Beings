@@ -58,7 +58,13 @@ def inventory(sources, conn):
                     errors.append({**where, "record_index": index, "reason": error.code})
             combined[key] = accepted
     payload = {key: [record for _, record in records] for key, records in combined.items()}
+    # Legal (codes are unique per owner), but the public show page then resolves to the first owner.
+    code_owners = {}
+    for key, records in payload.items():
+        for record in records: code_owners.setdefault(record["code"], set()).add(key)
+    shared_codes = sum(len(keys) > 1 for keys in code_owners.values())
     report = {"valid": not errors, "sources": sources_meta, "owners": len(combined),
+              "codes_shared_across_owners": shared_codes,
               "records": sum(len(x) for x in combined.values()), "content_hash": digest(payload), "errors": errors}
     return combined, payload, report
 

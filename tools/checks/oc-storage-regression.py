@@ -14,6 +14,7 @@ MODULES=[
  'services/platform/tests/test_oc_migration_cli.py',
  'services/platform/tests/test_oc_load.py',
  'apps/huiguan/tests/test_oc_sql_api.py',
+ 'apps/huiguan/tests/test_characters_concurrent_writes.py',
  'apps/huiguan/tests/test_fan_owner_edit.py',
  'apps/huiguan/tests/test_original_image_access.py',
  'apps/huiguan/tests/test_edit_role_column.py',

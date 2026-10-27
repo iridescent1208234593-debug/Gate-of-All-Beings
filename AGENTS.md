@@ -19,9 +19,10 @@
   deleted or rewritten before review.
 - Hong Kong production does not run trunk yet: it runs the old layout plus hotfixes. A fix that
   only exists in production is listed in `docs/changelog/hk-drift-*.md` until it is ported.
-- `characters.json` (all role sheets) is written only through `update_data()` by the one Huiguan
-  service process; never load, change and save it in separate steps. See
-  `docs/storage-runtime-writers.md`.
+- Role sheets (OC) are read and written only through `services/platform/oc_store.py`, inside one
+  `Store.transaction()`; never load, change and save `characters.json` (or the OC tables) in
+  separate steps. Binaries older than that module ignore its fence and must be stopped before any
+  storage cutover. See `docs/storage-runtime-writers.md` and `docs/storage/oc-sql-runbook.md`.
 
 ## File deletion and cleanup policy
 

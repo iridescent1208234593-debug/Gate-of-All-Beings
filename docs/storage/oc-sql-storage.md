@@ -9,7 +9,8 @@
 - `apps/huiguan/server_huiguan.py` 原来把所有账号的人设放在一份 JSON 字典：`{owner_key: [{code, data, html或html_ref, …}]}`。`local:<uid>` 明确属于本地账号，裸 UID 明确属于 USSO；两个 kind 的同号 UID 不是同一 owner。
 - OC 编号 `code` 只在 owner 内唯一，原接口允许不同 owner 使用相同编号。不能把 code 直接改成全局唯一约束。新表另设稳定内部 id；现存记录带 id 时保留它，否则确定性生成导入 id。原 code、内层 data.code 和所有自定义字段均保留。
 - 原 `load_data()` 和 `save_data()` 分别加锁，线程间可以各自读到旧文件，最后写回者覆盖其他人的修改。整份 JSON 的读写锁不能提供同一 OC 的版本冲突检查，也不是数据库事务。
-- 仓库另有未合并的 `fix/characters-json-lost-update@cd8e9f3`，通过一个 `update_data()` 串行化整份文件，修复进程内 lost update。本次只读审阅该分支，没有合并、删除或改写；SQL 改造覆盖这些写路径，同时保留默认 JSON 兼容适配器。
+- PR #10（`update_data()`，进程内串行化整份文件）已合入 master；本分支变基其上，用 `oc_store` 的围栏事务取代 `update_data()`，并保留其并发测试 `apps/huiguan/tests/test_characters_concurrent_writes.py`，在默认 JSON 后端上运行。
+- 公开展示页 `/api/get-character?code=` 与原 JSON 扫描一致：多个 owner 用同一编号时取第一个（JSON 按 owner 桶再按记录顺序；SQL 按 `oc_owners.position` 再按 `oc_records.position`），不返回 409。dry-run 报告 `codes_shared_across_owners` 只给出这类编号的数量。
 - 现有会馆 `users.db` 已保存账号、会话、公开角色投影 fan_characters、海报、积分、云存档。源代码启动时非 Windows 使用 WAL，Windows 保留原 DELETE journal 兼容策略。普通 db() 的 NORMAL 同步设置保留；OC 数据层连接单独要求 FULL、foreign_keys=ON、busy_timeout=10000ms、显式事务、及时关闭。
 - `docs/database.md` 中仍有旧的源码内路径；当前路径以 `storage_paths.py`、就绪标记和 `docs/storage-runtime-writers.md` 为准：`<storage-root>/<environment>/data/huiguan/{users.db,characters.json}`。图片和展示文档在独立 managed assets 中，只迁移 JSON 引用不会迁移图片字节。
 - `docs/operations.md` 明确香港仍是旧布局及线上热修复，本机是新 canonical 布局。现有分支中的恢复记录把香港数据指向 `/srv/iridescently/data/portal/huiguan/`，这是待负责人核对的既有证据，未登录香港确认。不能把本机路径或旧文档路径直接用于生产命令。

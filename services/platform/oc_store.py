@@ -169,7 +169,8 @@ def require_safe_wal(conn):
     version = sqlite3.sqlite_version_info
     patched = (version >= (3, 51, 3) or (3, 50, 7) <= version < (3, 51, 0)
                or (3, 44, 6) <= version < (3, 45, 0))
-    if (os.environ.get("IRIDESCENTLY_ENVIRONMENT") in {"staging", "production"}
+    # Unset counts as deployed: an old-layout host may never export IRIDESCENTLY_ENVIRONMENT.
+    if (os.environ.get("IRIDESCENTLY_ENVIRONMENT", "").strip() not in {"development", "test"}
             and not patched and conn.execute("PRAGMA journal_mode").fetchone()[0].lower() == "wal"):
         raise OCError(503, "oc_sqlite_wal_patch_required")
 
@@ -234,8 +235,12 @@ class Store:
     def public_records(self, code):
         with self.transaction() as session:
             if self.backend == "sqlite":
-                return [session.record(row) for row in session.conn.execute("SELECT * FROM oc_records WHERE code=?", (code,))
-                        if (json.loads(row["record_json"]).get("html") or json.loads(row["record_json"]).get("html_ref"))]
+                # Same order as the legacy JSON scan (owner bucket, then record) so a code shared by
+                # several owners keeps resolving to the record it resolved to before cutover.
+                rows = session.conn.execute("""SELECT r.* FROM oc_records r JOIN oc_owners o
+                    ON o.owner_kind=r.owner_kind AND o.owner_uid=r.owner_uid
+                    WHERE r.code=? ORDER BY o.position, o.owner_kind, o.owner_uid, r.position, r.id""", (code,))
+                return [record for record in map(session.record, rows) if record.get("html") or record.get("html_ref")]
             return [record for records in session.data.values() for record in records
                     if record.get("code") == code and (record.get("html") or record.get("html_ref"))]
 

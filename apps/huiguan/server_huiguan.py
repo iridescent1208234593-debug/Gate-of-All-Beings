@@ -2321,10 +2321,8 @@ class Handler(BaseStaticHandler):
         if not code:
             self._json(400, {"error": "缺少 code 参数"})
             return
-        matches = character_store().public_records(code)
-        data = {"public": matches}
-        if len(matches) > 1:
-            self._json(409, {"error": "ambiguous_public_oc_code"}); return
+        # Codes are unique per owner only; like the legacy scan, the first public record wins.
+        data = {"public": character_store().public_records(code)}
         for uid, chars in data.items():
             for c in chars:
                 if c.get("code") == code:

@@ -4,6 +4,7 @@ characters.json holds every account's role sheets in one document, so each write
 read whole -> change one account -> write whole. Two requests that read before either
 writes would each write back a copy without the other's change. The read is slowed
 here to stand in for a large production file; the result must still contain every save.
+Runs against the default JSON backend of oc_store, whose fenced transaction replaced update_data().
 """
 import json
 import os
@@ -28,6 +29,7 @@ os.environ["HX_SSO_SECRET"] = "test-only-concurrent-secret"
 sys.path.insert(0, str(ROOT / "apps" / "huiguan"))
 import scraping_observer  # noqa: E402
 import server_huiguan as huiguan  # noqa: E402
+import oc_store  # noqa: E402
 
 USERS = 4
 SHEETS_PER_USER = 6
@@ -94,15 +96,14 @@ class ConcurrentCharacterWritesTest(unittest.TestCase):
         TEMP.cleanup()
 
     def setUp(self):
-        original = huiguan._read_data_file
+        original = oc_store.JsonSession.__init__
 
-        def slow_read():
-            data = original()
+        def slow_read(session, data, conn):
+            original(session, data, conn)
             time.sleep(0.02)
-            return data
 
-        huiguan._read_data_file = slow_read
-        self.addCleanup(setattr, huiguan, "_read_data_file", original)
+        oc_store.JsonSession.__init__ = slow_read
+        self.addCleanup(setattr, oc_store.JsonSession, "__init__", original)
 
     def saved_codes(self, client):
         status, body = client.call("/api/get-characters")
@@ -133,11 +134,12 @@ class ConcurrentCharacterWritesTest(unittest.TestCase):
         self.assertEqual(self.saved_codes(first), ["R-0", "R-1", "R-2"])
         self.assertTrue({f"S-{n}" for n in range(7)} <= set(self.saved_codes(second)))
 
-    def test_every_write_goes_through_update_data(self):
-        # A read-modify-write that bypasses update_data reintroduces the lost update.
+    def test_every_write_goes_through_oc_store(self):
+        # A read-modify-write outside oc_store's fenced transaction reintroduces the lost update.
         source = (ROOT / "apps" / "huiguan" / "server_huiguan.py").read_text(encoding="utf-8")
-        callers = [line.strip() for line in source.splitlines() if "save_data(" in line and "def " not in line]
-        self.assertEqual(callers, [], "write characters.json only through update_data()")
+        callers = [line.strip() for line in source.splitlines()
+                   if ("save_data(" in line or "open(DATA_FILE" in line or "atomic_json(" in line) and "def " not in line]
+        self.assertEqual(callers, [], "write characters.json only through oc_store transactions")
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ import argparse
 from contextlib import closing
 import json
 import hashlib
+import os
 from pathlib import Path
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "services" / "platform"))
@@ -21,6 +22,9 @@ def run(args):
     database = directory / "users.db"
     sources = args.source or [directory / "characters.json"]
     write = args.command in {"freeze", "activate-sql", "activate-json", "resume-json", "export"} or (args.command == "import" and args.apply)
+    if write and not os.environ.get("IRIDESCENTLY_ENVIRONMENT", "").strip():
+        # environment() defaults to development, which would skip the production guard below.
+        raise OCError(400, "explicit_environment_required")
     if write and not args.confirm_stopped:
         raise OCError(400, "maintenance_confirmation_required")
     if write and environment() == "production" and not args.allow_production:

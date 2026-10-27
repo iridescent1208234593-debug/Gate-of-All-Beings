@@ -39,7 +39,9 @@ python tools/runtime/oc-storage.py import --dry-run
 
 确实存在多份互不重叠的活跃来源时，重复 `--source <绝对文件路径>`。工具不扫描任意磁盘、不自动导入备份。重复 owner 桶、重复 owner 内 code、重复原始全局 id、无效 JSON/嵌套数据、重复 JSON 键、非法/无对应账户 owner 都会报告并阻断整次导入，不猜归属。报告只含计数、哈希、来源序号与错误位置，不打印人设内容、姓名或 owner UID。
 
-确认报告 valid=true，保存源文件字节哈希、规范化内容哈希与记录数。人工处理异常前保留原始文件。跨 owner 重复 code 是原接口允许的情况，不自动合并。
+确认报告 valid=true，保存源文件字节哈希、规范化内容哈希与记录数。人工处理异常前保留原始文件。跨 owner 重复 code 是原接口允许的情况，不自动合并；报告的 `codes_shared_across_owners` 给出数量，这些编号的公开展示页继续指向第一个 owner。
+
+所有写命令都要求显式设置 `IRIDESCENTLY_ENVIRONMENT`（未设置时拒绝执行，避免默认 development 绕过生产保护）。服务在 SQL 后端下，只有显式 development/test 才跳过 WAL-reset 引擎门槛，未设置按已部署环境处理。
 
 ## 冻结和正式导入
 

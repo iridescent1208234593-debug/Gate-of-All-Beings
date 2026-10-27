@@ -118,6 +118,22 @@ class API(unittest.TestCase):
         with urllib.request.urlopen(self.base+'/api/get-character?code=gallery-2') as response:
             self.assertIn('新故事',response.read().decode())
 
+    def test_code_shared_by_two_owners_still_serves_a_public_page(self):
+        for client, story in ((self.a, '甲的故事'), (self.b, '乙的故事')):
+            body = sheet('shared-public', '同号角色', story); body.update(version=0)
+            self.assertEqual(client.call('/api/save-character', body)[0], 200)
+        pages = []
+        for _ in range(2):
+            with urllib.request.urlopen(self.base + '/api/get-character?code=shared-public') as response:
+                self.assertEqual(response.status, 200); pages.append(response.read().decode())
+        # The owner that registered first wins, as with the legacy JSON scan, and it is stable.
+        self.assertEqual(pages[0], pages[1])
+        with closing(open_database(app.USER_DB)) as db:
+            first = db.execute("""SELECT o.owner_uid FROM oc_owners o JOIN oc_records r USING(owner_kind, owner_uid)
+                WHERE r.code='shared-public' ORDER BY o.position LIMIT 1""").fetchone()[0]
+            owner_a = str(db.execute("SELECT uid FROM local_users WHERE username='oc_owner'").fetchone()[0])
+        self.assertIn('甲的故事' if first == owner_a else '乙的故事', pages[0])
+
     def test_poster_and_oc_colors_are_one_transaction(self):
         from PIL import Image
         output=BytesIO();Image.new('RGB',(2,2),'green').save(output,format='PNG')

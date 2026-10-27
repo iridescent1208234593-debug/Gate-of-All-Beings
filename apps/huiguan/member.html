@@ -144,7 +144,7 @@ function render(){
       const schemes=u.schemes||[], posters=u.posters||[];
       const schemeHtml=schemes.length?schemes.map(c=>`<span class="scheme-chip"><span class="scheme-dot" style="background:${escAttr(c.primary_color)}"></span><span class="scheme-dot" style="background:${escAttr(c.accent_color)}"></span>${esc(c.primary_name||'主色')}×${esc(c.accent_name||'辅色')} <span class="dim">${esc((c.name||'').slice(0,10))}</span> <span class="dim">${esc((c.created_at||'').slice(0,10))}</span></span>`).join(''):'<span class="dim">暂无自定义配色</span>';
       const posterHtml=posters.length?posters.map(p=>`<span class="poster-chip">${p.img_ref?`<img loading="lazy" decoding="async" src="${escAttr(p.img_ref)}" alt="">`:''}<span class="p-info"><span class="p-title">${esc(p.title)}</span><span class="p-sub">${p.char_name?'关联：'+esc(p.char_name):'未关联人设'} · ${p.is_public?'已共享画廊':'私有'} · ${esc((p.updated_at||'').slice(0,10))}</span></span><button class="del-sheet" data-id="${p.id}" data-title="${escAttr(p.title)}" onclick="delPoster(this.dataset.id,this.dataset.title)" title="删除该海报">✕</button></span>`).join(''):'<span class="dim">暂无配色海报</span>';
-      const sheetRow=(isOpen&&myScope==='all')?`<tr class="sheet-row"><td colspan="9">${sheets.length?sheets.map(s=>`<span class="sheet-chip">◈ <a href="/show.html?code=${encodeURIComponent(s.code)}" target="_blank" style="color:inherit;text-decoration:none">${esc(s.name)}</a><button class="del-sheet" data-key="${escAttr(key)}" data-code="${escAttr(s.code)}" data-name="${escAttr(s.name)}" onclick="delSheet(this.dataset.key,this.dataset.code,this.dataset.name)" title="删除该设表">✕</button></span>`).join(''):'<span class="dim">暂无人设表</span>'}<div class="mgr-block"><div class="mgr-title">自定义配色（与 /haibao 互通）</div>${schemeHtml}</div><div class="mgr-block"><div class="mgr-title">配色海报（${posters.length}）</div>${posterHtml}</div></td></tr>`:'';
+      const sheetRow=(isOpen&&myScope==='all')?`<tr class="sheet-row"><td colspan="9">${sheets.length?sheets.map(s=>`<span class="sheet-chip">◈ <a href="/show.html?code=${encodeURIComponent(s.code)}" target="_blank" style="color:inherit;text-decoration:none">${esc(s.name)}</a><button class="del-sheet" data-key="${escAttr(key)}" data-code="${escAttr(s.code)}" data-name="${escAttr(s.name)}" data-version="${s.version==null?'':s.version}" onclick="delSheet(this.dataset.key,this.dataset.code,this.dataset.name,this.dataset.version)" title="删除该设表">✕</button></span>`).join(''):'<span class="dim">暂无人设表</span>'}<div class="mgr-block"><div class="mgr-title">自定义配色（与 /haibao 互通）</div>${schemeHtml}</div><div class="mgr-block"><div class="mgr-title">配色海报（${posters.length}）</div>${posterHtml}</div></td></tr>`:'';
       return `<tr><td class="dim">${u.kind==='local'?'站内':'USSO'}</td><td>${esc(u.nickname||u.name)}</td><td>${roleSel}</td><td>${scribeSel}</td><td>${u.status==='banned'?'<span class="tag banned">已封禁</span>':'<span class="dim">正常</span>'}</td><td class="dim">${esc((u.last_login||'').replace('T',' ').substring(0,16))}</td>${sheetTd}<td><span class="tag ${u.role==='admin'?'admin':u.role==='elder'?'elder':''}">${roleName[u.role]||'执行者'}</span> ${u.edit_role==='scribe'?'<span class="tag scribe">编辑</span>':''}</td><td>${statusBtn}</td></tr>${sheetRow}`;
     };
   let __i=0;
@@ -178,15 +178,15 @@ function render(){
 }
 function toggleSheets(key){ if(expanded.has(key))expanded.delete(key);else expanded.add(key); render(); }
 function escAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-async function delSheet(key,code,name){
+async function delSheet(key,code,name,version){
   if(!confirm('确定删除「'+(name||code)+'」的这张人设表？此操作不可恢复。'))return;
   const err=document.getElementById('err'); err.textContent='';
   try{
-    const r=await fetch('/api/admin/delete-character',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,code})});
+    const r=await fetch('/api/admin/delete-character',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key,code,version:version===''||version==null?undefined:Number(version)})});
     const d=await r.json();
-    if(!d.ok){err.textContent=d.error||'删除失败';return;}
+    if(!d.ok){err.textContent=d.error==='oc_version_conflict'||r.status===428?'这张设表刚被修改过，已重新读取，请确认后再删除。':(d.error||'删除失败');loadedChars=false;loadUsers();return;}
     alert('✔ 已删除 '+d.removed+' 张设表');
-    loadUsers();
+    loadedChars=false; loadUsers();
   }catch(e){err.textContent='网络错误';}
 }
 async function delPoster(id,title){

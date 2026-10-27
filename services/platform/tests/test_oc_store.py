@@ -209,5 +209,30 @@ class StoreTest(unittest.TestCase):
             with self.assertRaises(OCError) as error: self.store.list(A)
             self.assertEqual(error.exception.code,'oc_sqlite_wal_patch_required')
 
+    def test_unpatched_wal_is_blocked_when_environment_is_unset(self):
+        # An old-layout host may never export the variable; only explicit development/test may skip.
+        from unittest.mock import patch
+        environment = {k: v for k, v in os.environ.items() if k != 'IRIDESCENTLY_ENVIRONMENT'}
+        with patch.dict(os.environ, environment, clear=True), patch.object(sqlite3,'sqlite_version_info',(3,50,4)):
+            with self.assertRaises(OCError) as error: self.store.list(A)
+            self.assertEqual(error.exception.code,'oc_sqlite_wal_patch_required')
+        with patch.dict(os.environ, {'IRIDESCENTLY_ENVIRONMENT':'test'}), patch.object(sqlite3,'sqlite_version_info',(3,50,4)):
+            self.assertEqual(self.store.list(A), [])
+
+    def test_code_shared_by_owners_resolves_to_the_same_public_record_as_json(self):
+        original = {"7": [record("shared", html="<html>usso</html>")],
+                    "local:7": [record("shared", html="<html>local</html>")]}
+        source = self.root / "characters.json"; atomic_json(source, original)
+        json_store = Store(self.root, lambda: open_database(self.path), "json")
+        atomic_json(self.root / "characters-storage-state.json", {"schema": 1, "backend": "json"})
+        legacy = [x["html"] for x in json_store.public_records("shared")]
+        with closing(open_database(self.path)) as db:
+            report = migrate([source], db)
+            self.assertEqual(report["codes_shared_across_owners"], 1)
+            db.execute('BEGIN IMMEDIATE'); migrate([source], db, True); db.commit()
+        atomic_json(self.root / "characters-storage-state.json", {"schema": 1, "backend": "sqlite"})
+        self.assertEqual([x["html"] for x in self.store.public_records("shared")], legacy)
+        self.assertEqual(legacy[0], "<html>usso</html>")
+
 
 if __name__ == '__main__': unittest.main()

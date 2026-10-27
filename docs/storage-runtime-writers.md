@@ -36,12 +36,13 @@ approved source/managed image roots. The database itself does not need a path re
 An unavailable worldview database is opened with SQLite `mode=rw` and is never silently
 recreated as an empty file.
 
-`characters.json` is one JSON document shared by every account. All writes go
-through `update_data()` in `apps/huiguan/server_huiguan.py`, which reads, changes and
-replaces the file under one lock, so concurrent saves cannot overwrite each other
-(`apps/huiguan/tests/test_characters_concurrent_writes.py`). The lock is in-process:
-exactly one service process may write the file, and offline tools such as
-`apps/huiguan/migrate_characters.py` run only while the service is stopped.
+`characters.json` is one JSON document shared by every account. All OC reads and writes go
+through `services/platform/oc_store.py`: in the default JSON backend a write reads, changes and
+replaces the file inside one `Store.transaction()` under an in-process lock plus an interprocess
+file lock (`characters-storage.lock`), so concurrent saves cannot overwrite each other
+(`apps/huiguan/tests/test_characters_concurrent_writes.py`). Binaries that predate `oc_store`
+do not take that lock, and offline tools such as `apps/huiguan/migrate_characters.py` run only
+while every service is stopped.
 
 Juling requires the configured SQLite runtime. An unavailable or damaged database
 fails startup rather than silently switching storage formats. Existing JSON values
