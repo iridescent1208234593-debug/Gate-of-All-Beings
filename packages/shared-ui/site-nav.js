@@ -1,6 +1,6 @@
 /* Iridescently site navigation — the one global bar shared by 节气画廊, 西木会馆 and 众生之门.
  *
- * Classic <script src=".../shared/shared-ui/site-nav.js?v=20261027z"> mounts it immediately.
+ * Classic <script src=".../shared/shared-ui/site-nav.js?v=20261028b"> mounts it immediately.
  *   data-variant="overlay"  lighter glass over an immersive first screen (gallery, hero)
  *   data-tone="light"       cream glass with ink text for light pages (connections)
  *   data-manual             do not mount; call IridescentlyNav.mount() yourself
@@ -338,9 +338,7 @@
       nav.querySelectorAll('.qc-links>a[data-site]').forEach(function (link) {
         var key = keys[link.dataset.site]; if (!key || !(key in status)) return;
         var up = status[key] === true;
-        var dot = el('span', 'qc-status'); dot.dataset.state = up ? 'up' : 'down';
-        dot.setAttribute('role', 'img'); dot.setAttribute('aria-label', up ? '在线' : '暂时无法访问');
-        link.appendChild(dot);
+        // 站点在线状态圆点已移除：导航只保留文字标签
       });
     }).catch(function () {});
   }
