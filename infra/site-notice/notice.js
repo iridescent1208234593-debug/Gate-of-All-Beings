@@ -13,14 +13,20 @@
   "use strict";
 
   var CONFIG = {
-    version: "20261027b",
+    version: "20261027g",
     title: "站点公告",
     subtitle: "西木会馆 · 众生之门",
     items: [
       ["项目重构", "站点已迁移至全新架构，功能与数据完整保留"],
-      ["密码登录", "USSO 账号新增密码登录，可在账户页设置"],
-      ["邮箱绑定", "绑定并验证邮箱后，可用于找回账号与重置密码"],
-      ["密码找回", "管理员可为忘记密码的站内账号重置密码"]
+      ["密码登录", "USSO 账号可设置登录密码，用昵称或邮箱直接登录"],
+      ["登录注册分离", "登录不再自动建号，新账号请点「注册账号」"],
+      ["邮箱绑定", "验证邮箱后可用于找回账号与重置密码"],
+      ["密码找回", "忘记密码可自助找回，也可由管理员重置"],
+      ["邮件系统", "发信已修复，验证与找回邮件可正常送达"],
+      ["绑定提醒", "未验证邮箱会收到提醒，可关闭，5 分钟后再提醒"],
+      ["图片加速", "全站大图转为 WebP，总体积减少约 88%，加载更快"],
+      ["画廊修复", "同人画廊提议弹窗的字色与对比度已修正"],
+      ["配色主题", "账户页可设置专属配色，子站登录后自动跟随"]
     ],
     art: "/__notice-bg.webp",
     watermark: "美术组 · 海苔 老师作画"
@@ -42,7 +48,7 @@
   + "#__lxh_notice .nc-body.on{opacity:1;transform:none;pointer-events:auto}"
   + "#__lxh_notice .nc-title{font-family:'Noto Serif SC','Songti SC',serif;font-size:17px;font-weight:700;letter-spacing:.06em;color:#3a4a3e;margin:0 0 1px;display:block}"
   + "#__lxh_notice .nc-sub{font-size:10.5px;letter-spacing:.16em;color:#7a8a7e;margin-bottom:8px;display:block}"
-  + "#__lxh_notice .nc-list{max-height:calc(10 * 21px);overflow-y:auto;overflow-x:hidden;margin:2px 0 4px;padding-right:2px;scrollbar-width:thin;scrollbar-color:#d4cfbe rgba(0,0,0,0);-webkit-overflow-scrolling:touch}#__lxh_notice .nc-list::-webkit-scrollbar{width:4px}#__lxh_notice .nc-list::-webkit-scrollbar-track{background:transparent}#__lxh_notice .nc-list::-webkit-scrollbar-thumb{background:#d4cfbe;border-radius:2px}#__lxh_notice .nc-list::-webkit-scrollbar-thumb:hover{background:#bdb6a0}#__lxh_notice .nc-item{display:block;padding:3px 8px;border-radius:6px;background:rgba(245,240,232,.94);border:1px solid #d4cfbe;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transform:translateY(10px) scale(.985);transition:opacity .55s ease,transform .6s cubic-bezier(.16,1,.3,1);content-visibility:auto}"
+  + "#__lxh_notice .nc-list{max-height:none;overflow:visible;overflow-x:hidden;margin:2px 0 4px;padding-right:2px;scrollbar-width:thin;scrollbar-color:#d4cfbe rgba(0,0,0,0);-webkit-overflow-scrolling:touch}#__lxh_notice .nc-list::-webkit-scrollbar{width:4px}#__lxh_notice .nc-list::-webkit-scrollbar-track{background:transparent}#__lxh_notice .nc-list::-webkit-scrollbar-thumb{background:#d4cfbe;border-radius:2px}#__lxh_notice .nc-list::-webkit-scrollbar-thumb:hover{background:#bdb6a0}#__lxh_notice .nc-item{display:block;padding:3px 8px;border-radius:6px;background:rgba(245,240,232,.94);border:1px solid #d4cfbe;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transform:translateY(10px) scale(.985);transition:opacity .55s ease,transform .6s cubic-bezier(.16,1,.3,1);content-visibility:auto}"
   + "#__lxh_notice .nc-body.on .nc-item{opacity:1;transform:none}"
   + "#__lxh_notice .nc-item b{display:inline;font-size:12px;color:#3a4a3e;margin-right:5px}"
   + "#__lxh_notice .nc-item span{font-size:11.5px;line-height:1.55;color:#7a8a7e}"

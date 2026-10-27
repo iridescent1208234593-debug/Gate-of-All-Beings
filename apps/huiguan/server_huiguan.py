@@ -5046,6 +5046,8 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "角色名不能为空"}); return
         if len(name) > 50:
             self._json(400, {"error": "角色名过长（≤50字）"}); return
+        if is_official_title_name(name):
+            self._json(400, {"error": "「" + name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
         try:
             image_data = _persist_preview_reference((body.get("image_data") or "").strip())
         except ValueError as error:
@@ -5138,6 +5140,7 @@ class Handler(BaseStaticHandler):
             conn = db()
             published = 0
             skipped = 0
+            blocked = []
             for c in chars:
                 cd = c.get("data") or c
                 code = cd.get("code")
@@ -5145,6 +5148,9 @@ class Handler(BaseStaticHandler):
                     continue
                 fields = fan_fields(cd)
                 if not fields["name"]:
+                    continue
+                if is_official_title_name(fields["name"]):
+                    blocked.append(fields["name"])
                     continue
                 # 同一角色只保留一条画廊记录：先按编号找，旧记录（无编号）再按名字找
                 existing = conn.execute(
@@ -5181,6 +5187,9 @@ class Handler(BaseStaticHandler):
                 published += 1
             conn.commit()
             conn.close()
+            if blocked:
+                self._json(400, {"error": "以下名号是官方世界观角色名，不能公开：" + "、".join(sorted(set(blocked))) + "；请先改成自建名号"}); return
+
             self._json(200, {"ok": True, "published": published, "skipped": skipped})
         except Exception as e:
             traceback.print_exc()

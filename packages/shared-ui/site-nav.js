@@ -34,10 +34,10 @@
   var ORIGIN = domains.url('main');
   var MARK = ORIGIN + '/shared/shared-ui/brand/iridescently-mark.svg';
   var SITES = [
-    { host: new URL(domains.url('main')).hostname, label: '节气画廊', path: '/' },
-    { host: new URL(domains.url('huiguan')).hostname, label: '西木会馆', path: '/' },
-    { host: new URL(domains.url('zszm')).hostname, label: '众生之门', path: '/', beta: true }
-  ];
+      { host: new URL(domains.url('huiguan')).hostname, label: '西木会馆', path: '/' },
+      { host: new URL(domains.url('zszm')).hostname, label: '众生之门', path: '/', beta: true },
+      { host: new URL(domains.url('main')).hostname, label: '节气画廊', path: '/homepage.html' }
+    ];
   var MORE = [
     { host: new URL(domains.url('oc')).hostname, label: '佳霖馆长设定', path: '/' },
     { host: new URL(domains.url('huiguan')).hostname, label: '配色海报工坊', path: '/haibao/' },
