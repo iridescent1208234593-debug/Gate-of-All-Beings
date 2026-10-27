@@ -54,6 +54,38 @@ python tools/runtime/relocate-storage.py apply --to <新存储根>
 
 `apply` 在移动前后逐文件比对大小与 sha256，同盘重命名、跨盘复制后校验（跨盘时保留原目录供人工确认后再处理），然后检查每个数据库的完整性，最后才改写标记与迁移清单里的根和 `recovery` 路径。`source`（迁移来源）与 `legacy_asset_roots`（世界观库里旧绝对路径的换算规则）是历史记录，保持不变。改写前的两份记录和清单存在 `<backups>/relocations/<时间>/`。之后若工作区清单的 `runtime` 指向新位置，就不再需要设置 `IRIDESCENTLY_STORAGE_ROOT`。
 
+## 新开发机：从零到本机运行
+
+只需要本仓库与这份约定，不需要任何计划任务、外部运维目录或旧路径。
+
+```powershell
+# 1. 工作区与检出
+mkdir <工作区>; cd <工作区>
+git clone https://github.com/iridescent1208234593-debug/Gate-of-All-Beings.git repo
+# 按上面"清单格式"写 <工作区>\iridescently-workspace.json（至少 repo、runtime、worktrees、scratch）
+
+# 2. 依赖（Node 版本见 .nvmrc，Python 见 .python-version）
+cd repo
+npm ci
+foreach ($m in 'cards','softie','management','ecology') { npm ci --prefix "apps/$m" }
+npm ci --prefix apps/www/gallery-engine
+
+# 3. 一个空的开发存储（development 允许没有迁移清单；production/staging 不允许）
+$env:IRIDESCENTLY_ENVIRONMENT = 'development'
+python -c "import sys; sys.path.insert(0, 'services/platform'); import storage_paths as s; print(s.initialize_storage()['roots'])"
+
+# 4. 构建、封存、启动、验证、停止
+npm run build:site; npm run build:release; npm run release:seal
+python tools/runtime/local-runtime.py start
+python tools/checks/local-smoke.py
+python tools/runtime/local-runtime.py stop
+
+# 5. 回归（只用临时 test 存储，不碰上面的开发存储）
+python tools/checks/regression.py
+```
+
+真实数据不随仓库分发：需要时按 [恢复手册](recovery.md) 把快照恢复到 `production` 环境，而不是复制进检出。
+
 ## Windows 与 Linux
 
 目录名全 ASCII、无空格，两边一一对应。Windows 本机为 `E:\Iridescently`；Linux 开发机建议 `~/iridescently`。香港生产使用自己的部署布局（`/srv/iridescently/...`），不是开发工作区。
