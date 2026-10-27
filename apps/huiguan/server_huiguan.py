@@ -2184,6 +2184,9 @@ class Handler(BaseStaticHandler):
         if find_usso_password_login(username) or _usso_nickname_exists(username):
             self._json(409, {"error": "「" + username + "」是既有的 USSO 账号，请改用「登录」入口，不要走注册"}); return
 
+        # /api/auth 不再承担注册职责：未知用户名一律拒绝，避免任何客户端误建账号
+        self._json(410, {"error": "该入口只用于登录；没有账号请使用「注册账号」入口"}); return
+
         # —— 注册（用户名不存在） ——
         # 新账号默认以用户名作为名号；已有账号登录不会经过此检查。
         if is_official_title_name(username):
