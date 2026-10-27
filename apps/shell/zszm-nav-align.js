@@ -10,24 +10,34 @@
  */
 (function () {
   "use strict";
+  // 站点域名统一走 shared/site-domains 的映射，源码不写自家域名字面量
+  function qcUrl(site, path) {
+    try {
+      if (window.IridescentlyDomains && window.IridescentlyDomains.url) {
+        return window.IridescentlyDomains.url(site, path || "/");
+      }
+    } catch (e) {}
+    return path || "/";
+  }
+
   var NEW_ORDER = ["西木会馆", "众生之门", "节气画廊"];
   var GROUPS = [
     { title: "会馆", items: [
-      ["角色画廊", "https://huiguan.iridescently.xyz/gallery.html"],
-      ["同人画廊", "https://huiguan.iridescently.xyz/fan.html"],
-      ["官方角色档案", "https://huiguan.iridescently.xyz/works.html"],
-      ["表情包收录", "https://huiguan.iridescently.xyz/stickers.html"],
-      ["人物关系图", "https://huiguan.iridescently.xyz/relation.html"],
-      ["配色海报工坊", "https://huiguan.iridescently.xyz/haibao/"]
+      ["角色画廊", qcUrl("huiguan", "/gallery.html")],
+      ["同人画廊", qcUrl("huiguan", "/fan.html")],
+      ["官方角色档案", qcUrl("huiguan", "/works.html")],
+      ["表情包收录", qcUrl("huiguan", "/stickers.html")],
+      ["人物关系图", qcUrl("huiguan", "/relation.html")],
+      ["配色海报工坊", qcUrl("huiguan", "/haibao/")]
     ] },
     { title: "玩法", items: [
-      ["众生之门 · 门庭", "https://zszm.iridescently.xyz/"],
-      ["聚灵", "https://zszm.iridescently.xyz/app/shell/m/juling"],
-      ["灵境会馆 · 据点经营", "https://zszm.iridescently.xyz/#management"]
+      ["众生之门 · 门庭", qcUrl("zszm", "/")],
+      ["聚灵", qcUrl("zszm", "/app/shell/m/juling")],
+      ["灵境会馆 · 据点经营", qcUrl("zszm", "/#management")]
     ] },
     { title: "其他", items: [
-      ["佳霖馆长设定", "https://oc.iridescently.xyz/"],
-      ["连接与鸣谢", "https://iridescently.xyz/connections.html"]
+      ["佳霖馆长设定", qcUrl("oc", "/")],
+      ["连接与鸣谢", qcUrl("main", "/connections.html")]
     ] }
   ];
 
@@ -45,7 +55,7 @@
     if (!byLabel["西木会馆"] || !byLabel["众生之门"] || !byLabel["节气画廊"]) return false;
 
     var gallery = byLabel["节气画廊"];
-    gallery.href = "https://iridescently.xyz/homepage.html";
+    gallery.href = qcUrl("main", "/homepage.html");
 
     // 已经符合顺序就不再动
     var currentOrder = items.map(function (a) { return a.textContent.trim().replace(/\s*beta\s*$/, ""); });

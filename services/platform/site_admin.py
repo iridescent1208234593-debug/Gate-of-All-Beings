@@ -93,16 +93,21 @@ def is_huiguan_admin(kind, uid, project_root=None):
 
 
 def is_admin(kind, uid, project_root=None):
-    """站长，或会馆管理员，都视为管理员。"""
+    """站长，或会馆管理员，都视为管理员。
+
+    is_site_owner 接受的是已验签的 hx_sso payload（dict），不是 (kind, uid)；
+    这里按同样语义构造最小 payload 再判断，避免签名字段错位。
+    """
+    payload = {"kind": kind, "uid": str(uid)}
     try:
-        if is_site_owner(kind, uid):
+        if is_site_owner(payload, project_root):
             return True
     except TypeError:
         try:
-            if is_site_owner(kind, uid, project_root):
+            if is_site_owner(payload):
                 return True
         except Exception:
             pass
     except Exception:
         pass
-    return is_huiguan_admin(kind, uid)
+    return is_huiguan_admin(kind, uid, project_root)

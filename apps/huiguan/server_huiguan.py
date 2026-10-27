@@ -749,16 +749,21 @@ def find_usso_password_login(identifier):
         return None
     conn = db()
     # 可用标识：昵称、USSO 自带邮箱、或站内重新绑定的已验证邮箱
-    rows = conn.execute(
-        "SELECT DISTINCT u.user_id, u.nickname, u.email, p.pass_hash "
-        "FROM users u "
-        "JOIN usso_passwords p ON p.user_id = u.user_id "
-        "LEFT JOIN account_emails e ON e.kind='usso' AND e.uid=CAST(u.user_id AS TEXT) "
-        "WHERE lower(u.nickname)=lower(?) "
-        "   OR lower(u.email)=lower(?) "
-        "   OR lower(e.email_norm)=lower(?)",
-        (key, key, key),
-    ).fetchall()
+    try:
+        rows = conn.execute(
+            "SELECT DISTINCT u.user_id, u.nickname, u.email, p.pass_hash "
+            "FROM users u "
+            "JOIN usso_passwords p ON p.user_id = u.user_id "
+            "LEFT JOIN account_emails e ON e.kind='usso' AND e.uid=CAST(u.user_id AS TEXT) "
+            "WHERE lower(u.nickname)=lower(?) "
+            "   OR lower(u.email)=lower(?) "
+            "   OR lower(e.email_norm)=lower(?)",
+            (key, key, key),
+        ).fetchall()
+    except sqlite3.OperationalError:
+        # 全新库还没建 usso_passwords 表：视为没有密码登录账号，不阻断登录流程
+        conn.close()
+        return None
     conn.close()
     return rows[0] if len(rows) == 1 else None
 
