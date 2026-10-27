@@ -140,7 +140,7 @@ def handle_email(handler, action, api):
             if too_soon or user_hourly or ip_hourly:
                 conn.rollback(); conn.close()
                 return reply(429, {"error": "操作过于频繁，请稍后再试"})
-            if owner and (owner["kind"], owner["uid"]) != (kind, uid):
+            if owner and (str(owner["kind"]), str(owner["uid"])) != (str(kind), str(uid)):
                 conn.rollback(); conn.close()
                 return reply(409, {"error": "该邮箱已绑定其他账户"})
             conn.executemany("INSERT INTO account_email_attempts VALUES (?,?)", [(bucket, now) for bucket in buckets])
@@ -179,7 +179,7 @@ def handle_email(handler, action, api):
                 conn.commit()
                 return reply(400, {"error": "对应账户已不可用，请重新登录后发送验证邮件"})
             owner = conn.execute("SELECT kind,uid FROM account_emails WHERE email_norm=?", (challenge["email_norm"],)).fetchone()
-            if owner and (owner["kind"], owner["uid"]) != (challenge["kind"], challenge["uid"]):
+            if owner and (str(owner["kind"]), str(owner["uid"])) != (str(challenge["kind"]), str(challenge["uid"])):
                 conn.rollback()
                 return reply(409, {"error": "该邮箱已绑定其他账户"})
             verified_at = datetime.now(timezone.utc).isoformat()
