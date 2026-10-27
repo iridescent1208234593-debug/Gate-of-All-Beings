@@ -5403,6 +5403,7 @@ class Handler(BaseStaticHandler):
     def _static_allowed(self, path):
         return _base_static_allowed(path)
 
+
     def _json(self, status, data, cookie=None, *, sanitize_images=True):
         if sanitize_images:
             data = _sanitize_json_image_sources(data)

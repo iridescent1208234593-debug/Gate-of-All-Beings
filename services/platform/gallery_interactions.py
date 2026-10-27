@@ -89,14 +89,24 @@ def find_original(project_root, runtime_dir, image):
         source_asset_dir("homepage-gallery"),
         source_asset_dir("罗小黑战记数据库", "罗小黑节气贺图（gallery素材）"),
     )
+    # 图片已全站转为 WebP，前端仍可能用原始扩展名（如 xxx.png）请求：
+    # 依次尝试 原名 → 换 .webp → 原名+.webp
+    candidates = [image]
+    stem = Path(image).with_suffix("").name
+    if Path(image).suffix.lower() != ".webp":
+        candidates.append(str(Path(image).with_suffix(".webp")))
+    if stem:
+        candidates.append(stem + ".webp")
+    candidates.append(image + ".webp")
     for root in roots:
-        target = (root / image).resolve()
-        try:
-            target.relative_to(root.resolve())
-        except ValueError:
-            continue
-        if target.is_file() and target.suffix.lower() in IMAGE_SUFFIXES:
-            return target
+        for name in candidates:
+            target = (root / name).resolve()
+            try:
+                target.relative_to(root.resolve())
+            except ValueError:
+                continue
+            if target.is_file() and target.suffix.lower() in IMAGE_SUFFIXES:
+                return target
     return None
 
 
@@ -129,3 +139,28 @@ def comments_page(db, image, offset, limit=3):
         "SELECT name, comment, created_at FROM gallery_comments WHERE image=? "
         "ORDER BY created_at DESC, rowid DESC LIMIT ? OFFSET ?", (image, limit, offset)
     )]
+
+
+def migrate_comments_schema(db):
+    """旧库主键 (kind,uid) → (kind,uid,image)：允许每张图各留一条。"""
+    row = db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='gallery_comments'").fetchone()
+    if not row or not row[0]:
+        return
+    if "PRIMARY KEY(kind, uid, image)" in row[0]:
+        return
+    db.executescript("""
+        ALTER TABLE gallery_comments RENAME TO gallery_comments_old;
+        CREATE TABLE gallery_comments (
+            kind TEXT NOT NULL, uid TEXT NOT NULL, name TEXT NOT NULL,
+            image TEXT NOT NULL, comment TEXT NOT NULL,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY(kind, uid, image), CHECK(length(comment) <= 25)
+        );
+        INSERT OR IGNORE INTO gallery_comments(kind,uid,name,image,comment,created_at)
+            SELECT kind,uid,name,image,comment,created_at FROM gallery_comments_old;
+        DROP TABLE gallery_comments_old;
+        CREATE INDEX IF NOT EXISTS gallery_comments_image ON gallery_comments(image, created_at);
+    """)
+    print("[gallery] gallery_comments 主键已迁移")
+
+
