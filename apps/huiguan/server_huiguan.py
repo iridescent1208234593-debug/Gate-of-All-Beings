@@ -2052,7 +2052,7 @@ class Handler(BaseStaticHandler):
             try:
                 cur = conn.execute(
                     "INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES (?,?,?,?,?,?,?)",
-                    (username, pass_hash, nickname, role, "active", now_iso(), now_iso()))
+                    (username, pass_hash, nickname, role, "active", now_iso(), ""))
                 uid = cur.lastrowid
             except sqlite3.IntegrityError:
                 conn.close()
@@ -3441,8 +3441,8 @@ class Handler(BaseStaticHandler):
                              "group_qq": GROUP_QQ, "msg": "已成为荣誉长老"}); return
         reason = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", str(body.get("reason") or "")).strip()[:300]
         alias = re.sub(r"[\x00-\x1f<>\"'&]", "", str(body.get("alias") or "")).strip()[:8]
-        if not reason:
-            self._json(400, {"error": "请写下你为什么是妖王～"}); return
+        if len(reason) < 2:
+            self._json(400, {"error": "请写下你为什么是妖王～（至少 2 个字）"}); return
         if len(reason) > YAOWANG_AUTO_MIN_CHARS:
             self._set_user_cols(ident, honor_kind="yaowang", honor_alias=alias, honor_reason=reason)
             self._json(200, {"ok": True, "status": "approved", "honor": honor, "alias": alias, "remind_group": True,
@@ -4000,6 +4000,8 @@ class Handler(BaseStaticHandler):
         if body is None:
             return
         msg = (body.get("message") or "").strip()
+        if len(msg) < 2:
+            self._json(400, {"error": "请填写申请理由（至少 2 个字）"}); return
         with DB_LOCK:
             conn = db()
             existing = conn.execute("SELECT id FROM executor_requests WHERE user_kind=? AND user_uid=? AND status='pending'", (ident["kind"], ident["uid"])).fetchone()
@@ -4426,6 +4428,8 @@ class Handler(BaseStaticHandler):
         if typ not in ("age", "skill"):
             self._json(400, {"error": "申请类型无效"}); return
         msg = (body.get("message") or "").strip()[:300]
+        if len(msg) < 2:
+            self._json(400, {"error": "请填写申请理由（至少 2 个字）"}); return
         with DB_LOCK:
             conn = db()
             exist = conn.execute("SELECT id FROM exempt_requests WHERE type=? AND user_kind=? AND user_uid=? AND status='pending'",

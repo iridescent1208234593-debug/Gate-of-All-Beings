@@ -74,6 +74,13 @@ def handle_recovery(handler, action, api):
                        WHERE e.kind='local' AND e.email_norm=? AND u.status='active'""",
                     (email_norm,),
                 ).fetchone()
+                if not user:
+                    user = conn.execute(
+                        """SELECT u.user_id AS uid, u.nickname AS username FROM account_emails e
+                           JOIN users u ON u.user_id=CAST(e.uid AS TEXT)
+                           WHERE e.kind='usso' AND e.email_norm=?""",
+                        (email_norm,),
+                    ).fetchone()
                 if user:
                     conn.execute(
                         "INSERT OR REPLACE INTO account_email_recovery VALUES (?,?,?,?,?)",
@@ -121,12 +128,24 @@ def handle_recovery(handler, action, api):
         ).fetchone()
         if not challenge:
             return reply(400, {"error": "找回链接无效或已过期"})
-        user = conn.execute(
-            """SELECT u.uid, u.pass_hash FROM local_users u
-               JOIN account_emails e ON e.kind='local' AND CAST(e.uid AS INTEGER)=u.uid
-               WHERE u.uid=? AND u.status='active' AND e.email_norm=?""",
+        own = conn.execute(
+            "SELECT kind FROM account_emails WHERE CAST(uid AS TEXT)=CAST(? AS TEXT) AND email_norm=?",
             (challenge["uid"], challenge["email_norm"]),
         ).fetchone()
+        owner_kind = (own["kind"] if own else "local")
+        if owner_kind == "usso":
+            user = conn.execute(
+                "SELECT u.user_id AS uid, p.pass_hash AS pass_hash FROM users u "
+                "LEFT JOIN usso_passwords p ON p.user_id=u.user_id WHERE u.user_id=CAST(? AS TEXT)",
+                (challenge["uid"],),
+            ).fetchone()
+        else:
+            user = conn.execute(
+                """SELECT u.uid, u.pass_hash FROM local_users u
+                   JOIN account_emails e ON e.kind='local' AND CAST(e.uid AS INTEGER)=u.uid
+                   WHERE u.uid=? AND u.status='active' AND e.email_norm=?""",
+                (challenge["uid"], challenge["email_norm"]),
+            ).fetchone()
     finally:
         conn.close()
     if not user:
@@ -136,12 +155,18 @@ def handle_recovery(handler, action, api):
         conn = api["db"]()
         try:
             conn.execute("BEGIN IMMEDIATE")
-            current = conn.execute(
-                """SELECT u.pass_hash FROM local_users u
-                   JOIN account_emails e ON e.kind='local' AND CAST(e.uid AS INTEGER)=u.uid
-                   WHERE u.uid=? AND u.status='active' AND e.email_norm=?""",
-                (challenge["uid"], challenge["email_norm"]),
-            ).fetchone()
+            if owner_kind == "usso":
+                current = conn.execute(
+                    "SELECT pass_hash FROM usso_passwords WHERE user_id=CAST(? AS TEXT)",
+                    (challenge["uid"],),
+                ).fetchone()
+            else:
+                current = conn.execute(
+                    """SELECT u.pass_hash FROM local_users u
+                       JOIN account_emails e ON e.kind='local' AND CAST(e.uid AS INTEGER)=u.uid
+                       WHERE u.uid=? AND u.status='active' AND e.email_norm=?""",
+                    (challenge["uid"], challenge["email_norm"]),
+                ).fetchone()
             fresh = conn.execute(
                 "SELECT 1 FROM account_email_recovery WHERE uid=? AND email_norm=? AND token_hash=? AND expires_at>?",
                 (challenge["uid"], challenge["email_norm"], token_hash, time.time()),
@@ -149,9 +174,17 @@ def handle_recovery(handler, action, api):
             if not current or current["pass_hash"] != user["pass_hash"] or not fresh:
                 conn.rollback()
                 return reply(400, {"error": "找回链接无效或已过期"})
-            conn.execute("UPDATE local_users SET pass_hash=? WHERE uid=?", (password_hash, challenge["uid"]))
+            stamp = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+            if owner_kind == "usso":
+                conn.execute(
+                    "INSERT INTO usso_passwords(user_id, pass_hash, created_at, updated_at) VALUES(?,?,?,?) "
+                    "ON CONFLICT(user_id) DO UPDATE SET pass_hash=excluded.pass_hash, updated_at=excluded.updated_at",
+                    (str(challenge["uid"]), password_hash, stamp, stamp))
+                conn.execute("DELETE FROM sessions_db WHERE kind='usso' AND uid=?", (str(challenge["uid"]),))
+            else:
+                conn.execute("UPDATE local_users SET pass_hash=? WHERE uid=?", (password_hash, challenge["uid"]))
+                conn.execute("DELETE FROM sessions_db WHERE kind='local' AND uid=?", (str(challenge["uid"]),))
             conn.execute("DELETE FROM account_email_recovery WHERE uid=?", (challenge["uid"],))
-            conn.execute("DELETE FROM sessions_db WHERE kind='local' AND uid=?", (str(challenge["uid"]),))
             conn.commit()
         except Exception:
             conn.rollback()
