@@ -2,7 +2,7 @@
 (function () {
   if (window.IridescentlyNav || document.querySelector('script[data-iridescently-nav]')) return;
   var script = document.createElement('script');
-  script.src = '/shared/shared-ui/site-nav.js?v=20261027-groups';
+  script.src = '/shared/shared-ui/site-nav.js?v=20261027z';
   script.dataset.iridescentlyNav = '';
   if (/^huiguan\./.test(location.hostname) && /^\/(?:index\.html)?$/.test(location.pathname)) script.dataset.variant = 'overlay';
   document.body.appendChild(script);

@@ -76,7 +76,7 @@ if (statusDots.length) {
 
 if (!document.querySelector("script[data-site-language]")) {
   const localeScript = document.createElement("script");
-  localeScript.src = "/assets/site-language.js?v=20261014-1";
+  localeScript.src = "/assets/site-language.js?v=20261027z";
   localeScript.dataset.siteLanguage = "";
   document.head.append(localeScript);
 }

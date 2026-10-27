@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>素材库 · 西木会馆设计系统</title>
-<link rel="stylesheet" href="design-system.css?v=3">
-<link rel="stylesheet" href="ui/lxh-ui.css?v=20261020">
-<script src="ui/lxh-ui.js?v=20261020" defer></script>
+<link rel="stylesheet" href="design-system.css?v=20261027z">
+<link rel="stylesheet" href="ui/lxh-ui.css?v=20261027z">
+<script src="ui/lxh-ui.js?v=20261027z" defer></script>
 <style>
   body{padding:48px 16px 80px;}
   .wrap{max-width:1200px;margin:0 auto;}
@@ -235,7 +235,7 @@ const AVA_KEYS = ['beast-heicat','beast-fox','beast-rabbit','beast-dog',
   'divine-phoenix','divine-dragon','divine-qilin'];
 const AVA_BASE = BASE + '/design-system/ui/lxh/avatars/';
 document.getElementById('avaGrid').innerHTML = AVA_KEYS.map(k =>
-  `<div class="avacard" onclick="copyURL('${AVA_BASE}${k}.png?v=2')"><img data-original-image src="${AVA_BASE}${k}.png?v=2" loading="lazy" decoding="async" onerror="imgFail(this)"><div class="nm">${k}</div></div>`).join('');
+  `<div class="avacard" onclick="copyURL('${AVA_BASE}${k}.png?v=20261027z')"><img data-original-image src="${AVA_BASE}${k}.png?v=20261027z" loading="lazy" decoding="async" onerror="imgFail(this)"><div class="nm">${k}</div></div>`).join('');
 
 // ---- lxh-ui 组件精选 ----
 window.addEventListener('load', function () {
@@ -250,18 +250,18 @@ window.addEventListener('load', function () {
     show.appendChild(d);
   };
   pane('种族选择网格 · racegrid（接入头像）',
-    U.racegrid({ tab: 0, sel: 0, avatars: AVA_KEYS.slice(0, 12).map(k => AVA_BASE + k + '.png?v=2') }));
+    U.racegrid({ tab: 0, sel: 0, avatars: AVA_KEYS.slice(0, 12).map(k => AVA_BASE + k + '.png?v=20261027z') }));
   pane('主 HUD · hud（夜 + 头像）',
-    U.hud({ night: true, lv: 42, avatar: AVA_BASE + 'beast-heicat.png?v=2', status: [{ icon: 'radar' }, { icon: 'star', big: true }] }));
+    U.hud({ night: true, lv: 42, avatar: AVA_BASE + 'beast-heicat.webp?v=20261027z', status: [{ icon: 'radar' }, { icon: 'star', big: true }] }));
   pane('社交 · nameplate / chatbubble / friends',
     U.nameplate({ id: 'ID 10086', name: '罗小黑' }),
-    U.chatbubble({ avatar: AVA_BASE + 'beast-fox.png?v=2', text: '一起去冒险吧！' }),
-    U.friends({ rows: [{ name: '阿根', avatar: AVA_BASE + 'beast-dog.png?v=2' }, { name: '小白', avatar: AVA_BASE + 'beast-rabbit.png?v=2' }] }));
+    U.chatbubble({ avatar: AVA_BASE + 'beast-fox.png?v=20261027z', text: '一起去冒险吧！' }),
+    U.friends({ rows: [{ name: '阿根', avatar: AVA_BASE + 'beast-dog.webp?v=20261027z' }, { name: '小白', avatar: AVA_BASE + 'beast-rabbit.png?v=20261027z' }] }));
   pane('数值 · counter / expbar / lvchart / radar5', U.counter(20260831), U.expbar(66), U.lvchart(),
     U.radar5({ values: [0.9, 0.55, 0.75, 0.45, 0.85] }));
   pane('种族谱系树 · racetree', U.racetree());
   pane('头像框与杂项 · avaframe / filmcard / confirm',
-    U.avaframe({ gold: true, avatar: AVA_BASE + 'divine-phoenix.png?v=2' }),
+    U.avaframe({ gold: true, avatar: AVA_BASE + 'divine-phoenix.png?v=20261027z' }),
     U.filmcard(), confirmTrigger());
 });
 
@@ -282,6 +282,6 @@ function confirmTrigger(){
 
 // 角色库数据加载已在上方 load(true) 启动（/api/official/characters）
 </script>
-<script src="/original-image-viewer.js?v=20261022-1"></script>
+<script src="/original-image-viewer.js?v=20261027z"></script>
 </body>
 </html>

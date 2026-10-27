@@ -527,7 +527,7 @@
 
 /* ============================================================
    13. 等级条形图（手写 LV + 赭黄块）
-   考据：lxh/ui/level-chart.png
+   考据：lxh/ui/level-chart.webp
    ============================================================ */
 .lxh-lvchart { display: flex; align-items: flex-end; gap: 10px; height: 150px; }
 .lxh-lvchart .col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
@@ -600,7 +600,7 @@
 
 /* ============================================================
    16. 好友定位面板（乳白卡 + 搜索 + 联系人行）
-   考据：lxh/ui/friends-locate-panel.png
+   考据：lxh/ui/friends-locate-panel.webp
    ============================================================ */
 .lxh-friends {
   background: var(--lxh-paper); border-radius: 18px; padding: 16px;
@@ -641,7 +641,7 @@
 
 /* ============================================================
    17. 游戏内手机面板（状态栏 + 快捷钮 + 声明列表）
-   考据：lxh/ui/phone-declaration-panel.png
+   考据：lxh/ui/phone-declaration-panel.webp
    ============================================================ */
 .lxh-phone {
   width: 260px; border: 4px solid var(--lxh-forest); border-radius: 26px;

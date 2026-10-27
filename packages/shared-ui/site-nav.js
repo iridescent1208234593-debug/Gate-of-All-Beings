@@ -1,6 +1,6 @@
 /* Iridescently site navigation — the one global bar shared by 节气画廊, 西木会馆 and 众生之门.
  *
- * Classic <script src=".../shared/shared-ui/site-nav.js?v=20261027-groups"> mounts it immediately.
+ * Classic <script src=".../shared/shared-ui/site-nav.js?v=20261027z"> mounts it immediately.
  *   data-variant="overlay"  lighter glass over an immersive first screen (gallery, hero)
  *   data-tone="light"       cream glass with ink text for light pages (connections)
  *   data-manual             do not mount; call IridescentlyNav.mount() yourself
@@ -247,7 +247,7 @@
     } };
 
     if (!document.querySelector('script[data-site-language]')) {
-      var language = el('script'); language.src = ORIGIN + '/assets/site-language.js?v=20261017-nav';
+      var language = el('script'); language.src = ORIGIN + '/assets/site-language.js?v=20261027z';
       language.dataset.siteLanguage = ''; document.head.appendChild(language);
     }
     // 主题控件等 theme.js 加载完成再挂（脚本注入是异步的，直接挂会拿不到 window.XTheme）。
@@ -256,7 +256,7 @@
       var themeReady = function () { if (state && state.right === right) buildThemeControl(right, nav); };
       if (window.XTheme) themeReady();
       else {
-        var THEME_SRC = '/shared/shared-ui/theme.js?v=20261025';
+        var THEME_SRC = '/shared/shared-ui/theme.js?v=20261027z';
         var loadTheme = function (src, fallback) {
           var tag = el('script'); tag.src = src; tag.dataset.siteTheme = '';
           tag.addEventListener('load', themeReady);

@@ -729,6 +729,19 @@ def security_email(kind, uid):
     conn.close()
     return (row["email"] if row and row["email"] else "")
 
+def _usso_nickname_exists(value):
+    """该昵称/邮箱是否属于既有 USSO 账号（用于阻止误注册）。"""
+    key = (value or "").strip()
+    if not key:
+        return False
+    conn = db()
+    row = conn.execute(
+        "SELECT 1 FROM users WHERE lower(nickname)=lower(?) OR lower(email)=lower(?) LIMIT 1",
+        (key, key),
+    ).fetchone()
+    conn.close()
+    return bool(row)
+
 def find_usso_password_login(identifier):
     """按昵称或邮箱查找已设置登录密码的 USSO 账号；唯一匹配才返回。"""
     key = (identifier or "").strip()
@@ -2165,6 +2178,11 @@ class Handler(BaseStaticHandler):
                        cookie=[self._session_cookie(session_id),
                                self._sso_cookie(usso["user_id"], "usso", ident.get("name") or "")])
             return
+
+        # 兜底：该标识属于既有 USSO 账号时，绝不新建站内账号
+        # （旧客户端可能仍向 /api/auth 提交「昵称+密码」，此时应提示去登录而不是建号）
+        if find_usso_password_login(username) or _usso_nickname_exists(username):
+            self._json(409, {"error": "「" + username + "」是既有的 USSO 账号，请改用「登录」入口，不要走注册"}); return
 
         # —— 注册（用户名不存在） ——
         # 新账号默认以用户名作为名号；已有账号登录不会经过此检查。

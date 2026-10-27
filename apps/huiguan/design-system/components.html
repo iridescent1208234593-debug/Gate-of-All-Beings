@@ -5,9 +5,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>lxh-ui 组件库 · 西木会馆设计系统</title>
-<link rel="stylesheet" href="design-system.css?v=4">
-<link rel="stylesheet" href="ui/lxh-ui.css?v=20261020">
-<script src="ui/lxh-ui.js?v=20261020"></script>
+<link rel="stylesheet" href="design-system.css?v=20261027z">
+<link rel="stylesheet" href="ui/lxh-ui.css?v=20261027z">
+<script src="ui/lxh-ui.js?v=20261027z"></script>
 <style>
   body{padding:40px 16px 96px;}
   .wrap{max-width:1080px;margin:0 auto;}
@@ -96,8 +96,8 @@
   <section id="start">
     <h2 class="qc-h2">接入</h2>
     <p class="note">会馆页面用相对路径 <code>/design-system/ui/</code>（指向 <code>packages/shared-ui</code> 的 junction）；其他站点用 <code>/shared/shared-ui/</code>；React 模块用工作区包 <code>@lxh/shared-ui</code>。只要样式不要脚本也可以，所有组件都能手写 HTML。</p>
-    <div class="code"><pre>&lt;link rel="stylesheet" href="/design-system/ui/lxh-ui.css?v=20261020"&gt;
-&lt;script src="/design-system/ui/lxh-ui.js?v=20261020"&gt;&lt;/script&gt;
+    <div class="code"><pre>&lt;link rel="stylesheet" href="/design-system/ui/lxh-ui.css?v=20261027z"&gt;
+&lt;script src="/design-system/ui/lxh-ui.js?v=20261027z"&gt;&lt;/script&gt;
 
 // React / Vite 模块
 import '@lxh/shared-ui/lxh-ui.css';
@@ -284,7 +284,7 @@ LXHUI.avaframe({ gold: true, avatar: url, onEdit: () =&gt; pickAvatar() });</pre
   var AVA = '/design-system/ui/lxh/ai-avatars/';
   var BASE5 = ['beast-heicat','beast-fox','beast-rabbit','beast-dog','divine-phoenix'];
   var KEYS = []; for (var q = 0; q < 12; q++) KEYS.push(BASE5[q % 5]);
-  var ava = function (k) { return AVA + k + '.png?v=2'; };
+  var ava = function (k) { return AVA + k + '.png?v=20261027z'; };
   var $ = function (id) { return document.getElementById(id); };
 
   function toast(msg) {
@@ -444,6 +444,6 @@ LXHUI.avaframe({ gold: true, avatar: url, onEdit: () =&gt; pickAvatar() });</pre
   });
 })();
 </script>
-<script src="/shared/shared-ui/site-nav.js?v=20261027-groups"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261027z"></script>
 </body>
 </html>

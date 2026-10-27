@@ -76,20 +76,12 @@
   }
 
   function goLandscape() {
-    var root = document.documentElement;
-    var done = function () { sync(); };
-    try {
-      if (root.requestFullscreen) {
-        root.requestFullscreen().then(function () {
-          if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock("landscape").then(done).catch(done);
-          } else { done(); }
-        }).catch(done);
-        return;
-      }
-      if (root.webkitRequestFullscreen) { root.webkitRequestFullscreen(); done(); return; }
-    } catch (e) { /* 忽略，回退为手动旋转 */ }
-    done();
+    // 只做温和引导：不申请全屏、不锁方向，避免强制翻转影响其它页面
+    var tip = overlay && overlay.querySelector(".rc-tip");
+    if (tip) tip.textContent = "请把手机横向转动；若画面没有跟着转，请打开系统的「自动旋转」";
+    var btn = overlay && overlay.querySelector("button");
+    if (btn) { btn.textContent = "知道了"; btn.onclick = function () { overlay.classList.remove("on"); }; }
+    sync();
   }
 
   function sync() {
