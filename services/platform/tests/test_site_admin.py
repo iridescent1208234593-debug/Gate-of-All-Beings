@@ -91,9 +91,11 @@ class SiteOwnerTest(unittest.TestCase):
             self.assertFalse(site_admin.is_site_owner(payload), payload)
 
     def test_other_huiguan_admins_do_not_gain_main_site_rights(self):
+        # 站长名单只有 usso/local 的 uid 7（iridescent）与 uid 1（摆烂人生）。
+        # 其他会馆管理员不因会馆角色获得主站管理权。
         self.assertFalse(site_admin.is_site_owner({"kind": "local", "uid": "218"}))
-        self.assertFalse(site_admin.is_site_owner({"kind": "usso", "uid": "1"}))
         self.assertFalse(site_admin.is_site_owner({"kind": "local", "uid": "8"}))
+        self.assertFalse(site_admin.is_site_owner({"kind": "usso", "uid": "9"}))
 
     def test_disabled_owner_account_loses_admin(self):
         db = DATA / "huiguan" / "users.db"

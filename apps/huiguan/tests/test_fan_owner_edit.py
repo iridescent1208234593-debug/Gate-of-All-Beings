@@ -78,7 +78,7 @@ class FanOwnerEditTest(unittest.TestCase):
                 time.sleep(0.1)
         cls.owner, cls.other = Client(cls.base), Client(cls.base)
         for client, name in ((cls.owner, "owner_test"), (cls.other, "other_test")):
-            status, _ = client.call("/api/register", {"username": name, "password": "test-password-123", "nickname": name})
+            status, _ = client.call("/api/register", {"username": name, "password": "test-password-123", "nickname": name, "email": "t@example.com"})
             assert status == 200, status
 
     @classmethod
