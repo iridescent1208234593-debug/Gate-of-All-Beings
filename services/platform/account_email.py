@@ -142,7 +142,7 @@ def handle_email(handler, action, api):
                 return reply(429, {"error": "操作过于频繁，请稍后再试"})
             if owner and (str(owner["kind"]), str(owner["uid"])) != (str(kind), str(uid)):
                 conn.rollback(); conn.close()
-                return reply(409, {"error": "该邮箱已绑定其他账户"})
+                return reply(409, {"error": _owner_hint(conn, owner), "owner_kind": owner["kind"], "owner_uid": str(owner["uid"])})
             conn.executemany("INSERT INTO account_email_attempts VALUES (?,?)", [(bucket, now) for bucket in buckets])
             token = secrets.token_urlsafe(32)
             conn.execute("INSERT OR REPLACE INTO account_email_challenges VALUES (?,?,?,?,?,?,?)", (kind, uid, email, normalized, hashlib.sha256(token.encode()).hexdigest(), now + 1800, now))
@@ -181,7 +181,7 @@ def handle_email(handler, action, api):
             owner = conn.execute("SELECT kind,uid FROM account_emails WHERE email_norm=?", (challenge["email_norm"],)).fetchone()
             if owner and (str(owner["kind"]), str(owner["uid"])) != (str(challenge["kind"]), str(challenge["uid"])):
                 conn.rollback()
-                return reply(409, {"error": "该邮箱已绑定其他账户"})
+                return reply(409, {"error": _owner_hint(conn, owner), "owner_kind": owner["kind"], "owner_uid": str(owner["uid"])})
             verified_at = datetime.now(timezone.utc).isoformat()
             conn.execute("INSERT INTO account_emails VALUES (?,?,?,?,?) ON CONFLICT(kind,uid) DO UPDATE SET email=excluded.email,email_norm=excluded.email_norm,verified_at=excluded.verified_at", (challenge["kind"], challenge["uid"], challenge["email"], challenge["email_norm"], verified_at))
             conn.execute("DELETE FROM account_email_challenges WHERE kind=? AND uid=?", (challenge["kind"], challenge["uid"]))
@@ -192,3 +192,26 @@ def handle_email(handler, action, api):
         finally:
             conn.close()
     return reply(200, {"ok": True, "email": challenge["email"], "message": "邮箱验证成功"})
+
+
+def _owner_hint(conn, owner):
+    """把「已绑定其他账户」换成带账号名的可操作提示。"""
+    kind, uid = str(owner["kind"]), str(owner["uid"])
+    name = ""
+    try:
+        if kind == "usso":
+            row = conn.execute("SELECT nickname FROM users WHERE user_id=?", (uid,)).fetchone()
+        else:
+            row = conn.execute("SELECT username FROM local_users WHERE CAST(uid AS TEXT)=?", (uid,)).fetchone()
+        if row:
+            # 兼容 row_factory 与普通元组两种取行方式
+            try:
+                name = (row["nickname"] if kind == "usso" else row["username"]) or ""
+            except (TypeError, IndexError, KeyError):
+                name = (row[0] or "")
+    except Exception:
+        name = ""
+    name = (name or "").strip()
+    who = ("「%s」" % name) if name else ("账户 #%s" % uid)
+    kind_cn = "USSO" if kind == "usso" else "站内"
+    return "该邮箱已绑定到%s（%s账号）。如需使用，请改用该账号登录；或为当前账号换一个邮箱。" % (who, kind_cn)
