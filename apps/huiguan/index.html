@@ -866,6 +866,8 @@
     <div class="auth-msg" id="authMsg"></div>
     <label class="auth-label" for="authUsername">用户名</label>
     <input class="auth-input" id="authUsername" maxlength="16" autocomplete="username" placeholder="2-16 位中英文 / 数字 / 下划线">
+    <label class="auth-label" for="authEmail">邮箱（注册必填）</label>
+    <input class="auth-input" id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="用于找回账号与重置密码">
     <label class="auth-label" for="authPassword">密码</label>
     <input class="auth-input" id="authPassword" type="password" maxlength="128" autocomplete="current-password" placeholder="登录使用已有密码；新注册需至少 12 位">
     <div style="display:flex;gap:8px;margin-top:4px">
@@ -1571,21 +1573,26 @@ async function submitRegister() {
   const msg = document.getElementById('authMsg');
   const btn = document.getElementById('authRegister');
   msg.className = 'auth-msg';
+  const email = (document.getElementById('authEmail') || {}).value ? document.getElementById('authEmail').value.trim() : '';
   if (!username || !password) { msg.textContent = '请填写用户名和密码'; return; }
   if (password.length < 12) { msg.textContent = '密码至少 12 位'; return; }
-  if (!confirm('确定用「' + username + '」注册账号？\n注册后请到账户页绑定邮箱，以便找回密码。')) return;
+  if (!email) { msg.textContent = '请填写邮箱（用于找回账号与重置密码）'; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = '请输入有效邮箱地址'; return; }
+  if (!confirm('确定用「' + username + '」注册账号？\n邮箱：' + email + '\n验证邮件将发到该邮箱。')) return;
   btn.disabled = true;
   try {
     const r = await fetch('/api/register', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password, email })
     });
     const d = await r.json();
     if (d.ok) {
       hideGuestReminder();
       msg.className = 'auth-msg ok';
-      msg.textContent = '注册成功，正在进入…';
+      msg.textContent = d.email_sent ? '注册成功，验证邮件已发送，请查收；正在进入…'
+        : '注册成功（邮箱验证暂不可用，稍后可在账户页重试）；正在进入…';
       document.getElementById('authPassword').value = '';
+      const em = document.getElementById('authEmail'); if (em) em.value = '';
       setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 400);
     } else {
       msg.textContent = d.error || '注册失败';
@@ -4262,7 +4269,7 @@ if (new URLSearchParams(location.search).get('openauth')) initialLoginCheck.then
 <script src="/design-system/ui/lxh-intro.js?v=20261027z"></script>
 <script src="/assets/gate/gate-scene.js?v=20261027z"></script>
 <script src="/homepage.js?v=20261027z"></script>
-<script src="/shared/shared-ui/site-nav.js?v=20261027z"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261028b"></script>
 <script src="/homepage-chrome.js?v=20261027z"></script>
 <script src="/homepage-content.js?v=20261027z"></script>
 <script src="/original-image-viewer.js?v=20261027z"></script>

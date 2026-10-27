@@ -40,7 +40,7 @@ from site_domains import (SITE_DOMAIN, PRODUCTION_HOSTS, cookie_domain, request_
                           request_origin_allowed, cors_headers, oauth_callback, site_url, OAuthUnavailable)
 from site_admin import is_site_owner
 from account_security import init_schema as init_security_schema, handle_security
-from account_email import init_schema as init_email_schema, handle_email
+from account_email import init_schema as init_email_schema, handle_email, EMAIL_RE
 from account_recovery import init_schema as init_recovery_schema, handle_recovery
 from account_profile import init_schema as init_profile_schema, get_profile, set_account_avatar, valid_asset_url, store_avatar_image as normalize_avatar_image
 import game_saves
@@ -2033,6 +2033,14 @@ class Handler(BaseStaticHandler):
         if len(password) < 12 or len(password) > 128:
             self._json(400, {"error": "密码长度需在 12-128 位之间"})
             return
+        email = (body.get("email") or "").strip()
+        if not email:
+            self._json(400, {"error": "请填写邮箱（用于找回账号与重置密码）"})
+            return
+        if len(email) > 254 or not EMAIL_RE.fullmatch(email):
+            self._json(400, {"error": "请输入有效邮箱地址"})
+            return
+        email_norm = email.casefold()
         if find_usso_password_login(username) or _usso_nickname_exists(username):
             self._json(409, {"error": "「" + username + "」是既有的 USSO 账号名号，请直接使用「登录」入口"}); return
         if get_local_user_by_name(username):
@@ -2061,9 +2069,32 @@ class Handler(BaseStaticHandler):
             conn.commit()
             conn.close()
 
+        # 绑定邮箱（未验证）；发送验证邮件失败时直接跳过，注册照常完成
+        email_sent = False
+        email_skipped = False
+        try:
+            token = secrets.token_urlsafe(32)
+            now_ts = time.time()
+            with DB_LOCK:
+                conn = db()
+                try:
+                    conn.execute(
+                        "INSERT OR REPLACE INTO account_email_challenges VALUES (?,?,?,?,?,?,?)",
+                        ("local", str(uid), email, email_norm, hashlib.sha256(token.encode()).hexdigest(), now_ts + 1800, now_ts))
+                    conn.commit()
+                finally:
+                    conn.close()
+            from account_email import _send_email
+            _send_email(email, token, site_url("huiguan", "/account.html", request_host(self)))
+            email_sent = True
+        except Exception as exc:
+            email_skipped = True
+            print("[register] email skipped: %r" % (exc,), flush=True)
+
         session_id = create_session("local", uid, request_root(self))
         ident = resolve_identity("local", uid)
-        self._json(200, {"ok": True, "user": ident}, cookie=[self._session_cookie(session_id), self._sso_cookie(uid, "local", ident.get("name") or "")])
+        self._json(200, {"ok": True, "user": ident, "email_sent": email_sent, "email_skipped": email_skipped},
+                   cookie=[self._session_cookie(session_id), self._sso_cookie(uid, "local", ident.get("name") or "")])
 
     def _api_local_login(self):
         body = self._read_json()
