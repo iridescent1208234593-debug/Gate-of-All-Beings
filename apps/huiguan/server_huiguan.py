@@ -871,22 +871,40 @@ def sync_fan_characters(conn, ident, code, cd, previous_code=None):
         [fields[col] for col in FAN_SYNC_COLUMNS] + [code, now_iso(), ident["kind"], ident["uid"]] + codes)
     return cur.rowcount
 
-def load_data():
+def _read_data_file():
     if not os.path.exists(DATA_FILE):
         return {}
-    with DATA_LOCK:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
-def save_data(data_dict):
+def load_data():
     with DATA_LOCK:
-        temporary = DATA_FILE + ".tmp"
-        with open(temporary, "w", encoding="utf-8") as f:
-            json.dump(data_dict, f, ensure_ascii=False, indent=2)
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(temporary, DATA_FILE)
+        return _read_data_file()
+
+
+def _write_data_file(data_dict):
+    temporary = DATA_FILE + ".tmp"
+    with open(temporary, "w", encoding="utf-8") as f:
+        json.dump(data_dict, f, ensure_ascii=False, indent=2)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(temporary, DATA_FILE)
+
+
+def update_data(mutate):
+    """characters.json 唯一的写入口：读取、修改、写回在同一把锁内完成。
+
+    整个文件是所有账户共用的一份文档；分开调用 load_data() 与写回，会让并发请求
+    各自写回一份不含对方改动的旧副本（lost update）。mutate(data) 原地修改
+    data，其返回值交回调用方；mutate 抛出异常时不写回。
+    只保证本进程内串行：characters.json 只能由一个服务进程写入。
+    """
+    with DATA_LOCK:
+        data = _read_data_file()
+        result = mutate(data)
+        _write_data_file(data)
+        return result
 
 
 # ---------- 外置存储（展示页 HTML / 上传图），给 characters.json 瘦身 ----------
@@ -2481,37 +2499,38 @@ class Handler(BaseStaticHandler):
             if isinstance(data_field.get("images"), list):
                 data_field["images"] = [store_data_uri(x) for x in data_field["images"]]
 
-        data = load_data()
         key = self._data_key(ident)
-        chars = data.get(key, [])
 
-        # 编辑时改了编号：原位改名，而不是另存一份新记录
-        previous_code = body.get("previous_code") or ""
-        if previous_code and previous_code != code and not any(c.get("code") == code for c in chars):
+        def upsert(data):
+            chars = data.get(key, [])
+            # 编辑时改了编号：原位改名，而不是另存一份新记录
+            previous_code = body.get("previous_code") or ""
+            if previous_code and previous_code != code and not any(c.get("code") == code for c in chars):
+                for c in chars:
+                    if c.get("code") == previous_code:
+                        c["code"] = code
+                        break
+                else:
+                    previous_code = ""
+
+            found = False
             for c in chars:
-                if c.get("code") == previous_code:
-                    c["code"] = code
+                if c.get("code") == code:
+                    if html_ref:
+                        c["html_ref"] = html_ref
+                        c.pop("html", None)
+                    c["data"] = data_field
+                    found = True
                     break
-            else:
-                previous_code = ""
-
-        found = False
-        for c in chars:
-            if c.get("code") == code:
+            if not found:
+                rec = {"code": code, "data": data_field}
                 if html_ref:
-                    c["html_ref"] = html_ref
-                    c.pop("html", None)
-                c["data"] = data_field
-                found = True
-                break
-        if not found:
-            rec = {"code": code, "data": data_field}
-            if html_ref:
-                rec["html_ref"] = html_ref
-            chars.insert(0, rec)
+                    rec["html_ref"] = html_ref
+                chars.insert(0, rec)
+            data[key] = chars
+            return previous_code, found
 
-        data[key] = chars
-        save_data(data)
+        previous_code, found = update_data(upsert)
 
         conn = db()
         try:
@@ -2544,14 +2563,8 @@ class Handler(BaseStaticHandler):
             return
 
         chars = body.get("characters", [])
-        data = load_data()
         key = self._data_key(ident)
-        old = data.get(key, [])
-        old_map = {c.get("code", ""): c for c in old}
-        new_chars = []
         for c in chars:
-            code = c.get("code", "")
-            entry_old = old_map.get(code, {})
             if isinstance(c, dict):
                 try:
                     normalize_oc_avatar(c)
@@ -2565,14 +2578,24 @@ class Handler(BaseStaticHandler):
                     c["image"] = store_data_uri(c["image"])
                 if isinstance(c.get("images"), list):
                     c["images"] = [store_data_uri(x) for x in c["images"]]
-            rec = {"code": code, "data": c}
-            if entry_old.get("html_ref"):
-                rec["html_ref"] = entry_old["html_ref"]
-            elif entry_old.get("html"):
-                rec["html_ref"] = store_showcase_html(entry_old["html"])
-            new_chars.append(rec)
-        data[key] = new_chars
-        save_data(data)
+
+        def replace_roster(data):
+            # 展示页只在单个保存时上传；整表替换沿用每个编号已有的展示页
+            old_map = {c.get("code", ""): c for c in data.get(key, [])}
+            new_chars = []
+            for c in chars:
+                code = c.get("code", "")
+                entry_old = old_map.get(code, {})
+                rec = {"code": code, "data": c}
+                if entry_old.get("html_ref"):
+                    rec["html_ref"] = entry_old["html_ref"]
+                elif entry_old.get("html"):
+                    rec["html_ref"] = store_showcase_html(entry_old["html"])
+                new_chars.append(rec)
+            data[key] = new_chars
+            return new_chars
+
+        new_chars = update_data(replace_roster)
         conn = db()
         try:
             for rec in new_chars:
@@ -3121,10 +3144,7 @@ class Handler(BaseStaticHandler):
 
         # 同时删除该用户的角色卡数据
         key = f"local:{uid}" if kind == "local" else uid
-        data = load_data()
-        if key in data:
-            data.pop(key)
-            save_data(data)
+        update_data(lambda data: data.pop(key, None))
         self._json(200, {"ok": True})
 
     # ---------- 改名（昵称唯一 + 3 天一次） ----------
@@ -4369,14 +4389,16 @@ class Handler(BaseStaticHandler):
         code = (body.get("code") or "").strip()
         if not key or not code:
             self._json(400, {"error": "缺少 owner / code"}); return
-        data = load_data()
-        chars = data.get(key, [])
-        before = len(chars)
-        data[key] = [c for c in chars if (c.get("code") or "").strip() != code]
-        removed = before - len(data[key])
-        if not data[key]:
-            data.pop(key, None)
-        save_data(data)
+        def remove(data):
+            chars = data.get(key, [])
+            kept = [c for c in chars if (c.get("code") or "").strip() != code]
+            if kept:
+                data[key] = kept
+            else:
+                data.pop(key, None)
+            return len(chars) - len(kept)
+
+        removed = update_data(remove)
         self._json(200, {"ok": True, "removed": removed})
 
     def _api_admin_scribe_requests(self):
@@ -4665,11 +4687,11 @@ class Handler(BaseStaticHandler):
                 )
                 pid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
                 if character is not None:
-                    character_data = load_data()
-                    character = next(c for c in character_data.get(self._data_key(ident), []) if c.get("code") == char_code)
-                    saved = character.setdefault("data", {})
-                    saved.update(colorPrimary=primary, colorAccent=accent, colorIndex=-1)
-                    save_data(character_data)
+                    def recolor(data):
+                        current = next(c for c in data.get(self._data_key(ident), []) if c.get("code") == char_code)
+                        current.setdefault("data", {}).update(colorPrimary=primary, colorAccent=accent, colorIndex=-1)
+
+                    update_data(recolor)
                 conn.commit()
         except Exception:
             if conn is not None:
