@@ -92,7 +92,7 @@
     try {
       var user = await read('/api/user');
       if (!user.logged_in) { window.openAuthModal(); return; }
-      if (!confirm('编辑可以审查与修订官方设定。请确认已加入会馆交流群，并愿意谨慎维护资料。继续申请？')) return;
+      if (!confirm('编辑可以审查与修订官方角色资料。请确认已加入会馆交流群，并愿意谨慎维护资料。继续申请？')) return;
       var message = prompt('简单介绍为什么适合成为编辑（选填）：');
       if (message === null) return;
       var response = await fetch('/api/official/scribe-apply', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: message.trim() }), signal: controller.signal });

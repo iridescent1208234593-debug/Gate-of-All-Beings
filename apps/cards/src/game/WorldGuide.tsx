@@ -8,7 +8,7 @@ export function WorldGuide() {
   const [tab,setTab]=useState('角色');
   const [query,setQuery]=useState('');
   const [limit,setLimit]=useState(36);
-  const items=tab==='角色'?facts.characters.map(c=>({id:c.id,title:c.name,tag:c.species||'角色',text:c.abilities.join('；')||'暂无能力记录',detail:c.affiliation,url:c.sourceUrl})):
+  const items=tab==='角色'?facts.characters.map(c=>({id:c.id,title:c.name,tag:c.category==='同人角色'?`同人 · ${c.species||'角色'}`:c.species||'角色',text:c.abilities.join('；')||'暂无能力记录',detail:c.affiliation,url:c.sourceUrl})):
     tab==='地点'?facts.locations.map(l=>({id:l.id,title:l.name,tag:l.type||'地点',text:l.description||'',detail:'',url:''})):
     tab==='纪事'?facts.timeline.map(t=>({id:t.id,title:t.event,tag:t.era,text:t.description,detail:t.relatedCharacters,url:''})):
     facts.terms.filter(t=>tab==='灵物'?t.category==='法器灵物':t.category!=='法器灵物').map(t=>({id:t.id,title:t.term,tag:t.category,text:t.definition||'',detail:'',url:''}));

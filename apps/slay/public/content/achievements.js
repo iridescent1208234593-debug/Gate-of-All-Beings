@@ -87,7 +87,7 @@ export const ACHIEVEMENTS = [
 	},
 	{
 		id: 'boss-naga',
-		name: '北域之主陨落',
+		name: '北域之战',
 		desc: '击败北域领主「那伽」，渊啸之寒为之平息。',
 		category: 'boss',
 		icon: '🐍',
@@ -117,7 +117,7 @@ export const ACHIEVEMENTS = [
 	},
 	{
 		id: 'boss-mingwang',
-		name: '明王伏诛',
+		name: '明王之试',
 		desc: '击败「明王·阎罗噬魂」——吞噬魂灵之路到此为止。',
 		category: 'boss',
 		icon: '👹',
@@ -251,7 +251,7 @@ export const ACHIEVEMENTS = [
 	},
 	{
 		id: 'boss-slayer-3',
-		name: '斩妖如麻',
+		name: '过关斩将',
 		desc: '跨局累计击败 3 个区域/最终 Boss。',
 		category: 'challenge',
 		icon: '🏆',

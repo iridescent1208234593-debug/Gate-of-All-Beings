@@ -88,8 +88,8 @@ h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
   <p class="subtitle">罗小黑战记 · 全部已出场角色 · 数据来自世界观数据库</p>
   <div class="scribe-banner" id="scribeBanner">
     <div class="sb-text">
-      <strong>成为「编辑」，一起维护官方设定</strong>
-      <span>熟悉《罗小黑战记》的你，可以申请成为编辑：审查他人提交的角色补充、修订与勘误官方设定，让数据库更准确、更完整。</span>
+      <strong>成为「编辑」，一起维护官方角色资料</strong>
+      <span>熟悉《罗小黑战记》的你，可以申请成为编辑：审查他人提交的角色补充、修订与勘误官方角色资料，让数据库更准确、更完整。</span>
     </div>
     <button class="sb-btn" onclick="applyScribe()">申请成为编辑</button>
     <button class="sb-btn sb-ghost" type="button" id="codeToggle" onclick="toggleCode()">我有编辑码</button>
@@ -193,7 +193,7 @@ async function applyScribe(){
   try{
     const u=await (await fetch('/api/user')).json();
     if(!u.logged_in){ location.href='/?openauth=1'; return; }
-    if(!confirm('申请【编辑】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。\n确认继续申请？'))return;
+    if(!confirm('申请【编辑】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 编辑权限可修改、删除站内的官方角色资料，请务必谨慎，避免误删数据。\n确认继续申请？'))return;
     const msg=(prompt('简单介绍下你为什么适合成为编辑（选填）：')||'').trim();
     const r=await fetch('/api/official/scribe-apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
     const d=await r.json();
@@ -219,7 +219,7 @@ async function submitCode(e){
       input.value=''; document.getElementById('codeRow').hidden=true;
       markScribe(true);
       if(window.RFX) RFX.toast(d.already?'你已经是编辑啦 ✨':'验证成功，欢迎成为编辑 ✨');
-      HuiguanGroup.show({title:'验证成功，欢迎你，编辑！',lead:'编辑可以修改、补充官方设定。'});
+      HuiguanGroup.show({title:'验证成功，欢迎你，编辑！',lead:'编辑可以修改、补充官方角色资料。'});
     }else{ msg.className='code-msg err'; msg.textContent=d.error||'验证失败，请稍后再试'; }
   }catch(err){ msg.className='code-msg err'; msg.textContent='网络不太顺，请稍后再试～'; }
   finally{ btn.disabled=false; }
@@ -227,7 +227,7 @@ async function submitCode(e){
 }
 function markScribe(scribeOnly){
   const b=document.getElementById('scribeBanner'); if(!b) return;
-  b.querySelector('.sb-text strong').textContent = scribeOnly ? '你已是编辑，感谢你维护官方设定' : '你已是管理员，可直接修订官方设定';
+  b.querySelector('.sb-text strong').textContent = scribeOnly ? '你已是编辑，感谢你维护官方角色资料' : '你已是管理员，可直接修订官方角色资料';
   b.querySelectorAll('.sb-btn,.code-row').forEach(el=>el.style.display='none');
 }
 async function initScribe(){

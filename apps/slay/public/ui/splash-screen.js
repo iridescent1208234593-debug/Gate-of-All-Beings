@@ -49,8 +49,8 @@ export default class SplashScreen extends Component {
 			)
 		return html`
 			<article class="Splash Splash--fadein">
-				<h1 style="margin-top:8vh">罗小黑战记·重生之门</h1>
-				<h2>一场属于你和浏览器的爬塔冒险</h2>
+				<h1 style="margin-top:8vh">重生之门 · 罗小黑战记同人</h1>
+				<h2>众生之门里的一场卡牌冒险</h2>
 				<p>共同旅途 · 灵质 ${state.sharedResources?.spirit??'—'} · 草药 ${state.sharedResources?.herb??'—'}　<a href="/app/modules/cards/#journey">查看同行名册与灵卡</a></p>
 				<img class="Splash-spoder" src="ui/images/spoder.png" title="嘿，你好呀" />
 				<div class="Splash-element">
@@ -75,7 +75,7 @@ export default class SplashScreen extends Component {
 						: html`<p class="Splash-elementHint">不选则随机觉醒一个五行系。</p>`}
 				</div>
 				<div class="Splash-element Splash-branch">
-					<p class="Splash-elementTitle">灵质天赋 · 八大能力系（可跳过，无天赋偏向）</p>
+					<p class="Splash-elementTitle">灵质天赋 · 六大系与强化、治愈分支（本作分类，可跳过）</p>
 					<div class="Splash-elementGrid Splash-branchGrid">
 						${abilityBranches.map(
 							(b) => html`
@@ -93,10 +93,10 @@ export default class SplashScreen extends Component {
 					</div>
 					${state.branch
 						? html`<p class="Splash-elementHint">已选择「${abilityBranches.find((b) => b.id === state.branch).name}」：${abilityBranches.find((b) => b.id === state.branch).flavor}${abilityBranches.find((b) => b.id === state.branch).dualSkill ? ` 开局觉醒双系合技「${abilityBranches.find((b) => b.id === state.branch).dualSkill}」。` : ''}</p>`
-						: html`<p class="Splash-elementHint">八大系天赋为灵质空间先天的偏向，选择后获得对应被动与专属开局卡；不选则无天赋。</p>`}
+						: html`<p class="Splash-elementHint">灵质天赋为灵质空间先天的偏向。本作以原作六大系为基础，另把生灵系的强化、治愈单列为两支。选择后获得对应被动与专属开局卡；不选则无天赋。</p>`}
 				</div>
 				<div class="Splash-element Splash-guild">
-					<p class="Splash-elementTitle">出身分馆 · 妖灵会馆七大分馆（可跳过，随机出身）</p>
+					<p class="Splash-elementTitle">出身会馆 · 苍南总馆与六处可选分馆（可跳过，随机出身）</p>
 					<div class="Splash-elementGrid Splash-guildGrid">
 						${guildBranches.map(
 							(g) => html`
@@ -197,12 +197,12 @@ export default class SplashScreen extends Component {
 								每回合从抽牌堆抽取 5 张牌。打出卡牌需要消耗能量，每回合你拥有 3 点能量。
 							</p>
 							<p>
-								卡牌可以对怪物造成伤害、格挡敌方攻击，或让敌人陷入虚弱、易伤等状态，
+								卡牌可以对敌人造成伤害、格挡敌方攻击，或让敌人陷入虚弱、易伤等状态，
 								也能为自己回血或提供其他增益。多试试就明白了。
 							</p>
-							<p>注意，每当你结束回合，怪物就会行动。</p>
+							<p>注意，每当你结束回合，敌人就会行动。</p>
 							<p>
-								若你能在被击败前清空房间里的怪物，就能进入下一房间。也许会有奖励等着你。
+								若你能在被击败前击退房间里的敌人，就能进入下一房间。也许会有奖励等着你。
 								你能闯到终点吗？
 							</p>
 

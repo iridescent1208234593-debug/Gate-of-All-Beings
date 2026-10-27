@@ -29,14 +29,14 @@ import { LingzhiSetup, LingzhiView } from '../activities/lingzhi/LingzhiView';
 
 const nameOf = (id: number) => Object.values(HEROES).find(h => h.characterId === id)?.name ?? `同行者 ${id}`;
 const PLACE_NAMES: Record<PlaceId, string> = { lodge: '林间小馆', 'forest-path': '林间小径', 'deep-forest': '深林', 'rebirth-gate': '重生之门', 'lingzhi-circuit': '灵质回路' };
-const CONDITION_LABEL = { healthy: '', wounded: ' · 重伤', fallen: ' · 已陨落' } as const;
+const CONDITION_LABEL = { healthy: '', wounded: ' · 重伤', fallen: ' · 静养中' } as const;
 
 export function changeText(c: Change): string {
   switch (c.kind) {
     case 'resource': return `${RESOURCE_NAMES[c.key]} ${c.amount > 0 ? '+' : ''}${c.amount}`;
     case 'bond': return `${nameOf(c.character)} 默契 +${c.amount}`;
     case 'wound': return `${nameOf(c.character)} 重伤`;
-    case 'fall': return `${nameOf(c.character)} 陨落`;
+    case 'fall': return `${nameOf(c.character)} 倒下`;
     case 'recover': return `${nameOf(c.character)} ${c.from === 'fallen' ? '恢复' : '痊愈'}`;
     case 'seal': return `${nameOf(c.character)} 结下封灵之契`;
     case 'card': return `记下「${CARDS[c.card]?.name ?? c.card}」`;
