@@ -717,6 +717,28 @@ def resolve_identity(kind, uid):
         }
 
 
+def find_usso_password_login(identifier):
+    """按昵称或邮箱查找已设置登录密码的 USSO 账号；唯一匹配才返回。"""
+    key = (identifier or "").strip()
+    if not key:
+        return None
+    conn = db()
+    rows = conn.execute(
+        "SELECT u.user_id, u.nickname, u.email, p.pass_hash "
+        "FROM users u JOIN usso_passwords p ON p.user_id = u.user_id "
+        "WHERE lower(u.nickname)=lower(?) OR lower(u.email)=lower(?)",
+        (key, key),
+    ).fetchall()
+    conn.close()
+    return rows[0] if len(rows) == 1 else None
+
+
+def get_usso_password_hash(user_id):
+    conn = db()
+    row = conn.execute("SELECT pass_hash FROM usso_passwords WHERE user_id=?", (str(user_id),)).fetchone()
+    conn.close()
+    return row["pass_hash"] if row else None
+
 def create_session(kind, uid, root_domain=None):
     sid = secrets.token_urlsafe(32)
     exp = (datetime.now(timezone.utc) + timedelta(days=SESSION_DAYS)).isoformat()
@@ -1647,6 +1669,10 @@ class Handler(BaseStaticHandler):
             return self._api_admin_exempt_decide()
         if path == "/api/admin/delete-character":
             return self._api_admin_delete_character()
+        if path == "/api/account/password":
+            return self._api_account_password()
+        if path == "/api/admin/reset-password":
+            return self._api_admin_reset_password()
         if path == "/api/member/user/update":
             return self._api_member_user_update()
         if path == "/api/official/sticker/upload":
@@ -2020,7 +2046,24 @@ class Handler(BaseStaticHandler):
             return
 
         u = get_local_user_by_name(username)
-        if not u or not verify_password(password, u["pass_hash"]):
+        if not u:
+            usso = find_usso_password_login(username) if username else None
+            if usso and verify_password(password, usso["pass_hash"]):
+                with DB_LOCK:
+                    conn = db()
+                    conn.execute("UPDATE users SET last_login=? WHERE user_id=?", (now_iso(), usso["user_id"]))
+                    conn.commit()
+                    conn.close()
+                session_id = create_session("usso", usso["user_id"], request_root(self))
+                ident = resolve_identity("usso", usso["user_id"])
+                self._json(200, {"ok": True, "user": ident},
+                           cookie=[self._session_cookie(session_id),
+                                   self._sso_cookie(usso["user_id"], "usso", ident.get("name") or "")])
+                return
+            rate_add(rkey)
+            self._json(401, {"error": "用户名或密码错误"})
+            return
+        if not verify_password(password, u["pass_hash"]):
             rate_add(rkey)
             self._json(401, {"error": "用户名或密码错误"})
             return
@@ -4476,6 +4519,96 @@ class Handler(BaseStaticHandler):
             u["posters"] = po_map.get(mk, [])
         self._json(200, {"scope": scope, "users": out,
                          "self": {"kind": ident["kind"], "uid": ident["uid"], "role": ident.get("role")}})
+
+    def _api_account_password(self):
+        """设置 / 修改登录密码。
+
+        - local 账号：需要原密码
+        - usso 账号：首次设置免原密码；已设置则需原密码
+        """
+        ident = self._require_ident()
+        if not ident:
+            return
+        body = self._read_json()
+        if body is None:
+            return
+        old_password = body.get("old_password") or ""
+        new_password = (body.get("new_password") or "").strip()
+        if len(new_password) < 12 or len(new_password) > 128:
+            self._json(400, {"error": "新密码长度需在 12-128 位之间"}); return
+        kind, uid = ident["kind"], str(ident["uid"])
+        if kind == "local":
+            conn = db()
+            row = conn.execute("SELECT pass_hash FROM local_users WHERE uid=?", (uid,)).fetchone()
+            conn.close()
+            current = row["pass_hash"] if row else None
+            if not row:
+                self._json(404, {"error": "账号不存在"}); return
+            if not verify_password(old_password, current):
+                self._json(403, {"error": "原密码不正确"}); return
+            pass_hash = hash_password(new_password)
+            with DB_LOCK:
+                conn = db(); conn.execute("UPDATE local_users SET pass_hash=? WHERE uid=?", (pass_hash, uid)); conn.commit(); conn.close()
+        else:
+            current = get_usso_password_hash(uid)
+            if current and not verify_password(old_password, current):
+                self._json(403, {"error": "原密码不正确"}); return
+            pass_hash = hash_password(new_password)
+            now = now_iso()
+            with DB_LOCK:
+                conn = db()
+                conn.execute(
+                    "INSERT INTO usso_passwords(user_id, pass_hash, created_at, updated_at) VALUES (?,?,?,?) "
+                    "ON CONFLICT(user_id) DO UPDATE SET pass_hash=excluded.pass_hash, updated_at=excluded.updated_at",
+                    (uid, pass_hash, now, now))
+                conn.commit(); conn.close()
+        print("[account-password] %s:%s updated" % (kind, uid), flush=True)
+        self._json(200, {"ok": True, "kind": kind, "has_password": True})
+
+    def _api_admin_reset_password(self):
+        """管理员为站内账号重置密码（仅管理员、仅站内账号、不可重置自己）。"""
+        ident = self._require_ident()
+        if not ident:
+            return
+        if self._member_scope(ident) != "all":
+            self._json(403, {"error": "仅管理员可重置密码"}); return
+        body = self._read_json()
+        if body is None:
+            return
+        kind = body.get("kind", "local")
+        uid = str(body.get("uid", "")).strip()
+        new_password = (body.get("new_password") or "").strip()
+        if kind != "local" or not uid.isdigit():
+            self._json(400, {"error": "仅支持重置站内账号密码"}); return
+        if uid == str(ident["uid"]):
+            self._json(400, {"error": "不能重置自己的密码"}); return
+        if new_password and (len(new_password) < 12 or len(new_password) > 128):
+            self._json(400, {"error": "密码长度需在 12-128 位之间"}); return
+        generated = not new_password
+        if generated:
+            new_password = secrets.token_urlsafe(12)[:16]
+        pass_hash = hash_password(new_password)
+        with DB_LOCK:
+            conn = db()
+            try:
+                row = conn.execute("SELECT username FROM local_users WHERE uid=?", (uid,)).fetchone()
+                if not row:
+                    conn.close(); self._json(404, {"error": "账号不存在"}); return
+                conn.execute("BEGIN IMMEDIATE")
+                conn.execute("UPDATE local_users SET pass_hash=? WHERE uid=?", (pass_hash, uid))
+                try:
+                    conn.execute("DELETE FROM sessions_db WHERE kind='local' AND uid=?", (uid,))
+                except Exception:
+                    pass
+                conn.commit()
+            except Exception:
+                conn.rollback(); conn.close()
+                self._json(500, {"error": "重置失败"}); return
+            conn.close()
+        print("[admin-reset] by=%s:%s target=local:%s" % (ident["kind"], ident["uid"], uid), flush=True)
+        self._json(200, {"ok": True, "uid": int(uid), "username": row["username"],
+                         "password": new_password if generated else "",
+                         "message": "密码已重置，该用户需重新登录"})
 
     def _api_member_user_update(self):
         ident = self._require_ident()

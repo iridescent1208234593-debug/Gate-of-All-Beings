@@ -102,6 +102,17 @@ function render(u,emailState){
       <p class="qc-hint">设置找回问题、修改密码，或检查你的站内登录账号。</p>
       <a class="qc-btn" href="/security.html" style="margin-top:var(--qc-sp-3)">管理账户安全</a>
     </div>
+    <div class="qc-card" id="password-setting">
+      <h2 class="qc-h2">登录密码</h2>
+      <p class="qc-hint">设置后可以用「昵称或邮箱 + 密码」直接登录，即使 USSO 单点登录不可用也能进站。${u.kind==='usso'?'<br>你当前是 USSO 账号，首次设置无需原密码。':''}</p>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <input id="pwOld" type="password" maxlength="128" autocomplete="current-password" placeholder="原密码（首次设置可留空）" class="qc-input">
+        <input id="pwNew" type="password" maxlength="128" autocomplete="new-password" placeholder="新密码（12-128 位）" class="qc-input">
+        <button class="qc-btn" onclick="setLoginPassword()">保存密码</button>
+      </div>
+      <div class="qc-hint" id="pwMsg" role="status"></div>
+    </div>
+
     <div class="qc-card" id="email-binding">
       <h2 class="qc-h2">邮箱验证</h2>
       ${emailState.verified?`<div class="row"><span class="k">已验证邮箱</span><span>${esc(emailState.email)} <span class="qc-tag qc-tag--accent">可用于账号找回</span></span></div>`:'<div class="qc-hint">绑定并验证一个常用邮箱，可用于找回站内账号名和重置密码。旧资料中的邮箱不会自动视为已验证。</div>'}
@@ -193,6 +204,19 @@ document.addEventListener('change',async event=>{
   try{accountAvatarDraft=await window.HuiguanAvatarCropper.open(file);if(accountAvatarDraft){if(accountAvatarPreviewUrl)URL.revokeObjectURL(accountAvatarPreviewUrl);accountAvatarPreviewUrl=URL.createObjectURL(accountAvatarDraft);const preview=document.getElementById('accountAvatarPreview');preview.src=accountAvatarPreviewUrl;preview.hidden=false;document.getElementById('accountAvatarSave').disabled=false;document.getElementById('accountAvatarHint').textContent='预览已更新；点击“保存头像”后同步到你的账户。';}}
   catch(error){document.getElementById('accountAvatarHint').textContent=error.message||'图片处理失败';}
 });
+async function setLoginPassword(){
+  const oldEl=document.getElementById('pwOld'), newEl=document.getElementById('pwNew'), msg=document.getElementById('pwMsg');
+  const oldPwd=oldEl?oldEl.value:'', newPwd=newEl?newEl.value:'';
+  if(!newPwd || newPwd.length<12 || newPwd.length>128){ if(msg){msg.textContent='新密码长度需在 12-128 位之间';msg.style.color='#b3543f';} return; }
+  if(msg){msg.textContent='保存中…';msg.style.color='';}
+  try{
+    const r=await fetch('/api/account/password',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({old_password:oldPwd,new_password:newPwd})});
+    const d=await r.json().catch(()=>({}));
+    if(r.status===200){ if(msg){msg.textContent='密码已保存，下次可直接用昵称或邮箱登录';msg.style.color='#5a9e8f';} if(oldEl)oldEl.value=''; if(newEl)newEl.value=''; }
+    else if(msg){ msg.textContent=d.error||'保存失败'; msg.style.color='#b3543f'; }
+  }catch(e){ if(msg){msg.textContent='网络错误，请稍后再试';msg.style.color='#b3543f';} }
+}
 async function sendEmailVerification(){
   const input=document.getElementById('accountEmail'), button=document.getElementById('emailSend');
   const hint=document.getElementById('emailHint'), err=document.getElementById('emailErr');
