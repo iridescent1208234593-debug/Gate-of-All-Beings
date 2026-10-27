@@ -204,7 +204,7 @@
     <h2 class="qc-h2">站点导航 Site Bar</h2>
     <p style="color:var(--qc-dim);font-size:13px;margin-bottom:12px;">本页顶部就是真实组件。三站与模块共用一条 48px 全局栏：像素标 + 西木会馆 / 众生之门 / 节气画廊三站并列，当前站点金色下划线；右侧依次是页面插槽、语言、账户。代码：<code>packages/shared-ui/site-nav.js</code>。</p>
     <div style="display:grid;gap:8px;max-width:640px;font-size:13px;line-height:1.8;">
-      <div><strong>普通页</strong>：<code>&lt;script src="/shared/shared-ui/site-nav.js"&gt;</code>，自动给 body 让出栏高。</div>
+      <div><strong>普通页</strong>：<code>&lt;script src="/shared/shared-ui/site-nav.js?v=20261027-groups"&gt;</code>，自动给 body 让出栏高。</div>
       <div><strong>沉浸首屏</strong>（节气画廊）：加 <code>data-variant="overlay"</code>，透明叠在画面上，不让位。</div>
       <div><strong>站内子导航</strong>（众生之门页签、模块壳）：在全局栏下方放一条米白本地栏，<code>top: var(--qc-nav-h)</code> 粘顶；不要再画第二条深色栏。</div>
       <div><strong>页面自己的按钮</strong>：放进 <code>IridescentlyNav.slot()</code>，不要用 position:fixed 占角落。</div>
@@ -241,6 +241,6 @@
 
 </div>
 <script src="qc-modal.js?v=20261019"></script>
-<script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261027-groups"></script>
 </body>
 </html>

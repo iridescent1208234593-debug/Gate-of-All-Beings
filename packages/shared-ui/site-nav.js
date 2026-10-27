@@ -1,6 +1,6 @@
 /* Iridescently site navigation — the one global bar shared by 节气画廊, 西木会馆 and 众生之门.
  *
- * Classic <script src=".../shared/shared-ui/site-nav.js"> mounts it immediately.
+ * Classic <script src=".../shared/shared-ui/site-nav.js?v=20261027-groups"> mounts it immediately.
  *   data-variant="overlay"  lighter glass over an immersive first screen (gallery, hero)
  *   data-tone="light"       cream glass with ink text for light pages (connections)
  *   data-manual             do not mount; call IridescentlyNav.mount() yourself
