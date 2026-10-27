@@ -17,7 +17,7 @@ export const EXPEDITION_TARGETS = [
   { name: '流石会馆', type: '妖灵会馆分馆', desc: '馆长大松，在第二部电影中被人类袭击，全员遇难' },
   { name: '罗家岙', type: '乡村', desc: '罗小白的老家，爷爷和阿根生活的地方' },
   { name: '北域', type: '区域', desc: '那伽的领地，清凝曾被囚禁于此三百年' },
-  { name: '龙游会馆', type: '地点', desc: '你可以帮助罗小黑百科补充资料' },
+  { name: '龙游会馆', type: '地点', desc: '妖灵会馆在龙游市的分馆，馆长潘靖' },
   { name: '兰溪', type: '城镇', desc: '蓝溪镇迁出后的新城镇' },
   { name: '小香礁', type: '岛屿', desc: '罗小黑世界中的岛屿' },
   { name: '灵风山', type: '山', desc: '罗小黑世界中的山' },
@@ -77,7 +77,7 @@ export const EXPEDITION_TARGETS = [
   { name: '三岙', type: '地点', desc: '罗小黑世界观中的地点' },
   { name: '龙凤山', type: '山', desc: '罗小黑世界中的山' },
   { name: '空岛', type: '岛屿', desc: '罗小黑世界中的岛屿' },
-  { name: '天朝', type: '国/朝代', desc: '古代国号/朝代名，出自萌娘百科罗小黑战记导航模板' },
+  { name: '天朝', type: '国/朝代', desc: '古代国号/朝代名' },
   { name: '玉国', type: '国/朝代', desc: '君主制国家，后在战乱中灭亡' },
   { name: '吴国', type: '国/朝代', desc: '古代国家，蓝溪镇相关：无限元年，吴国、燕国和玉国之间的多年战争宣告结束' },
   { name: '燕国', type: '国/朝代', desc: '古代国家，蓝溪镇相关：无限元年，吴国、燕国和玉国之间的多年战争宣告结束' },
@@ -97,7 +97,7 @@ export const EXPEDITION_TARGETS = [
   { name: '松山', type: '山', desc: '山脉/山地，青云洞、三岙、龙凤山所在' },
   { name: '新月村', type: '村', desc: '蓝溪镇相关村落' },
   { name: 'Matthiola incana Flower', type: '地点', desc: '风息公园旁的花店' },
-  { name: '白文村', type: '村', desc: '蓝溪镇相关村落，原角色表中归为非角色，补入地点表' },
+  { name: '白文村', type: '村', desc: '蓝溪镇相关村落' },
 ];
 
 /** 按名称查询目标，未命中返回 undefined */

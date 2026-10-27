@@ -50,7 +50,7 @@ export type Availability = { ok: true; reason?: undefined } | { ok: false; reaso
 export function canStartExpedition(w: WorldState, companion?: CharacterId): Availability {
   if (w.daypart !== 'morning') return { ok: false, reason: '天色已晚，今天先歇下，明早再出行。' };
   if (allFallen(w)) return { ok: false, reason: '同行者都已倒下，需要静养几夜。这段时间可以去重生之门走走。' };
-  if (companion !== undefined && w.companions[companion]?.condition === 'fallen') return { ok: false, reason: '这位同行者已经陨落，暂时不能同行。' };
+  if (companion !== undefined && w.companions[companion]?.condition === 'fallen') return { ok: false, reason: '这位同行者倒下了，正在静养，暂时不能同行。' };
   return { ok: true };
 }
 

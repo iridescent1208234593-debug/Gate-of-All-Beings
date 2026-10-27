@@ -53,7 +53,7 @@ try{
   await page.screenshot({path:path.join(output,'journey-mobile.png')});
   await page.setViewportSize({width:1280,height:900});
   await page.goto(origin+'/app/modules/slay/');
-  await page.getByRole('heading',{name:'罗小黑战记·重生之门',exact:true}).waitFor();
+  await page.getByRole('heading',{name:'重生之门 · 罗小黑战记同人',exact:true}).waitFor();
   await page.getByRole('button',{name:'开始',exact:true}).click();
   const hasRun=await page.evaluate(async()=>{const bridge=await import('/app/modules/slay/game/shared-progress.js');await bridge.flushSharedProgress();const game=await import('/shared/shared-session/game.js');return Boolean((await game.readMode('slay')).snapshot.storage['lxz-rebirth-run-v1']);});
   assert(hasRun,'Slay native gameplay did not checkpoint to the shared mode slot');

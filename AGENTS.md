@@ -17,6 +17,11 @@
   no wildcard or suffix host checks, no global Origin gate on navigation.
 - No force-push or history rewrite on shared branches; collaborators' branches are not merged,
   deleted or rewritten before review.
+- Hong Kong production does not run trunk yet: it runs the old layout plus hotfixes. A fix that
+  only exists in production is listed in `docs/changelog/hk-drift-*.md` until it is ported.
+- `characters.json` (all role sheets) is written only through `update_data()` by the one Huiguan
+  service process; never load, change and save it in separate steps. See
+  `docs/storage-runtime-writers.md`.
 
 ## File deletion and cleanup policy
 

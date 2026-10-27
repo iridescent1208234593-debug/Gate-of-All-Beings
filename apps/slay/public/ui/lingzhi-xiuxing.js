@@ -772,7 +772,7 @@ class LingzhiBattle extends Component {
 								<b>${opt.label}</b><span>${opt.desc}</span>
 							</button>`)}
 					</div>
-					<p class="Lxz-hint">灵质空间是一方由主人心念开辟的小天地，闯入其中需循其规则。</p>
+					<p class="Lxz-hint">灵质空间是每个生命固有的空间；进了别人的灵质空间，就要守它主人的规矩。</p>
 				</div></div>`}
 
 				${state.overlay === 'spaceResult' && room?.type === 'space' && room.resolved && html`<div class="Lxz-overlay"><div class="Lxz-overlayInner Lxz-event">

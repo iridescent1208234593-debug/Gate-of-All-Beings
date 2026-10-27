@@ -248,7 +248,7 @@ async function doRename(){
   }catch(e){err.textContent='网络错误';}
 }
 async function applyElder(){
-  if(!confirm('申请【长老】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 长老/编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。\n确认继续申请？'))return;
+  if(!confirm('申请【长老】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 长老/编辑权限可修改、删除站内的官方角色资料，请务必谨慎，避免误删数据。\n确认继续申请？'))return;
   const msg=(prompt('申请长老的理由（选填，300 字内）：')||'').trim();
   const err=document.getElementById('applyErr'); err.textContent='';
   try{
@@ -259,7 +259,7 @@ async function applyElder(){
   }catch(e){err.textContent='网络错误';}
 }
 async function applyScribe(){
-  if(!confirm('申请【编辑】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。\n确认继续申请？'))return;
+  if(!confirm('申请【编辑】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 编辑权限可修改、删除站内的官方角色资料，请务必谨慎，避免误删数据。\n确认继续申请？'))return;
   const msg=(prompt('申请编辑的理由（选填，说明你如何补充世界观内容）：')||'').trim();
   const err=document.getElementById('applyErr'); err.textContent='';
   try{

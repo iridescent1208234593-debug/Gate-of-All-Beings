@@ -16,7 +16,7 @@ const GATE_LAYERS = { ...ALL_LAYERS, text: false };
 const MIN_WAIT = 2.5;
 const FRAME_CAP = 1 / 30;
 const SPEAK_AT = 2.5;
-const GREETING = '你好，欢迎来到众生门';
+const GREETING = '你好，欢迎来到众生之门';
 const THEMES: { id: ThemeMode; label: string; color: string }[] = [
   { id: 'original', label: 'Classic Night', color: '#85A96F' },
   { id: 'twilight', label: 'Twilight Blue', color: '#74B9FF' },
