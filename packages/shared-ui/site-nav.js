@@ -38,12 +38,24 @@
       { host: new URL(domains.url('zszm')).hostname, label: '众生之门', path: '/', beta: true },
       { host: new URL(domains.url('main')).hostname, label: '节气画廊', path: '/homepage.html' }
     ];
-  var MORE = [
-    { host: new URL(domains.url('oc')).hostname, label: '佳霖馆长设定', path: '/' },
-    { host: new URL(domains.url('huiguan')).hostname, label: '配色海报工坊', path: '/haibao/' },
-    { host: new URL(domains.url('zszm')).hostname, label: '灵境会馆 · 据点经营', path: '/', hash: '#management' },
-    { host: new URL(domains.url('zszm')).hostname, label: '聚灵', path: '/app/shell/m/juling' },
-    { host: new URL(domains.url('main')).hostname, label: '连接与鸣谢', path: '/connections.html' }
+  var MORE_GROUPS = [
+    { title: '会馆', items: [
+      { host: new URL(domains.url('huiguan')).hostname, label: '角色画廊', path: '/gallery.html' },
+      { host: new URL(domains.url('huiguan')).hostname, label: '同人画廊', path: '/fan.html' },
+      { host: new URL(domains.url('huiguan')).hostname, label: '官方角色档案', path: '/works.html' },
+      { host: new URL(domains.url('huiguan')).hostname, label: '表情包收录', path: '/stickers.html' },
+      { host: new URL(domains.url('huiguan')).hostname, label: '人物关系图', path: '/relation.html' },
+      { host: new URL(domains.url('huiguan')).hostname, label: '配色海报工坊', path: '/haibao/' }
+    ] },
+    { title: '玩法', items: [
+      { host: new URL(domains.url('zszm')).hostname, label: '众生之门 · 门庭', path: '/' },
+      { host: new URL(domains.url('zszm')).hostname, label: '聚灵', path: '/app/shell/m/juling' },
+      { host: new URL(domains.url('zszm')).hostname, label: '灵境会馆 · 据点经营', path: '/', hash: '#management' }
+    ] },
+    { title: '其他', items: [
+      { host: new URL(domains.url('oc')).hostname, label: '佳霖馆长设定', path: '/' },
+      { host: new URL(domains.url('main')).hostname, label: '连接与鸣谢', path: '/connections.html' }
+    ] }
   ];
   var LEGAL = '<summary>版权与免责声明</summary><p class="qc-copy">罗小黑战记相关 IP 版权归寒木春华动画工作室所有。</p>' +
     '<p class="qc-copy">本站为非商业性粉丝社区项目，用于信息交流与角色创作。罗小黑战记相关角色、形象与作品的知识产权归原作者及寒木春华动画工作室所有。本站未获官方授权，如有侵权请通过连接与鸣谢页面联系管理员删除。</p>';
@@ -54,6 +66,8 @@
     '#qc-nav{--qc-fg:var(--qc-nav-paper);--qc-fg-soft:#f4eedfcc;--qc-sub:#c3d2bf;--qc-mark:var(--qc-nav-gold);--qc-glass:rgba(18,34,28,.58);--qc-edge:rgba(246,248,248,.16);--qc-hi:rgba(255,255,255,.07);--qc-panel:rgba(20,36,30,.86);--qc-hover:rgba(246,248,248,.08)}',
     '#qc-nav[data-variant="overlay"]{--qc-glass:rgba(12,19,26,.3);--qc-panel:rgba(14,22,28,.84)}',
     '#qc-nav[data-tone="light"]{--qc-fg:#17372e;--qc-fg-soft:#17372ec4;--qc-sub:#5d6a70;--qc-mark:#b07a22;--qc-glass:rgba(250,246,237,.6);--qc-edge:rgba(34,49,58,.12);--qc-hi:rgba(255,255,255,.7);--qc-panel:rgba(251,248,241,.92);--qc-hover:rgba(34,49,58,.06)}',
+    '#qc-nav[data-hidden]{transform:translateY(-100%);pointer-events:none}',
+    '#qc-nav{transition:transform .32s cubic-bezier(.4,0,.2,1)}',
     '#qc-nav{position:fixed;top:0;left:0;right:0;z-index:9999;box-sizing:border-box;height:var(--qc-nav-h);display:flex;align-items:center;gap:clamp(10px,2vw,22px);padding:0 clamp(12px,3vw,32px);background:linear-gradient(180deg,var(--qc-hi),transparent 70%),var(--qc-glass);border-bottom:1px solid var(--qc-edge);box-shadow:inset 0 1px 0 var(--qc-hi),0 6px 22px rgba(6,14,12,.08);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);color:var(--qc-fg);font:14px/1.2 "LXGW WenKai","Noto Serif SC","Source Han Serif SC",serif;letter-spacing:.03em}',
     '@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){#qc-nav{--qc-glass:rgba(18,34,28,.92)}#qc-nav[data-tone="light"]{--qc-glass:rgba(250,246,237,.96)}}',
     '#qc-nav *{box-sizing:border-box}',
@@ -107,6 +121,9 @@
     '#qc-nav .qc-brand img{width:26px;height:26px}',
     '#qc-nav .qc-links>a,#qc-nav .qc-more>summary{padding:0 7px}',
     '#qc-nav .qc-links>a.is-site::after{left:7px;right:7px}',
+    '#qc-nav .qc-panel-group{display:block;margin:10px 0 4px;padding:0 10px;font-size:11px;letter-spacing:.18em}',
+    '#qc-nav .qc-panel-group{color:var(--qc-mark);opacity:.85;border-top:1px solid var(--qc-edge);padding-top:8px}',
+    '#qc-nav .qc-more-panel>small.qc-panel-group:first-of-type{border-top:0;padding-top:0;margin-top:2px}',
     '#qc-nav .qc-more>summary{font-size:0;padding:0 10px}',
     '#qc-nav .qc-more>summary::after{margin:-4px 0 0;width:7px;height:7px}',
     '#qc-nav .qc-more-panel{position:fixed;left:8px;right:8px;top:calc(var(--qc-nav-h) + 4px);max-width:none}',
@@ -176,13 +193,16 @@
       if (site.beta) link.appendChild(el('small', 'qc-beta', 'beta'));
       panel.appendChild(link);
     });
-    MORE.forEach(function (item) {
-      var link = el('a', '', item.label); link.href = href(item);
-      if (item.unpublished) {
-        var dot = el('span', 'qc-status'); dot.dataset.state = 'unpublished'; dot.title = '尚未并入本站';
-        dot.setAttribute('role', 'img'); dot.setAttribute('aria-label', '尚未并入本站'); link.appendChild(dot);
-      }
-      panel.appendChild(link);
+    MORE_GROUPS.forEach(function (group) {
+      panel.appendChild(el('small', 'qc-panel-group', group.title));
+      group.items.forEach(function (item) {
+        var link = el('a', '', item.label); link.href = href(item);
+        if (item.unpublished) {
+          var dot = el('span', 'qc-status'); dot.dataset.state = 'unpublished'; dot.title = '尚未并入本站';
+          dot.setAttribute('role', 'img'); dot.setAttribute('aria-label', '尚未并入本站'); link.appendChild(dot);
+        }
+        panel.appendChild(link);
+      });
     });
     var legal = el('details'); legal.innerHTML = LEGAL; panel.appendChild(legal);
     panel.appendChild(el('small', '', '© ' + new Date().getFullYear() + ' Iridescently'));
@@ -344,7 +364,19 @@
     mount: mount,
     unmount: unmount,
     slot: function () { return state ? state.slot : null; },
-    height: function () { return state ? state.nav.offsetHeight : 0; }
+    height: function () { return state ? state.nav.offsetHeight : 0; },
+    // 沉浸场景（开场动画、全屏玩法）可临时收起全局导航
+    hide: function () {
+      if (!state) return;
+      state.nav.setAttribute('data-hidden', '');
+      document.documentElement.style.setProperty('--qc-nav-h', '0px');
+    },
+    show: function () {
+      if (!state) return;
+      state.nav.removeAttribute('data-hidden');
+      document.documentElement.style.setProperty('--qc-nav-h', state.nav.offsetHeight + 'px');
+    },
+    hidden: function () { return !!(state && state.nav.hasAttribute('data-hidden')); }
   };
   var script = document.currentScript;
   if (script && !('manual' in script.dataset)) {

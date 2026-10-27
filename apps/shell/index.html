@@ -44,6 +44,7 @@
   @media (max-width: 640px) { .shell-topbar a { padding: 0 9px; font-size: 13px; } .shell-topbar a.active::after { left: 9px; right: 9px; } }
 </style>
 <script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
+<script src="/shared/shared-ui/landscape-hint.js?v=20261027a" data-auto defer></script>
 <script defer src="/shared/shared-ui/server-recovery.js"></script>
 </head>
 <body>
@@ -54,6 +55,37 @@
   <span id="iridescently-shell-user"></span>
 </header>
 <main id="iridescently-shell-view"></main>
+<script>
+/* 进入模块（沉浸玩法）时收起全局导航；模块可通过 postMessage 自行控制。
+   - 路由 /app/shell/m/<key> 视为沉浸态
+   - 模块内开场动画等可发 {type:'qc-nav', hide:true/false}
+   兼容未加载 IridescentlyNav 的情况（静默跳过）。*/
+(function () {
+  var nav = null;
+  function api() { return window.IridescentlyNav || null; }
+  function setHidden(hide) {
+    var a = api(); if (!a) return;
+    if (hide) a.hide(); else a.show();
+    document.documentElement.setAttribute('data-qc-nav', hide ? 'hidden' : 'shown');
+  }
+  function syncWithRoute() {
+    setHidden(location.pathname.indexOf('/app/shell/m/') === 0);
+  }
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (d && d.type === 'qc-nav' && typeof d.hide === 'boolean') setHidden(d.hide);
+  });
+  window.addEventListener('popstate', syncWithRoute);
+  var push = history.pushState;
+  history.pushState = function () { var r = push.apply(this, arguments); syncWithRoute(); return r; };
+  var rep = history.replaceState;
+  history.replaceState = function () { var r = rep.apply(this, arguments); syncWithRoute(); return r; };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncWithRoute, { once: true });
+  else syncWithRoute();
+  window.__qcNavImmersive = { set: setHidden, sync: syncWithRoute };
+})();
+</script>
+
 
 <script type="module">
 import { refreshSession } from '/shared/shared-session/session.js';
