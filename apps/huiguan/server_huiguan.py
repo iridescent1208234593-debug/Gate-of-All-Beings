@@ -2033,6 +2033,8 @@ class Handler(BaseStaticHandler):
         if len(password) < 12 or len(password) > 128:
             self._json(400, {"error": "密码长度需在 12-128 位之间"})
             return
+        if find_usso_password_login(username) or _usso_nickname_exists(username):
+            self._json(409, {"error": "「" + username + "」是既有的 USSO 账号名号，请直接使用「登录」入口"}); return
         if get_local_user_by_name(username):
             self._json(409, {"error": "该用户名已被注册"})
             return
