@@ -200,6 +200,28 @@ class Handler(BaseStaticHandler):
             return False
         return _is_any_admin(str(user["kind"]), str(user["uid"]))
 
+
+    def _email_verified(self, user):
+        """是否已绑定并验证邮箱；用于互动功能的门槛。"""
+        if not user or not user.get("uid") or not user.get("kind"):
+            return False
+        kind, uid = str(user["kind"]), str(user["uid"])
+        try:
+            from storage_paths import data_root, huiguan_data_dir
+            db_path = huiguan_data_dir(data_root()) / "users.db"
+            if not db_path.exists():
+                return True  # 没有账户库时不阻断
+            conn = sqlite3.connect(f"file:{db_path.as_posix()}?mode=ro", uri=True, timeout=5)
+            try:
+                row = conn.execute(
+                    "SELECT verified_at FROM account_emails WHERE kind=? AND CAST(uid AS TEXT)=?",
+                    (kind, uid)).fetchone()
+                return bool(row and row[0])
+            finally:
+                conn.close()
+        except Exception:
+            return True  # 查询异常时不阻断（宁可放行也不误伤）
+
     def _read_json(self):
         try:
             length = int(self.headers.get("Content-Length", 0) or 0)
@@ -447,6 +469,10 @@ class Handler(BaseStaticHandler):
             self._json(404, {"error": "图片不存在"})
             return
         identity = (str(user["kind"]), str(user["uid"]))
+        if not self._email_verified(user):
+            self._json(403, {"error": "请先在「账户」页验证邮箱，验证后即可点赞与留言",
+                             "need_email_verified": True})
+            return
         try:
             with gallery_interactions.session(root) as db:
                 db.execute("BEGIN IMMEDIATE")

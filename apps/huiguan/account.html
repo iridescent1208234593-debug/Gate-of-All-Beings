@@ -73,8 +73,8 @@ async function init(){
         const result=await fetch('/api/account/email/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
         const data=await result.json();
         if(data.ok) history.replaceState(null,'',location.pathname+location.search);
-        alert(data.ok?'邮箱验证成功：'+data.email:(data.error||'邮箱验证失败'));
-      }catch(e){alert('验证请求暂时失败，请检查网络后刷新重试。');}
+        window.qcAlert(data.ok?('邮箱验证成功：'+data.email):(data.error||'邮箱验证失败'), data.ok?'验证成功':'验证失败');
+      }catch(e){window.qcAlert('验证请求暂时失败，请检查网络后刷新重试。', '网络异常');}
     }
     const r=await fetch('/api/user'); const u=await r.json();
     if(!u.logged_in)return pageState('请先登录后管理账户。',[{label:'去登录',href:'/?openauth=1'}],true);
@@ -87,8 +87,8 @@ async function init(){
 }
 function render(u,emailState){
   const isElder=u.role==='elder', isAdmin=u.is_admin, isScribe=u.edit_role==='scribe';
-  const curP=((u.theme_primary||'#f5f0e8').match(/^#[0-9a-fA-F]{6}$/)?u.theme_primary:'#f5f0e8').toLowerCase();
-  const curA=((u.theme_accent||'#5a9e8f').match(/^#[0-9a-fA-F]{6}$/)?u.theme_accent:'#5a9e8f').toLowerCase();
+  const curP=(/^#[0-9a-fA-F]{6}$/.test(u.theme_primary||'')?u.theme_primary:'#f5f0e8').toLowerCase();
+  const curA=(/^#[0-9a-fA-F]{6}$/.test(u.theme_accent||'')?u.theme_accent:'#5a9e8f').toLowerCase();
   document.getElementById('content').innerHTML=`
     <div class="qc-card">
       <h2 class="qc-h2">账户头像</h2>
@@ -166,8 +166,8 @@ function render(u,emailState){
       <div class="schemes" id="schemeGrid">
         ${COLOR_SCHEMES.map((s,i)=>`<button type="button" class="chip ${curP===s.primary.toLowerCase()&&curA===s.accent.toLowerCase()?'on':''}" data-i="${i}" onclick="pickScheme(${i})" title="${esc(s.name)}"><span class="dot" style="background:${s.primary}"></span><span class="dot" style="background:${s.accent}"></span><span class="nm">${esc(s.name)}</span></button>`).join('')}
       </div>
-      <div class="row" style="margin-top:12px;"><span class="k">主色</span><input type="color" id="tp" value="${curP}" oninput="syncThemeInputs()"><input class="qc-input hex-in" id="tpHex" value="${curP}" oninput="syncThemeInputs()"></div>
-      <div class="row"><span class="k">辅色</span><input type="color" id="ta" value="${curA}" oninput="syncThemeInputs()"><input class="qc-input hex-in" id="taHex" value="${curA}" oninput="syncThemeInputs()"></div>
+      <div class="row" style="margin-top:12px;"><span class="k">主色</span><input type="color" id="tp" value="${(curP||"#000000").match(/^#[0-9a-fA-F]{6}$/)?curP:"#000000"}" oninput="syncThemeInputs()"><input class="qc-input hex-in" id="tpHex" value="${curP}" oninput="syncThemeInputs()"></div>
+      <div class="row"><span class="k">辅色</span><input type="color" id="ta" value="${(curA||"#000000").match(/^#[0-9a-fA-F]{6}$/)?curA:"#000000"}" oninput="syncThemeInputs()"><input class="qc-input hex-in" id="taHex" value="${curA}" oninput="syncThemeInputs()"></div>
       <div class="theme-prev" id="themePrev"></div>
       <div class="actions">
         <button class="qc-btn" onclick="saveTheme()">保存配色</button>
@@ -251,13 +251,13 @@ function exemptBtn(u,type){
 }
 async function applyExempt(type){
   const label = type==='age' ? '突破年龄限制' : '突破技能选择限制';
-  const msg=(prompt(`申请${label}的理由（选填）：`)||'').trim();
+  const msg=await window.qcDialog({title:'申请' + label, subtitle:'说明用途，便于馆长审批（至少 2 个字）', placeholder:'例如：角色设定需要更长寿命', minLength:2, maxlength:300});
+  if(msg===null)return;
   const err=document.getElementById('applyErr'); err.textContent='';
   try{
     const r=await fetch('/api/exempt/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,message:msg})});
     const d=await r.json();
-    if(d.ok){alert('✔ '+(d.msg||'申请已提交，等待审批。')); init();}
-    else err.textContent=d.error||'申请失败';
+    if(d.ok){window.qcAlert(d.msg||'申请已提交，等待审批。', '已提交'); init();}else{window.qcAlert(d.error||'提交失败', '申请失败');}
   }catch(e){err.textContent='网络错误';}
 }
 async function doRename(){
@@ -267,30 +267,35 @@ async function doRename(){
   try{
     const r=await fetch('/api/rename',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nickname:nn})});
     const d=await r.json();
-    if(d.ok){alert('✔ 昵称已改为「'+(d.nickname||nn)+'」');init();}
-    else err.textContent=d.error||'改名失败';
+    if(d.ok){window.qcAlert('昵称已改为「'+(d.nickname||nn)+'」', '改名成功');init();}else{window.qcAlert(d.error||'改名失败', '改名失败');}
   }catch(e){err.textContent='网络错误';}
 }
 async function applyElder(){
-  if(!confirm('申请【长老】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 长老/编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。\n确认继续申请？'))return;
-  const msg=(prompt('申请长老的理由（选填，300 字内）：')||'').trim();
+  const _ok = await window.qcDialog({title:'申请长老前请确认', input:false,
+    subtitle:'1. 已加入西木会馆交流群（QQ群 878029597）；<br>2. 长老/编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。',
+    okText:'确认继续', cancelText:'再想想'});
+  if(_ok===null)return;
+  const msg=await window.qcDialog({title:'申请长老', subtitle:'说明你的贡献与管理意愿（至少 2 个字）', placeholder:'例如：已整理 30 条角色档案，愿意协助审核', minLength:2, maxlength:300});
+  if(msg===null)return;
   const err=document.getElementById('applyErr'); err.textContent='';
   try{
     const r=await fetch('/api/elder/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
     const d=await r.json();
-    if(d.ok){alert('✔ 长老申请已提交，等待馆长审批。');init();}
-    else err.textContent=d.error||'申请失败';
+    if(d.ok){window.qcAlert('长老申请已提交，等待馆长审批。', '已提交');init();}else{window.qcAlert(d.error||'提交失败', '申请失败');}
   }catch(e){err.textContent='网络错误';}
 }
 async function applyScribe(){
-  if(!confirm('申请【编辑】前请确认：\n1. 已加入西木会馆交流群（QQ群：878029597，微信群二维码见页脚/画廊）；\n2. 编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。\n确认继续申请？'))return;
-  const msg=(prompt('申请编辑的理由（选填，说明你如何补充世界观内容）：')||'').trim();
+  const _ok2 = await window.qcDialog({title:'申请编辑前请确认', input:false,
+    subtitle:'1. 已加入西木会馆交流群（QQ群 878029597）；<br>2. 编辑权限可修改、删除官方设定，请务必谨慎，避免误删数据。',
+    okText:'确认继续', cancelText:'再想想'});
+  if(_ok2===null)return;
+  const msg=await window.qcDialog({title:'申请编辑', subtitle:'说明你打算如何补充世界观内容（至少 2 个字）', placeholder:'例如：补充罗小黑世界的地理设定', minLength:2, maxlength:300});
+  if(msg===null)return;
   const err=document.getElementById('applyErr'); err.textContent='';
   try{
     const r=await fetch('/api/official/scribe-apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
     const d=await r.json();
-    if(d.ok){alert('✔ 编辑申请已提交，等待长老/管理员审批。');init();}
-    else err.textContent=d.error||'申请失败';
+    if(d.ok){window.qcAlert('编辑申请已提交，等待长老/管理员审批。', '已提交');init();}else{window.qcAlert(d.error||'提交失败', '申请失败');}
   }catch(e){err.textContent='网络错误';}
 }
 // ---------- 外观配色 ----------
@@ -377,6 +382,77 @@ function resetTheme(){
 }
 init();
 </script>
-<script src="/shared/shared-ui/site-nav.js?v=20261027z"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261028k"></script>
+
+<style id="__qc_modal_css">
+.qc-dlg-mask{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;
+  background:rgba(12,20,17,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+.qc-dlg{width:min(440px,88vw);max-height:82vh;overflow:auto;border-radius:16px;padding:22px 22px 18px;
+  background:#faf7ef;color:#22302a;border:1px solid rgba(34,49,58,.12);
+  box-shadow:0 24px 64px rgba(6,14,12,.35);font:14px/1.65 "LXGW WenKai","Noto Serif SC",serif;}
+html[data-theme="dark"] .qc-dlg{background:#16211d;color:#f1ece0;border-color:rgba(246,248,248,.14);}
+.qc-dlg h3{margin:0 0 6px;font-size:15px;letter-spacing:.06em;}
+.qc-dlg .qc-dlg-sub{margin:0 0 14px;font-size:12px;opacity:.65;line-height:1.7;}
+.qc-dlg textarea{width:100%;box-sizing:border-box;min-height:96px;resize:vertical;padding:10px 12px;
+  border-radius:10px;border:1px solid rgba(34,49,58,.18);background:rgba(255,255,255,.7);
+  color:inherit;font:inherit;outline:none;}
+html[data-theme="dark"] .qc-dlg textarea{background:rgba(10,20,16,.6);border-color:rgba(246,248,248,.18);}
+.qc-dlg textarea:focus{border-color:#5c8f7d;box-shadow:0 0 0 3px rgba(92,143,125,.16);}
+.qc-dlg .qc-dlg-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;opacity:.6;}
+.qc-dlg .qc-dlg-err{color:#c0504d;min-height:16px;font-size:12px;margin-top:4px;}
+.qc-dlg .qc-dlg-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;}
+.qc-dlg button{padding:8px 20px;border-radius:999px;font:inherit;cursor:pointer;border:1px solid rgba(34,49,58,.2);background:transparent;color:inherit;}
+.qc-dlg button.qc-primary{background:#5c8f7d;border-color:#5c8f7d;color:#fff;}
+.qc-dlg button:hover{opacity:.9;}
+</style>
+<script id="__qc_modal_js">
+/* 站点内置弹窗：替代 window.prompt / confirm / alert */
+window.qcDialog = function(opts){
+  opts = opts || {};
+  return new Promise(function(resolve){
+    var mask = document.createElement('div');
+    mask.className = 'qc-dlg-mask';
+    var box = document.createElement('div');
+    box.className = 'qc-dlg';
+    var html = '<h3>' + (opts.title || '') + '</h3>';
+    if (opts.subtitle) html += '<p class="qc-dlg-sub">' + opts.subtitle + '</p>';
+    if (opts.input !== false) {
+      html += '<textarea maxlength="' + (opts.maxlength || 300) + '" placeholder="' + (opts.placeholder || '') + '"></textarea>'
+        + '<div class="qc-dlg-meta"><span data-count>0 / ' + (opts.maxlength || 300) + '</span><span>' + (opts.optional === false ? '必填' : '选填') + '</span></div>';
+    }
+    html += '<div class="qc-dlg-err" data-err></div>'
+      + '<div class="qc-dlg-actions">'
+      + '<button type="button" data-cancel>' + (opts.cancelText || '取消') + '</button>'
+      + '<button type="button" class="qc-primary" data-ok>' + (opts.okText || '确定') + '</button>'
+      + '</div>';
+    box.innerHTML = html;
+    mask.appendChild(box);
+    document.body.appendChild(mask);
+
+    var ta = box.querySelector('textarea');
+    var cnt = box.querySelector('[data-count]');
+    var err = box.querySelector('[data-err]');
+    function close(val){ mask.remove(); resolve(val); }
+    if (ta) {
+      ta.addEventListener('input', function(){ if (cnt) cnt.textContent = ta.value.length + ' / ' + (opts.maxlength || 300); });
+      setTimeout(function(){ ta.focus(); }, 30);
+    }
+    box.querySelector('[data-cancel]').onclick = function(){ close(null); };
+    box.querySelector('[data-ok]').onclick = function(){
+      var val = ta ? (ta.value || '').trim() : '';
+      var min = opts.minLength == null ? 0 : opts.minLength;
+      if (min > 0 && val.length < min) { err.textContent = '至少填写 ' + min + ' 个字'; if (ta) ta.focus(); return; }
+      close(val);
+    };
+    mask.addEventListener('click', function(e){ if (e.target === mask) close(null); });
+    document.addEventListener('keydown', function esc(e){
+      if (e.key === 'Escape') { document.removeEventListener('keydown', esc); close(null); }
+    });
+  });
+};
+window.qcAlert = function(msg, title){
+  return window.qcDialog({ title: title || '提示', subtitle: msg, input: false, okText: '知道了', cancelText: '关闭' });
+};
+</script>
 </body>
 </html>
