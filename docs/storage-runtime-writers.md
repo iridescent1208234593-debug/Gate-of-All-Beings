@@ -9,7 +9,8 @@ verified migration manifest.
 | Writer/owner | Persistent target | Generated or temporary target |
 | --- | --- | --- |
 | Huiguan accounts, sessions, account profiles, email/recovery/security, points, tasks and cloud saves | `data/huiguan/users.db` (including SQLite journal/WAL sidecars) | — |
-| Huiguan role sheets and imported legacy saves | `data/huiguan/characters.json`, `data/huiguan/game_saves.json` | atomic JSON temporary sibling |
+| Huiguan OC role sheets | default `data/huiguan/characters.json`; explicitly activated SQL uses `data/huiguan/users.db` `oc_*` tables | backend fence and atomic JSON temporary sibling |
+| Imported legacy game saves | `data/huiguan/game_saves.json` retained as migration source | — |
 | Huiguan uploads, avatars and showcase documents | `assets/managed/huiguan/uploads/`, `assets/managed/huiguan/store/` | — |
 | Editable worldview, image moderation and sticker metadata | `data/worldview/worldview_luoxiaohei_v4.db` | — |
 | New worldview image/sticker uploads | `assets/managed/worldview/images/` | — |
@@ -35,12 +36,13 @@ approved source/managed image roots. The database itself does not need a path re
 An unavailable worldview database is opened with SQLite `mode=rw` and is never silently
 recreated as an empty file.
 
-`characters.json` is one JSON document shared by every account. All writes go
-through `update_data()` in `apps/huiguan/server_huiguan.py`, which reads, changes and
-replaces the file under one lock, so concurrent saves cannot overwrite each other
-(`apps/huiguan/tests/test_characters_concurrent_writes.py`). The lock is in-process:
-exactly one service process may write the file, and offline tools such as
-`apps/huiguan/migrate_characters.py` run only while the service is stopped.
+`characters.json` is one JSON document shared by every account. All OC reads and writes go
+through `services/platform/oc_store.py`: in the default JSON backend a write reads, changes and
+replaces the file inside one `Store.transaction()` under an in-process lock plus an interprocess
+file lock (`characters-storage.lock`), so concurrent saves cannot overwrite each other
+(`apps/huiguan/tests/test_characters_concurrent_writes.py`). Binaries that predate `oc_store`
+do not take that lock, and offline tools such as `apps/huiguan/migrate_characters.py` run only
+while every service is stopped.
 
 Juling requires the configured SQLite runtime. An unavailable or damaged database
 fails startup rather than silently switching storage formats. Existing JSON values
@@ -75,3 +77,15 @@ Regression checks use synthetic identities/images and disposable storage:
 Cards identity/balance tests and Spirit settings tests. Run Python fixture modules in
 separate processes: they deliberately configure their own environment and import-time
 service state.
+
+## OC backend fence
+
+All OC reads/writes, including Cards candidates, use `services/platform/oc_store.py`.
+`IRIDESCENTLY_OC_BACKEND` defaults to `json`; it never selects SQL automatically or dual-writes.
+`data/huiguan/characters-storage-state.json` must agree with the selected backend; `frozen`
+rejects OC access. Only offline, explicitly confirmed operations in `tools/runtime/oc-storage.py`
+change the fence. Older binaries do not honor it and must be stopped by the operator.
+SQL mutation and its gallery/poster/registration-point effects use the same users.db transaction.
+The pre-cutover JSON remains a protected source; after SQL accepts writes, rollback must export
+and reconcile current SQL data before JSON can be reactivated. See
+[OC storage](storage/oc-sql-storage.md) and [manual runbook](storage/oc-sql-runbook.md).
