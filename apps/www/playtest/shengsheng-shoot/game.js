@@ -1,4 +1,4 @@
-import { createGame, step, clamp } from './core.js?v=4';
+import { createGame, step, clamp } from './core.js?v=20261027z';
 import { reportResult } from '/shared/shared-session/progress.js';
 
 const $ = id => document.getElementById(id);

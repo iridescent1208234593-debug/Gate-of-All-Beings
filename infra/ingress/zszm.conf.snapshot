@@ -1,0 +1,136 @@
+# 缓存策略：内容未变 -> 304 复用本地；变了 -> 只传变更
+map $uri $zszm_cache_ctl {
+    default                                              "no-cache";
+    # 带内容哈希的构建产物：一年不变
+    "~*[-.][A-Za-z0-9_-]{8,}\.(?:js|css|woff2?)$"          "public, max-age=31536000, immutable";
+    # 图片/字体：一周，不阻塞渲染
+    "~*\.(?:woff2?|ttf|otf|png|jpe?g|gif|webp|avif|svg|ico)$" "public, max-age=604800";
+}
+
+proxy_cache_path /var/cache/nginx/zszm levels=1:2 keys_zone=zszm:16m max_size=4g inactive=7d use_temp_path=off;
+map $http_upgrade $zszm_connection { default upgrade; '' close; }
+map $upstream_cache_status $zszm_cache { default $upstream_cache_status; '' BYPASS; }
+log_format zszm '$time_iso8601 $request_method $uri $status bytes=$body_bytes_sent cache=$zszm_cache upstream=$upstream_response_time';
+
+server {
+    listen 127.0.0.1:8080;
+    server_name iridescently.xyz www.iridescently.xyz huiguan.iridescently.xyz
+                oc.iridescently.xyz spirit.iridescently.xyz zszm.iridescently.xyz
+                game.iridescently.xyz juling.iridescently.xyz lingjing.iridescently.xyz;
+    server_tokens off;
+    include /etc/nginx/snippets/iridescently-origin-guards.conf;
+    client_max_body_size 32m;
+    access_log /var/log/nginx/zszm-access.log zszm;
+    error_log /var/log/nginx/zszm-error.log warn;
+    add_header X-Iridescently-Node hk-ecsvkdu0 always;
+    add_header X-Iridescently-Cache $zszm_cache always;
+    proxy_pass_request_headers on;
+    proxy_http_version 1.1;
+    proxy_connect_timeout 15s;
+    proxy_read_timeout 300s;
+    gzip on;
+    gzip_comp_level 5;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_vary on;
+    gzip_types text/css text/javascript application/javascript application/json image/svg+xml application/wasm font/ttf font/otf;
+
+    # Keep navigation recovery available even if the application origin is down.
+    error_page 502 503 504 /__server/unavailable;
+    location = /__server/unavailable {
+        internal;
+        alias /srv/iridescently/current/shared/shared-ui/server-unavailable.html;
+        default_type text/html;
+        add_header Cache-Control "no-store" always;
+        add_header X-Content-Type-Options nosniff always;
+    }
+    location = /shared/shared-ui/server-recovery.js {
+        alias /srv/iridescently/current/shared/shared-ui/server-recovery.js;
+        default_type application/javascript;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    # Dynamic routes precede the static extension rule, including embedded APIs.
+    location ~ (?:^|/)api(?:/|$) {
+        error_page 502 503 504 = @api_unavailable;
+        include /etc/nginx/snippets/zszm-proxy.conf;
+        proxy_pass http://127.0.0.1:18181;
+        proxy_buffering off;
+        proxy_cache off;
+    }
+    location @api_unavailable {
+        default_type application/json;
+        add_header Cache-Control "no-store" always;
+        return 502 '{"error":"服务暂时不可用，请稍后重试"}';
+    }
+    location ~ (^|/)\. { return 404; }
+    location ~* (?:\.(?:py|db|db-shm|db-wal|log|sqlite|sqlite3|pem|key|pfx|p12)$|\.bak|/(?:characters|game_saves)\.json$|/(?:__pycache__|backup|store|node_modules)(?:/|$)) {
+        return 404;
+    }
+    location ~* ^/(?:assets/|shared/|app/modules/[^/]+/(?!api/)|app/shell/).*\.(?:js|css|woff2?|ttf|otf|png|jpe?g|gif|webp|avif|svg|ico|mp4|webm|mp3|ogg|wav|wasm)$ {
+        include /etc/nginx/snippets/zszm-proxy.conf;
+        # These directories contain public build assets. Never send credentials
+        # to their origin, so logged-in visitors share the same public cache.
+        proxy_set_header Cookie '';
+        proxy_set_header Authorization '';
+        proxy_pass http://127.0.0.1:18181;
+        proxy_cache zszm;
+        proxy_cache_key "$host$request_uri";
+        proxy_cache_valid 200 1h;
+        proxy_cache_lock on;
+        proxy_cache_lock_timeout 20s;
+        proxy_cache_revalidate on;
+        proxy_force_ranges on;
+        # Nginx honors upstream Cache-Control, Set-Cookie and Vary by default.
+        # 丢弃上游缓存头，由本层统一决定
+        proxy_hide_header Cache-Control;
+        add_header Cache-Control $zszm_cache_ctl always;
+    }
+    # server-manager-selector: public version chooser, no administrative operations.
+    location = /__server/select {
+        alias /srv/iridescently/control/public/server-select.html;
+        default_type text/html;
+        add_header Cache-Control "no-store" always;
+        add_header X-Iridescently-Node hk-ecsvkdu0 always;
+    }
+    location = /__email-guard.js {
+        alias /srv/iridescently/control/public/email-guard.js;
+        default_type application/javascript;
+        add_header Cache-Control "no-cache" always;
+    }
+
+    # 节气画廊 3D 引擎静态资源（app 的静态白名单不含该目录，直接由 nginx 直出）
+    location ^~ /gallery-engine/ {
+        root /srv/iridescently/new/20261026T113632Z/site/apps/www;
+        autoindex off;
+        add_header Cache-Control "public, max-age=604800" always;
+    }
+
+    location = /__notice.js {
+        alias /srv/iridescently/control/public/notice.js;
+        default_type application/javascript;
+        add_header Cache-Control "no-store" always;
+    }
+    location = /__notice-bg.webp {
+        alias /srv/iridescently/control/public/notice-bg.webp;
+        default_type image/webp;
+        add_header Cache-Control "public, max-age=86400" always;
+    }
+    location = /__server/selector.js {
+        alias /srv/iridescently/control/public/selector.js;
+        default_type application/javascript;
+        add_header Cache-Control "no-cache" always;
+        add_header X-Iridescently-Node hk-ecsvkdu0 always;
+    }
+    location / {
+        proxy_set_header Accept-Encoding "";
+        sub_filter_once on;
+        # Match the real document head before any inline JS/template HTML appears.
+        sub_filter '<head>' '<head><script defer src="/__server/selector.js?v=20261024.1"></script><script defer src="/__notice.js?v=20261027j"></script><script defer src="/__email-guard.js?v=20261027a"></script>';
+        include /etc/nginx/snippets/zszm-proxy.conf;
+        proxy_pass http://127.0.0.1:18181;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_intercept_errors on;
+    }
+}

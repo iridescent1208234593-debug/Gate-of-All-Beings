@@ -15,7 +15,10 @@ from storage_paths import data_root, huiguan_data_dir
 
 
 # The site owner's two accounts. Add entries here; never compare a bare uid.
-SITE_OWNER_ACCOUNTS = frozenset({("usso", "7"), ("local", "7")})
+SITE_OWNER_ACCOUNTS = frozenset({
+    ("usso", "7"), ("local", "7"),          # iridescent 站长
+    ("usso", "1"), ("local", "1"),          # 摆烂人生（USSO 主账号）
+})
 
 
 def _users_db(project_root=None):
@@ -58,3 +61,53 @@ def is_site_owner(token_payload, project_root=None):
     if (kind, uid) not in SITE_OWNER_ACCOUNTS:
         return False
     return account_usable(kind, uid, project_root)
+
+
+def is_huiguan_admin(kind, uid, project_root=None):
+    """会馆角色为 admin（local_users.role 或 user_flags.role）的账号也算管理员。"""
+    database = _users_db(project_root)
+    if not database.exists():
+        return False
+    try:
+        conn = sqlite3.connect(f"file:{database.as_posix()}?mode=ro", uri=True, timeout=5)
+    except sqlite3.Error:
+        return False
+    try:
+        if kind == "local":
+            row = conn.execute(
+                "SELECT role FROM local_users WHERE CAST(uid AS TEXT)=? AND status='active'", (uid,)
+            ).fetchone()
+            if row and str(row[0]).lower() == "admin":
+                return True
+        try:
+            row = conn.execute(
+                "SELECT role FROM user_flags WHERE kind=? AND CAST(uid AS TEXT)=?", (kind, uid)
+            ).fetchone()
+            if row and str(row[0]).lower() == "admin":
+                return True
+        except sqlite3.OperationalError:
+            pass
+        return False
+    finally:
+        conn.close()
+
+
+def is_admin(kind, uid, project_root=None):
+    """站长，或会馆管理员，都视为管理员。
+
+    is_site_owner 接受的是已验签的 hx_sso payload（dict），不是 (kind, uid)；
+    这里按同样语义构造最小 payload 再判断，避免签名字段错位。
+    """
+    payload = {"kind": kind, "uid": str(uid)}
+    try:
+        if is_site_owner(payload, project_root):
+            return True
+    except TypeError:
+        try:
+            if is_site_owner(payload):
+                return True
+        except Exception:
+            pass
+    except Exception:
+        pass
+    return is_huiguan_admin(kind, uid, project_root)

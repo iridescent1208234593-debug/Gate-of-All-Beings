@@ -645,11 +645,11 @@
   .auth-legacy summary { cursor: pointer; color: var(--text-dim); font-size: 11px; }
   .auth-legacy .auth-hint { margin: 6px 0 0; }
 </style>
-<link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261015-1">
-<link rel="stylesheet" href="/homepage.css?v=20261021-sub3">
-<link rel="preload" as="script" href="/design-system/ui/lxh-intro.js?v=20261015-1">
-<link rel="preload" as="script" href="/assets/gate/gate-scene.js?v=20261009-6">
-<link rel="preload" as="script" href="/homepage.js?v=20261016-1">
+<link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261027z">
+<link rel="stylesheet" href="/homepage.css?v=20261027z">
+<link rel="preload" as="script" href="/design-system/ui/lxh-intro.js?v=20261027z">
+<link rel="preload" as="script" href="/assets/gate/gate-scene.js?v=20261027z">
+<link rel="preload" as="script" href="/homepage.js?v=20261027z">
 <script>document.documentElement.classList.add('home-booting');</script>
 <script src="/oc-revisions.js?v=20261026"></script>
 </head>
@@ -868,11 +868,16 @@
     <div class="auth-msg" id="authMsg"></div>
     <label class="auth-label" for="authUsername">用户名</label>
     <input class="auth-input" id="authUsername" maxlength="16" autocomplete="username" placeholder="2-16 位中英文 / 数字 / 下划线">
+    <label class="auth-label" for="authEmail">邮箱（注册必填）</label>
+    <input class="auth-input" id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="用于找回账号与重置密码">
     <label class="auth-label" for="authPassword">密码</label>
     <input class="auth-input" id="authPassword" type="password" maxlength="128" autocomplete="current-password" placeholder="登录使用已有密码；新注册需至少 12 位">
     <div class="auth-turnstile" id="authTurnstile" hidden></div>
-    <button type="button" class="auth-submit" id="authSubmit" onclick="submitAuth()">登录 / 注册</button>
-    <div class="auth-hint">用户名不存在时将自动注册并登录。请使用注册用户名，不是昵称；密码区分大小写。新注册用户名不得使用官方世界观角色名。</div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button type="button" class="auth-submit" id="authSubmit" onclick="submitAuth()" style="flex:2">登录</button>
+      <button type="button" class="auth-submit" id="authRegister" onclick="submitRegister()" style="flex:1;font-size:13px;background:transparent;border:1px solid rgba(242,239,230,.55);color:#f2efe6">注册账号</button>
+    </div>
+    <div class="auth-hint">登录仅校验已有账号，不会自动注册。需要新账号请点「注册账号」。密码区分大小写；新注册用户名不得使用官方世界观角色名。</div>
     <a class="auth-usso" href="/security.html?mode=recover">找回账号 / 密码（已验证邮箱或找回问题）</a>
     <details class="auth-legacy"><summary>其他登录方式</summary><div class="auth-hint">USSO 外部登录已暂停；既有账户资料与角色数据保留。请使用会馆站内账号登录。</div></details>
   </div>
@@ -1362,14 +1367,14 @@
   </div>
 </div>
 
-<script src="/image-upload.js?v=20261024-2"></script>
-<script src="/reactions-fx.js?v=20261018"></script>
-<script src="/group-reminder.js?v=20261018-2"></script>
-<link rel="stylesheet" href="/avatar-cropper.css?v=20261024">
-<script src="/avatar-cropper.js?v=20261024"></script>
-<script src="/character-colors.js?v=20261013"></script>
-<script src="/auth-next.js?v=20261025"></script>
-<script src="/turnstile-widget.js?v=20261027"></script>
+<script src="/image-upload.js?v=20261027z"></script>
+<script src="/reactions-fx.js?v=20261027z"></script>
+<script src="/group-reminder.js?v=20261027z"></script>
+<link rel="stylesheet" href="/avatar-cropper.css?v=20261027z">
+<script src="/avatar-cropper.js?v=20261027z"></script>
+<script src="/character-colors.js?v=20261027z"></script>
+<script src="/auth-next.js?v=20261027z"></script>
+<script src="/turnstile-widget.js?v=20261028"></script>
 <script>
 const STORAGE_KEY = 'luoxiaohei_characters';
 
@@ -1409,7 +1414,7 @@ function maybeGroupReminder() {
     m = document.createElement('div');
     m.id = 'groupModal';
     m.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(20,26,22,.6);display:flex;align-items:center;justify-content:center;padding:20px;';
-    m.innerHTML = `<div style="background:var(--panel,#fbf8f2);border:1px solid var(--border,#d4cfbe);border-radius:12px;max-width:440px;width:100%;padding:22px;">
+    m.innerHTML = `<div style="background:#fbf8f2;border:1px solid #d4cfbe;border-radius:12px;max-width:440px;width:100%;padding:22px;color:#3a4a3e;box-shadow:0 24px 60px rgba(20,30,26,.35);">
       <strong style="font-size:16px;letter-spacing:1px;">加入交流群 · 领取编辑权限</strong>
       <p style="font-size:13px;color:var(--dim,#7a8a7e);line-height:1.8;margin:12px 0;">你已拥有<strong>长老/编辑</strong>权限，可修改、删除站内的官方角色资料。为防止权限被滥用、便于协作与追责，请先加入交流群并填写你的群昵称：</p>
       <div style="font-size:13px;margin-bottom:10px;">QQ群：<strong>878029597</strong>（微信群二维码见页脚/画廊）</div>
@@ -1444,11 +1449,11 @@ function maybeFanGalleryReminder() {
     m.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(20,26,22,.6);display:flex;align-items:center;justify-content:center;padding:20px;';
     const count = d.character_count || 0;
     m.innerHTML = `<div style="background:var(--panel,#fbf8f2);border:1px solid var(--border,#d4cfbe);border-radius:12px;max-width:440px;width:100%;padding:22px;">
-      <strong style="font-size:16px;letter-spacing:1px;">你有 ${count} 个已登记角色</strong>
-      <p style="font-size:13px;color:var(--dim,#7a8a7e);line-height:1.8;margin:12px 0;">你的人设已收录进会馆名册，要不要把它们公开到<strong>同人角色画廊</strong>，让更多同好看到？</p>
+      <strong style="display:block;font-size:16px;letter-spacing:1px;color:#3a4a3e;">你有 ${count} 个已登记角色</strong>
+      <p style="font-size:13px;color:#5a6b5f;line-height:1.8;margin:12px 0;">你的人设已收录进会馆名册，要不要把它们公开到<strong style="color:#3a4a3e;">同人角色画廊</strong>，让更多同好看到？</p>
       <div style="display:flex;gap:10px;">
-        <button type="button" id="fanSuggestGo" style="flex:1;padding:10px;border:none;border-radius:6px;background:var(--gold,#d4a840);color:#fff;font-size:14px;font-family:inherit;cursor:pointer;">去同人画廊</button>
-        <button type="button" id="fanSuggestClose" style="flex:1;padding:10px;border:1px solid var(--border,#d4cfbe);border-radius:6px;background:transparent;color:var(--dim,#7a8a7e);font-size:14px;font-family:inherit;cursor:pointer;">暂时不用</button>
+        <button type="button" id="fanSuggestGo" style="flex:1;padding:10px;border:none;border-radius:6px;background:#c99a2e;color:#fff;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">去同人画廊</button>
+        <button type="button" id="fanSuggestClose" style="flex:1;padding:10px;border:1px solid #d4cfbe;border-radius:6px;background:transparent;color:#5a6b5f;font-size:14px;font-family:inherit;cursor:pointer;">暂时不用</button>
       </div>
     </div>`;
     document.body.appendChild(m);
@@ -1559,7 +1564,7 @@ function openAuthModal(notice) {
   if (notice) { m.className = 'auth-msg ok'; m.textContent = notice; }
   else { m.className = 'auth-msg'; m.textContent = ''; }
   document.getElementById('authMask').hidden = false;
-  window.HuiguanTurnstile.mount(document.getElementById('authTurnstile'), 'auth').catch(() => {
+  window.HuiguanTurnstile.mount(document.getElementById('authTurnstile'), 'login').catch(() => {
     m.className = 'auth-msg'; m.textContent = '人机验证加载失败，请检查网络后重新打开此窗口';
   });
   const u = document.getElementById('authUsername');
@@ -1569,6 +1574,49 @@ function closeAuthModal() {
   document.getElementById('authMask').hidden = true;
   showGuestReminder();
 }
+// Login and register share one Turnstile widget but the server binds tokens to each endpoint;
+// switching endpoints re-renders the widget, and the visitor completes it before submitting.
+async function authTurnstileReady(action, msg, label) {
+  const state = await window.HuiguanTurnstile.ensure(document.getElementById('authTurnstile'), action).catch(() => 'error');
+  if (state === 'error') { msg.textContent = '人机验证加载失败，请检查网络后重试'; return false; }
+  if (state === 'pending') { msg.textContent = '请先完成下方的人机验证，再点「' + label + '」'; return false; }
+  return true;
+}
+async function submitRegister() {
+  const username = document.getElementById('authUsername').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const msg = document.getElementById('authMsg');
+  const btn = document.getElementById('authRegister');
+  msg.className = 'auth-msg';
+  const email = (document.getElementById('authEmail') || {}).value ? document.getElementById('authEmail').value.trim() : '';
+  if (!username || !password) { msg.textContent = '请填写用户名和密码'; return; }
+  if (password.length < 12) { msg.textContent = '密码至少 12 位'; return; }
+  if (!email) { msg.textContent = '请填写邮箱（用于找回账号与重置密码）'; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = '请输入有效邮箱地址'; return; }
+  if (!await authTurnstileReady('register', msg, '注册账号')) return;
+  if (!confirm('确定用「' + username + '」注册账号？\n邮箱：' + email + '\n验证邮件将发到该邮箱。')) return;
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password, email, turnstile: window.HuiguanTurnstile.token() })
+    });
+    const d = await r.json();
+    window.HuiguanTurnstile.reset();
+    if (d.ok) {
+      hideGuestReminder();
+      msg.className = 'auth-msg ok';
+      msg.textContent = d.email_sent ? '注册成功，验证邮件已发送，请查收；正在进入…'
+        : '注册成功（邮箱验证暂不可用，稍后可在账户页重试）；正在进入…';
+      document.getElementById('authPassword').value = '';
+      const em = document.getElementById('authEmail'); if (em) em.value = '';
+      setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 400);
+    } else {
+      msg.textContent = d.error || '注册失败';
+    }
+  } catch (e) { window.HuiguanTurnstile.reset(); msg.textContent = '网络错误，请重试'; }
+  btn.disabled = false;
+}
 async function submitAuth() {
   const username = document.getElementById('authUsername').value.trim();
   const password = document.getElementById('authPassword').value;
@@ -1576,9 +1624,10 @@ async function submitAuth() {
   const btn = document.getElementById('authSubmit');
   msg.className = 'auth-msg';
   if (!username || !password) { msg.textContent = '请填写用户名和密码'; return; }
+  if (!await authTurnstileReady('login', msg, '登录')) return;
   btn.disabled = true;
   try {
-    const r = await fetch('/api/auth', {
+    const r = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password, turnstile: window.HuiguanTurnstile.token() })
@@ -1588,7 +1637,7 @@ async function submitAuth() {
     if (d.ok) {
       hideGuestReminder();
       msg.className = 'auth-msg ok';
-      msg.textContent = d.registered ? '已自动注册并登录' : '登录成功';
+      msg.textContent = '登录成功';
       document.getElementById('authPassword').value = '';
       // Re-validated at use: exact approved host on this page's own root (packages/site-domains/index.js).
       const next = window.__AUTH_NEXT && window.safeAuthNext(window.__AUTH_NEXT);
@@ -1599,7 +1648,7 @@ async function submitAuth() {
       }
       setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 300);
     } else {
-      msg.textContent = d.error || '操作失败，请重试';
+      msg.textContent = (d.error || '操作失败，请重试') + (r.status === 401 ? '（如需新账号，请点「注册账号」）' : '');
     }
   } catch(e) {
     window.HuiguanTurnstile.reset();
@@ -3794,7 +3843,7 @@ body.theme-transition, body.theme-transition * { transition: background-color 0.
   };
 })();
 <\/script>
-<script src="/showcase-download.js?v=20261014"><\/script>
+<script src="/showcase-download.js?v=20261027z"><\/script>
 </body>
 </html>`;
 }
@@ -4246,14 +4295,14 @@ if (new URLSearchParams(location.search).get('openauth')) initialLoginCheck.then
 
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"6fa5e24ac49f4de687c113b64d110992","r":1}' crossorigin="anonymous"></script>
 
-<script src="/design-system/ui/lxh-intro.js?v=20261015-1"></script>
-<script src="/assets/gate/gate-scene.js?v=20261009-6"></script>
-<script src="/homepage.js?v=20261016-1"></script>
-<script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
-<script src="/homepage-chrome.js?v=20261017-nav"></script>
-<script src="/homepage-content.js?v=20261009-2"></script>
-<script src="/original-image-viewer.js?v=20261022-1"></script>
-<script src="/homepage-registration.js?v=20261009-1"></script>
+<script src="/design-system/ui/lxh-intro.js?v=20261027z"></script>
+<script src="/assets/gate/gate-scene.js?v=20261027z"></script>
+<script src="/homepage.js?v=20261027z"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261028k"></script>
+<script src="/homepage-chrome.js?v=20261027z"></script>
+<script src="/homepage-content.js?v=20261027z"></script>
+<script src="/original-image-viewer.js?v=20261027z"></script>
+<script src="/homepage-registration.js?v=20261027z"></script>
 <script>
 /* 链接框（浏览器标签 / 分享链接标题）文字轮播：小猫脸眨眼 → 站点文案打字机 */
 (function () {
@@ -4286,6 +4335,6 @@ if (new URLSearchParams(location.search).get('openauth')) initialLoginCheck.then
   setTimeout(function () { clearInterval(blink); type(); }, 2400);
 })();
 </script>
-<script src="/form-feedback.js?v=20261011-1"></script>
+<script src="/form-feedback.js?v=20261027z"></script>
 </body>
 </html>
