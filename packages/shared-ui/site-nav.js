@@ -1,6 +1,6 @@
 /* Iridescently site navigation — the one global bar shared by 节气画廊, 西木会馆 and 众生之门.
  *
- * Classic <script src=".../shared/shared-ui/site-nav.js?v=20261028k"> mounts it immediately.
+ * Classic <script src=".../shared/shared-ui/site-nav.js?v=20261028o"> mounts it immediately.
  *   data-variant="overlay"  lighter glass over an immersive first screen (gallery, hero)
  *   data-tone="light"       cream glass with ink text for light pages (connections)
  *   data-manual             do not mount; call IridescentlyNav.mount() yourself
@@ -84,7 +84,7 @@
     '#qc-nav details>summary{cursor:pointer;list-style:none}',
     '#qc-nav summary::-webkit-details-marker{display:none}',
     '#qc-nav .qc-more>summary::after{content:"";width:6px;height:6px;margin:-3px 0 0 7px;border:solid currentColor;border-width:0 1.5px 1.5px 0;transform:rotate(45deg);opacity:.7}',
-    '#qc-nav .qc-more-panel{position:absolute;left:0;top:calc(100% + 6px);display:grid;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:72svh;overflow:auto;padding:8px;background:var(--qc-panel);border:1px solid var(--qc-edge);border-radius:12px;box-shadow:inset 0 1px 0 var(--qc-hi),0 14px 34px rgba(4,16,11,.22);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}',
+    '#qc-nav .qc-more-panel{position:absolute;left:0;top:calc(100% + 6px);display:block;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:72svh;overflow:auto;padding:8px;background:var(--qc-panel);border:1px solid var(--qc-edge);border-radius:12px;box-shadow:inset 0 1px 0 var(--qc-hi),0 14px 34px rgba(4,16,11,.22);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}',
     '#qc-nav .qc-more-panel>a,#qc-nav .qc-more-panel>details>summary{display:flex;align-items:center;gap:8px;padding:10px;border-radius:5px}',
     '#qc-nav .qc-more-panel .qc-panel-site,#qc-nav .qc-more-panel .qc-panel-sites-head{display:none}',
     '#qc-nav .qc-more-panel>a:hover{background:var(--qc-hover)}',
@@ -96,6 +96,7 @@
     '#qc-nav .qc-more-panel::-webkit-scrollbar-thumb:hover{background:rgba(230,192,106,.5)}',
     '#qc-nav .qc-more-panel::-webkit-scrollbar-corner{background:transparent}',
     '#qc-nav .qc-more-panel>small{padding:8px 10px;color:var(--qc-sub);font-size:11px}',
+    '#qc-nav .qc-more-panel>a,#qc-nav .qc-more-panel>details{width:100%;box-sizing:border-box}', /* qc-panel-single-col */
     '#qc-nav .qc-copy{margin:6px 10px 8px;white-space:normal;font-size:12px;line-height:1.8;color:var(--qc-sub)}',
     '#qc-nav .qc-status{display:inline-block;width:6px;height:6px;margin-left:6px;border-radius:50%;background:#7c8b7f}',
     '#qc-nav .qc-status[data-state="up"]{background:#7fd38a}',
