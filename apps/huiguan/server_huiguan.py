@@ -2490,6 +2490,22 @@ class Handler(BaseStaticHandler):
         for uid, chars in data.items():
             for c in chars:
                 if c.get("code") == code:
+                    # 隐私守卫：未公开的设表只有本人能看，访客直接拒绝
+                    _ident = self._require_ident_optional()
+                    _owner = bool(_ident) and self._data_key(_ident) == uid
+                    if not _owner:
+                        try:
+                            _conn = db()
+                            _row = _conn.execute(
+                                "SELECT is_public FROM fan_characters WHERE code=? ORDER BY id DESC LIMIT 1",
+                                (code,)).fetchone()
+                            _conn.close()
+                            _public = bool(_row and _row["is_public"])
+                        except Exception:
+                            _public = False
+                        if not _public:
+                            self._json(403, {"error": "该设表未公开，仅作者本人可见"})
+                            return
                     html = get_record_html(c)
                     if html:
                         data = c.get("data") or {}
