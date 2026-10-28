@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import siteDomains from '../../../../packages/site-domains/index.mjs';
 import { facts } from '@lxh/shared-data/catalog.js';
 import { ABILITY_SYSTEMS, ELEMENTS } from '@lxh/shared-types/world';
 import type { MetaState } from './core/types';
@@ -17,7 +18,7 @@ export function WorldGuide() {
     <div className="world-vocabulary"><div><small>六大系</small>{Object.values(ABILITY_SYSTEMS).map(s=><span key={s}>{s}</span>)}</div><div><small>御灵五行</small>{Object.values(ELEMENTS).map(s=><span key={s}>{s}</span>)}</div></div>
     <div className="guide-tools"><div className="filter-row">{['角色','地点','灵物','设定','纪事'].map(x=><button key={x} aria-pressed={tab===x} className={tab===x?'selected':''} onClick={()=>{setTab(x);setLimit(36);}}>{x}</button>)}</div><input aria-label="搜索万灵志" placeholder="寻找一个名字、一种能力…" value={query} onChange={e=>{setQuery(e.target.value);setLimit(36);}}/></div>
     <p className="subtle">找到 {matches.length} 条{tab==='纪事'?' · 纪事保留资料中的时间表述':''}</p>
-    <div className="guide-grid">{matches.slice(0,limit).map(i=><article key={i.id}><small>{i.tag}</small><h2>{i.title}</h2><p>{i.text.slice(0,240)}{i.text.length>240?'…':''}</p>{i.detail&&<p className="guide-detail">{i.detail}</p>}{/^https?:\/\//.test(i.url)&&<a href={i.url} target="_blank" rel="noreferrer">查看资料出处 ↗</a>}</article>)}</div>
+    <div className="guide-grid">{matches.slice(0,limit).map(i=><article key={i.id}><small>{i.tag}</small><h2>{i.title}</h2><p>{i.text.slice(0,240)}{i.text.length>240?'…':''}</p>{i.detail&&<p className="guide-detail">{i.detail}</p>}{/^https?:\/\//.test(i.url)&&<a href={siteDomains.localizeUrl(i.url)} target="_blank" rel="noreferrer">查看资料出处 ↗</a>}</article>)}</div>
     {matches.length>limit&&<button className="secondary" onClick={()=>setLimit(limit+36)}>继续翻阅</button>}
   </section>;
 }

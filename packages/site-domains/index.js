@@ -28,6 +28,18 @@
       return parsed.href;
     } catch { return ''; }
   }
+  // A stored absolute link to one of our own hosts points at the same service on the visitor's
+  // root, so following it never moves the reader to another root.
+  function localizeUrl(raw, host = currentHost()) {
+    if (typeof raw !== 'string' || !/^https?:\/\//i.test(raw)) return raw;
+    try {
+      const parsed = new URL(raw);
+      const target = hosts.get(parsed.hostname.toLowerCase());
+      const root = rootFor(host);
+      if (!target || !root || target.root === root || parsed.port || parsed.username || parsed.password) return raw;
+      return url(target.service, parsed.pathname + parsed.search + parsed.hash, host);
+    } catch { return raw; }
+  }
   function requestContext(request) {
     const headers = request.headers;
     const count = name => request.rawHeaders?.filter((_, index) => index % 2 === 0 && request.rawHeaders[index].toLowerCase() === name).length ?? (headers[name] ? 1 : 0);
@@ -60,6 +72,6 @@
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyLinks);
     else applyLinks();
   }
-  return { config, rootFor, url, safeReturn, requestContext, sameOrigin,
+  return { config, rootFor, url, localizeUrl, safeReturn, requestContext, sameOrigin,
     allowedHosts: [...hosts.keys(), ...config.previewHosts], service: host => hosts.get(host)?.service };
 });
