@@ -840,6 +840,7 @@ body:has(#qc-gamenav) #app {
 }
 .login-box input:focus { border-color: #7fb2e5; }
 .login-error { color: #ff8a80; font-size: 12px; min-height: 16px; }
+.login-turnstile { min-height: 65px; }
 .login-actions { display: flex; gap: 8px; }
 .login-actions button { flex: 1; }
 
