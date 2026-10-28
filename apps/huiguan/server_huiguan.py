@@ -47,6 +47,7 @@ from account_recovery import init_schema as init_recovery_schema, handle_recover
 from account_profile import init_schema as init_profile_schema, get_profile, set_account_avatar, valid_asset_url, store_avatar_image as normalize_avatar_image
 import game_saves
 import account_progress
+import turnstile
 from showcase_document import published_document
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 from storage_paths import (project_root as resolve_project_root, data_root, huiguan_data_dir,
@@ -807,6 +808,23 @@ def rate_add(key):
         RATE.setdefault(key, []).append(now)
 
 
+# Failed password checks are counted three ways: one account from one IP, one IP across every
+# account (credential stuffing sweeps many usernames from one address), and one account across
+# every IP (distributed guessing against a single account).
+LOGIN_FAILURE_LIMITS = (("login:{user}|{ip}", 8, 600), ("login-ip:{ip}", 30, 600), ("login-user:{user}", 20, 3600))
+
+
+def login_throttled(username, ip):
+    user = username.lower()
+    return any(rate_blocked(key.format(user=user, ip=ip), max_n, window) for key, max_n, window in LOGIN_FAILURE_LIMITS)
+
+
+def login_failed(username, ip):
+    user = username.lower()
+    for key, _, _ in LOGIN_FAILURE_LIMITS:
+        rate_add(key.format(user=user, ip=ip))
+
+
 # ---------- USSO ----------
 
 def sso_post(url, data):
@@ -1473,6 +1491,8 @@ class Handler(BaseStaticHandler):
             return self._api_user()
         if path == "/api/oc":
             return self._api_owned_character(qs)
+        if path == "/api/turnstile":
+            return self._json(200, {"siteKey": turnstile.site_key() or None})
         if path == "/api/user/ocs":
             return self._api_user_ocs()
         if path == "/api/account/email":
@@ -1947,6 +1967,8 @@ class Handler(BaseStaticHandler):
         if rate_blocked(f"reg:{ip}", 5, 3600):
             self._json(429, {"error": "注册过于频繁，请稍后再试"})
             return
+        if not self._turnstile_passed(body, "register"):
+            return
         rate_add(f"reg:{ip}")
 
         username = (body.get("username") or "").strip()
@@ -1999,14 +2021,15 @@ class Handler(BaseStaticHandler):
         username = (body.get("username") or "").strip()
         password = body.get("password") or ""
         ip = self._client_ip()
-        rkey = f"login:{username.lower()}|{ip}"
-        if rate_blocked(rkey, 8, 600):
+        if login_throttled(username, ip):
             self._json(429, {"error": "尝试次数过多，请 10 分钟后再试"})
+            return
+        if not self._turnstile_passed(body, "login"):
             return
 
         u = get_local_user_by_name(username)
         if not u or not verify_password(password, u["pass_hash"]):
-            rate_add(rkey)
+            login_failed(username, ip)
             self._json(401, {"error": "用户名或密码错误"})
             return
         if u.get("status") != "active":
@@ -2031,16 +2054,17 @@ class Handler(BaseStaticHandler):
         username = (body.get("username") or "").strip()
         password = body.get("password") or ""
         ip = self._client_ip()
+        if login_throttled(username, ip):
+            self._json(429, {"error": "尝试次数过多，请 10 分钟后再试"})
+            return
+        if not self._turnstile_passed(body, "auth"):
+            return
 
         u = get_local_user_by_name(username) if username else None
         if u:
             # —— 登录 ——
-            rkey = f"login:{username.lower()}|{ip}"
-            if rate_blocked(rkey, 8, 600):
-                self._json(429, {"error": "尝试次数过多，请 10 分钟后再试"})
-                return
             if not verify_password(password, u["pass_hash"]):
-                rate_add(rkey)
+                login_failed(username, ip)
                 self._json(401, {"error": "密码错误"})
                 return
             if u.get("status") != "active":
@@ -4999,6 +5023,16 @@ class Handler(BaseStaticHandler):
 
     def _client_ip(self):
         return self.headers.get("CF-Connecting-IP") or self.client_address[0]
+
+    def _turnstile_passed(self, body, action):
+        """Answer the request and return False unless its Turnstile token verifies (no-op when not configured)."""
+        ok, reason = turnstile.verify(self, body.get("turnstile"), action, self._client_ip())
+        if not ok:
+            if reason == "unavailable":
+                self._json(503, {"error": "人机验证服务暂时不可用，请稍后再试", "turnstile": True})
+            else:
+                self._json(403, {"error": "人机验证未通过，请重试", "turnstile": True})
+        return ok
 
     def _session_cookie(self, sid):
         secure = "; Secure" if COOKIE_SECURE else ""

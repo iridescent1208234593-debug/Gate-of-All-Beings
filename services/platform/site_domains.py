@@ -8,7 +8,7 @@ import json
 import os
 from pathlib import Path
 import re
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlunsplit
 
 CONFIG = json.loads((Path(__file__).resolve().parents[2] / "packages" / "site-domains" / "domains.json").read_text(encoding="utf-8"))
 ROOTS = tuple(CONFIG["roots"])
@@ -65,6 +65,22 @@ def site_url(service, path="", host=None):
     if not root:
         raise ValueError("cannot construct URLs from an unapproved host")
     return "https://" + (prefix + "." if prefix else "") + root + path
+
+
+def localize_url(value, host):
+    """A stored absolute link to one of our hosts, moved to the same service on the request's root."""
+    if not isinstance(value, str) or not value.lower().startswith(("https://", "http://")):
+        return value
+    try:
+        parsed = urlsplit(value)
+        port = parsed.port
+    except ValueError:
+        return value
+    target = HOST_MAP.get((parsed.hostname or "").lower())
+    root = domain_root(host) if host else None
+    if not target or not root or target[1] == root or port or parsed.username or parsed.password:
+        return value
+    return site_url(target[0], urlunsplit(("", "", parsed.path or "/", parsed.query, parsed.fragment)), host)
 
 
 def request_host(handler):
@@ -199,12 +215,12 @@ def csp_policy(root=None):
     sockets = " ".join("wss://" + host for host in hosts)
     return "; ".join((
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://static.cloudflareinsights.com " + origins + " https://*.paypal.com https://*.paypalobjects.com",
+        "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://static.cloudflareinsights.com https://challenges.cloudflare.com " + origins + " https://*.paypal.com https://*.paypalobjects.com",
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net " + origins,
         "img-src 'self' data: blob: " + origins + " https://*.paypal.com https://*.paypalobjects.com",
         "font-src 'self' data: https://cdn.jsdelivr.net " + origins,
         "connect-src 'self' " + origins + " " + sockets + " https://static.cloudflareinsights.com https://*.paypal.com",
         "media-src 'self' data: blob: " + origins,
-        "frame-src 'self' " + origins + " https://*.paypal.com",
+        "frame-src 'self' " + origins + " https://challenges.cloudflare.com https://*.paypal.com",
         "worker-src 'self' blob:",
     ))

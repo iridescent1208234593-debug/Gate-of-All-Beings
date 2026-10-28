@@ -48,10 +48,10 @@ async function api(path, options = {}) {
 }
 
 /** 登录或注册（用户名不存在时自动注册），成功返回用户信息 */
-export async function login(username, password) {
+export async function login(username, password, turnstile = '') {
   const data = await api('/api/auth', {
     method: 'POST',
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, turnstile }),
   });
   const user = data.user || null;
   persistUser(user);
