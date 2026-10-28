@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <script src="/shared/site-domains/index.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f0e8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="众生之门">
+  <title>添加到桌面 · 众生之门</title>
+  <link rel="icon" href="/pwa/icon-192.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png">
+  <link rel="stylesheet" href="/design-system/design-system.css">
+  <link rel="stylesheet" href="/install.css">
+  <script defer src="/install.js"></script>
+</head>
+<body class="qc-body">
+<main class="install-guide" data-install-guide>
+  <a href="/#home">返回众生之门</a>
+  <h1>添加到桌面</h1>
+  <p>将众生之门安装到电脑或添加到手机主屏幕，无需应用商店下载。</p>
+  <p id="install-status" role="status" aria-live="polite"></p>
+  <div id="install-embedded" hidden>
+    <h2>先在浏览器中打开</h2>
+    <p>在微信、QQ 等应用内，请打开右上角菜单，选择在浏览器中打开。iPhone 请使用 Safari；安卓请使用手机自带或其他支持添加桌面的浏览器，再选择对应教程。</p>
+    <button type="button" id="install-copy">复制网址</button>
+    <p id="install-copy-status" role="status"></p>
+  </div>
+  <nav class="install-platforms" aria-label="选择安装教程">
+    <button type="button" data-platform="ios" aria-pressed="true" aria-controls="install-ios">iPhone / iPad</button>
+    <button type="button" data-platform="android" aria-pressed="false" aria-controls="install-android">安卓</button>
+    <button type="button" data-platform="desktop" aria-pressed="false" aria-controls="install-desktop">电脑</button>
+  </nav>
+  <div class="install-actions" data-install-slot><button type="button" id="install-now">点击下载桌面快捷打开方式</button></div>
+  <section id="install-ios">
+    <h2>用 Safari 添加</h2>
+    <p>先用 Safari 打开本页或众生之门首页，再按下面三步操作。下图展示了“分享”和“添加到主屏幕”的位置；系统版本不同，菜单样式可能有所区别。</p>
+    <ol class="install-steps">
+      <li><h3>打开分享菜单</h3><p>如果浏览器菜单里出现下图所示的“分享”，点击它。也可以直接点击工具栏中方框向上箭头的分享图标。</p>
+        <figure><a href="/pwa/ios-share.png" target="_blank" rel="noopener" aria-label="查看分享入口截图大图"><img src="/pwa/ios-share.png" width="778" height="1005" alt="苹果浏览器菜单截图：最上方是方框向上箭头图标和“分享”文字。"></a><figcaption>点击最上方的“分享”。点击图片可查看大图。</figcaption></figure>
+      </li>
+      <li><h3>选择“添加到主屏幕”</h3><p>在分享菜单中向下滚动，找到这个选项。</p>
+        <figure><a href="/pwa/ios-home.png" target="_blank" rel="noopener" aria-label="查看添加到主屏幕截图大图"><img src="/pwa/ios-home.png" width="1320" height="2315" loading="lazy" alt="苹果分享菜单截图：向下找到带加号图标的“添加到主屏幕”，该选项已用红线圈出。"></a><figcaption>点击红圈中的“添加到主屏幕”；没看到时向下滚动。点击图片可查看大图。</figcaption></figure>
+      </li>
+      <li><h3>确认名称，点击“添加”</h3><p>名称填写“众生之门”。如有“作为网页 App 打开”选项，请保持开启。</p>
+        <figure><img src="/pwa/ios-confirm.svg" width="720" height="600" loading="lazy" alt="iPhone 添加确认页示意：名称为众生之门，网页 App 开关开启，右上角添加按钮被红框标出。"><figcaption>完成后回到手机主屏幕查看图标。</figcaption></figure>
+      </li>
+    </ol>
+    <p class="install-source">前两步使用菜单截图，最后一步为确认页示意。实际界面随系统版本变化。<a href="https://support.apple.com/zh-cn/guide/iphone/iphea86e5236/ios" target="_blank" rel="noopener noreferrer">查看 Apple 官方说明</a></p>
+  </section>
+  <section id="install-android" hidden>
+    <h2>用安卓浏览器添加</h2>
+    <p>可先点击上方“点击下载桌面快捷打开方式”。浏览器支持一键安装时会弹出真实确认；未提供此能力时，请选择你正在使用的浏览器，查看手动方法。</p>
+    <label class="install-browser-label" for="android-browser">你使用的浏览器</label>
+    <select id="android-browser" class="install-browser-select" data-android-browser>
+      <option value="system">其他 / 手机自带浏览器（通用）</option>
+      <option value="huawei">华为浏览器</option>
+      <option value="honor">荣耀浏览器</option>
+      <option value="xiaomi">小米 / REDMI 浏览器</option>
+      <option value="oppo">OPPO / 一加 / realme 浏览器</option>
+      <option value="vivo">vivo / iQOO 浏览器</option>
+      <option value="qq">QQ 浏览器</option>
+      <option value="uc">UC 浏览器</option>
+      <option value="quark">夸克</option>
+      <option value="baidu">百度 App 内网页</option>
+      <option value="360">360 浏览器</option>
+      <option value="chrome">Chrome</option>
+      <option value="edge">Edge</option>
+      <option value="samsung">三星浏览器</option>
+      <option value="firefox">Firefox</option>
+    </select>
+    <section data-android-help="system"><h3>手机自带浏览器</h3><p>打开本页后，查看浏览器的菜单、工具箱、收藏或分享区域，寻找“添加到桌面”“添加至桌面”“发送到桌面”等选项。找到后确认名称并添加；如果没有该选项，当前版本可能未提供此功能。</p></section>
+    <section data-android-help="huawei" hidden>
+      <h3>华为浏览器</h3>
+      <p>以下为华为官方操作截图，适用于 HarmonyOS 5.0 以下系统。图中以华为网站为例，操作时请先打开众生之门。</p>
+      <ol class="install-steps">
+        <li><h3>打开浏览器菜单</h3><p>在众生之门页面，点击浏览器底部右侧的菜单。</p>
+          <figure><a href="/pwa/huawei-step-1.png" target="_blank" rel="noopener" aria-label="查看华为浏览器菜单截图大图"><img src="/pwa/huawei-step-1.png" width="2000" height="4309" loading="lazy" alt="华为官方截图：手指指向浏览器底部右侧的菜单入口。"></a><figcaption>点击图片可查看大图。</figcaption></figure></li>
+        <li><h3>选择“添加至”</h3><p>在打开的浏览器菜单中，点击星形图标的“添加至”。</p>
+          <figure><a href="/pwa/huawei-step-2.png" target="_blank" rel="noopener" aria-label="查看华为添加至菜单截图大图"><img src="/pwa/huawei-step-2.png" width="2000" height="4309" loading="lazy" alt="华为官方截图：浏览器菜单中，手指指向星形图标的添加至选项。"></a><figcaption>选择“添加至”，进入添加位置选择。</figcaption></figure></li>
+        <li><h3>选择“桌面”，再确认</h3><p>添加位置选择“桌面”，核对网址为众生之门后点击“确定”。</p>
+          <figure><a href="/pwa/huawei-step-3.png" target="_blank" rel="noopener" aria-label="查看华为添加桌面确认截图大图"><img src="/pwa/huawei-step-3.png" width="2000" height="4309" loading="lazy" alt="华为官方截图：添加至面板显示书签和桌面两个选项，手指指向桌面，下方为确定按钮。"></a><figcaption>图中的网站仅为官方示例。</figcaption></figure></li>
+      </ol>
+      <p class="install-source">图片来源：<a href="https://consumer.huawei.com/cn/support/content/zh-cn00448896/" target="_blank" rel="noopener noreferrer">华为官方操作说明</a>。HarmonyOS 5.0 及以上入口不同，请查看官方说明中的对应版本教程。</p>
+    </section>
+    <section data-android-help="honor" hidden><h3>荣耀浏览器</h3><p>在浏览器菜单、收藏或分享区域查找“添加到桌面”等选项。荣耀不同机型和版本的入口可能不同；未找到时，请查看该版本的浏览器帮助。</p></section>
+    <section data-android-help="xiaomi" hidden><h3>小米 / REDMI 浏览器</h3><p>查看浏览器菜单或工具箱，寻找“添加到桌面”；也可检查收藏或书签的编辑选项是否提供桌面入口。位置随版本变化，没有该选项时请查看浏览器帮助。</p></section>
+    <section data-android-help="oppo" hidden><h3>OPPO / 一加 / realme 浏览器</h3><p>打开浏览器菜单，检查工具、收藏或分享区域是否有“添加到桌面”等选项。不同品牌和版本不保证有同一入口；没有时请查看浏览器帮助。</p></section>
+    <section data-android-help="vivo" hidden><h3>vivo / iQOO 浏览器</h3><p>检查浏览器菜单、收藏或历史记录中的网址操作，寻找“添加至桌面”等选项。具体入口请以当前系统和浏览器版本为准。</p></section>
+    <section data-android-help="qq" hidden><h3>QQ 浏览器</h3><p>查看菜单里的收藏或书签操作，以及网址的编辑选项，寻找“发送到桌面”或“添加到桌面”。这是浏览器自身的操作；没有相应入口时，网页无法替浏览器创建桌面图标。</p></section>
+    <section data-android-help="uc" hidden><h3>UC 浏览器</h3><p>查看菜单中的收藏、书签或网址操作，寻找“手机桌面”或“添加到桌面”等选项。不同版本可能没有同一入口，未找到时请查看浏览器帮助。</p></section>
+    <section data-android-help="quark" hidden><h3>夸克</h3><p>检查网页菜单、收藏或分享区域是否提供“添加到桌面”。若当前版本没有该功能，可复制网址到另一款支持添加桌面的浏览器。不能将添加到夸克首页当作已经添加到手机桌面。</p></section>
+    <section data-android-help="baidu" hidden><h3>百度 App 内网页</h3><p>先在网页菜单中寻找“在浏览器打开”，转到手机浏览器后按对应教程操作。添加到 App 内收藏或首页，不等于生成手机桌面图标。</p></section>
+    <section data-android-help="360" hidden><h3>360 浏览器</h3><p>查看浏览器菜单中的收藏、书签或网址操作，寻找“添加到桌面”“手机桌面”等选项。没有相应入口时，当前版本可能不支持，请查看浏览器帮助或使用其他已支持的浏览器。</p></section>
+    <div data-android-help="chrome" hidden>
+      <p>下面三张图仅为 Chrome 界面示意，其他浏览器的菜单可能不同。</p>
+    <ol class="install-steps">
+      <li><h3>打开浏览器菜单</h3><p>用 Chrome 打开本页或众生之门首页，再打开浏览器菜单。</p>
+        <figure><img src="/pwa/android-menu.svg" width="720" height="600" alt="安卓 Chrome 浏览器示意：地址栏右侧的三点菜单被红框标出。"><figcaption>点击浏览器的菜单，而不是网页里的菜单。</figcaption></figure>
+      </li>
+      <li><h3>选择“添加到主屏幕”</h3><p>菜单里也可能直接显示“安装应用”。不同浏览器的名称和位置可能不同。</p>
+        <figure><img src="/pwa/android-home.svg" width="720" height="600" loading="lazy" alt="Chrome 菜单示意：“添加到主屏幕”一项被红框标出。"><figcaption>如有后续选项，选择“安装应用”。</figcaption></figure>
+      </li>
+      <li><h3>确认安装或添加</h3><p>确认名称为“众生之门”，按浏览器提示点击“安装”或“添加”。</p>
+        <figure><img src="/pwa/android-confirm.svg" width="720" height="600" loading="lazy" alt="安卓安装确认框示意：应用名称为众生之门，右下角安装按钮被红框标出。"><figcaption>完成后回到手机主屏幕查看图标。</figcaption></figure>
+      </li>
+    </ol>
+    </div>
+    <section data-android-help="edge" hidden><h3>Edge 安卓版</h3><p>打开浏览器菜单，寻找“添加到手机”“添加到主屏幕”或安装相关选项；具体名称因版本而异。如果上方按钮能调起安装，直接按浏览器确认即可。</p></section>
+    <section data-android-help="samsung" hidden><h3>三星浏览器</h3><p>检查浏览器菜单的“添加页面至”等选项，寻找主屏幕入口；具体名称和位置以当前版本为准。如果没有相应功能，可继续以网页方式访问。</p></section>
+    <section data-android-help="firefox" hidden><h3>Firefox 安卓版</h3><p>打开网页后，展开浏览器菜单，选择“添加到主屏幕”，确认名称并完成添加。具体界面以当前版本为准。</p><p><a href="https://support.mozilla.org/zh-CN/kb/在%20Android%20上将网站快捷方式添加到主屏幕" target="_blank" rel="noopener noreferrer">Firefox 官方操作说明</a></p></section>
+    <p class="install-note">各浏览器的功能和菜单会随版本变化。如果添加后没有桌面图标，可检查系统是否允许该浏览器创建桌面快捷方式。部分浏览器只创建网页快捷方式，点击后仍会显示浏览器界面；不保证都能变成独立窗口。</p>
+  </section>
+  <section id="install-desktop" hidden>
+    <h2>安装到电脑</h2>
+    <ol class="install-steps">
+      <li><h3>使用 Chrome 或 Edge 打开</h3><p>浏览器允许安装时，点击上方“点击下载桌面快捷打开方式”，会弹出浏览器提供的真实安装确认。</p></li>
+      <li><h3>没有弹出安装确认时</h3><p>检查地址栏右侧的安装图标，或在浏览器菜单中查找“安装应用”“将此站点安装为应用”等选项。不同版本的名称和位置可能不同。</p></li>
+      <li><h3>确认安装</h3><p>按浏览器提示完成安装。Mac 用户也可以在支持的 Safari 版本中选择“文件 → 添加到程序坞”。</p></li>
+    </ol>
+    <p>浏览器未提供安装入口时，仍可继续在网页中使用。安装后的独立窗口也需要联网。</p>
+  </section>
+  <p class="install-note">添加后，请回到手机主屏幕查看图标。使用时仍需联网；进入其他子站时，可能会打开浏览器页面。</p>
+  <p><a href="/#home">我知道了，返回众生之门</a></p>
+  <noscript><p>浏览器脚本已关闭，请按上面的 iPhone 步骤操作；安卓用户可在浏览器菜单中选择“安装应用”或“添加到主屏幕”。</p></noscript>
+</main>
+</body>
+</html>
