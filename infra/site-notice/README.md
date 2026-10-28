@@ -39,7 +39,7 @@ ginx.conf.snippet | 生产 nginx 注入片段 |
 
 ## 行为约定
 
-- **同一版本只弹一次**：cookie lxh_notice_<version>，域为 .iridescently.xyz，跨子站共享
+- **同一版本只弹一次**：cookie `lxh_notice_<version>`。页面载入了域名映射（`packages/site-domains`）时写在访问者所在的根域（`.xyz`、`.cn`、`.dpdns.org` 同等），跨子站共享；否则只写当前主机
 - **iframe 内不显示**：window.self !== window.top 直接返回
 - **改文案**：编辑 
 otice.js 顶部的 CONFIG，无需重新发布

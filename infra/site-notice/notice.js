@@ -63,8 +63,17 @@
   var EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3 3l18 18"/><path d="M10.6 6.1A9.6 9.6 0 0 1 12 6c6.6 0 10.2 6 10.2 6a17 17 0 0 1-3.3 4"/><path d="M6.3 7.5A16.6 16.6 0 0 0 1.8 12S5.4 18 12 18a9.7 9.7 0 0 0 4.2-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
   var X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 
+  // The "seen" flag is shared across the visitor's own root (xyz, cn or dpdns.org alike) when
+  // the page has the domain map (packages/site-domains), otherwise it stays on this host.
+  // Never derive the root from the last two labels: that is wrong for iridescently.dpdns.org.
+  function cookieDomain() {
+    var map = window.IridescentlyDomains;
+    var root = map && typeof map.rootFor === "function" ? map.rootFor(location.hostname) : null;
+    return root ? "; domain=." + root : "";
+  }
+
   function remember() {
-    try { document.cookie = COOKIE + "=1; domain=.iridescently.xyz; path=/; max-age=3600; SameSite=Lax; Secure"; } catch (e) {}
+    try { document.cookie = COOKIE + "=1" + cookieDomain() + "; path=/; max-age=3600; SameSite=Lax; Secure"; } catch (e) {}
   }
 
   function build() {
