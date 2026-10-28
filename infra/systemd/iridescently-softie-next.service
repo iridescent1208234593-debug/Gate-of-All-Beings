@@ -1,0 +1,19 @@
+[Unit]
+Description=Iridescently Softie (灵质空间, 4173)
+After=network-online.target
+
+[Service]
+Type=simple
+User=iridescently
+Group=iridescently
+WorkingDirectory=/srv/iridescently/new/20261026T113632Z/site/apps/softie
+Environment=IRIDESCENTLY_STORAGE_ROOT=/srv/iridescently/new/20261026T113632Z
+Environment=IRIDESCENTLY_ENVIRONMENT=production
+Environment=PORT=4173
+Environment=PATH=/opt/iridescently-node/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/opt/iridescently-node/bin/node server/spirit-service.mjs
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
