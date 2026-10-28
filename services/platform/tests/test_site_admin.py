@@ -120,8 +120,10 @@ class SiteOwnerTest(unittest.TestCase):
 class EndpointTest(unittest.TestCase):
     def test_sso_user_reports_admin_from_server_check(self):
         with Server() as server:
-            for kind, uid, expected in (("usso", "7", True), ("local", "7", True), ("local", "218", False),
-                                        ("usso", "1", False), ("admin", "7", False)):
+            # Since 2026-10-27 (live on HK) usso/local 1 are owner accounts too, and an active
+            # 会馆 admin also counts as a main-site admin.
+            for kind, uid, expected in (("usso", "7", True), ("local", "7", True), ("local", "218", True),
+                                        ("usso", "1", True), ("admin", "7", False)):
                 status, body = server.request("/api/sso-user", token(kind, uid))
                 self.assertEqual(status, 200)
                 self.assertEqual(body["admin"], expected, (kind, uid))
@@ -131,7 +133,9 @@ class EndpointTest(unittest.TestCase):
         with Server() as server:
             self.assertEqual(server.request("/api/admin/links", token("local", "7"), invalid)[0], 400)
             self.assertEqual(server.request("/api/admin/links", token("usso", "7"), invalid)[0], 400)
-            for kind, uid in (("local", "218"), ("usso", "1"), ("admin", "7"), ("local", "8")):
+            for kind, uid in (("local", "218"), ("usso", "1")):
+                self.assertEqual(server.request("/api/admin/links", token(kind, uid), invalid)[0], 400, (kind, uid))
+            for kind, uid in (("admin", "7"), ("local", "8")):
                 self.assertEqual(server.request("/api/admin/links", token(kind, uid), invalid)[0], 403, (kind, uid))
             self.assertEqual(server.request("/api/admin/links", None, invalid)[0], 403)
             forged = token("local", "8").rsplit(".", 1)[0] + "." + "0" * 64

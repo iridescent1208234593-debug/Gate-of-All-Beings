@@ -92,14 +92,14 @@ class FanOwnerEditTest(unittest.TestCase):
         return [c for c in listing["characters"] if c["code"] == code]
 
     def test_owner_edits_published_character_in_place(self):
-        self.assertEqual(self.owner.call("/api/save-character", sheet("A-1", "小黑", "旧故事"))[0], 200)
+        self.assertEqual(self.owner.call("/api/save-character", sheet("A-1", "阿青", "旧故事"))[0], 200)
         status, result = self.owner.call("/api/fan/publish", {"character_codes": ["A-1"]})
         self.assertEqual((status, result["published"]), (200, 1))
 
         # 公开后仍可编辑：改名 + 改故事，画廊记录原位更新
-        self.assertEqual(self.owner.call("/api/save-character", sheet("A-1", "小黑·改", "新故事"))[0], 200)
+        self.assertEqual(self.owner.call("/api/save-character", sheet("A-1", "阿青·改", "新故事"))[0], 200)
         rows = self.public(self.owner, "A-1")
-        self.assertEqual([(r["name"], r["story"], r["is_mine"]) for r in rows], [("小黑·改", "新故事", True)])
+        self.assertEqual([(r["name"], r["story"], r["is_mine"]) for r in rows], [("阿青·改", "新故事", True)])
         self.assertEqual([r["is_mine"] for r in self.public(self.other, "A-1")], [False])
 
         # 改名后再次公开不产生副本
@@ -108,7 +108,7 @@ class FanOwnerEditTest(unittest.TestCase):
         self.assertEqual(len(self.public(self.owner, "A-1")), 1)
 
         # 编辑时改编号：原位改名，画廊记录跟随
-        body = sheet("A-2", "小黑·改", "换编号")
+        body = sheet("A-2", "阿青·改", "换编号")
         body["previous_code"] = "A-1"
         self.assertEqual(self.owner.call("/api/save-character", body)[0], 200)
         self.assertEqual(self.public(self.owner, "A-1"), [])
@@ -118,18 +118,18 @@ class FanOwnerEditTest(unittest.TestCase):
         self.assertEqual((codes.count("A-1"), codes.count("A-2")), (0, 1))
 
     def test_non_owner_cannot_change_public_record(self):
-        self.owner.call("/api/save-character", sheet("B-1", "鹿野", "原文"))
+        self.owner.call("/api/save-character", sheet("B-1", "林风", "原文"))
         self.owner.call("/api/fan/publish", {"character_codes": ["B-1"]})
         fid = self.public(self.owner, "B-1")[0]["id"]
 
         # 同编号保存只写进自己的名册，不改别人的公开记录
         self.assertEqual(self.other.call("/api/save-character", sheet("B-1", "冒名", "篡改"))[0], 200)
         self.assertEqual(self.other.call("/api/save-all-characters", {"characters": [{"code": "B-1", "name": "冒名", "story": "篡改"}]})[0], 200)
-        self.assertEqual([(r["name"], r["story"]) for r in self.public(self.owner, "B-1")], [("鹿野", "原文")])
+        self.assertEqual([(r["name"], r["story"]) for r in self.public(self.owner, "B-1")], [("林风", "原文")])
         self.assertEqual(self.other.call("/api/fan/toggle", {"id": fid, "is_public": False})[0], 403)
         self.assertEqual(self.other.call("/api/fan/publish", {"character_codes": ["B-1"]})[1]["published"], 1)
         mine_flags = sorted((r["name"], r["is_mine"]) for r in self.public(self.other, "B-1"))
-        self.assertEqual(mine_flags, [("冒名", True), ("鹿野", False)])
+        self.assertEqual(mine_flags, [("冒名", True), ("林风", False)])
 
 
 if __name__ == "__main__":

@@ -5,8 +5,8 @@ account is still usable in the 会馆 account store. Bare uids and token-supplie
 roles or kinds are never trusted: the signed hx_sso token only proves which
 account is calling, and the account store decides whether it is still active.
 
-This is deliberately separate from 会馆 roles (local_users.role / user_flags):
-being a 会馆 admin does not grant main-site editing, matching existing practice.
+is_site_owner() stays separate from 会馆 roles. Since 2026-10-27, is_admin() (used by the
+main-site admin endpoints) also accepts an active 会馆 admin (local_users.role / user_flags).
 """
 import os
 import sqlite3

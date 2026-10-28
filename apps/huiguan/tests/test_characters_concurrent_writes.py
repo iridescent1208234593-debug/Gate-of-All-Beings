@@ -79,7 +79,7 @@ class ConcurrentCharacterWritesTest(unittest.TestCase):
         for index in range(USERS):
             client = Client(base)
             name = f"writer_{index}"
-            status, _ = client.call("/api/register", {"username": name, "password": "test-password-123", "nickname": name})
+            status, _ = client.call("/api/register", {"username": name, "password": "test-password-123", "nickname": name, "email": f"{name}@example.com"})
             assert status == 200, status
             cls.clients.append(client)
 

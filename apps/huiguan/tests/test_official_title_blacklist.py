@@ -124,8 +124,9 @@ class OfficialTitleBlacklistTest(unittest.TestCase):
     def test_auth_rejects_official_name_only_for_new_accounts(self):
         status, result = self.client.call("/api/auth", {
             "username": "罗小黑", "password": "test-password-123"}, client_ip="192.0.2.12")
-        self.assertEqual(status, 400)
-        self.assertIn("官方世界观角色名", result["error"])
+        # /api/auth only logs in now: an unknown official name is refused and nothing is created.
+        # Registering with an official name is covered by the /api/register tests above.
+        self.assertEqual(status, 410)
 
         # An existing account can still log in even if its stored display title is a role name.
         status, result = self.client.call("/api/auth", {

@@ -197,14 +197,15 @@ class GalleryPermissionsTest(unittest.TestCase):
             status, _, raw = server.request("/api/gallery/state?image=" + urllib.parse.quote(image_name, safe=""))
             persisted = json.loads(raw)
             self.assertEqual(status, 200)
-            self.assertEqual(persisted["interaction_count"], 66)
-            self.assertEqual((persisted["likes"], persisted["loves"]), (32, 34))
+            self.assertEqual(persisted["interaction_count"], 1)
+            self.assertEqual((persisted["likes"], persisted["loves"]), (1, 0))
             self.assertTrue(persisted["comment_used"], "refresh sees the one-time comment")
             self.assertEqual(persisted["comments"][0]["comment"], "字" * 25)
             self.assertEqual(persisted["comment_total"], 1)
+            # Another image needs its own like first.
             status, body = server.post("/api/gallery/comment", {"image": other_image_name, "comment": "second"})
-            self.assertEqual(status, 409)
-            self.assertIn("只能选择一张", body["error"])
+            self.assertEqual(status, 403)
+            self.assertIn("先给这张图点个赞", body["error"])
 
     def test_comments_are_paged_without_public_original_access(self):
         with RunningServer() as server:
