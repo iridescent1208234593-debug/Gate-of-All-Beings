@@ -2,7 +2,7 @@ import { cardText } from './core/cardText';
 import '@lxh/shared-ui/lxh-ui.css';
 import './unified.css';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { ArrowRight, BookOpen, Sprout, Map as MapIcon, Sparkles, X, Download, CircleHelp, Check, Home, ScrollText, Clapperboard } from 'lucide-react';
+import { ArrowRight, BookOpen, Sprout, Map as MapIcon, Sparkles, X, Download, CircleHelp, Check, Home, ScrollText, Clapperboard, Settings } from 'lucide-react';
 import { HEROES, registerEcoCards } from './core/content';
 import { advanceDay, sealCharacter } from './core/meta';
 import type { MetaState, SaveData } from './core/types';
@@ -33,12 +33,12 @@ const navs: {id:View;label:string;icon:typeof Home;hidden?:boolean}[]=[{id:'shor
 navs.push({id:'journey',label:'共同旅途',icon:BookOpen});
 navs.splice(1,0,{id:'journal',label:'众生牌录',icon:ScrollText});
 function readView():View {const id=location.hash.slice(1);return navs.some(n=>n.id===id)?id as View:'home';}
-function Modal({title,children,onClose}:{title:string;children:React.ReactNode;onClose:()=>void}) {const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{const el=ref.current;el?.showModal();return()=>el?.close();},[]);return <dialog ref={ref} className="game-modal" onCancel={onClose}><div className="modal-head"><h2>{title}</h2><button aria-label="关闭" onClick={onClose}><X size={20}/></button></div>{children}</dialog>;}
+function Modal({title,children,onClose,className=''}:{title:string;children:React.ReactNode;onClose:()=>void;className?:string}) {const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{const el=ref.current;el?.showModal();return()=>el?.close();},[]);return <dialog ref={ref} className={`game-modal ${className}`} onCancel={onClose}><div className="modal-head"><h2>{title}</h2><button aria-label="关闭" onClick={onClose}><X size={20}/></button></div>{children}</dialog>;}
 export default function GameApp({ onReturnGate, onCreateIdentity }: { onReturnGate?: () => void; onCreateIdentity?: () => void } = {}) {
   const balance=useCardBalance();
   const { account: ssoUser, identity: playerIdentity } = usePlayerProfile();
   const [save,setSave]=useState<SaveData>(freshSave);const [ready,setReady]=useState(false);const [saveStatus,setSaveStatus]=useState('读取存档');const [storageOK,setStorageOK]=useState(true);
-  const [view,setView]=useState<View>(readView);const [modal,setModal]=useState<'help'|'identity'|null>(()=>avatarPickInterrupted()?'identity':null);const [error,setError]=useState('');
+  const [view,setView]=useState<View>(readView);const [modal,setModal]=useState<'help'|'identity'|'settings'|null>(()=>avatarPickInterrupted()?'identity':null);const [error,setError]=useState('');
   const [durableSave,setDurableSave]=useState<SaveData|null>(null);
   const pendingSave=useRef(Promise.resolve());const revision=useRef(0);
   useEffect(()=>{let active=true;readSave().then(s=>{if(active){setSave(s);setDurableSave(s);setReady(true);}}).catch(()=>{if(active){setStorageOK(false);setSaveStatus('存档不可用 · 可导出备份');setReady(true);setError('本地存档无法读取，已进入临时游玩模式；原存档不会被覆盖。');}});return()=>{active=false;};},[]);
@@ -57,7 +57,7 @@ export default function GameApp({ onReturnGate, onCreateIdentity }: { onReturnGa
     try{const packet=validateEcoExchange(value);setSave(s=>{try{return queueEcology(s,packet);}catch(e){setError((e as Error).message);return s;}});}catch(e){setError((e as Error).message);}
   }
   if(!ready)return <div className="qc-loading qc-loading--page" role="status">正在读取旅途存档…</div>;
-  return <div className="zszm-game"><header className="game-header"><nav aria-label="游戏导航">{navs.filter(n=>!n.hidden).map(n=><button key={n.id} className={view===n.id?'active':''} aria-current={view===n.id?'page':undefined} onClick={()=>go(n.id)}><n.icon size={15}/>{n.label}</button>)}</nav><div className="game-header__links">{onReturnGate&&<button type="button" className="gate-return" onClick={onReturnGate} title="重看开场动画" aria-label="重看开场动画"><Clapperboard size={15}/><span>开场</span></button>}<button className="help-button" aria-label="玩法说明" title="玩法说明" onClick={()=>setModal('help')}><CircleHelp size={19}/></button><button type="button" className="identity-entry" aria-label={`玩家形象：${playerIdentity.display_name || '旅人'}`} onClick={()=>setModal('identity')}><PlayerAvatar identity={playerIdentity}/><span>{playerIdentity.display_name || '形象'}</span></button></div></header>
+  return <div className="zszm-game"><header className="game-header"><nav aria-label="游戏导航">{navs.filter(n=>!n.hidden).map(n=><button key={n.id} className={view===n.id?'active':''} aria-current={view===n.id?'page':undefined} onClick={()=>go(n.id)}><n.icon size={15}/>{n.label}</button>)}</nav><div className="game-header__links">{onReturnGate&&<button type="button" className="gate-return" onClick={onReturnGate} title="重看开场动画" aria-label="重看开场动画"><Clapperboard size={15}/><span>开场</span></button>}<button type="button" aria-label="设置" title="设置" onClick={()=>setModal('settings')}><Settings size={19}/></button><button className="help-button" aria-label="玩法说明" title="玩法说明" onClick={()=>setModal('help')}><CircleHelp size={19}/></button><button type="button" className="identity-entry" aria-label={`玩家形象：${playerIdentity.display_name || '旅人'}`} onClick={()=>setModal('identity')}><PlayerAvatar identity={playerIdentity}/><span>{playerIdentity.display_name || '形象'}</span></button></div></header>
     <main className={`game-main view-${view}`}><LoadBoundary resetKey={view}>
     {balance.error&&<div className="balance-warning" role="alert">{balance.error} 已暂停历练操作。<button className="secondary" disabled={balance.busy} onClick={()=>void balance.reload()}>重试连接</button></div>}
     <FeatureGuide view={view}/>
@@ -73,6 +73,7 @@ export default function GameApp({ onReturnGate, onCreateIdentity }: { onReturnGa
     </LoadBoundary></main><footer className="game-footer"><div><span className="footer-mark">众生有灵 · 山水有期</span><small>罗小黑战记非商业同人项目 · IP 版权归原权利方所有</small></div><div className="footer-links"><span className="save-status" role="status"><i/>{saveStatus}</span><button onClick={()=>downloadJSON(save,'众生之门-旅途备份.json')} aria-label="导出完整存档"><Download size={16}/></button></div></footer>
     {error&&<div className="toast" role="alert">{error}<button aria-label="关闭提示" onClick={()=>setError('')}><X size={15}/></button></div>}
     {modal==='help'&&<Modal title="众生之门 · 功能手册" onClose={()=>setModal(null)}><FullGuide/><button className="primary" onClick={()=>setModal(null)}>明白了，出发吧 <ArrowRight size={17}/></button></Modal>}
+    {modal==='settings'&&<Modal title="设置" className="gate-install-settings-dialog" onClose={()=>setModal(null)}><section className="gate-install-settings"><h3>使用帮助</h3><p>查看 iPhone / iPad 和安卓手机的桌面安装步骤。</p><button type="button" className="secondary" onClick={()=>{setModal(null);window.dispatchEvent(new Event('gate:open-install'));}}>添加到桌面 <ArrowRight size={17}/></button></section></Modal>}
     {modal==='identity'&&<PlayerIdentity key={ssoUser.logged_in?`${ssoUser.kind}:${ssoUser.user_id}`:'anonymous'} account={ssoUser} onClose={()=>setModal(null)} onCreateWithOpening={onCreateIdentity&&(()=>{setModal(null);onCreateIdentity();})}/>}
   </div>;
 }

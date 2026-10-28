@@ -1,0 +1,54 @@
+.install-guide{max-width:640px;margin:auto;padding:32px 20px 64px;line-height:1.8}
+.install-guide h1{font-size:clamp(26px,6vw,36px);margin:24px 0 12px}
+.install-guide h2{font-size:20px;margin:28px 0 12px}
+.install-guide p{margin:12px 0}
+.install-guide ol{padding-left:26px}
+.install-guide li{padding:10px 0 10px 8px;border-bottom:1px solid var(--qc-border,#d4cfbe)}
+.install-steps h3{font-size:18px;margin:0;font-weight:700}
+.install-guide .install-steps li{padding-top:20px;padding-bottom:24px}
+.install-steps figure{margin:16px 0 0;max-width:400px}
+.install-steps img{display:block;width:100%;height:auto;border-radius:12px}
+.install-steps figcaption,.install-source{font-size:13px;line-height:1.7;color:var(--qc-text,#3a4a3e)}
+.install-steps figcaption{margin-top:8px}
+.install-guide a{color:var(--qc-text,#3a4a3e);text-underline-offset:4px}
+.install-platforms,.install-actions{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}
+.install-guide button{font:inherit;min-height:44px;padding:10px 16px;border:1px solid var(--qc-border,#d4cfbe);border-radius:6px;background:var(--qc-bg,#f5f0e8);color:var(--qc-text,#3a4a3e);cursor:pointer}
+.install-platforms button[aria-pressed=true]{border-color:var(--qc-accent,#5a9e8f);font-weight:700}
+.install-guide button:focus-visible{outline:2px solid var(--qc-text,#3a4a3e);outline-offset:3px}
+.install-guide button:disabled{opacity:.6;cursor:wait}
+.install-guide [hidden]{display:none!important}
+.install-note{color:var(--qc-text,#3a4a3e);border-top:1px solid var(--qc-border,#d4cfbe);padding-top:16px}
+.gate-install-dialog{position:fixed;inset:0;margin:auto;transform:none;box-sizing:border-box;max-width:calc(100vw - 32px);width:min(420px,calc(100% - 32px));max-height:calc(100dvh - 32px);padding:0;border:1px solid var(--qc-border,#d4cfbe);border-radius:16px;background:var(--qc-bg,#f5f0e8);color:var(--qc-text,#3a4a3e);font:16px/1.7 "Microsoft YaHei","PingFang SC",sans-serif;overflow:hidden}
+.gate-install-dialog[open]{display:flex;flex-direction:column}
+.gate-install-dialog::backdrop{background:rgb(18 33 27 / 55%)}
+.gate-install-open{overflow:hidden}
+.gate-install-head{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid var(--qc-border,#d4cfbe)}
+.gate-install-head h2{font-size:18px;margin:0}
+.gate-install-dialog button{font:inherit;cursor:pointer;min-height:44px;padding:8px 14px;border:1px solid var(--qc-border,#d4cfbe);border-radius:6px;background:transparent;color:inherit}
+.gate-install-dialog button:focus-visible{outline:2px solid var(--qc-text,#3a4a3e);outline-offset:3px}
+.gate-install-dialog button:disabled{opacity:.6;cursor:wait}
+.gate-install-dialog [hidden]{display:none!important}
+.gate-install-scroll{min-height:0;flex:1;box-sizing:border-box;padding:24px;max-height:calc(100dvh - 126px);overflow:auto;overscroll-behavior:contain}
+.gate-install-welcome{text-align:center}
+.gate-install-welcome img{display:block;margin:0 auto 20px;border-radius:16px}
+.gate-install-welcome h3{font-size:22px;line-height:1.5;margin:0 0 12px;text-wrap:balance}
+.gate-install-welcome p{font-size:15px;margin:0}
+.gate-install-actions{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+.gate-install-dialog .gate-install-primary,.install-guide #install-now{box-sizing:border-box;width:100%;min-height:52px;padding:12px 16px;text-align:center;background:var(--qc-text,#3a4a3e);color:var(--qc-bg,#f5f0e8);border-color:transparent}
+.gate-install-actions [data-install-later]{border-color:transparent}
+.gate-install-hint{font-size:12px;text-align:center;margin:20px 0 0}
+.gate-install-dialog.is-expanded{width:min(640px,calc(100% - 32px))}
+.gate-install-tutorial.install-guide{padding:8px 0 0;max-width:none}
+.gate-install-tutorial .install-steps{padding-left:22px}
+.gate-install-settings p{line-height:1.8}
+@media(max-width:600px){.gate-install-dialog.is-expanded{width:calc(100vw - 32px)}.gate-install-dialog.is-expanded .gate-install-scroll{padding-bottom:calc(24px + env(safe-area-inset-bottom))}}
+
+.gate-install-dialog.is-expanded .gate-install-welcome,.gate-install-dialog.is-expanded [data-install-later]{display:none}
+.gate-install-dialog.is-expanded .gate-install-actions{margin-top:0}
+
+.install-browser-label{display:block;font-weight:700;margin:20px 0 8px}
+.install-browser-select{box-sizing:border-box;width:100%;min-height:44px;padding:10px 12px;border:1px solid var(--qc-border,#d4cfbe);border-radius:6px;background:var(--qc-bg,#f5f0e8);color:var(--qc-text,#3a4a3e);font:inherit}
+.install-browser-select:focus-visible{outline:2px solid var(--qc-text,#3a4a3e);outline-offset:3px}
+.install-guide [data-android-help] h3{margin:20px 0 8px;font-size:18px}
+
+.game-modal.gate-install-settings-dialog{position:fixed;inset:0;margin:auto;transform:none;box-sizing:border-box;width:min(520px,calc(100vw - 32px));max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);overflow:auto}

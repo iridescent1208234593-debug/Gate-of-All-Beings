@@ -58,6 +58,15 @@ function GateFlow() {
   const destinationVisible = entered && !gateVisible && (!doorVisible || doorRevealed);
   const appActive = entered && phase === 'destination';
   const showBar = appActive && !onboarding;
+  useEffect(() => {
+    const ready = showBar && profile.resolved && !profile.loading && profile.account.logged_in;
+    document.documentElement.dataset.gateInstallReady = String(ready);
+    window.dispatchEvent(new Event('gate:install-ready'));
+    return () => {
+      document.documentElement.dataset.gateInstallReady = 'false';
+      window.dispatchEvent(new Event('gate:install-ready'));
+    };
+  }, [showBar, profile.resolved, profile.loading, profile.account.logged_in]);
   // Phones: landscape is forced only while the intro, door or onboarding is on screen; elsewhere
   // (including the profile loading after a reload) the player's portrait choice stands.
   const inGame = appActive && !creatingNew && profile.resolved && identityComplete(profile.identity);
