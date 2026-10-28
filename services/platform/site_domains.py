@@ -8,7 +8,7 @@ import json
 import os
 from pathlib import Path
 import re
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlunsplit
 
 CONFIG = json.loads((Path(__file__).resolve().parents[2] / "packages" / "site-domains" / "domains.json").read_text(encoding="utf-8"))
 ROOTS = tuple(CONFIG["roots"])
@@ -65,6 +65,22 @@ def site_url(service, path="", host=None):
     if not root:
         raise ValueError("cannot construct URLs from an unapproved host")
     return "https://" + (prefix + "." if prefix else "") + root + path
+
+
+def localize_url(value, host):
+    """A stored absolute link to one of our hosts, moved to the same service on the request's root."""
+    if not isinstance(value, str) or not value.lower().startswith(("https://", "http://")):
+        return value
+    try:
+        parsed = urlsplit(value)
+        port = parsed.port
+    except ValueError:
+        return value
+    target = HOST_MAP.get((parsed.hostname or "").lower())
+    root = domain_root(host) if host else None
+    if not target or not root or target[1] == root or port or parsed.username or parsed.password:
+        return value
+    return site_url(target[0], urlunsplit(("", "", parsed.path or "/", parsed.query, parsed.fragment)), host)
 
 
 def request_host(handler):

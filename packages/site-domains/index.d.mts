@@ -22,6 +22,8 @@ export interface SiteDomains {
   rootFor(host: string): string | null;
   /** Absolute URL of a service on the same approved root as `host` (default: the current page). */
   url(service: string, path?: string, host?: string): string;
+  /** A stored absolute link to one of our hosts, moved to the same service on the caller's root; other values unchanged. */
+  localizeUrl<T>(raw: T, host?: string): T | string;
   /** The URL when it is an approved HTTPS target on the caller's own root, otherwise ''. */
   safeReturn(raw: unknown, host?: string): string;
   requestContext(request: unknown): SiteRequestContext | null;
