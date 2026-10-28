@@ -240,6 +240,17 @@ def _safe_image_path(raw):
                 break
     except (OSError, ValueError, TypeError):
         pass
+    # 旧 portal 的素材根：/srv/iridescently/data/assets/<...>
+    # migration marker 未登记这条根，导致这些记录永远转换失败而 404。
+    LEGACY_PORTAL_ASSETS = "/srv/iridescently/data/assets/"
+    if isinstance(raw, str) and raw.startswith(LEGACY_PORTAL_ASSETS):
+        rest = raw[len(LEGACY_PORTAL_ASSETS):].strip("/")
+        parts = [seg for seg in rest.split("/") if seg and seg not in (".", "..")]
+        if parts:
+            try:
+                raw = str(source_asset_dir(*parts))
+            except Exception:
+                pass
     p = os.path.realpath(raw)
     if not os.path.isabs(p):
         return None
@@ -248,6 +259,11 @@ def _safe_image_path(raw):
     for root in ASSET_ROOT_DIRS:
         try:
             if os.path.commonpath([p, os.path.realpath(root)]) == os.path.realpath(root):
+                # WEBP_FALLBACK: 原图已在 WebP 化时替换，磁盘上只剩同名 .webp
+                if not os.path.exists(p):
+                    alt = os.path.splitext(p)[0] + ".webp"
+                    if os.path.exists(alt):
+                        p = alt
                 return p
         except ValueError:
             continue
