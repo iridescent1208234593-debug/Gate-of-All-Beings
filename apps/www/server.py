@@ -26,7 +26,7 @@ RUNTIME_DIR = STATIC_DIR
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "services", "platform"))
 import hx_sso
 from site_domains import (PRODUCTION_HOSTS, service_name, site_url, request_host,
-                          request_origin_allowed, cors_headers)
+                          request_origin_allowed, cors_headers, localize_url)
 from base_static import BaseStaticHandler
 # 管理员：完整 (kind, uid) 站长账户 + 账户库状态复核，见 services/platform/site_admin.py
 from site_admin import is_site_owner
@@ -185,6 +185,24 @@ class Handler(BaseStaticHandler):
             "/api/gallery/action", "/api/gallery/comment", "/api/gallery/comments", "/api/gallery/original",
         )
 
+    def _site_config_json(self, name):
+        """Homepage link lists may name another root's host; readers stay on the root they came from."""
+        try:
+            with open(_site_config_path(name), encoding="utf-8") as stream:
+                data = json.load(stream)
+        except (OSError, ValueError):
+            self.send_error(404)
+            return
+        host = request_host(self)
+
+        def localize(value):
+            if isinstance(value, dict):
+                return {key: localize(item) for key, item in value.items()}
+            if isinstance(value, list):
+                return [localize(item) for item in value]
+            return localize_url(value, host)
+        self._json(200, localize(data))
+
     # ---- 通用 JSON 响应 ----
     def _json(self, code, obj):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -253,6 +271,8 @@ class Handler(BaseStaticHandler):
         if self._legacy_redirect():
             return
         path = self.path.split("?")[0]
+        if path in ("/links.json", "/thanks.json"):
+            return self._site_config_json(path.lstrip("/"))
         if path == "/api/gallery/state":
             image = urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query).get("image", [""])[0]
             if gallery_interactions.find_original(self._gallery_root(), RUNTIME_DIR, image) is None:

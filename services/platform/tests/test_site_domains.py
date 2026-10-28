@@ -247,6 +247,29 @@ class BrowserAndNodeParity(unittest.TestCase):
                                 cwd=ROOT, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_stored_own_domain_links_follow_the_readers_root(self):
+        cases = [
+            ("https://huiguan.iridescently.xyz/api/official/img-id?id=1&t=1", "zszm.iridescently.cn",
+             "https://huiguan.iridescently.cn/api/official/img-id?id=1&t=1"),
+            ("https://iridescently.xyz/", "huiguan.iridescently.dpdns.org", "https://iridescently.dpdns.org/"),
+            ("http://zszm.iridescently.xyz/#home", "oc.iridescently.cn", "https://zszm.iridescently.cn/#home"),
+            ("https://zszm.iridescently.xyz/#home", "zszm.iridescently.xyz", "https://zszm.iridescently.xyz/#home"),
+            ("https://example.com/x", "zszm.iridescently.cn", "https://example.com/x"),
+            ("https://huiguan.iridescently.xyz:8443/x", "zszm.iridescently.cn", "https://huiguan.iridescently.xyz:8443/x"),
+            ("https://huiguan.iridescently.xyz.evil.example/", "zszm.iridescently.cn", "https://huiguan.iridescently.xyz.evil.example/"),
+            ("/relative/path", "zszm.iridescently.cn", "/relative/path"),
+            (42, "zszm.iridescently.cn", 42),
+        ]
+        script = ("const d=require('./packages/site-domains/index.js');const c=JSON.parse(process.argv[1]);"
+                  "console.log(JSON.stringify(c.map(([v,h])=>d.localizeUrl(v,h))));")
+        node = subprocess.run(["node", "-e", script, json.dumps([[v, h] for v, h, _ in cases])],
+                              cwd=ROOT, capture_output=True, text=True)
+        self.assertEqual(node.returncode, 0, node.stderr)
+        for (value, host, expected), browser in zip(cases, json.loads(node.stdout)):
+            with self.subTest(value=value, host=host):
+                self.assertEqual(site_domains.localize_url(value, host), expected)
+                self.assertEqual(browser, expected)
+
     def test_return_urls_and_request_context_stay_within_one_root(self):
         script = r"""
 const d = require('./packages/site-domains/index.js');
