@@ -2643,21 +2643,21 @@ function renderFormColorGrid() {
   COLOR_SCHEMES.forEach((cs, i) => {
     html += `<div class="color-card ${(i === selectedColorIdx && selectedUserIdx < 0) ? 'selected' : ''}" data-index="${i}" onclick="selectFormColor(${i}, this)">
       <div class="swatches">
-        <div class="swatch" style="background:${cs.primary};"></div>
-        <div class="swatch" style="background:${cs.accent};"></div>
+        <div class="swatch" style="background:${safeCssHex(cs.primary)};"></div>
+        <div class="swatch" style="background:${safeCssHex(cs.accent)};"></div>
       </div>
-      <div class="label">${cs.name}</div>
+      <div class="label">${escapeHtml(cs.name)}</div>
     </div>`;
   });
   USER_SCHEMES.forEach((us, j) => {
     const i = COLOR_SCHEMES.length + j;
     html += `<div class="color-card ${j === selectedUserIdx ? 'selected' : ''}" data-index="${i}" onclick="selectFormColor(${i}, this)">
       <div class="swatches">
-        <div class="swatch" style="background:${us.primary};"></div>
-        <div class="swatch" style="background:${us.accent};"></div>
+        <div class="swatch" style="background:${safeCssHex(us.primary)};"></div>
+        <div class="swatch" style="background:${safeCssHex(us.accent)};"></div>
       </div>
-      <div class="label">⭐ ${us.name}</div>
-      ${us.can_delete ? `<button type="button" class="color-card-del" title="删除配色" onclick="deleteUserScheme(${us.id}, event)">✕</button>` : ''}
+      <div class="label">⭐ ${escapeHtml(us.name)}</div>
+      ${us.can_delete ? `<button type="button" class="color-card-del" title="删除配色" onclick="deleteUserScheme(${Number(us.id)}, event)">✕</button>` : ''}
     </div>`;
   });
   grid.innerHTML = html;
@@ -3250,11 +3250,11 @@ function renderColorGrid() {
   grid.innerHTML = all.map((cs, i) => `
     <div class="color-card" data-index="${i}" onclick="selectColor(${i}, this)">
       <div class="swatches">
-        <div class="swatch" style="background:${cs.primary};"></div>
-        <div class="swatch" style="background:${cs.accent};"></div>
+        <div class="swatch" style="background:${safeCssHex(cs.primary)};"></div>
+        <div class="swatch" style="background:${safeCssHex(cs.accent)};"></div>
       </div>
-      <div class="label">${i < COLOR_SCHEMES.length ? cs.name : '⭐ ' + cs.name}</div>
-      ${i >= COLOR_SCHEMES.length && cs.can_delete ? `<button type="button" class="color-card-del" title="删除配色" onclick="deleteUserScheme(${cs.id}, event)">✕</button>` : ''}
+      <div class="label">${i < COLOR_SCHEMES.length ? escapeHtml(cs.name) : '⭐ ' + escapeHtml(cs.name)}</div>
+      ${i >= COLOR_SCHEMES.length && cs.can_delete ? `<button type="button" class="color-card-del" title="删除配色" onclick="deleteUserScheme(${Number(cs.id)}, event)">✕</button>` : ''}
     </div>
   `).join('');
 }
@@ -4219,6 +4219,11 @@ function escapeHtml(s) {
   const div = document.createElement('div');
   div.textContent = s;
   return div.innerHTML;
+}
+
+// 配色颜色只接受 #hex，旧库里的非法值不进 style 属性
+function safeCssHex(c) {
+  return /^#[0-9a-f]{3,8}$/i.test(String(c || '')) ? c : 'transparent';
 }
 
 renderFormColorGrid();

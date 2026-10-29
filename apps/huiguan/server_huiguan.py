@@ -265,6 +265,8 @@ RATE = {}
 RATE_LOCK = threading.Lock()
 
 USERNAME_RE = re.compile(r"^[\u4e00-\u9fa5A-Za-z0-9_]{2,16}$")
+# \u81ea\u547d\u540d\u914d\u8272\u7684\u4e3b\u8272\u540d/\u8f85\u8272\u540d\u4f1a\u5728\u591a\u4e2a\u9875\u9762\u6e32\u67d3\uff1a\u53ea\u653e\u884c\u6587\u5b57\u3001\u6570\u5b57\u4e0e\u5c11\u91cf\u6807\u70b9\uff08\u4e0d\u542b \u00d7\uff0c\u5b83\u662f\u4e3b\u8f85\u8272\u5206\u9694\u7b26\uff09
+COLOR_NAME_RE = re.compile(r"[\w\u4e00-\u9fff\u00b7\uff08\uff09()\uff0c\u3002\u3001\- ]{1,30}")
 
 
 def now_iso():
@@ -1746,6 +1748,8 @@ class Handler(BaseStaticHandler):
         accent = (body.get("accent") or "").strip().lower()
         if not primary_name or len(primary_name) > 30 or not accent_name or len(accent_name) > 30:
             self._json(400, {"error": "主色名与辅色名均需为 1-30 个字符"}); return
+        if not COLOR_NAME_RE.fullmatch(primary_name) or not COLOR_NAME_RE.fullmatch(accent_name):
+            self._json(400, {"error": "色名只能包含文字、数字、空格与 ·（）()，。、-_"}); return
         if not re.match(r"^#[0-9a-f]{6}$", primary) or not re.match(r"^#[0-9a-f]{6}$", accent):
             self._json(400, {"error": "颜色格式需为 #RRGGBB"}); return
         ident = self._require_ident_optional()
