@@ -22,7 +22,7 @@ import { composeSpecies, speciesParts } from './species';
 import './mode-hall.css';
 import {SharedResources} from './SharedResources';
 
-type Props = { onNavigate: (view: string) => void; onEditIdentity?: () => void };
+type Props = { onNavigate: (view: string) => void; onEditIdentity?: () => void; onReady?: () => void };
 type Game = { key: string; title: string; genre: string; desc: string; points: string[]; shots: string[]; view?: string; scene?: ReactNode };
 const auxiliary = [
   { view: 'hall', title: '会馆日常', caption: '照料同行者，积攒默契', icon: Sprout },
@@ -166,7 +166,8 @@ function GameCard({ game, index, onNavigate }: { game: Game; index: number; onNa
 }
 
 /** portal.json decides which independent modes are published; the hall owns order and presentation. */
-export function ModeHall({ onNavigate, onEditIdentity }: Props) {
+export function ModeHall({ onNavigate, onEditIdentity, onReady }: Props) {
+  useEffect(() => { onReady?.(); }, [onReady]);
   const { identity } = usePlayerProfile();
   const parts = speciesParts(identity);
   const note = parts.note;
