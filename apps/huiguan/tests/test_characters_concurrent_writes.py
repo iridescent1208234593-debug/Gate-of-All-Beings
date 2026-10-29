@@ -35,6 +35,12 @@ USERS = 4
 SHEETS_PER_USER = 6
 
 
+class Server(ThreadingHTTPServer):
+    # Production serves Huiguan through portal_server with the same backlog; the default of 5
+    # resets some of the simultaneous connections this test opens (ConnectionResetError on CI).
+    request_queue_size = 1024
+
+
 class Quiet(huiguan.Handler):
     def log_message(self, *_):
         pass
@@ -72,7 +78,7 @@ class ConcurrentCharacterWritesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         huiguan.init_user_db()
-        cls.httpd = ThreadingHTTPServer(("127.0.0.1", 0), Quiet)
+        cls.httpd = Server(("127.0.0.1", 0), Quiet)
         threading.Thread(target=cls.httpd.serve_forever, daemon=True).start()
         base = f"http://127.0.0.1:{cls.httpd.server_port}"
         cls.clients = []
