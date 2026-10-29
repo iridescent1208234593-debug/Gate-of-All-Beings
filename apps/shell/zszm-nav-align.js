@@ -99,6 +99,12 @@
         st.textContent =
           "#qc-nav .qc-panel-group{display:block;margin:10px 0 4px;padding:8px 10px 0;font-size:11px;" +
           "#qc-nav .qc-more-panel{display:block!important;grid-template-columns:1fr!important;}" +
+          "#qc-nav *::-webkit-scrollbar{width:6px!important;height:6px!important;background:transparent!important;}" +
+          "#qc-nav *::-webkit-scrollbar-track{background:transparent!important;}" +
+          "#qc-nav *::-webkit-scrollbar-thumb{background:rgba(230,192,106,.28)!important;border-radius:999px!important;border:0!important;}" +
+          "#qc-nav *::-webkit-scrollbar-thumb:hover{background:rgba(230,192,106,.5)!important;}" +
+          "#qc-nav *::-webkit-scrollbar-button{display:none!important;height:0!important;width:0!important;}" +
+          "#qc-nav *::-webkit-scrollbar-corner{background:transparent!important;}" +
           /* qc-scrollbar-fix: 卡片页不走 site-nav.js 的 CSS，这里补细滚动条 */
           "#qc-nav .qc-more-panel{scrollbar-width:thin;scrollbar-color:rgba(230,192,106,.32) transparent;}" +
           "#qc-nav .qc-more-panel::-webkit-scrollbar{width:6px;height:6px;}" +

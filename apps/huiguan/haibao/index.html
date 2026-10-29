@@ -581,7 +581,8 @@ function duotoneHalf(c2, color, x, w) {
   g.addColorStop(0.885, '#ffffff');
   g.addColorStop(1, '#ffffff');
   c2.fillStyle = g;
-  c2.fillRect(x, 0, w, H);
+  // seamfix: 两半之间多铺 1px，避免抗锯齿在接缝处留下竖线
+  c2.fillRect(x, 0, w + 1, H);
 }
 function drawDuotoneBg(c2) {
   duotoneHalf(c2, colorA(), 0, 540);
@@ -1874,7 +1875,7 @@ try {
 
 <!-- 全站统一导航（与西木会馆主站一致）；登录栏由本页自挂 -->
 <script>window.__HUIGUAN_OWN_AUTH = true; window.__HUIGUAN_OWN_CONTACT = true;</script>
-<script src="/shared/shared-ui/site-nav.js?v=20261027z"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261028o"></script>
 <script>
 (function () {
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
