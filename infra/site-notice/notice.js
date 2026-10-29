@@ -13,7 +13,7 @@
   "use strict";
 
   var CONFIG = {
-    version: "20261029c",
+    version: "20261029d",
     title: "站点公告",
     subtitle: "西木会馆 · 众生之门",
     items: [
@@ -52,8 +52,10 @@
         + "#__lxh_notice .nc-list::-webkit-scrollbar-track{background:transparent}"
         + "#__lxh_notice .nc-list::-webkit-scrollbar-thumb{background:rgba(122,138,126,.35);border-radius:99px}"
   + "#__lxh_notice .nc-body.on .nc-item{opacity:1;transform:none}"
-  + "#__lxh_notice .nc-item b{display:inline;font-size:12px;color:#3a4a3e;margin-right:5px}"
-  + "#__lxh_notice .nc-item span{font-size:11.5px;line-height:1.55;color:#7a8a7e}"
+  + "#__lxh_notice .nc-item{display:block!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere!important;margin:0 0 7px}"
+  + "#__lxh_notice .nc-item:last-child{margin-bottom:0}"
+  + "#__lxh_notice .nc-item b{display:inline!important;white-space:normal!important;font-size:12px;color:#3a4a3e;margin-right:5px}"
+  + "#__lxh_notice .nc-item span{display:inline!important;white-space:normal!important;overflow-wrap:anywhere!important;text-overflow:clip!important;font-size:11.5px;line-height:1.55;color:#7a8a7e}"
   + "#__lxh_notice .nc-mark{display:block;margin-top:5px;text-align:right;font-size:9.5px;letter-spacing:.05em;color:#7a8a7e}"
   /* 左上：小眼睛；右上：关闭 */
   + "#__lxh_notice .nc-btn{position:absolute;top:9px;width:32px;height:32px;display:grid;place-items:center;border:1px solid rgba(251,248,242,.55);border-radius:50%;background:rgba(12,18,20,.45);color:#fbf8f2;cursor:pointer;padding:0;z-index:4;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);transition:background .2s,transform .2s;line-height:0}"
