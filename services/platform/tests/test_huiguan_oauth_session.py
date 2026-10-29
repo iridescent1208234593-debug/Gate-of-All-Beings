@@ -53,9 +53,10 @@ class HuiguanOAuthSessionTest(unittest.TestCase):
         self.assertEqual(app.read_session(sid, "iridescently.cn"), {"kind": "local", "uid": "unit-root-user"})
         self.assertIsNone(app.read_session(sid, "iridescently.xyz"))
         self.assertIsNone(app.read_session(sid, "iridescently.dpdns.org"))
+        # 不指定根域时默认用当前 SITE_DOMAIN（已切到 .cn）
         legacy = app.create_session("local", "unit-legacy-user")
-        self.assertIsNotNone(app.read_session(legacy, "iridescently.xyz"))
-        self.assertIsNone(app.read_session(legacy, "iridescently.cn"))
+        self.assertIsNotNone(app.read_session(legacy, "iridescently.cn"))
+        self.assertIsNone(app.read_session(legacy, "iridescently.xyz"))
 
     def test_login_on_a_root_without_a_registered_callback_never_leaves_that_root(self):
         registered = FakeRequest("huiguan.iridescently.xyz")
