@@ -38,7 +38,7 @@ h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
   <div class="tip">颜色按物种类别区分：人类（金）/ 妖精（绿）/ 动物（棕）/ 同人角色（紫色虚线框）/ 非角色（灰色方形）。拥有神/仙身份的节点叠加标识：「神·」「仙·」标签前缀，神为菱形、仙为三角。连线标注关系（师徒 / 同门 / 亲友 / 敌对 等）。点击节点跳转到该角色详情页；搜索可高亮某角色及其直接关系。</div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
-<script src="/shared/shared-ui/site-nav.js?v=20261027z"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261028o"></script>
 <script>
 let chart=null, nodes=[], edges=[], byName={};
 const CAT_COLOR={'人类':'#d4a840','妖精':'#5a9e8f','动物':'#c08050','神':'#e0b63a','同人角色':'#8a7fb5','非角色':'#9a9a9a'};
@@ -46,6 +46,22 @@ const CAT_INDEX={'人类':0,'妖精':1,'动物':2,'神':3,'同人角色':4,'非�
 const catOf = n => (n.category && CAT_COLOR[n.category]) ? n.category : (n.type.includes('人类')?'人类':n.type.includes('妖精')?'妖精':'其他');
 const catColor = c => CAT_COLOR[c] || '#8a7f6a';
 const deityOf = n => (n.deity==='神'||n.deity==='仙') ? n.deity : '';
+
+/** 并发受限的图片预取：进入页面就开始下载，渲染时多半已经在缓存里。 */
+function prefetchAvatars(list){
+  const urls=[...new Set((list||[]).map(n=>n&&n.avatar).filter(Boolean))];
+  let i=0;
+  const CONCURRENCY=6;
+  function next(){
+    if(i>=urls.length)return;
+    const img=new Image();
+    img.decoding='async';
+    img.loading='eager';
+    img.onload=img.onerror=()=>next();
+    img.src=urls[i++];
+  }
+  for(let k=0;k<CONCURRENCY;k++)next();
+}
 async function init(){
   if(!window.echarts){ document.getElementById('chart').innerHTML='<div class="loading">图谱库加载失败，请检查网络后刷新。</div>'; return; }
   try{
@@ -53,6 +69,8 @@ async function init(){
     nodes=d.nodes||[]; edges=d.edges||[];
     document.getElementById('stat').textContent=`${nodes.length} 个角色 · ${edges.length} 条关系`;
     nodes.forEach(n=>byName[n.name]=n);
+// 进入页面即开始预热头像：限制并发，避免一次打满连接数
+prefetchAvatars(nodes);
     render();
   }catch(e){ document.getElementById('chart').innerHTML='<div class="loading">加载失败，请刷新。</div>'; }
 }

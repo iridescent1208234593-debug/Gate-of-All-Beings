@@ -294,6 +294,13 @@ def route(host, path):
     if h == "zszm":
         if p == "/api/sso-user":
             return www.Handler, {}
+        # HUIGUAN_API_ON_ZSZM: 众生之门里有些页面要读会馆的角色资料，
+        # 这些接口在 cards 后端不存在；此前被下面的 /api/ 兜底转给 cards 导致 404。
+        if p.startswith(("/api/get-characters", "/api/get-character",
+                         "/api/save-character", "/api/save-all-characters",
+                         "/api/my-broken-characters", "/api/fan/",
+                         "/api/official/character")):
+            return huiguan.Handler, {}
         if p.startswith("/api/"):
             return ProxyHandler, {"port": PROXY_PORTS["cards"], "strip": ""}
         return StaticHandler, {"root": str(MODULES_DIR / "cards"), "spa": "/index.html"}
