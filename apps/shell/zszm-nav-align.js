@@ -28,6 +28,7 @@
       ["官方角色档案", qcUrl("huiguan", "/works.html")],
       ["表情包收录", qcUrl("huiguan", "/stickers.html")],
       ["人物关系图", qcUrl("huiguan", "/relation.html")],
+          ["世界地图", qcUrl("huiguan", "/map/")],
       ["配色海报工坊", qcUrl("huiguan", "/haibao/")]
     ] },
     { title: "玩法", items: [
