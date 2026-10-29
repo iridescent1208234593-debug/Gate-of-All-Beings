@@ -29,7 +29,7 @@ from site_domains import (PRODUCTION_HOSTS, service_name, site_url, request_host
                           request_origin_allowed, cors_headers)
 from base_static import BaseStaticHandler
 # 管理员：完整 (kind, uid) 站长账户 + 账户库状态复核，见 services/platform/site_admin.py
-from site_admin import is_site_owner, is_admin as _is_any_admin
+from site_admin import is_site_owner, is_admin as _is_any_admin, is_original_viewer
 import gallery_interactions
 from storage_paths import data_root, homepage_data_dir, require_ready
 
@@ -201,7 +201,7 @@ class Handler(BaseStaticHandler):
             return False
         kind, uid = str(user["kind"]), str(user["uid"])
         try:
-            return bool(site_admin.is_original_viewer(kind, uid))
+            return bool(is_original_viewer(kind, uid))
         except Exception:
             return False
 

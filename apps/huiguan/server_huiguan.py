@@ -2507,7 +2507,15 @@ class Handler(BaseStaticHandler):
             for c in chars:
                 if c.get("code") == code:
                     # 隐私守卫：未公开的设表只有本人能看，访客直接拒绝
-                    _ident = self._require_ident_optional()
+                    _ident = self._require_ident_optional()
+                    if not _ident:
+                        # 跨站单点登录只带 hx_sso，会馆自己的 session 可能不存在
+                        try:
+                            _sso = hx_sso.read_cookie(self.headers)
+                            if _sso:
+                                _ident = {"kind": str(_sso.get("kind")), "uid": str(_sso.get("uid"))}
+                        except Exception:
+                            _ident = _ident
                     # 兼容旧数据键：characters.json 里既有 local:7 也有 local_7
                     _key = self._data_key(_ident) if _ident else ""
                     _owner = bool(_ident) and (_key == uid or _key.replace(":", "_") == uid)

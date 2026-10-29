@@ -26,31 +26,41 @@ def _users_db(project_root=None):
     return huiguan_data_dir(root) / "users.db"
 
 
-def account_usable(kind, uid, project_root=None):
-    """True when the account exists and is not disabled; read-only."""
+def _account_state(kind, uid, project_root=None):
+    """返回 'absent' / 'active' / 'disabled' / 'nostore'，用于区分「查不到行」与「被停用」。"""
     database = _users_db(project_root)
     if not database.exists():
-        return False
+        return "nostore"
     try:
         conn = sqlite3.connect(f"file:{database.as_posix()}?mode=ro", uri=True, timeout=5)
     except sqlite3.Error:
-        return False
+        return "nostore"
     try:
         if kind == "local":
-            row = conn.execute("SELECT status FROM local_users WHERE CAST(uid AS TEXT)=?", (uid,)).fetchone()
-            return bool(row) and row[0] == "active"
+            row = conn.execute(
+                "SELECT status FROM local_users WHERE CAST(uid AS TEXT)=?", (uid,)
+            ).fetchone()
+            if not row:
+                return "absent"
+            return "active" if row[0] == "active" else "disabled"
         if kind == "usso":
-            # USSO accounts are created on first login; only an explicit ban disables them.
             try:
-                flag = conn.execute("SELECT status FROM user_flags WHERE kind='usso' AND uid=?", (uid,)).fetchone()
+                flag = conn.execute(
+                    "SELECT status FROM user_flags WHERE kind='usso' AND uid=?", (uid,)
+                ).fetchone()
             except sqlite3.OperationalError:
                 flag = None
-            return not (flag and flag[0] == "banned")
-        return False
+            return "disabled" if (flag and flag[0] == "banned") else "active"
+        return "absent"
     except sqlite3.Error:
-        return False
+        return "nostore"
     finally:
         conn.close()
+
+
+def account_usable(kind, uid, project_root=None):
+    """True when the account exists and is not disabled; read-only."""
+    return _account_state(kind, uid, project_root) == "active"
 
 
 def is_site_owner(token_payload, project_root=None):
@@ -60,7 +70,13 @@ def is_site_owner(token_payload, project_root=None):
     kind, uid = token_payload.get("kind"), str(token_payload.get("uid") or "")
     if (kind, uid) not in SITE_OWNER_ACCOUNTS:
         return False
-    return account_usable(kind, uid, project_root)
+    state = _account_state(kind, uid, project_root)
+    # 账户库整体缺失 → 拒绝（无法确认账号状态）。
+    # 库存在但缺该行 → 站长名单内、且 cookie 已验签的身份仍视为站长；
+    # 存在但被停用 → 拒绝。
+    if state == "nostore":
+        return False
+    return state in ("active", "absent")
 
 
 def is_huiguan_admin(kind, uid, project_root=None):
