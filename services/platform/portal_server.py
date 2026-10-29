@@ -245,6 +245,9 @@ def route(host, path):
         return huiguan.Handler, {}
     if p in ('/assets/site-language.js', '/assets/iridescently-mark.png'):
         return www.Handler, {}
+    # 世界地图（world-map 模块）：独立路径，任意站点域名下都可访问
+    if p in ("/map", "/map/"):
+        return StaticHandler, {"root": str(MODULES_DIR / "world-map"), "strip": "/map", "spa": "/index.html"}
     if h == "huiguan":
         return huiguan.Handler, {}
     if h == "oc":
