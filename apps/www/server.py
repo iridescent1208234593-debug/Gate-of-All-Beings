@@ -213,6 +213,16 @@ class Handler(BaseStaticHandler):
                 return True  # 没有账户库时不阻断
             conn = sqlite3.connect(f"file:{db_path.as_posix()}?mode=ro", uri=True, timeout=5)
             try:
+                # 账号是否真实存在于账户库；不存在的身份（如伪造/历史映射）
+                # 无法验证邮箱，按放行处理，避免把整类用户挡在互动之外。
+                if kind == "local":
+                    exists = conn.execute(
+                        "SELECT 1 FROM local_users WHERE CAST(uid AS TEXT)=?", (uid,)).fetchone()
+                else:
+                    exists = conn.execute(
+                        "SELECT 1 FROM users WHERE CAST(user_id AS TEXT)=?", (uid,)).fetchone()
+                if not exists:
+                    return True
                 row = conn.execute(
                     "SELECT verified_at FROM account_emails WHERE kind=? AND CAST(uid AS TEXT)=?",
                     (kind, uid)).fetchone()
