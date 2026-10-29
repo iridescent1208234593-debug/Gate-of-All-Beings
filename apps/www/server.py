@@ -195,6 +195,16 @@ class Handler(BaseStaticHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _can_view_original(self, user):
+        """原图只有站长与会馆管理员可见（不限制具体成员）。"""
+        if not user or not user.get("uid") or not user.get("kind"):
+            return False
+        kind, uid = str(user["kind"]), str(user["uid"])
+        try:
+            return bool(site_admin.is_original_viewer(kind, uid))
+        except Exception:
+            return False
+
     def _is_admin(self, user):
         if not user or not user.get("uid") or not user.get("kind"):
             return False
@@ -396,7 +406,7 @@ class Handler(BaseStaticHandler):
                 self._json(403, {"error": "原图请求来源不被允许"})
             return
         user = hx_sso.read_cookie(self.headers)
-        if not self._is_admin(user):
+        if not self._can_view_original(user):
             if head:
                 self.send_response(403)
                 self.send_header("Cache-Control", "no-store")

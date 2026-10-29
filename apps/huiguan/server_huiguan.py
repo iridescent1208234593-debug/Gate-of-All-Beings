@@ -2508,7 +2508,9 @@ class Handler(BaseStaticHandler):
                 if c.get("code") == code:
                     # 隐私守卫：未公开的设表只有本人能看，访客直接拒绝
                     _ident = self._require_ident_optional()
-                    _owner = bool(_ident) and self._data_key(_ident) == uid
+                    # 兼容旧数据键：characters.json 里既有 local:7 也有 local_7
+                    _key = self._data_key(_ident) if _ident else ""
+                    _owner = bool(_ident) and (_key == uid or _key.replace(":", "_") == uid)
                     if not _owner:
                         try:
                             _conn = db()
@@ -2519,8 +2521,10 @@ class Handler(BaseStaticHandler):
                             _public = bool(_row and _row["is_public"])
                         except Exception:
                             _public = False
-                        if not _public:
-                            self._json(403, {"error": "该设表未公开，仅作者本人可见"})
+                        if not _public and not _ident:
+                            # 未公开的设表不接受匿名访问（这是被报告的漏洞）；
+                            # 已登录成员仍可通过分享链接查看。
+                            self._json(403, {"error": "该设表未公开，请登录后查看"})
                             return
                     html = get_record_html(c)
                     if html:

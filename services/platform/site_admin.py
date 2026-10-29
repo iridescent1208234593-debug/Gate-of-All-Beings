@@ -93,21 +93,28 @@ def is_huiguan_admin(kind, uid, project_root=None):
 
 
 def is_admin(kind, uid, project_root=None):
-    """站长，或会馆管理员，都视为管理员。
+    """只认站长名单：会馆管理员不因会馆角色获得主站管理权。
 
-    is_site_owner 接受的是已验签的 hx_sso payload（dict），不是 (kind, uid)；
-    这里按同样语义构造最小 payload 再判断，避免签名字段错位。
+    原图查看等需要放宽的场景请用 is_original_viewer 另行判断。
+    is_site_owner 接受已验签的 hx_sso payload（dict），不是 (kind, uid)。
     """
     payload = {"kind": kind, "uid": str(uid)}
     try:
-        if is_site_owner(payload, project_root):
-            return True
+        return bool(is_site_owner(payload, project_root))
     except TypeError:
         try:
-            if is_site_owner(payload):
-                return True
+            return bool(is_site_owner(payload))
         except Exception:
-            pass
+            return False
     except Exception:
-        pass
-    return is_huiguan_admin(kind, uid, project_root)
+        return False
+
+
+def is_original_viewer(kind, uid, project_root=None):
+    """原图可见性：站长，或会馆管理员。"""
+    if is_admin(kind, uid, project_root):
+        return True
+    try:
+        return bool(is_huiguan_admin(kind, uid, project_root))
+    except Exception:
+        return False

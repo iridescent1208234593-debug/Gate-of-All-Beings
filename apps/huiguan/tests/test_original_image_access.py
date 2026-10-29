@@ -193,7 +193,8 @@ class OriginalImageAccessTest(unittest.TestCase):
             self.assertNotEqual(preview_body, char_original)
         showcase = f'<html><body><img src="/assets/uploads/{upload_name}"></body></html>'
         Path(huiguan.DATA_FILE).write_text(json.dumps({"local_7": [{"code": "showcase", "html": showcase, "data": {}}]}), encoding="utf-8")
-        status, _, html = self.get("/api/get-character?code=showcase")
+        # 未公开设表只有作者本人可读，这里以作者身份验证「不泄露源路径」
+        status, _, html = self.get("/api/get-character?code=showcase", self.OWNER)
         self.assertEqual(status, 200)
         self.assertNotIn("/assets/uploads/", html.decode("utf-8"))
         self.assertIn("/api/uploads/preview?name=" + upload_name, html.decode("utf-8"))
