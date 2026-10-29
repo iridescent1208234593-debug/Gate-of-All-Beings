@@ -95,15 +95,16 @@ class HostAllowlist(unittest.TestCase):
         self.assertEqual(site_domains.request_host(request), "127.0.0.1")
 
     def test_configuration_rejects_unapproved_roots(self):
-        for environment in ({"SITE_DOMAIN": "evil.example"}, {"SITE_DOMAIN": "iridescently.cn", "IRIDESCENTLY_ALLOWED_DOMAINS": "iridescently.xyz"},
+        for environment in ({"SITE_DOMAIN": "evil.example"}, {"SITE_DOMAIN": "iridescently.com"},
                             {"IRIDESCENTLY_ALLOWED_DOMAINS": "iridescently.xyz,iridescently.xyz"},
                             {"IRIDESCENTLY_ALLOWED_DOMAINS": "iridescently.xyz,*.iridescently.cn"}):
             with self.subTest(environment=environment):
                 self.assertNotEqual(isolated_python("import site_domains", **environment).returncode, 0)
         result = isolated_python("import site_domains; print(sorted(site_domains.PRODUCTION_HOSTS))",
-                                 IRIDESCENTLY_ALLOWED_DOMAINS="iridescently.xyz")
+                                 IRIDESCENTLY_ALLOWED_DOMAINS="iridescently.cn,iridescently.xyz")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertNotIn("iridescently.cn", result.stdout)
+        # 语义 B：domains.json 声明的根域天然允许，显式白名单只是额外补充
+        self.assertIn("iridescently.cn", result.stdout)
 
 
 class OriginBoundary(unittest.TestCase):
@@ -254,7 +255,7 @@ const socket = remoteAddress => ({ remoteAddress });
 const ctx = (headers, rawHeaders, remote = '127.0.0.1') => d.requestContext({ headers, rawHeaders, socket: socket(remote) });
 console.log(JSON.stringify({
   sameRoot: d.safeReturn('https://zszm.iridescently.cn/#home', 'huiguan.iridescently.cn'),
-  crossRoot: d.safeReturn('https://zszm.iridescently.cn/#home', 'huiguan.iridescently.cn'),
+  crossRoot: d.safeReturn('https://zszm.iridescently.xyz/#home', 'huiguan.iridescently.cn'),
   unknown: d.safeReturn('https://zszm.iridescently.cn.evil.example/', 'huiguan.iridescently.cn'),
   port: d.safeReturn('https://zszm.iridescently.cn:444/', 'huiguan.iridescently.cn'),
   urlCn: d.url('zszm', '/#home', 'huiguan.iridescently.cn'),
