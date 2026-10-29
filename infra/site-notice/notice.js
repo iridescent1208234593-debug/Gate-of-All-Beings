@@ -13,7 +13,7 @@
   "use strict";
 
   var CONFIG = {
-    version: "20261029d",
+    version: "20261029e",
     title: "站点公告",
     subtitle: "西木会馆 · 众生之门",
     items: [
@@ -31,6 +31,11 @@
     watermark: "美术组 · 海苔 老师作画"
   };
 
+  // 公告规则：最多 20 条，新的在最上面，旧的依次向下；新增内容必须提升 version。
+  var MAX_ITEMS = 20;
+  if (CONFIG.items && CONFIG.items.length > MAX_ITEMS) {
+    CONFIG.items = CONFIG.items.slice(0, MAX_ITEMS);
+  }
   var COOKIE = "lxh_notice_" + CONFIG.version;
   if (window.self !== window.top) return;
   if (("; " + document.cookie).indexOf("; " + COOKIE + "=1") !== -1) return;
