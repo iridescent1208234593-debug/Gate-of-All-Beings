@@ -1,8 +1,8 @@
 {
   "defaultRoot": "iridescently.cn",
   "roots": [
-    "iridescently.cn",
     "iridescently.xyz",
+    "iridescently.cn",
     "iridescently.dpdns.org"
   ],
   "services": {

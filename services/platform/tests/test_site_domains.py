@@ -254,7 +254,7 @@ const socket = remoteAddress => ({ remoteAddress });
 const ctx = (headers, rawHeaders, remote = '127.0.0.1') => d.requestContext({ headers, rawHeaders, socket: socket(remote) });
 console.log(JSON.stringify({
   sameRoot: d.safeReturn('https://zszm.iridescently.cn/#home', 'huiguan.iridescently.cn'),
-  crossRoot: d.safeReturn('https://zszm.iridescently.xyz/#home', 'huiguan.iridescently.cn'),
+  crossRoot: d.safeReturn('https://zszm.iridescently.cn/#home', 'huiguan.iridescently.cn'),
   unknown: d.safeReturn('https://zszm.iridescently.cn.evil.example/', 'huiguan.iridescently.cn'),
   port: d.safeReturn('https://zszm.iridescently.cn:444/', 'huiguan.iridescently.cn'),
   urlCn: d.url('zszm', '/#home', 'huiguan.iridescently.cn'),
@@ -273,7 +273,7 @@ console.log(JSON.stringify({
         self.assertEqual(value["sameRoot"], "https://zszm.iridescently.cn/#home")
         self.assertEqual((value["crossRoot"], value["unknown"], value["port"]), ("", "", ""))
         self.assertEqual(value["urlCn"], "https://zszm.iridescently.cn/#home")
-        self.assertEqual(value["urlUnknown"], "https://zszm.iridescently.xyz/#home")
+        self.assertEqual(value["urlUnknown"], "https://zszm.iridescently.cn/#home")
         self.assertEqual(value["forwarded"], "https://spirit.iridescently.dpdns.org")
         self.assertIsNone(value["remoteForwarded"])
         self.assertIsNone(value["duplicate"])
