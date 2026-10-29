@@ -7,7 +7,6 @@ import { AccountLinkReminder } from './AccountLinkReminder';
 import { OrientationGuard, useOrientationGuard } from './OrientationGuard';
 import { needsAccountAfterOnboarding } from './accountReminder';
 import { startPreload } from './preload';
-import { resolveEntryRoute } from './entry-flow';
 import { LoadBoundary } from '../components/LoadBoundary';
 import { EMPTY_IDENTITY, PlayerProfileProvider, accountScope, identityComplete, usePlayerProfile, type GateIdentity } from '../game/PlayerProfile';
 const GameApp = lazy(() => import('../game/GameApp'));
@@ -81,7 +80,7 @@ function GateFlow() {
   // Resolve identity before choosing whether the player needs onboarding or can pass through the door.
   useEffect(() => {
     if (phase !== 'routing' || profile.loading || !profile.resolved) return;
-    setPhase(resolveEntryRoute({ loading: profile.loading, resolved: profile.resolved, creatingNew, identityComplete: identityComplete(profile.identity) }) === 'onboarding' ? 'onboarding' : 'door');
+    setPhase(creatingNew || !identityComplete(profile.identity) ? 'onboarding' : 'door');
   }, [phase, profile.loading, profile.resolved, profile.identity, creatingNew]);
   function enter() {
     if (phase !== 'intro') return;
