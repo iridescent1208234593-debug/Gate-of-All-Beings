@@ -302,7 +302,7 @@ def route(host, path):
         if p.startswith(("/api/get-characters", "/api/get-character",
                          "/api/save-character", "/api/save-all-characters",
                          "/api/my-broken-characters", "/api/fan/",
-                         "/api/official/character")):
+                         "/api/official/character", "/api/account/")):
             return huiguan.Handler, {}
         if p.startswith("/api/"):
             return ProxyHandler, {"port": PROXY_PORTS["cards"], "strip": ""}
