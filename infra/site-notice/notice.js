@@ -13,7 +13,7 @@
   "use strict";
 
   var CONFIG = {
-    version: "20261029b",
+    version: "20261029c",
     title: "站点公告",
     subtitle: "西木会馆 · 众生之门",
     items: [
@@ -78,7 +78,18 @@
   var X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
 
   function remember() {
-    try { document.cookie = COOKIE + "=1; domain=.iridescently.xyz; path=/; max-age=3600; SameSite=Lax; Secure"; } catch (e) {}
+    try {
+    // 按当前域名推导根域：站点同时存在于 .xyz / .cn / .dpdns.org
+    var _roots = ["iridescently.dpdns.org", "iridescently.xyz", "iridescently.cn"];
+    var _host = (location.hostname || "").toLowerCase();
+    var _root = "";
+    for (var _i = 0; _i < _roots.length; _i++) {
+      var _r = _roots[_i];
+      if (_host === _r || _host.slice(-(_r.length + 1)) === "." + _r) { _root = _r; break; }
+    }
+    // 1 小时后再提醒；同一版本内容关闭后不再打扰
+    document.cookie = COOKIE + "=1; " + (_root ? "domain=." + _root + "; " : "") + "path=/; max-age=3600; SameSite=Lax";
+  } catch (e) {}
   }
 
   function build() {
