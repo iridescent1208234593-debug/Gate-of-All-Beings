@@ -1,6 +1,6 @@
 /* Iridescently site navigation — the one global bar shared by 节气画廊, 西木会馆 and 众生之门.
  *
- * Classic <script src=".../shared/shared-ui/site-nav.js?v=20261028o"> mounts it immediately.
+ * Classic <script src=".../shared/shared-ui/site-nav.js?v=20261029a"> mounts it immediately.
  *   data-variant="overlay"  lighter glass over an immersive first screen (gallery, hero)
  *   data-tone="light"       cream glass with ink text for light pages (connections)
  *   data-manual             do not mount; call IridescentlyNav.mount() yourself
@@ -33,28 +33,34 @@
   }
   var ORIGIN = domains.url('main');
   var MARK = ORIGIN + '/shared/shared-ui/brand/iridescently-mark.svg';
+  var H = function (key) { return new URL(domains.url(key)).hostname; };
+  // 顶层：按「入口 → 内容主站 → 玩法」排列；品牌指向节气画廊首页
   var SITES = [
-      { host: new URL(domains.url('huiguan')).hostname, label: '西木会馆', path: '/' },
-      { host: new URL(domains.url('zszm')).hostname, label: '众生之门', path: '/', beta: true },
-      { host: new URL(domains.url('main')).hostname, label: '节气画廊', path: '/homepage.html' }
+      { host: H('main'), label: '节气画廊', path: '/homepage.html' },
+      { host: H('huiguan'), label: '西木会馆', path: '/' },
+      { host: H('zszm'), label: '众生之门', path: '/', beta: true }
     ];
+  // 「更多」按使用顺序分组：看 → 做 → 玩 → 关于
   var MORE_GROUPS = [
-    { title: '会馆', items: [
-      { host: new URL(domains.url('huiguan')).hostname, label: '角色画廊', path: '/gallery.html' },
-      { host: new URL(domains.url('huiguan')).hostname, label: '同人画廊', path: '/fan.html' },
-      { host: new URL(domains.url('huiguan')).hostname, label: '官方角色档案', path: '/works.html' },
-      { host: new URL(domains.url('huiguan')).hostname, label: '表情包收录', path: '/stickers.html' },
-      { host: new URL(domains.url('huiguan')).hostname, label: '人物关系图', path: '/relation.html' },
-      { host: new URL(domains.url('huiguan')).hostname, label: '配色海报工坊', path: '/haibao/' }
+    { title: '浏览', items: [
+      { host: H('huiguan'), label: '角色画廊', path: '/gallery.html' },
+      { host: H('huiguan'), label: '同人画廊', path: '/fan.html' },
+      { host: H('huiguan'), label: '官方角色档案', path: '/works.html' },
+      { host: H('huiguan'), label: '人物关系图', path: '/relation.html' },
+      { host: H('huiguan'), label: '表情包收录', path: '/stickers.html' }
     ] },
-    { title: '玩法', items: [
-      { host: new URL(domains.url('zszm')).hostname, label: '众生之门 · 门庭', path: '/' },
-      { host: new URL(domains.url('zszm')).hostname, label: '聚灵', path: '/app/shell/m/juling' },
-      { host: new URL(domains.url('zszm')).hostname, label: '灵境会馆 · 据点经营', path: '/', hash: '#management' }
+    { title: '创作', items: [
+      { host: H('huiguan'), label: '配色海报工坊', path: '/haibao/' },
+      { host: H('main'), label: '摆烂一百天', path: '/100-days/' }
     ] },
-    { title: '其他', items: [
-      { host: new URL(domains.url('oc')).hostname, label: '佳霖馆长设定', path: '/' },
-      { host: new URL(domains.url('main')).hostname, label: '连接与鸣谢', path: '/connections.html' }
+    { title: '众生之门', items: [
+      { host: H('zszm'), label: '门庭', path: '/' },
+      { host: H('zszm'), label: '聚灵', path: '/app/shell/m/juling' },
+      { host: H('zszm'), label: '灵境会馆 · 据点经营', path: '/', hash: '#management' }
+    ] },
+    { title: '关于', items: [
+      { host: H('oc'), label: '佳霖馆长设定', path: '/' },
+      { host: H('main'), label: '连接与鸣谢', path: '/connections.html' }
     ] }
   ];
   var LEGAL = '<summary>版权与免责声明</summary><p class="qc-copy">罗小黑战记相关 IP 版权归寒木春华动画工作室所有。</p>' +
