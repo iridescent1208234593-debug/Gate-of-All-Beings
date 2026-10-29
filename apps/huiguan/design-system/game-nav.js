@@ -18,7 +18,7 @@
   }
   if (window.IridescentlyNav) { window.IridescentlyNav.mount(); addReturn(); return; }
   var script = document.createElement('script');
-  script.src = '/shared/shared-ui/site-nav.js?v=20261017';
+  script.src = '/shared/shared-ui/site-nav.js?v=20261027z';
   script.onload = addReturn;
   document.head.appendChild(script);
 })();

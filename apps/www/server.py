@@ -29,7 +29,7 @@ from site_domains import (PRODUCTION_HOSTS, service_name, site_url, request_host
                           request_origin_allowed, cors_headers, localize_url)
 from base_static import BaseStaticHandler
 # 管理员：完整 (kind, uid) 站长账户 + 账户库状态复核，见 services/platform/site_admin.py
-from site_admin import is_site_owner
+from site_admin import is_site_owner, is_admin as _is_any_admin
 import gallery_interactions
 from storage_paths import data_root, homepage_data_dir, require_ready
 
@@ -182,7 +182,7 @@ class Handler(BaseStaticHandler):
     def _is_api_path(self):
         return self.path.split("?")[0] in (
             "/api/sso-user", "/api/site-status", "/api/gallery/state",
-            "/api/gallery/action", "/api/gallery/comment", "/api/gallery/comments", "/api/gallery/original",
+            "/api/gallery/action", "/api/gallery/comment", "/api/gallery/comment/delete", "/api/gallery/comments", "/api/gallery/original",
         )
 
     def _site_config_json(self, name):
@@ -214,7 +214,31 @@ class Handler(BaseStaticHandler):
         self.wfile.write(body)
 
     def _is_admin(self, user):
-        return is_site_owner(user)
+        if not user or not user.get("uid") or not user.get("kind"):
+            return False
+        return _is_any_admin(str(user["kind"]), str(user["uid"]))
+
+
+    def _email_verified(self, user):
+        """是否已绑定并验证邮箱；用于互动功能的门槛。"""
+        if not user or not user.get("uid") or not user.get("kind"):
+            return False
+        kind, uid = str(user["kind"]), str(user["uid"])
+        try:
+            from storage_paths import data_root, huiguan_data_dir
+            db_path = huiguan_data_dir(data_root()) / "users.db"
+            if not db_path.exists():
+                return True  # 没有账户库时不阻断
+            conn = sqlite3.connect(f"file:{db_path.as_posix()}?mode=ro", uri=True, timeout=5)
+            try:
+                row = conn.execute(
+                    "SELECT verified_at FROM account_emails WHERE kind=? AND CAST(uid AS TEXT)=?",
+                    (kind, uid)).fetchone()
+                return bool(row and row[0])
+            finally:
+                conn.close()
+        except Exception:
+            return True  # 查询异常时不阻断（宁可放行也不误伤）
 
     def _read_json(self):
         try:
@@ -321,6 +345,9 @@ class Handler(BaseStaticHandler):
 
     def do_POST(self):
         path = self.path.split("?")[0]
+        if path == "/api/gallery/comment/delete":
+            self._delete_gallery_comment()
+            return
         if path in ("/api/gallery/action", "/api/gallery/comment"):
             self._post_gallery_interaction(path)
             return
@@ -412,6 +439,35 @@ class Handler(BaseStaticHandler):
             with target.open("rb") as stream:
                 shutil.copyfileobj(stream, self.wfile)
 
+    def _delete_gallery_comment(self):
+        if not request_origin_allowed(self):
+            self._json(403, {"error": "来源不被允许"})
+            return
+        user = hx_sso.read_cookie(self.headers)
+        if not user or not user.get("uid") or not user.get("kind"):
+            self._json(401, {"error": "登录后即可操作"})
+            return
+        payload = self._read_json()
+        if not isinstance(payload, dict):
+            return
+        image = payload.get("image")
+        if not gallery_interactions.valid_image_name(image):
+            self._json(400, {"error": "图片地址无效"})
+            return
+        identity = (str(user["kind"]), str(user["uid"]))
+        admin = self._is_admin(user)
+        try:
+            with gallery_interactions.session(self._gallery_root()) as db:
+                if admin:
+                    removed = db.execute("DELETE FROM gallery_comments WHERE image=?", (image,)).rowcount
+                else:
+                    removed = db.execute(
+                        "DELETE FROM gallery_comments WHERE kind=? AND uid=? AND image=?",
+                        (*identity, image)).rowcount
+            self._json(200, {"ok": True, "removed": removed})
+        except sqlite3.Error:
+            self._json(500, {"error": "删除暂时不可用"})
+
     def _post_gallery_interaction(self, path):
         origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
         if not request_origin_allowed(self):
@@ -433,6 +489,10 @@ class Handler(BaseStaticHandler):
             self._json(404, {"error": "图片不存在"})
             return
         identity = (str(user["kind"]), str(user["uid"]))
+        if not self._email_verified(user):
+            self._json(403, {"error": "请先在「账户」页验证邮箱，验证后即可点赞与留言",
+                             "need_email_verified": True})
+            return
         try:
             with gallery_interactions.session(root) as db:
                 db.execute("BEGIN IMMEDIATE")
@@ -442,6 +502,20 @@ class Handler(BaseStaticHandler):
                     if action not in ("like", "love") or not isinstance(request_id, str) or not request_id.strip() or len(request_id) > 80:
                         self._json(400, {"error": "互动内容无效"})
                         return
+                    # 点赞限额：每账号每图 1 赞，最多 5 张图
+                    if action == "like":
+                        done = db.execute(
+                            "SELECT 1 FROM gallery_actions WHERE kind=? AND uid=? AND image=? AND action='like'",
+                            (*identity, image)).fetchone()
+                        if done:
+                            self._json(409, {"error": "这张图你已经点过赞了"})
+                            return
+                        used = db.execute(
+                            "SELECT COUNT(DISTINCT image) FROM gallery_actions WHERE kind=? AND uid=? AND action='like'",
+                            identity).fetchone()[0]
+                        if used >= 5:
+                            self._json(403, {"error": "每人最多给 5 张贺图点赞（已用 5 次）"})
+                            return
                     db.execute("INSERT OR IGNORE INTO gallery_actions(kind,uid,image,action,request_id) VALUES(?,?,?,?,?)",
                                (*identity, image, action, request_id))
                 else:
@@ -453,17 +527,37 @@ class Handler(BaseStaticHandler):
                     if not comment or len(comment) > 25:
                         self._json(400, {"error": "评论需为 1 至 25 个字"})
                         return
-                    existing = db.execute("SELECT image FROM gallery_comments WHERE kind=? AND uid=?", identity).fetchone()
+                    existing = db.execute("SELECT 1 FROM gallery_comments WHERE kind=? AND uid=? AND image=?",
+                                         (*identity, image)).fetchone()
                     if existing:
-                        self._json(409, {"error": "每位用户只能选择一张图片留言", "image": existing["image"]})
+                        self._json(409, {"error": "这张图你已经留过言了"})
                         return
-                    interactions = db.execute("SELECT COUNT(*) FROM gallery_actions WHERE kind=? AND uid=? AND image=?",
-                                              (*identity, image)).fetchone()[0]
-                    if interactions < 66:
-                        self._json(403, {"error": "同一张图片累计互动 66 次后才能留言"})
+                    liked = db.execute(
+                        "SELECT 1 FROM gallery_actions WHERE kind=? AND uid=? AND image=? AND action='like'",
+                        (*identity, image)).fetchone()
+                    if not liked and not self._is_admin(user):
+                        self._json(403, {"error": "先给这张图点个赞，再来留言吧"})
+                        return
+                    # 每账号 / 每 IP 60 分钟各限 1 条；删除评论不重置计时
+                    ip = (self.headers.get("X-Real-IP") or self.headers.get("CF-Connecting-IP")
+                          or (self.client_address[0] if self.client_address else ""))[:64]
+                    db.execute("""CREATE TABLE IF NOT EXISTS gallery_comment_attempts (
+                        kind TEXT NOT NULL DEFAULT '', uid TEXT NOT NULL DEFAULT '',
+                        ip TEXT NOT NULL DEFAULT '', created_at REAL NOT NULL)""")
+                    now_ts = time.time()
+                    recent_uid = db.execute(
+                        "SELECT 1 FROM gallery_comment_attempts WHERE kind=? AND uid=? AND created_at > ?",
+                        (*identity, now_ts - 3600)).fetchone()
+                    recent_ip = db.execute(
+                        "SELECT 1 FROM gallery_comment_attempts WHERE ip=? AND created_at > ?",
+                        (ip, now_ts - 3600)).fetchone()
+                    if recent_uid or recent_ip:
+                        self._json(429, {"error": "每人每 IP 每 60 分钟只能发一条留言"})
                         return
                     db.execute("INSERT INTO gallery_comments(kind,uid,name,image,comment) VALUES(?,?,?,?,?)",
                                (*identity, str(user.get("name", "访客"))[:40], image, comment))
+                    db.execute("INSERT INTO gallery_comment_attempts(kind,uid,ip,created_at) VALUES(?,?,?,?)",
+                               (*identity, ip, time.time()))
                 result = gallery_interactions.snapshot(db, image, user)
             self._json(200, result)
         except sqlite3.IntegrityError:

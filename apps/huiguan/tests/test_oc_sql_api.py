@@ -42,7 +42,7 @@ class API(unittest.TestCase):
         cls.base = 'http://127.0.0.1:' + str(cls.server.server_port)
         cls.a, cls.b = Client(cls.base), Client(cls.base)
         for client, name in [(cls.a,'oc_owner'),(cls.b,'oc_other')]:
-            assert client.call('/api/register', {'username':name,'password':'test-only-password-123','nickname':name})[0] == 200
+            assert client.call('/api/register', {'username':name,'password':'test-only-password-123','nickname':name,'email':name+'@example.com'})[0] == 200
 
     @classmethod
     def tearDownClass(cls):

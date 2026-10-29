@@ -85,7 +85,7 @@
   window.HuiguanShowcaseExport = {
     mount(frame, html) {
       sourceFrame = frame; snapshot = html;
-      const script = '<script src="/showcase-download.js?v=20261014"></script>';
+      const script = '<script src="/showcase-download.js?v=20261027z"></script>';
       return html.includes('</body>') ? html.replace('</body>', script + '</body>') : html + script;
     }
   };

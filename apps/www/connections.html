@@ -14,12 +14,12 @@
     <script>
       (function(){try{var m=document.cookie.match(/(?:^|;\s*)hx_theme=(light|dark|auto)/);var p=m?m[1]:'auto';document.documentElement.dataset.theme=p==='auto'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;}catch(e){}})();
     </script>
-    <link rel="stylesheet" href="./styles/connections.css?v=20261025-theme" />
+    <link rel="stylesheet" href="./styles/connections.css?v=20261027z" />
     <title>连接与鸣谢 · Iridescently</title>
   </head>
   <body>
     <script>document.addEventListener('xthemechange', function(event){var meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',event.detail.resolved==='dark'?'#10171a':'#f1e9d9');});</script>
-    <script src="/shared/shared-ui/site-nav.js?v=20261025-navfix" data-theme-enabled></script>
+    <script src="/shared/shared-ui/site-nav.js?v=20261028k" data-theme-enabled></script>
 
     <main class="connections">
       <header class="connections-intro">
@@ -71,6 +71,11 @@
           <li data-crew="codex"><span class="history-date">10/22</span><h3>会馆角色档案与轻量图库</h3><p>公开角色登记卡可以原位修改，官方角色与同人作品各归其位；图库列表优先加载轻量 WebP 预览，原图访问收紧到获准的查看方式。</p></li>
           <li data-crew="codex"><span class="history-date">10/22</span><h3>众生之门手机横屏引导</h3><p>开场与门庭按横屏体验整理，手机竖屏进入时会提示横过来，可尝试全屏横屏，也能随时切回竖屏继续使用。</p></li>
           <li data-crew="codex"><span class="history-date">10/23</span><h3>会馆账号称号防冒用</h3><p>注册和改名时拦截与官方角色重名的称号，并识别全角、大小写和不可见格式字符等变体，减少误认与冒充。</p></li>
+          <li data-crew="codex claude"><span class="history-date">10/24</span><h3>香港正式站上线</h3><p>主站整体迁到香港服务器，域名、证书、反向代理和 Cloudflare 隧道一并整理；预览与正式分开，发布有据可查。</p></li>
+          <li data-crew="codex claude"><span class="history-date">10/26</span><h3>目录换成规范布局</h3><p>仓库按 apps / services / packages / tools / infra 重组，旧的 portal、server、shared 目录退场；数据、素材与发布目录各自分开，迁移脚本可重复执行并自校验。</p></li>
+          <li data-crew="codex claude"><span class="history-date">10/27 早</span><h3>账号体系重做</h3><p>登录与注册彻底分开，登录不再自动建号；USSO 账号可以设置登录密码，用昵称或邮箱直接登录；邮箱成为找回密码的通道，USSO 与站内账号都支持；注册必填邮箱，发信失败时自动跳过验证、不阻塞注册；身份申请一律要求填写理由。</p></li>
+          <li data-crew="codex claude"><span class="history-date">10/27 晚</span><h3>节气画廊终于亮起来</h3><p>查了很多轮才确认：画廊从来没走过构建流程，发上去的一直是源码，浏览器解析不了裸模块、CSS 与资源导入，所以永远空白。接入构建流程后，三千多张原图压成 384 张 WebP 预览，3D 画廊第一次完整显示；同时把「设表」数据从旧库补回——迁移时漏搬了一千多位用户的角色，幸好旧数据根还在。</p></li>
+          <li data-crew="codex claude"><span class="history-date">10/28</span><h3>点赞、留言与两个停摆的服务</h3><p>画廊加入点赞与留言：每张贺图可赞一次、每人最多五张图，点过赞就能留言，每账号每 IP 六十分钟一条；留言以弹幕从下往上飘，点左下角的圆球可以写一句。账户页所有原生弹窗换成站点自己的样式。另外修好了两个悄悄停摆的后台——数值后台和灵质空间，它们的工作目录还指向迁移前的旧路径，导致部分玩法一直报「未启动」。</p></li>
           <li class="history-next" data-crew="codex claude"><span class="history-date">接下来</span><h3>还在继续折腾</h3><p>更多游戏与捏脸系统，继续探索中。</p></li>
         </ol>
       </section>
@@ -444,7 +449,7 @@
           <summary>查看微信二维码（个人微信与群聊）</summary>
           <div class="contact-codes">
           <figure><a href="/assets/wechat-personal-qr.png" target="_blank" rel="noopener"><img src="/assets/wechat-personal-qr.png" alt="佳霖的个人微信二维码" loading="lazy" width="820" height="1219"></a><figcaption><h3>个人微信</h3><p>添加佳霖为好友 · 点图查看原图</p></figcaption></figure>
-          <figure><a href="/assets/wechat-group-qr.png?v=20261010" target="_blank" rel="noopener"><img src="/assets/wechat-group-qr.png?v=20261010" alt="西木会馆—众生之门新的微信群二维码" loading="lazy" width="1031" height="1449"></a><figcaption><h3>西木会馆 · 众生之门</h3><p>群码标注 10 月 17 日前有效；过期可通过 QQ 群或个人微信联系。</p></figcaption></figure>
+          <figure><a href="/assets/wechat-group-qr.png?v=20261027z" target="_blank" rel="noopener"><img src="/assets/wechat-group-qr.png?v=20261027z" alt="西木会馆—众生之门新的微信群二维码" loading="lazy" width="1031" height="1449"></a><figcaption><h3>西木会馆 · 众生之门</h3><p>群码标注 10 月 17 日前有效；过期可通过 QQ 群或个人微信联系。</p></figcaption></figure>
           </div>
         </details>
       </section>
@@ -537,6 +542,6 @@
       <span>© 2026 Iridescently</span>
     </footer>
 
-    <script type="module" src="./scripts/connections.js?v=20261018-pets"></script>
+    <script type="module" src="./scripts/connections.js?v=20261027z"></script>
   </body>
 </html>

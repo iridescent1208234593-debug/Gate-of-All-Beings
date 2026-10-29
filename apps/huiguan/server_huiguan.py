@@ -42,7 +42,7 @@ from site_domains import (SITE_DOMAIN, PRODUCTION_HOSTS, cookie_domain, request_
                           request_origin_allowed, cors_headers, oauth_callback, site_url, OAuthUnavailable)
 from site_admin import is_site_owner
 from account_security import init_schema as init_security_schema, handle_security
-from account_email import init_schema as init_email_schema, handle_email
+from account_email import init_schema as init_email_schema, handle_email, EMAIL_RE
 from account_recovery import init_schema as init_recovery_schema, handle_recovery
 from account_profile import init_schema as init_profile_schema, get_profile, set_account_avatar, valid_asset_url, store_avatar_image as normalize_avatar_image
 import game_saves
@@ -722,6 +722,63 @@ def resolve_identity(kind, uid):
             "is_admin": is_admin,
         }
 
+
+def security_email(kind, uid):
+    """账号的安全邮箱（用于收验证码等）：站内绑定优先，其次 USSO 自带。"""
+    conn = db()
+    row = conn.execute(
+        "SELECT email FROM account_emails WHERE kind=? AND uid=? ORDER BY verified_at DESC LIMIT 1",
+        (str(kind), str(uid)),
+    ).fetchone()
+    if not row and str(kind) == "usso":
+        row = conn.execute("SELECT email FROM users WHERE user_id=?", (str(uid),)).fetchone()
+    conn.close()
+    return (row["email"] if row and row["email"] else "")
+
+def _usso_nickname_exists(value):
+    """该昵称/邮箱是否属于既有 USSO 账号（用于阻止误注册）。"""
+    key = (value or "").strip()
+    if not key:
+        return False
+    conn = db()
+    row = conn.execute(
+        "SELECT 1 FROM users WHERE lower(nickname)=lower(?) OR lower(email)=lower(?) LIMIT 1",
+        (key, key),
+    ).fetchone()
+    conn.close()
+    return bool(row)
+
+def find_usso_password_login(identifier):
+    """按昵称或邮箱查找已设置登录密码的 USSO 账号；唯一匹配才返回。"""
+    key = (identifier or "").strip()
+    if not key:
+        return None
+    conn = db()
+    # 可用标识：昵称、USSO 自带邮箱、或站内重新绑定的已验证邮箱
+    try:
+        rows = conn.execute(
+            "SELECT DISTINCT u.user_id, u.nickname, u.email, p.pass_hash "
+            "FROM users u "
+            "JOIN usso_passwords p ON p.user_id = u.user_id "
+            "LEFT JOIN account_emails e ON e.kind='usso' AND e.uid=CAST(u.user_id AS TEXT) "
+            "WHERE lower(u.nickname)=lower(?) "
+            "   OR lower(u.email)=lower(?) "
+            "   OR lower(e.email_norm)=lower(?)",
+            (key, key, key),
+        ).fetchall()
+    except sqlite3.OperationalError:
+        # 全新库还没建 usso_passwords 表：视为没有密码登录账号，不阻断登录流程
+        conn.close()
+        return None
+    conn.close()
+    return rows[0] if len(rows) == 1 else None
+
+
+def get_usso_password_hash(user_id):
+    conn = db()
+    row = conn.execute("SELECT pass_hash FROM usso_passwords WHERE user_id=?", (str(user_id),)).fetchone()
+    conn.close()
+    return row["pass_hash"] if row else None
 
 def create_session(kind, uid, root_domain=None):
     sid = secrets.token_urlsafe(32)
@@ -1652,6 +1709,10 @@ class Handler(BaseStaticHandler):
             return self._api_admin_exempt_decide()
         if path == "/api/admin/delete-character":
             return self._api_admin_delete_character()
+        if path == "/api/account/password":
+            return self._api_account_password()
+        if path == "/api/admin/reset-password":
+            return self._api_admin_reset_password()
         if path == "/api/member/user/update":
             return self._api_member_user_update()
         if path == "/api/official/sticker/upload":
@@ -1984,6 +2045,16 @@ class Handler(BaseStaticHandler):
         if len(password) < 12 or len(password) > 128:
             self._json(400, {"error": "密码长度需在 12-128 位之间"})
             return
+        email = (body.get("email") or "").strip()
+        if not email:
+            self._json(400, {"error": "请填写邮箱（用于找回账号与重置密码）"})
+            return
+        if len(email) > 254 or not EMAIL_RE.fullmatch(email):
+            self._json(400, {"error": "请输入有效邮箱地址"})
+            return
+        email_norm = email.casefold()
+        if find_usso_password_login(username) or _usso_nickname_exists(username):
+            self._json(409, {"error": "「" + username + "」是既有的 USSO 账号名号，请直接使用「登录」入口"}); return
         if get_local_user_by_name(username):
             self._json(409, {"error": "该用户名已被注册"})
             return
@@ -2001,7 +2072,7 @@ class Handler(BaseStaticHandler):
             try:
                 cur = conn.execute(
                     "INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES (?,?,?,?,?,?,?)",
-                    (username, pass_hash, nickname, role, "active", now_iso(), now_iso()))
+                    (username, pass_hash, nickname, role, "active", now_iso(), ""))
                 uid = cur.lastrowid
             except sqlite3.IntegrityError:
                 conn.close()
@@ -2010,9 +2081,32 @@ class Handler(BaseStaticHandler):
             conn.commit()
             conn.close()
 
+        # 绑定邮箱（未验证）；发送验证邮件失败时直接跳过，注册照常完成
+        email_sent = False
+        email_skipped = False
+        try:
+            token = secrets.token_urlsafe(32)
+            now_ts = time.time()
+            with DB_LOCK:
+                conn = db()
+                try:
+                    conn.execute(
+                        "INSERT OR REPLACE INTO account_email_challenges VALUES (?,?,?,?,?,?,?)",
+                        ("local", str(uid), email, email_norm, hashlib.sha256(token.encode()).hexdigest(), now_ts + 1800, now_ts))
+                    conn.commit()
+                finally:
+                    conn.close()
+            from account_email import _send_email
+            _send_email(email, token, site_url("huiguan", "/account.html", request_host(self)))
+            email_sent = True
+        except Exception as exc:
+            email_skipped = True
+            print("[register] email skipped: %r" % (exc,), flush=True)
+
         session_id = create_session("local", uid, request_root(self))
         ident = resolve_identity("local", uid)
-        self._json(200, {"ok": True, "user": ident}, cookie=[self._session_cookie(session_id), self._sso_cookie(uid, "local", ident.get("name") or "")])
+        self._json(200, {"ok": True, "user": ident, "email_sent": email_sent, "email_skipped": email_skipped},
+                   cookie=[self._session_cookie(session_id), self._sso_cookie(uid, "local", ident.get("name") or "")])
 
     def _api_local_login(self):
         body = self._read_json()
@@ -2028,7 +2122,24 @@ class Handler(BaseStaticHandler):
             return
 
         u = get_local_user_by_name(username)
-        if not u or not verify_password(password, u["pass_hash"]):
+        if not u:
+            usso = find_usso_password_login(username) if username else None
+            if usso and verify_password(password, usso["pass_hash"]):
+                with DB_LOCK:
+                    conn = db()
+                    conn.execute("UPDATE users SET last_login=? WHERE user_id=?", (now_iso(), usso["user_id"]))
+                    conn.commit()
+                    conn.close()
+                session_id = create_session("usso", usso["user_id"], request_root(self))
+                ident = resolve_identity("usso", usso["user_id"])
+                self._json(200, {"ok": True, "user": ident},
+                           cookie=[self._session_cookie(session_id),
+                                   self._sso_cookie(usso["user_id"], "usso", ident.get("name") or "")])
+                return
+            login_failed(username, ip)
+            self._json(401, {"error": "用户名或密码错误"})
+            return
+        if not verify_password(password, u["pass_hash"]):
             login_failed(username, ip)
             self._json(401, {"error": "用户名或密码错误"})
             return
@@ -2060,6 +2171,23 @@ class Handler(BaseStaticHandler):
         if not self._turnstile_passed(body, "auth"):
             return
 
+        # 邮箱形式标识：先尝试 USSO 密码登录（早于用户名格式校验）
+        if "@" in username:
+            usso_email = find_usso_password_login(username)
+            if usso_email and verify_password(password, usso_email["pass_hash"]):
+                with DB_LOCK:
+                    conn = db()
+                    conn.execute("UPDATE users SET last_login=? WHERE user_id=?", (now_iso(), usso_email["user_id"]))
+                    conn.commit(); conn.close()
+                session_id = create_session("usso", usso_email["user_id"], request_root(self))
+                ident = resolve_identity("usso", usso_email["user_id"])
+                self._json(200, {"ok": True, "registered": False, "user": ident},
+                           cookie=[self._session_cookie(session_id),
+                                   self._sso_cookie(usso_email["user_id"], "usso", ident.get("name") or "")])
+                return
+            if not get_local_user_by_name(username):
+                self._json(401, {"error": "用户名或密码错误"}); return
+
         u = get_local_user_by_name(username) if username else None
         if u:
             # —— 登录 ——
@@ -2080,6 +2208,31 @@ class Handler(BaseStaticHandler):
             self._json(200, {"ok": True, "registered": False, "user": ident},
                        cookie=[self._session_cookie(session_id), self._sso_cookie(u["uid"], "local", ident.get("name") or username)])
             return
+
+        # —— USSO 账号的密码登录（避免把它当成新用户名去注册）——
+        usso = find_usso_password_login(username) if username else None
+        if usso and verify_password(password, usso["pass_hash"]):
+            rkey = f"login:{username.lower()}|{ip}"
+            if rate_blocked(rkey, 8, 600):
+                self._json(429, {"error": "尝试次数过多，请 10 分钟后再试"}); return
+            with DB_LOCK:
+                conn = db()
+                conn.execute("UPDATE users SET last_login=? WHERE user_id=?", (now_iso(), usso["user_id"]))
+                conn.commit(); conn.close()
+            session_id = create_session("usso", usso["user_id"], request_root(self))
+            ident = resolve_identity("usso", usso["user_id"])
+            self._json(200, {"ok": True, "registered": False, "user": ident},
+                       cookie=[self._session_cookie(session_id),
+                               self._sso_cookie(usso["user_id"], "usso", ident.get("name") or "")])
+            return
+
+        # 兜底：该标识属于既有 USSO 账号时，绝不新建站内账号
+        # （旧客户端可能仍向 /api/auth 提交「昵称+密码」，此时应提示去登录而不是建号）
+        if find_usso_password_login(username) or _usso_nickname_exists(username):
+            self._json(409, {"error": "「" + username + "」是既有的 USSO 账号，请改用「登录」入口，不要走注册"}); return
+
+        # /api/auth 不再承担注册职责：未知用户名一律拒绝，避免任何客户端误建账号
+        self._json(410, {"error": "该入口只用于登录；没有账号请使用「注册账号」入口"}); return
 
         # —— 注册（用户名不存在） ——
         # 新账号默认以用户名作为名号；已有账号登录不会经过此检查。
@@ -3306,8 +3459,8 @@ class Handler(BaseStaticHandler):
                              "group_qq": GROUP_QQ, "msg": "已成为荣誉长老"}); return
         reason = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", "", str(body.get("reason") or "")).strip()[:300]
         alias = re.sub(r"[\x00-\x1f<>\"'&]", "", str(body.get("alias") or "")).strip()[:8]
-        if not reason:
-            self._json(400, {"error": "请写下你为什么是妖王～"}); return
+        if len(reason) < 2:
+            self._json(400, {"error": "请写下你为什么是妖王～（至少 2 个字）"}); return
         if len(reason) > YAOWANG_AUTO_MIN_CHARS:
             self._set_user_cols(ident, honor_kind="yaowang", honor_alias=alias, honor_reason=reason)
             self._json(200, {"ok": True, "status": "approved", "honor": honor, "alias": alias, "remind_group": True,
@@ -3865,6 +4018,8 @@ class Handler(BaseStaticHandler):
         if body is None:
             return
         msg = (body.get("message") or "").strip()
+        if len(msg) < 2:
+            self._json(400, {"error": "请填写申请理由（至少 2 个字）"}); return
         with DB_LOCK:
             conn = db()
             existing = conn.execute("SELECT id FROM executor_requests WHERE user_kind=? AND user_uid=? AND status='pending'", (ident["kind"], ident["uid"])).fetchone()
@@ -4291,6 +4446,8 @@ class Handler(BaseStaticHandler):
         if typ not in ("age", "skill"):
             self._json(400, {"error": "申请类型无效"}); return
         msg = (body.get("message") or "").strip()[:300]
+        if len(msg) < 2:
+            self._json(400, {"error": "请填写申请理由（至少 2 个字）"}); return
         with DB_LOCK:
             conn = db()
             exist = conn.execute("SELECT id FROM exempt_requests WHERE type=? AND user_kind=? AND user_uid=? AND status='pending'",
@@ -4455,6 +4612,96 @@ class Handler(BaseStaticHandler):
             u["posters"] = po_map.get(mk, [])
         self._json(200, {"scope": scope, "users": out,
                          "self": {"kind": ident["kind"], "uid": ident["uid"], "role": ident.get("role")}})
+
+    def _api_account_password(self):
+        """设置 / 修改登录密码。
+
+        - local 账号：需要原密码
+        - usso 账号：首次设置免原密码；已设置则需原密码
+        """
+        ident = self._require_ident()
+        if not ident:
+            return
+        body = self._read_json()
+        if body is None:
+            return
+        old_password = body.get("old_password") or ""
+        new_password = (body.get("new_password") or "").strip()
+        if len(new_password) < 12 or len(new_password) > 128:
+            self._json(400, {"error": "新密码长度需在 12-128 位之间"}); return
+        kind, uid = ident["kind"], str(ident["uid"])
+        if kind == "local":
+            conn = db()
+            row = conn.execute("SELECT pass_hash FROM local_users WHERE uid=?", (uid,)).fetchone()
+            conn.close()
+            current = row["pass_hash"] if row else None
+            if not row:
+                self._json(404, {"error": "账号不存在"}); return
+            if not verify_password(old_password, current):
+                self._json(403, {"error": "原密码不正确"}); return
+            pass_hash = hash_password(new_password)
+            with DB_LOCK:
+                conn = db(); conn.execute("UPDATE local_users SET pass_hash=? WHERE uid=?", (pass_hash, uid)); conn.commit(); conn.close()
+        else:
+            current = get_usso_password_hash(uid)
+            if current and not verify_password(old_password, current):
+                self._json(403, {"error": "原密码不正确"}); return
+            pass_hash = hash_password(new_password)
+            now = now_iso()
+            with DB_LOCK:
+                conn = db()
+                conn.execute(
+                    "INSERT INTO usso_passwords(user_id, pass_hash, created_at, updated_at) VALUES (?,?,?,?) "
+                    "ON CONFLICT(user_id) DO UPDATE SET pass_hash=excluded.pass_hash, updated_at=excluded.updated_at",
+                    (uid, pass_hash, now, now))
+                conn.commit(); conn.close()
+        print("[account-password] %s:%s updated" % (kind, uid), flush=True)
+        self._json(200, {"ok": True, "kind": kind, "has_password": True})
+
+    def _api_admin_reset_password(self):
+        """管理员为站内账号重置密码（仅管理员、仅站内账号、不可重置自己）。"""
+        ident = self._require_ident()
+        if not ident:
+            return
+        if self._member_scope(ident) != "all":
+            self._json(403, {"error": "仅管理员可重置密码"}); return
+        body = self._read_json()
+        if body is None:
+            return
+        kind = body.get("kind", "local")
+        uid = str(body.get("uid", "")).strip()
+        new_password = (body.get("new_password") or "").strip()
+        if kind != "local" or not uid.isdigit():
+            self._json(400, {"error": "仅支持重置站内账号密码"}); return
+        if uid == str(ident["uid"]):
+            self._json(400, {"error": "不能重置自己的密码"}); return
+        if new_password and (len(new_password) < 12 or len(new_password) > 128):
+            self._json(400, {"error": "密码长度需在 12-128 位之间"}); return
+        generated = not new_password
+        if generated:
+            new_password = secrets.token_urlsafe(12)[:16]
+        pass_hash = hash_password(new_password)
+        with DB_LOCK:
+            conn = db()
+            try:
+                row = conn.execute("SELECT username FROM local_users WHERE uid=?", (uid,)).fetchone()
+                if not row:
+                    conn.close(); self._json(404, {"error": "账号不存在"}); return
+                conn.execute("BEGIN IMMEDIATE")
+                conn.execute("UPDATE local_users SET pass_hash=? WHERE uid=?", (pass_hash, uid))
+                try:
+                    conn.execute("DELETE FROM sessions_db WHERE kind='local' AND uid=?", (uid,))
+                except Exception:
+                    pass
+                conn.commit()
+            except Exception:
+                conn.rollback(); conn.close()
+                self._json(500, {"error": "重置失败"}); return
+            conn.close()
+        print("[admin-reset] by=%s:%s target=local:%s" % (ident["kind"], ident["uid"], uid), flush=True)
+        self._json(200, {"ok": True, "uid": int(uid), "username": row["username"],
+                         "password": new_password if generated else "",
+                         "message": "密码已重置，该用户需重新登录"})
 
     def _api_member_user_update(self):
         ident = self._require_ident()
@@ -4823,6 +5070,8 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "角色名不能为空"}); return
         if len(name) > 50:
             self._json(400, {"error": "角色名过长（≤50字）"}); return
+        if is_official_title_name(name):
+            self._json(400, {"error": "「" + name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
         try:
             image_data = _persist_preview_reference((body.get("image_data") or "").strip())
         except ValueError as error:
@@ -4910,6 +5159,7 @@ class Handler(BaseStaticHandler):
             codes = body.get("character_codes") or []
             if not codes:
                 self._json(400, {"error": "请选择要公开的角色"}); return
+            blocked = []
             with character_store().transaction(write=True) as session:
                 chars = session.list(ident)
                 conn = session.conn
@@ -4922,6 +5172,9 @@ class Handler(BaseStaticHandler):
                         continue
                     fields = fan_fields(cd)
                     if not fields["name"]:
+                        continue
+                    if is_official_title_name(fields["name"]):
+                        blocked.append(fields["name"])
                         continue
                     # 同一角色只保留一条画廊记录：先按编号找，旧记录（无编号）再按名字找
                     existing = conn.execute(
@@ -4956,6 +5209,8 @@ class Handler(BaseStaticHandler):
                          now_iso(), now_iso())
                     )
                     published += 1
+            if blocked:
+                self._json(400, {"error": "以下名号是官方世界观角色名，不能公开：" + "、".join(sorted(set(blocked))) + "；请先改成自建名号"}); return
             self._json(200, {"ok": True, "published": published, "skipped": skipped})
         except oc_store.OCError as error:
             self._json(error.status, {"error": error.code})
@@ -5121,6 +5376,7 @@ class Handler(BaseStaticHandler):
 
     def _static_allowed(self, path):
         return _base_static_allowed(path)
+
 
     def _json(self, status, data, cookie=None, *, sanitize_images=True):
         if sanitize_images:
