@@ -12,11 +12,27 @@ map $http_upgrade $zszm_connection { default upgrade; '' close; }
 map $upstream_cache_status $zszm_cache { default $upstream_cache_status; '' BYPASS; }
 log_format zszm '$time_iso8601 $request_method $uri $status bytes=$body_bytes_sent cache=$zszm_cache upstream=$upstream_response_time';
 
+map $host $qc_cn_target {
+    default                                   "";
+    "iridescently.xyz"                        "www.iridescently.cn";
+    "www.iridescently.xyz"                    "www.iridescently.cn";
+    "huiguan.iridescently.xyz"                "huiguan.iridescently.cn";
+    "zszm.iridescently.xyz"                   "zszm.iridescently.cn";
+    "oc.iridescently.xyz"                     "oc.iridescently.cn";
+    "spirit.iridescently.xyz"                 "www.iridescently.cn";
+    "juling.iridescently.xyz"                 "www.iridescently.cn";
+    "lingjing.iridescently.xyz"               "www.iridescently.cn";
+    "game.iridescently.xyz"                   "www.iridescently.cn";
+    "pc-zszm.iridescently.xyz"                "zszm.iridescently.cn";
+}
+
 server {
     listen 127.0.0.1:8080;
-    server_name iridescently.xyz www.iridescently.xyz huiguan.iridescently.xyz
-                oc.iridescently.xyz spirit.iridescently.xyz zszm.iridescently.xyz
-                game.iridescently.xyz juling.iridescently.xyz lingjing.iridescently.xyz;
+    # 域名迁移：.xyz 全部 301 到 .cn（保留路径）
+    if ($qc_cn_target != "") {
+        return 301 https://$qc_cn_target$request_uri;
+    }
+    server_name game.iridescently.cn game.iridescently.dpdns.org game.iridescently.xyz huiguan.iridescently.cn huiguan.iridescently.dpdns.org huiguan.iridescently.xyz iridescently.cn iridescently.dpdns.org iridescently.xyz juling.iridescently.cn juling.iridescently.dpdns.org juling.iridescently.xyz lingjing.iridescently.cn lingjing.iridescently.dpdns.org lingjing.iridescently.xyz oc.iridescently.cn oc.iridescently.dpdns.org oc.iridescently.xyz spirit.iridescently.cn spirit.iridescently.dpdns.org spirit.iridescently.xyz www.iridescently.cn www.iridescently.dpdns.org www.iridescently.xyz zszm.iridescently.cn zszm.iridescently.dpdns.org zszm.iridescently.xyz;
     server_tokens off;
     include /etc/nginx/snippets/iridescently-origin-guards.conf;
     client_max_body_size 32m;
@@ -126,7 +142,7 @@ server {
         proxy_set_header Accept-Encoding "";
         sub_filter_once on;
         # Match the real document head before any inline JS/template HTML appears.
-        sub_filter '<head>' '<head><script defer src="/__server/selector.js?v=20261024.1"></script><script defer src="/__notice.js?v=20261027j"></script><script defer src="/__email-guard.js?v=20261027a"></script>';
+        sub_filter '<head>' '<head><script defer src="/__server/selector.js?v=20261024.1"></script><script defer src="/__notice.js?v=20261029f"></script><script defer src="/__email-guard.js?v=20261027a"></script>';
         include /etc/nginx/snippets/zszm-proxy.conf;
         proxy_pass http://127.0.0.1:18181;
         proxy_buffering off;
