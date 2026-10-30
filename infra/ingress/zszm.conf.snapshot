@@ -12,6 +12,13 @@ map $http_upgrade $zszm_connection { default upgrade; '' close; }
 map $upstream_cache_status $zszm_cache { default $upstream_cache_status; '' BYPASS; }
 log_format zszm '$time_iso8601 $request_method $uri $status bytes=$body_bytes_sent cache=$zszm_cache upstream=$upstream_response_time';
 
+# 不参与 .xyz→.cn 域名迁移的路径（接口与模块请求保持原域，避免 301 打断 POST/WS）
+map $uri $qc_skip_cn {
+    default 0;
+    ~^/api/   1;
+    ~^/app/   1;
+}
+
 map $host $qc_cn_target {
     default                                   "";
     "iridescently.xyz"                        "www.iridescently.cn";
@@ -28,8 +35,13 @@ map $host $qc_cn_target {
 
 server {
     listen 127.0.0.1:8080;
-    # 域名迁移：.xyz 全部 301 到 .cn（保留路径）
-    if ($qc_cn_target != "") {
+    # 域名迁移：.xyz 的页面导航 301 到 .cn（保留路径）。
+    # /api/ 与 /app/ 不参与迁移：POST 遇到 301/302 会被浏览器改成 GET 并丢掉请求体，
+    # 停留在旧域名标签页里的用户会永久保存/上传失败（2026-10-30 用户反馈）。
+    set $qc_redirect_cn 0;
+    if ($qc_cn_target != "") { set $qc_redirect_cn 1; }
+    if ($qc_skip_cn = 1) { set $qc_redirect_cn 0; }
+    if ($qc_redirect_cn = 1) {
         return 301 https://$qc_cn_target$request_uri;
     }
     server_name game.iridescently.cn game.iridescently.dpdns.org game.iridescently.xyz huiguan.iridescently.cn huiguan.iridescently.dpdns.org huiguan.iridescently.xyz iridescently.cn iridescently.dpdns.org iridescently.xyz juling.iridescently.cn juling.iridescently.dpdns.org juling.iridescently.xyz lingjing.iridescently.cn lingjing.iridescently.dpdns.org lingjing.iridescently.xyz oc.iridescently.cn oc.iridescently.dpdns.org oc.iridescently.xyz spirit.iridescently.cn spirit.iridescently.dpdns.org spirit.iridescently.xyz www.iridescently.cn www.iridescently.dpdns.org www.iridescently.xyz zszm.iridescently.cn zszm.iridescently.dpdns.org zszm.iridescently.xyz;
