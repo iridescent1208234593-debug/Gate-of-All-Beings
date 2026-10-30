@@ -74,7 +74,7 @@ select.ctl{font-family:inherit;font-size:12px;padding:3px 6px;border:1px solid v
   </div>
   <div id="content"><div class="state-box">加载中…</div></div>
 </div>
-<script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261027z"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 let myScope='', state={q:'',fRole:'',fEdit:'',fStatus:'',sortBy:'login'};
@@ -140,12 +140,15 @@ function render(){
       const statusBtn=u.status==='banned'
         ?`<button class="op" onclick="upd('${u.kind}','${u.uid}','status','active')">解封</button>`
         :`<button class="op danger" onclick="upd('${u.kind}','${u.uid}','status','banned')">封禁</button>`;
+      const resetBtn=(myScope==='all'&&u.kind==='local')
+        ?`<button class="op" onclick="resetPwd('${u.kind}','${u.uid}','${escAttr(u.nickname||u.name||'')}')">重置密码</button>`
+        :'';
       const sheetTd=myScope==='all'?`<td><span class="expander" onclick="toggleSheets('${key}')">${isOpen?'▾':'▸'} <span class="cnt">${sheets.length}</span> 份</span></td>`:'';
       const schemes=u.schemes||[], posters=u.posters||[];
       const schemeHtml=schemes.length?schemes.map(c=>`<span class="scheme-chip"><span class="scheme-dot" style="background:${escAttr(c.primary_color)}"></span><span class="scheme-dot" style="background:${escAttr(c.accent_color)}"></span>${esc(c.primary_name||'主色')}×${esc(c.accent_name||'辅色')} <span class="dim">${esc((c.name||'').slice(0,10))}</span> <span class="dim">${esc((c.created_at||'').slice(0,10))}</span></span>`).join(''):'<span class="dim">暂无自定义配色</span>';
       const posterHtml=posters.length?posters.map(p=>`<span class="poster-chip">${p.img_ref?`<img loading="lazy" decoding="async" src="${escAttr(p.img_ref)}" alt="">`:''}<span class="p-info"><span class="p-title">${esc(p.title)}</span><span class="p-sub">${p.char_name?'关联：'+esc(p.char_name):'未关联人设'} · ${p.is_public?'已共享画廊':'私有'} · ${esc((p.updated_at||'').slice(0,10))}</span></span><button class="del-sheet" data-id="${p.id}" data-title="${escAttr(p.title)}" onclick="delPoster(this.dataset.id,this.dataset.title)" title="删除该海报">✕</button></span>`).join(''):'<span class="dim">暂无配色海报</span>';
       const sheetRow=(isOpen&&myScope==='all')?`<tr class="sheet-row"><td colspan="9">${sheets.length?sheets.map(s=>`<span class="sheet-chip">◈ <a href="/show.html?code=${encodeURIComponent(s.code)}" target="_blank" style="color:inherit;text-decoration:none">${esc(s.name)}</a><button class="del-sheet" data-key="${escAttr(key)}" data-code="${escAttr(s.code)}" data-name="${escAttr(s.name)}" data-version="${s.version==null?'':s.version}" onclick="delSheet(this.dataset.key,this.dataset.code,this.dataset.name,this.dataset.version)" title="删除该设表">✕</button></span>`).join(''):'<span class="dim">暂无人设表</span>'}<div class="mgr-block"><div class="mgr-title">自定义配色（与 /haibao 互通）</div>${schemeHtml}</div><div class="mgr-block"><div class="mgr-title">配色海报（${posters.length}）</div>${posterHtml}</div></td></tr>`:'';
-      return `<tr><td class="dim">${u.kind==='local'?'站内':'USSO'}</td><td>${esc(u.nickname||u.name)}</td><td>${roleSel}</td><td>${scribeSel}</td><td>${u.status==='banned'?'<span class="tag banned">已封禁</span>':'<span class="dim">正常</span>'}</td><td class="dim">${esc((u.last_login||'').replace('T',' ').substring(0,16))}</td>${sheetTd}<td><span class="tag ${u.role==='admin'?'admin':u.role==='elder'?'elder':''}">${roleName[u.role]||'执行者'}</span> ${u.edit_role==='scribe'?'<span class="tag scribe">编辑</span>':''}</td><td>${statusBtn}</td></tr>${sheetRow}`;
+      return `<tr><td class="dim">${u.kind==='local'?'站内':'USSO'}</td><td>${esc(u.nickname||u.name)}</td><td>${roleSel}</td><td>${scribeSel}</td><td>${u.status==='banned'?'<span class="tag banned">已封禁</span>':'<span class="dim">正常</span>'}</td><td class="dim">${esc((u.last_login||'').replace('T',' ').substring(0,16))}</td>${sheetTd}<td><span class="tag ${u.role==='admin'?'admin':u.role==='elder'?'elder':''}">${roleName[u.role]||'执行者'}</span> ${u.edit_role==='scribe'?'<span class="tag scribe">编辑</span>':''}</td><td>${statusBtn} ${resetBtn}</td></tr>${sheetRow}`;
     };
   let __i=0;
   function __setSentinel(on){
@@ -175,6 +178,21 @@ function render(){
     setInterval(watch, 800);
   }
 
+}
+function resetPwd(kind,uid,name){
+  const p=prompt(`为「${name||uid}」设置新密码\n留空则自动生成 16 位临时密码\n（至少 12 位）`,'');
+  if(p===null) return;
+  const body={kind,uid};
+  if(p.trim()) body.new_password=p.trim();
+  fetch('/api/admin/reset-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(r=>r.json().then(d=>({s:r.status,d})))
+    .then(({s,d})=>{
+      if(s!==200){ alert(d.error||'重置失败'); return; }
+      if(d.password){ alert(`已重置「${d.username}」的密码\n\n临时密码：${d.password}\n\n请告知用户并提醒其登录后立即修改。`); }
+      else { alert(`已重置「${d.username}」的密码，该用户需重新登录。`); }
+      render();
+    })
+    .catch(()=>alert('网络错误，请稍后再试'));
 }
 function toggleSheets(key){ if(expanded.has(key))expanded.delete(key);else expanded.add(key); render(); }
 function escAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}

@@ -175,22 +175,18 @@ class GalleryPermissionsTest(unittest.TestCase):
                 error.close()
             body = {"image": image_name, "action": "like", "request_id": "same"}
             self.assertEqual(server.post("/api/gallery/action", body)[0], 200)
-            self.assertEqual(server.post("/api/gallery/action", body)[0], 200)
+            # 新规则：同一账号对同一张图只能点一次赞，重复请求返回 409
+            self.assertEqual(server.post("/api/gallery/action", body)[0], 409)
             status, _, raw = server.request("/api/gallery/state?image=" + urllib.parse.quote(image_name, safe=""))
             self.assertEqual(status, 200)
             self.assertEqual(json.loads(raw)["likes"], 1)
 
-    def test_66_mixed_interactions_unlock_one_comment_for_account(self):
+    def test_one_like_unlocks_one_comment_for_account(self):
+        # 新规则：给这张图点过赞即可留言（不再要求 66 次互动）
         with RunningServer() as server:
-            for index in range(65):
-                status, _ = server.post("/api/gallery/action", {
-                    "image": image_name, "action": "like" if index % 2 else "love",
-                    "request_id": f"action-{index}"
-                })
-                self.assertEqual(status, 200)
             self.assertEqual(server.post("/api/gallery/comment", {"image": image_name, "comment": "early"})[0], 403)
             status, _ = server.post("/api/gallery/action", {
-                "image": image_name, "action": "love", "request_id": "action-65"
+                "image": image_name, "action": "like", "request_id": "action-1"
             })
             self.assertEqual(status, 200)
             with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
@@ -201,14 +197,15 @@ class GalleryPermissionsTest(unittest.TestCase):
             status, _, raw = server.request("/api/gallery/state?image=" + urllib.parse.quote(image_name, safe=""))
             persisted = json.loads(raw)
             self.assertEqual(status, 200)
-            self.assertEqual(persisted["interaction_count"], 66)
-            self.assertEqual((persisted["likes"], persisted["loves"]), (32, 34))
+            self.assertEqual(persisted["interaction_count"], 1)
+            self.assertEqual((persisted["likes"], persisted["loves"]), (1, 0))
             self.assertTrue(persisted["comment_used"], "refresh sees the one-time comment")
             self.assertEqual(persisted["comments"][0]["comment"], "字" * 25)
             self.assertEqual(persisted["comment_total"], 1)
+            # Another image needs its own like first.
             status, body = server.post("/api/gallery/comment", {"image": other_image_name, "comment": "second"})
-            self.assertEqual(status, 409)
-            self.assertIn("只能选择一张", body["error"])
+            self.assertEqual(status, 403)
+            self.assertIn("先给这张图点个赞", body["error"])
 
     def test_comments_are_paged_without_public_original_access(self):
         with RunningServer() as server:

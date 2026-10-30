@@ -8,6 +8,10 @@
 | --- | --- | --- |
 | **trunk**（当前名为 `batch/7-canonical-structure`） | 唯一的集成与发布来源。Batch 6 存储分离、10-24 安全加固、apps/services/packages/tools/infra 布局都在这里。 | 只通过 PR 合入；PR 必须通过 `regression` 与 `merge-gate`（与最新 trunk 合并后的检查）；不强推、不改写历史。 |
 | `master` | GitHub 默认分支，目前完全包含在 trunk 之内（落后、无独有提交）。 | 负责人决定后快进到 trunk 并成为 trunk 的正式名称；在此之前不在 `master` 上开新工作。 |
+> **现状核对（2026-10-30 实测，DSH Agent）**：上表 `master` 一行已与实况相反。
+> `master`（`dca09aaa`，2026-10-29 16:15）比 `batch/7-canonical-structure`（`ce0e0405`，2026-10-26 09:19）多 **67 个提交**，而 trunk 没有任何独有提交；10-26 之后的 PR（#16 `merge/hk-line-into-master`、#18 等）都合入了 `master`。
+> 结论：集成实际发生在 `master`，trunk 已停更三天。本文档其余规则（一分支一 PR、必须通过 `regression` 与 `merge-gate`、不强推、不删协作者分支）仍然有效。
+> **trunk 与 `master` 的处置（快进、改名，或把 trunk 归档）属于负责人决定**；本条只记录测量结果，不改变策略。
 
 香港生产在迁移到本布局之前运行旧布局。线上热修复如果只能基于旧布局，必须同时：在变更记录里写明对应的线上版本与文件；在一周内移植进 trunk（按本布局与三根域规则）。移植合并之前，热修复分支保持原样，不删除。
 

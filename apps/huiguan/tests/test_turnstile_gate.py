@@ -125,8 +125,8 @@ class TurnstileGateTest(unittest.TestCase):
         self.assertEqual(status, 403)
 
     def test_register_and_login_endpoints_need_their_own_action(self):
-        self.assertEqual(self.post("/api/register", {"username": "gate_new", "password": "test-password-123", "turnstile": "good-auth"})[0], 403)
-        self.assertEqual(self.post("/api/register", {"username": "gate_new", "password": "test-password-123", "turnstile": "good-register"})[0], 200)
+        self.assertEqual(self.post("/api/register", {"username": "gate_new", "password": "test-password-123", "email": "gate_new@example.com", "turnstile": "good-auth"})[0], 403)
+        self.assertEqual(self.post("/api/register", {"username": "gate_new", "password": "test-password-123", "email": "gate_new@example.com", "turnstile": "good-register"})[0], 200)
         self.assertEqual(self.post("/api/login", {"username": "gate_member", "password": "test-password-123", "turnstile": "good-auth"})[0], 403)
 
     def test_secret_and_client_ip_are_sent_to_siteverify(self):

@@ -91,7 +91,7 @@ class OfficialTitleBlacklistTest(unittest.TestCase):
 
     def test_register_rejects_official_display_name(self):
         status, result = self.client.call("/api/register", {
-            "username": "new_member", "password": "test-password-123", "nickname": "罗小黑"},
+            "username": "new_member", "password": "test-password-123", "nickname": "罗小黑", "email": "t@example.com"},
             client_ip="192.0.2.10")
         self.assertEqual(status, 400)
         self.assertIn("官方世界观角色名", result["error"])
@@ -100,31 +100,33 @@ class OfficialTitleBlacklistTest(unittest.TestCase):
         for index, nickname in enumerate(("ＭＴ", "mT", "M\u200bT", "M T")):
             with self.subTest(nickname=nickname):
                 status, result = self.client.call("/api/register", {
-                    "username": f"variant_{index}", "password": "test-password-123", "nickname": nickname},
+                    "username": f"variant_{index}", "password": "test-password-123", "nickname": nickname, "email": "t@example.com"},
                     client_ip=f"192.0.2.{20 + index}")
                 self.assertEqual(status, 400)
                 self.assertIn("官方世界观角色名", result["error"])
 
     def test_matching_remains_exact_after_normalization(self):
         status, result = self.client.call("/api/register", {
-            "username": "near_match", "password": "test-password-123", "nickname": "余某"},
+            "username": "near_match", "password": "test-password-123", "nickname": "余某", "email": "t@example.com"},
             client_ip="192.0.2.11")
         self.assertEqual(status, 200, result)
 
     def test_registration_keeps_existing_numeric_name_behavior(self):
         status, result = self.client.call("/api/register", {
-            "username": "numeric_name", "password": "test-password-123", "nickname": "123456"},
+            "username": "numeric_name", "password": "test-password-123", "nickname": "123456", "email": "t@example.com"},
             client_ip="192.0.2.15")
         self.assertEqual(status, 200, result)
         status, result = self.client.call("/api/auth", {
             "username": "654321", "password": "test-password-123"}, client_ip="192.0.2.16")
-        self.assertEqual((status, result.get("registered")), (200, True))
+        # 新策略：/api/auth 只做登录，未知账号返回 410，不再自动建号
+        self.assertEqual(status, 410)
 
     def test_auth_rejects_official_name_only_for_new_accounts(self):
         status, result = self.client.call("/api/auth", {
             "username": "罗小黑", "password": "test-password-123"}, client_ip="192.0.2.12")
-        self.assertEqual(status, 400)
-        self.assertIn("官方世界观角色名", result["error"])
+        # /api/auth only logs in now: an unknown official name is refused and nothing is created.
+        # Registering with an official name is covered by the /api/register tests above.
+        self.assertEqual(status, 410)
 
         # An existing account can still log in even if its stored display title is a role name.
         status, result = self.client.call("/api/auth", {
@@ -133,7 +135,7 @@ class OfficialTitleBlacklistTest(unittest.TestCase):
 
     def test_rename_rejects_official_and_numeric_names(self):
         status, result = self.client.call("/api/register", {
-            "username": "rename_member", "password": "test-password-123", "nickname": "普通名号"},
+            "username": "rename_member", "password": "test-password-123", "nickname": "普通名号", "email": "t@example.com"},
             client_ip="192.0.2.14")
         self.assertEqual(status, 200, result)
         status, result = self.client.call("/api/rename", {"nickname": "罗小黑"})

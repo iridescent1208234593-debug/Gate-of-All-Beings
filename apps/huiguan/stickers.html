@@ -110,7 +110,7 @@ body{background:var(--bg);color:var(--text);font-family:"Noto Serif SC","Source 
   </div>
 </div>
 <div id="lightbox" onclick="this.classList.remove('show')"><img loading="lazy" decoding="async" id="lbImg" alt=""></div>
-<script src="/image-upload.js?v=20261024"></script>
+<script src="/image-upload.js?v=20261027z"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function zoom(src){document.getElementById('lbImg').src=src;document.getElementById('lightbox').classList.add('show');}
@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   checkLogin().then(loadStickers);
 });
 </script>
-<script src="/shared/shared-ui/site-nav.js?v=20261025-navfix"></script>
-<script src="/original-image-viewer.js?v=20261022-1"></script>
+<script src="/shared/shared-ui/site-nav.js?v=20261027z"></script>
+<script src="/original-image-viewer.js?v=20261027z"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 // (GET /api/turnstile returns the public site key or null); the secret never reaches the page.
 (function () {
   var SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-  var config = null, loading = null, widget = null, current = '';
+  var config = null, loading = null, widget = null, rendered = '', current = '';
 
   function siteKey() {
     if (!config) config = fetch('/api/turnstile', { credentials: 'same-origin' })
@@ -23,14 +23,18 @@
     return loading;
   }
 
-  // Render once into container; later calls only reset the existing widget.
+  // Render into container; later calls for the same action only reset the existing widget.
+  // The server binds each token to its endpoint's action, so another action re-renders it.
   function mount(container, action) {
     if (!container) return Promise.resolve(false);
     return siteKey().then(function (key) {
       if (!key) { container.hidden = true; return false; }
       container.hidden = false;
-      if (widget !== null) { reset(); return true; }
+      if (widget !== null && rendered === action) { reset(); return true; }
       return loadScript().then(function (ts) {
+        if (widget !== null) { ts.remove(widget); widget = null; }
+        current = '';
+        rendered = action;
         widget = ts.render(container, {
           sitekey: key, action: action,
           callback: function (token) { current = token; },
@@ -42,6 +46,17 @@
     });
   }
 
+  // Before a submission: "off" when Turnstile is not enabled, "ready" when the widget already
+  // serves this action (send token()), "pending" when it was just switched to this action and
+  // the visitor has to complete it first.
+  function ensure(container, action) {
+    return siteKey().then(function (key) {
+      if (!key) return 'off';
+      if (widget !== null && rendered === action) return 'ready';
+      return mount(container, action).then(function () { return 'pending'; });
+    });
+  }
+
   function token() { return current; }
 
   // Tokens are single-use: reset after every submission, successful or not.
@@ -50,5 +65,5 @@
     if (widget !== null && window.turnstile) window.turnstile.reset(widget);
   }
 
-  window.HuiguanTurnstile = { mount: mount, token: token, reset: reset };
+  window.HuiguanTurnstile = { mount: mount, ensure: ensure, token: token, reset: reset };
 })();
