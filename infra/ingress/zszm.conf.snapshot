@@ -39,13 +39,13 @@ server {
     error_page 502 503 504 /__server/unavailable;
     location = /__server/unavailable {
         internal;
-        alias /srv/iridescently/current/shared/shared-ui/server-unavailable.html;
+        alias /srv/iridescently/new/20261026T113632Z/site/packages/shared-ui/server-unavailable.html;
         default_type text/html;
         add_header Cache-Control "no-store" always;
         add_header X-Content-Type-Options nosniff always;
     }
     location = /shared/shared-ui/server-recovery.js {
-        alias /srv/iridescently/current/shared/shared-ui/server-recovery.js;
+        alias /srv/iridescently/new/20261026T113632Z/site/packages/shared-ui/server-recovery.js;
         default_type application/javascript;
         add_header Cache-Control "no-cache" always;
     }
