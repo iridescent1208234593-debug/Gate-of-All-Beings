@@ -58,3 +58,61 @@
   .door-scene.is-entering .door-flash { opacity: 1; transition: opacity .4s ease !important; }
   .door-scene.is-entering .door-hint { animation: none !important; }
 }
+
+/* ── 小屏 / 矮屏下的门庭开场控件定位 ──────────────────────────────
+   来源：线上构建产物中手工注入的 __qc_door_fix 补丁，此处落回源码，
+   使重新构建即可复现，不再依赖对 dist 的事后修改。
+   使用 !important 是刻意的：基础规则与 .door-scene.is-* 修饰符优先级更高，
+   不改动既有规则以降低回归风险。后续可并入上方基础规则并去掉 !important。 */
+.door-hint{
+  position: fixed !important;
+  left: 50% !important;
+  top: 58% !important;
+  transform: translate(-50%, 0) !important;
+  margin-left: 0 !important;
+  right: auto !important;
+  bottom: max(16vh, calc(env(safe-area-inset-bottom, 0px) + 64px)) !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  z-index: 40 !important;
+}
+.door-skip{
+  position: fixed !important;
+  top: auto !important;
+  left: auto !important;
+  right: max(16px, env(safe-area-inset-right, 16px)) !important;
+  bottom: max(46px, calc(env(safe-area-inset-bottom, 0px) + 40px)) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: none !important;
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  color: #f4eedf !important;
+  font-size: 13px !important;
+  letter-spacing: .08em !important;
+  opacity: .85 !important;
+  z-index: 41 !important;
+}
+.door-skip::after{ content: " \2198"; margin-left: 4px; opacity: .8; }
+.door-credit{
+  position: fixed !important;
+  left: auto !important;
+  right: max(16px, env(safe-area-inset-right, 16px)) !important;
+  bottom: max(12px, calc(env(safe-area-inset-bottom, 0px) + 8px)) !important;
+  transform: none !important;
+  font-size: 11px !important;
+  text-align: right !important;
+  z-index: 40 !important;
+  pointer-events: none !important;
+}
+@media (max-height: 600px){
+  .door-hint{ bottom: max(20vh, calc(env(safe-area-inset-bottom, 0px) + 48px)) !important; font-size: 90% !important; }
+}
+@media (max-width: 560px){
+  .door-hint{ bottom: max(18vh, calc(env(safe-area-inset-bottom, 0px) + 72px)) !important; font-size: 95% !important; }
+  .door-credit{ font-size: 10px !important; }
+}
+@media (max-height: 420px){
+  .door-hint{ bottom: 24vh !important; }
+}
