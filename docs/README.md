@@ -15,6 +15,10 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 | [operations.md](operations.md) | 谁在哪里运行；本机唯一的服务启动路径、端口、香港发布、排障 |
 | [recovery.md](recovery.md) | 恢复手册：Git、退役分支、本机运行数据、迁移原件、Release 的副本位置与恢复/演练命令 |
 | [development/BRANCH_STRATEGY.md](development/BRANCH_STRATEGY.md) | 分支策略：trunk、短期分支、线上热修复移植、归档 tag 与删除规则 |
+| [development/AI_DEVELOPMENT.md](development/AI_DEVELOPMENT.md) | Claude / Codex / Copilot 等 AI 的统一开发规则与交付要求 |
+| [development/GLOSSARY.md](development/GLOSSARY.md) | Account / OC / Gate Identity / Player / Actor / Owner / Scope 等核心术语唯一语义 |
+| [development/NAMING_AND_CONTRACTS.md](development/NAMING_AND_CONTRACTS.md) | 变量、API、数据库、环境变量命名与历史兼容字段迁移规则 |
+| [development/AI_TASK_TEMPLATE.md](development/AI_TASK_TEMPLATE.md) | 所有开发者共用的单次 AI 任务模板，避免每个人维护一套项目 Prompt |
 | [security/README.md](security/README.md) | 安全文档索引：现行规则与历史报告的区分、最近一次审计证据的位置 |
 | [SESSION_HANDOFF.md](SESSION_HANDOFF.md) | 历史交接（写作时的 GitHub / Cloudflare 状态）；现行状态以上面各文档为准 |
 

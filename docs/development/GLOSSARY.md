@@ -1,0 +1,74 @@
+# 核心术语表
+
+本文件定义《众生之门》仓库中需要跨开发者、跨 AI 保持一致的核心语义。这里定义“概念是什么”，具体字段名和兼容规则见 `NAMING_AND_CONTRACTS.md`。
+
+## 身份与角色
+
+### Account
+登录账户。负责认证、权限、账户昵称与账户级资料。Account 不是游戏角色，也不天然具有种族。
+
+当前账户 owner 的稳定语义为 `(kind, uid)` 组合，而不是裸 `uid`。
+
+### Account Avatar
+账户通用头像。属于 Account 资料，与 OC 头像、Gate Identity 头像分离。
+
+### OC
+作者登记的原创角色。一个 Account 可以拥有多个 OC。OC 有自己的名称、物种、头像和设定，不等于登录账户，也不会自动成为 Gate Identity。
+
+### Gate Identity
+《众生之门》中的玩家形象/身份资料。它可以从 Account 或 OC 显式复制部分信息，但复制后独立保存，不自动双向同步。
+
+### Player
+面向玩法或 UI 的“玩家”泛称。不要把 `Player` 当作数据库层的统一 owner 概念。若需要持久化归属，必须落到具体的 Account owner、设备本地 scope 或明确的玩法 owner。
+
+### Actor
+世界模拟中的实体实例。Actor 是世界内对象，不等于 Account、OC 或 Gate Identity。
+
+### Controller
+控制某个 Actor 的控制主体或控制关系。Controller 与登录账户、身份和 Actor 之间的映射必须显式，不允许把 `controller_id` 当作账户 ID 使用。
+
+## 所有权与范围
+
+### Owner
+一份数据真正归属于谁/什么。Account 数据的 owner 目前以 `{kind, user_id}` 或等价 `(kind, uid)` 语义表达。其他玩法可能有设备本地、分支、全服等 owner；必须在对应模块文档中明确。
+
+### Scope
+用于隔离同类数据的命名空间或玩法槽位，例如 management / softie。Scope 不是 Account，也不能代替 owner。
+
+### Branch
+世界或模拟状态的一条分支。Branch 是世界状态拓扑概念，不是 Git branch。代码和文档中涉及 Git 时必须写清 `Git branch`，涉及模拟世界时写 `world branch` 或具体领域名称，避免歧义。
+
+### Release
+封存的不可变构建产物。Release 与源码分支、candidate、runtime storage、production 是不同概念。
+
+### Candidate
+待验证、尚未发布的构建候选。Candidate 不是 Production。
+
+### Production
+当前对真实用户提供服务的线上运行环境。GitHub 合并或 push 不等于 Production 已更新。
+
+### Runtime Storage
+运行期数据根，包括数据库、上传、玩法状态等。Runtime Storage 不属于源码 checkout，代码不得假设源码目录就是数据目录。
+
+## 数据与接口
+
+### Contract
+被两个或更多模块、进程、客户端、数据库层或外部调用方依赖的稳定接口，包括：字段名、类型、枚举、API 形状、Schema、Cookie/Host/Origin 约定等。
+
+### Canonical
+仓库内被指定为唯一真身的实现或定义。新增能力应优先复用 canonical 实现，不复制平行版本。
+
+### Compatibility Alias
+为兼容旧客户端、旧数据库字段或历史接口而保留的名称。Alias 不代表推荐的新代码命名。
+
+### Migration
+从旧契约/旧数据到新契约/新数据的受控转换过程。Migration 必须有兼容策略、验证和可回退/可诊断信息，不能用一次全局重命名代替。
+
+## 已知容易混淆的词
+
+- `uid`：部分认证/SSO 层使用的用户标识字段；不能脱离 `kind` 单独作为跨系统 owner。
+- `user_id`：多个当前 API/内部归一层使用的账户标识字段；语义上仍需结合 `kind`。
+- `player_id`：部分历史 activation / player session 接口中的字段，不自动等于全仓库 Account ID。
+- `character`：可能指 OC、玩法角色或世界 Actor。新代码应优先使用更精确术语，禁止仅用 `character_id` 表达一个未定义的跨系统概念。
+
+若新术语会被多个模块使用，必须先加入本文件再进入公共代码。
