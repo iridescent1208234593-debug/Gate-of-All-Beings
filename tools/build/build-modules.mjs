@@ -6,6 +6,7 @@ import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, write
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { candidateRoot, recordCandidate } from '../release/release-artifacts.mjs';
+import { buildMiniGames } from '../../apps/mini-games/build.mjs';
 
 const buildDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(buildDir, '..', '..');
@@ -72,6 +73,8 @@ for (const name of ['management', 'ecology', 'cards']) viteModule(path.join(srcR
 viteModule(path.join(srcRoot, 'world-map'), 'world-map');
 viteModule(path.join(srcRoot, 'softie'), 'softie');
 copyModule(path.join(srcRoot, 'juling', 'public'), 'juling');
+buildMiniGames(path.join(outRoot, 'mini-games'));
+console.log('[copy] mini-games');
 copyModule(path.join(srcRoot, 'slay', 'public'), 'slay');
 cpSync(path.join(srcRoot, 'slay', 'LICENSE'), path.join(outRoot, 'slay', 'LICENSE'));
 copyModule(path.join(srcRoot, 'aeon'), 'aeon',

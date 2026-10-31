@@ -44,7 +44,7 @@
   @media (max-width: 640px) { .shell-topbar a { padding: 0 9px; font-size: 13px; } .shell-topbar a.active::after { left: 9px; right: 9px; } }
 </style>
 <script src="/shared/shared-ui/site-nav.js?v=20261027z"></script>
-<script src="/shared/shared-ui/landscape-hint.js?v=20261027z" data-auto defer></script>
+<script src="/shared/shared-ui/landscape-hint.js?v=20261027z" defer></script>
 <script defer src="/shared/shared-ui/server-recovery.js"></script>
 </head>
 <body>
@@ -291,6 +291,9 @@ function render() {
   if (activeMount) { releaseMount(activeMount); activeMount = null; }
   setBase(BASE_PATH);
   const r = route();
+  // These mini-games adapt to portrait and landscape; other modules keep the hint.
+  const portraitReady = r.name === 'module' && ['oc-run', 'frog-crossing'].includes(r.key);
+  window.IridescentlyLandscape?.[portraitReady ? 'disable' : 'enable']();
   if (r.name === 'module') renderModule(r.key); else renderHome();
   for (const a of navlinks.querySelectorAll('a')) {
     const current = a.getAttribute('href') === location.pathname;

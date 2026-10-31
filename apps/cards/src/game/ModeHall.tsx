@@ -15,6 +15,8 @@ import management from './previews/management.webp';
 import ecology from './previews/ecology.webp';
 import softie from './previews/softie.webp';
 import aeon from './previews/aeon.webp';
+import ocRunPreview from '../../../mini-games/assets/runner-preview.png';
+import crossingPreview from '../../../mini-games/assets/crossing-preview.png';
 import { usePlayerProfile } from './PlayerProfile';
 import { PlayerAvatar } from './PlayerAvatar';
 import { Forest } from './Forest';
@@ -52,6 +54,10 @@ const GAMES: Game[] = [
     desc: '捏一只自己的软软灵体，在林间空地与其他旅人相遇、贴贴、戳一下。', points: ['自定义灵体', '多人同场'] },
   { key: 'aeon', title: 'AEON', genre: '模拟 · 神经演化', shots: [aeon],
     desc: '每个生灵都用真实的神经网络思考：领导一个民族，或以神之手塑造世界，看文明兴衰。', points: ['生存 / 创造双模式', '神经网络生灵'] },
+  { key: 'oc-run', title: 'OC 快跑', genre: '跑酷 · 自己的 OC', shots: [ocRunPreview],
+    desc: '带上自己的 OC，跑过门后的风景。跳过障碍，再向前一点。', points: ['选择会馆 OC', '默认 / 经典小恐龙', '二段跳'] },
+  { key: 'frog-crossing', title: '青蛙过河', genre: '闯关 · 自己的 OC', shots: [crossingPreview],
+    desc: '看准车流，跳上浮木。和自己的 OC 一起，走向另一边的河岸。', points: ['晴日马路 / 林间小河', '方向键或滑动', '五个终点'] },
 ];
 const VOTE_KEY = 'zszm.journal-update-vote';
 const VOTER_KEY = 'zszm.journal-update-voter-id';

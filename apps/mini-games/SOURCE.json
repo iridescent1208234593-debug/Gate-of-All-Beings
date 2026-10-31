@@ -1,0 +1,28 @@
+{
+  "archive": "Lets-Go-小工具-20261019-空间额度查询.zip",
+  "archiveSha256": "2524c1d5e1433d0054de1bb26dceb954443b6d00de27e8b3b355f7211112030d",
+  "sourceScriptSha256": "3ae11e0b31b22e5ac90c2fc49e5d8e069b7cf8f86adfdefdc4b1b958a74d6075",
+  "assets": {
+    "coin.webp": {
+      "source": "assets/static-a2be484f4093cf7e.webp",
+      "sha256": "20e33591821822861783e5e0c7c82859c89ab1de1719d92e0e7c3af0b94fb0ef"
+    },
+    "double.webp": {
+      "source": "assets/static-9d9171eba6d4bbdd.webp",
+      "sha256": "d481f86100b698b7751f44cfed43a7f929ebb438e9049a85864451ce317334fc"
+    },
+    "shield.webp": {
+      "source": "assets/static-be69b19631a23337.webp",
+      "sha256": "6ed75dd3630207b4aa7a905606cb566a833c1b2173f1c58a4b6e6138bb3ad83a"
+    },
+    "magnet.svg": {
+      "source": "app.js: effectIconSVG.magnet",
+      "sha256": "bf982783b7a741c33bc6ab7e11699539cfc689aa2a219fbab50079f60ee37a67"
+    },
+    "jetpack.svg": {
+      "source": "app.js: effectIconSVG.jetpack",
+      "sha256": "f067b340ff6cb0715f257b894dbbbd818800ce5665fcd6c420a3fa9ec9e7331f"
+    }
+  },
+  "ported": "Runner and coin mode physics, in-run pickups/effects, built-in maps, crossing rules. Editors, wallet, inventory, shops, companions and mini-tool SDK excluded."
+}

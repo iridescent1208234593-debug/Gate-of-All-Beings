@@ -172,12 +172,12 @@
       $('board-metric').textContent = '按' + data.metric + '排名';
       if (!data.rows.length) { $('rows').innerHTML = '<li class="empty">还没有人上榜，来做第一个吧。</li>'; }
       else $('rows').innerHTML = data.rows.map(r => {
-        const score = board === 'level' ? `Lv.${r.score} <small class="muted">${r.points} 分</small>` : `${r.score} ${esc(data.unit)}`;
+        const score = board === 'level' ? `Lv.${r.score} <small class="muted">${r.points} 分</small>` : `${r.score} ${esc(data.unit)}${board === 'oc-run-coins' ? `<small class="muted" style="display:block">距离 ${r.distance}</small>` : ''}`;
         const extra = board === 'level' ? '' : `<small>Lv.${r.level}${r.wins ? ' · 胜 ' + r.wins : ''}</small>`;
         return `<li class="${r.me ? 'me' : ''}"><span class="rank ${r.rank <= 3 ? 'top' : ''}">${r.rank}</span>
           <span class="name">${esc(r.name)}${extra}</span><span class="score">${score}</span></li>`;
       }).join('');
-      if (data.mine) $('mine').textContent = `你的名次：第 ${data.mine.rank} 名 · ${board === 'level' ? 'Lv.' + data.mine.score : data.mine.score + ' ' + data.unit}`;
+      if (data.mine) $('mine').textContent = `你的名次：第 ${data.mine.rank} 名 · ${board === 'level' ? 'Lv.' + data.mine.score : data.mine.score + ' ' + data.unit}${board === 'oc-run-coins' ? ' · 距离 ' + data.mine.distance : ''}`;
       else if (!data.logged_in) $('mine').textContent = '登录会馆账号后可以上榜。';
       else $('mine').textContent = board === 'level' ? '还没有积分，玩一局就能上榜。' : '你还没有这个玩法的成绩。';
     } catch (error) {

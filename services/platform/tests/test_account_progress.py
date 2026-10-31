@@ -244,6 +244,26 @@ class Http(unittest.TestCase):
         self.assertEqual(self.call("GET", "/api/progress/leaderboard?board=nope")[0], 404)
         self.assertEqual(len(self.call("GET", "/api/progress/boards")[1]["boards"]), len(ap.GAMES) + 1)
 
+    def test_mini_games_use_existing_http_without_rewards(self):
+        token = hx_sso.make_token("8", "local", "eight")
+        before = self.call("GET", "/api/progress/me", cookie=token)[1]
+        for game in ("oc-run", "oc-run-coins", "frog-crossing"):
+            payload = {"game": game, "score": 20, "distance": 300, "finished": True, "ref": "mini-http"}
+            status, guest = self.call("POST", "/api/progress/report", payload)
+            self.assertEqual((status, guest["ranked"]), (200, False))
+            for _ in range(2):
+                status, result = self.call("POST", "/api/progress/report", payload, cookie=token)
+                self.assertEqual(status, 200, result)
+                self.assertEqual(result["awarded"], [])
+            status, board = self.call("GET", "/api/progress/leaderboard?board=" + game, cookie=token)
+            self.assertEqual((status, board["mine"]["score"]), (200, 20))
+            if game == "oc-run-coins": self.assertEqual(board["mine"]["distance"], 300)
+        after = self.call("GET", "/api/progress/me", cookie=token)[1]
+        self.assertEqual(after["points"], before["points"])
+        self.assertEqual(after["today"], before["today"])
+        bad = {"game": "oc-run-coins", "score": 20, "distance": -1, "finished": True, "ref": "invalid"}
+        self.assertEqual(self.call("POST", "/api/progress/report", bad, cookie=token)[0], 400)
+
     def test_banned_or_forged_identity_is_anonymous(self):
         banned = hx_sso.make_token("9", "local", "gone")
         self.assertFalse(self.call("POST", "/api/progress/report", {"game": "slay", "score": 3}, cookie=banned)[1]["ranked"])

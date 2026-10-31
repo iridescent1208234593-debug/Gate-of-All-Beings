@@ -30,8 +30,9 @@ async function post(body) {
  * 一局结束：finished=true 计入完成局数；won=true 计入胜利。ref 是这一局的稳定编号（重试不重复计分），
  * 缺省时自动生成。返回服务器结果（访客为 {ranked:false}），失败返回 null。
  */
-export async function reportResult(game, { score = 0, won = false, finished = true, ref, toast = true } = {}) {
+export async function reportResult(game, { score = 0, won = false, finished = true, ref, toast = true, distance } = {}) {
   const body = { game, score: Math.max(0, Math.floor(Number(score) || 0)), finished: !!finished, won: !!won };
+  if (game === 'oc-run-coins') body.distance = distance;
   if (body.finished || body.won) body.ref = String(ref || runRef(game)).slice(0, 120);
   const result = await post(body);
   if (toast && result) showProgressToast(result);

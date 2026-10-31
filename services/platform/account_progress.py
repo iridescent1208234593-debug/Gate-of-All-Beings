@@ -17,6 +17,7 @@ CLI (run from the project root; IRIDESCENTLY_STORAGE_ROOT and IRIDESCENTLY_ENVIR
   python services/platform/account_progress.py reset-legacy --apply   # archive + zero every account's points
   python services/platform/account_progress.py restore-legacy --apply # rollback: put archived legacy points back
 """
+import mini_game_scores
 import argparse
 from storage_paths import data_root, huiguan_data_dir, require_ready
 import json
@@ -61,6 +62,8 @@ RULES = {
 }
 DAILY_CAP_X10 = 80          # 每个账户每天最多 8 分
 MAX_REPORTS_PER_GAME_DAY = 300
+GAMES.update(mini_game_scores.GAMES)
+
 EXPLORE_GAMES = 3
 TASKS = ("task-finish", "task-explore")
 
@@ -104,6 +107,7 @@ def level_info(points_x10):
 # ---------- schema ----------
 
 def init_schema(conn):
+    mini_game_scores.init_schema(conn)
     conn.execute("""CREATE TABLE IF NOT EXISTS account_points (
         kind TEXT NOT NULL,
         uid TEXT NOT NULL,
@@ -258,6 +262,8 @@ def leaderboard(conn, board, limit=50, me=None):
     if board not in GAMES:
         raise KeyError(board)
     game = GAMES[board]
+    if board in mini_game_scores.GAMES:
+        return mini_game_scores.leaderboard(conn, board, limit, me, level_for)
     rows = conn.execute("""SELECT s.kind, s.uid, s.best_score, s.runs, s.wins, s.display_name, COALESCE(p.points_x10, 0) AS px
         FROM game_scores s LEFT JOIN account_points p ON p.kind=s.kind AND p.uid=s.uid
         WHERE s.game=? AND s.best_score > 0 ORDER BY s.best_score DESC, s.wins DESC, s.best_at ASC, s.kind ASC, s.uid ASC LIMIT ?""",
@@ -330,7 +336,10 @@ def clean_report(body):
     finished, won = body.get("finished") is True, body.get("won") is True
     if (finished or won) and not ref:
         raise ValueError("完成一局需要对局编号")
-    return {"game": game, "score": score, "finished": finished or won, "won": won, "ref": ref}
+    result = {"game": game, "score": score, "finished": finished or won, "won": won, "ref": ref}
+    if game in mini_game_scores.GAMES:
+        result["distance"] = mini_game_scores.clean(body)
+    return result
 
 
 def record_report(conn, kind, uid, name, report, now=None):
@@ -339,6 +348,8 @@ def record_report(conn, kind, uid, name, report, now=None):
     name = str(name or "")[:60]
     game, score, cfg = report["game"], report["score"], GAMES[report["game"]]
     day, stamp = today(now), _now()
+    if game in mini_game_scores.GAMES:
+        return mini_game_scores.record(conn, kind, uid, name, report, day, stamp, MAX_REPORTS_PER_GAME_DAY)
     awarded = []
     conn.execute("BEGIN IMMEDIATE")
     try:
