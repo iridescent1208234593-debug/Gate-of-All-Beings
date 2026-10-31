@@ -5,6 +5,11 @@
   `docs/development/BRANCH_STRATEGY.md`. Local services and HK publishing: `docs/operations.md`.
   Recovery: `docs/recovery.md`. Security: `docs/security/README.md` (which documents are current
   rules and which are dated history; live production state comes only from fresh read-only evidence).
+- AI-assisted development: read `docs/development/AI_DEVELOPMENT.md`,
+  `docs/development/GLOSSARY.md`, and `docs/development/NAMING_AND_CONTRACTS.md` before creating
+  shared fields, APIs, database/schema changes, environment variables, or new domain concepts.
+  Use `docs/development/AI_TASK_TEMPLATE.md` for one-off AI tasks instead of maintaining separate
+  project prompts per developer/model.
 - Re-check the live Git and disk state before acting; documents and handoffs record the state when
   they were written.
 
@@ -24,6 +29,10 @@
   `Store.transaction()`; never load, change and save `characters.json` (or the OC tables) in
   separate steps. Binaries older than that module ignore its fence and must be stopped before any
   storage cutover. See `docs/storage-runtime-writers.md` and `docs/storage/oc-sql-runbook.md`.
+- Do not introduce parallel names for an existing core concept. Existing compatibility names such
+  as `uid`, `user_id`, and domain-specific `player_id` must be normalized at boundaries rather than
+  globally search-replaced. Any new shared concept must be registered in the glossary and contract
+  rules in the same change.
 
 ## File deletion and cleanup policy
 
