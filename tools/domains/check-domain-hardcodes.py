@@ -32,8 +32,8 @@ EXCEPT_FILES = {
     "apps/cards/scripts/verify-game.mjs": "operator inspection of the live canonical site",
 }
 EXCEPT_SNIPPETS = (
-    re.compile(r'<link rel="canonical" href="https://iridescently\.xyz/[^"]*"'),
-    re.compile(r'<meta property="og:image" content="https://(?:huiguan|oc)\.iridescently\.xyz/favicon\.png">'),
+    re.compile(r'<link rel="canonical" href="https://(?:www\.)?iridescently\.(?:xyz|cn)/[^"]*"'),
+    re.compile(r'<meta property="og:image" content="https://(?:huiguan|oc)\.iridescently\.(?:xyz|cn)/favicon\.png">'),
     # Character provenance in shared worldview data, in source and minified bundles.
     re.compile(r'"?sourceUrl"?:\s*"https://huiguan\.iridescently\.xyz/"'),
 )
