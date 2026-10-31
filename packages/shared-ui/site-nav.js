@@ -55,6 +55,9 @@
     '#qc-nav[data-variant="overlay"]{--qc-glass:rgba(12,19,26,.3);--qc-panel:rgba(14,22,28,.84)}',
     '#qc-nav[data-tone="light"]{--qc-fg:#17372e;--qc-fg-soft:#17372ec4;--qc-sub:#5d6a70;--qc-mark:#b07a22;--qc-glass:rgba(250,246,237,.6);--qc-edge:rgba(34,49,58,.12);--qc-hi:rgba(255,255,255,.7);--qc-panel:rgba(251,248,241,.92);--qc-hover:rgba(34,49,58,.06)}',
     '#qc-nav{position:fixed;top:0;left:0;right:0;z-index:9999;box-sizing:border-box;height:var(--qc-nav-h);display:flex;align-items:center;gap:clamp(10px,2vw,22px);padding:0 clamp(12px,3vw,32px);background:linear-gradient(180deg,var(--qc-hi),transparent 70%),var(--qc-glass);border-bottom:1px solid var(--qc-edge);box-shadow:inset 0 1px 0 var(--qc-hi),0 6px 22px rgba(6,14,12,.08);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);color:var(--qc-fg);font:14px/1.2 "LXGW WenKai","Noto Serif SC","Source Han Serif SC",serif;letter-spacing:.03em}',
+    '#qc-nav{transition:transform .32s cubic-bezier(.4,0,.2,1)}',
+    // 沉浸场景（开场动画、全屏玩法）可临时收起全局导航
+    '#qc-nav[data-hidden]{transform:translateY(-100%);pointer-events:none}',
     '@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){#qc-nav{--qc-glass:rgba(18,34,28,.92)}#qc-nav[data-tone="light"]{--qc-glass:rgba(250,246,237,.96)}}',
     '#qc-nav *{box-sizing:border-box}',
     '#qc-nav a,#qc-nav summary,#qc-nav button{color:inherit;text-decoration:none;font:inherit}',
@@ -344,7 +347,19 @@
     mount: mount,
     unmount: unmount,
     slot: function () { return state ? state.slot : null; },
-    height: function () { return state ? state.nav.offsetHeight : 0; }
+    height: function () { return state ? state.nav.offsetHeight : 0; },
+    // 沉浸场景（开场动画、全屏玩法）可临时收起全局导航
+    hide: function () {
+      if (!state) return;
+      state.nav.setAttribute('data-hidden', '');
+      document.documentElement.style.setProperty('--qc-nav-h', '0px');
+    },
+    show: function () {
+      if (!state) return;
+      state.nav.removeAttribute('data-hidden');
+      document.documentElement.style.setProperty('--qc-nav-h', state.nav.offsetHeight + 'px');
+    },
+    hidden: function () { return !!(state && state.nav.hasAttribute('data-hidden')); }
   };
   var script = document.currentScript;
   if (script && !('manual' in script.dataset)) {
