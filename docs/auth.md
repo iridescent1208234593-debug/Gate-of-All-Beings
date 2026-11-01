@@ -63,3 +63,47 @@
 - Cookie 仅 `HttpOnly`，前端拿不到 token，只能读 `/api/sso-user`。
 - 静态白名单：`base_static.static_allowed` 屏蔽 `.py/.db/.log/.bak` 及点文件；`BaseStaticHandler.list_directory` 返回 404。
 - 写接口（www 的 `/api/admin/*`）校验同源 + 管理员。
+
+## 6. 角色与权限规则
+
+身份决定御灵系可选数量与年龄上限，规则同时写在前端表单提示里（`apps/huiguan/index.html` 的基础与身份段），改动时两处要同步。
+
+| 身份 | 御灵系可选 | 年龄上限 | 获得方式 |
+| --- | --- | --- | --- |
+| 未登录访客 | 1 系 | 450 岁 | — |
+| 执行者 | 2 系 | 450 岁 | 注册即默认 |
+| 长老 | 2 系 | 1500 岁 | 提交申请并经馆长批准，或管理员在后台直接设置 |
+| 荣誉长老 / 妖王 | 2 系 | 1500 岁 | 表单页内直接选择，妖王需写明理由 |
+| 管理员 | — | — | `ADMIN_USSO_IDS` 中的 USSO 账号，或 `local_users.role='admin'` |
+
+- 兜底：若全站没有任何管理员，第一个注册者自动成为管理员（`server_huiguan.py` 的注册逻辑）。
+- 管理员身份与会话标记分离：`ADMIN_USSO_IDS` 是永久白名单，`user_flags.role` 是站内授予。
+
+## 7. 管理后台
+
+页面 `/admin.html`，仅管理员可见入口；接口集中在 `server_huiguan.py` 的 `/api/admin/*`。
+
+| 分组 | 端点 |
+| --- | --- |
+| 查看 | `/api/admin/users`、`/characters`、`/elder-requests`、`/honor-requests`、`/supplements`、`/scribe-requests`、`/exempt-requests`、`/posters` |
+| 用户 | `/api/admin/user/update`（封禁 / 角色）、`/api/admin/user/delete`、`/api/admin/reset-password` |
+| 审核 | `/api/admin/elder/decide`、`/honor/decide`、`/supplement/decide`、`/scribe/decide`、`/exempt/decide` |
+| 内容 | `/api/admin/delete-character`、`/api/admin/poster/delete` |
+
+封禁后该用户的既有会话立即失效；删除用户会连同其角色卡一并删除，不可恢复。
+
+## 8. 限流
+
+| 场景 | 计数键 | 阈值 |
+| --- | --- | --- |
+| 注册 | `reg:{ip}` | 5 次 / 1 小时 |
+| 登录失败 | 用户名 + IP 组合 | 8 次 / 10 分钟 |
+| 登录失败 | `login-ip:{ip}` | 30 次 / 10 分钟 |
+| 登录失败 | `login-user:{user}` | 20 次 / 1 小时 |
+
+计数键形如 `login:{user}`+`{ip}`，实现为 `rate_blocked(key, max_n, window)`，阈值集中在 `LOGIN_FAILURE_LIMITS`；计数每 5 分钟清理一次过期条目（`_RATE_CLEANUP_INTERVAL`）。触发时返回 429 与中文提示。
+
+## 9. 常见问题
+
+- **登录时打错用户名会怎样？** 统一入口 `/api/auth` 是"用户名存在就登录、不存在就注册"，所以拼错的名字会被当成新账号**自动注册并登录**。识别方法：登录后昵称不对、角色卡为空。表单弹窗已提示"用户名不存在时将自动注册并登录"；误建的空账号可由管理员在后台删除。
+- **脚本访问接口返回 403 `error code: 1010`？** 这是 Cloudflare 的浏览器完整性检查拦了非浏览器 UA，换成浏览器 UA 即可；真实用户在浏览器里不受影响。
