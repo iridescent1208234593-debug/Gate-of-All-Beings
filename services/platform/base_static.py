@@ -68,9 +68,8 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
         return service_name(request_host(self) or "") == "zszm"
 
     def version_string(self):
-        if self._zszm_request():
-            return "Iridescently"
-        return super().version_string()
+        # 所有域统一返回站点名，不暴露 SimpleHTTP/Python 版本号
+        return "Iridescently"
 
     def send_error(self, code, message=None, explain=None):
         from access_recovery import send_recovery
@@ -137,9 +136,10 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
                 ct = h.decode("utf-8", errors="replace").lower()
                 break
         if "text/html" in ct:
-            super().send_header("Cache-Control", "no-cache, no-store, must-revalidate")
-            super().send_header("Pragma", "no-cache")
-            super().send_header("Expires", "0")
+            # HTML 允许 CF 边缘短缓存：60 秒新鲜 + 300 秒 stale-while-revalidate。
+            # 站长改完内容最多 60 秒生效；普通访客不再每次都回源到阿姆斯特丹。
+            # 管理员接口(/api/*)是 application/json，不会进这个分支，不受影响。
+            super().send_header("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
         else:
             ext = os.path.splitext(request_path)[1].lower()
             if ("image/" in ct or ext in (".woff", ".woff2", ".ttf", ".otf")) and not any(
