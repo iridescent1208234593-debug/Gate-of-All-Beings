@@ -4744,6 +4744,9 @@ class Handler(BaseStaticHandler):
         role = patch.get("role")
         if status not in (None, "active", "banned"):
             self._json(400, {"error": "非法状态"}); return
+        # 封禁 / 解封是管理员专属：长老只能管理角色文书等级，不能改账号状态
+        if status is not None and scope != "all":
+            self._json(403, {"error": "仅管理员可修改账号封禁状态"}); return
         if edit_role not in (None, "none", "scribe"):
             self._json(400, {"error": "非法文书等级"}); return
         if role not in (None, "executor"):
