@@ -12,7 +12,7 @@
 | Batch 6 迁移前的原始文件 | `<runtime>/production/backups/batch6-migration-20261025/original-source/` + `manifest.json` | — | `python tools/runtime/storage-migrate.py restore-source --manifest <manifest.json>`（只复制、拒绝覆盖较新数据） |
 | 本机 Release | `<runtime>/<environment>/releases/store/<id>`（不可变） | 可由 trunk 提交重建 | `npm run release:rollback -- <release-id>`（只移动 channel） |
 | 运维工具代码 | `<工作区>/operations`（本地 Git） | 无远端（含敏感材料，不推送） | `git -C <工作区>/operations log` / `checkout` |
-| 原始资产与协作原件 | `<工作区>/originals` | 目前只有这一份 | — |
+| 原始资产与协作原件 | 工作区之外的 `E:\资产`（`众生之门项目组原件资产`） | 目前只有这一份 | — |
 
 ## 演练与校验命令
 
@@ -49,5 +49,5 @@ python tools/runtime/backup-storage.py verify <runtime>\production\backups\snaps
 
 - 香港生产没有异地副本，人设表与用户上传没有自动快照（见上一节）。
 - 本机没有异地副本：运行数据、原件、运维备份都只在本机 E: 盘；D: 上只有仓库 bundle，而且 D: 几乎已满。
-- `originals` 没有第二份。
+- `E:\资产` 下的原始资产与协作原件没有第二份。
 - 本机快照包含 6 GiB 的只读原图，每次快照都整份复制；需要一个只备份可变数据（data、managed 上传）的轻量快照，或改为增量。
