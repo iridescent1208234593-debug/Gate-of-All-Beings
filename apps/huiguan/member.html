@@ -137,9 +137,9 @@ function render(){
         ?`<select class="ctl" onchange="upd('${u.kind}','${u.uid}','role',this.value)">${['executor','elder','admin'].map(x=>`<option value="${x}" ${u.role===x?'selected':''}>${roleName[x]}</option>`).join('')}</select>`
         :'<span class="dim">执行者</span>';
       const scribeSel=`<select class="ctl" onchange="upd('${u.kind}','${u.uid}','edit_role',this.value)"><option value="none" ${u.edit_role!=='scribe'?'selected':''}>否</option><option value="scribe" ${u.edit_role==='scribe'?'selected':''}>是</option></select>`;
-      const statusBtn=u.status==='banned'
+      const statusBtn=myScope!=='all'?'':(u.status==='banned'
         ?`<button class="op" onclick="upd('${u.kind}','${u.uid}','status','active')">解封</button>`
-        :`<button class="op danger" onclick="upd('${u.kind}','${u.uid}','status','banned')">封禁</button>`;
+        :`<button class="op danger" onclick="upd('${u.kind}','${u.uid}','status','banned')">封禁</button>`);
       const resetBtn=(myScope==='all'&&u.kind==='local')
         ?`<button class="op" onclick="resetPwd('${u.kind}','${u.uid}','${escAttr(u.nickname||u.name||'')}')">重置密码</button>`
         :'';
