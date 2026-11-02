@@ -79,8 +79,8 @@ SSO_USERINFO = "https://sso.umrc.cn/userinfo.php"
 # 站长 USSO ID：永远拥有管理员权限
 ADMIN_USSO_IDS = {"7"}
 
-# 编辑码：知道编辑码的用户可免申请直接成为编辑（仅服务端校验，不下发前端）；可用环境变量覆盖
-EDITOR_CODE = os.environ.get("HUIGUAN_EDITOR_CODE", "20142010")
+# 编辑码仅从运行环境读取；未配置时关闭编辑码授权。
+EDITOR_CODE = os.environ.get("HUIGUAN_EDITOR_CODE", "").strip()
 GROUP_QQ = "878029597"
 # 妖王自述超过该字数自动通过，否则进入人工审核
 YAOWANG_AUTO_MIN_CHARS = 50
@@ -3438,7 +3438,9 @@ class Handler(BaseStaticHandler):
         if self._get_edit_role(ident) in ("scribe", "admin"):
             self._json(200, {"ok": True, "already": True, "group_qq": GROUP_QQ,
                              "msg": "你已经是编辑啦，无需再输入编辑码。"}); return
-        if not EDITOR_CODE or not hmac.compare_digest(code.encode("utf-8"), EDITOR_CODE.encode("utf-8")):
+        if not EDITOR_CODE:
+            self._json(503, {"error": "编辑码功能暂不可用，请联系管理员。"}); return
+        if not hmac.compare_digest(code.encode("utf-8"), EDITOR_CODE.encode("utf-8")):
             rate_add(ukey); rate_add(ikey)
             self._json(400, {"error": "编辑码不太对哦，请再核对一下～"}); return
         self._set_user_cols(ident, edit_role="scribe")
