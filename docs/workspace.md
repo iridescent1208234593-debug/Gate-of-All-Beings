@@ -11,7 +11,6 @@
 | `runtime` | `runtime/` | 外部存储父目录：`<environment>/{data,assets,cache,releases,backups}` | 只由存储契约与发布工具写；搬迁只能用 `tools/runtime/relocate-storage.py` |
 | `operations` | `operations/` | 本机运维工具（不在本仓库） | 本地 Git，只跟踪代码；状态、日志、备份不入库 |
 | `secrets` | `secrets/` | 密钥、Tunnel 凭据、环境原件 | 只有当前用户与 SYSTEM 可读；不进 Git、证据或普通备份 |
-| `originals` | `originals/` | 原始资产与协作原件（美术/音乐原档、生成素材原集） | 不可再生；只增不改 |
 | `promo` | `promo/` | 推广物料（视频封面、标题文案、对比截图） | |
 | `evidence` | `evidence/<主题-日期>/` | 验证证据、事故记录、迁移清单 | 只追加，不改写 |
 | `backups` | `backups/` | 时间点副本（仓库 bundle、运维 DB 快照） | 敏感 |
