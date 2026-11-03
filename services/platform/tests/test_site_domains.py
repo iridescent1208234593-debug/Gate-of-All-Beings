@@ -148,6 +148,23 @@ class OriginBoundary(unittest.TestCase):
             request._external_host = "huiguan.iridescently.cn"
             self.assertEqual(site_domains.cors_headers(request), [], origin)
 
+    def test_same_service_origin_excludes_sibling_subdomains(self):
+        # Opt-in (issue #41): the default stays same-root for every existing caller.
+        cases = [("https://www.iridescently.cn", "www.iridescently.cn", True),
+                 ("https://iridescently.cn", "www.iridescently.cn", True),
+                 ("https://www.iridescently.cn", "iridescently.cn", True),
+                 ("https://huiguan.iridescently.cn", "huiguan.iridescently.cn", True),
+                 ("https://oc.iridescently.cn", "www.iridescently.cn", False),
+                 ("https://huiguan.iridescently.cn", "www.iridescently.cn", False),
+                 ("https://zszm.iridescently.cn", "iridescently.cn", False),
+                 ("https://www.iridescently.xyz", "www.iridescently.cn", False),
+                 ("https://www.iridescently.cn", None, False),
+                 ("https://pc-www.iridescently.xyz", "www.iridescently.xyz", False)]
+        for origin, host, expected in cases:
+            with self.subTest(origin=origin, host=host):
+                self.assertEqual(site_domains.allowed_origin(origin, host, same_service=True), expected)
+        self.assertTrue(site_domains.allowed_origin("https://oc.iridescently.cn", "www.iridescently.cn"))
+
 
 class CookiesAndSessions(unittest.TestCase):
     def test_cookie_domain_is_the_request_root_and_never_a_shared_suffix(self):

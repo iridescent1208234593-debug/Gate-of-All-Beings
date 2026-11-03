@@ -253,6 +253,68 @@ class GalleryPermissionsTest(unittest.TestCase):
                 self.assertEqual(error.code, 403)
                 error.close()
 
+    def test_sibling_subdomains_of_the_sso_root_cannot_drive_www(self):
+        # Issue #41 (M9): hx_sso is shared across the root and SameSite=Lax treats sibling subdomains as
+        # same-site, so only www's own application may write or read owner-only originals.
+        import http.client
+        original = "/api/gallery/original?image=" + urllib.parse.quote(image_name, safe="")
+        writes = [("/api/gallery/action", "8", {"image": image_name, "action": "love", "request_id": "m9"}),
+                  ("/api/gallery/comment", "7", {"image": image_name, "comment": "m9"}),
+                  ("/api/gallery/comment/delete", "7", {"image": image_name}),
+                  ("/api/admin/links", "7", {"items": [{"name": "x", "url": "https://evil.example"}]}),
+                  ("/api/admin/thanks", "7", {"sections": [{"title": "x", "items": [{"name": "x"}]}]})]
+        with RunningServer() as server:
+            def send(method, path, uid, host, origin=None, body=None, content_type="application/json", fetch_site=None):
+                connection = http.client.HTTPConnection("127.0.0.1", server.httpd.server_port, timeout=5)
+                headers = {"Host": host, "Cookie": f"hx_sso={hx_sso.make_token(uid, 'local', 'Tester')}"}
+                if origin:
+                    headers["Origin"] = origin
+                if fetch_site:
+                    headers["Sec-Fetch-Site"] = fetch_site
+                data = None
+                if body is not None:
+                    headers["Content-Type"] = content_type
+                    data = json.dumps(body, ensure_ascii=False).encode()
+                connection.request(method, path, body=data, headers=headers)
+                response = connection.getresponse()
+                result = response.status, response.getheader("Access-Control-Allow-Origin"), response.read()
+                connection.close()
+                return result
+
+            for sibling in ("https://oc.iridescently.xyz", "https://huiguan.iridescently.xyz", "https://zszm.iridescently.xyz"):
+                for path, uid, body in writes:
+                    with self.subTest(sibling=sibling, path=path):
+                        status, cors, _ = send("POST", path, uid, "www.iridescently.xyz", sibling, body, "text/plain")
+                        self.assertEqual(status, 403)
+                        self.assertIsNone(cors)
+                        self.assertEqual(send("POST", path, uid, "www.iridescently.xyz", sibling, body)[0], 403)
+                with self.subTest(sibling=sibling, path="original"):
+                    status, cors, body = send("GET", original, "7", "www.iridescently.xyz", sibling, fetch_site="same-site")
+                    self.assertEqual(status, 403)
+                    self.assertIsNone(cors)
+                    self.assertNotEqual(body, b"original image bytes")
+                    self.assertEqual(send("GET", original, "7", "www.iridescently.xyz", sibling)[0], 403)
+            for foreign in ("https://evil.example", "https://www.iridescently.cn", "null"):
+                with self.subTest(foreign=foreign):
+                    self.assertEqual(send("POST", writes[0][0], "8", "www.iridescently.xyz", foreign, writes[0][2])[0], 403)
+            # A simple (preflight-free) body type is refused even from www's own pages.
+            status, _, _ = send("POST", writes[0][0], "8", "www.iridescently.xyz", "https://www.iridescently.xyz",
+                                writes[0][2], "text/plain")
+            self.assertEqual(status, 415)
+            # www's own pages, on www and on the apex served by the same application, keep working.
+            for host in ("www.iridescently.xyz", "iridescently.xyz"):
+                with self.subTest(host=host):
+                    origin = "https://" + host
+                    self.assertEqual(send("POST", "/api/gallery/action", "8", host, origin,
+                                          {"image": image_name, "action": "like", "request_id": "own-" + host})[0],
+                                     200 if host == "www.iridescently.xyz" else 409)
+                    self.assertEqual(send("POST", "/api/admin/links", "7", host, origin,
+                                          {"items": [{"name": "own", "url": "https://iridescently.xyz/"}]})[0], 200)
+                    status, cors, body = send("GET", original, "7", host, fetch_site="same-origin")
+                    self.assertEqual((status, cors, body), (200, None, b"original image bytes"))
+            self.assertEqual(send("POST", "/api/gallery/action", "8", "www.iridescently.xyz", "https://iridescently.xyz",
+                                  {"image": image_name, "action": "love", "request_id": "apex-to-www"})[0], 200)
+
 
 if __name__ == "__main__":
     unittest.main()
