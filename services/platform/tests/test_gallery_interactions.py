@@ -77,8 +77,8 @@ class RunningServer:
         self.httpd.server_close()
         self.thread.join(timeout=2)
 
-    def request(self, path, method="GET", kind="local", uid="8", payload=None):
-        headers = {"Cookie": f"hx_sso={hx_sso.make_token(uid, kind, 'Tester')}"}
+    def request(self, path, method="GET", kind="local", uid="8", payload=None, extra_headers=None):
+        headers = {"Cookie": f"hx_sso={hx_sso.make_token(uid, kind, 'Tester')}", **(extra_headers or {})}
         data = None
         if payload is not None:
             headers["Content-Type"] = "application/json"
@@ -93,8 +93,8 @@ class RunningServer:
             error.close()
             return result
 
-    def post(self, path, body, uid="8"):
-        status, _, raw = self.request(path, method="POST", uid=uid, payload=body)
+    def post(self, path, body, uid="8", extra_headers=None):
+        status, _, raw = self.request(path, method="POST", uid=uid, payload=body, extra_headers=extra_headers)
         return status, json.loads(raw)
 class GalleryPermissionsTest(unittest.TestCase):
     @classmethod
@@ -206,6 +206,20 @@ class GalleryPermissionsTest(unittest.TestCase):
             status, body = server.post("/api/gallery/comment", {"image": other_image_name, "comment": "second"})
             self.assertEqual(status, 403)
             self.assertIn("先给这张图点个赞", body["error"])
+
+    def test_forged_forwarding_headers_do_not_reset_the_per_ip_comment_limit(self):
+        # Issue #36: a standalone www server keys the per-IP comment limit on the TCP peer.
+        with RunningServer() as server:
+            for uid in ("8", "9"):
+                self.assertEqual(server.post("/api/gallery/action", {
+                    "image": image_name, "action": "like", "request_id": f"forged-like-{uid}"}, uid=uid)[0], 200)
+            self.assertEqual(server.post("/api/gallery/comment", {"image": image_name, "comment": "first"}, uid="8",
+                                         extra_headers={"X-Real-IP": "198.51.100.1"})[0], 200)
+            status, body = server.post("/api/gallery/comment", {"image": image_name, "comment": "second"}, uid="9",
+                                       extra_headers={"X-Real-IP": "198.51.100.2", "CF-Connecting-IP": "198.51.100.2",
+                                                      "CF-Ray": "0123456789abcdef-HKG", "X-Forwarded-For": "198.51.100.2"})
+            self.assertEqual(status, 429)
+            self.assertIn("每 IP", body["error"])
 
     def test_comments_are_paged_without_public_original_access(self):
         with RunningServer() as server:

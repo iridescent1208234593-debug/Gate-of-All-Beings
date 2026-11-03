@@ -40,6 +40,16 @@ pnpm run db:import -- exports/activation-core-export.json
 - 设备激活状态查询与管理
 - 客户端激活与验证接口
 
+## 客户端接口与防重放
+
+`/api/client/verify` 与 `/api/client/activate` 每次调用前都要先取一次性 challenge：
+
+1. `POST /api/client/challenge`，请求体 `{ "device_id": "...", "route": "/api/client/verify" }`（或 `/api/client/activate`），返回 `challenge`，60 秒内有效。
+2. 把 `challenge` 放进 verify / activate 的请求体。服务端原子消费：已用（`CHALLENGE_USED`）、过期（`CHALLENGE_EXPIRED`）、设备或接口不符（`CHALLENGE_INVALID`）、缺失（`CHALLENGE_REQUIRED`）一律拒绝。
+3. 响应里的 `license_token`（ES256）把这个 challenge 写进 `nonce`。客户端必须先验签，再确认 `nonce`、`device_id`、`route` 与本次请求一致，才能信任“已激活”。
+
+客户端必须内置服务端公钥，缺少时不得跳过验签；参考实现见 `example/activation-client.js`。
+
 ## 技术栈
 
 - Next.js 16
@@ -58,7 +68,7 @@ pnpm install
 
 ### 2. 配置环境变量
 
-复制 `.env.example` 为 `.env.local`，并至少配置：
+复制 `.env.example` 为 `.env.local`，并至少配置（下面是格式示例，**不是可用的值**）：
 
 ```bash
 DATABASE_URL=postgresql://username:password@hostname:port/database_name?sslmode=require
@@ -69,6 +79,28 @@ RESPONSE_SIGN_KEY_ID=key-v1
 RESPONSE_SIGN_TOKEN_TTL_SEC=120
 NODE_ENV=development
 ```
+
+生产部署还需设置 `IRIDESCENTLY_CLIENT_IP_HEADER`，声明入口代理覆盖的客户端 IP 头（见 `.env.example`）。未设置时服务不信任任何转发头，所有客户端共用一个 IP 限额。
+
+频率限制计数存于数据库表 `rate_limit_buckets`，多实例共享；升级后需执行 `pnpm run db:migrate`。
+
+> [!WARNING]
+> 部署时必须重新生成随机凭据：运行 `pnpm run generate-keys`，把输出的 `JWT_SECRET`、
+> `CLIENT_API_KEY`（以及启用时的 `ADMIN_SECRET`）填入部署环境。不要使用 `.env.example`
+> 或本 README 中的示例值。
+>
+> `NODE_ENV=production` 时服务启动会统一校验凭据（规则在 `src/lib/server-credentials.ts`），
+> 不合格则打印原因并退出：
+>
+> | 变量 | production 要求 |
+> | --- | --- |
+> | `JWT_SECRET` | 必填；至少 32 个字符、不少于 8 种不同字符；不能是示例/占位值 |
+> | `CLIENT_API_KEY` | 必填；规则同上 |
+> | `DATABASE_URL` | 必填；连接串中的密码不能是示例/占位值 |
+> | `ADMIN_SECRET` | 可选（不配置则管理密钥通道关闭）；配置时规则同 `JWT_SECRET` |
+> | `EVENT_ACCESS_CODE` | 可选（不配置则事件码通道关闭）；配置时至少 12 个字符、不少于 6 种不同字符 |
+>
+> 非 production 环境只强制 `JWT_SECRET` 已配置且不是示例值，其余问题仅打印告警。
 
 ### 3. 初始化数据库
 
@@ -103,11 +135,15 @@ pnpm run dev
 pnpm run dev
 pnpm run build
 pnpm run start
+pnpm run test
 pnpm run generate-keys
 pnpm run hash-password -- --username <管理员用户名>
+ACTIVATION_CORE_TEST_DATABASE_URL=postgresql://.../activation_core_test pnpm test
 ```
 
 `hash-password` 用于在数据库中直接重置管理员密码：在终端中会隐藏输入密码并要求输入两次，也可以通过标准输入传入一行密码（`< password.txt`）。它没有默认密码，不接受命令行参数传入密码，也不会输出明文密码。如果运行后没有出现“请输入新的管理员密码”提示（例如 Windows Git Bash/mintty 下 Node 可能识别不到终端），输入不会被隐藏，请改用 PowerShell / CMD 运行。
+
+`pnpm test` 只连接 `ACTIVATION_CORE_TEST_DATABASE_URL` 指向的一次性库（库名须含 `test`，测试会清空限流表）；未设置时数据库相关测试显式跳过。
 
 ## 项目结构
 

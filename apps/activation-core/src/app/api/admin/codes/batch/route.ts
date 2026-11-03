@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { batchDeleteActivationCodes, batchResetActivationCodes } from '@/server/activation';
 
 /**
  * 批量操作激活码 API
  * POST /api/admin/codes/batch
  */
-export async function POST(request: NextRequest) {
+export const POST = withAdminAccess(async (request: NextRequest) => {
   try {
     // 解析请求体
     const body = await request.json();
@@ -96,4 +97,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

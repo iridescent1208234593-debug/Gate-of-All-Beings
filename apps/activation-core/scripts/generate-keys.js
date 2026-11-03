@@ -23,6 +23,7 @@ try {
     console.log('正在生成随机密钥...\n');
     const jwtSecret = crypto.randomBytes(32).toString('hex');
     const clientApiKey = crypto.randomBytes(32).toString('hex');
+    const adminSecret = crypto.randomBytes(32).toString('hex');
 
     // 输出环境变量格式
     console.log('✅ 密钥生成完成！\n');
@@ -35,6 +36,10 @@ try {
 
     console.log('# 客户端 API 认证密钥');
     console.log(`CLIENT_API_KEY=${clientApiKey}`);
+    console.log('');
+
+    console.log('# 可选：管理密钥（X-Admin-Key 通道；不需要时删除此行即关闭该通道）');
+    console.log(`ADMIN_SECRET=${adminSecret}`);
     console.log('');
 
     console.log('# ES256 私钥（防抓包篡改）');

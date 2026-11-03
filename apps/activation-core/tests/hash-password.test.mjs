@@ -1,15 +1,12 @@
-// 运行: pnpm run test:scripts（需先在 apps/activation-core 下 pnpm install）
-// 只覆盖非终端（标准输入）路径；终端隐藏输入路径见 PR 中的手工验收记录。
+// 回归测试：#46 M16 scripts/hash-password.js 不得有默认口令、不得输出明文密码。
+// 只覆盖非终端（标准输入）路径；终端隐藏输入路径见 PR #53 的手工验收记录。
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import bcrypt from 'bcryptjs';
 
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const { spawnSync } = require('node:child_process');
-const path = require('node:path');
-const bcrypt = require('bcryptjs');
-
-const SCRIPT = path.join(__dirname, 'hash-password.js');
+const SCRIPT = fileURLToPath(new URL('../scripts/hash-password.js', import.meta.url));
 const PASSWORD = 'Correct-Horse-9';
 
 function run(args, input = '') {

@@ -1,6 +1,5 @@
 """Small, bounded observe-only request counters for public scraping signals."""
 
-import ipaddress
 import logging
 from logging.handlers import RotatingFileHandler
 import os
@@ -12,12 +11,11 @@ import time
 from urllib.parse import parse_qs, urlsplit
 from collections import deque
 from storage_paths import cache_dir, require_ready
-from site_domains import PRODUCTION_HOSTS as _PRODUCTION_HOSTS
+from host_policy import edge_client_identity
 
 _lock = threading.Lock()
 _windows = {}
 _logger = None
-_RAY = re.compile(r"^[A-Za-z0-9-]{1,64}$")
 
 
 class _SafeRotatingHandler(RotatingFileHandler):
@@ -53,32 +51,6 @@ def _log():
     return _logger
 
 
-def get_client_identity(handler):
-    """Trust edge identity only on the configured production Tunnel path."""
-    peer = str(handler.client_address[0])
-    try:
-        is_loopback = ipaddress.ip_address(peer).is_loopback
-    except ValueError:
-        is_loopback = False
-    ray = str(handler.headers.get("CF-Ray", ""))[:64]
-    ray = ray if _RAY.fullmatch(ray) else ""
-    host = str(handler.headers.get("Host", "")).strip().lower().split(":", 1)[0]
-    is_production_tunnel_path = (
-        os.environ.get("IRIDESCENTLY_ENVIRONMENT", "").strip().lower() == "production"
-        and is_loopback
-        and host in _PRODUCTION_HOSTS
-        and bool(ray)
-    )
-    if is_production_tunnel_path:
-        try:
-            forwarded = ipaddress.ip_address(str(handler.headers.get("CF-Connecting-IP", "")).strip())
-        except ValueError:
-            forwarded = None
-        if forwarded is not None:
-            return str(forwarded), ray, True
-    return peer, ray, False
-
-
 def _category(path, query):
     if path in ("/api/official/characters", "/api/fan/list"):
         return "SEARCH" if query.get("q", [""])[0].strip() else "CHARACTER_LIST"
@@ -106,7 +78,7 @@ def observe(handler):
     category = _category(parsed.path, query)
     if category == "OTHER_API" and not parsed.path.startswith(("/api/official/", "/api/fan/", "/api/gallery/")):
         return
-    identity, ray, trusted = get_client_identity(handler)
+    identity, ray, trusted = edge_client_identity(handler)
     now = time.monotonic()
     resource = (query.get("id") or query.get("cid") or query.get("page") or [""])[0][:80]
     key = (identity, category)

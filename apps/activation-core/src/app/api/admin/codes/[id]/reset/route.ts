@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { resetActivationCode } from '@/server/activation';
 import { formatDateTimeForAPI } from '@/lib/utils';
 
@@ -6,10 +7,10 @@ import { formatDateTimeForAPI } from '@/lib/utils';
  * 重置激活码 API
  * POST /api/admin/codes/[id]/reset
  */
-export async function POST(
+export const POST = withAdminAccess(async (
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
-) {
+) => {
   try {
     const { id } = await params;
     const codeId = parseInt(id);
@@ -61,4 +62,4 @@ export async function POST(
       { status: 500 }
     );
   }
-}
+});

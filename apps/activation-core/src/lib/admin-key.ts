@@ -8,14 +8,13 @@
  */
 
 import { timingSafeEqual } from "node:crypto";
+import { getAdminSecretValue, getEventAccessCodeValue } from "./server-credentials";
 
 export const ADMIN_KEY_HEADER = "x-admin-key";
 
 /** 读取服务端配置的管理密钥（未配置返回 null） */
 export function getAdminSecret(): string | null {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret || secret.trim().length === 0) return null;
-  return secret;
+  return getAdminSecretValue();
 }
 
 export function isAdminKeyConfigured(): boolean {
@@ -60,23 +59,9 @@ export function verifyAdminKey(request: Request): boolean {
   return isValidAdminKey(extractAdminKey(request));
 }
 
-/**
- * 管理端接口的操作者标识：
- * - 密钥通道：admin-key
- * - JWT 通道：中间件注入的 x-admin-username
- */
-export function getAdminOperator(request: Request): string {
-  const username = request.headers.get("x-admin-username");
-  if (username && username.trim().length > 0) return username.trim();
-  if (verifyAdminKey(request)) return "admin-key";
-  return "unknown";
-}
-
 /** 事件访问码（可选配置；未配置则该通道关闭） */
 export function getEventAccessCode(): string | null {
-  const value = process.env.EVENT_ACCESS_CODE;
-  if (!value || value.trim().length === 0) return null;
-  return value;
+  return getEventAccessCodeValue();
 }
 
 export function isEventAccessConfigured(): boolean {

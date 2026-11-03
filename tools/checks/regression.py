@@ -41,9 +41,10 @@ def main():
 
         # The sealed-runtime test bundles Cards and Softie services with their own dependencies;
         # without them it fails with an esbuild resolve error that hides the real cause.
-        missing = [p for p in ("node_modules", "apps/cards/node_modules", "apps/softie/node_modules") if not (ROOT / p).is_dir()]
+        missing = [p for p in ("node_modules", "apps/cards/node_modules", "apps/softie/node_modules", "apps/activation-core/node_modules")
+                   if not (ROOT / p).is_dir()]
         if missing:
-            print("\n[dependencies] missing: " + ", ".join(missing) + " -> run npm ci in each (see README)", flush=True)
+            print("\n[dependencies] missing: " + ", ".join(missing) + " -> install each (npm ci; pnpm install for activation-core; see docs/workspace.md)", flush=True)
             results.append({"check": "dependencies installed (" + ", ".join(missing) + ")", "passed": False, "seconds": 0})
 
         # Separate processes avoid modules leaking import caches/environment fixtures.
@@ -55,6 +56,9 @@ def main():
         publisher_check = ROOT / "tools/release/test-publish-release.mjs"
         if publisher_check.exists():
             run("immutable seal and rollback", [node, str(publisher_check)])
+        # activation-core (pnpm install required): its `test` script runs the tsx suites and the
+        # route/credential suites from the app directory, where its tsconfig path aliases resolve.
+        run("activation-core", [shutil.which("npm.cmd" if os.name == "nt" else "npm"), "test", "--prefix", "apps/activation-core"])
         if args.full:
             npm = shutil.which("npm.cmd" if os.name == "nt" else "npm")
             commands = [
@@ -68,6 +72,7 @@ def main():
             commands.extend([
                 ("OAuth return allowlist", [npm, "run", "test:huiguan-auth-next"]),
                 ("OAuth mock browser", [npm, "run", "test:oauth-mock"]),
+                ("Gallery attribute escaping browser", [npm, "run", "test:huiguan-gallery-escape"]),
             ])
             for name, command in commands:
                 run(name, command)

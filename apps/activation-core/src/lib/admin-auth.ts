@@ -1,12 +1,7 @@
 import { SignJWT } from 'jose';
+import { getJwtSecretKey } from './server-credentials';
 
 const ADMIN_SESSION_MAX_AGE = 24 * 60 * 60;
-
-if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your-secret-key') {
-  throw new Error('🔒 安全错误: JWT_SECRET 环境变量未设置或使用默认值，请设置强随机密钥');
-}
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 export interface AdminSessionUser {
   id: number;
@@ -22,7 +17,7 @@ export async function createAdminSessionToken(user: AdminSessionUser): Promise<s
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('24h')
-    .sign(JWT_SECRET);
+    .sign(getJwtSecretKey());
 }
 
 export function getAdminSessionCookieOptions(maxAge: number = ADMIN_SESSION_MAX_AGE) {

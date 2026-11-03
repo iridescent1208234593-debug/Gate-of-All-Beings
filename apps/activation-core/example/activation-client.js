@@ -1,23 +1,25 @@
 /**
  * 浏览器环境下的激活客户端
  * 负责与服务端API通信，处理激活码验证和状态检查
- * 支持服务端响应签名验证，防止抓包篡改
+ *
+ * 防篡改 / 防重放（#45 M15）：
+ * - 必须提供服务端 ES256 公钥，缺少时构造直接报错，不会静默跳过验签
+ * - 每次 verify / activate 先向服务端申请一次性 challenge；服务端消费后把它写进
+ *   license_token 的 nonce。客户端只接受签名有效、且 nonce / device_id / route 与本次请求
+ *   一致的响应，截获的旧响应无法重放，也不依赖本地时钟或内存缓存
+ * - 本地保存的激活信息取自已验签的 token，而不是未签名的响应正文
  */
 class ActivationClient {
     constructor(apiBaseUrl, apiKey, options = {}) {
+        if (!options.publicKeyPem) {
+            throw new Error('ActivationClient 需要服务端 ES256 公钥（options.publicKeyPem），缺少时拒绝工作');
+        }
         this.apiBaseUrl = apiBaseUrl.replace(/\/$/, ''); // 移除末尾斜杠
         this.apiKey = apiKey;
         this.timeout = options.timeout || 30000; // 30秒超时
-        this.enableSignatureVerification = options.enableSignatureVerification !== false; // 默认启用
-        this.publicKeyPem = options.publicKeyPem || null; // ES256 公钥
-        this.maxClockSkew = options.maxClockSkew || 90000; // 90秒时钟偏差容忍
-        this.nonceCache = new Set(); // 用于防重放的 nonce 缓存
-
-        // 如果启用签名验证但没有提供公钥，给出警告
-        if (this.enableSignatureVerification && !this.publicKeyPem) {
-            console.warn('⚠️ 签名验证已启用但未提供公钥，将跳过验签检查');
-            this.enableSignatureVerification = false;
-        }
+        this.publicKeyPem = options.publicKeyPem; // ES256 公钥
+        this.maxClockSkew = options.maxClockSkew || 90000; // token 过期判断的时钟偏差容忍（毫秒）
+        this.publicKeyPromise = null;
     }
 
     /**
@@ -57,135 +59,102 @@ class ActivationClient {
         }
     }
 
+    getPublicKey() {
+        if (!this.publicKeyPromise) {
+            this.publicKeyPromise = this.importPublicKey(this.publicKeyPem);
+        }
+        return this.publicKeyPromise;
+    }
+
     /**
-     * 验证服务端响应签名
+     * 向服务端申请一次性 challenge
+     * @param {string} deviceId 设备ID
+     * @param {string} route 将要调用的接口
+     * @returns {Promise<string>} challenge
+     */
+    async requestChallenge(deviceId, route) {
+        const response = await this.makeRequest('/api/client/challenge', 'POST', { device_id: deviceId, route });
+        const result = await response.json();
+        if (!result.success || !result.data || typeof result.data.challenge !== 'string') {
+            throw new Error(result.message || '获取 challenge 失败');
+        }
+        return result.data.challenge;
+    }
+
+    /**
+     * 验证服务端签名，并确认 token 属于本次请求
      * @param {Object} responseData 服务端响应数据
      * @param {string} route API 路径
-     * @returns {Promise<boolean>} 验证结果
+     * @param {string} deviceId 本次请求的设备ID
+     * @param {string} challenge 本次请求使用的 challenge
+     * @returns {Promise<Object|null>} 验签通过返回 token 载荷，否则 null
      */
-    async verifyServerSignature(responseData, route) {
-        if (!this.enableSignatureVerification || !this.publicKeyPem) {
-            console.warn('跳过签名验证：未启用或未配置公钥');
-            return true; // 跳过验证
-        }
-
+    async verifyServerSignature(responseData, route, deviceId, challenge) {
         try {
-            const { license_token, nonce, ts, alg } = responseData.data || {};
-
-            if (!license_token || !nonce || !ts) {
-                console.error('响应缺少签名字段:', { license_token: !!license_token, nonce: !!nonce, ts: !!ts });
-                return false;
+            const { license_token } = responseData.data || {};
+            if (typeof license_token !== 'string') {
+                console.error('响应缺少 license_token');
+                return null;
             }
 
-            // 检查算法
-            if (alg && alg !== 'ES256') {
-                console.error('不支持的签名算法:', alg);
-                return false;
-            }
-
-            // 检查时钟偏差
-            const serverTime = parseInt(ts);
-            const localTime = Date.now();
-            const timeDiff = Math.abs(localTime - serverTime);
-
-            if (timeDiff > this.maxClockSkew) {
-                console.error('服务端时间偏差过大:', {
-                    serverTime: new Date(serverTime).toISOString(),
-                    localTime: new Date(localTime).toISOString(),
-                    diff: timeDiff,
-                    maxAllowed: this.maxClockSkew
-                });
-                return false;
-            }
-
-            // 检查 nonce 重复（防重放）
-            if (this.nonceCache.has(nonce)) {
-                console.error('检测到重复的 nonce:', nonce);
-                return false;
-            }
-
-            // 解析并验证 JWT
             const parts = license_token.split('.');
             if (parts.length !== 3) {
                 console.error('License token 格式错误');
-                return false;
+                return null;
             }
 
-            // 解码 header 和 payload
-            const header = JSON.parse(atob(parts[0]));
-            const payload = JSON.parse(atob(parts[1]));
-
-            // 验证 header
+            const header = JSON.parse(this.base64urlDecodeToString(parts[0]));
             if (header.alg !== 'ES256') {
                 console.error('License token 算法不匹配:', header.alg);
-                return false;
+                return null;
             }
 
-            // 验证 payload 基础字段
-            const now = Math.floor(Date.now() / 1000);
-            if (payload.exp && payload.exp < now) {
-                console.error('License token 已过期:', {
-                    exp: payload.exp,
-                    now: now
-                });
-                return false;
-            }
-
-            // 验证 payload 内容与响应一致性
-            if (payload.route !== route) {
-                console.error('License token route 不匹配:', {
-                    expected: route,
-                    actual: payload.route
-                });
-                return false;
-            }
-
-            if (payload.nonce !== nonce || payload.ts !== serverTime) {
-                console.error('License token 元数据不匹配:', {
-                    nonce: { expected: nonce, actual: payload.nonce },
-                    ts: { expected: serverTime, actual: payload.ts }
-                });
-                return false;
-            }
-
-            // 导入公钥并验证签名
-            const publicKey = await this.importPublicKey(this.publicKeyPem);
-
-            // 准备验签数据
-            const signatureData = parts[0] + '.' + parts[1];
-            const signature = this.base64urlToArrayBuffer(parts[2]);
-            const data = new TextEncoder().encode(signatureData);
-
-            // 执行 ECDSA 验签
+            // 先验签，验签通过后才信任载荷
             const isValid = await crypto.subtle.verify(
-                {
-                    name: 'ECDSA',
-                    hash: 'SHA-256'
-                },
-                publicKey,
-                signature,
-                data
+                { name: 'ECDSA', hash: 'SHA-256' },
+                await this.getPublicKey(),
+                this.base64urlToArrayBuffer(parts[2]),
+                new TextEncoder().encode(parts[0] + '.' + parts[1])
             );
-
-            if (isValid) {
-                // 验签成功，缓存 nonce（限制缓存大小，避免内存泄露）
-                this.nonceCache.add(nonce);
-                if (this.nonceCache.size > 1000) {
-                    const firstNonce = this.nonceCache.values().next().value;
-                    this.nonceCache.delete(firstNonce);
-                }
-
-                console.log('✅ 服务端响应签名验证通过');
-                return true;
-            } else {
+            if (!isValid) {
                 console.error('❌ 服务端响应签名验证失败');
-                return false;
+                return null;
             }
 
+            const payload = JSON.parse(this.base64urlDecodeToString(parts[1]));
+
+            // 防重放：nonce 必须是本次申请并提交的 challenge
+            if (payload.nonce !== challenge) {
+                console.error('License token 不属于本次请求（nonce 不匹配），疑似重放');
+                return null;
+            }
+            if (payload.route !== route) {
+                console.error('License token route 不匹配:', { expected: route, actual: payload.route });
+                return null;
+            }
+            if (payload.device_id !== deviceId) {
+                console.error('License token 设备不匹配');
+                return null;
+            }
+            if (payload.is_activated !== true) {
+                console.error('License token 未声明激活');
+                return null;
+            }
+            if (typeof payload.exp !== 'number' || payload.exp * 1000 + this.maxClockSkew < Date.now()) {
+                console.error('License token 已过期');
+                return null;
+            }
+
+            console.log('✅ 服务端响应签名验证通过');
+            return payload;
         } catch (error) {
             console.error('签名验证过程出错:', error);
-            return false;
+            return null;
         }
+    }
+
+    base64urlDecodeToString(base64url) {
+        return new TextDecoder().decode(this.base64urlToArrayBuffer(base64url));
     }
 
     /**
@@ -214,24 +183,23 @@ class ActivationClient {
      * @returns {Promise<Object>} 激活结果
      */
     async activate(deviceId, activationCode) {
+        const route = '/api/client/activate';
         try {
             console.log(`开始激活设备: ${deviceId}`);
 
-            const requestData = {
+            const challenge = await this.requestChallenge(deviceId, route);
+            const response = await this.makeRequest(route, 'POST', {
                 device_id: deviceId,
-                code: activationCode
-            };
-
-            const response = await this.makeRequest('/api/client/activate', 'POST', requestData);
+                code: activationCode,
+                challenge
+            });
             const result = await response.json();
 
             console.log(`激活API响应:`, result);
 
             if (result.success && result.data) {
-                // 验证服务端签名
-                const signatureValid = await this.verifyServerSignature(result, '/api/client/activate');
-
-                if (!signatureValid) {
+                const claims = await this.verifyServerSignature(result, route, deviceId, challenge);
+                if (!claims) {
                     console.error('⚠️ 服务端响应签名验证失败，拒绝激活');
                     return {
                         success: false,
@@ -239,8 +207,8 @@ class ActivationClient {
                     };
                 }
 
-                // 激活成功，保存到本地存储
-                this.saveActivationStatus(deviceId, result.data);
+                // 激活成功，保存已验签的激活信息
+                this.saveActivationStatus(deviceId, claims);
                 console.log('激活状态已保存到本地');
             }
 
@@ -260,24 +228,21 @@ class ActivationClient {
      * @returns {Promise<Object>} 验证结果
      */
     async verify(deviceId) {
+        const route = '/api/client/verify';
         try {
             console.log(`开始验证设备激活状态: ${deviceId}`);
 
-            const requestData = {
-                device_id: deviceId
-            };
-
-            const response = await this.makeRequest('/api/client/verify', 'POST', requestData);
+            const challenge = await this.requestChallenge(deviceId, route);
+            const response = await this.makeRequest(route, 'POST', { device_id: deviceId, challenge });
             const result = await response.json();
 
             console.log(`验证API响应:`, result);
 
             if (result.success && result.data) {
-                // 如果设备已激活且有签名字段，进行验证
-                if (result.data.is_activated && result.data.license_token) {
-                    const signatureValid = await this.verifyServerSignature(result, '/api/client/verify');
-
-                    if (!signatureValid) {
+                if (result.data.is_activated) {
+                    // 声明“已激活”必须带有本次请求的有效签名，否则一律按失败处理
+                    const claims = await this.verifyServerSignature(result, route, deviceId, challenge);
+                    if (!claims) {
                         console.error('⚠️ 服务端响应签名验证失败，清除本地状态');
                         this.clearActivationStatus(deviceId);
                         return {
@@ -291,11 +256,7 @@ class ActivationClient {
                             }
                         };
                     }
-                }
-
-                // 更新本地激活状态
-                if (result.data.is_activated && result.data.activation_info) {
-                    this.updateActivationStatus(deviceId, result.data);
+                    this.saveActivationStatus(deviceId, claims);
                 } else {
                     this.clearActivationStatus(deviceId);
                 }
@@ -375,7 +336,7 @@ class ActivationClient {
                 activatedAt: data.activated_at,
                 expiresAt: data.expires_at,
                 savedAt: new Date().toISOString(),
-                signatureVerified: this.enableSignatureVerification // 记录是否经过签名验证
+                signatureVerified: true // 只有验签通过的 token 才会写入本地
             };
 
             const key = `activation_${deviceId}`;
@@ -383,22 +344,6 @@ class ActivationClient {
             console.log('激活状态已保存到localStorage');
         } catch (error) {
             console.warn('保存激活状态失败:', error);
-        }
-    }
-
-    /**
-     * 更新本地激活状态
-     * @param {string} deviceId 设备ID
-     * @param {Object} data 验证数据
-     */
-    updateActivationStatus(deviceId, data) {
-        if (data.activation_info) {
-            const activationData = {
-                device_id: deviceId,
-                activated_at: data.activation_info.activated_at,
-                expires_at: data.activation_info.expires_at
-            };
-            this.saveActivationStatus(deviceId, activationData);
         }
     }
 

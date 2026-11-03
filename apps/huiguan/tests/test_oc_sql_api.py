@@ -48,6 +48,12 @@ class API(unittest.TestCase):
     def tearDownClass(cls):
         cls.server.shutdown(); cls.server.server_close(); cls.thread.join(); TEMP.cleanup()
 
+    def setUp(self):
+        # Functional saves here are not about throttling; each test starts with a fresh save budget.
+        with app.RATE_LOCK:
+            for key in [k for k in app.RATE if k.startswith('oc-save:')]: app.RATE.pop(key)
+            app.OC_STORAGE.clear()
+
     def save(self, client, code, version=0, **extra):
         body = sheet(code, '角色'+code, '原始内容'); body.update(version=version, **extra)
         return client.call('/api/save-character', body)
@@ -126,8 +132,10 @@ class API(unittest.TestCase):
         for _ in range(2):
             with urllib.request.urlopen(self.base + '/api/get-character?code=shared-public') as response:
                 self.assertEqual(response.status, 200); pages.append(response.read().decode())
-        # The owner that registered first wins, as with the legacy JSON scan, and it is stable.
-        self.assertEqual(pages[0], pages[1])
+        # The owner that registered first wins, as with the legacy JSON scan, and it is stable
+        # (apart from the per-response script nonce).
+        import re
+        self.assertEqual(*[re.sub(r"nonce[-=\"']*[A-Za-z0-9_-]{16,}", 'nonce', page) for page in pages])
         with closing(open_database(app.USER_DB)) as db:
             first = db.execute("""SELECT o.owner_uid FROM oc_owners o JOIN oc_records r USING(owner_kind, owner_uid)
                 WHERE r.code='shared-public' ORDER BY o.position LIMIT 1""").fetchone()[0]
