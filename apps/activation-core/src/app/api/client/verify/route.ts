@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkDeviceActivationStatus } from '@/server/activation';
 import { formatDateTimeForAPI } from '@/lib/utils';
-import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS, toRateLimitIpKey } from '@/lib/rate-limit';
 import { createLicenseToken, generateNonce, getKeyInfo } from '@/lib/signing';
 
 /**
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     const { device_id } = body;
 
     // 3. 验证请求参数
-    if (!device_id) {
+    if (!device_id || typeof device_id !== 'string') {
       return NextResponse.json(
         {
           success: false,
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     // 5. 频率限制检查
     // 检查基于 IP 的频率限制
-    const ipRateLimit = checkRateLimit(clientIP, RATE_LIMIT_CONFIGS.VERIFY_IP);
+    const ipRateLimit = await checkRateLimit(toRateLimitIpKey(clientIP), RATE_LIMIT_CONFIGS.VERIFY_IP);
     if (ipRateLimit.limited) {
       console.log(`🚦 验证 IP 频率限制触发: ${clientIP}, 剩余重置时间: ${Math.ceil(ipRateLimit.resetTimeMs / 1000)}s`);
       return NextResponse.json(
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查基于设备 ID 的频率限制
-    const deviceRateLimit = checkRateLimit(device_id, RATE_LIMIT_CONFIGS.VERIFY_DEVICE);
+    const deviceRateLimit = await checkRateLimit(device_id, RATE_LIMIT_CONFIGS.VERIFY_DEVICE);
     if (deviceRateLimit.limited) {
       console.log(`🚦 验证设备频率限制触发: ${device_id}, 剩余重置时间: ${Math.ceil(deviceRateLimit.resetTimeMs / 1000)}s`);
       return NextResponse.json(
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 检查全局频率限制
-    const globalRateLimit = checkRateLimit('global', RATE_LIMIT_CONFIGS.VERIFY_GLOBAL);
+    const globalRateLimit = await checkRateLimit('global', RATE_LIMIT_CONFIGS.VERIFY_GLOBAL);
     if (globalRateLimit.limited) {
       return NextResponse.json(
         {

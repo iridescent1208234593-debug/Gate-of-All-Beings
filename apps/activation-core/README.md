@@ -70,6 +70,10 @@ RESPONSE_SIGN_TOKEN_TTL_SEC=120
 NODE_ENV=development
 ```
 
+生产部署还需设置 `IRIDESCENTLY_CLIENT_IP_HEADER`，声明入口代理覆盖的客户端 IP 头（见 `.env.example`）。未设置时服务不信任任何转发头，所有客户端共用一个 IP 限额。
+
+频率限制计数存于数据库表 `rate_limit_buckets`，多实例共享；升级后需执行 `pnpm run db:migrate`。
+
 ### 3. 初始化数据库
 
 执行 Drizzle migration：
@@ -105,7 +109,10 @@ pnpm run build
 pnpm run start
 pnpm run generate-keys
 pnpm run hash-password -- <password>
+ACTIVATION_CORE_TEST_DATABASE_URL=postgresql://.../activation_core_test pnpm test
 ```
+
+`pnpm test` 只连接 `ACTIVATION_CORE_TEST_DATABASE_URL` 指向的一次性库（库名须含 `test`，测试会清空限流表）；未设置时数据库相关测试显式跳过。
 
 ## 项目结构
 

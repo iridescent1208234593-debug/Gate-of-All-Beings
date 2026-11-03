@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { issueSessionByActivationCode, issueEventAccessSession } from '@/server/activation';
 import { cleanActivationCode, isValidActivationCodeFormat, formatDateTimeForAPI } from '@/lib/utils';
-import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS } from '@/lib/rate-limit';
+import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS, toRateLimitIpKey } from '@/lib/rate-limit';
 import { extractAdminKey, isValidAdminKey, isValidEventAccessCode } from '@/lib/admin-key';
 
 /**
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ===== 频率限制（IP / 玩家 / 全局） =====
-    const ipRateLimit = checkRateLimit(clientIP, RATE_LIMIT_CONFIGS.VERIFY_IP);
+    const ipRateLimit = await checkRateLimit(toRateLimitIpKey(clientIP), RATE_LIMIT_CONFIGS.VERIFY_IP);
     if (ipRateLimit.limited) {
       return NextResponse.json(
         {
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const playerRateLimit = checkRateLimit(playerId, RATE_LIMIT_CONFIGS.VERIFY_DEVICE);
+    const playerRateLimit = await checkRateLimit(playerId, RATE_LIMIT_CONFIGS.VERIFY_DEVICE);
     if (playerRateLimit.limited) {
       return NextResponse.json(
         {
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const globalRateLimit = checkRateLimit('global', RATE_LIMIT_CONFIGS.VERIFY_GLOBAL);
+    const globalRateLimit = await checkRateLimit('global', RATE_LIMIT_CONFIGS.VERIFY_GLOBAL);
     if (globalRateLimit.limited) {
       return NextResponse.json(
         {
