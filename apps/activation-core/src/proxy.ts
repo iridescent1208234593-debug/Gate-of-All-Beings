@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
-
-// 安全检查：确保 JWT_SECRET 已设置
-if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your-secret-key') {
-  throw new Error('🔒 安全错误: JWT_SECRET 环境变量未设置或使用默认值，请设置强随机密钥');
-}
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+import { getAdminSecretValue, getJwtSecretKey } from '@/lib/server-credentials';
 
 // 完整的 JWT 验证函数（包括签名验证）
 async function verifyJWT(token: string) {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecretKey());
     return payload;
   } catch (error) {
     throw new Error('Invalid token');
@@ -41,8 +35,8 @@ function readProvidedAdminKey(request: NextRequest): string | null {
 }
 
 function isValidAdminKey(candidate: string | null): boolean {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret || secret.trim().length === 0 || !candidate) return false;
+  const secret = getAdminSecretValue();
+  if (!secret || !candidate) return false;
 
   const encoder = new TextEncoder();
   const candidateBytes = encoder.encode(candidate);

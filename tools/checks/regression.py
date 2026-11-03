@@ -55,6 +55,9 @@ def main():
         publisher_check = ROOT / "tools/release/test-publish-release.mjs"
         if publisher_check.exists():
             run("immutable seal and rollback", [node, str(publisher_check)])
+        # activation-core uses pnpm and is not installed here; these tests load only Node built-ins.
+        for file in sorted((ROOT / "apps/activation-core/tests").glob("*.test.mjs")):
+            run(str(file.relative_to(ROOT)), [node, "--experimental-strip-types", "--test", str(file)])
         if args.full:
             npm = shutil.which("npm.cmd" if os.name == "nt" else "npm")
             commands = [

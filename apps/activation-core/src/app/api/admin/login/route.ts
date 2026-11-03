@@ -14,13 +14,7 @@ import {
   getClearedAdminSessionCookieOptions
 } from '@/lib/admin-auth';
 import { getClientIP } from '@/lib/rate-limit';
-
-// 安全检查：确保 JWT_SECRET 已设置
-if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your-secret-key') {
-  throw new Error('🔒 安全错误: JWT_SECRET 环境变量未设置或使用默认值，请设置强随机密钥');
-}
-
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+import { getJwtSecretKey } from '@/lib/server-credentials';
 const JWT_EXPIRES_IN = '24h';
 
 /**
@@ -242,7 +236,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 验证 JWT Token
-    const { payload: decoded } = await jwtVerify(token, JWT_SECRET);
+    const { payload: decoded } = await jwtVerify(token, getJwtSecretKey());
 
     return NextResponse.json(
       {

@@ -10,6 +10,7 @@
 
 import { jwtVerify } from "jose";
 import { extractAdminKey, isValidAdminKey } from "./admin-key";
+import { getJwtSecretKey } from "./server-credentials";
 
 export type AdminAccessVia = "admin-key" | "jwt" | "none";
 
@@ -18,12 +19,6 @@ export interface AdminAccessResult {
   via: AdminAccessVia;
   username?: string;
   message?: string;
-}
-
-function getJwtSecret(): Uint8Array | null {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) return null;
-  return new TextEncoder().encode(secret);
 }
 
 /** 从 Cookie 头中提取指定 cookie 值 */
@@ -54,15 +49,14 @@ export async function requireAdminAccess(request: Request): Promise<AdminAccessR
     return { ok: false, via: "none", message: "管理密钥无效" };
   }
 
-  const secret = getJwtSecret();
   const token = readCookie(request, "token");
 
-  if (!secret || !token) {
+  if (!token) {
     return { ok: false, via: "none", message: "未授权访问" };
   }
 
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, getJwtSecretKey());
     if (!payload.id || !payload.username || payload.role !== "admin") {
       return { ok: false, via: "none", message: "Token 无效或已过期" };
     }

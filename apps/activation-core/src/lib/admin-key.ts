@@ -8,14 +8,13 @@
  */
 
 import { timingSafeEqual } from "node:crypto";
+import { getAdminSecretValue, getEventAccessCodeValue } from "./server-credentials";
 
 export const ADMIN_KEY_HEADER = "x-admin-key";
 
 /** 读取服务端配置的管理密钥（未配置返回 null） */
 export function getAdminSecret(): string | null {
-  const secret = process.env.ADMIN_SECRET;
-  if (!secret || secret.trim().length === 0) return null;
-  return secret;
+  return getAdminSecretValue();
 }
 
 export function isAdminKeyConfigured(): boolean {
@@ -74,9 +73,7 @@ export function getAdminOperator(request: Request): string {
 
 /** 事件访问码（可选配置；未配置则该通道关闭） */
 export function getEventAccessCode(): string | null {
-  const value = process.env.EVENT_ACCESS_CODE;
-  if (!value || value.trim().length === 0) return null;
-  return value;
+  return getEventAccessCodeValue();
 }
 
 export function isEventAccessConfigured(): boolean {
