@@ -61,6 +61,38 @@ wv.execute("INSERT INTO characters VALUES (1, 'c', '', 'x', 1, NULL, '主角', '
 wv.execute("INSERT INTO character_images VALUES (1, 1, ?, 0, '', '')", (str(WORLD / "images" / "char.png"),))
 wv.execute("INSERT INTO unclassified_images VALUES (1, ?, '')", (str(WORLD / "images" / "unclassified.png"),))
 wv.execute("INSERT INTO shared_assets VALUES (1, 'c', 'n', '', '', 1, ?)", (str(WORLD / "images" / "char.png"),))
+# Remote rows as a migration or a hand-edited database might leave them (character 50 does not exist,
+# so these rows never appear in the gallery or in character 1's image list).
+APPROVED_REMOTE = {
+    100: ("https://huiji-thumb.huijistatic.com/luoxiaohei/uploads/a/ab/x.png",
+          "https://huiji-thumb.huijistatic.com/luoxiaohei/uploads/a/ab/x.png"),
+    101: ("HTTPS://Huiji-Public.HuijiStatic.com:443/luoxiaohei/uploads/小黑.png?v=1#frag",
+          "https://huiji-public.huijistatic.com/luoxiaohei/uploads/%E5%B0%8F%E9%BB%91.png?v=1"),
+    102: ("https://huiji-public.huijistatic.com/a/%E5%B0%8F.png",
+          "https://huiji-public.huijistatic.com/a/%E5%B0%8F.png"),
+}
+DIRTY_REMOTE = {
+    200: "http://huiji-thumb.huijistatic.com/a.png",
+    201: "https://evil.example/a.png",
+    202: "https://user:pw@huiji-thumb.huijistatic.com/a.png",
+    203: "https://huiji-thumb.huijistatic.com@evil.example/a.png",
+    204: "https://huiji-thumb.huijistatic.com.evil.example/a.png",
+    205: "https://huiji-thumb.huijistatic.com./a.png",
+    206: "https://huiji-thumb.huijistatic.com:8443/a.png",
+    207: "https://huiji-thumb.huijistatic.com:99999/a.png",
+    208: "https://huiji-thumb.huijistatic.com/a.png\r\nSet-Cookie: hx_sso=forged",
+    209: "https://evil.example\\@huiji-thumb.huijistatic.com/a.png",
+    210: "https://huiji-thumb.huijistatic.com\t.evil.example/a.png",
+    211: "HTTP://EVIL.EXAMPLE/a.png",
+    212: "https:///a.png",
+}
+for iid, (stored, _) in APPROVED_REMOTE.items():
+    wv.execute("INSERT INTO character_images VALUES (?, 50, ?, 0, '', '')", (iid, stored))
+    wv.execute("INSERT INTO unclassified_images VALUES (?, ?, '')", (iid, stored))
+for iid, stored in DIRTY_REMOTE.items():
+    wv.execute("INSERT INTO character_images VALUES (?, 50, ?, 0, '', '')", (iid, stored))
+    wv.execute("INSERT INTO unclassified_images VALUES (?, ?, '')", (iid, stored))
+    wv.execute("INSERT INTO shared_assets VALUES (?, 'c', 'n', '', '', 1, ?)", (iid, stored))
 wv.commit()
 wv.close()
 
@@ -233,6 +265,65 @@ class OriginalImageAccessTest(unittest.TestCase):
         path = "/api/original-image?src=" + urllib.parse.quote("/assets/uploads/" + upload_name, safe="")
         self.assertEqual(self.get(path, self.OWNER, headers={"Sec-Fetch-Site": "cross-site"})[0], 403)
         self.assertEqual(self.get(path, self.OWNER, headers={"Origin": "https://evil.example"})[0], 403)
+
+    def test_original_redirect_only_reaches_approved_hosts(self):
+        def original(src, who=None, method="GET"):
+            return self.get("/api/original-image?src=" + urllib.parse.quote(src, safe=""), who or self.OWNER, method)
+        for iid, (_, expected) in APPROVED_REMOTE.items():
+            for src in (f"/api/official/img-id?id={iid}", f"/api/official/unclassified-img?id={iid}"):
+                for method in ("GET", "HEAD"):
+                    status, headers, _ = original(src, method=method)
+                    self.assertEqual((status, headers.get("Location")), (302, expected), (src, method))
+                    self.assertEqual(headers["Cache-Control"], "no-store")
+                for who in (self.GUEST, self.MEMBER, self.HALL_ADMIN):
+                    status, headers, _ = self.get("/api/original-image?src=" + urllib.parse.quote(src, safe=""), who)
+                    self.assertEqual(status, 403, (who, src))
+                    self.assertIsNone(headers.get("Location"), (who, src))
+        for iid, stored in DIRTY_REMOTE.items():
+            for src in (f"/api/official/img-id?id={iid}", f"/api/official/unclassified-img?id={iid}",
+                        f"/api/assets/shared?id={iid}"):
+                for method in ("GET", "HEAD"):
+                    status, headers, _ = original(src, method=method)
+                    self.assertEqual(status, 404, (stored, src, method))
+                    self.assertIsNone(headers.get("Location"), (stored, src, method))
+                    self.assertIsNone(headers.get("Set-Cookie"), (stored, src, method))
+
+    def test_stale_preview_token_cannot_redirect_to_unapproved_host(self):
+        # A token minted before a rule change (or by any future caller) is re-checked at the sink.
+        token = "s" * 32
+        with huiguan.IMAGE_SOURCE_LOCK:
+            huiguan.IMAGE_SOURCES[token] = (huiguan.time.time(), "https://evil.example/a.png")
+        status, headers, _ = self.get("/api/original-image?src=" + urllib.parse.quote("/api/image-preview?id=" + token, safe=""), self.OWNER)
+        self.assertEqual(status, 404)
+        self.assertIsNone(headers.get("Location"))
+
+    def test_original_of_in_memory_preview_returns_bytes(self):
+        token = "m" * 32
+        with huiguan.IMAGE_SOURCE_LOCK:
+            huiguan.IMAGE_SOURCES[token] = (huiguan.time.time(), upload_original)
+        status, headers, body = self.get("/api/original-image?src=" + urllib.parse.quote("/api/image-preview?id=" + token, safe=""), self.OWNER)
+        self.assertEqual((status, headers["Content-Type"], body), (200, "image/png", upload_original))
+
+    def test_remote_fetch_and_preview_tokens_share_the_final_host_check(self):
+        for _, expected in APPROVED_REMOTE.values():
+            self.assertEqual(huiguan._approved_remote_image_url(expected), expected)
+        for stored in DIRTY_REMOTE.values():
+            self.assertIsNone(huiguan._approved_remote_image_url(stored), stored)
+            self.assertEqual(huiguan._safe_image_reference(stored), "" if stored.lower().startswith(("http://", "https://")) else stored)
+        for value in (None, b"https://huiji-thumb.huijistatic.com/a.png", 7):
+            self.assertIsNone(huiguan._approved_remote_image_url(value))
+        with mock.patch.object(huiguan.socket, "getaddrinfo", side_effect=AssertionError("dirty URL was resolved")):
+            for stored in DIRTY_REMOTE.values():
+                self.assertIsNone(huiguan._remote_image_bytes(stored), stored)
+        # A redirect from an approved host to any other host stops before the second hop.
+        redirect = urllib.error.HTTPError(APPROVED_REMOTE[100][1], 302, "Found", {"Location": "https://evil.example/a.png"}, None)
+        opener = mock.Mock()
+        opener.open.side_effect = [redirect, AssertionError("followed redirect to unapproved host")]
+        public_ip = [(None, None, None, None, ("93.184.216.34", 443))]
+        with mock.patch.object(huiguan.socket, "getaddrinfo", return_value=public_ip), \
+                mock.patch.object(huiguan.urllib.request, "build_opener", return_value=opener):
+            self.assertIsNone(huiguan._remote_image_bytes(APPROVED_REMOTE[100][1]))
+        self.assertEqual(opener.open.call_count, 1)
 
     def test_raw_upload_paths_are_not_static(self):
         paths = (
