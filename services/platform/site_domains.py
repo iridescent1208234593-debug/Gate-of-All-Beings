@@ -119,7 +119,21 @@ def cookie_domain(handler):
     return "" if request_host(handler) in DEVELOPMENT_HOSTS else "; Domain=." + request_root(handler)
 
 
-def allowed_origin(origin, host=None, *, referer=False):
+# The apex and www hosts are one application (one backend serves both).
+_SAME_APPLICATION = {"main": "www"}
+
+
+def same_application(origin_host, host):
+    """True when both hosts are on one root and served by the same application, not merely the same root."""
+    origin_service, origin_root = HOST_MAP.get(origin_host, (None, None))
+    service, root = HOST_MAP.get(host, (None, None))
+    return bool(origin_service and service) and origin_root == root and \
+        _SAME_APPLICATION.get(origin_service, origin_service) == _SAME_APPLICATION.get(service, service)
+
+
+def allowed_origin(origin, host=None, *, referer=False, same_service=False):
+    """Same-root Origin by default. same_service=True narrows a production Origin to the request's own
+    application, so a sibling subdomain of the shared SSO root cannot drive this endpoint."""
     if not isinstance(origin, str) or not origin:
         return False
     try:
@@ -131,6 +145,8 @@ def allowed_origin(origin, host=None, *, referer=False):
         origin_host = normalize_host(parsed.netloc, allow_any_port=True)
         # Explicit ports, spelling, and scheme matter; do not normalize attacker input.
         if parsed.scheme == "https" and parsed.netloc == origin_host and origin_host in PRODUCTION_HOSTS:
+            if same_service:
+                return same_application(origin_host, host)
             return not host or domain_root(origin_host) == domain_root(host)
         environment = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").lower()
         local_origins = {f"http://{name}:{port}" for name in ("localhost", "127.0.0.1") for port in CONFIG["localPorts"]}
@@ -140,7 +156,7 @@ def allowed_origin(origin, host=None, *, referer=False):
         return False
 
 
-def request_origin_allowed(handler, *, missing=True):
+def request_origin_allowed(handler, *, missing=True, same_service=False):
     headers = handler.headers
     origins = headers.get_all("Origin", []) if hasattr(headers, "get_all") else [headers["Origin"]] if headers.get("Origin") else []
     if len(origins) > 1:
@@ -151,7 +167,7 @@ def request_origin_allowed(handler, *, missing=True):
         parsed = urlsplit(value)
         if parsed.scheme == "http" and parsed.netloc == headers.get("Host", "") and not parsed.username and not parsed.password:
             return not origins or (not parsed.path and not parsed.query and not parsed.fragment)
-    return allowed_origin(value, request_host(handler), referer=not origins) if value else missing
+    return allowed_origin(value, request_host(handler), referer=not origins, same_service=same_service) if value else missing
 
 
 def cors_headers(handler, *, credentials=True):

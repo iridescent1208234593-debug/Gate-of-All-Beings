@@ -26,7 +26,7 @@ RUNTIME_DIR = STATIC_DIR
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "services", "platform"))
 import hx_sso
 from site_domains import (PRODUCTION_HOSTS, service_name, site_url, request_host,
-                          request_origin_allowed, cors_headers, localize_url)
+                          request_origin_allowed, localize_url)
 from base_static import BaseStaticHandler
 from host_policy import trusted_client_ip
 # 管理员：完整 (kind, uid) 站长账户 + 账户库状态复核，见 services/platform/site_admin.py
@@ -241,6 +241,21 @@ class Handler(BaseStaticHandler):
         except Exception:
             return True  # 查询异常时不阻断（宁可放行也不误伤）
 
+    def _write_request_allowed(self):
+        """State-changing www calls come only from www's own pages (issue #41).
+
+        A sibling subdomain shares the SSO cookie and counts as same-site, so a same-root Origin is not
+        enough: the Origin must be this application, and the body must be JSON so any cross-origin
+        caller would first need a CORS preflight that www never grants."""
+        if not request_origin_allowed(self, same_service=True):
+            self._json(403, {"error": "来源不被允许"})
+            return False
+        content_type = (self.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+        if content_type != "application/json":
+            self._json(415, {"error": "请求格式需为 JSON"})
+            return False
+        return True
+
     def _read_json(self):
         try:
             length = int(self.headers.get("Content-Length", 0) or 0)
@@ -356,10 +371,8 @@ class Handler(BaseStaticHandler):
             self._json(404, {"error": "接口不存在"})
             return
 
-        # 同源校验：带 Origin/Referer 时必须是本站域名
-        origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
-        if not request_origin_allowed(self):
-            self._json(403, {"error": "来源不被允许"})
+        # 同源校验：带 Origin/Referer 时必须是主站本身（不是同根的其他子域）
+        if not self._write_request_allowed():
             return
 
         user = hx_sso.read_cookie(self.headers)
@@ -395,9 +408,10 @@ class Handler(BaseStaticHandler):
         return data_root()
 
     def _send_gallery_original(self, head=False):
+        # Owner-only originals open by navigation from www's own pages: sibling subdomains are same-site
+        # but must not read them, so there is no CORS and no same-site fetch.
         fetch_site = (self.headers.get("Sec-Fetch-Site") or "").lower()
-        origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
-        if fetch_site == "cross-site" or not request_origin_allowed(self):
+        if fetch_site in ("cross-site", "same-site") or not request_origin_allowed(self, same_service=True):
             if head:
                 self.send_response(403)
                 self.send_header("Cache-Control", "no-store")
@@ -432,17 +446,13 @@ class Handler(BaseStaticHandler):
         self.send_header("Content-Length", str(target.stat().st_size))
         self.send_header("Cache-Control", "private, no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
-        for name, value in cors_headers(self):
-            self.send_header(name, value)
-        self.send_header("Vary", "Origin")
         self.end_headers()
         if not head:
             with target.open("rb") as stream:
                 shutil.copyfileobj(stream, self.wfile)
 
     def _delete_gallery_comment(self):
-        if not request_origin_allowed(self):
-            self._json(403, {"error": "来源不被允许"})
+        if not self._write_request_allowed():
             return
         user = hx_sso.read_cookie(self.headers)
         if not user or not user.get("uid") or not user.get("kind"):
@@ -470,9 +480,7 @@ class Handler(BaseStaticHandler):
             self._json(500, {"error": "删除暂时不可用"})
 
     def _post_gallery_interaction(self, path):
-        origin = self.headers.get("Origin") or self.headers.get("Referer") or ""
-        if not request_origin_allowed(self):
-            self._json(403, {"error": "来源不被允许"})
+        if not self._write_request_allowed():
             return
         user = hx_sso.read_cookie(self.headers)
         if not user or not user.get("uid") or not user.get("kind"):
