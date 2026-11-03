@@ -58,6 +58,8 @@ jobs:
           for module in cards management ecology softie; do
             npm ci --prefix "apps/$module"
           done
+          # activation-core is a pnpm project (pnpm-lock.yaml), installed for its route tests.
+          npx --yes pnpm@10.28.0 install --frozen-lockfile --dir apps/activation-core
       - run: npx playwright install --with-deps chromium
       - name: Install gallery preview encoder
         run: |

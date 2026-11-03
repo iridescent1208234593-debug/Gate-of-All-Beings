@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { getActivationCodes, createActivationCodes } from '@/server/activation';
 import { generateUniqueActivationCodes, formatDateTimeForAPI } from '@/lib/utils';
 
@@ -8,7 +9,7 @@ import { generateUniqueActivationCodes, formatDateTimeForAPI } from '@/lib/utils
  * 获取激活码列表 API
  * GET /api/admin/codes
  */
-export async function GET(request: NextRequest) {
+export const GET = withAdminAccess(async (request: NextRequest) => {
   try {
     const { searchParams } = new URL(request.url);
 
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * 批量生成激活码 API
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
  *   - "2024-12-31T23:59:59"
  *   - "2024-12-31T23:59:59.000Z"
  */
-export async function POST(request: NextRequest) {
+export const POST = withAdminAccess(async (request: NextRequest) => {
   try {
     // 解析请求体
     const body = await request.json();
@@ -189,4 +190,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

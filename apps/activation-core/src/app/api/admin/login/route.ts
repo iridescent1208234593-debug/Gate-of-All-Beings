@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { jwtVerify } from 'jose';
 import {
   clearAdminLoginFailures,
   getAdminByUsername,
@@ -14,7 +13,7 @@ import {
   getClearedAdminSessionCookieOptions
 } from '@/lib/admin-auth';
 import { getClientIP } from '@/lib/rate-limit';
-import { getJwtSecretKey } from '@/lib/server-credentials';
+import { verifyAdminSessionToken } from '@/lib/admin-guard';
 const JWT_EXPIRES_IN = '24h';
 
 /**
@@ -235,8 +234,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 验证 JWT Token
-    const { payload: decoded } = await jwtVerify(token, getJwtSecretKey());
+    // 验证 JWT Token（与管理路由同一规则：签名、有效期、admin 角色）
+    const session = await verifyAdminSessionToken(token);
+    if (!session.ok) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Token无效或已过期'
+        },
+        { status: 401 }
+      );
+    }
 
     return NextResponse.json(
       {
@@ -244,8 +252,8 @@ export async function GET(request: NextRequest) {
         message: '已登录',
         data: {
           user: {
-            id: decoded.id,
-            username: decoded.username,
+            id: session.adminId,
+            username: session.username,
             role: 'admin' // 硬编码，因为这是管理员系统
           }
         }

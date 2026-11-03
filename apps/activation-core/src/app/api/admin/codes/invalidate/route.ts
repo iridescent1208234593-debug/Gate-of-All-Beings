@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminAccess } from '@/lib/admin-guard';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { invalidateCodes, invalidateCode } from '@/server/activation';
 import { cleanActivationCode } from '@/lib/utils';
 
@@ -15,17 +15,8 @@ import { cleanActivationCode } from '@/lib/utils';
  * 作废为永久失效（status = invalidated，写入 revoked_at / revoked_by），
  * 同时踢出该码下所有活跃会话。
  */
-export async function POST(request: NextRequest) {
+export const POST = withAdminAccess(async (request: NextRequest, _context, access) => {
   try {
-    const access = await requireAdminAccess(request);
-
-    if (!access.ok) {
-      return NextResponse.json(
-        { success: false, message: access.message ?? '未授权访问' },
-        { status: 401 }
-      );
-    }
-
     let body: Record<string, unknown>;
     try {
       body = await request.json();
@@ -105,4 +96,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

@@ -59,18 +59,6 @@ export function verifyAdminKey(request: Request): boolean {
   return isValidAdminKey(extractAdminKey(request));
 }
 
-/**
- * 管理端接口的操作者标识：
- * - 密钥通道：admin-key
- * - JWT 通道：中间件注入的 x-admin-username
- */
-export function getAdminOperator(request: Request): string {
-  const username = request.headers.get("x-admin-username");
-  if (username && username.trim().length > 0) return username.trim();
-  if (verifyAdminKey(request)) return "admin-key";
-  return "unknown";
-}
-
 /** 事件访问码（可选配置；未配置则该通道关闭） */
 export function getEventAccessCode(): string | null {
   return getEventAccessCodeValue();
