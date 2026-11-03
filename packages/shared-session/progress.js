@@ -100,7 +100,8 @@ export function showProgressToast(result) {
   if (!result.ranked) text = '登录会馆账号后，成绩才会记入排行榜';
   else if (earned > 0) text = `+${Math.round(earned * 10) / 10} 积分 · Lv.${result.level}` + (result.new_best ? ' · 新纪录' : '');
   else if (result.new_best) text = `新纪录 ${result.best} · Lv.${result.level}`;
-  else return;
+  if (result.held_for_review) text = (earned > 0 ? `+${Math.round(earned * 10) / 10} 积分 · ` : '') + '这次成绩提升较大，复核后上榜';
+  if (!text) return;
   const el = document.createElement('a');
   el.href = leaderboardUrl(result.game);
   el.target = '_top';

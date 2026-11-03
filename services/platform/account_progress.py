@@ -9,21 +9,30 @@ reached at a cumulative n(n+1)/2 points (1, 3, 6, 10, ...). A new account is lev
 
 Scores are reported by the game clients and therefore only as trustworthy as the
 browser; each game has a plausibility ceiling and points are capped per day, so a
-forged score can at most top one board, never farm levels.
+forged score can at most top one board, never farm levels. On top of that the server
+rate-limits reports per account+game and per client IP+game (handle()), and a new best
+that rises more than the game's daily step above the best the account had at the start
+of the day is held in game_score_reviews instead of entering the board; the owner
+accepts or rejects held claims with the review CLI. Every board is an honour board, not
+a verified result (docs/account-progress-and-leaderboards.md section 4).
 
 CLI (run from the project root; IRIDESCENTLY_STORAGE_ROOT and IRIDESCENTLY_ENVIRONMENT select isolated data):
   python services/platform/account_progress.py status                 # legacy points and new totals
   python services/platform/account_progress.py reset-legacy           # dry run: what the reset would change
   python services/platform/account_progress.py reset-legacy --apply   # archive + zero every account's points
   python services/platform/account_progress.py restore-legacy --apply # rollback: put archived legacy points back
+  python services/platform/account_progress.py reviews                # held (quarantined) best scores
+  python services/platform/account_progress.py review ID --accept     # put a held score on its board (--reject drops it)
 """
 import argparse
 from storage_paths import data_root, huiguan_data_dir, require_ready
+import hashlib
 import json
 import math
 import os
 import sqlite3
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -34,6 +43,9 @@ RESET_MIGRATION = "points-reset-v2"
 
 # Every board: label, how the score reads, how runs are aggregated and a plausibility ceiling.
 #   agg "best": keep the highest single score; "sum": add up per-report deltas (time played).
+#   "step" (best boards): how far a best may rise in one Beijing day above the best the
+#   account held when the day began before the new best is held for review instead of
+#   ranked. Defaults to STEP_RATIO of the ceiling; the "sum" board is capped per day already.
 GAMES = {
     "cards": {"name": "众生牌录 · 入世历练", "metric": "最深层数", "unit": "层", "agg": "best", "max": 60},
     "slay": {"name": "重生之门", "metric": "最高层数", "unit": "层", "agg": "best", "max": 80},
@@ -61,8 +73,18 @@ RULES = {
 }
 DAILY_CAP_X10 = 80          # 每个账户每天最多 8 分
 MAX_REPORTS_PER_GAME_DAY = 300
+STEP_RATIO = 0.3            # 单日个人最佳最多上升该玩法上限的 30%，超出进入人工复核
+# Report rate limits per rolling minute: (bucket scope, limit). A normal client sends one
+# report per finished run and at most one progress report per 5 minutes per game.
+RATE_WINDOW_SECONDS = 60
+RATE_LIMITS = {"account-game": 12, "ip-game": 40, "ip": 120}
 EXPLORE_GAMES = 3
 TASKS = ("task-finish", "task-explore")
+
+
+def step_for(game):
+    cfg = GAMES[game]
+    return int(cfg.get("step") or max(1, int(cfg["max"] * STEP_RATIO)))
 
 
 def _now():
@@ -149,6 +171,34 @@ def init_schema(conn):
         PRIMARY KEY (kind, uid, game, day)
     )""")
     # One row per finished run: makes a retried "finished" report count once.
+    if "base_best" not in {r[1] for r in conn.execute("PRAGMA table_info(game_score_daily)")}:
+        # Best score the account held when the day's first report arrived: the daily step is measured from it.
+        conn.execute("ALTER TABLE game_score_daily ADD COLUMN base_best INTEGER")
+    # Best scores held back from the boards because they rose implausibly fast; status
+    # pending -> accepted (copied into game_scores) or rejected, decided by the owner.
+    conn.execute("""CREATE TABLE IF NOT EXISTS game_score_reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        kind TEXT NOT NULL,
+        uid TEXT NOT NULL,
+        game TEXT NOT NULL,
+        score INTEGER NOT NULL,
+        base_best INTEGER NOT NULL,
+        reason TEXT NOT NULL,
+        ref TEXT NOT NULL DEFAULT '',
+        display_name TEXT NOT NULL DEFAULT '',
+        status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
+        created_at TEXT NOT NULL,
+        decided_at TEXT NOT NULL DEFAULT ''
+    )""")
+    conn.execute("CREATE INDEX IF NOT EXISTS game_score_reviews_owner ON game_score_reviews (kind, uid, game, status)")
+    # Per-minute report counters for rate limiting; buckets hold a hashed account/IP key, never a raw IP.
+    conn.execute("""CREATE TABLE IF NOT EXISTS progress_rate_buckets (
+        bucket TEXT NOT NULL,
+        minute INTEGER NOT NULL,
+        hits INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (bucket, minute)
+    )""")
+    conn.execute("CREATE INDEX IF NOT EXISTS progress_rate_buckets_window ON progress_rate_buckets (minute)")
     conn.execute("""CREATE TABLE IF NOT EXISTS game_runs (
         kind TEXT NOT NULL,
         uid TEXT NOT NULL,
@@ -232,9 +282,13 @@ def summary(conn, kind, uid, now=None):
             "today": {"earned": earned / 10, "cap": DAILY_CAP_X10 / 10, "tasks": tasks}, "games": games}
 
 
+# Every board ranks browser-reported results: an honour board, not a verified competition result.
+TRUST = "honour"
+
+
 def boards():
-    return [{"board": "level", "name": "账户等级", "metric": "等级 / 积分", "unit": "级"}] + [
-        {"board": key, "name": g["name"], "metric": g["metric"], "unit": g["unit"]} for key, g in GAMES.items()]
+    return [{"board": "level", "name": "账户等级", "metric": "等级 / 积分", "unit": "级", "trust": TRUST}] + [
+        {"board": key, "name": g["name"], "metric": g["metric"], "unit": g["unit"], "trust": TRUST} for key, g in GAMES.items()]
 
 
 def leaderboard(conn, board, limit=50, me=None):
@@ -254,7 +308,7 @@ def leaderboard(conn, board, limit=50, me=None):
                 ahead = conn.execute("""SELECT COUNT(*) FROM account_points WHERE points_x10 > ? OR (points_x10 = ? AND
                     (updated_at < ? OR (updated_at = ? AND (kind, uid) < (?, ?))))""", (mx, mx, mu, mu, *me)).fetchone()[0]
                 mine = {"rank": ahead + 1, "score": level_for(mx), "points": mx / 10}
-        return {"board": "level", "name": "账户等级", "metric": "等级", "unit": "级", "rows": out, "mine": mine}
+        return {"board": "level", "name": "账户等级", "metric": "等级", "unit": "级", "trust": TRUST, "rows": out, "mine": mine}
     if board not in GAMES:
         raise KeyError(board)
     game = GAMES[board]
@@ -274,7 +328,8 @@ def leaderboard(conn, board, limit=50, me=None):
                 (best_score = ? AND (wins > ? OR (wins = ? AND (best_at < ? OR (best_at = ? AND (kind, uid) < (?, ?)))))))""",
                                  (board, row["best_score"], row["best_score"], row["wins"], row["wins"], row["best_at"], row["best_at"], *me)).fetchone()[0]
             mine = {"rank": ahead + 1, "score": row["best_score"]}
-    return {"board": board, "name": game["name"], "metric": game["metric"], "unit": game["unit"], "rows": out, "mine": mine}
+    return {"board": board, "name": game["name"], "metric": game["metric"], "unit": game["unit"], "trust": TRUST,
+            "rows": out, "mine": mine}
 
 
 # ---------- writes ----------
@@ -350,16 +405,31 @@ def record_report(conn, kind, uid, name, report, now=None):
             return {"ok": False, "error": "今天这个玩法的上报次数已达上限", "status": 429}
         if cfg["agg"] == "sum":
             score = max(0, min(score, cfg.get("day_max", score) - summed))
-        conn.execute("""INSERT INTO game_score_daily (kind, uid, game, day, reports, summed) VALUES (?,?,?,?,1,?)
-            ON CONFLICT(kind, uid, game, day) DO UPDATE SET reports=reports+1, summed=summed+excluded.summed""",
-                     (kind, uid, game, day, score if cfg["agg"] == "sum" else 0))
         row = conn.execute("SELECT best_score FROM game_scores WHERE kind=? AND uid=? AND game=?", (kind, uid, game)).fetchone()
         previous = row["best_score"] if row else 0
+        conn.execute("""INSERT INTO game_score_daily (kind, uid, game, day, reports, summed, base_best) VALUES (?,?,?,?,1,?,?)
+            ON CONFLICT(kind, uid, game, day) DO UPDATE SET reports=reports+1, summed=summed+excluded.summed,
+            base_best=COALESCE(game_score_daily.base_best, excluded.base_best)""",
+                     (kind, uid, game, day, score if cfg["agg"] == "sum" else 0, previous))
+        base = conn.execute("SELECT base_best FROM game_score_daily WHERE kind=? AND uid=? AND game=? AND day=?",
+                            (kind, uid, game, day)).fetchone()[0]
+        held = None
+        if cfg["agg"] == "best" and score > previous and score - base > step_for(game):
+            # Too large a jump for one day: keep the run's points, hold the best for review.
+            held = score
+            reason = "单日个人最佳上升 %d，超过该玩法的单日幅度 %d" % (score - base, step_for(game))
+            pending = conn.execute("""SELECT id FROM game_score_reviews WHERE kind=? AND uid=? AND game=? AND status='pending'
+                AND score >= ?""", (kind, uid, game, score)).fetchone()
+            if not pending:
+                conn.execute("""INSERT INTO game_score_reviews (kind, uid, game, score, base_best, reason, ref, display_name, created_at)
+                    VALUES (?,?,?,?,?,?,?,?,?)""", (kind, uid, game, score, base, reason, str(report["ref"] or "")[:120], name, stamp))
+            score = previous
         new_finish = False
         if report["finished"]:
             # A run counts once even if the client retries the same report.
             new_finish = conn.execute("""INSERT OR IGNORE INTO game_runs (kind, uid, game, ref, day, score, won, created_at)
-                VALUES (?,?,?,?,?,?,?,?)""", (kind, uid, game, report["ref"], day, score, int(report["won"]), stamp)).rowcount == 1
+                VALUES (?,?,?,?,?,?,?,?)""", (kind, uid, game, report["ref"], day, held if held is not None else score,
+                                              int(report["won"]), stamp)).rowcount == 1
         best = previous + score if cfg["agg"] == "sum" else max(previous, score)
         improved = best > previous and cfg["agg"] == "best" and previous > 0
         conn.execute("""INSERT INTO game_scores (kind, uid, game, best_score, runs, wins, best_at, last_at, display_name)
@@ -382,7 +452,70 @@ def record_report(conn, kind, uid, name, report, now=None):
         conn.execute("ROLLBACK")
         raise
     return {"ok": True, "ranked": True, "game": game, "best": best, "previous_best": previous,
-            "new_best": best > previous, "awarded": awarded, **level_info(get_points_x10(conn, kind, uid))}
+            "new_best": best > previous, "held_for_review": held is not None, "awarded": awarded,
+            **level_info(get_points_x10(conn, kind, uid))}
+
+
+# ---------- abuse controls: rate limits and held scores ----------
+
+def _bucket(*parts):
+    return hashlib.sha256("\x1f".join(str(p) for p in parts).encode("utf-8")).hexdigest()[:32]
+
+
+def check_rate(conn, kind, uid, game, client_ip, now=None):
+    """Count one report against the per-minute limits; -> None if allowed, else the scope that tripped.
+
+    Limits are per account+game, per client IP+game (several accounts on one IP) and per IP overall.
+    client_ip must come from host_policy.trusted_client_ip, never from a request header.
+    """
+    minute = int((now.timestamp() if now else time.time()) // RATE_WINDOW_SECONDS)
+    buckets = [("account-game", _bucket("a", kind, uid, game))]
+    if client_ip:
+        buckets += [("ip-game", _bucket("ig", client_ip, game)), ("ip", _bucket("i", client_ip))]
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        conn.execute("DELETE FROM progress_rate_buckets WHERE minute < ?", (minute - 1,))
+        for scope, key in buckets:
+            hits = conn.execute("SELECT hits FROM progress_rate_buckets WHERE bucket=? AND minute=?", (key, minute)).fetchone()
+            if hits and hits[0] >= RATE_LIMITS[scope]:
+                conn.execute("COMMIT")
+                return scope
+        for _, key in buckets:
+            conn.execute("""INSERT INTO progress_rate_buckets (bucket, minute, hits) VALUES (?,?,1)
+                ON CONFLICT(bucket, minute) DO UPDATE SET hits=hits+1""", (key, minute))
+        conn.execute("COMMIT")
+    except Exception:
+        conn.execute("ROLLBACK")
+        raise
+    return None
+
+
+def pending_reviews(conn, limit=100):
+    return [dict(r) for r in conn.execute("""SELECT id, kind, uid, game, score, base_best, reason, ref, display_name, created_at
+        FROM game_score_reviews WHERE status='pending' ORDER BY id LIMIT ?""", (int(limit),))]
+
+
+def decide_review(conn, review_id, accept):
+    """Accept (copy the held score onto its board if it beats the current best) or reject one held score."""
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        r = conn.execute("SELECT * FROM game_score_reviews WHERE id=? AND status='pending'", (int(review_id),)).fetchone()
+        if not r:
+            raise ValueError("no pending review %s" % review_id)
+        stamp = _now()
+        if accept:
+            conn.execute("""INSERT INTO game_scores (kind, uid, game, best_score, best_at, last_at, display_name)
+                VALUES (?,?,?,?,?,?,?) ON CONFLICT(kind, uid, game) DO UPDATE SET
+                best_at=CASE WHEN excluded.best_score > game_scores.best_score THEN excluded.best_at ELSE game_scores.best_at END,
+                best_score=MAX(game_scores.best_score, excluded.best_score)""",
+                         (r["kind"], r["uid"], r["game"], r["score"], r["created_at"], r["created_at"], r["display_name"]))
+        conn.execute("UPDATE game_score_reviews SET status=?, decided_at=? WHERE id=?",
+                     ("accepted" if accept else "rejected", stamp, r["id"]))
+        conn.execute("COMMIT")
+    except Exception:
+        conn.execute("ROLLBACK")
+        raise
+    return dict(r)
 
 
 def award_sheet(conn, kind, uid, name, code, custom_color=False, now=None):
@@ -569,6 +702,11 @@ def handle(handler, method, path, project_root=None):
             if not me:
                 # Anonymous visitors play freely; nothing is stored and nothing is ranked.
                 return send(200, {"ok": True, "ranked": False, "logged_in": False})
+            from host_policy import trusted_client_ip
+            tripped = check_rate(conn, *me, report["game"], trusted_client_ip(handler))
+            if tripped:
+                print(json.dumps({"event": "progress_rate_limited", "scope": tripped, "game": report["game"]}), flush=True)
+                return send(429, {"ok": False, "error": "上报太频繁，请稍后再试"})
             result = record_report(conn, *me, ident["name"], report)
             return send(result.pop("status", 200), result)
         return send(404, {"error": "接口不存在"})
@@ -578,12 +716,24 @@ def handle(handler, method, path, project_root=None):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("command", choices=("status", "reset-legacy", "restore-legacy"))
+    parser.add_argument("command", choices=("status", "reset-legacy", "restore-legacy", "reviews", "review"))
+    parser.add_argument("review_id", nargs="?", type=int, help="review: the held score's id (from `reviews`)")
+    decision = parser.add_mutually_exclusive_group()
+    decision.add_argument("--accept", action="store_true", help="review: put the held score on its board")
+    decision.add_argument("--reject", action="store_true", help="review: drop the held score")
     parser.add_argument("--apply", action="store_true", help="actually write; without it the command is a dry run")
     parser.add_argument("--force", action="store_true", help="re-run a reset that was already applied")
     args = parser.parse_args(argv)
+    if args.command == "review" and (args.review_id is None or not (args.accept or args.reject)):
+        parser.error("review needs an id and --accept or --reject")
     conn = open_db()
     try:
+        if args.command == "reviews":
+            print(json.dumps(pending_reviews(conn), ensure_ascii=False, indent=2))
+            return 0
+        if args.command == "review":
+            print(json.dumps(decide_review(conn, args.review_id, args.accept), ensure_ascii=False))
+            return 0
         if args.command == "status" or not args.apply:
             print(json.dumps(reset_plan(conn), ensure_ascii=False, indent=2))
             if args.command != "status":

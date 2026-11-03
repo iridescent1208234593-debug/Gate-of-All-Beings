@@ -152,6 +152,81 @@ class Awards(unittest.TestCase):
         self.assertEqual(board["mine"]["rank"], 2)
 
 
+class AbuseControls(unittest.TestCase):
+    """M4: implausible jumps are held for review, report floods are rate-limited."""
+
+    def setUp(self):
+        self.c = conn()
+        for t in ("account_points", "account_point_events", "game_scores", "game_score_daily", "game_runs",
+                  "game_score_reviews", "progress_rate_buckets"):
+            self.c.execute(f"DELETE FROM {t}")
+
+    def tearDown(self):
+        self.c.close()
+
+    def best(self, uid, game):
+        row = self.c.execute("SELECT best_score FROM game_scores WHERE kind='local' AND uid=? AND game=?", (uid, game)).fetchone()
+        return row[0] if row else 0
+
+    def test_steady_progress_is_ranked_directly(self):
+        step = ap.step_for("cards")
+        self.assertEqual(step, 18)
+        for i, score in enumerate((5, 12, step)):
+            r = report(self.c, "local", "8", game="cards", score=score, finished=True, ref=f"s{i}")
+            self.assertFalse(r["held_for_review"])
+        self.assertEqual(self.best("8", "cards"), step)
+        # The next day the step is measured from the new best.
+        r = report(self.c, "local", "8", now=NEXT_DAY, game="cards", score=2 * step, finished=True, ref="s9")
+        self.assertFalse(r["held_for_review"])
+        self.assertEqual(self.best("8", "cards"), 2 * step)
+        self.assertEqual(ap.pending_reviews(self.c), [])
+
+    def test_jump_is_held_but_the_run_still_pays(self):
+        report(self.c, "local", "8", game="cards", score=4, finished=True, ref="a")
+        r = report(self.c, "local", "8", game="cards", score=60, finished=True, won=True, ref="b")
+        self.assertTrue(r["held_for_review"])
+        self.assertEqual((r["best"], r["new_best"]), (4, False))
+        self.assertIn("win", [a["rule"] for a in r["awarded"]])       # the run itself still counts
+        self.assertNotIn("best", [a["rule"] for a in r["awarded"]])   # no "new best" points for a held score
+        self.assertEqual(self.best("8", "cards"), 4)
+        self.assertEqual([row["score"] for row in ap.leaderboard(self.c, "cards")["rows"]], [4])
+        # Climbing in small steps within the same day does not get around the hold.
+        for i, score in enumerate((15, 22, 30)):
+            report(self.c, "local", "8", game="cards", score=score, ref=f"c{i}")
+        self.assertEqual(self.best("8", "cards"), 15)
+        held = ap.pending_reviews(self.c)
+        self.assertEqual([h["score"] for h in held], [60])  # lower claims under a pending higher one are not repeated
+        self.assertEqual(held[0]["base_best"], 0)  # best when the day began
+        self.assertNotIn("uid", ap.leaderboard(self.c, "cards")["rows"][0])
+
+    def test_owner_accepts_or_rejects(self):
+        report(self.c, "local", "7", game="slay", score=70, finished=True, ref="x")
+        report(self.c, "local", "8", game="slay", score=79, finished=True, ref="y")
+        first, second = ap.pending_reviews(self.c)
+        ap.decide_review(self.c, first["id"], accept=True)
+        ap.decide_review(self.c, second["id"], accept=False)
+        self.assertEqual([(r["name"], r["score"]) for r in ap.leaderboard(self.c, "slay")["rows"]], [("名7", 70)])
+        self.assertEqual(ap.pending_reviews(self.c), [])
+        with self.assertRaises(ValueError):
+            ap.decide_review(self.c, first["id"], accept=True)
+
+    def test_rate_limits_per_account_and_ip(self):
+        limit = ap.RATE_LIMITS["account-game"]
+        for _ in range(limit):
+            self.assertIsNone(ap.check_rate(self.c, "local", "8", "slay", "203.0.113.5", now=NOON))
+        self.assertEqual(ap.check_rate(self.c, "local", "8", "slay", "203.0.113.5", now=NOON), "account-game")
+        self.assertIsNone(ap.check_rate(self.c, "local", "8", "cards", "203.0.113.5", now=NOON))  # other game
+        later = datetime.fromtimestamp(NOON.timestamp() + ap.RATE_WINDOW_SECONDS, timezone.utc)
+        self.assertIsNone(ap.check_rate(self.c, "local", "8", "slay", "203.0.113.5", now=later))  # next minute
+        # Many accounts from one IP share the IP+game budget.
+        tripped = [ap.check_rate(self.c, "local", str(100 + i), "aeon", "198.51.100.9", now=NOON)
+                   for i in range(ap.RATE_LIMITS["ip-game"] + 1)]
+        self.assertEqual(tripped[-1], "ip-game")
+        self.assertIsNone(ap.check_rate(self.c, "local", "999", "aeon", "198.51.100.10", now=NOON))
+        # Buckets never hold the raw IP.
+        self.assertFalse(self.c.execute("SELECT 1 FROM progress_rate_buckets WHERE bucket LIKE '%198.51%'").fetchone())
+
+
 class TieBreak(unittest.TestCase):
     def test_my_rank_matches_the_row_order_on_ties(self):
         c = conn()
@@ -255,6 +330,23 @@ class Http(unittest.TestCase):
                                    headers={"Origin": "https://evil.example"})[0], 403)
         self.assertEqual(self.call("POST", "/api/progress/report", {"game": "slay", "score": 1}, cookie=token,
                                    headers={"Content-Type": "text/plain"})[0], 415)
+
+    def test_report_flood_gets_429(self):
+        token = hx_sso.make_token("8", "local", "eight")
+        saved = dict(ap.RATE_LIMITS)
+        ap.RATE_LIMITS["account-game"] = 2
+        try:
+            # 5 requests cannot all fit under a limit of 2 even if they straddle one minute boundary.
+            statuses = [self.call("POST", "/api/progress/report", {"game": "lingzhi", "score": 1}, cookie=token)[0]
+                        for _ in range(5)]
+        finally:
+            ap.RATE_LIMITS.update(saved)
+        self.assertIn(429, statuses)
+        self.assertEqual(statuses[0], 200)
+
+    def test_boards_are_labelled_as_honour_boards(self):
+        self.assertTrue(all(b["trust"] == "honour" for b in self.call("GET", "/api/progress/boards")[1]["boards"]))
+        self.assertEqual(self.call("GET", "/api/progress/leaderboard?board=slay")[1]["trust"], "honour")
 
 
 class HuiguanSheet(unittest.TestCase):
