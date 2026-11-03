@@ -1,10 +1,14 @@
 /**
  * #43 M13：限流状态多实例共享、标识轮换与转发头伪造的负向测试（需一次性 PostgreSQL）
+ *
+ * 这里的 verify 请求不带 challenge：通过限流后会得到 400 CHALLENGE_REQUIRED（#45），
+ * 所以“放行”以“不是 429”判断。
  */
 import { after, before, beforeEach, describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
+import { exportPKCS8, generateKeyPair } from 'jose';
 import { getTestDatabaseUrl, migrateTestDatabase, prepareTestEnv, TEST_CLIENT_API_KEY } from './helpers/test-env';
 
 prepareTestEnv({ IRIDESCENTLY_CLIENT_IP_HEADER: undefined });
@@ -32,6 +36,9 @@ async function callVerify(deviceId: string, headers: Record<string, string> = {}
 
 describe('数据库共享限流', { skip }, () => {
   before(async () => {
+    // 签名配置缺失时 verify 在限流之前就返回 503（#45），这里配好密钥以便走到限流
+    const { privateKey } = await generateKeyPair('ES256', { extractable: true });
+    process.env.RESPONSE_SIGN_PRIVATE_KEY_PEM = await exportPKCS8(privateKey);
     await migrateTestDatabase();
   });
 
@@ -104,7 +111,7 @@ describe('数据库共享限流', { skip }, () => {
   test('未声明可信入口头：每次伪造不同 X-Forwarded-For 与设备号，第 31 次仍被 IP 限额拦下', async () => {
     for (let i = 0; i < 30; i++) {
       const res = await callVerify(`device-xff-${i}`, { 'x-forwarded-for': `198.51.100.${i}`, 'cf-connecting-ip': `192.0.2.${i}` });
-      assert.equal(res.status, 200, `第 ${i + 1} 次应放行`);
+      assert.notEqual(res.status, 429, `第 ${i + 1} 次应放行`);
     }
     const blocked = await callVerify('device-xff-30', { 'x-forwarded-for': '198.51.100.30', 'cf-connecting-ip': '192.0.2.30' });
     assert.equal(blocked.status, 429);
@@ -115,21 +122,21 @@ describe('数据库共享限流', { skip }, () => {
     process.env.IRIDESCENTLY_CLIENT_IP_HEADER = 'cf-connecting-ip';
     for (let i = 0; i < 30; i++) {
       const res = await callVerify(`rotated-device-${i}`, { 'cf-connecting-ip': '203.0.113.20', 'x-forwarded-for': `198.51.100.${i}` });
-      assert.equal(res.status, 200, `第 ${i + 1} 次应放行`);
+      assert.notEqual(res.status, 429, `第 ${i + 1} 次应放行`);
     }
     const blocked = await callVerify('rotated-device-30', { 'cf-connecting-ip': '203.0.113.20' });
     assert.equal(blocked.status, 429);
     assert.equal(blocked.headers.get('x-ratelimit-limit'), '30');
 
     const otherClient = await callVerify('rotated-device-31', { 'cf-connecting-ip': '203.0.113.21' });
-    assert.equal(otherClient.status, 200);
+    assert.notEqual(otherClient.status, 429);
   });
 
   test('同一 /64 内轮换 IPv6 地址共用一个 IP 限额', async () => {
     process.env.IRIDESCENTLY_CLIENT_IP_HEADER = 'cf-connecting-ip';
     for (let i = 0; i < 30; i++) {
       const res = await callVerify(`v6-device-${i}`, { 'cf-connecting-ip': `2001:db8:5:6::${(i + 1).toString(16)}` });
-      assert.equal(res.status, 200);
+      assert.notEqual(res.status, 429);
     }
     const blocked = await callVerify('v6-device-30', { 'cf-connecting-ip': '2001:db8:5:6:ffff::1' });
     assert.equal(blocked.status, 429);
@@ -139,7 +146,7 @@ describe('数据库共享限流', { skip }, () => {
     process.env.IRIDESCENTLY_CLIENT_IP_HEADER = 'cf-connecting-ip';
     for (let i = 0; i < 20; i++) {
       const res = await callVerify('same-device', { 'cf-connecting-ip': `203.0.113.${100 + i}` });
-      assert.equal(res.status, 200);
+      assert.notEqual(res.status, 429);
     }
     const blocked = await callVerify('same-device', { 'cf-connecting-ip': '203.0.113.200' });
     assert.equal(blocked.status, 429);

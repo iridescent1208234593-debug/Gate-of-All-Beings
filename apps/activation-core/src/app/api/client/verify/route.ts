@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkDeviceActivationStatus } from '@/server/activation';
 import { formatDateTimeForAPI } from '@/lib/utils';
 import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS, toRateLimitIpKey } from '@/lib/rate-limit';
-import { createLicenseToken, generateNonce, getKeyInfo } from '@/lib/signing';
+import { assertResponseSigningReady, createLicenseToken, getKeyInfo } from '@/lib/signing';
+import { challengeFailureResponse, consumeClientChallenge, signingUnavailableResponse } from '@/lib/client-challenge';
 
 /**
  * 处理预检请求
@@ -52,12 +53,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 签名配置缺失时直接拒绝（fail closed），不能在核销 / 消费 challenge 之后才发现无法签名
+    try {
+      await assertResponseSigningReady();
+    } catch (error) {
+      return signingUnavailableResponse(error);
+    }
+
     // 2. 获取客户端信息用于频率限制
     const clientIP = getClientIP(request);
 
     // 解析请求体
     const body = await request.json();
-    const { device_id } = body;
+    const { device_id, challenge } = body;
 
     // 3. 验证请求参数
     if (!device_id || typeof device_id !== 'string') {
@@ -142,6 +150,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 一次性 challenge：服务端登记并原子消费，过期 / 已用 / 设备或接口不符一律拒绝
+    const challengeCheck = await consumeClientChallenge(challenge, device_id, '/api/client/verify');
+    if (challengeCheck !== 'consumed') {
+      return challengeFailureResponse(challengeCheck);
+    }
+
     // 6. 查询设备激活状态
     const activationStatus = await checkDeviceActivationStatus(device_id);
 
@@ -166,7 +180,8 @@ export async function POST(request: NextRequest) {
       console.log(`✅ 设备验证成功: ${device_id} 激活状态有效 (IP: ${clientIP})`);
 
       // 仅在激活有效时提供签名令牌
-      const nonce = generateNonce();
+      // nonce 即本次请求消费的 challenge，客户端据此确认响应属于自己这次请求
+      const nonce = challenge as string;
       const ts = Date.now();
       const algInfo = getKeyInfo();
       const licenseClaims = {

@@ -255,6 +255,11 @@ export default function Home() {
                     <code className="text-cyan-200">{`  "device_id"`}</code>
                     <code className="text-neutral-100">{`: `}</code>
                     <code className="text-emerald-200">{`"unique-device-id"`}</code>
+                    <code className="text-neutral-100">{`,`}</code>
+                    <br />
+                    <code className="text-cyan-200">{`  "challenge"`}</code>
+                    <code className="text-neutral-100">{`: `}</code>
+                    <code className="text-emerald-200">{`"先调用 POST /api/client/challenge 获取"`}</code>
                     <br />
                     <code className="text-neutral-100">{`}`}</code>
                   </pre>

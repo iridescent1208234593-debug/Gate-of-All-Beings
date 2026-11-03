@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateActivationCode } from '@/server/activation';
 import { cleanActivationCode, isValidActivationCodeFormat, formatDateTimeForAPI } from '@/lib/utils';
 import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS, toRateLimitIpKey } from '@/lib/rate-limit';
-import { createLicenseToken, generateNonce, getKeyInfo } from '@/lib/signing';
+import { assertResponseSigningReady, createLicenseToken, getKeyInfo } from '@/lib/signing';
+import { challengeFailureResponse, consumeClientChallenge, signingUnavailableResponse } from '@/lib/client-challenge';
 
 /**
  * 处理预检请求
@@ -52,12 +53,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 签名配置缺失时直接拒绝（fail closed），不能在核销 / 消费 challenge 之后才发现无法签名
+    try {
+      await assertResponseSigningReady();
+    } catch (error) {
+      return signingUnavailableResponse(error);
+    }
+
     // 2. 获取客户端信息用于频率限制
     const clientIP = getClientIP(request);
 
     // 解析请求体
     const body = await request.json();
-    const { code, device_id } = body;
+    const { code, device_id, challenge } = body;
 
     // 3. 验证请求参数
     if (!code || !device_id || typeof code !== 'string' || typeof device_id !== 'string') {
@@ -156,13 +164,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 一次性 challenge：必须在核销激活码之前消费，失败则不产生任何副作用
+    const challengeCheck = await consumeClientChallenge(challenge, device_id, '/api/client/activate');
+    if (challengeCheck !== 'consumed') {
+      return challengeFailureResponse(challengeCheck);
+    }
+
     // 7. 执行激活码验证（使用清理后的激活码）
     const result = await validateActivationCode(cleanCode, device_id);
 
     if (result.success) {
       // 激活成功
       console.log(`✅ 激活成功: ${cleanCode} -> ${device_id} (IP: ${clientIP})`);
-      const nonce = generateNonce();
+      // nonce 即本次请求消费的 challenge，客户端据此确认响应属于自己这次请求
+      const nonce = challenge as string;
       const ts = Date.now();
       const algInfo = getKeyInfo();
       const licenseClaims = {
