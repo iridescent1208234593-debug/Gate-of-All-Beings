@@ -1287,10 +1287,9 @@ def _safe_image_reference(value):
             return ""
         return "/api/uploads/preview?name=" + urllib.parse.quote(name)
     elif _is_remote_image(value):
-        parsed = urllib.parse.urlsplit(value)
-        if parsed.scheme != "https" or (parsed.hostname or "").lower() not in REMOTE_IMAGE_HOSTS:
+        source = _approved_remote_image_url(value)
+        if source is None:
             return ""
-        source = value
     elif os.path.isabs(value) and os.path.splitext(value)[1].lower() in ASSET_IMAGE_EXTS:
         source = _safe_image_path(value)
         if not source or not os.path.isfile(source):
@@ -1381,14 +1380,47 @@ def _persist_preview_reference(value):
     return store_image(raw, mime)
 
 
+_REMOTE_URL_UNSAFE = re.compile(r"[\x00-\x20\x7f\\]")
+
+
+def _approved_remote_image_url(raw):
+    """Return a canonical https URL on an approved image host, or None.
+
+    Every remote image sink (outbound fetch, Location redirect) calls this on the final
+    value, so stored or migrated URLs are never trusted on their way out. Only https, no
+    userinfo, no explicit non-443 port, and the hostname must be exactly in REMOTE_IMAGE_HOSTS.
+    Control characters, whitespace and backslashes are refused before parsing because
+    urlsplit silently strips some of them and browsers read a backslash as a slash.
+    """
+    if not isinstance(raw, str) or _REMOTE_URL_UNSAFE.search(raw):
+        return None
+    try:
+        parts = urllib.parse.urlsplit(raw)
+        port = parts.port
+    except ValueError:
+        return None
+    host = (parts.hostname or "").lower()
+    if parts.scheme.lower() != "https" or host not in REMOTE_IMAGE_HOSTS:
+        return None
+    if "@" in parts.netloc or parts.username is not None or parts.password is not None:
+        return None
+    if port not in (None, 443):
+        return None
+    # Rebuild from parts: the host comes from the allowlist spelling, the fragment is dropped
+    # and non-ASCII path/query bytes are percent-encoded (existing %XX escapes are kept).
+    path = urllib.parse.quote(parts.path or "/", safe="/%:@!$&'()*+,;=-._~")
+    query = urllib.parse.quote(parts.query, safe="/?%:@!$&'()*+,;=-._~")
+    return urllib.parse.urlunsplit(("https", host, path, query, ""))
+
+
 def _remote_image_bytes(url):
     """Fetch only known public image hosts; reject private IPs, redirects to other hosts and oversized bodies."""
     current = url
     for _ in range(4):
-        parts = urllib.parse.urlsplit(current)
-        host = (parts.hostname or "").lower()
-        if parts.scheme != "https" or host not in REMOTE_IMAGE_HOSTS or parts.username or parts.password:
+        current = _approved_remote_image_url(current)
+        if current is None:
             return None
+        host = urllib.parse.urlsplit(current).hostname
         try:
             addresses = {ipaddress.ip_address(item[4][0]) for item in socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)}
             if not addresses or any(not address.is_global for address in addresses):
@@ -2987,9 +3019,14 @@ class Handler(BaseStaticHandler):
                 return refuse(error.status, "原图暂不可用")
         else:
             return refuse(404, "原图暂不可用")
-        if _is_remote_image(target):
+        if isinstance(target, str) and _is_remote_image(target):
+            # Final sink: the URL may come from a migrated or dirty database row, so it is
+            # re-checked here rather than trusted because an upstream lookup returned it.
+            location = _approved_remote_image_url(target)
+            if location is None:
+                return refuse(404, "原图暂不可用")
             self.send_response(302)
-            self.send_header("Location", target)
+            self.send_header("Location", location)
             self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", "0")
             self.end_headers()
