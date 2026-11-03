@@ -23,7 +23,15 @@ conn=s.db()
 for name in ("target_member", "bystander"):
     conn.execute("INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES (?,?,?,?,?,?,?)", (name, s.hash_password("test-password-123"), name, "executor", "active", s.now_iso(), s.now_iso()))
 conn.commit(); conn.close()
-http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()
+class EdgeHandler(s.Handler):
+    # Stands in for portal ingress on the production Tunnel path: host_policy.enforce_request
+    # vouches for CF-Connecting-IP there, never on a standalone server (issue #36).
+    def parse_request(self):
+        ok = super().parse_request()
+        self._edge_identity_trusted = ok
+        return ok
+handler = EdgeHandler if sys.argv[3] == 'edge' else s.Handler
+http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), handler).serve_forever()
 '''
 
 
@@ -34,6 +42,8 @@ def free_port():
 
 
 class LoginThrottleTest(unittest.TestCase):
+    mode = "edge"
+
     @classmethod
     def setUpClass(cls):
         cls.root = tempfile.TemporaryDirectory()
@@ -43,7 +53,7 @@ class LoginThrottleTest(unittest.TestCase):
                    IRIDESCENTLY_ENVIRONMENT="test", HX_SSO_SECRET="test-only-secret")
         for key in ("DATA", "ASSETS", "CACHE", "RELEASE", "BACKUP", "PROJECT"):
             env.pop(f"IRIDESCENTLY_{key}_ROOT", None)
-        cls.proc = subprocess.Popen([sys.executable, "-c", LAUNCH, str(HUIGUAN), str(port)], env=env,
+        cls.proc = subprocess.Popen([sys.executable, "-c", LAUNCH, str(HUIGUAN), str(port), cls.mode], env=env,
                                     stdout=subprocess.DEVNULL, stderr=None)
         cls.base = f"http://127.0.0.1:{port}"
         for _ in range(100):
@@ -61,7 +71,8 @@ class LoginThrottleTest(unittest.TestCase):
 
     def login(self, path, username, password, client_ip):
         request = urllib.request.Request(self.base + path, data=json.dumps({"username": username, "password": password}).encode(),
-                                         headers={"Content-Type": "application/json", "CF-Connecting-IP": client_ip})
+                                         headers={"Content-Type": "application/json", "CF-Connecting-IP": client_ip,
+                                                  "CF-Ray": "0123456789abcdef-HKG"})
         try:
             with urllib.request.urlopen(request, timeout=30) as response:
                 return response.status
@@ -87,6 +98,27 @@ class LoginThrottleTest(unittest.TestCase):
         for _ in range(8):
             self.assertEqual(self.login("/api/login", "bystander", "wrong-password-0", ip), 401)
         self.assertEqual(self.login("/api/login", "bystander", "test-password-123", ip), 429)
+
+
+class StandaloneForgedForwardingTest(unittest.TestCase):
+    """Issue #36: a standalone server keys limits on the TCP peer, whatever the client claims."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.mode = "standalone"
+        LoginThrottleTest.setUpClass.__func__(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        LoginThrottleTest.tearDownClass.__func__(cls)
+
+    login = LoginThrottleTest.login
+
+    def test_rotating_forged_client_ip_does_not_escape_the_per_ip_limit(self):
+        for index in range(30):
+            self.assertEqual(self.login("/api/login", f"forged_{index}", "wrong-password-0", f"198.51.100.{index + 1}"), 401)
+        # Same TCP peer, yet another invented CF-Connecting-IP: still the same identity.
+        self.assertEqual(self.login("/api/login", "forged_next", "wrong-password-0", "192.0.2.250"), 429)
 
 
 if __name__ == "__main__":

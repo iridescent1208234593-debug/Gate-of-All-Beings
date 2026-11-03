@@ -26,7 +26,14 @@ s.init_user_db()
 conn=s.db()
 conn.execute("INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES (?,?,?,?,?,?,?)", ("gate_member", s.hash_password("test-password-123"), "gate_member", "executor", "active", s.now_iso(), s.now_iso()))
 conn.commit(); conn.close()
-http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()
+class EdgeHandler(s.Handler):
+    # Stands in for portal ingress on the production Tunnel path: host_policy.enforce_request
+    # vouches for CF-Connecting-IP there, never on a standalone server (issue #36).
+    def parse_request(self):
+        ok = super().parse_request()
+        self._edge_identity_trusted = ok
+        return ok
+http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), EdgeHandler).serve_forever()
 '''
 # token -> siteverify answer (the mock stands in for challenges.cloudflare.com)
 ANSWERS = {
@@ -97,7 +104,8 @@ class TurnstileGateTest(unittest.TestCase):
     def post(self, path, body):
         TurnstileGateTest.ip += 1
         request = urllib.request.Request(self.base + path, data=json.dumps(body).encode(), headers={
-            "Content-Type": "application/json", "CF-Connecting-IP": f"198.18.5.{self.ip}"})
+            "Content-Type": "application/json", "CF-Connecting-IP": f"198.18.5.{self.ip}",
+            "CF-Ray": "0123456789abcdef-HKG"})
         try:
             with urllib.request.urlopen(request, timeout=30) as response:
                 return response.status, json.loads(response.read())

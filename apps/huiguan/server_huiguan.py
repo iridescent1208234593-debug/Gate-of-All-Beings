@@ -41,6 +41,7 @@ from functools import wraps
 from site_domains import (SITE_DOMAIN, PRODUCTION_HOSTS, cookie_domain, request_host, request_root,
                           request_origin_allowed, cors_headers, oauth_callback, site_url, OAuthUnavailable)
 from site_admin import is_site_owner
+from host_policy import trusted_client_ip
 from account_security import init_schema as init_security_schema, handle_security
 from account_email import init_schema as init_email_schema, handle_email, EMAIL_RE
 from account_recovery import init_schema as init_recovery_schema, handle_recovery
@@ -5286,7 +5287,8 @@ class Handler(BaseStaticHandler):
         return sid if sid and read_session(sid, request_root(self)) else ""
 
     def _client_ip(self):
-        return self.headers.get("CF-Connecting-IP") or self.client_address[0]
+        # Register/login/email/edit-code limits and Turnstile remoteip share this one identity.
+        return trusted_client_ip(self)
 
     def _turnstile_passed(self, body, action):
         """Answer the request and return False unless its Turnstile token verifies (no-op when not configured)."""

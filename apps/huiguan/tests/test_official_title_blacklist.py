@@ -23,7 +23,14 @@ s.init_user_db()
 conn=s.db()
 conn.execute("INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES (?,?,?,?,?,?,?)", ("existing_official", s.hash_password("test-password-123"), "罗小黑", "executor", "active", s.now_iso(), s.now_iso()))
 conn.commit(); conn.close()
-http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()
+class EdgeHandler(s.Handler):
+    # Stands in for portal ingress on the production Tunnel path: host_policy.enforce_request
+    # vouches for CF-Connecting-IP there, never on a standalone server (issue #36).
+    def parse_request(self):
+        ok = super().parse_request()
+        self._edge_identity_trusted = ok
+        return ok
+http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), EdgeHandler).serve_forever()
 '''
 
 
@@ -42,7 +49,7 @@ class Client:
         data = None if body is None else json.dumps(body, ensure_ascii=False).encode()
         headers = {"Content-Type": "application/json"}
         if client_ip:
-            headers["CF-Connecting-IP"] = client_ip
+            headers.update({"CF-Connecting-IP": client_ip, "CF-Ray": "0123456789abcdef-HKG"})
         if self.session:
             headers["Cookie"] = "session=" + self.session
         request = urllib.request.Request(self.base + path, data=data, headers=headers)

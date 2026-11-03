@@ -28,6 +28,7 @@ import hx_sso
 from site_domains import (PRODUCTION_HOSTS, service_name, site_url, request_host,
                           request_origin_allowed, cors_headers, localize_url)
 from base_static import BaseStaticHandler
+from host_policy import trusted_client_ip
 # 管理员：完整 (kind, uid) 站长账户 + 账户库状态复核，见 services/platform/site_admin.py
 from site_admin import is_site_owner, is_admin as _is_any_admin
 import gallery_interactions
@@ -539,8 +540,7 @@ class Handler(BaseStaticHandler):
                         self._json(403, {"error": "先给这张图点个赞，再来留言吧"})
                         return
                     # 每账号 / 每 IP 60 分钟各限 1 条；删除评论不重置计时
-                    ip = (self.headers.get("X-Real-IP") or self.headers.get("CF-Connecting-IP")
-                          or (self.client_address[0] if self.client_address else ""))[:64]
+                    ip = trusted_client_ip(self)[:64]
                     db.execute("""CREATE TABLE IF NOT EXISTS gallery_comment_attempts (
                         kind TEXT NOT NULL DEFAULT '', uid TEXT NOT NULL DEFAULT '',
                         ip TEXT NOT NULL DEFAULT '', created_at REAL NOT NULL)""")
