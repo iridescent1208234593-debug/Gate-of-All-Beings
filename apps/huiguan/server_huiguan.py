@@ -49,6 +49,7 @@ import game_saves
 import account_progress
 import turnstile
 from showcase_document import published_document
+from showcase_sanitizer import controlled_showcase
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 from storage_paths import (project_root as resolve_project_root, data_root, huiguan_data_dir,
                            managed_asset_dir, source_asset_dir, cache_dir, require_ready)
@@ -2607,12 +2608,12 @@ class Handler(BaseStaticHandler):
                         index = data.get("colorIndex")
                         has_hex = all(isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", value) for value in (primary, accent))
                         has_index = isinstance(index, int) and not isinstance(index, bool) and 0 <= index < 19
+                        theme = None
                         if has_hex or has_index:
                             # HEX is authoritative; the shared preset map covers index-only snapshots.
                             theme = json.dumps({"colorPrimary": primary if has_hex else None, "colorAccent": accent if has_hex else None, "colorIndex": index if has_index else None})
-                            injection = ('<script src="/character-colors.js?v=20261013"></script>'
-                                         '<script>HuiguanColors.installShowcase(' + theme + ');</script>')
-                            html = html.replace("</head>", injection + "</head>", 1)
+                        # [M7] Saved HTML is rebuilt from an allowlist; only server scripts run on it.
+                        html = controlled_showcase(html, theme, REMOTE_IMAGE_HOSTS)
                         self._send_html(html)
                         return
         conn = db()
@@ -2639,7 +2640,7 @@ class Handler(BaseStaticHandler):
             body = gzip.compress(body, 6)
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Content-Security-Policy", "sandbox allow-popups allow-forms")
+        self.send_header("Content-Security-Policy", "sandbox allow-popups")
         if use_gzip:
             self.send_header("Content-Encoding", "gzip")
             self.send_header("Vary", "Accept-Encoding")

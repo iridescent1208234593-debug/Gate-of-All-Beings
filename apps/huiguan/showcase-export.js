@@ -85,6 +85,8 @@
   window.HuiguanShowcaseExport = {
     mount(frame, html) {
       sourceFrame = frame; snapshot = html;
+      // The server already adds the export script (under its nonce CSP) to saved showcases.
+      if (html.includes('/showcase-download.js')) return html;
       const script = '<script src="/showcase-download.js?v=20261027z"></script>';
       return html.includes('</body>') ? html.replace('</body>', script + '</body>') : html + script;
     }
