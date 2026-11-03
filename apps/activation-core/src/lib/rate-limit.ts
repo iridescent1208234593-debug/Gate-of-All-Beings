@@ -248,5 +248,24 @@ export const RATE_LIMIT_CONFIGS = {
     maxRequests: 100,
     windowMs: 60 * 1000, // 1 分钟
     keyPrefix: 'verify_global'
+  } as RateLimitConfig,
+
+  // challenge API：每次 verify / activate 前各取一次，额度不低于两者之和
+  CHALLENGE_IP: {
+    maxRequests: process.env.NODE_ENV === 'development' ? 20 : 60,
+    windowMs: 60 * 1000,
+    keyPrefix: 'challenge_ip'
+  } as RateLimitConfig,
+
+  CHALLENGE_DEVICE: {
+    maxRequests: process.env.NODE_ENV === 'development' ? 10 : 40,
+    windowMs: 60 * 1000,
+    keyPrefix: 'challenge_device'
+  } as RateLimitConfig,
+
+  CHALLENGE_GLOBAL: {
+    maxRequests: 200,
+    windowMs: 60 * 1000,
+    keyPrefix: 'challenge_global'
   } as RateLimitConfig
 };

@@ -40,6 +40,16 @@ pnpm run db:import -- exports/activation-core-export.json
 - 设备激活状态查询与管理
 - 客户端激活与验证接口
 
+## 客户端接口与防重放
+
+`/api/client/verify` 与 `/api/client/activate` 每次调用前都要先取一次性 challenge：
+
+1. `POST /api/client/challenge`，请求体 `{ "device_id": "...", "route": "/api/client/verify" }`（或 `/api/client/activate`），返回 `challenge`，60 秒内有效。
+2. 把 `challenge` 放进 verify / activate 的请求体。服务端原子消费：已用（`CHALLENGE_USED`）、过期（`CHALLENGE_EXPIRED`）、设备或接口不符（`CHALLENGE_INVALID`）、缺失（`CHALLENGE_REQUIRED`）一律拒绝。
+3. 响应里的 `license_token`（ES256）把这个 challenge 写进 `nonce`。客户端必须先验签，再确认 `nonce`、`device_id`、`route` 与本次请求一致，才能信任“已激活”。
+
+客户端必须内置服务端公钥，缺少时不得跳过验签；参考实现见 `example/activation-client.js`。
+
 ## 技术栈
 
 - Next.js 16

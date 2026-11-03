@@ -749,29 +749,15 @@
               <div class="help-text">用于客户端API认证的密钥</div>
             </div>
 
-            <div class="form-group">
-              <div class="checkbox-group">
-                <input
-                  type="checkbox"
-                  id="enableSigVerify"
-                  class="checkbox"
-                  checked
-                />
-                <label for="enableSigVerify" class="checkbox-label">
-                  🔒 启用响应签名验证（防抓包篡改）
-                </label>
-              </div>
-            </div>
-
             <div class="form-group" id="publicKeyGroup">
-              <label for="publicKey">ES256 公钥 (PEM格式)</label>
+              <label for="publicKey">ES256 公钥 (PEM格式，必填)</label>
               <textarea
                 id="publicKey"
                 class="textarea"
                 placeholder="-----BEGIN PUBLIC KEY-----&#10;MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE...&#10;-----END PUBLIC KEY-----"
               ></textarea>
               <div class="help-text">
-                请粘贴服务端对应的 ES256 公钥用于验证响应签名
+                请粘贴服务端对应的 ES256 公钥。缺少公钥时客户端拒绝工作，不会跳过验签
               </div>
             </div>
 
@@ -944,12 +930,10 @@
       function createClient() {
         const apiUrl = document.getElementById("apiUrl").value;
         const apiKey = document.getElementById("apiKey").value;
-        const enableSigVerify =
-          document.getElementById("enableSigVerify").checked;
         const publicKey = document.getElementById("publicKey").value.trim();
 
+        // 缺少公钥时构造函数会抛错（fail closed），由调用方的 try/catch 提示用户
         const options = {
-          enableSignatureVerification: enableSigVerify,
           publicKeyPem: publicKey || null,
           timeout: 30000,
           maxClockSkew: 90000,
@@ -1404,15 +1388,7 @@
 
       // 测试签名验证功能
       function testSignatureVerification() {
-        const enableSigVerify =
-          document.getElementById("enableSigVerify").checked;
         const publicKey = document.getElementById("publicKey").value.trim();
-
-        if (!enableSigVerify) {
-          logMessage("info", "签名验证已禁用");
-          showToast("签名验证已禁用", "warning");
-          return;
-        }
 
         if (!publicKey) {
           logMessage("error", "请先配置ES256公钥");
@@ -1556,14 +1532,6 @@
         document.getElementById("themeIcon").textContent =
           theme === "dark" ? "☀️" : "🌙";
       }
-
-      // 控制公钥输入框显示
-      document
-        .getElementById("enableSigVerify")
-        .addEventListener("change", function () {
-          const publicKeyGroup = document.getElementById("publicKeyGroup");
-          publicKeyGroup.style.display = this.checked ? "block" : "none";
-        });
 
       // 激活码输入自动格式化
       document
