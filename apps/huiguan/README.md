@@ -62,7 +62,7 @@
 
 `character-colors.js` 是会馆角色颜色的唯一解析 / 派生入口，同时保存 19 个现有预设；设表只引用该预设表。保存的 `colorPrimary` 与 `colorAccent` HEX 优先，`colorIndex` 只用于缺少 HEX 的旧记录，包含读取历史展示快照时的 fallback。设表与展示页复用原色 surface / accent 和显式派生的 background / text；展示页不再私自混合 16% / 30% surface。海报上半双色区域保留准确的选色 RGB，下半向白色过渡属于明确派生效果。保存绑定海报时，由同一个保存请求更新本人角色的 HEX；展示 HTML 的旧快照在读取时注入当前颜色，无需重新登记。
 
-`show.html` 中的用户展示 HTML 保持不透明来源的安全沙箱。`showcase-download.js` 只发送导出请求和经过格式限制的颜色值，不能读取父页。`showcase-export.js` 在可信父页中处理导出：使用父页已经取到的 HTML 快照，去除活动节点、事件和非上传图 URL，再放入禁止脚本 / 表单、带资源 CSP 的离屏副本，用现有 html2canvas 渲染并下载 PNG。可读取的离屏副本与正在展示的用户沙箱是不同对象；旧快照的原导出监听由捕获阶段接管。按 2 倍清晰度导出，极长页面以 1600 万像素 / 16384 高度上限收敛，避免移动端巨型 Canvas。
+公开展示页由服务端受控输出（`services/platform/showcase_sanitizer.py`）：保存的展示 HTML 按白名单重建，去掉脚本、事件属性、嵌入/表单/跳转标签和站外或 `javascript:` 链接，再只附加服务端自己的脚本（`showcase-runtime.js` 负责墨点、主题切换和看大图，`showcase-download.js` 负责导出），用每次响应的 nonce CSP 拒绝其他脚本。`show.html` 中的用户展示 HTML 保持不透明来源的安全沙箱。`showcase-download.js` 只发送导出请求和经过格式限制的颜色值，不能读取父页。`showcase-export.js` 在可信父页中处理导出：使用父页已经取到的 HTML 快照，去除活动节点、事件和非上传图 URL，再放入禁止脚本 / 表单、带资源 CSP 的离屏副本，用现有 html2canvas 渲染并下载 PNG。可读取的离屏副本与正在展示的用户沙箱是不同对象；旧快照的原导出监听由捕获阶段接管。按 2 倍清晰度导出，极长页面以 1600 万像素 / 16384 高度上限收敛，避免移动端巨型 Canvas。
 
 ## 账户、OC 与众生之门形象
 
