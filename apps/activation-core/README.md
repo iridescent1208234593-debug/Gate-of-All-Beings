@@ -137,9 +137,11 @@ pnpm run build
 pnpm run start
 pnpm run test
 pnpm run generate-keys
-pnpm run hash-password -- <password>
+pnpm run hash-password -- --username <管理员用户名>
 ACTIVATION_CORE_TEST_DATABASE_URL=postgresql://.../activation_core_test pnpm test
 ```
+
+`hash-password` 用于在数据库中直接重置管理员密码：在终端中会隐藏输入密码并要求输入两次，也可以通过标准输入传入一行密码（`< password.txt`）。它没有默认密码，不接受命令行参数传入密码，也不会输出明文密码。如果运行后没有出现“请输入新的管理员密码”提示（例如 Windows Git Bash/mintty 下 Node 可能识别不到终端），输入不会被隐藏，请改用 PowerShell / CMD 运行。
 
 `pnpm test` 只连接 `ACTIVATION_CORE_TEST_DATABASE_URL` 指向的一次性库（库名须含 `test`，测试会清空限流表）；未设置时数据库相关测试显式跳过。
 
