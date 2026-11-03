@@ -104,8 +104,10 @@ pnpm run dev
 pnpm run build
 pnpm run start
 pnpm run generate-keys
-pnpm run hash-password -- <password>
+pnpm run hash-password -- --username <管理员用户名>
 ```
+
+`hash-password` 用于在数据库中直接重置管理员密码：在终端中会隐藏输入密码并要求输入两次，也可以通过标准输入传入一行密码（`< password.txt`）。它没有默认密码，不接受命令行参数传入密码，也不会输出明文密码。如果运行后没有出现“请输入新的管理员密码”提示（例如 Windows Git Bash/mintty 下 Node 可能识别不到终端），输入不会被隐藏，请改用 PowerShell / CMD 运行。
 
 ## 项目结构
 
