@@ -570,5 +570,7 @@ class Handler(BaseStaticHandler):
 
 
 if __name__ == "__main__":
-    print(f"iridescently 主站服务启动: http://localhost:{PORT}")
-    http.server.ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    from listen_address import listen_host
+    host = listen_host()
+    print(f"iridescently 主站服务启动: http://{host}:{PORT}")
+    http.server.ThreadingHTTPServer((host, PORT), Handler).serve_forever()

@@ -32,6 +32,10 @@ python tools/runtime/local-runtime.py status | stop
 | 5173 / 5179 | 卡牌、灵境会馆的前端开发服务器 | `npm run dev`（各自目录），不属于本机 runtime |
 | 8088 / 8089 / 8090 | 主站、会馆、人设站单站 | 只用于单独调试；统一入口已在进程内提供 |
 
+### 监听地址
+
+统一入口（8080）和三个单站（8088/8089/8090）都只监听 `127.0.0.1`，规则在 `services/platform/listen_address.py`：Tunnel 与统一入口都在本机访问它们，不需要外部网卡。只有同时设置 `IRIDESCENTLY_ENVIRONMENT=development` 和 `HOST=<地址>`（如 `HOST=0.0.0.0`）才会监听局域网，用于临时 LAN 调试；其他环境（包括未设置）一律忽略 `HOST` 并在 stderr 提示。`HOST` 非敏感、非必填、默认 `127.0.0.1`。回归检查：`services/platform/tests/test_listen_address.py`。
+
 同一端口只能有一个占用者。登录时自动启动、并占用以上端口的旧任务会让 `local-runtime.py` 启动失败（例如 2026-10-26 前仍在的 `D:\Projects\zszm` 5178 预览任务）。
 
 ## 香港发布
