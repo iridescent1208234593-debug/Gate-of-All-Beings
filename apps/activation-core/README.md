@@ -68,7 +68,7 @@ pnpm install
 
 ### 2. 配置环境变量
 
-复制 `.env.example` 为 `.env.local`，并至少配置：
+复制 `.env.example` 为 `.env.local`，并至少配置（下面是格式示例，**不是可用的值**）：
 
 ```bash
 DATABASE_URL=postgresql://username:password@hostname:port/database_name?sslmode=require
@@ -83,6 +83,24 @@ NODE_ENV=development
 生产部署还需设置 `IRIDESCENTLY_CLIENT_IP_HEADER`，声明入口代理覆盖的客户端 IP 头（见 `.env.example`）。未设置时服务不信任任何转发头，所有客户端共用一个 IP 限额。
 
 频率限制计数存于数据库表 `rate_limit_buckets`，多实例共享；升级后需执行 `pnpm run db:migrate`。
+
+> [!WARNING]
+> 部署时必须重新生成随机凭据：运行 `pnpm run generate-keys`，把输出的 `JWT_SECRET`、
+> `CLIENT_API_KEY`（以及启用时的 `ADMIN_SECRET`）填入部署环境。不要使用 `.env.example`
+> 或本 README 中的示例值。
+>
+> `NODE_ENV=production` 时服务启动会统一校验凭据（规则在 `src/lib/server-credentials.ts`），
+> 不合格则打印原因并退出：
+>
+> | 变量 | production 要求 |
+> | --- | --- |
+> | `JWT_SECRET` | 必填；至少 32 个字符、不少于 8 种不同字符；不能是示例/占位值 |
+> | `CLIENT_API_KEY` | 必填；规则同上 |
+> | `DATABASE_URL` | 必填；连接串中的密码不能是示例/占位值 |
+> | `ADMIN_SECRET` | 可选（不配置则管理密钥通道关闭）；配置时规则同 `JWT_SECRET` |
+> | `EVENT_ACCESS_CODE` | 可选（不配置则事件码通道关闭）；配置时至少 12 个字符、不少于 6 种不同字符 |
+>
+> 非 production 环境只强制 `JWT_SECRET` 已配置且不是示例值，其余问题仅打印告警。
 
 ### 3. 初始化数据库
 
@@ -117,6 +135,7 @@ pnpm run dev
 pnpm run dev
 pnpm run build
 pnpm run start
+pnpm run test
 pnpm run generate-keys
 pnpm run hash-password -- <password>
 ACTIVATION_CORE_TEST_DATABASE_URL=postgresql://.../activation_core_test pnpm test

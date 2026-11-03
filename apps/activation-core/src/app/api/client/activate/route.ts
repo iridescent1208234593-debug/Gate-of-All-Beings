@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateActivationCode } from '@/server/activation';
 import { cleanActivationCode, isValidActivationCodeFormat, formatDateTimeForAPI } from '@/lib/utils';
 import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS, toRateLimitIpKey } from '@/lib/rate-limit';
+import { getClientApiKey } from '@/lib/server-credentials';
 import { assertResponseSigningReady, createLicenseToken, getKeyInfo } from '@/lib/signing';
 import { challengeFailureResponse, consumeClientChallenge, signingUnavailableResponse } from '@/lib/client-challenge';
 
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
   try {
     // 1. API Key 认证检查
     const apiKey = request.headers.get('x-api-key');
-    const expectedApiKey = process.env.CLIENT_API_KEY;
+    const expectedApiKey = getClientApiKey();
 
     if (!expectedApiKey) {
       console.error('CLIENT_API_KEY 环境变量未配置');

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminAccess } from '@/lib/admin-guard';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { isAdminKeyConfigured } from '@/lib/admin-key';
 import { formatDateTimeForAPI } from '@/lib/utils';
 
@@ -9,16 +9,7 @@ import { formatDateTimeForAPI } from '@/lib/utils';
  *
  * 鉴权：X-Admin-Key 或 JWT Cookie（双通道任一通过即可）
  */
-export async function GET(request: NextRequest) {
-  const access = await requireAdminAccess(request);
-
-  if (!access.ok) {
-    return NextResponse.json(
-      { success: false, message: access.message ?? '未授权访问' },
-      { status: 401 }
-    );
-  }
-
+export const GET = withAdminAccess(async (request: NextRequest, _context, access) => {
   return NextResponse.json(
     {
       success: true,
@@ -33,4 +24,4 @@ export async function GET(request: NextRequest) {
     },
     { status: 200 }
   );
-}
+});

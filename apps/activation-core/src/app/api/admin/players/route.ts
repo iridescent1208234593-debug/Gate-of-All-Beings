@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminAccess } from '@/lib/admin-guard';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { getPlayerSessions, getPlayerSessionStats, kickPlayer } from '@/server/activation';
 import { formatDateTimeForAPI, formatDurationForAPI } from '@/lib/utils';
 
@@ -10,17 +10,8 @@ import { formatDateTimeForAPI, formatDurationForAPI } from '@/lib/utils';
  *
  * 鉴权：X-Admin-Key 或 JWT Cookie
  */
-export async function GET(request: NextRequest) {
+export const GET = withAdminAccess(async (request: NextRequest) => {
   try {
-    const access = await requireAdminAccess(request);
-
-    if (!access.ok) {
-      return NextResponse.json(
-        { success: false, message: access.message ?? '未授权访问' },
-        { status: 401 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const onlineOnly = searchParams.get('online_only') === 'true';
     const limitParam = Number(searchParams.get('limit'));
@@ -71,19 +62,10 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = withAdminAccess(async (request: NextRequest, _context, access) => {
   try {
-    const access = await requireAdminAccess(request);
-
-    if (!access.ok) {
-      return NextResponse.json(
-        { success: false, message: access.message ?? '未授权访问' },
-        { status: 401 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const playerId = searchParams.get('player_id')?.trim() || '';
 
@@ -119,4 +101,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

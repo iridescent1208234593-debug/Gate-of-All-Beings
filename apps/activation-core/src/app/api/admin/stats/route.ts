@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { getActivationStats } from '@/server/activation';
 
 /**
  * 获取激活码统计数据 API
  * GET /api/admin/stats
  */
-export async function GET() {
+export const GET = withAdminAccess(async () => {
   try {
     const stats = await getActivationStats();
     
@@ -34,4 +35,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

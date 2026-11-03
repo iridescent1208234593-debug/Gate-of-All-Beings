@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminAccess } from '@/lib/admin-guard';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { exportActivationCodes } from '@/server/activation';
 import { formatDateTimeForAPI } from '@/lib/utils';
 
@@ -10,17 +10,8 @@ import { formatDateTimeForAPI } from '@/lib/utils';
  * 鉴权：X-Admin-Key 或 JWT Cookie
  * 返回：全量（不分页）符合条件的激活码明细，供运营侧导出留档
  */
-export async function GET(request: NextRequest) {
+export const GET = withAdminAccess(async (request: NextRequest, _context, access) => {
   try {
-    const access = await requireAdminAccess(request);
-
-    if (!access.ok) {
-      return NextResponse.json(
-        { success: false, message: access.message ?? '未授权访问' },
-        { status: 401 }
-      );
-    }
-
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status')?.trim() || 'all';
     const search = searchParams.get('search')?.trim() || '';
@@ -76,4 +67,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});

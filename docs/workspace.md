@@ -68,6 +68,7 @@ cd repo
 npm ci
 foreach ($m in 'cards','softie','management','ecology') { npm ci --prefix "apps/$m" }
 npm ci --prefix apps/www/gallery-engine
+npx pnpm@10.28.0 install --frozen-lockfile --dir apps/activation-core   # pnpm 项目，回归里的路由测试需要
 
 # 3. 一个空的开发存储（development 允许没有迁移清单；production/staging 不允许）
 $env:IRIDESCENTLY_ENVIRONMENT = 'development'

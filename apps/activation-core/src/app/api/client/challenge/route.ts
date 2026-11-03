@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getClientApiKey } from '@/lib/server-credentials';
 import { formatDateTimeForAPI } from '@/lib/utils';
 import { checkRateLimit, getClientIP, RATE_LIMIT_CONFIGS, toRateLimitIpKey, type RateLimitResult } from '@/lib/rate-limit';
 import { assertResponseSigningReady } from '@/lib/signing';
@@ -43,7 +44,7 @@ function rateLimitedResponse(result: RateLimitResult, message: string) {
 export async function POST(request: NextRequest) {
   try {
     const apiKey = request.headers.get('x-api-key');
-    const expectedApiKey = process.env.CLIENT_API_KEY;
+    const expectedApiKey = getClientApiKey();
 
     if (!expectedApiKey) {
       console.error('CLIENT_API_KEY 环境变量未配置');

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { requireAdminAccess } from '@/lib/admin-guard';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { backupActivationData } from '@/server/activation';
 import { formatDateTimeForAPI } from '@/lib/utils';
 
@@ -11,17 +11,8 @@ import { formatDateTimeForAPI } from '@/lib/utils';
  * 返回：activation_codes 与 player_sessions 两张表的全量原始行（含已作废/已结束记录），
  *      用于离线备份与灾后恢复；不含任何密钥信息。
  */
-export async function GET(request: NextRequest) {
+export const GET = withAdminAccess(async (request: NextRequest, _context, access) => {
   try {
-    const access = await requireAdminAccess(request);
-
-    if (!access.ok) {
-      return NextResponse.json(
-        { success: false, message: access.message ?? '未授权访问' },
-        { status: 401 }
-      );
-    }
-
     const backup = await backupActivationData();
     const backedUpAt = new Date();
 
@@ -84,4 +75,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
