@@ -68,6 +68,7 @@ def main():
             commands.extend([
                 ("OAuth return allowlist", [npm, "run", "test:huiguan-auth-next"]),
                 ("OAuth mock browser", [npm, "run", "test:oauth-mock"]),
+                ("Gallery attribute escaping browser", [npm, "run", "test:huiguan-gallery-escape"]),
             ])
             for name, command in commands:
                 run(name, command)
