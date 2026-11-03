@@ -48,6 +48,12 @@ class API(unittest.TestCase):
     def tearDownClass(cls):
         cls.server.shutdown(); cls.server.server_close(); cls.thread.join(); TEMP.cleanup()
 
+    def setUp(self):
+        # Functional saves here are not about throttling; each test starts with a fresh save budget.
+        with app.RATE_LOCK:
+            for key in [k for k in app.RATE if k.startswith('oc-save:')]: app.RATE.pop(key)
+            app.OC_STORAGE.clear()
+
     def save(self, client, code, version=0, **extra):
         body = sheet(code, '角色'+code, '原始内容'); body.update(version=version, **extra)
         return client.call('/api/save-character', body)

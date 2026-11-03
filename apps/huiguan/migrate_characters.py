@@ -21,7 +21,7 @@ def main():
     import server_huiguan as S
     from oc_store import parse_owner
     store = S.character_store()
-    moved_html = moved_img = 0
+    moved_html = moved_img = rejected_img = kept_html = 0
     with store.transaction(write=True) as session:
         if store.backend == 'json' and Path(S.DATA_FILE).exists():
             backup = S.DATA_FILE + '.bak_' + time.strftime('%Y%m%d_%H%M%S')
@@ -32,18 +32,31 @@ def main():
             for record in session.list(ident):
                 changed = False
                 if record.get('html'):
-                    record['html_ref'] = S.store_showcase_html(record.pop('html'))
-                    moved_html += 1; changed = True
+                    try:
+                        record['html_ref'] = S.store_showcase_html(record['html'])
+                        record.pop('html'); moved_html += 1; changed = True
+                    except ValueError:
+                        kept_html += 1  # above the showcase cap: left inline for the owner to review
                 data = record.get('data') or {}
+                def externalize(value):
+                    nonlocal moved_img, rejected_img, changed
+                    try:
+                        stored = S.store_data_uri(value)
+                    except ValueError:
+                        rejected_img += 1  # invalid image: left in place, never written to uploads
+                        return value
+                    moved_img += 1; changed = True
+                    return stored
                 if isinstance(data.get('image'), str) and data['image'].startswith('data:'):
-                    data['image'] = S.store_data_uri(data['image']); moved_img += 1; changed = True
+                    data['image'] = externalize(data['image'])
                 if isinstance(data.get('images'), list):
                     for index, image in enumerate(data['images']):
                         if isinstance(image, str) and image.startswith('data:'):
-                            data['images'][index] = S.store_data_uri(image); moved_img += 1; changed = True
+                            data['images'][index] = externalize(image)
                 if changed:
                     session.save(ident, record, record.get('_oc_version'))
-    print({'externalized_html': moved_html, 'externalized_images': moved_img})
+    print({'externalized_html': moved_html, 'externalized_images': moved_img,
+           'kept_inline_html': kept_html, 'rejected_images': rejected_img})
 
 
 if __name__ == '__main__':

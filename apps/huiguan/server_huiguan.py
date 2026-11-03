@@ -884,6 +884,83 @@ def login_failed(username, ip):
         rate_add(key.format(user=user, ip=ip))
 
 
+# Role-sheet (OC) writes per account: request rate plus a rolling 24h budget of bytes the
+# save flow persists (showcase HTML, data: images, editor image uploads). Both live in this
+# process's memory like the other rate limits, so a restart resets them.
+OC_SAVE_LIMITS = ((20, 60), (120, 3600))
+OC_STORAGE_BUDGET = 256 * 1024 * 1024
+OC_STORAGE_WINDOW = 24 * 3600
+OC_STORAGE = {}
+_SECURITY_LOGGED = {}
+
+
+def _account_ref(ident):
+    return hashlib.sha256(f"{ident['kind']}:{ident['uid']}".encode("utf-8")).hexdigest()[:16]
+
+
+def security_event(event, ident, **fields):
+    """One JSON line on stderr per account/event/minute; never content, cookies or raw ids."""
+    key = (event, ident["kind"], str(ident["uid"]))
+    now = time.time()
+    with RATE_LOCK:
+        if now - _SECURITY_LOGGED.get(key, 0) < 60:
+            return
+        _SECURITY_LOGGED[key] = now
+        if len(_SECURITY_LOGGED) > 10000:
+            for stale in [k for k, t in _SECURITY_LOGGED.items() if now - t > 3600]:
+                _SECURITY_LOGGED.pop(stale, None)
+    record = {"security_event": event, "at": now_iso(), "account": _account_ref(ident), **fields}
+    print(json.dumps(record, ensure_ascii=False), file=sys.stderr, flush=True)
+
+
+def oc_save_throttled(ident, endpoint):
+    """Count one save attempt; True (and a security log line) when over a limit."""
+    key = f"oc-save:{ident['kind']}:{ident['uid']}"
+    for max_n, window in OC_SAVE_LIMITS:
+        if rate_blocked(key, max_n, window):
+            security_event("oc_save_rate_limited", ident, endpoint=endpoint, limit=max_n, window=window)
+            return True
+    rate_add(key)
+    return False
+
+
+def oc_storage_charge(ident, nbytes, endpoint):
+    """Reserve nbytes of the account's rolling budget; False (and a log line) when it would overflow."""
+    if nbytes <= 0:
+        return True
+    key = (ident["kind"], str(ident["uid"]))
+    now = time.time()
+    with RATE_LOCK:
+        entries = [(t, n) for t, n in OC_STORAGE.get(key, []) if now - t < OC_STORAGE_WINDOW]
+        used = sum(n for _, n in entries)
+        allowed = used + nbytes <= OC_STORAGE_BUDGET
+        if allowed:
+            entries.append((now, nbytes))
+        if entries:
+            OC_STORAGE[key] = entries
+        else:
+            OC_STORAGE.pop(key, None)
+    if not allowed:
+        security_event("oc_storage_quota_exceeded", ident, endpoint=endpoint, used=used, requested=nbytes,
+                       budget=OC_STORAGE_BUDGET, window=OC_STORAGE_WINDOW)
+    return allowed
+
+
+def data_image_bytes(value):
+    """Upper bound of decoded bytes a data: URI would add to storage (0 for references)."""
+    if not isinstance(value, str) or not value.startswith("data:"):
+        return 0
+    encoded = value.partition(",")[2]
+    return len(encoded) * 3 // 4
+
+
+def oc_incoming_image_bytes(record):
+    if not isinstance(record, dict):
+        return 0
+    images = record.get("images") if isinstance(record.get("images"), list) else []
+    return sum(data_image_bytes(x) for x in [record.get("image"), record.get("avatar_asset_id"), *images])
+
+
 # ---------- USSO ----------
 
 def sso_post(url, data):
@@ -1064,39 +1141,55 @@ def normalize_oc_avatar(data):
     if shape:
         data["avatar_display_shape"] = shape
 
+class ShowcaseTooLarge(ValueError):
+    """A showcase page above SHOWCASE_HTML_LIMIT; the save endpoints answer 413."""
+
+
+SHOWCASE_HTML_LIMIT = 2 * 1024 * 1024
+SHOWCASE_REF_RE = re.compile(r"^(?:[a-f0-9]{32}|[a-f0-9]{64})\.html$")  # legacy MD5 or SHA-256 names
+
+
+def showcase_html_bytes(html):
+    """Encode and bound a submitted showcase page before anything is written."""
+    if not isinstance(html, str):
+        raise ValueError("展示页格式无效")
+    encoded = html.encode("utf-8")
+    if len(encoded) > SHOWCASE_HTML_LIMIT:
+        raise ShowcaseTooLarge("展示页需≤2MB")
+    return encoded
+
+
 def store_showcase_html(html):
-    """把展示页 HTML 写成独立文件，返回文件名（存进 JSON 的 html_ref）。"""
-    name = hashlib.md5(html.encode("utf-8")).hexdigest() + ".html"
+    """把展示页 HTML 写成独立文件（SHA-256 命名），返回文件名（存进 JSON 的 html_ref）。"""
+    encoded = showcase_html_bytes(html)
+    name = hashlib.sha256(encoded).hexdigest() + ".html"
     path = os.path.join(STORE_DIR, name)
     if not os.path.exists(path):
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(html)
+        temporary = path + "." + secrets.token_hex(8) + ".tmp"
+        with open(temporary, "wb") as f:
+            f.write(encoded)
+        os.replace(temporary, path)
     return name
 
 def store_data_uri(uri):
-    """把 data: 图片解码写成独立文件，返回可访问的 URL；非 data: 原样返回。"""
-    if not uri or not uri.startswith("data:"):
+    """把 data: 图片校验后写成独立文件，返回可访问的 URL；非 data: 原样返回。
+
+    Raises ValueError for unknown MIME types, forged/corrupt images and oversized files,
+    so nothing unvalidated reaches disk or stays inline in the record.
+    """
+    if not isinstance(uri, str) or not uri.startswith("data:"):
         return uri
     try:
-        head, _, b64 = uri.partition(",")
-        mime = head[5:].split(";")[0]
-        ext = _DATAURI_EXT.get(mime, ".img")
-        raw = base64.b64decode(b64)
-        name = hashlib.md5(raw).hexdigest() + ext
-        path = os.path.join(UPLOAD_DIR, name)
-        if not os.path.exists(path):
-            with open(path, "wb") as f:
-                f.write(raw)
-        return "/assets/uploads/" + name
-    except Exception:
-        return uri
+        return store_source_data_uri(uri)
+    except (ValueError, TypeError) as error:
+        raise ValueError(str(error) or "图片格式无效") from error
 
 def get_record_html(rec):
     """读取记录对应的展示页 HTML：优先内联 html（旧），否则读 html_ref 文件。"""
     if rec.get("html"):
         return rec["html"]
     ref = rec.get("html_ref")
-    if ref:
+    if isinstance(ref, str) and SHOWCASE_REF_RE.fullmatch(ref):
         try:
             with open(os.path.join(STORE_DIR, ref), "r", encoding="utf-8") as f:
                 return f.read()
@@ -2623,6 +2716,8 @@ class Handler(BaseStaticHandler):
         ident = self._require_ident()
         if not ident:
             return
+        if oc_save_throttled(ident, "save-character"):
+            self._json(429, {"error": "提交太频繁，请稍等一会儿再试"}); return
         # New clients upload image files first; the bounded allowance supports cached legacy imports.
         body = self._read_json(max_bytes=64 * 1024 * 1024)
         if body is None:
@@ -2632,12 +2727,22 @@ class Handler(BaseStaticHandler):
         html = body.get("html", "")
         data_field = body.get("data", {})
 
+        # Bound everything before the first write: a rejected save leaves no files behind.
+        try:
+            html_bytes = len(showcase_html_bytes(html)) if html else 0
+        except ShowcaseTooLarge as error:
+            self._json(413, {"error": str(error)}); return
+        except ValueError as error:
+            self._json(400, {"error": str(error)}); return
+        if not oc_storage_charge(ident, html_bytes + oc_incoming_image_bytes(data_field), "save-character"):
+            self._json(429, {"error": "今日保存的图片和展示页已达上限，请明天再试"}); return
+
         try:
             normalize_oc_avatar(data_field)
         except ValueError as error:
             self._json(400, {"error": str(error)}); return
 
-        # 外置大字段：展示页 HTML -> 文件；base64 图片 -> 独立文件 URL
+        # 外置大字段：展示页 HTML -> 文件；base64 图片 -> 校验后独立文件 URL
         html_ref = store_showcase_html(html) if html else None
         if isinstance(data_field, dict):
             try:
@@ -2645,12 +2750,12 @@ class Handler(BaseStaticHandler):
                     data_field["image"] = _persist_preview_reference(data_field["image"])
                 if isinstance(data_field.get("images"), list):
                     data_field["images"] = [_persist_preview_reference(x) if isinstance(x, str) else x for x in data_field["images"]]
+                if isinstance(data_field.get("image"), str):
+                    data_field["image"] = store_data_uri(data_field["image"])
+                if isinstance(data_field.get("images"), list):
+                    data_field["images"] = [store_data_uri(x) for x in data_field["images"]]
             except ValueError as error:
                 self._json(400, {"error": str(error)}); return
-            if data_field.get("image", "").startswith("data:"):
-                data_field["image"] = store_data_uri(data_field["image"])
-            if isinstance(data_field.get("images"), list):
-                data_field["images"] = [store_data_uri(x) for x in data_field["images"]]
 
         previous_code = body.get("previous_code") or ""
         rec = {"code": code, "data": data_field}
@@ -2673,6 +2778,8 @@ class Handler(BaseStaticHandler):
         ident = self._require_ident()
         if not ident:
             return
+        if oc_save_throttled(ident, "save-all-characters"):
+            self._json(429, {"error": "提交太频繁，请稍等一会儿再试"}); return
         # 图片以 base64 传输，封面 / 多图 / 展示页可能重复包含图片。
         body = self._read_json(max_bytes=64 * 1024 * 1024)
         if body is None:
@@ -2681,6 +2788,8 @@ class Handler(BaseStaticHandler):
         chars = body.get("characters", [])
         if not isinstance(chars, list) or any(not isinstance(c, dict) for c in chars):
             self._json(400, {"error": "invalid_oc_records"}); return
+        if not oc_storage_charge(ident, sum(oc_incoming_image_bytes(c) for c in chars), "save-all-characters"):
+            self._json(429, {"error": "今日保存的图片和展示页已达上限，请明天再试"}); return
         new_chars = []
         for c in chars:
             try:
@@ -2688,10 +2797,10 @@ class Handler(BaseStaticHandler):
                 if isinstance(c.get("image"), str): c["image"] = _persist_preview_reference(c["image"])
                 if isinstance(c.get("images"), list):
                     c["images"] = [_persist_preview_reference(x) if isinstance(x, str) else x for x in c["images"]]
+                if isinstance(c.get("image"), str): c["image"] = store_data_uri(c["image"])
+                if isinstance(c.get("images"), list): c["images"] = [store_data_uri(x) for x in c["images"]]
             except ValueError as error:
                 self._json(400, {"error": str(error)}); return
-            if c.get("image", "").startswith("data:"): c["image"] = store_data_uri(c["image"])
-            if isinstance(c.get("images"), list): c["images"] = [store_data_uri(x) for x in c["images"]]
             new_chars.append({"code": c.get("code", ""), "data": c})
         with character_store().transaction(write=True) as session:
             old = session.list(ident)
@@ -2699,7 +2808,9 @@ class Handler(BaseStaticHandler):
             for rec in new_chars:
                 entry = old_map.get(rec["code"], {})
                 if entry.get("html_ref"): rec["html_ref"] = entry["html_ref"]
-                elif entry.get("html"): rec["html_ref"] = store_showcase_html(entry["html"])
+                elif entry.get("html"):
+                    try: rec["html_ref"] = store_showcase_html(entry["html"])
+                    except ValueError: rec["html"] = entry["html"]  # legacy inline page above the new cap stays as it was
             saved = session.replace(ident, new_chars, body.get("versions"))
             incoming = {c["code"] for c in saved}
             for rec in old:
@@ -4776,11 +4887,14 @@ class Handler(BaseStaticHandler):
         body = self._read_image_form()
         if body is None:
             return
-        if not self._require_ident():
+        ident = self._require_ident()
+        if not ident:
             return
         image = body.pop("_image_file", None)
         if not image:
             self._json(400, {"error": "缺少图片文件"}); return
+        if not oc_storage_charge(ident, len(image[0]), "images-upload"):
+            self._json(429, {"error": "今日保存的图片和展示页已达上限，请明天再试"}); return
         # The editor uploads this path and then saves it as durable character data.
         self._json(200, {"ok": True, "url": store_image(*image)}, sanitize_images=False)
 
