@@ -132,8 +132,10 @@ class API(unittest.TestCase):
         for _ in range(2):
             with urllib.request.urlopen(self.base + '/api/get-character?code=shared-public') as response:
                 self.assertEqual(response.status, 200); pages.append(response.read().decode())
-        # The owner that registered first wins, as with the legacy JSON scan, and it is stable.
-        self.assertEqual(pages[0], pages[1])
+        # The owner that registered first wins, as with the legacy JSON scan, and it is stable
+        # (apart from the per-response script nonce).
+        import re
+        self.assertEqual(*[re.sub(r"nonce[-=\"']*[A-Za-z0-9_-]{16,}", 'nonce', page) for page in pages])
         with closing(open_database(app.USER_DB)) as db:
             first = db.execute("""SELECT o.owner_uid FROM oc_owners o JOIN oc_records r USING(owner_kind, owner_uid)
                 WHERE r.code='shared-public' ORDER BY o.position LIMIT 1""").fetchone()[0]
