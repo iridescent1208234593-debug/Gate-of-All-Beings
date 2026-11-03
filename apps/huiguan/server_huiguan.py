@@ -1771,9 +1771,9 @@ class Handler(BaseStaticHandler):
             return self._api_posters_publish()
         if path == "/api/admin/poster/delete":
             return self._api_admin_poster_delete()
-        self.send_response(404)
-        self.send_header("Content-Length", "0")
-        self.end_headers()
+        # 未知 POST：请求体可能尚未读取，直接关闭连接，
+        # 避免 keep-alive 把残留字节当成下一个请求行解析。
+        self._json(404, {"error": "接口不存在"})
 
     # ---------- 自命名配色（色环选色保存） ----------
     def _api_color_schemes(self):
