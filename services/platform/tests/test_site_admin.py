@@ -7,6 +7,7 @@ import importlib.util
 import json
 import os
 import sqlite3
+import shutil
 import sys
 import tempfile
 import threading
@@ -29,10 +30,16 @@ os.environ["HX_SSO_SECRET"] = "test-only-site-admin-secret"
 
 conn = sqlite3.connect(DATA / "huiguan" / "users.db")
 conn.executescript("""
-CREATE TABLE local_users (uid INTEGER PRIMARY KEY, username TEXT, role TEXT, status TEXT);
+CREATE TABLE local_users (uid INTEGER PRIMARY KEY, username TEXT, role TEXT, status TEXT, created_at TEXT);
+CREATE TABLE users (user_id TEXT PRIMARY KEY, nickname TEXT, first_login TEXT);
 CREATE TABLE user_flags (kind TEXT, uid TEXT, status TEXT, role TEXT, PRIMARY KEY (kind, uid));
-INSERT INTO local_users VALUES (7, 'iridescent', 'admin', 'active'), (8, 'eight', 'executor', 'active'),
-                               (218, 'other-admin', 'admin', 'active'), (9, 'banned-seven', 'admin', 'banned');
+INSERT INTO local_users VALUES (1, 'bailan', 'executor', 'active', '2025-03-01T10:00:00+08:00'),
+                               (7, 'iridescent', 'admin', 'active', '2025-03-02T10:00:00+08:00'),
+                               (8, 'eight', 'executor', 'active', '2025-03-03T10:00:00+08:00'),
+                               (218, 'other-admin', 'admin', 'active', '2026-01-01T10:00:00+08:00'),
+                               (9, 'banned-seven', 'admin', 'banned', '2025-03-04T10:00:00+08:00');
+INSERT INTO users VALUES ('1', 'bailan', '2025-02-01T10:00:00+08:00'), ('7', 'iridescent', '2025-02-02T10:00:00+08:00'),
+                         ('9', 'nine', '2025-02-03T10:00:00+08:00');
 INSERT INTO user_flags VALUES ('usso', '1', 'active', 'admin');
 """)
 conn.commit()
@@ -112,9 +119,120 @@ class SiteOwnerTest(unittest.TestCase):
             conn.commit()
             conn.close()
 
+    def test_owner_survives_restore_that_keeps_rows(self):
+        # A backup restore / migration copies uid and creation time unchanged: owner rights stay.
+        with tempfile.TemporaryDirectory() as restored:
+            target = Path(restored) / "huiguan"
+            target.mkdir()
+            shutil.copy(DATA / "huiguan" / "users.db", target / "users.db")
+            for kind, uid in (("local", "7"), ("usso", "7"), ("local", "1"), ("usso", "1")):
+                self.assertTrue(site_admin.is_site_owner({"kind": kind, "uid": uid}, restored), (kind, uid))
+
     def test_missing_account_store_denies(self):
         with tempfile.TemporaryDirectory() as empty:
             self.assertFalse(site_admin.is_site_owner({"kind": "local", "uid": "7"}, empty))
+
+
+# The live schema from apps/huiguan/server_huiguan.py (init_db), without unrelated columns.
+LIVE_SCHEMA = """
+CREATE TABLE users (user_id TEXT PRIMARY KEY, nickname TEXT, email TEXT, picture TEXT,
+                    first_login TEXT, last_login TEXT);
+CREATE TABLE local_users (uid INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL COLLATE NOCASE,
+                          pass_hash TEXT NOT NULL, nickname TEXT DEFAULT '', email TEXT DEFAULT '',
+                          picture TEXT DEFAULT '', role TEXT DEFAULT 'user', status TEXT DEFAULT 'active',
+                          created_at TEXT, last_login TEXT);
+CREATE TABLE user_flags (kind TEXT NOT NULL, uid TEXT NOT NULL, status TEXT DEFAULT 'active',
+                         role TEXT DEFAULT 'user', PRIMARY KEY (kind, uid));
+"""
+
+
+def _now():
+    # Same format as server_huiguan.now_iso().
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
+
+
+class UidReuseTest(unittest.TestCase):
+    """M10: a uid that matches an owner entry is not enough; the account row must be the pinned one."""
+
+    def store(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        (Path(directory.name) / "huiguan").mkdir()
+        conn = sqlite3.connect(Path(directory.name) / "huiguan" / "users.db")
+        conn.executescript(LIVE_SCHEMA)
+        conn.commit()
+        return directory.name, conn
+
+    def register_local(self, conn, username):
+        # The INSERT used by /api/register and /api/local/register.
+        cur = conn.execute(
+            "INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login)"
+            " VALUES (?,?,?,?,?,?,?)", (username, "x", "", "executor", "active", _now(), _now()))
+        conn.commit()
+        return str(cur.lastrowid)
+
+    def test_first_registrants_of_a_fresh_store_are_not_owners(self):
+        root, conn = self.store()
+        uids = [self.register_local(conn, f"stranger{n}") for n in range(1, 9)]
+        conn.close()
+        self.assertIn("1", uids)
+        self.assertIn("7", uids)
+        self.assertFalse(site_admin.is_site_owner({"kind": "local", "uid": "1"}, root))
+        self.assertFalse(site_admin.is_site_owner({"kind": "local", "uid": "7"}, root))
+        self.assertFalse(site_admin.is_admin("local", "1", root))
+        self.assertFalse(site_admin.is_admin("local", "7", root))
+
+    def test_owner_name_does_not_help_a_new_registrant(self):
+        root, conn = self.store()
+        uid = self.register_local(conn, "iridescent")
+        conn.close()
+        self.assertEqual(uid, "1")
+        self.assertFalse(site_admin.is_site_owner({"kind": "local", "uid": uid}, root))
+
+    def test_deleted_owner_cannot_be_reused(self):
+        # AUTOINCREMENT never hands a deleted uid out again; a deleted owner simply stops matching.
+        root, conn = self.store()
+        conn.execute("INSERT INTO local_users (uid, username, pass_hash, status, created_at)"
+                     " VALUES (7, 'iridescent', 'x', 'active', '2025-03-02T10:00:00+08:00')")
+        conn.commit()
+        self.assertTrue(site_admin.is_site_owner({"kind": "local", "uid": "7"}, root))
+        conn.execute("DELETE FROM local_users WHERE uid=7")
+        conn.commit()
+        new_uid = self.register_local(conn, "someone-else")
+        conn.close()
+        self.assertNotEqual(new_uid, "7")
+        self.assertFalse(site_admin.is_site_owner({"kind": "local", "uid": "7"}, root))
+        self.assertFalse(site_admin.is_site_owner({"kind": "local", "uid": new_uid}, root))
+
+    def test_recreated_usso_row_is_not_owner(self):
+        # Deleting a USSO account removes its users row and ban flag; the next login recreates it.
+        root, conn = self.store()
+        conn.execute("INSERT INTO users (user_id, nickname, first_login) VALUES ('7', 'new', ?)", (_now(),))
+        conn.commit()
+        conn.close()
+        self.assertFalse(site_admin.is_site_owner({"kind": "usso", "uid": "7"}, root))
+
+    def test_usso_owner_without_account_row_is_denied(self):
+        root, conn = self.store()
+        conn.close()
+        self.assertFalse(site_admin.is_site_owner({"kind": "usso", "uid": "7"}, root))
+        self.assertFalse(site_admin.is_site_owner({"kind": "usso", "uid": "1"}, root))
+
+    def test_unusable_creation_time_is_denied(self):
+        root, conn = self.store()
+        for uid, created in ((1, None), (7, "")):
+            conn.execute("INSERT INTO local_users (uid, username, pass_hash, status, created_at)"
+                         " VALUES (?, ?, 'x', 'active', ?)", (uid, f"u{uid}", created))
+        conn.execute("INSERT INTO users (user_id, first_login) VALUES ('1', 'not-a-date')")
+        conn.execute("INSERT INTO users (user_id, first_login) VALUES ('7', '2025-02-02T10:00:00')")  # no offset
+        conn.commit()
+        conn.close()
+        for kind, uid in (("local", "1"), ("local", "7"), ("usso", "1"), ("usso", "7")):
+            self.assertFalse(site_admin.is_site_owner({"kind": kind, "uid": uid}, root), (kind, uid))
+
+    def test_unhashable_kind_is_rejected(self):
+        self.assertFalse(site_admin.is_site_owner({"kind": ["local"], "uid": "7"}))
 
 
 class EndpointTest(unittest.TestCase):
