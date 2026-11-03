@@ -5473,5 +5473,7 @@ if __name__ == "__main__":
     init_user_db()
     if not CLIENT_ID:
         print("未配置 CLIENT_ID，请编辑 server_huiguan.py 填入 sso.umrc.cn 的 Client ID 和密钥")
-    print(f"huiguan 服务启动: http://localhost:{PORT}")
-    http.server.ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+    from listen_address import listen_host
+    host = listen_host()
+    print(f"huiguan 服务启动: http://{host}:{PORT}")
+    http.server.ThreadingHTTPServer((host, PORT), Handler).serve_forever()

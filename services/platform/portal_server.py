@@ -26,8 +26,6 @@ from pathlib import Path
 
 PORT = int(os.environ.get("PORT", "8080"))
 ENVIRONMENT = os.environ.get("IRIDESCENTLY_ENVIRONMENT", "production").strip().lower()
-# Production ingress must remain loopback-only; HOST is configurable only for local development.
-HOST = (os.environ.get("HOST", "127.0.0.1").strip() or "127.0.0.1") if ENVIRONMENT == "development" else "127.0.0.1"
 CODE_ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -44,6 +42,9 @@ from base_static import BaseStaticHandler  # noqa: E402
 from host_policy import enforce_request, forwarded_headers  # noqa: E402
 from site_domains import service_name, site_url, cors_headers  # noqa: E402
 from storage_paths import data_root  # noqa: E402
+# Production ingress must remain loopback-only; HOST is honoured only in development.
+from listen_address import listen_host  # noqa: E402
+HOST = listen_host()
 
 DATA_ROOT = data_root()
 
