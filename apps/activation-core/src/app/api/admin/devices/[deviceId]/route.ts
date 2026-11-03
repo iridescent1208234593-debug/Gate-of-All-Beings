@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { getDeviceActivationHistory, checkDeviceActivationStatus, resetDeviceValidActivations } from '@/server/activation';
 import { formatDateTimeForAPI } from '@/lib/utils';
 
@@ -6,10 +7,10 @@ import { formatDateTimeForAPI } from '@/lib/utils';
  * 查询设备激活状态和历史 API
  * GET /api/admin/devices/[deviceId]
  */
-export async function GET(
+export const GET = withAdminAccess(async (
   request: NextRequest,
   { params }: { params: Promise<{ deviceId: string }> }
-) {
+) => {
   try {
     const { deviceId: rawDeviceId } = await params;
     const deviceId = decodeURIComponent(rawDeviceId);
@@ -74,16 +75,17 @@ export async function GET(
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * 重置设备激活状态 API
  * DELETE /api/admin/devices/[deviceId]
  */
-export async function DELETE(
+export const DELETE = withAdminAccess(async (
   request: NextRequest,
-  { params }: { params: Promise<{ deviceId: string }> }
-) {
+  { params }: { params: Promise<{ deviceId: string }> },
+  access
+) => {
   try {
     const { deviceId: rawDeviceId } = await params;
     const deviceId = decodeURIComponent(rawDeviceId);
@@ -99,9 +101,9 @@ export async function DELETE(
       );
     }
 
-    // 获取管理员信息（从中间件设置的请求头中）
-    const adminId = request.headers.get('x-admin-id');
-    const adminUsername = request.headers.get('x-admin-username');
+    // 操作者来自路由内鉴权结果，不信任请求头
+    const adminId = access.adminId ?? '-';
+    const adminUsername = access.username ?? 'unknown';
 
     // 只重置该设备有效期内的激活码，保留历史记录
     const resetCount = await resetDeviceValidActivations(deviceId);
@@ -137,4 +139,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-}
+});

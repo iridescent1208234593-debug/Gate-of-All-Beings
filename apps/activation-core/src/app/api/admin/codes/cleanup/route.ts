@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { cleanupExpiredUnusedCodes, getActivationCleanupStats } from '@/server/activation';
 import { formatDateTimeForAPI } from '@/lib/utils';
 
@@ -6,7 +7,7 @@ import { formatDateTimeForAPI } from '@/lib/utils';
  * 清理过期激活码 API
  * POST /api/admin/codes/cleanup
  */
-export async function POST(request: NextRequest) {
+export const POST = withAdminAccess(async (request: NextRequest) => {
   try {
     // 执行清理操作 - 删除过期的激活码
     const cleanedCount = await cleanupExpiredUnusedCodes();
@@ -38,13 +39,13 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
 
 /**
  * 获取清理统计信息
  * GET /api/admin/codes/cleanup
  */
-export async function GET() {
+export const GET = withAdminAccess(async () => {
   try {
     // 统计可清理的过期激活码数量
     const stats = await getActivationCleanupStats();
@@ -83,4 +84,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

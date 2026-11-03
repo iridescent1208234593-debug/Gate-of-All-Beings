@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withAdminAccess } from '@/lib/admin-guard';
 import { getAdminById, updateAdminPassword } from '@/server/admin';
 import bcrypt from 'bcryptjs';
 import { formatDateTimeForAPI } from '@/lib/utils';
@@ -7,28 +8,11 @@ import { formatDateTimeForAPI } from '@/lib/utils';
  * 修改管理员密码 API
  * POST /api/admin/settings/password
  */
-export async function POST(request: NextRequest) {
+export const POST = withAdminAccess(async (request: NextRequest, _context, access) => {
   try {
-    // 中间件已经验证了 JWT，我们需要从 token 中获取管理员 ID
-    const token = request.cookies.get('token')?.value;
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: '未授权访问' },
-        { status: 401 }
-      );
-    }
-
-    // 解码 token 获取管理员 ID（不需要验证签名，中间件已经验证过）
-    let adminId: number;
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      adminId = payload.id;
-    } catch (error) {
-      return NextResponse.json(
-        { success: false, message: 'Token 格式无效' },
-        { status: 401 }
-      );
-    }
+    // 管理员 ID 来自已验证签名、有效期与角色的会话 token（withAdminAccess），
+    // 管理密钥通道没有账号身份，已被 requireSession 拒绝
+    const adminId = access.adminId as number;
 
     // 解析请求体
     const body = await request.json();
@@ -115,4 +99,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+}, { requireSession: true });
