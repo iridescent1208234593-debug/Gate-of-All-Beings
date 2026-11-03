@@ -56,9 +56,9 @@ def main():
         publisher_check = ROOT / "tools/release/test-publish-release.mjs"
         if publisher_check.exists():
             run("immutable seal and rollback", [node, str(publisher_check)])
-        # activation-core tests load its TypeScript sources directly (route tests need its pnpm install).
-        for file in sorted((ROOT / "apps/activation-core/tests").glob("*.test.mjs")):
-            run(str(file.relative_to(ROOT)), [node, "--experimental-strip-types", "--test", str(file)])
+        # activation-core (pnpm install required): its `test` script runs the tsx suites and the
+        # route/credential suites from the app directory, where its tsconfig path aliases resolve.
+        run("activation-core", [shutil.which("npm.cmd" if os.name == "nt" else "npm"), "test", "--prefix", "apps/activation-core"])
         if args.full:
             npm = shutil.which("npm.cmd" if os.name == "nt" else "npm")
             commands = [
@@ -72,6 +72,7 @@ def main():
             commands.extend([
                 ("OAuth return allowlist", [npm, "run", "test:huiguan-auth-next"]),
                 ("OAuth mock browser", [npm, "run", "test:oauth-mock"]),
+                ("Gallery attribute escaping browser", [npm, "run", "test:huiguan-gallery-escape"]),
             ])
             for name, command in commands:
                 run(name, command)

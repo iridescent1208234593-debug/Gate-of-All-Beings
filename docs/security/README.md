@@ -19,7 +19,7 @@
 | [csp-migration-plan.md](csp-migration-plan.md) | CSP 收紧计划 |
 | [security-question-migration.md](security-question-migration.md) | 找回问题的迁移 |
 
-代码中的现行控制：入口 Host / 转发头 `services/platform/host_policy.py`、域名表 `packages/site-domains/domains.json`（见 [域名 readiness](../domain-readiness.md)）、Turnstile `services/platform/turnstile.py`（`TURNSTILE_SECRET` 未设置时关闭，配置见 `services/platform/.env.example`）、会馆登录限流 `apps/huiguan/server_huiguan.py` 的 `LOGIN_FAILURE_LIMITS`。
+代码中的现行控制：入口 Host / 转发头 `services/platform/host_policy.py`（含限流用的可信客户端 IP `trusted_client_ip`，见 [术语表](../development/GLOSSARY.md)）、域名表 `packages/site-domains/domains.json`（见 [域名 readiness](../domain-readiness.md)）、Turnstile `services/platform/turnstile.py`（`TURNSTILE_SECRET` 未设置时关闭，配置见 `services/platform/.env.example`）、会馆登录限流 `apps/huiguan/server_huiguan.py` 的 `LOGIN_FAILURE_LIMITS`。
 
 ## 历史（不要照做其中的路径和命令）
 

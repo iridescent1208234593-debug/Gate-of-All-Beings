@@ -5,20 +5,45 @@ account is still usable in the 会馆 account store. Bare uids and token-supplie
 roles or kinds are never trusted: the signed hx_sso token only proves which
 account is calling, and the account store decides whether it is still active.
 
+A uid alone is not a principal: local uids come from AUTOINCREMENT in whatever
+users.db is mounted, so a fresh or rebuilt store hands uid 1 and 7 to the first
+public registrants, and a deleted USSO row is recreated on the next login. Each
+owner entry is therefore pinned to the account row that existed when the entry
+was written: the row must exist and its creation time (local_users.created_at,
+users.first_login for USSO) must be no later than the entry's cutoff. A restore
+or migration that keeps uid and creation time keeps the owner; anything that
+recreates the row (new store, delete then re-register, re-created USSO row)
+does not. Re-pinning an owner after such an event is a reviewed code change.
+
 is_site_owner() stays separate from 会馆 roles. Since 2026-10-27, is_admin() (used by the
 main-site admin endpoints) also accepts an active 会馆 admin (local_users.role / user_flags).
 """
 import os
 import sqlite3
+from datetime import datetime
 from pathlib import Path
 from storage_paths import data_root, huiguan_data_dir
 
 
-# The site owner's two accounts. Add entries here; never compare a bare uid.
-SITE_OWNER_ACCOUNTS = frozenset({
-    ("usso", "7"), ("local", "7"),          # iridescent 站长
-    ("usso", "1"), ("local", "1"),          # 摆烂人生（USSO 主账号）
-})
+# The site owner's accounts: (kind, uid) -> latest acceptable creation time of that account row.
+# Add entries here; never compare a bare uid. The cutoff is the moment the entry was added, so
+# an account created afterwards under the same uid can never match.
+_ADDED_2026_10_27 = "2026-10-27T17:22:20+08:00"   # c79b4df; earlier entries were already live
+SITE_OWNER_ACCOUNTS = {
+    ("usso", "7"): _ADDED_2026_10_27, ("local", "7"): _ADDED_2026_10_27,   # iridescent 站长
+    ("usso", "1"): _ADDED_2026_10_27, ("local", "1"): _ADDED_2026_10_27,   # 摆烂人生（USSO 主账号）
+}
+
+
+def _parse_time(value):
+    """Aware datetime from a stored ISO timestamp; None when missing, naive or malformed."""
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.strip())
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else None
 
 
 def _users_db(project_root=None):
@@ -26,8 +51,15 @@ def _users_db(project_root=None):
     return huiguan_data_dir(root) / "users.db"
 
 
-def account_usable(kind, uid, project_root=None):
-    """True when the account exists and is not disabled; read-only."""
+def account_usable(kind, uid, project_root=None, created_not_after=None):
+    """True when the account exists and is not disabled; read-only.
+
+    With created_not_after, the account row must also carry a creation time no later than it,
+    so a row recreated under the same uid (fresh store, re-registration, re-login) is rejected.
+    """
+    cutoff = _parse_time(created_not_after) if created_not_after is not None else None
+    if created_not_after is not None and cutoff is None:
+        return False
     database = _users_db(project_root)
     if not database.exists():
         return False
@@ -37,15 +69,25 @@ def account_usable(kind, uid, project_root=None):
         return False
     try:
         if kind == "local":
-            row = conn.execute("SELECT status FROM local_users WHERE CAST(uid AS TEXT)=?", (uid,)).fetchone()
-            return bool(row) and row[0] == "active"
+            column = "created_at" if cutoff else "NULL"
+            row = conn.execute(
+                f"SELECT status, {column} FROM local_users WHERE CAST(uid AS TEXT)=?", (uid,)
+            ).fetchone()
+            if not row or row[0] != "active":
+                return False
+            return cutoff is None or _created_in_time(row[1], cutoff)
         if kind == "usso":
             # USSO accounts are created on first login; only an explicit ban disables them.
             try:
                 flag = conn.execute("SELECT status FROM user_flags WHERE kind='usso' AND uid=?", (uid,)).fetchone()
             except sqlite3.OperationalError:
                 flag = None
-            return not (flag and flag[0] == "banned")
+            if flag and flag[0] == "banned":
+                return False
+            if cutoff is None:
+                return True
+            row = conn.execute("SELECT first_login FROM users WHERE user_id=?", (uid,)).fetchone()
+            return bool(row) and _created_in_time(row[0], cutoff)
         return False
     except sqlite3.Error:
         return False
@@ -53,14 +95,22 @@ def account_usable(kind, uid, project_root=None):
         conn.close()
 
 
+def _created_in_time(value, cutoff):
+    created = _parse_time(value)
+    return created is not None and created <= cutoff
+
+
 def is_site_owner(token_payload, project_root=None):
     """Decide main-site admin from a verified hx_sso payload."""
     if not isinstance(token_payload, dict):
         return False
     kind, uid = token_payload.get("kind"), str(token_payload.get("uid") or "")
-    if (kind, uid) not in SITE_OWNER_ACCOUNTS:
+    if not isinstance(kind, str):
         return False
-    return account_usable(kind, uid, project_root)
+    cutoff = SITE_OWNER_ACCOUNTS.get((kind, uid))
+    if cutoff is None:
+        return False
+    return account_usable(kind, uid, project_root, created_not_after=cutoff)
 
 
 def is_huiguan_admin(kind, uid, project_root=None):
