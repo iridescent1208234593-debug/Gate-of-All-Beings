@@ -66,9 +66,11 @@ wv.close()
 
 users = sqlite3.connect(DATA / "huiguan" / "users.db")
 users.executescript("""
-CREATE TABLE local_users (uid INTEGER PRIMARY KEY, username TEXT, role TEXT, status TEXT);
+CREATE TABLE local_users (uid INTEGER PRIMARY KEY, username TEXT, role TEXT, status TEXT, created_at TEXT);
 CREATE TABLE user_flags (kind TEXT, uid TEXT, status TEXT, role TEXT, PRIMARY KEY(kind, uid));
-INSERT INTO local_users VALUES (7, 'owner', 'admin', 'active'), (8, 'member', 'executor', 'active'), (9, 'hall-admin', 'admin', 'active');
+INSERT INTO local_users VALUES (7, 'owner', 'admin', 'active', '2025-03-02T10:00:00+08:00'),
+                               (8, 'member', 'executor', 'active', '2025-03-03T10:00:00+08:00'),
+                               (9, 'hall-admin', 'admin', 'active', '2025-03-04T10:00:00+08:00');
 """)
 users.commit()
 users.close()
