@@ -46,7 +46,25 @@
 
 `GET /api/sso-user`
 
-## 7. 契约
+## 7. 统一入口共用接口（每个已登记主机同源可达，`services/platform/portal_server.py`）
+
+身份都来自共享 `hx_sso` Cookie；POST 要求 JSON 与同根域来源。
+
+账户积分：`/api/progress/*`（`services/platform/account_progress.py`）。
+
+会馆托付（`services/platform/hall_errands.py`，供 Godot 会馆客户端 `labs/fengling-godot` 使用；界面上“托付”即 errand、“到场”即 presence）：
+
+| 方法与路径 | 请求 | 返回 |
+| --- | --- | --- |
+| `GET /api/errands` | — | `{logged_in, terms, errands: [{errand_id, name, desc, place, stay_seconds, reward, is_held, is_mine}], active}` |
+| `POST /api/errands/accept` | `{errand_id}` | 进行中的记录 `{run_id, errand_id, status, present_seconds, stay_seconds, can_report, accepted_at, finished_at}`；已持有一项或已被他人接走 → 409 |
+| `POST /api/errands/presence` | `{place, is_present}` | 同上，另有 `is_present`、`credited_seconds`；只在 `is_present` 且 `place` 等于托付地点时计时，两次之间最多计 90 秒；不在场即断开计时链 |
+| `POST /api/errands/report` | `{}` | 同上，另有 `awarded`；到场时间不足 → 400；按 `account_progress` 的 `errand` 规则记积分（每天 3 次，受每日上限约束） |
+| `POST /api/errands/abandon` | `{}` | `{ok}` |
+
+一个账户同时只持有一项；一项托付同时只归一人；24 小时无到场记录的持有会自动释放。是否到场目前由客户端上报，服务端无法核实。托付内容（`ERRANDS`）是占位文案，待文案组提供。
+
+## 8. 契约
 
 跨模块 JSON 契约见 `packages/shared-types`（`npm run verify`）。生态 → 主入口的收获包 `kind: eco-harvest`，详见 `packages/shared-types/README.md`。
 

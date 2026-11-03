@@ -58,6 +58,7 @@ RULES = {
     "task-explore": {"x10": 10, "cap": 1, "per_game": False, "label": "每日任务 · 今天玩三种玩法"},
     "sheet": {"x10": 10, "cap": 2, "per_game": False, "label": "登记新角色设表"},
     "sheet-color": {"x10": 5, "cap": 1, "per_game": False, "label": "设表使用自定义配色"},
+    "errand": {"x10": 10, "cap": 3, "per_game": False, "label": "完成会馆托付"},  # hall_errands.report
 }
 DAILY_CAP_X10 = 80          # 每个账户每天最多 8 分
 MAX_REPORTS_PER_GAME_DAY = 300
