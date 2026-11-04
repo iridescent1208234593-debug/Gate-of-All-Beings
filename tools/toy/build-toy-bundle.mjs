@@ -45,8 +45,8 @@ function ownHostPatterns() {
 export function linksFrom(content) {
   const links = [];
   const b = content.bilibili || {};
-  if (b.spaceMid) links.push({ type: 'space', id: String(b.spaceMid), label: '作者空间' });
-  if (b.tribeeId) links.push({ type: 'tribee', id: String(b.tribeeId), label: '西木会馆小站' });
+  if (b.space_mid) links.push({ type: 'space', id: String(b.space_mid), label: '作者空间' });
+  if (b.tribee_id) links.push({ type: 'tribee', id: String(b.tribee_id), label: '西木会馆小站' });
   for (const v of b.videos || []) {
     if (v && v.bvid) links.push({ type: 'video', id: String(v.bvid), label: v.label || '介绍视频' });
   }
@@ -55,16 +55,16 @@ export function linksFrom(content) {
 
 export function validateContent(content, { release }) {
   const errors = [];
-  if (content.schemaVersion !== 1) errors.push('content.json schemaVersion must be 1');
+  if (content.schema_version !== 1) errors.push('content.json schema_version must be 1');
   for (const key of ['title', 'publisher']) if (!content[key]) errors.push(`content.json ${key} is empty`);
   const b = content.bilibili || {};
-  if (b.spaceMid && !/^\d{1,20}$/.test(String(b.spaceMid))) errors.push('bilibili.spaceMid must be digits');
-  if (b.tribeeId && !/^\d{1,20}$/.test(String(b.tribeeId))) errors.push('bilibili.tribeeId must be digits');
+  if (b.space_mid && !/^\d{1,20}$/.test(String(b.space_mid))) errors.push('bilibili.space_mid must be digits');
+  if (b.tribee_id && !/^\d{1,20}$/.test(String(b.tribee_id))) errors.push('bilibili.tribee_id must be digits');
   for (const v of b.videos || []) {
     if (!/^BV[0-9A-Za-z]{10}$/.test(String(v.bvid || ''))) errors.push(`video bvid "${v.bvid}" is not a BV id`);
   }
   for (const link of linksFrom(content)) if (!NAVIGATE_TYPES.has(link.type)) errors.push(`unsupported navigate type ${link.type}`);
-  if (release && !b.spaceMid) errors.push('--release needs bilibili.spaceMid (the project account that publishes the Toy)');
+  if (release && !b.space_mid) errors.push('--release needs bilibili.space_mid (the project account that publishes the Toy)');
   return errors;
 }
 
@@ -81,7 +81,7 @@ function render(template, content) {
   const linksJson = JSON.stringify(linksFrom(content)).replace(/</g, '\\u003c');
   const values = {
     title: escapeHtml(content.title), subtitle: escapeHtml(content.subtitle || ''), intro: paragraphs,
-    projects, notices: noticesHtml, ipNotice: escapeHtml(content.legal?.ipNotice || ''),
+    projects, notices: noticesHtml, ip_notice: escapeHtml(content.legal?.ip_notice || ''),
     disclaimer: escapeHtml(content.legal?.disclaimer || ''), publisher: escapeHtml(content.publisher), linksJson,
   };
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {

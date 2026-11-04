@@ -15,8 +15,8 @@
 
 `content.json` 的 `bilibili` 段：
 
-- `spaceMid`：项目方发布账号的 UID（数字）。正式发布必填，`--release` 会检查。
-- `tribeeId`：西木会馆 B站 小站 id（数字），没有就留空。
+- `space_mid`：项目方发布账号的 UID（数字）。正式发布必填，`--release` 会检查。
+- `tribee_id`：西木会馆 B站 小站 id（数字），没有就留空。
 - `videos`：`[{ "bvid": "BV...", "label": "介绍视频" }]`，只能是项目方账号自己的视频。
 
 ## 构建

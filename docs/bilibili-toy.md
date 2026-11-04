@@ -43,7 +43,7 @@ B站 站内                                       会馆自有（不变）
 实施步骤：
 
 1. 负责人确认本方案与页面文字（`content.json` 里的介绍、项目列表、免责声明）。
-2. 负责人填写 `content.json` 的 `publisher`、`bilibili.spaceMid`（发布账号 UID）、可选 `tribeeId` 与介绍视频 BV 号；决定是否放图，放图则按授权登记进 `assets/assets.json`。
+2. 负责人填写 `content.json` 的 `publisher`、`bilibili.space_mid`（发布账号 UID）、可选 `tribee_id` 与介绍视频 BV 号；决定是否放图，放图则按授权登记进 `assets/assets.json`。
 3. 合并分支（经评审），按 `apps/bilibili-toy/README.md` 用 `--release` 构建。
 4. 负责人用自己的账号预览、提交审核、首发 `link-only`，确认后改 `public`。
 5. 负责人用 `toy video bind` 把介绍视频挂上 Toy 入口。

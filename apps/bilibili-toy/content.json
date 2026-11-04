@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schema_version": 1,
   "title": "西木会馆 · 众生之门",
   "subtitle": "一个《罗小黑战记》同人世界的门庭",
   "publisher": "西木会馆项目方",
@@ -31,12 +31,12 @@
   ],
   "notices": [],
   "bilibili": {
-    "spaceMid": "",
-    "tribeeId": "",
+    "space_mid": "",
+    "tribee_id": "",
     "videos": []
   },
   "legal": {
-    "ipNotice": "罗小黑战记相关 IP 版权归寒木春华动画工作室所有。",
+    "ip_notice": "罗小黑战记相关 IP 版权归寒木春华动画工作室所有。",
     "disclaimer": "本 Toy 为非商业性同人项目，未获官方授权。罗小黑战记相关角色、形象与作品的知识产权归原作者及寒木春华动画工作室所有。如有侵权，请私信本 Toy 作者删除。"
   }
 }

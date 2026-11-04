@@ -33,7 +33,7 @@ test('--release refuses a package without the publishing account', () => {
   const out = path.join(temp(), 'pkg');
   const run = spawnSync(process.execPath, [SCRIPT, '--out', out, '--release'], { encoding: 'utf8' });
   assert.equal(run.status, 1);
-  assert.match(run.stderr, /spaceMid/);
+  assert.match(run.stderr, /space_mid/);
   assert.equal(fs.existsSync(out), false);
 });
 
@@ -44,11 +44,11 @@ test('output inside the repository is refused', () => {
 });
 
 test('only B站 in-app navigation targets become links', () => {
-  const content = { schemaVersion: 1, title: 't', publisher: 'p',
-    bilibili: { spaceMid: '123', tribeeId: '456', videos: [{ bvid: 'BV1Hh411S7Ys', label: '介绍' }] } };
+  const content = { schema_version: 1, title: 't', publisher: 'p',
+    bilibili: { space_mid: '123', tribee_id: '456', videos: [{ bvid: 'BV1Hh411S7Ys', label: '介绍' }] } };
   assert.deepEqual(validateContent(content, { release: true }), []);
   assert.deepEqual(linksFrom(content).map((l) => l.type), ['space', 'tribee', 'video']);
-  assert.ok(validateContent({ ...content, bilibili: { spaceMid: 'https://example.com' } }, { release: false }).length);
+  assert.ok(validateContent({ ...content, bilibili: { space_mid: 'https://example.com' } }, { release: false }).length);
   assert.ok(validateContent({ ...content, bilibili: { videos: [{ bvid: 'javascript:x' }] } }, { release: false }).length);
 });
 
