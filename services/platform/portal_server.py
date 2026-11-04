@@ -229,6 +229,16 @@ class ProgressHandler(BaseStaticHandler):
     do_GET = do_HEAD = do_POST = _serve
 
 
+class ErrandsHandler(BaseStaticHandler):
+    """/api/errands/*: 会馆托付 for the Godot hall client (services/platform/hall_errands.py)."""
+
+    def _serve(self):
+        import hall_errands
+        hall_errands.handle(self, self.command, self.path, str(DATA_ROOT))
+
+    do_GET = do_HEAD = do_POST = _serve
+
+
 def route(host, path):
     """-> (处理类, 配置 dict)。"""
     h = service_name(host)
@@ -238,6 +248,8 @@ def route(host, path):
     # Same-origin on every host, so each game (zszm, spirit, huiguan, main site) can reach it.
     if p.startswith('/api/progress/'):
         return ProgressHandler, {}
+    if p == '/api/errands' or p.startswith('/api/errands/'):
+        return ErrandsHandler, {}
     if p.startswith('/shared/'):
         return StaticHandler, {"root": str(CODE_ROOT / "packages"), "strip": "/shared"}
     # Shared code and public derived media have one same-origin path on every domain.

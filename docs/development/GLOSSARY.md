@@ -67,6 +67,12 @@
 ### Trusted Client IP（可信客户端 IP）
 限流、Turnstile `remoteip` 与防爬观察使用的请求方身份，唯一来源是 `services/platform/host_policy.py` 的 `trusted_client_ip(handler)`（需要 CF-Ray 与“是否可信”时用 `edge_client_identity`）。只有经过统一入口 `enforce_request` 认定的生产 Tunnel 路径（`IRIDESCENTLY_ENVIRONMENT=production`、回环对端、已登记 Host、访客 HTTPS）且带合法 `CF-Ray` 和唯一可解析的 `CF-Connecting-IP` 时才取该头；其余情况（含独立运行的单站服务）一律用 TCP 对端地址。`X-Real-IP`、`X-Forwarded-For` 等转发头不是客户端身份，新代码不得直接读取。
 
+### Errand（会馆托付）
+会馆发布、由一个 Account 接下并到指定会馆完成的一件事，界面上叫“托付”。持久化 owner 是 `(kind, uid)`；记录在 `hall_errand_runs`。它不是每日任务（`account_progress` 的 `task-*` 规则）也不是任务链（`task_chains`），三者不要互相替代。代码见 `services/platform/hall_errands.py`。
+
+### Presence（到场）
+玩家此刻是否身在某项托付的地点，界面上叫“到场”。由客户端上报 `{place, is_present}`；只有到场的时间计入托付。它不是登录在线状态。
+
 ## 已知容易混淆的词
 
 - `uid`：部分认证/SSO 层使用的用户标识字段；不能脱离 `kind` 单独作为跨系统 owner。
