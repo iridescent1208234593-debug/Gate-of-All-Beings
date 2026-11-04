@@ -37,7 +37,7 @@ node --test tools/toy/test-toy-bundle.mjs
 开发者只交付构建好的文件夹，不登录、不上传、不提交审核。负责人自己：
 
 1. 安装官方 `toy` CLI（见 <https://github.com/bilibili/toy>）后 `toy login`，在浏览器里用**项目方 B站 账号**授权；`toy whoami --json` 确认账号无误。也可以直接在 Toy 发布平台网页上传文件夹。
-2. 首次：`toy create <包目录> --json`（不带 `--yes`）得到预览链接，在手机 B站 App 和电脑上各看一遍。名称、slug（发布后不可改，建议 `ximu-huiguan` 这类）、封面、可见性按 `toy create --help-json` 当前列出的参数填写。首发建议可见性选 `link-only`（仅链接可见），确认无误后再改 `public`。
+2. 首次：`toy create <包目录> --json`（不带 `--yes`）得到预览链接，在手机 B站 App 和电脑上各看一遍。名称、slug（发布后不可改，建议 `ximu-huiguan` 这类）、封面、可见性按 `toy create --help-json` 当前列出的参数填写。首发建议可见性选 `link-only`（仅链接可见），确认无误后再改 `public`。网页表单各栏填法见 [docs/bilibili-toy.md](../../docs/bilibili-toy.md)，封面和图标用 `node tools/toy/render-poster.cjs <目录>` 生成。
 3. 确认后用同样参数加 `--yes` 提交审核。审核约十分钟，可能未通过，按拒绝原因改后重提。
 4. 之后更新：`toy mylist --json` 找 id → `toy update <id> <新包目录> --json` 预览 → 确认后加 `--yes`。slug 保持不变。
 5. 把视频挂上 Toy 入口：`toy video bind`（即时生效，可随时 `unbind`）。
@@ -46,5 +46,5 @@ node --test tools/toy/test-toy-bundle.mjs
 
 - 暂时撤回：`toy update <id> --visibility password --access-password <4-32位>`（或 `link-only`）后 `--yes`，Toy 从广场消失，只有知道密码 / 链接的人能打开。改回 `public` 即恢复。
 - 回滚内容：用上一版本的 Git 提交重新构建，再走一次 `update`。
-- 彻底下架：官方 CLI（2026-11-03 版仓库）没有删除命令；Toy 发布平台网页是否有删除按钮尚未核实，负责人登录后确认，没有就按官方 FAQ 所说的审核咨询入口申请。
+- 彻底下架：删除 Toy 发布时自动生成的关联动态，平台会同步删除 Toy（不可恢复）。官方 CLI 没有删除命令。
 - 第三方退出合作：他从来没有项目方账号的登录态，无需交接；项目方吊销其仓库权限即可，Toy 不受影响。
