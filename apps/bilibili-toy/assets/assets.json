@@ -1,0 +1,5 @@
+{
+  "schema_version": 1,
+  "note": "进入 Toy 包的每一张图都必须登记在这里；未登记、或 rights 不是 owner / licensed 的文件，构建会拒绝。",
+  "files": []
+}

@@ -28,7 +28,8 @@ with zipfile.ZipFile(io.BytesIO(archive)) as source:
         parts = Path(name).parts
         if '..' in parts or Path(name).is_absolute():
             raise RuntimeError('Unsafe archive path')
-        if name.startswith(('apps/www/assets/homepage/', 'apps/www/gallery-engine/', 'apps/huiguan/design-system/ui/')):
+        # apps/bilibili-toy is published to B站 Toy by the owner, never served from the site.
+        if name.startswith(('apps/www/assets/homepage/', 'apps/www/gallery-engine/', 'apps/huiguan/design-system/ui/', 'apps/bilibili-toy/')):
             continue
         if any(part in ('node_modules', 'uploads', 'store', '__pycache__') or part.startswith('.env') for part in parts):
             continue

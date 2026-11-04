@@ -56,6 +56,7 @@ def main():
         publisher_check = ROOT / "tools/release/test-publish-release.mjs"
         if publisher_check.exists():
             run("immutable seal and rollback", [node, str(publisher_check)])
+        run("Bilibili Toy package safety", [node, "--test", "tools/toy/test-toy-bundle.mjs"])
         # activation-core (pnpm install required): its `test` script runs the tsx suites and the
         # route/credential suites from the app directory, where its tsconfig path aliases resolve.
         run("activation-core", [shutil.which("npm.cmd" if os.name == "nt" else "npm"), "test", "--prefix", "apps/activation-core"])
