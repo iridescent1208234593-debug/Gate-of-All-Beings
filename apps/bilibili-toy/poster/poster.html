@@ -1,0 +1,65 @@
+<!doctype html>
+<!-- Toy 封面（1200×900，?kind=cover）与图标（500×500，?kind=icon）的源文件，由 tools/toy/render-poster.cjs 截图。不进 Toy 包。 -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  :root { --ink: #17372e; --soft: #3f5a50; --paper: #f4eedf; --gold: #b07a22; }
+  html, body { margin: 0; }
+  body { font-family: "PingFang SC", "Noto Sans SC", "WenQuanYi Zen Hei", "Microsoft YaHei", sans-serif; color: var(--ink); }
+  .stage {
+    position: relative; overflow: hidden; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background:
+      radial-gradient(ellipse at 50% 38%, #fffaf0 0%, rgba(255, 250, 240, 0) 60%),
+      linear-gradient(180deg, #f7f1e3 0%, var(--paper) 55%, #e9dfc6 100%);
+  }
+  .cover { width: 1200px; height: 900px; }
+  .icon { width: 500px; height: 500px; }
+  .ground { position: absolute; left: 0; right: 0; bottom: 0; height: 18%; background: linear-gradient(180deg, rgba(23, 55, 46, 0) 0%, rgba(23, 55, 46, .1) 100%); }
+  .gate { display: flex; align-items: flex-end; }
+  .gate .post { background: var(--ink); border-radius: 3px; }
+  .gate .door {
+    border: solid var(--gold); border-bottom: 0;
+    background: linear-gradient(180deg, #fff8e6, #ead9b0);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .6);
+  }
+  .gate .glow { background: radial-gradient(ellipse at 50% 100%, #ffe7a8 0%, #f4c76a 40%, rgba(244, 199, 106, 0) 75%); }
+  .cover .gate { gap: 18px; height: 330px; margin-bottom: 54px; }
+  .cover .post { width: 22px; height: 330px; }
+  .cover .door { width: 128px; height: 300px; border-width: 6px; border-radius: 128px 128px 0 0; }
+  .cover .glow { width: 26px; height: 300px; }
+  .icon .gate { gap: 8px; height: 270px; margin-bottom: 26px; }
+  .icon .post { width: 16px; height: 270px; }
+  .icon .door { width: 92px; height: 246px; border-width: 5px; border-radius: 92px 92px 0 0; }
+  .icon .glow { width: 14px; height: 246px; }
+  h1 { margin: 0; font-weight: 700; letter-spacing: .14em; }
+  .cover h1 { font-size: 92px; }
+  .icon h1 { font-size: 72px; letter-spacing: .3em; margin-right: -.3em; }
+  .sub { color: var(--soft); letter-spacing: .2em; margin: 22px 0 0; font-size: 34px; }
+  .tag {
+    position: absolute; top: 36px; right: 40px; font-size: 26px; letter-spacing: .2em;
+    border: 2px solid var(--gold); color: var(--gold); padding: 6px 16px; border-radius: 6px;
+  }
+  .frame { position: absolute; inset: 20px; border: 2px solid rgba(176, 122, 34, .35); border-radius: 18px; pointer-events: none; }
+  .icon .frame { inset: 14px; border-radius: 24px; }
+</style>
+</head>
+<body>
+<div id="stage" class="stage">
+  <div class="frame"></div>
+  <div class="gate"><span class="post"></span><span class="door"></span><span class="glow"></span><span class="door"></span><span class="post"></span></div>
+  <h1 id="title"></h1>
+  <p class="sub" id="sub"></p>
+  <span class="tag" id="tag">同人</span>
+  <div class="ground"></div>
+</div>
+<script>
+  var kind = new URLSearchParams(location.search).get('kind') === 'icon' ? 'icon' : 'cover';
+  document.getElementById('stage').classList.add(kind);
+  document.getElementById('title').textContent = kind === 'icon' ? '西木' : '西木会馆 · 众生之门';
+  if (kind === 'cover') document.getElementById('sub').textContent = '一个《罗小黑战记》同人世界的门庭';
+  else { document.getElementById('sub').remove(); document.getElementById('tag').remove(); }
+</script>
+</body>
+</html>
