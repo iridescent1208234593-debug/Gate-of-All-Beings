@@ -7,6 +7,7 @@
 | `apps/www`、`apps/huiguan`、`apps/oc` | 主站、会馆、人设站（统一入口按 Host 分发） |
 | `apps/activation-core` | 独立 Next.js 应用，不由门户启动 |
 | `apps/shell` | 统一壳 `index.html` 与导航清单 `portal.json` |
+| `apps/bilibili-toy` | B站 Toy 门庭页源码与内容（`content.json`、`assets/assets.json`）；由负责人用自己的 B站账号发布，不进站点快照，见 `apps/bilibili-toy/README.md` |
 | `apps/<模块>` | 游戏源码；目录名即模块 key：cards、management、ecology、juling、aeon、world-map、slay、softie |
 | `services/platform` | 统一入口 `portal_server.py`、SSO/账户/安全、存储契约（`storage_paths.py` 与 `runtime-paths.cjs`）；测试在 `tests/` |
 | `packages/shared-*` | 设计系统、类型契约、只读事实、会话/存档（npm 包名仍为 `@lxh/*`） |
@@ -16,6 +17,7 @@
 | `tools/runtime` | 本机回环启动器、存储快照、Batch 6 数据迁移 |
 | `tools/domains` | 域名配置生成与自有域名硬编码扫描 |
 | `tools/checks/regression.py` | 回归入口：每个测试模块单独进程，只用临时 test 存储 |
+| `tools/toy` | B站 Toy 包的构建与安全检查（`build-toy-bundle.mjs`）及其测试 |
 | `tools/ops` | 调用外部运维目录的入口（`run-ops.mjs`、`update.mjs`） |
 | `infra/ingress` | 入口清单 `deployed-hosts.json`、Nginx/Tunnel 生成物及渲染器、边界探针、选服页 |
 | `infra/hk-legacy` | 香港旧布局的候选叠加工具（见下文"香港"） |

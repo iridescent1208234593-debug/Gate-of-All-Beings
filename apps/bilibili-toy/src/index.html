@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{title}}</title>
+<script src="https://s1.hdslb.com/bfs/seed/toy/app/sdk/toy-sdk.js"></script>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main class="page">
+  <header class="hero">
+    <div class="gate" aria-hidden="true"><span></span><span></span></div>
+    <h1>{{title}}</h1>
+    <p class="subtitle">{{subtitle}}</p>
+  </header>
+
+  <section class="card" aria-labelledby="intro-h">
+    <h2 id="intro-h">会馆是什么</h2>
+    {{intro}}
+  </section>
+
+  <section class="card" aria-labelledby="projects-h">
+    <h2 id="projects-h">门后有什么</h2>
+    <ul class="projects">{{projects}}</ul>
+  </section>
+
+  {{notices}}
+
+  <section class="card" id="follow" aria-labelledby="follow-h" hidden>
+    <h2 id="follow-h">在 B站 找到我们</h2>
+    <div class="actions" id="actions"></div>
+    <p class="hint" id="env-hint" hidden>请在 B站 App 或哔哩哔哩网页版的 Toy 页面中打开，才能跳转。</p>
+  </section>
+
+  <section class="card" id="handoff" aria-labelledby="handoff-h" hidden>
+    <h2 id="handoff-h">在手机上打开</h2>
+    <img id="qr" width="200" height="200" alt="本 Toy 首页的二维码">
+  </section>
+
+  <footer class="legal">
+    <p>{{ipNotice}}</p>
+    <details><summary>免责声明</summary><p>{{disclaimer}}</p></details>
+    <p class="publisher">发布：{{publisher}}</p>
+  </footer>
+</main>
+<script type="application/json" id="toy-links">{{linksJson}}</script>
+<script src="./toy-page.js"></script>
+</body>
+</html>
