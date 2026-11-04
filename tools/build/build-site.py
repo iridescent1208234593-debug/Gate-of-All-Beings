@@ -18,7 +18,10 @@ if target.resolve().parent != (releases / 'candidate').resolve():
 # Deployable source roots; a checkout only needs the ones it has.
 SOURCE_DIRS = ('apps', 'services', 'packages')
 present = set(subprocess.check_output(['git', 'ls-tree', '--name-only', 'HEAD'], cwd=root, text=True).split())
-archive = subprocess.check_output(['git', 'archive', '--format=zip', 'HEAD', *(d for d in SOURCE_DIRS if d in present)], cwd=root)
+# core.autocrlf must not leak into the archive: on Windows it rewrites committed text as CRLF,
+# so the same commit would seal to different bytes than on Linux (and never match HK's release).
+archive = subprocess.check_output(['git', '-c', 'core.autocrlf=false', 'archive', '--format=zip', 'HEAD',
+                                   *(d for d in SOURCE_DIRS if d in present)], cwd=root)
 if target.exists():
     shutil.rmtree(target)
 target.mkdir(parents=True)

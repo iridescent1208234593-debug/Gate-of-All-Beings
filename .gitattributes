@@ -1,0 +1,28 @@
+# Release archives and builds must be byte-identical on every platform.
+# Committed text is LF; a Windows checkout with core.autocrlf=true would otherwise
+# make `git archive` emit CRLF and seal a different Release for the same commit.
+* text=auto eol=lf
+
+# Binary assets are never converted (images, fonts, audio, archives).
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.avif binary
+*.psd binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.mp3 binary
+*.ogg binary
+*.wav binary
+*.flac binary
+*.mp4 binary
+*.webm binary
+*.zip binary
+*.gz binary
+*.7z binary
+*.pdf binary
