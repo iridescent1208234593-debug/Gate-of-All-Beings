@@ -29,12 +29,12 @@ test('the committed Toy source builds into a package that passes the safety chec
   assert.ok(fs.statSync(path.join(out, 'index.html')).size < 1024 * 1024);
 });
 
-test('--release refuses a package without the publishing account', () => {
+test('--release builds the committed content, and refuses content without the publishing account', () => {
   const out = path.join(temp(), 'pkg');
   const run = spawnSync(process.execPath, [SCRIPT, '--out', out, '--release'], { encoding: 'utf8' });
-  assert.equal(run.status, 1);
-  assert.match(run.stderr, /space_mid/);
-  assert.equal(fs.existsSync(out), false);
+  assert.equal(run.status, 0, run.stderr);
+  const errors = validateContent({ schema_version: 1, title: 't', publisher: 'p', bilibili: {} }, { release: true });
+  assert.ok(errors.some((e) => /space_mid/.test(e)));
 });
 
 test('output inside the repository is refused', () => {
