@@ -221,6 +221,11 @@ def create_app(lab: Lab) -> FastAPI:
             resp = HTMLResponse(html)
             resp.headers["Cache-Control"] = "no-store"
             return security_headers(resp, page_csp(inline_script_hashes(html), connect))
+        # Revalidate with a cheap 304 instead of re-sending ~10 MB through the home uplink on every reload.
+        st = f.stat()
+        etag = f'"{st.st_size:x}-{st.st_mtime_ns:x}"'
+        if request.headers.get("if-none-match") == etag:
+            return Response(status_code=304, headers={"ETag": etag, "Cache-Control": "private, no-cache"})
         accept = request.headers.get("accept-encoding", "")
         encoded = None
         for enc, suffix in (("br", ".br"), ("gzip", ".gz")):
@@ -231,7 +236,8 @@ def create_app(lab: Lab) -> FastAPI:
         if encoded:
             resp.headers["Content-Encoding"] = encoded[0]
             resp.headers["Vary"] = "Accept-Encoding"
-        resp.headers["Cache-Control"] = "private, max-age=60" if f.suffix in (".pck", ".wasm") else "private, max-age=300"
+        resp.headers["Cache-Control"] = "private, no-cache"
+        resp.headers["ETag"] = etag
         resp.headers["X-Content-Type-Options"] = "nosniff"
         resp.headers["Cross-Origin-Resource-Policy"] = "same-origin"
         return resp

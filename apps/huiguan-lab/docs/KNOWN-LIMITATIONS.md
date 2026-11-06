@@ -1,12 +1,14 @@
 # 已知限制与未完成项
 
-## 阻塞中
+## 网络与外网入口
 
-- **外网入口还没有建立**：新建 Tunnel 和 `pc-lab.iridescently.cn` 记录时，被本机 Claude Code 的自动权限拦截（「DNS / Domain / Cert Changes」类操作）。这不是 Cloudflare 权限的问题。负责人双击 `Setup-LAB-Tunnel.cmd` 即可。在这之前，「至少一次通过外部网络验证」为 BLOCKED。
-- **27 条旧 pc-* 记录的清理**：需要负责人在 CLOUDFLARE-DNS-AUDIT.md 的方案 A、B、C 中选择。删除同样属于 DNS 写操作，也要由负责人运行（命令已写在审计文档里）。
-
+- 外网入口已经由负责人建好（Tunnel `zszm-lab-v2`）。本机的外网流量都经过 Mihomo TUN 代理。实测 Tunnel 改走 http2 后（QUIC 经代理时会断流），下载约 1.5–3 Mbps，首次加载 10 MB 游戏包需要 30–60 秒；外网 WebSocket 往返 1.1–1.3 秒，因为客户端和 Tunnel 都要经过本机代理。有一段时间，本机到 Cloudflare 代理的 `.cn` 主机（包括 `pc-huiguan`）还出现过 TLS 握手失败。建议在 Mihomo 里给 `cloudflared.exe`（或 `*.argotunnel.com` 以及 198.41.192.0/20、198.41.200.0/21）加一条直连规则，并用手机流量这类真正外部的网络复测。`.cn` 正式站当初迁到国内 CDN，可能也是同类原因；`pc-lab.iridescently.cn` 走的是 Cloudflare 代理，在中国大陆的可用性需要实测。
+- `cloudflared.yml` 加了 `protocol: http2`（原配置备份在同目录 `cloudflared.yml.bak-20261106-quic`）。
+- Cloudflare 在页面里自动注入了 Web Analytics 的 beacon 脚本，被 LAB 的 CSP 拦截。这不影响功能，只会在控制台留下报错；如果不需要，可以在 Cloudflare 里关闭这个主机的 Web Analytics。
+- 27 条旧 pc-* 记录仍然全部保留，需要负责人在 CLOUDFLARE-DNS-AUDIT.md 的方案 A、B、C 中选择。
 ## 已知限制
 
+- 公共世界的羊和狼已在第 145 tick（世界第 7 天）自然灭绝，这是 Mesa 模型本身的结果，世界时间还会继续走。要重新看到生物，需要换一个新的 `world.sqlite`（或者在私人空间里开辟分支前先重置）。管理台可以生成测试生物，但它们不参与生态。
 - R4 Mesa 模型的历史上限是 1,001 tick：按默认每 60 秒一个 tick，公共世界约 16.7 小时后停在上限。在上限停下（`mesa_support_limit`）时不会自动重启，需要停掉 LAB、换一个新的 `world.sqlite` 后重启。这是 R4 研究代码自带的约束；延长上限要改 R4 的 adapter，不属于本轮范围。
 - R4 偶尔出现 worker 清理超时（`taskkill` 在 10 秒内没完成，机器高负载时实测出现过），对应分支的调度会被 R4 停下。网关会自动重新启用，每个分支每小时最多 6 次。
 - 浏览器测试在 headless Chromium 的软件渲染（SwiftShader）下进行，帧率 7–14 FPS 只能说明能跑，不代表真实显卡上的帧率。真实浏览器和显卡上的帧率还需要你或测试玩家实测（NOT TESTED）。

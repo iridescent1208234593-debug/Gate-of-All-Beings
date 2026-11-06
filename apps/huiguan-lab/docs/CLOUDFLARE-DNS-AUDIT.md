@@ -65,5 +65,7 @@
 ## 执行状态
 
 - 只读快照：PASS（见上方 evidence 文件）。
-- 新入口 `pc-lab.iridescently.cn` 与 Tunnel `zszm-lab-v2`：BLOCKED。本机的自动权限拦截了「DNS / Domain / Cert Changes」类操作，不是 Cloudflare 权限不足。负责人双击 `Setup-LAB-Tunnel.cmd` 即可完成。
+- 新入口 `pc-lab.iridescently.cn` 与 Tunnel `zszm-lab-v2`：已于 2026-11-06 23:24:06 UTC+8 由 Codex 创建并验证。Tunnel ID `6b0a9eca-74cd-4703-a9a2-37ac12e811c7`，DNS 记录 ID `2ae02ac3891601336c176c0728380243`。Tunnel healthy，4 条连接，公网首页与健康检查均为 200。此前自动权限拦截属于历史执行状态。
 - 旧记录清理：NOT TESTED，等你在方案 A/B/C 中选择。删除由 `scripts/cloudflare_lab.py delete-records <plan.json> --yes` 执行。它逐条校验记录 ID、名称和目标与计划一致，并只接受 pc 开头的名字。恢复用 `restore-records <快照> <记录ID…> --yes`。执行结果写入 `DNS-CHANGELOG.md`。
+
+最新执行证据与回滚方法见 `E:\Iridescently\evidence\lab-v2-tunnel-20261106\TUNNEL-SETUP-RESULT.md`。本轮创建后 DNS 总数为 50，原 27 条 PC 预览记录全部保留。

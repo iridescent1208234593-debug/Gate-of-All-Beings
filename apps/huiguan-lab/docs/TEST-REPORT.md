@@ -6,7 +6,7 @@
 
 | 检查 | 结果 | 依据 |
 |---|---|---|
-| 公开域名可以访问 | **BLOCKED** | Tunnel 和 DNS 写操作被本机自动权限拦截，等负责人运行 `Setup-LAB-Tunnel.cmd` |
+| 公开域名可以访问 | PASS（不稳定） | 负责人建好 Tunnel 后，本机经外网访问首页、登录、游戏包和 WSS 都成功过（证据 `e2e-public-3`）。2026-11-07 00:15 前后，本机到 `*.iridescently.cn` 的 Cloudflare 代理入口出现 TLS 握手失败和超时，`pc-huiguan.iridescently.cn` 也一样，而同一时刻 `www.cloudflare.com` 和 `.cn` 的 CDN 入口都正常。判断是本机代理（Mihomo）到 Cloudflare 代理 `.cn` 主机这一段的线路问题，不是 LAB 本身的问题，见 KNOWN-LIMITATIONS |
 | 没有测试码无法进入游戏或取得游戏资源 | PASS | pytest `test_entry_requires_code`；浏览器测试 A1 中，访问 `/play/index.pck` 被重定向回测试码页 |
 | 无效测试码被拒绝 | PASS | pytest，浏览器测试 A2 |
 | 有效测试码可以登录 | PASS | 浏览器测试 A3（两个独立浏览器上下文） |
@@ -30,7 +30,7 @@
 | 断线后能重连：每一步都重新加载页面，玩家回到原空间，对方列表里只有一个 A，没有幽灵 | PASS |
 | 同一测试码重复连接时旧连接被替换 | PASS（pytest `test_reconnect_replaces_old_socket_without_ghost`） |
 | 服务端拒绝作弊移动（瞬移会收到 `correct`） | PASS（pytest） |
-| 至少一次通过外部网络验证 | **BLOCKED**（等待 Tunnel） |
+| 至少一次通过外部网络验证 | PASS（部分）：`e2e-public-3` 经 `https://pc-lab.iridescently.cn`，A1–A3、C0、B1–B4、C1 全部 PASS（登录、真实上传、两人互看移动、聊天、互看 OC）。之后切换 3D 视图要重新加载页面，这一步在 300 秒内没完成，原因是隧道下行太慢，加上旧的缓存策略让每次重载都要重新下载约 10 MB；缓存策略已改为 ETag 加 304 重新验证。3D、私人空间和重连这几项在外网上 NOT TESTED（本机已 PASS）。外网 RTT 为 1.1–1.3 s（客户端和 Tunnel 都要经过本机代理，属于最坏情况） |
 
 ## C. OC
 
@@ -74,7 +74,7 @@
 | 进程崩溃能被发现并有限次数重启 | 逻辑已实现；没有人为杀进程做故障注入：NOT TESTED |
 | R4 调度出错后自动恢复 | PASS（实际遇到过一次 worker 清理超时，网关的调度核对把它重新启用） |
 | 不与香港生产串线 | PASS（独立数据库与令牌，Host 白名单，没有任何指向生产的地址；见 SECURITY.md） |
-| 新 Tunnel 与旧预览 Tunnel 不冲突 | NOT TESTED（新 Tunnel 还没建） |
+| 新 Tunnel 与旧预览 Tunnel 不冲突 | PASS：两个 Tunnel 的 ID 不同（`zszm-lab-v2` 是 6b0a9eca…，旧预览是 b79024ab…），ingress 主机名互不重叠，旧预览的配置没有改动 |
 | DNS 清理后必要入口仍在 | NOT TESTED（还没清理） |
 | 服务端集成测试 | PASS，12/12（`pytest server/tests`） |
 
@@ -101,5 +101,5 @@
 | 测试 | 结果 |
 |---|---|
 | 栖风原 Phase 1C.3 `VerifyPhase1C3.ps1`，第一次重跑（21:40） | FAIL：服务端 25/25 PASS，原生客户端第 12 项 `nearby_interaction_enabled` 报 ERROR |
-| 同上，第二次重跑（机器负载较低时） | 见下方补记 |
+| 同上，第二次重跑（22:55，机器负载较低） | FAIL：同一项 `nearby_interaction_enabled`。可以复现，不是偶发，是旧工程现有的回归问题（不影响 LAB V2）。演示服务已停止 |
 | R4 长时基准（`r4/run.ps1`） | NOT TESTED |

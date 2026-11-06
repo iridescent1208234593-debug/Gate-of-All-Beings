@@ -9,5 +9,16 @@
 
 待执行：
 
-- 负责人运行 `Setup-LAB-Tunnel.cmd`。执行后在这里补一行，填 Tunnel ID 和记录 ID（脚本会打印出来）。回滚方法：在 Cloudflare 删除这条记录和 Tunnel `zszm-lab-v2`，并删除 `secrets/lab-v2/tunnel.json` 与 `cloudflared.yml`。
+- LAB 专用入口已由 Codex 完成，见下方执行记录。
 - pc-* 清理：选定方案后，由负责人运行 `server\.venv\Scripts\python.exe scripts\cloudflare_lab.py delete-records docs\dns-plan-A.json --yes`（方案 A：18 条）。脚本会把实际删除的记录逐条打印出来，请把输出贴到这里。回滚方法：`cloudflare_lab.py restore-records <快照文件> <记录ID…> --yes`，按快照里的原始类型、目标和代理状态重建。删除之后，还要把 `operations/local-workspace.json` 的 `pcPreviewRoots` 改成 `["iridescently.xyz"]`，否则网站管家下次运行 pc-configure 会重建这些记录。
+
+## Codex 执行记录
+
+执行时间为 2026-11-06 23:24:06 UTC+8。
+
+- 创建 Tunnel `zszm-lab-v2`，ID `6b0a9eca-74cd-4703-a9a2-37ac12e811c7`。
+- 创建代理 CNAME `pc-lab.iridescently.cn`，记录 ID `2ae02ac3891601336c176c0728380243`，目标 `6b0a9eca-74cd-4703-a9a2-37ac12e811c7.cfargotunnel.com`。
+- Ingress 精确回源 `http://127.0.0.1:18300`。重启 LAB 后 Tunnel healthy，4 条连接。
+- 公网首页与健康检查均为 200，匿名 API 为 401，游戏入口为 303，管理 API 为 404，匿名 WebSocket 握手为 403。
+- 原 27 条 PC 预览记录全部保留，三 Zone 总记录数 49 → 50。旧预览清理方案另行处理。
+- 变更前后快照、逐项差异、回滚方法及验证边界见 `E:\Iridescently\evidence\lab-v2-tunnel-20261106\TUNNEL-SETUP-RESULT.md`。
