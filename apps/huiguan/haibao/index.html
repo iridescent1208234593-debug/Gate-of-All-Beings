@@ -1778,6 +1778,7 @@ function renderPosterList() {
       const r = await fetch('/api/posters/publish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: p.id, is_public: !p.is_public }) });
       const d = await r.json();
       if (!d.ok) { alert(d.error || '操作失败'); return; }
+      if (d.is_public && d.review_status === 'pending') alert('已提交到同人画廊，审核员审核通过后就会显示～');
       loadMyPosters();
     };
     box.appendChild(div);

@@ -1148,6 +1148,12 @@
           <input type="file" id="imgInput" name="image" accept="image/jpeg,image/png,image/webp" multiple onchange="handleImage(event)">
         </div>
         <div id="imgGallery" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
+        <fieldset class="art-source" style="border:0;padding:0;margin:12px 0 0;">
+          <legend style="font-size:13px;margin-bottom:6px;">立绘来源 <span style="color:var(--text-dim);font-size:11px">（有图时请选，公开到同人画廊时会用到）</span></legend>
+          <label style="display:inline-flex;align-items:center;gap:6px;margin-right:16px;font-size:13px;"><input type="radio" name="art_source" value="human"> 手绘 / 约稿 / 已获授权</label>
+          <label style="display:inline-flex;align-items:center;gap:6px;font-size:13px;"><input type="radio" name="art_source" value="ai"> AI 生成或 AI 辅助</label>
+          <div class="hint">AI 立绘的设表会收进同人画廊的「AI 立绘」折叠区，登记与展示页都不受影响；审核员也会帮忙核对。</div>
+        </fieldset>
         <div class="oc-avatar-editor" aria-labelledby="ocAvatarHeading">
           <div class="oc-avatar-editor__preview"><img loading="lazy" decoding="async" id="ocAvatarPreview" alt="OC 头像预览" hidden><span id="ocAvatarFallback" aria-hidden="true">人设</span></div>
           <div class="oc-avatar-editor__body">
@@ -1369,7 +1375,7 @@
 
 <script src="/image-upload.js?v=20261027z"></script>
 <script src="/reactions-fx.js?v=20261027z"></script>
-<script src="/group-reminder.js?v=20261027z"></script>
+<script src="/group-reminder.js?v=20261106c"></script>
 <link rel="stylesheet" href="/avatar-cropper.css?v=20261027z">
 <script src="/avatar-cropper.js?v=20261027z"></script>
 <script src="/character-colors.js?v=20261027z"></script>
@@ -2658,6 +2664,7 @@ function collectData() {
     appearance: f.appearance.value.trim(),
     image: imageList[0] || '',
     images: imageList.slice(),
+    art_source: (f.querySelector('input[name="art_source"]:checked') || {}).value || '',
     avatar_asset_id: ocAvatarAsset,
     avatar_display_shape: ocAvatarDisplayShape,
     abilities: abilities,
@@ -3952,6 +3959,8 @@ function fillFormFromData(c) {
   f.dislikes.value = c.dislikes || '';
   f.food.value = c.food || '';
   f.appearance.value = c.appearance || '';
+  const artSource = f.querySelector('input[name="art_source"][value="' + (c.art_source === 'ai' ? 'ai' : c.art_source === 'human' ? 'human' : '') + '"]');
+  if (artSource) artSource.checked = true;
   weaponList = (c.weapon || '').split('、').map(s => s.trim()).filter(Boolean);
   renderWeaponTags();
   const _wInput = document.getElementById('weaponInput'); if (_wInput) _wInput.value = '';

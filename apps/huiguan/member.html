@@ -68,6 +68,7 @@ select.ctl{font-family:inherit;font-size:12px;padding:3px 6px;border:1px solid v
     <input id="q" placeholder="搜索昵称 / 用户名…" oninput="state.q=this.value;render()">
     <select id="fRole" onchange="state.fRole=this.value;render()"><option value="">角色·全部</option><option value="executor">执行者</option><option value="elder">长老</option><option value="admin">管理员</option></select>
     <select id="fEdit" onchange="state.fEdit=this.value;render()"><option value="">编辑·全部</option><option value="scribe">是编辑</option><option value="none">非编辑</option></select>
+    <select id="fReview" onchange="state.fReview=this.value;render()"><option value="">审核·全部</option><option value="yes">是审核员</option><option value="no">非审核员</option></select>
     <select id="fStatus" onchange="state.fStatus=this.value;render()"><option value="">状态·全部</option><option value="active">正常</option><option value="banned">已封禁</option></select>
     <select id="sortBy" onchange="state.sortBy=this.value;render()"><option value="login">按最近登录</option><option value="sheets">按人设表数量</option><option value="name">按昵称</option></select>
     <span class="stat" id="stat"></span>
@@ -77,7 +78,7 @@ select.ctl{font-family:inherit;font-size:12px;padding:3px 6px;border:1px solid v
 <script src="/shared/shared-ui/site-nav.js?v=20261027z"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-let myScope='', state={q:'',fRole:'',fEdit:'',fStatus:'',sortBy:'login'};
+let myScope='', state={q:'',fRole:'',fEdit:'',fReview:'',fStatus:'',sortBy:'login'};
 let users=[], charMap={}, expanded=new Set(), loadedChars=false;
 const roleName={executor:'执行者',elder:'长老',admin:'管理员'};
 async function init(){
@@ -112,6 +113,7 @@ function filtered(){
   if(state.q){const q=state.q.toLowerCase(); list=list.filter(u=>(u.nickname||u.name||'').toLowerCase().includes(q));}
   if(state.fRole) list=list.filter(u=>u.role===state.fRole);
   if(state.fEdit) list=list.filter(u=>(u.edit_role==='scribe')===(state.fEdit==='scribe'));
+  if(state.fReview) list=list.filter(u=>!!u.is_fan_reviewer===(state.fReview==='yes'));
   if(state.fStatus) list=list.filter(u=>u.status===state.fStatus);
   if(state.sortBy==='sheets') list.sort((a,b)=>sheetCount(b)-sheetCount(a));
   else if(state.sortBy==='name') list.sort((a,b)=>(a.nickname||a.name||'').localeCompare(b.nickname||b.name||'','zh'));
@@ -126,7 +128,7 @@ function render(){
   document.getElementById('stat').textContent=`共 ${users.length} 位用户（站内 ${locals} · USSO ${users.length-locals}）· 有设表 ${withChars} · 显示 ${list.length}`;
   if(!list.length){box.innerHTML='<div class="state-box">没有匹配的成员。</div>';return;}
   const sheetTh=myScope==='all'?'<th>人设表</th>':'';
-  box.innerHTML='<table><thead><tr><th>来源</th><th>昵称</th><th>角色</th><th>编辑</th><th>状态</th><th>最近登录</th>'+sheetTh+'<th>身份</th><th>操作</th></tr></thead><tbody>'+'</tbody></table>';
+  box.innerHTML='<table><thead><tr><th>来源</th><th>昵称</th><th>角色</th><th>编辑</th><th>同人审核</th><th>状态</th><th>最近登录</th>'+sheetTh+'<th>身份</th><th>操作</th></tr></thead><tbody>'+'</tbody></table>';
   // ---- 分批渲染：首屏 40 条，仅手动下滑才继续加载 ----
   const __list=list, __tb=box.querySelector('tbody'), BATCH=40;
   const ROW=u=>{
@@ -137,6 +139,7 @@ function render(){
         ?`<select class="ctl" onchange="upd('${u.kind}','${u.uid}','role',this.value)">${['executor','elder','admin'].map(x=>`<option value="${x}" ${u.role===x?'selected':''}>${roleName[x]}</option>`).join('')}</select>`
         :'<span class="dim">执行者</span>';
       const scribeSel=`<select class="ctl" onchange="upd('${u.kind}','${u.uid}','edit_role',this.value)"><option value="none" ${u.edit_role!=='scribe'?'selected':''}>否</option><option value="scribe" ${u.edit_role==='scribe'?'selected':''}>是</option></select>`;
+      const reviewSel=`<select class="ctl" onchange="upd('${u.kind}','${u.uid}','is_fan_reviewer',this.value==='1')"><option value="0" ${u.is_fan_reviewer?'':'selected'}>否</option><option value="1" ${u.is_fan_reviewer?'selected':''}>是</option></select>`;
       const statusBtn=myScope!=='all'?'':(u.status==='banned'
         ?`<button class="op" onclick="upd('${u.kind}','${u.uid}','status','active')">解封</button>`
         :`<button class="op danger" onclick="upd('${u.kind}','${u.uid}','status','banned')">封禁</button>`);
@@ -147,15 +150,15 @@ function render(){
       const schemes=u.schemes||[], posters=u.posters||[];
       const schemeHtml=schemes.length?schemes.map(c=>`<span class="scheme-chip"><span class="scheme-dot" style="background:${escAttr(c.primary_color)}"></span><span class="scheme-dot" style="background:${escAttr(c.accent_color)}"></span>${esc(c.primary_name||'主色')}×${esc(c.accent_name||'辅色')} <span class="dim">${esc((c.name||'').slice(0,10))}</span> <span class="dim">${esc((c.created_at||'').slice(0,10))}</span></span>`).join(''):'<span class="dim">暂无自定义配色</span>';
       const posterHtml=posters.length?posters.map(p=>`<span class="poster-chip">${p.img_ref?`<img loading="lazy" decoding="async" src="${escAttr(p.img_ref)}" alt="">`:''}<span class="p-info"><span class="p-title">${esc(p.title)}</span><span class="p-sub">${p.char_name?'关联：'+esc(p.char_name):'未关联人设'} · ${p.is_public?'已共享画廊':'私有'} · ${esc((p.updated_at||'').slice(0,10))}</span></span><button class="del-sheet" data-id="${p.id}" data-title="${escAttr(p.title)}" onclick="delPoster(this.dataset.id,this.dataset.title)" title="删除该海报">✕</button></span>`).join(''):'<span class="dim">暂无配色海报</span>';
-      const sheetRow=(isOpen&&myScope==='all')?`<tr class="sheet-row"><td colspan="9">${sheets.length?sheets.map(s=>`<span class="sheet-chip">◈ <a href="/show.html?code=${encodeURIComponent(s.code)}" target="_blank" style="color:inherit;text-decoration:none">${esc(s.name)}</a><button class="del-sheet" data-key="${escAttr(key)}" data-code="${escAttr(s.code)}" data-name="${escAttr(s.name)}" data-version="${s.version==null?'':s.version}" onclick="delSheet(this.dataset.key,this.dataset.code,this.dataset.name,this.dataset.version)" title="删除该设表">✕</button></span>`).join(''):'<span class="dim">暂无人设表</span>'}<div class="mgr-block"><div class="mgr-title">自定义配色（与 /haibao 互通）</div>${schemeHtml}</div><div class="mgr-block"><div class="mgr-title">配色海报（${posters.length}）</div>${posterHtml}</div></td></tr>`:'';
-      return `<tr><td class="dim">${u.kind==='local'?'站内':'USSO'}</td><td>${esc(u.nickname||u.name)}</td><td>${roleSel}</td><td>${scribeSel}</td><td>${u.status==='banned'?'<span class="tag banned">已封禁</span>':'<span class="dim">正常</span>'}</td><td class="dim">${esc((u.last_login||'').replace('T',' ').substring(0,16))}</td>${sheetTd}<td><span class="tag ${u.role==='admin'?'admin':u.role==='elder'?'elder':''}">${roleName[u.role]||'执行者'}</span> ${u.edit_role==='scribe'?'<span class="tag scribe">编辑</span>':''}</td><td>${statusBtn} ${resetBtn}</td></tr>${sheetRow}`;
+      const sheetRow=(isOpen&&myScope==='all')?`<tr class="sheet-row"><td colspan="10">${sheets.length?sheets.map(s=>`<span class="sheet-chip">◈ <a href="/show.html?code=${encodeURIComponent(s.code)}" target="_blank" style="color:inherit;text-decoration:none">${esc(s.name)}</a><button class="del-sheet" data-key="${escAttr(key)}" data-code="${escAttr(s.code)}" data-name="${escAttr(s.name)}" data-version="${s.version==null?'':s.version}" onclick="delSheet(this.dataset.key,this.dataset.code,this.dataset.name,this.dataset.version)" title="删除该设表">✕</button></span>`).join(''):'<span class="dim">暂无人设表</span>'}<div class="mgr-block"><div class="mgr-title">自定义配色（与 /haibao 互通）</div>${schemeHtml}</div><div class="mgr-block"><div class="mgr-title">配色海报（${posters.length}）</div>${posterHtml}</div></td></tr>`:'';
+      return `<tr><td class="dim">${u.kind==='local'?'站内':'USSO'}</td><td>${esc(u.nickname||u.name)}</td><td>${roleSel}</td><td>${scribeSel}</td><td>${reviewSel}</td><td>${u.status==='banned'?'<span class="tag banned">已封禁</span>':'<span class="dim">正常</span>'}</td><td class="dim">${esc((u.last_login||'').replace('T',' ').substring(0,16))}</td>${sheetTd}<td><span class="tag ${u.role==='admin'?'admin':u.role==='elder'?'elder':''}">${roleName[u.role]||'执行者'}</span> ${u.edit_role==='scribe'?'<span class="tag scribe">编辑</span>':''} ${u.is_fan_reviewer?'<span class="tag scribe">审核</span>':''}</td><td>${statusBtn} ${resetBtn}</td></tr>${sheetRow}`;
     };
   let __i=0;
   function __setSentinel(on){
     let s=document.getElementById('msent');
     if(on && !s){
       s=document.createElement('tr'); s.id='msent';
-      s.innerHTML='<td colspan="9" style="text-align:center;color:var(--dim);padding:12px">向下滑动加载更多…</td>';
+      s.innerHTML='<td colspan="10" style="text-align:center;color:var(--dim);padding:12px">向下滑动加载更多…</td>';
       __tb.appendChild(s);
     } else if(!on && s){ s.remove(); }
   }
