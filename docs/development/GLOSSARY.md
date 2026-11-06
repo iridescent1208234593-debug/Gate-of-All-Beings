@@ -76,6 +76,12 @@
 ### Bilibili Toy（B站 Toy 门庭）
 B站 Toy 平台上的西木会馆门庭页，源码在 `apps/bilibili-toy`，由 `tools/toy/build-toy-bundle.mjs` 构建成静态包。它是独立分发渠道，不是 Release、不是站点的一部分；它不碰会馆账户，只读取匿名只读接口 `/api/toy/archive`（公开同人前十与官方档案摘要），并链接到 `content.json` 批准的根域页面；发布主体永远是项目方自己的 B站 账号。Toy 平台的 `toyOpenId` 只在当前 Toy 内有效，不能当作 Account、`uid` 或 `user_id`。
 
+### Fan Review（同人审核）
+同人画廊（`/fan.html`）的上架审核。记录在 `fan_characters.review_status`：`pending`（待审）/ `approved`（通过）/ `rejected`（退回，理由在 `review_note`）。只有 `is_public=1 AND review_status='approved'` 的记录出现在 `/api/fan/list`、展示页兜底与 `/api/toy/archive`；作者改动已公开设表的内容会回到 `pending`。审核权（`can_review_fan`）= 管理员、长老或 `is_fan_reviewer=1` 的账号（`local_users` / `user_flags` 列），它与官方画廊的编辑（`edit_role='scribe'`）是两个互不包含的职位；两种申请共用 `executor_requests`，用 `requested_role`（`scribe` / `fan_reviewer`）区分。存量迁移：列首次加入时，已公开的记录记为 `approved`（`reviewed_by='legacy'`）。
+
+### Art Source（立绘来源）
+OC 数据与 `fan_characters` 上的 `art_source`：`''` 未声明、`human` 手绘 / 约稿 / 已授权、`ai` AI 生成或 AI 辅助。同人画廊按它与有无立绘分三个分区（`/api/fan/list?view=`）：`art` 有图且非 AI（默认，Toy 也用这个口径）、`text` 纯文字设（无图）、`ai` AI 立绘（页面默认折叠）。作者声明为 AI 会同步；已标为 AI 的不会因作者改声明自动变回，由审核员更正。
+
 ## 已知容易混淆的词
 
 - `uid`：部分认证/SSO 层使用的用户标识字段；不能脱离 `kind` 单独作为跨系统 owner。

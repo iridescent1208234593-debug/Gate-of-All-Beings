@@ -8,78 +8,184 @@
 <title>同人画廊 · 西木会馆</title>
 <link rel="icon" href="favicon.png">
 <style>
-:root{--bg:#f5f0e8;--panel:#fbf8f2;--border:#d4cfbe;--text:#3a4a3e;--dim:#5a6e5e;--accent:#5a9e8f;--gold:#d4a840;--danger:#b3543f}
+:root{--bg:#f5f0e8;--panel:#fbf8f2;--paper:#fffdf8;--border:#d4cfbe;--line:rgba(58,74,62,.12);--text:#3a4a3e;--dim:#5a6e5e;--accent:#5a9e8f;--accent-soft:rgba(90,158,143,.12);--gold:#c99a2e;--gold-soft:rgba(212,168,64,.12);--seal:#b3543f;--danger:#b3543f;--shadow:0 10px 28px rgba(40,52,45,.12)}
 *{margin:0;padding:0;box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--text);font-family:"Noto Serif SC","Source Han Serif SC",serif;min-height:100vh;padding:58px 16px 60px}
+a{color:inherit}
+button{font-family:inherit}
 .nav-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:100;height:42px}
 .nav-title{font-size:13px;color:var(--dim);letter-spacing:1px}
 .nav-right{display:flex;gap:8px;align-items:center}
-.nav-btn{font-family:inherit;font-size:12px;letter-spacing:1px;cursor:pointer;padding:5px 14px;border-radius:6px;border:1px solid var(--gold);background:var(--gold);color:#fff;text-decoration:none;transition:all .15s;display:inline-flex;align-items:center}
+.nav-btn{font-size:12px;letter-spacing:1px;cursor:pointer;padding:5px 14px;border-radius:6px;border:1px solid var(--gold);background:var(--gold);color:#fff;text-decoration:none;transition:filter .15s;display:inline-flex;align-items:center}
 .nav-btn:hover{filter:brightness(1.08)}
-.nav-btn.secondary{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.nav-btn.secondary{background:transparent;color:var(--gold)}
 .wrap{max-width:1200px;margin:0 auto}
-h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
-.subtitle{color:var(--dim);font-size:13px;margin-bottom:20px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
-.search{flex:1;min-width:200px;font-family:inherit;font-size:14px;padding:8px 14px;border:1px solid var(--border);border-radius:6px;background:var(--panel);color:var(--text);outline:none}
+
+/* 题头 */
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:8px 0 18px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.hero h1{font-size:26px;letter-spacing:4px}
+.hero .subtitle{color:var(--dim);font-size:13px;margin-top:4px}
+.hero-stats{display:flex;gap:18px;font-size:12px;color:var(--dim)}
+.hero-stats b{display:block;font-size:20px;color:var(--text);font-weight:600;letter-spacing:1px}
+.hero-links{display:flex;gap:8px;flex-wrap:wrap}
+.ghost-link{font-size:12px;color:var(--accent);text-decoration:none;border:1px solid rgba(90,158,143,.45);border-radius:999px;padding:4px 12px}
+.ghost-link:hover{background:var(--accent-soft)}
+
+/* 共创 · 招募 */
+.cocreate{border:1px solid rgba(201,154,46,.35);border-radius:14px;background:linear-gradient(120deg,rgba(212,168,64,.08),rgba(90,158,143,.07));padding:16px 18px;margin-bottom:20px}
+.cocreate-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cocreate-head strong{font-size:16px;letter-spacing:2px;color:var(--gold)}
+.cocreate-head span{font-size:13px;color:var(--dim)}
+.co-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.co-card{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:10px;background:var(--paper);border:1px solid var(--line);text-decoration:none;color:inherit}
+.co-card strong{font-size:14px;letter-spacing:1px}
+.co-card p{font-size:12px;color:var(--dim);line-height:1.7;flex:1}
+.co-card .co-act{align-self:flex-start;font-size:12px;cursor:pointer;padding:5px 14px;border-radius:999px;border:1px solid var(--gold);background:var(--gold);color:#fff;text-decoration:none}
+.co-card .co-act.done{background:transparent;color:var(--accent);border-color:var(--accent);cursor:default}
+.co-group{margin-top:12px;font-size:13px;line-height:1.9;padding:10px 14px;border:1px dashed var(--border);border-radius:10px;background:rgba(255,255,255,.45)}
+.co-group b{letter-spacing:1px}
+.co-copy{font-size:12px;cursor:pointer;padding:2px 12px;border-radius:999px;border:1px solid var(--accent);background:transparent;color:var(--accent);margin-left:6px}
+
+/* 区块 */
+.section-title{display:flex;align-items:baseline;gap:8px;font-size:16px;letter-spacing:1px;margin:24px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.section-title small{font-size:12px;color:var(--dim);font-weight:400}
+.official-link{display:flex;align-items:center;gap:12px;padding:12px 16px;margin:0 0 6px;border:1px solid rgba(90,158,143,.35);border-radius:10px;background:var(--accent-soft);text-decoration:none;transition:transform .15s}
+.official-link:hover{transform:translateY(-2px)}
+.official-link strong{color:var(--accent);letter-spacing:1px;font-size:14px}
+.official-link span{font-size:12px;color:var(--dim)}
+
+/* 分区页签 + 工具条 */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin:24px 0 14px}
+.tab{cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-1px;padding:8px 16px;font-size:15px;letter-spacing:1px;color:var(--dim)}
+.tab .n{font-size:12px;margin-left:4px;color:var(--dim)}
+.tab.active{color:var(--text);border-bottom-color:var(--gold);font-weight:600}
+.tab-hint{font-size:12px;color:var(--dim);margin:-6px 0 12px;line-height:1.7}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.search{flex:1;min-width:200px;font-family:inherit;font-size:14px;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:var(--panel);color:var(--text);outline:none}
 .search:focus{border-color:var(--accent)}
 .filter-btns{display:flex;gap:6px;flex-wrap:wrap}
-.fbtn{font-family:inherit;font-size:12px;cursor:pointer;padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--dim);transition:all .15s}
+.fbtn{font-size:12px;cursor:pointer;padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:var(--panel);color:var(--dim);transition:all .15s}
 .fbtn:hover{border-color:var(--accent);color:var(--accent)}
 .fbtn.active{background:var(--accent);border-color:var(--accent);color:#fff}
-.stat{color:var(--dim);font-size:13px;margin-bottom:14px}
-.section-title{font-size:16px;letter-spacing:1px;margin:20px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-.section-title small{font-size:12px;color:var(--dim);font-weight:400;margin-left:8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:transform .15s,box-shadow .15s;text-decoration:none;color:inherit;display:block;cursor:pointer}
-.card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
-.card.checkable{border:2px solid transparent;position:relative}
-.card.checkable.selected{border-color:var(--gold)}
-.card.checkable .check-mark{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:2px solid var(--border);background:var(--panel);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all .15s;z-index:2}
-.card.checkable.selected .check-mark{background:var(--gold);border-color:var(--gold);color:#fff}
-.card-img{width:100%;height:200px;object-fit:contain;background:#ece4d6;display:block}
-.card-placeholder{width:100%;height:200px;background:linear-gradient(135deg,rgba(90,158,143,.15),rgba(212,168,64,.12));display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--dim)}
-.card-body{padding:10px 12px 12px}
-.card-name{font-size:15px;font-weight:600;margin-bottom:2px}
-.card-meta{font-size:12px;color:var(--dim);line-height:1.5}
-.card-author{font-size:11px;color:var(--gold);margin-top:4px}
-.card-published-tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;background:var(--accent);color:#fff;margin-top:4px}
-.card-unpublish-btn{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid var(--red,#e74c3c);color:var(--red,#e74c3c);background:transparent;cursor:pointer;margin-top:4px;margin-left:4px;font-family:inherit}
-.card-unpublish-btn:hover{background:var(--red,#e74c3c);color:#fff}
-.card-edit-btn{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;border:1px solid var(--gold);color:var(--gold);background:transparent;cursor:pointer;margin-top:4px;margin-left:4px;font-family:inherit;text-decoration:none}
-.card-edit-btn:hover{background:var(--gold);color:#fff}
-.load-more{display:block;margin:18px auto 0;font-family:inherit;font-size:13px;cursor:pointer;padding:9px 30px;border-radius:8px;border:1px solid var(--accent);background:var(--panel);color:var(--accent);transition:all .15s}
+
+/* 立绘卡片 */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.card{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:12px;overflow:hidden;transition:transform .18s,box-shadow .18s;cursor:pointer;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.card-figure{position:relative;aspect-ratio:3/4;background:linear-gradient(160deg,#efe7d8,#e4dccb);overflow:hidden}
+.card-figure img{position:relative;z-index:1;width:100%;height:100%;object-fit:cover;object-position:top center;display:block;transition:transform .4s}
+.card:hover .card-figure img{transform:scale(1.03)}
+.card-figure.poster img{object-fit:contain;object-position:center}
+.card-initial{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:56px;color:rgba(58,74,62,.35)}
+.chip{display:inline-flex;align-items:center;font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(255,253,248,.88);color:var(--text);border:1px solid var(--line);letter-spacing:1px}
+.card-chips{position:absolute;z-index:2;left:8px;top:8px;display:flex;gap:4px;flex-wrap:wrap}
+.chip.ai{background:rgba(58,74,62,.82);color:#fff;border-color:transparent}
+.chip.poster{background:var(--gold);color:#fff;border-color:transparent}
+.card-rank{position:absolute;z-index:2;right:8px;top:8px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--seal);color:#fff;font-size:12px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.card-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:3px;flex:1}
+.card-name{font-size:15px;font-weight:600;letter-spacing:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-meta{font-size:12px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-author{font-size:12px;color:var(--gold)}
+.card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.mini-btn{font-size:11px;padding:1px 8px;border-radius:4px;border:1px solid var(--gold);color:var(--gold);background:transparent;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+.mini-btn:hover{background:var(--gold);color:#fff}
+.mini-btn.danger{border-color:var(--danger);color:var(--danger)}
+.mini-btn.danger:hover{background:var(--danger);color:#fff}
+
+/* 文字设展册 */
+.folio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.folio{position:relative;background:var(--paper);background-image:repeating-linear-gradient(transparent 0 31px,rgba(58,74,62,.06) 31px 32px);border:1px solid var(--line);border-left:6px double rgba(179,84,63,.35);border-radius:4px 12px 12px 4px;padding:18px 20px 14px 22px;cursor:pointer;transition:transform .18s,box-shadow .18s;display:flex;flex-direction:column;gap:8px}
+.folio:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.folio:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.folio-seal{position:absolute;right:16px;top:16px;width:40px;height:40px;border:2px solid var(--seal);color:var(--seal);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;transform:rotate(-6deg);opacity:.85}
+.folio h3{font-size:20px;letter-spacing:3px;padding-right:52px;line-height:1.4}
+.folio-meta{display:flex;gap:6px;flex-wrap:wrap}
+.folio-sec{font-size:13px;line-height:1.9}
+.folio-sec b{display:inline-block;min-width:3em;color:var(--seal);font-weight:600;letter-spacing:1px;margin-right:6px}
+.folio-story{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
+.folio-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:8px;border-top:1px dashed var(--border);font-size:12px;color:var(--dim)}
+.folio-foot .read{color:var(--accent);letter-spacing:1px}
+
+/* AI 折叠区 */
+.ai-fold{margin-top:26px;border:1px solid var(--border);border-radius:12px;background:var(--panel)}
+.ai-fold>summary{cursor:pointer;list-style:none;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;letter-spacing:1px}
+.ai-fold>summary::-webkit-details-marker{display:none}
+.ai-fold>summary::before{content:'▸';color:var(--dim);transition:transform .15s}
+.ai-fold[open]>summary::before{transform:rotate(90deg)}
+.ai-fold>summary small{color:var(--dim);font-size:12px;letter-spacing:0}
+.ai-fold .ai-inner{padding:4px 16px 16px}
+
+.load-more{display:block;margin:18px auto 0;font-size:13px;cursor:pointer;padding:9px 30px;border-radius:999px;border:1px solid var(--accent);background:var(--panel);color:var(--accent);transition:all .15s}
 .load-more:hover{background:var(--accent);color:#fff}
-.back{display:inline-block;margin-bottom:12px;color:var(--dim);font-size:13px;text-decoration:none}
-.back:hover{color:var(--accent)}
-.publish-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 18px;padding:14px 18px;border:1px solid rgba(212,168,64,.4);border-radius:10px;background:rgba(212,168,64,.07)}
-.publish-bar .pb-text{flex:1;min-width:220px}
-.publish-bar .pb-text strong{display:block;font-size:15px;color:var(--gold);margin-bottom:3px;letter-spacing:1px}
-.publish-bar .pb-text span{font-size:13px;color:var(--text);line-height:1.7}
-.pb-btn{font-family:inherit;font-size:13px;cursor:pointer;padding:8px 20px;border-radius:8px;border:1px solid var(--gold);background:var(--gold);color:#fff;transition:all .15s;white-space:nowrap}
+.empty,.loading,.login-prompt{text-align:center;padding:48px 20px;color:var(--dim);font-size:14px;grid-column:1/-1;line-height:1.8}
+.login-prompt a,.empty a{color:var(--gold);font-weight:600;text-decoration:none}
+
+/* 我的设表 */
+.publish-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 14px;padding:12px 16px;border:1px solid rgba(212,168,64,.4);border-radius:10px;background:var(--gold-soft)}
+.publish-bar .pb-text{flex:1;min-width:220px;font-size:13px;line-height:1.7}
+.publish-bar .pb-text strong{display:block;font-size:14px;color:var(--gold);letter-spacing:1px}
+.pb-btn{font-size:13px;cursor:pointer;padding:8px 20px;border-radius:8px;border:1px solid var(--gold);background:var(--gold);color:#fff;white-space:nowrap}
 .pb-btn:hover{filter:brightness(1.08)}
 .pb-btn:disabled{opacity:.5;cursor:not-allowed}
-.empty{text-align:center;padding:60px;color:var(--dim);font-size:14px}
-.loading{text-align:center;padding:60px;color:var(--dim)}
-.login-prompt{text-align:center;padding:40px;color:var(--dim);font-size:14px}
-.login-prompt a{color:var(--gold);text-decoration:none;font-weight:600}
-.card-poster-tag{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;background:var(--gold);color:#fff;margin-bottom:4px}
+.pb-btn.ghost{background:transparent;color:var(--gold)}
+.pb-btn.green{background:var(--accent);border-color:var(--accent)}
+.card.checkable{border:2px solid transparent}
+.card.checkable.selected{border-color:var(--gold)}
+.check-mark{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:2px solid var(--border);background:var(--panel);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;z-index:2}
+.card.selected .check-mark{background:var(--gold);border-color:var(--gold);color:#fff}
+.status{display:inline-block;font-size:11px;padding:1px 8px;border-radius:999px;letter-spacing:1px}
+.status.approved{background:var(--accent);color:#fff}
+.status.pending{background:var(--gold-soft);color:#94701d;border:1px solid rgba(201,154,46,.5)}
+.status.rejected{background:rgba(179,84,63,.1);color:var(--danger);border:1px solid rgba(179,84,63,.4)}
+.reject-note{font-size:11px;color:var(--danger);line-height:1.6}
+
+/* 审核台 */
+.review-desk{border:1px solid rgba(90,158,143,.5);border-radius:14px;background:var(--panel);margin:0 0 20px}
+.review-desk>summary{cursor:pointer;list-style:none;padding:12px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.review-desk>summary::-webkit-details-marker{display:none}
+.review-desk>summary strong{color:var(--accent);letter-spacing:2px}
+.review-desk>summary .count{background:var(--seal);color:#fff;border-radius:999px;font-size:12px;padding:0 9px}
+.review-desk>summary small{color:var(--dim);font-size:12px}
+.review-list{display:grid;gap:10px;padding:0 16px 16px}
+.review-item{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+.review-thumb{width:96px;aspect-ratio:3/4;border-radius:6px;background:#ece4d6;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:12px}
+.review-thumb img{width:100%;height:100%;object-fit:cover;object-position:top}
+.review-main{display:flex;flex-direction:column;gap:5px;min-width:0}
+.review-main .t{font-weight:600;letter-spacing:1px}
+.review-main .m{font-size:12px;color:var(--dim)}
+.review-main .s{font-size:12px;line-height:1.7;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.review-ops{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:auto}
+.review-ops select{font-family:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--panel);color:var(--text)}
+
+/* 灯箱与弹窗 */
 #posterLightbox{position:fixed;inset:0;z-index:9999;background:rgba(15,20,17,.82);display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:24px;cursor:zoom-out}
 #posterLightbox.is-open{display:flex}
 #posterLightbox img{max-height:82vh;max-width:92vw;border-radius:8px;box-shadow:0 12px 48px rgba(0,0,0,.5);background:#222}
 #posterLightbox .lb-cap{color:#f5f0e8;font-size:14px;letter-spacing:1px;text-align:center;line-height:1.7}
 #posterLightbox .lb-cap small{color:rgba(245,240,232,.6);font-size:12px}
-
-/* 弹窗 */
 .modal{position:fixed;inset:0;z-index:9990;background:rgba(20,26,22,.55);display:none;align-items:center;justify-content:center;padding:20px}
 .modal.is-open{display:flex}
 .modal-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;max-width:500px;width:100%;padding:24px;box-shadow:0 10px 40px rgba(20,26,22,.30)}
-.modal-title{font-size:18px;letter-spacing:1px;margin-bottom:16px}
+.modal-title{font-size:18px;letter-spacing:1px;margin-bottom:14px}
 .modal-close{float:right;cursor:pointer;background:none;border:none;font-size:20px;color:var(--dim);line-height:1}
-.modal-close:hover{color:var(--danger)}
-.modal-body{font-size:14px;color:var(--text);line-height:1.8;margin-bottom:16px}
+.modal-body{font-size:14px;line-height:1.8;margin-bottom:14px}
+.modal-input{width:100%;font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--paper);color:var(--text);resize:vertical;min-height:80px;margin-bottom:6px}
+.modal-err{font-size:12px;color:var(--danger);min-height:18px}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end}
-@media(max-width:600px){.grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
+@media(max-width:600px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .folio-grid{grid-template-columns:1fr}
+  .hero h1{font-size:22px}
+  .review-item{grid-template-columns:72px 1fr}
+  .review-thumb{width:72px}
+  .tab{padding:8px 10px;font-size:14px}
+  .co-card p{display:none}
+  .co-card{flex-direction:row;align-items:center;justify-content:space-between}
+  .co-card .co-act{align-self:center;white-space:nowrap}
+}
+@media(prefers-reduced-motion:reduce){.card,.folio,.card-figure img{transition:none}}
 </style>
 </head>
 <body>
@@ -91,304 +197,506 @@ h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
   </div>
 </div>
 <div class="wrap">
-  <h1>同人画廊</h1>
-  <p class="subtitle">罗小黑战记 · 同人创作角色 · 由爱好者提交与分享</p>
+  <header class="hero">
+    <div>
+      <h1>同人画廊</h1>
+      <p class="subtitle">罗小黑战记 · 同人创作角色 · 由爱好者登记、经审核员审核后公开</p>
+    </div>
+    <div class="hero-stats" id="heroStats" aria-live="polite"></div>
+  </header>
 
-  <!-- 登录后可见：从已登记人设公开 -->
-  <div class="publish-bar" id="publishBar" style="display:none">
+  <!-- 共创与招募：审核员、编辑都要先进群 -->
+  <section class="cocreate" aria-labelledby="coTitle">
+    <div class="cocreate-head">
+      <strong id="coTitle">一起共创西木会馆</strong>
+      <span>登记你的角色、帮忙审核同人设表、维护官方资料，都欢迎！</span>
+    </div>
+    <div class="co-grid">
+      <a class="co-card" href="/#charForm">
+        <strong>✍️ 登记你的 OC</strong>
+        <p>在会馆登记人设后，可以在下方一键公开到同人画廊，审核通过后大家就能看到。</p>
+        <span class="co-act">去登记</span>
+      </a>
+      <div class="co-card">
+        <strong>🔍 申请成为同人画廊审核员</strong>
+        <p>审核大家提交的设表、核对 AI 立绘标记、友善地给出修改建议。</p>
+        <button type="button" class="co-act" id="reviewerApplyBtn">申请审核员</button>
+      </div>
+      <a class="co-card" href="gallery.html#scribeBanner">
+        <strong>📚 申请成为官方画廊编辑</strong>
+        <p>修订、补充《罗小黑战记》官方角色资料，审查他人提交的补充与勘误。</p>
+        <span class="co-act" id="scribeApplyLink">去官方画廊申请</span>
+      </a>
+    </div>
+    <div class="co-group">
+      申请<b>审核员</b>或<b>编辑</b>前，请先加入会馆交流群，方便沟通和互相照应：<br>
+      QQ 群 <b id="groupQQ">878029597</b><button type="button" class="co-copy" id="copyQQ">复制群号</button>
+      · 微信群「<b>西木会馆-众生之门</b>」（二维码见页脚 / 群聊）
+    </div>
+  </section>
+
+  <!-- 审核台（审核员 / 长老 / 管理员可见） -->
+  <details class="review-desk" id="reviewDesk" hidden open>
+    <summary><strong>审核台</strong><span class="count" id="reviewCount">0</span><small>先到先审 · 通过后进入画廊 · 退回需写理由</small></summary>
+    <div class="review-list" id="reviewList"><div class="loading">加载中…</div></div>
+  </details>
+
+  <!-- 我的已登记人设 -->
+  <div class="section-title">我的已登记人设 <small id="myCount"></small></div>
+  <div class="publish-bar" id="publishBar" hidden>
     <div class="pb-text">
       <strong>从已登记人设中公开</strong>
-      <span>勾选下方角色卡片，一键公开到同人画廊——无需重新填写信息。</span>
+      勾选下方角色，一键提交到同人画廊。审核员审核通过后会出现在画廊里；修改已公开的设表后也会重新审核。
     </div>
-    <button class="pb-btn" id="publishBtn" onclick="doPublish()" disabled>公开到同人画廊</button>
+    <button type="button" class="pb-btn" id="publishBtn" disabled>公开到同人画廊</button>
   </div>
+  <div class="grid" id="myGrid"><div class="loading">加载中…</div></div>
 
-  <!-- 快速跳转卡片 -->
-  <a href="gallery.html" style="display:flex;align-items:center;gap:14px;padding:16px 18px;margin:0 0 18px;border:1px solid rgba(90,158,143,.45);border-radius:10px;background:linear-gradient(120deg,rgba(90,158,143,.10),rgba(212,168,64,.08));text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s;"
-     onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(30,40,34,.14)'"
-     onmouseout="this.style.transform='';this.style.boxShadow=''">
-    <div style="width:46px;height:46px;flex:none;display:flex;align-items:center;justify-content:center;font-size:28px;">🏛️</div>
-    <div style="flex:1;min-width:220px">
-      <strong style="display:block;font-size:16px;color:var(--gold);letter-spacing:1px;margin-bottom:4px;">官方角色画廊 →</strong>
-      <span style="font-size:13px;color:var(--text);line-height:1.7">查看经编辑审核的官方角色档案，了解会馆历代人物设定</span>
-    </div>
+  <a class="official-link" href="gallery.html" style="margin-top:24px">
+    <span style="font-size:24px">🏛️</span>
+    <span><strong>官方角色画廊 →</strong><br><span>经编辑维护的《罗小黑战记》官方角色档案</span></span>
   </a>
 
-  <!-- 我的已登记人设（登录后可见） -->
-  <div id="mySection" style="display:none">
-    <div class="section-title">我的已登记人设 <small id="myCount"></small></div>
-    <div class="grid" id="myGrid"><div class="loading">加载中…</div></div>
+  <!-- 公开的同人角色：立绘画廊 / 文字设展册 -->
+  <div class="tabs" role="tablist" aria-label="同人画廊分区">
+    <button type="button" class="tab active" role="tab" data-tab="art" aria-selected="true">立绘画廊<span class="n" id="nArt"></span></button>
+    <button type="button" class="tab" role="tab" data-tab="text" aria-selected="false">文字设展册<span class="n" id="nText"></span></button>
   </div>
-
-  <!-- 公开的同人角色 -->
-  <div class="section-title">公开的同人角色 <small id="pubCount"></small></div>
+  <p class="tab-hint" id="tabHint"></p>
   <div class="toolbar">
-    <input class="search" id="search" placeholder="搜索角色名…" oninput="onSearch(this.value)">
-    <div class="filter-btns">
-      <button class="fbtn active" onclick="setType('',this)">全部</button>
-      <button class="fbtn" onclick="setType('妖精',this)">妖精</button>
-      <button class="fbtn" onclick="setType('人类',this)">人类</button>
-      <button class="fbtn" onclick="setType('神灵',this)">神灵</button>
-      <button class="fbtn" onclick="setType('其他',this)">其他</button>
-      <button class="fbtn" onclick="setType('配色海报',this)">配色海报</button>
+    <input class="search" id="search" type="search" placeholder="搜索角色名…" aria-label="搜索角色名">
+    <div class="filter-btns" id="typeFilters">
+      <button type="button" class="fbtn active" data-type="">全部</button>
+      <button type="button" class="fbtn" data-type="妖精">妖精</button>
+      <button type="button" class="fbtn" data-type="人类">人类</button>
+      <button type="button" class="fbtn" data-type="配色海报" data-art-only>配色海报</button>
     </div>
   </div>
-  <div class="grid" id="grid"><div class="loading">加载中…</div></div>
-  <button class="load-more" id="loadMore" style="display:none" onclick="loadMore()">加载更多</button>
+
+  <div id="panelArt">
+    <div class="grid" id="gridArt"><div class="loading">加载中…</div></div>
+    <button type="button" class="load-more" id="moreArt" hidden>加载更多</button>
+    <details class="ai-fold" id="aiFold">
+      <summary>AI 立绘设表 <span class="n" id="nAi"></span><small>使用 AI 生成或 AI 辅助立绘的设表收在这里，默认折叠</small></summary>
+      <div class="ai-inner">
+        <div class="grid" id="gridAi"></div>
+        <button type="button" class="load-more" id="moreAi" hidden>加载更多</button>
+      </div>
+    </details>
+  </div>
+  <div id="panelText" hidden>
+    <div class="folio-grid" id="gridText"></div>
+    <button type="button" class="load-more" id="moreText" hidden>加载更多</button>
+  </div>
 </div>
 
 <!-- 配色海报灯箱 -->
-<div id="posterLightbox" onclick="closePosterView()">
-  <img loading="lazy" decoding="async" id="lbImg" src="" alt="配色海报">
+<div id="posterLightbox">
+  <img decoding="async" id="lbImg" src="" alt="配色海报">
   <div class="lb-cap"><span id="lbCap"></span><br><small id="lbSub"></small></div>
 </div>
 
-<!-- 确认弹窗 -->
-<div class="modal" id="confirmModal" onclick="if(event.target===this)closeConfirm()">
+<!-- 通用弹窗：确认公开 / 退回理由 / 审核员申请 -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-panel">
-    <button class="modal-close" onclick="closeConfirm()">&times;</button>
-    <div class="modal-title">确认公开</div>
-    <div class="modal-body" id="confirmBody"></div>
+    <button type="button" class="modal-close" id="modalClose" aria-label="关闭">&times;</button>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-body" id="modalBody"></div>
+    <textarea class="modal-input" id="modalInput" maxlength="300" hidden></textarea>
+    <div class="modal-err" id="modalErr"></div>
     <div class="modal-actions">
-      <button type="button" class="pb-btn" style="background:transparent;color:var(--gold);border:1px solid var(--gold)" onclick="closeConfirm()">取消</button>
-      <button type="button" class="pb-btn" id="confirmBtn" onclick="confirmPublish()">确认公开</button>
+      <button type="button" class="pb-btn ghost" id="modalCancel">取消</button>
+      <button type="button" class="pb-btn" id="modalOk">确定</button>
     </div>
   </div>
 </div>
 
 <script src="reactions-fx.js?v=20261027z"></script>
+<script src="group-reminder.js?v=20261106a"></script>
 <script>
-const PAGE=12;
-let curType='', curQ='', timer=null;
-let curPage=1, loaded=0, total=0, loading=false;
-let currentUser=null;
-let myChars=[], publishedIds={};
-let selectedCodes=new Set();
-
-// 已公开记录按编号对应；早期无编号的记录按名字对应
-function publishedId(c){return publishedIds['code:'+(c.code||'')]||publishedIds['name:'+(c.name||'')];}
+const PAGE = 12;
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast = msg => (window.RFX && RFX.toast ? RFX.toast(msg) : alert(msg));
 // #charForm：首页跳过开场并直接展开登记表单
-function editHref(code){return '/?edit='+encodeURIComponent(code||'')+'#charForm';}
-function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const editHref = code => '/?edit=' + encodeURIComponent(code || '') + '#charForm';
+const showHref = code => 'show.html?code=' + encodeURIComponent(code || '');
+const ART_LABEL = { '': '未声明', human: '手绘 / 约稿', ai: 'AI 立绘' };
 
-// ====== 公开角色卡片（画廊列表）======
-function cardHTML(c){
-  const img=c.image_data
-    ? `<img class="card-img" data-original-image src="${esc(c.image_data)}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.querySelector('.card-placeholder').style.display='flex';this.style.display='none'">`
-    : '';
-  const placeholder=!c.image_data
-    ? `<div class="card-placeholder">${esc(c.name?c.name[0]:'?')}</div>`
-    : `<div class="card-placeholder" style="display:none">${esc(c.name?c.name[0]:'?')}</div>`;
-  const isPoster=c.type==='配色海报';
-  const clickAct=isPoster
-    ? `openPosterView(this.dataset.img,this.dataset.cap,this.dataset.sub)`
-    : `location.href='show.html?code='+encodeURIComponent('${esc(c.code||'')}')`;
-  return `<div class="card" data-cid="${c.id}" data-img="${esc(c.image_data||'')}" data-cap="${esc(c.name||'')}" data-sub="${esc(c.user_name||'匿名')}" onclick="${clickAct}" style="cursor:pointer">
-    ${isPoster?'<div style="padding:8px 12px 0"><span class="card-poster-tag">配色海报</span></div>':''}
-    ${img}${placeholder}
+let currentUser = null, canReview = false;
+let curType = '', curQ = '', curTab = 'art', searchTimer = null;
+let myChars = [], fanByKey = {}, selectedCodes = new Set();
+const rowCache = new Map();   // 公开卡片 id → 记录（事件委托用，不把数据拼进内联脚本）
+
+async function getJSON(url, opts) {
+  const r = await fetch(url, opts);
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok && !d.error) d.error = '请求失败（' + r.status + '）';
+  return d;
+}
+const postJSON = (url, body) => getJSON(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+// ====== 通用弹窗 ======
+function openModal({ title, body, input, placeholder, okText, minLength, onOk }) {
+  $('modalTitle').textContent = title;
+  $('modalBody').innerHTML = body || '';
+  const ta = $('modalInput');
+  ta.hidden = !input; ta.value = ''; ta.placeholder = placeholder || '';
+  $('modalErr').textContent = '';
+  const ok = $('modalOk');
+  ok.textContent = okText || '确定'; ok.disabled = false;
+  ok.onclick = async () => {
+    const value = ta.value.trim();
+    if (input && value.length < (minLength || 0)) { $('modalErr').textContent = '请至少写 ' + minLength + ' 个字'; return; }
+    ok.disabled = true;
+    try { if (await onOk(value) !== false) closeModal(); }
+    finally { ok.disabled = false; }
+  };
+  $('modal').classList.add('is-open');
+  (input ? ta : ok).focus();
+}
+function closeModal() { $('modal').classList.remove('is-open'); }
+$('modalClose').onclick = $('modalCancel').onclick = closeModal;
+$('modal').addEventListener('click', e => { if (e.target === $('modal')) closeModal(); });
+
+// ====== 卡片 ======
+function metaLine(c) { return [c.species || '', c.gender || '', c.faction || ''].filter(Boolean).join(' · '); }
+function figureHTML(c, isPoster) {
+  const initial = esc((c.name || '?').slice(0, 1));
+  return `<div class="card-figure${isPoster ? ' poster' : ''}">
+      <img data-original-image src="${esc(c.image_data)}" alt="${esc(c.name)}" loading="lazy" decoding="async" onerror="this.remove()">
+      <div class="card-initial" aria-hidden="true">${initial}</div>
+    </div>`;
+}
+function ownerActions(c) {
+  const isPoster = c.type === '配色海报';
+  let html = '';
+  if (c.is_mine && !isPoster && c.code) html += `<a class="mini-btn" href="${esc(editHref(c.code))}" data-stop>编辑</a>`;
+  if (canReview) html += `<button type="button" class="mini-btn danger" data-act="revoke" data-id="${c.id}">退回</button>`;
+  return html ? `<div class="card-actions">${html}</div>` : '';
+}
+function artCardHTML(c, rank) {
+  const isPoster = c.type === '配色海报';
+  rowCache.set(String(c.id), c);
+  const chips = [isPoster ? '<span class="chip poster">配色海报</span>' : (c.type ? `<span class="chip">${esc(c.type)}</span>` : ''),
+                 c.art_source === 'ai' ? '<span class="chip ai">AI</span>' : ''].join('');
+  return `<article class="card" tabindex="0" data-open="${c.id}" aria-label="${esc(c.name)}">
+    <div style="position:relative">${figureHTML(c, isPoster)}
+      <div class="card-chips">${chips}</div>
+      ${rank && rank <= 3 ? `<span class="card-rank" title="人气第 ${rank}">${rank}</span>` : ''}
+    </div>
     <div class="card-body">
       <div class="card-name">${esc(c.name)}</div>
-      <div class="card-author">— ${esc(c.user_name||'匿名')}${isPoster?' · <a href="/haibao/" style="color:var(--gold)" onclick="event.stopPropagation()">去制作</a>':''}${c.is_mine&&!isPoster&&c.code?`<a class="card-edit-btn" href="${esc(editHref(c.code))}" onclick="event.stopPropagation()">编辑</a>`:''}</div>
-      ${RFX.bar('fan',c.id)}
+      ${metaLine(c) ? `<div class="card-meta">${esc(metaLine(c))}</div>` : ''}
+      <div class="card-author">— ${esc(c.user_name || '匿名')}${isPoster ? ' · <a href="/haibao/" data-stop style="color:var(--gold)">去制作</a>' : ''}</div>
+      ${ownerActions(c)}
+      ${window.RFX ? RFX.bar('fan', c.id) : ''}
     </div>
-  </div>`;
+  </article>`;
+}
+function folioHTML(c) {
+  rowCache.set(String(c.id), c);
+  const chips = [c.type, c.species, c.gender, c.faction].filter(Boolean).map(x => `<span class="chip">${esc(x)}</span>`).join('');
+  const sec = (label, value, cls) => value ? `<div class="folio-sec ${cls || ''}"><b>${label}</b>${esc(value)}</div>` : '';
+  return `<article class="folio" tabindex="0" data-open="${c.id}" aria-label="${esc(c.name)}">
+    <span class="folio-seal" aria-hidden="true">${esc((c.name || '?').slice(0, 1))}</span>
+    <h3>${esc(c.name)}</h3>
+    ${chips ? `<div class="folio-meta">${chips}</div>` : ''}
+    ${sec('能力', c.ability)}
+    ${sec('外貌', c.appearance)}
+    ${sec('故事', c.story, 'folio-story')}
+    <div class="folio-foot"><span>— ${esc(c.user_name || '匿名')}</span><span class="read">翻阅设表 →</span></div>
+    ${ownerActions(c)}
+    ${window.RFX ? RFX.bar('fan', c.id) : ''}
+  </article>`;
 }
 
-async function loadPub(reset=true){
-  if(loading) return;
-  const grid=document.getElementById('grid');
-  if(reset){curPage=1;loaded=0;grid.innerHTML='<div class="loading">加载中…</div>';}
-  loading=true;
-  const params=new URLSearchParams({limit:PAGE,page:curPage});
-  if(curQ) params.set('q',curQ);
-  if(curType) params.set('type',curType);
-  try{
-    const r=await fetch('/api/fan/list?'+params);
-    const d=await r.json();
-    const list=d.characters||[];total=d.total||0;
-    if(reset){grid.innerHTML='';loaded=0;}
-    document.getElementById('pubCount').textContent=`（共 ${total} 个）`;
-    if(reset&&!list.length){grid.innerHTML='<div class="empty">还没有公开的同人角色，来做第一个公开者吧！</div>';hideMore();loading=false;return;}
-    grid.insertAdjacentHTML('beforeend',list.map(cardHTML).join(''));
-    loaded+=list.length;
-    updateMore();
-  }catch(e){if(reset)grid.innerHTML='<div class="empty">加载失败，请刷新重试。</div>';}
-  loading=false;
-}
-function loadMore(){curPage++;loadPub(false);}
-function updateMore(){
-  const b=document.getElementById('loadMore');
-  if(loaded<total){b.style.display='block';b.textContent=`加载更多 · 已显示 ${loaded}/${total}`;}
-  else hideMore();
-}
-function hideMore(){document.getElementById('loadMore').style.display='none';}
-
-function setType(t,btn){
-  curType=t;
-  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  loadPub(true);
-}
-function onSearch(v){curQ=(v||'').trim();clearTimeout(timer);timer=setTimeout(()=>loadPub(true),300);}
-
-// ====== 我的已登记人设 ======
-function myCardHTML(c,idx){
-  const isPublished=!!publishedId(c);
-  const cls='card checkable'+(selectedCodes.has(c.code)?' selected':'')+(isPublished?' published':'');
-  const img=c.image
-    ? `<img class="card-img" data-original-image src="${esc(c.image)}" alt="${esc(c.name)}" loading="lazy" onerror="this.parentElement.querySelector('.card-placeholder').style.display='flex';this.style.display='none'">`
-    : '';
-  const placeholder=!c.image
-    ? `<div class="card-placeholder">${esc(c.name?c.name[0]:'?')}</div>`
-    : `<div class="card-placeholder" style="display:none">${esc(c.name?c.name[0]:'?')}</div>`;
-  return `<div class="${cls}" data-idx="${idx}" onclick="onMyCardClick(${idx})">
-    <div class="check-mark">✓</div>
-    ${img}${placeholder}
-    <div class="card-body">
-      <div class="card-name">${esc(c.name)}</div>
-      ${isPublished?`<span class="card-published-tag">已公开</span><a class="card-edit-btn" href="${esc(editHref(c.code))}" onclick="event.stopPropagation()">编辑</a><button class="card-unpublish-btn" onclick="event.stopPropagation();unpublishChar(myChars[${idx}])">取消公开</button>`:''}
-    </div>
-  </div>`;
-}
-
-function onMyCardClick(idx){
-  const c=myChars[idx];
-  if(!c) return;
-  if(publishedId(c)){
-    // 已公开：进入编辑（取消公开走卡片上的按钮），保存后画廊记录原位更新
-    location.href=editHref(c.code);
-    return;
+// ====== 公开列表（三个分区共用一套分页） ======
+const VIEWS = {
+  art:  { grid: 'gridArt',  more: 'moreArt',  render: artCardHTML, empty: '还没有审核通过的立绘设表，来做第一个公开者吧！' },
+  text: { grid: 'gridText', more: 'moreText', render: folioHTML,   empty: '展册里还没有文字设。只写了文字、没有立绘的设表会收进这里。' },
+  ai:   { grid: 'gridAi',   more: 'moreAi',   render: artCardHTML, empty: '暂无 AI 立绘设表。' },
+};
+const listState = {};
+async function loadView(view, reset) {
+  const v = VIEWS[view], st = listState[view] || (listState[view] = { page: 1, loaded: 0, total: 0, busy: false });
+  if (st.busy) return;
+  const grid = $(v.grid);
+  if (reset) { st.page = 1; st.loaded = 0; grid.innerHTML = '<div class="loading">加载中…</div>'; }
+  st.busy = true;
+  const params = new URLSearchParams({ limit: PAGE, page: st.page, view });
+  if (curQ) params.set('q', curQ);
+  if (curType && !(view === 'text' && curType === '配色海报')) params.set('type', curType);
+  try {
+    const d = await getJSON('/api/fan/list?' + params);
+    if (d.error) throw new Error(d.error);
+    const list = d.characters || [];
+    st.total = d.total || 0;
+    if (d.counts) paintCounts(d.counts);
+    if (reset) grid.innerHTML = '';
+    if (reset && !list.length) grid.innerHTML = `<div class="empty">${curQ || curType ? '没有符合条件的设表。' : v.empty}</div>`;
+    const sortedByScore = !curQ && !curType && view === 'art';
+    grid.insertAdjacentHTML('beforeend', list.map((c, i) => v.render(c, sortedByScore ? st.loaded + i + 1 : 0)).join(''));
+    st.loaded += list.length;
+    const more = $(v.more);
+    more.hidden = st.loaded >= st.total;
+    more.textContent = `加载更多 · 已显示 ${st.loaded}/${st.total}`;
+  } catch (e) {
+    if (reset) grid.innerHTML = '<div class="empty">加载失败，请刷新重试。</div>';
   }
-  if(selectedCodes.has(c.code)){
-    selectedCodes.delete(c.code);
-  }else{
-    selectedCodes.add(c.code);
-  }
-  renderMyCards();
+  st.busy = false;
 }
-
-async function unpublishChar(c){
-  try{
-    const fid=publishedId(c);
-    if(!fid){alert('找不到该角色的已公开记录');return;}
-    const r=await fetch('/api/fan/toggle',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({id:fid,is_public:false})
-    });
-    const d=await r.json();
-    if(!d.ok){alert(d.error||'切换失败');return;}
-    // 刷新列表
-    await loadMy();
-    loadPub(true);
-  }catch(e){alert('网络错误，请稍后再试');}
-}
-
-function renderMyCards(){
-  const grid=document.getElementById('myGrid');
-  grid.innerHTML=myChars.map((c,i)=>myCardHTML(c,i)).join('');
-  document.getElementById('myCount').textContent=`（共 ${myChars.length} 个，已公开 ${myChars.filter(publishedId).length} 个）`;
-  const btn=document.getElementById('publishBtn');
-  btn.disabled=selectedCodes.size===0;
-  if(selectedCodes.size>0){
-    btn.textContent=`公开到同人画廊（${selectedCodes.size}）`;
-  }else{
-    btn.textContent='公开到同人画廊';
+function paintCounts(c) {
+  $('nArt').textContent = c.art; $('nText').textContent = c.text; $('nAi').textContent = '（' + c.ai + '）';
+  if (!curQ && !curType) {
+    $('heroStats').innerHTML = `<span><b>${c.art}</b>立绘设表</span><span><b>${c.text}</b>文字设</span><span><b>${c.ai}</b>AI 立绘</span>`;
   }
 }
+function reloadPublic() {
+  loadView(curTab, true);
+  if (curTab === 'art' && $('aiFold').open) loadView('ai', true);
+  else if (listState.ai) listState.ai.stale = true;
+}
+Object.keys(VIEWS).forEach(view => { $(VIEWS[view].more).onclick = () => { listState[view].page++; loadView(view, false); }; });
+$('aiFold').addEventListener('toggle', () => {
+  if ($('aiFold').open && (!listState.ai || listState.ai.stale)) { loadView('ai', true); listState.ai.stale = false; }
+});
 
-async function loadMy(){
-  if(!currentUser||!currentUser.logged_in) return;
-  try{
-    const r=await fetch('/api/get-characters');
-    const d=await r.json();
-    myChars=(d.characters||[]).map(c=>c.data||c);
-    // 获取已公开列表
-    const fr=await fetch('/api/fan/my');
-    const fd=await fr.json();
-    const fchars=fd.characters||[];
-    // 仅将「已公开」的记录计入映射，取消公开后自动失效
-    const pub=fchars.filter(c=>c.is_public);
-    publishedIds={}; pub.forEach(c=>{ publishedIds[c.code?'code:'+c.code:'name:'+c.name]=c.id; });
-    
-    if(myChars.length===0){
-      document.getElementById('myGrid').innerHTML='<div class="empty">你还没有登记人设，去<a href="/">登记页</a>创建吧。</div>';
-      document.getElementById('myCount').textContent='（共 0 个）';
-      document.getElementById('publishBar').style.display='none';
-    }else{
-      document.getElementById('publishBar').style.display='flex';
-      document.getElementById('mySection').style.display='block';
-      renderMyCards();
-    }
-  }catch(e){
-    document.getElementById('myGrid').innerHTML='<div class="empty">加载我的角色失败，请刷新重试。</div>';
-  }
+const TAB_HINT = {
+  art: '默认只展示有立绘、非 AI 的设表，按人气排序；AI 立绘收在最下方的折叠区。',
+  text: '只有文字、没有立绘的设表收在这本展册里，适合慢慢翻阅。',
+};
+function setTab(tab) {
+  curTab = tab;
+  document.querySelectorAll('.tab').forEach(b => { const on = b.dataset.tab === tab; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
+  $('panelArt').hidden = tab !== 'art'; $('panelText').hidden = tab !== 'text';
+  $('tabHint').textContent = TAB_HINT[tab];
+  document.querySelectorAll('[data-art-only]').forEach(b => { b.hidden = tab !== 'art'; });
+  if (tab === 'text' && curType === '配色海报') setType('');
+  else loadView(tab, true);
 }
+function setType(t) {
+  curType = t;
+  document.querySelectorAll('#typeFilters .fbtn').forEach(b => b.classList.toggle('active', b.dataset.type === t));
+  reloadPublic();
+}
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+$('typeFilters').addEventListener('click', e => { const b = e.target.closest('.fbtn'); if (b) setType(b.dataset.type); });
+$('search').addEventListener('input', e => { curQ = e.target.value.trim(); clearTimeout(searchTimer); searchTimer = setTimeout(reloadPublic, 300); });
 
-// ====== 发布 ======
-function doPublish(){
-  if(selectedCodes.size===0) return;
-  const names=[];
-  for(const c of myChars){
-    if(selectedCodes.has(c.code)) names.push(c.name);
-  }
-  const body='将公开以下 <strong>'+names.length+'</strong> 个角色到同人画廊：<br>'+
-    names.map(n=>'&nbsp;&nbsp;· '+esc(n)).join('<br>');
-  document.getElementById('confirmBody').innerHTML=body;
-  document.getElementById('confirmModal').classList.add('is-open');
+// 打开卡片：配色海报进灯箱，其余进展示页；卡片里的按钮、链接、点赞条不触发
+function openCard(el) {
+  const c = rowCache.get(el.dataset.open);
+  if (!c) return;
+  if (c.type === '配色海报') openPosterView(c.image_data, c.name, c.user_name);
+  else location.href = showHref(c.code);
 }
-function closeConfirm(){
-  document.getElementById('confirmModal').classList.remove('is-open');
-}
-async function confirmPublish(){
-  const btn=document.getElementById('confirmBtn');
-  btn.disabled=true;btn.textContent='发布中…';
-  try{
-    const r=await fetch('/api/fan/publish',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({character_codes:[...selectedCodes]})
-    });
-    const d=await r.json();
-    if(d.ok){
-      closeConfirm();
-      selectedCodes.clear();
-      // 刷新我的列表 + 公开列表
-      await loadMy();
-      loadPub(true);
-    }else{
-      alert(d.error||'发布失败');
-    }
-  }catch(e){alert('网络错误，请稍后再试');}
-  btn.disabled=false;btn.textContent='确认公开';
-}
+document.addEventListener('click', e => {
+  const revoke = e.target.closest('[data-act="revoke"]');
+  if (revoke) { e.stopPropagation(); askReject(revoke.dataset.id, true); return; }
+  if (e.target.closest('[data-stop],.rfx-bar,a,button')) return;
+  const card = e.target.closest('[data-open]');
+  if (card) openCard(card);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closePosterView(); closeModal(); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches && e.target.matches('[data-open]')) { e.preventDefault(); openCard(e.target); }
+});
 
 // ====== 配色海报灯箱 ======
-function openPosterView(img,cap,sub){
-  if(!img) return;
-  document.getElementById('lbImg').src=img;
-  document.getElementById('lbCap').textContent=cap||'';
-  document.getElementById('lbSub').textContent=sub?('by '+sub+' · 点击任意处关闭'):'';
-  document.getElementById('posterLightbox').classList.add('is-open');
+function openPosterView(img, cap, sub) {
+  if (!img) return;
+  $('lbImg').src = img; $('lbCap').textContent = cap || '';
+  $('lbSub').textContent = sub ? 'by ' + sub + ' · 点击任意处关闭' : '';
+  $('posterLightbox').classList.add('is-open');
 }
-function closePosterView(){document.getElementById('posterLightbox').classList.remove('is-open');}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closePosterView();});
+function closePosterView() { $('posterLightbox').classList.remove('is-open'); }
+$('posterLightbox').onclick = closePosterView;
+
+// ====== 我的已登记人设 ======
+// 画廊记录按编号对应；早期无编号的记录按名字对应
+const fanRecord = c => fanByKey['code:' + (c.code || '')] || fanByKey['name:' + (c.name || '')];
+const STATUS_TEXT = { approved: '已公开', pending: '审核中', rejected: '已退回' };
+function myCardHTML(c, idx) {
+  const rec = fanRecord(c), published = rec && rec.is_public;
+  const status = published ? (rec.review_status || 'pending') : '';
+  const img = c.image || '';
+  const cls = 'card checkable' + (selectedCodes.has(c.code) ? ' selected' : '');
+  return `<article class="${cls}" data-my="${idx}" tabindex="0" aria-label="${esc(c.name)}">
+    ${published ? '' : '<div class="check-mark" aria-hidden="true">✓</div>'}
+    ${img ? figureHTML({ name: c.name, image_data: img }) : `<div class="card-figure"><div class="card-initial" aria-hidden="true">${esc((c.name || '?').slice(0, 1))}</div></div>`}
+    <div class="card-body">
+      <div class="card-name">${esc(c.name)}</div>
+      ${published ? `<div><span class="status ${status}">${STATUS_TEXT[status] || '审核中'}</span></div>` : '<div class="card-meta">未公开 · 点击勾选</div>'}
+      ${status === 'rejected' && rec.review_note ? `<div class="reject-note">退回理由：${esc(rec.review_note)}<br>修改设表后会自动重新提交审核。</div>` : ''}
+      ${status === 'pending' ? '<div class="card-meta">审核通过后出现在画廊</div>' : ''}
+      ${published ? `<div class="card-actions"><a class="mini-btn" href="${esc(editHref(c.code))}" data-stop>编辑</a><button type="button" class="mini-btn danger" data-unpublish="${idx}">取消公开</button></div>` : ''}
+    </div>
+  </article>`;
+}
+function renderMy() {
+  $('myGrid').innerHTML = myChars.map(myCardHTML).join('');
+  const pub = myChars.filter(c => { const r = fanRecord(c); return r && r.is_public; });
+  const pending = pub.filter(c => fanRecord(c).review_status === 'pending').length;
+  $('myCount').textContent = `（共 ${myChars.length} 个，已公开 ${pub.length - pending} 个${pending ? '，审核中 ' + pending + ' 个' : ''}）`;
+  const btn = $('publishBtn');
+  btn.disabled = selectedCodes.size === 0;
+  btn.textContent = selectedCodes.size ? `公开到同人画廊（${selectedCodes.size}）` : '公开到同人画廊';
+}
+$('myGrid').addEventListener('click', e => {
+  const un = e.target.closest('[data-unpublish]');
+  if (un) { unpublish(myChars[un.dataset.unpublish]); return; }
+  if (e.target.closest('a,button')) return;
+  const card = e.target.closest('[data-my]');
+  if (!card) return;
+  const c = myChars[card.dataset.my], rec = fanRecord(c);
+  if (rec && rec.is_public) { location.href = editHref(c.code); return; }
+  selectedCodes.has(c.code) ? selectedCodes.delete(c.code) : selectedCodes.add(c.code);
+  renderMy();
+});
+async function unpublish(c) {
+  const rec = c && fanRecord(c);
+  if (!rec) { toast('找不到该角色的公开记录'); return; }
+  const d = await postJSON('/api/fan/toggle', { id: rec.id, is_public: false }).catch(() => ({ error: '网络错误，请稍后再试' }));
+  if (!d.ok) { toast(d.error || '操作失败'); return; }
+  await loadMy(); reloadPublic();
+}
+async function loadMy() {
+  if (!currentUser || !currentUser.logged_in) return;
+  try {
+    const [chars, fan] = await Promise.all([getJSON('/api/get-characters'), getJSON('/api/fan/my')]);
+    myChars = (chars.characters || []).map(c => c.data || c);
+    fanByKey = {};
+    (fan.characters || []).filter(r => r.type !== '配色海报').forEach(r => {
+      const key = r.code ? 'code:' + r.code : 'name:' + r.name;
+      if (!fanByKey[key] || r.is_public) fanByKey[key] = r;
+    });
+    if (!myChars.length) {
+      $('myGrid').innerHTML = '<div class="empty">你还没有登记人设，去<a href="/#charForm">登记页</a>创建吧。</div>';
+      $('myCount').textContent = '（共 0 个）';
+      $('publishBar').hidden = true;
+      return;
+    }
+    $('publishBar').hidden = false;
+    renderMy();
+  } catch (e) { $('myGrid').innerHTML = '<div class="empty">加载我的角色失败，请刷新重试。</div>'; }
+}
+$('publishBtn').onclick = () => {
+  if (!selectedCodes.size) return;
+  const names = myChars.filter(c => selectedCodes.has(c.code)).map(c => '· ' + esc(c.name));
+  openModal({
+    title: '提交到同人画廊',
+    body: `将提交以下 <strong>${names.length}</strong> 个角色：<br>${names.join('<br>')}<br><br><span style="color:var(--dim);font-size:13px">审核员审核通过后才会在画廊展示；用了 AI 立绘的请在登记表里把「立绘来源」选为 AI。</span>`,
+    okText: '确认提交',
+    onOk: async () => {
+      const d = await postJSON('/api/fan/publish', { character_codes: [...selectedCodes] }).catch(() => ({ error: '网络错误，请稍后再试' }));
+      if (!d.ok) { $('modalErr').textContent = d.error || '发布失败'; return false; }
+      selectedCodes.clear();
+      toast(d.pending ? `已提交 ${d.pending} 个设表，等审核员审核通过后就会出现在画廊～` : '已公开到同人画廊 ✨');
+      await loadMy(); reloadPublic(); loadQueue();
+    },
+  });
+};
+
+// ====== 审核台 ======
+function reviewItemHTML(c) {
+  rowCache.set(String(c.id), c);
+  const meta = [c.type, c.species, c.gender, c.faction].filter(Boolean).join(' · ');
+  const opts = Object.keys(ART_LABEL).map(k => `<option value="${k}"${(c.art_source || '') === k ? ' selected' : ''}>立绘：${ART_LABEL[k]}</option>`).join('');
+  return `<div class="review-item" data-review="${c.id}">
+    <div class="review-thumb">${c.image_data ? `<img data-original-image src="${esc(c.image_data)}" alt="${esc(c.name)}" loading="lazy" decoding="async">` : '纯文字设'}</div>
+    <div class="review-main">
+      <div class="t">${esc(c.name)} <span class="m">— ${esc(c.user_name || '匿名')}</span></div>
+      ${meta ? `<div class="m">${esc(meta)}</div>` : ''}
+      ${c.story ? `<div class="s">${esc(c.story)}</div>` : ''}
+      <div class="review-ops">
+        ${c.type === '配色海报' ? '' : `<a class="mini-btn" href="${esc(showHref(c.code))}" target="_blank" rel="noopener">查看完整设表</a>`}
+        ${c.image_data ? `<select aria-label="立绘来源" data-art>${opts}</select>` : ''}
+        <button type="button" class="pb-btn green" data-approve="${c.id}">通过</button>
+        <button type="button" class="pb-btn ghost" data-reject="${c.id}">退回…</button>
+      </div>
+    </div>
+  </div>`;
+}
+async function loadQueue() {
+  if (!canReview) return;
+  $('reviewDesk').hidden = false;
+  const d = await getJSON('/api/fan/review/queue').catch(() => ({ error: '加载失败' }));
+  if (d.error) { $('reviewList').innerHTML = `<div class="empty">${esc(d.error)}</div>`; return; }
+  const list = d.characters || [];
+  $('reviewCount').textContent = d.total || 0;
+  $('reviewList').innerHTML = list.length ? list.map(reviewItemHTML).join('') : '<div class="empty">暂时没有待审核的设表 🌿</div>';
+}
+async function decide(id, decision, extra) {
+  const d = await postJSON('/api/fan/review/decide', { id: Number(id), decision, ...extra }).catch(() => ({ error: '网络错误，请稍后再试' }));
+  if (!d.ok) { toast(d.error || '操作失败'); return false; }
+  toast(decision === 'approve' ? '已通过，已进入画廊 ✓' : '已退回，作者会看到你的理由');
+  loadQueue(); reloadPublic();
+  return true;
+}
+function askReject(id, fromGallery) {
+  const c = rowCache.get(String(id)) || {};
+  openModal({
+    title: (fromGallery ? '从画廊退回「' : '退回「') + (c.name || '') + '」',
+    body: '写一句理由，作者会在「我的已登记人设」里看到。作者修改设表后会自动重新提交审核。',
+    input: true, minLength: 2, placeholder: '例如：立绘疑似 AI，请在登记表里把立绘来源改为 AI', okText: '确认退回',
+    onOk: note => decide(id, 'reject', { note }),
+  });
+}
+$('reviewList').addEventListener('click', e => {
+  const ap = e.target.closest('[data-approve]');
+  if (ap) {
+    const sel = ap.closest('.review-item').querySelector('[data-art]');
+    decide(ap.dataset.approve, 'approve', sel ? { art_source: sel.value } : {});
+    return;
+  }
+  const rj = e.target.closest('[data-reject]');
+  if (rj) askReject(rj.dataset.reject, false);
+});
+
+// ====== 共创：申请审核员 / 进群 ======
+function paintRecruit() {
+  const btn = $('reviewerApplyBtn');
+  if (canReview) { btn.textContent = '你已是审核员 ✓'; btn.classList.add('done'); btn.disabled = true; }
+  else if (currentUser && currentUser.fan_reviewer_pending) { btn.textContent = '申请审核中'; btn.classList.add('done'); btn.disabled = true; }
+  if (currentUser && currentUser.logged_in && (currentUser.edit_role === 'scribe' || currentUser.is_admin)) {
+    $('scribeApplyLink').textContent = '你已是编辑 ✓'; $('scribeApplyLink').classList.add('done');
+  }
+}
+$('reviewerApplyBtn').onclick = () => {
+  if (!currentUser || !currentUser.logged_in) { location.href = '/?openauth=1'; return; }
+  openModal({
+    title: '申请成为同人画廊审核员',
+    body: '申请前请先加入会馆交流群（QQ 群 <b>878029597</b> 或微信群「西木会馆-众生之门」）。<br>审核员决定哪些设表能在画廊展示，请公正、友善地对待每一位作者。<br>简单说说你的群昵称和想帮忙的原因：',
+    input: true, minLength: 2, placeholder: '例如：群昵称小青，常看同人设，愿意帮忙审核', okText: '提交申请',
+    onOk: async message => {
+      const d = await postJSON('/api/fan/reviewer-apply', { message }).catch(() => ({ error: '网络错误，请稍后再试' }));
+      if (!d.ok) { $('modalErr').textContent = d.error || '提交失败'; return false; }
+      currentUser.fan_reviewer_pending = !d.already;
+      paintRecruit();
+      if (window.HuiguanGroup) HuiguanGroup.show({ title: '申请已提交，记得进群哦', lead: '管理员会在群里和你确认，批准后你就能在本页看到审核台。' });
+      else toast(d.msg || '申请已提交');
+    },
+  });
+};
+$('copyQQ').onclick = async function () {
+  try { await navigator.clipboard.writeText($('groupQQ').textContent); this.textContent = '已复制 ✓'; }
+  catch (_) { this.textContent = '请长按群号复制'; }
+};
 
 // ====== 初始化 ======
-async function init(){
-  try{
-    const r=await fetch('/api/user');
-    currentUser=await r.json();
-  }catch(e){currentUser=null;}
-  
-  if(currentUser&&currentUser.logged_in){
-    document.getElementById('mySection').style.display='block';
-    await loadMy();
-  }else{
-    document.getElementById('mySection').style.display='block';
-    document.getElementById('myGrid').innerHTML='<div class="login-prompt">请先<a href="/?openauth=1">登录 / 注册</a>后查看和公开你的已登记人设</div>';
-    document.getElementById('myCount').textContent='';
+async function init() {
+  currentUser = await getJSON('/api/user').catch(() => null);
+  canReview = !!(currentUser && currentUser.logged_in && currentUser.can_review_fan);
+  paintRecruit();
+  if (currentUser && currentUser.logged_in) await loadMy();
+  else {
+    $('myGrid').innerHTML = '<div class="login-prompt">请先<a href="/?openauth=1">登录 / 注册</a>后查看和公开你的已登记人设</div>';
+    $('myCount').textContent = '';
   }
-  await RFX.load('fan');
-  loadPub(true);
+  if (window.RFX) await RFX.load('fan').catch(() => {});
+  loadQueue();
+  setTab('art');
 }
 init();
 </script>
