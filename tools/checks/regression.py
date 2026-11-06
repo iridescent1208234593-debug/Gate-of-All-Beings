@@ -15,10 +15,36 @@ sys.path.insert(0, str(ROOT / "services" / "platform"))
 from storage_paths import initialize_storage
 
 
+def run_check(results, name, command, *, cwd=ROOT, env=None):
+    """Run one check and append a JSON-safe result without exposing its environment."""
+    print(f"\n[{name}]", flush=True)
+    started = time.monotonic()
+
+    def elapsed():
+        return round(time.monotonic() - started, 2)
+
+    try:
+        result = subprocess.run(command, cwd=cwd, env=env)
+    except Exception as error:
+        # A missing executable is a failed check, not a batch-level crash.
+        results.append({"check": name, "passed": False, "status": "failed",
+                        "seconds": elapsed(), "command": [str(part) for part in command],
+                        "error": f"{type(error).__name__}: {error}"})
+        return
+    passed = result.returncode == 0
+    item = {"check": name, "passed": passed, "status": "passed" if passed else "failed",
+            "seconds": elapsed()}
+    if not passed:
+        item["command"] = [str(part) for part in command]
+        item["exit_code"] = result.returncode
+    results.append(item)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--full", action="store_true", help="also run frontend, type, HTTP and mock-browser checks")
-    parser.add_argument("--report", type=Path)
+    parser.add_argument("--report", type=Path,
+                        help="write the machine-readable JSON summary to this file")
     parser.add_argument("--modules", type=Path, help="built modules candidate for the all-roots portal routing check")
     args = parser.parse_args()
     results = []
@@ -33,11 +59,7 @@ def main():
         initialize_storage()
 
         def run(name, command, extra=None):
-            print(f"\n[{name}]", flush=True)
-            started = time.monotonic()
-            result = subprocess.run(command, cwd=ROOT, env={**env, **(extra or {})})
-            results.append({"check": name, "passed": result.returncode == 0,
-                            "seconds": round(time.monotonic() - started, 2)})
+            run_check(results, name, command, cwd=ROOT, env={**env, **(extra or {})})
 
         # The sealed-runtime test bundles Cards and Softie services with their own dependencies;
         # without them it fails with an esbuild resolve error that hides the real cause.
@@ -45,7 +67,9 @@ def main():
                    if not (ROOT / p).is_dir()]
         if missing:
             print("\n[dependencies] missing: " + ", ".join(missing) + " -> install each (npm ci; pnpm install for activation-core; see docs/workspace.md)", flush=True)
-            results.append({"check": "dependencies installed (" + ", ".join(missing) + ")", "passed": False, "seconds": 0})
+            results.append({"check": "dependencies installed (" + ", ".join(missing) + ")",
+                            "passed": False, "status": "failed", "seconds": 0,
+                            "error": "missing: " + ", ".join(missing)})
 
         # Separate processes avoid modules leaking import caches/environment fixtures.
         for directory in (ROOT / "services/platform/tests", ROOT / "apps/huiguan/tests", ROOT / "apps/cards/tests"):
@@ -84,7 +108,8 @@ def main():
                 run("Portal routing on every approved root", [sys.executable, "-X", "utf8", "services/platform/tests/verify_portal.py"],
                     {"IRIDESCENTLY_MODULES_ROOT": modules})
             else:
-                results.append({"check": "Portal routing on every approved root", "passed": False, "seconds": 0,
+                results.append({"check": "Portal routing on every approved root", "passed": False,
+                                "status": "skipped", "seconds": 0,
                                 "skipped": "pass --modules with a built modules candidate"})
         # Parse all changed/untracked Python without putting pyc files in source.
         changed = subprocess.check_output(["git", "diff", "--name-only", "HEAD"], cwd=ROOT).decode().splitlines()
