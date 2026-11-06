@@ -445,7 +445,10 @@ export class UI {
       </div>`;
     const f = $('act-focus'); if (f) f.onclick = () => { game.cam.setTarget(s.x, s.y, Math.max(game.cam.zoom, 9)); this.setNationTab('policies'); };
     this.el.inspBody.querySelectorAll('.fbtn').forEach((b) => {
-      b.onclick = () => { s.focus = b.dataset.f; this.renderSettlement(s, tr, game); this.toast({ type: 'info', msg: `${s.name || 'City'}: ${s.focus} focus` }); };
+      // Route through the symmetric verb (game -> GovernanceAPI) instead of
+      // writing the settlement's focus directly. The verb owns the toast; on
+      // success re-render so the "city focus — <b>..</b>" readout updates.
+      b.onclick = () => { if (game.setCityFocus(s, b.dataset.f)) this.renderSettlement(s, tr, game); };
     });
     const pa = $('act-playas3'); if (pa) pa.onclick = () => game.playAsTribe(tr);
     const w = $('act-war2'); if (w) w.onclick = () => { const g = this._gov('declareWar'); if (g && me && tr) g.declareWar(this._sim(), me, tr); };
