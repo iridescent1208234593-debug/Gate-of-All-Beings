@@ -9,9 +9,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { APP, ROOT, approvedHosts, isApprovedUrl, projectRoots, readContent, siteUrl } from './toy-site.mjs';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const APP = path.join(ROOT, 'apps/bilibili-toy');
 const SDK_URL = 'https://s1.hdslb.com/bfs/seed/toy/app/sdk/toy-sdk.js';
 const ENTRY_LIMIT = 1024 * 1024; // platform: entry index.html ≤ 1MB after unzip
 const PACKAGE_LIMIT = 50 * 1024 * 1024; // platform default package cap
@@ -33,12 +32,12 @@ function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
 }
 
-// Every host the project owns: the three roots, every service subdomain, preview and asset hosts.
+// Every host the project owns: the three roots and every subdomain. Approved links are removed
+// from a line before this runs, so any remaining mention is an unapproved one.
 function ownHostPatterns() {
-  const domains = readJson(path.join(ROOT, 'packages/site-domains/domains.json'));
-  const roots = domains.roots.map((r) => r.replace(/\./g, '\\.'));
+  const roots = projectRoots().map((r) => r.replace(/\./g, '\\.'));
   // Root names without the TLD as well, so "iridescently" in any form is caught.
-  const stems = [...new Set(domains.roots.map((r) => r.split('.')[0]))];
+  const stems = [...new Set(projectRoots().map((r) => r.split('.')[0]))];
   return [new RegExp(`(?:${roots.join('|')})`, 'i'), new RegExp(`\\b(?:${stems.join('|')})\\b`, 'i')];
 }
 
@@ -65,7 +64,49 @@ export function validateContent(content, { release }) {
   }
   for (const link of linksFrom(content)) if (!NAVIGATE_TYPES.has(link.type)) errors.push(`unsupported navigate type ${link.type}`);
   if (release && !b.space_mid) errors.push('--release needs bilibili.space_mid (the project account that publishes the Toy)');
+  try {
+    approvedHosts(content);
+    for (const link of content.site_links || []) siteUrl(content, link.service, link.path);
+    archiveUrl(content);
+  } catch (error) {
+    errors.push(error.message);
+  }
+  if (content.site_links?.length && content.site?.root !== 'iridescently.cn') {
+    errors.push('site.root: the Toy platform approved iridescently.cn only; another root needs a new platform approval first');
+  }
   return errors;
+}
+
+// The archive is read live from the approved huiguan host; the page renders it with textContent.
+export function archiveUrl(content) {
+  const a = content.archive;
+  return a && a.endpoint ? siteUrl(content, 'huiguan', a.endpoint, { dataEndpoint: true }) : '';
+}
+
+function renderArchive(content) {
+  if (!archiveUrl(content)) return '';
+  return `<section class="card archive" id="archive" aria-labelledby="archive-h">
+    <h2 id="archive-h">西木会馆档案室</h2>
+    <p class="hint" id="archive-status">正在翻开会馆档案…</p>
+    <h3 hidden id="fan-h">同人档案 · 人气前十</h3>
+    <div class="oc-grid" id="fan-grid"></div>
+    <h3 hidden id="official-h">官方角色档案</h3>
+    <div class="oc-grid official" id="official-grid"></div>
+    <p><a class="more" href="${escapeHtml(siteUrl(content, 'huiguan', '/'))}" target="_blank" rel="noopener">打开完整档案室</a></p>
+  </section>`;
+}
+
+function renderSiteLinks(content) {
+  const links = content.site_links || [];
+  if (!links.length) return '';
+  const items = links.map((l) => `<a class="site-link" href="${escapeHtml(siteUrl(content, l.service, l.path))}" target="_blank" rel="noopener"><b>${escapeHtml(l.label)}</b>${l.desc ? `<span>${escapeHtml(l.desc)}</span>` : ''}</a>`).join('\n    ');
+  return `<section class="card" aria-labelledby="site-h">
+    <h2 id="site-h">去会馆和众生之门</h2>
+    <div class="site-links">
+    ${items}
+    </div>
+    <p class="hint">游戏和登录在会馆网站上进行，会在浏览器中打开。</p>
+  </section>`;
 }
 
 function render(template, content) {
@@ -78,11 +119,13 @@ function render(template, content) {
       .map((n) => `<p>${n.date ? `<time>${escapeHtml(n.date)}</time>` : ''}${escapeHtml(n.text)}</p>`).join('\n    ')}\n  </section>`
     : '';
   // JSON inside <script> must not be able to close the tag.
-  const linksJson = JSON.stringify(linksFrom(content)).replace(/</g, '\\u003c');
+  const linksJson = JSON.stringify({ navigate: linksFrom(content), archive: archiveUrl(content), hosts: approvedHosts(content) })
+    .replace(/</g, '\\u003c');
   const values = {
     title: escapeHtml(content.title), subtitle: escapeHtml(content.subtitle || ''), intro: paragraphs,
     projects, notices: noticesHtml, ip_notice: escapeHtml(content.legal?.ip_notice || ''),
     disclaimer: escapeHtml(content.legal?.disclaimer || ''), publisher: escapeHtml(content.publisher), linksJson,
+    archive: renderArchive(content), site_links: renderSiteLinks(content),
   };
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => {
     if (!(key in values)) throw new Error(`unknown template token ${key}`);
@@ -98,7 +141,7 @@ function listFiles(dir, base = dir) {
 }
 
 // Static safety gate for a finished package. Returns a list of problems; empty means publishable.
-export function checkPackage(dir) {
+export function checkPackage(dir, hosts = approvedHosts(readContent()), dataUrls = [archiveUrl(readContent())].filter(Boolean)) {
   const problems = [];
   const files = listFiles(dir);
   const own = ownHostPatterns();
@@ -119,18 +162,27 @@ export function checkPackage(dir) {
     const text = fs.readFileSync(full, 'utf8');
     const lines = text.split(/\r?\n/);
     lines.forEach((raw, i) => {
-      const line = raw.split(SDK_URL).join('');
       const at = `${rel}:${i + 1}`;
+      let line = raw.split(SDK_URL).join('');
+      for (const url of dataUrls) line = line.split(url).join('');
+      // The page config lists approved hosts as plain JSON strings.
+      for (const host of hosts) line = line.split(`"${host}"`).join('""');
+      // Approved links (https, approved host, public page path) are allowed and removed before
+      // the remaining checks; HTML-escaped ampersands are undone so query strings parse.
+      line = line.replace(/https:\/\/[A-Za-z0-9.-]+\.[A-Za-z]{2,}[^\s"'<>)]*/g, (url) => (isApprovedUrl(url.replace(/&amp;/g, '&'), hosts) ? '' : url));
       for (const pattern of own) if (pattern.test(line)) problems.push(`${at}: names a project domain (Toy must not lead off-site)`);
       for (const m of line.matchAll(/(?:https?:)?\/\/[A-Za-z0-9.-]+\.[A-Za-z]{2,}[^\s"'<>)]*/g)) {
-        problems.push(`${at}: external URL ${m[0]} (only the official Toy SDK is allowed)`);
+        problems.push(`${at}: external URL ${m[0]} (only the official Toy SDK and approved project pages are allowed)`);
       }
       if (/\b(?:localhost|127\.0\.0\.1|0\.0\.0\.0)\b|\b\d{1,3}(?:\.\d{1,3}){3}\b/.test(line)) problems.push(`${at}: host or IP address`);
       if (/\/(?:api|app|admin|uploads|assets\/uploads)\//i.test(line)) problems.push(`${at}: site route (/api, /app, /admin, /uploads)`);
       if (/(?:secret|token|passw(?:or)?d|api[_-]?key|cookie|HX_SSO|TURNSTILE|SMTP|CLIENT_ID)/i.test(line)
           && !/toyOpenId/.test(line)) problems.push(`${at}: credential-like word`);
       if (/<(?:iframe|form|input|textarea|object|embed)\b/i.test(line)) problems.push(`${at}: iframe or user-input element (Toy forbids iframes and free UGC)`);
-      if (/\b(?:window\.open|location\.(?:href|assign|replace))\b|\bfetch\s*\(|XMLHttpRequest|WebSocket|sendBeacon/.test(line)) {
+      // The page script may fetch, but only the configured archive URL reaches it (see toy-page.js).
+      const fetchAllowed = rel === 'toy-page.js' && dataUrls.length > 0;
+      if (/\b(?:window\.open|location\.(?:href|assign|replace))\b|XMLHttpRequest|WebSocket|sendBeacon/.test(line)
+          || (!fetchAllowed && /\bfetch\s*\(/.test(line))) {
         problems.push(`${at}: direct navigation or network call (use toy.navigate only)`);
       }
       if (/\b(?:src|href)\s*=\s*["']\//i.test(line) && !/["']\/\//.test(line)) problems.push(`${at}: root-absolute path breaks under /toy/<slug>/`);
@@ -174,7 +226,7 @@ function main(argv) {
   if (outDir === ROOT || outDir.startsWith(ROOT + path.sep)) { fail('--out must be outside the repository'); return; }
   if (fs.existsSync(outDir) && fs.readdirSync(outDir).length) { fail(`${outDir} is not empty`); return; }
 
-  const content = readJson(path.join(APP, 'content.json'));
+  const content = readContent();
   const errors = validateContent(content, { release: argv.includes('--release') });
   errors.forEach((e) => fail(e));
   if (errors.length) return;
@@ -195,9 +247,10 @@ function build(outDir, content) {
   copyAssets(outDir);
   if (process.exitCode) return;
 
-  const problems = checkPackage(outDir);
+  const problems = checkPackage(outDir, approvedHosts(content), [archiveUrl(content)].filter(Boolean));
   problems.forEach((p) => fail(p));
   if (problems.length) return;
+  if (!archiveUrl(content)) console.warn('[toy] WARN archive.endpoint not set; the 档案室 section is left out');
   if (!linksFrom(content).length) console.warn('[toy] WARN no B站 navigation targets set; the "在 B站 找到我们" block stays hidden');
   console.log(`[toy] OK package written to ${outDir}`);
 }

@@ -5,7 +5,7 @@
   "publisher": "西木会馆项目方",
   "intro": [
     "西木会馆是一个非商业的同人社区项目：同好在这里登记自己的原创角色（OC），这些角色汇入「众生之门」这个同人世界。",
-    "这个 Toy 是会馆在 B站 的门庭：介绍项目，发布公告。"
+    "这个 Toy 是会馆在 B站 的门庭：翻阅会馆档案室，也可以从这里前往会馆和众生之门的游戏。"
   ],
   "projects": [
     {
@@ -30,6 +30,36 @@
     }
   ],
   "notices": [],
+  "site": {
+    "root": "iridescently.cn",
+    "services": [
+      "huiguan",
+      "zszm"
+    ],
+    "approval_note": "负责人 2026-11-06 告知：Toy 平台已批准跳转 iridescently.cn 及其子域。平台批准原文待补。"
+  },
+  "site_links": [
+    {
+      "label": "进入西木会馆",
+      "service": "huiguan",
+      "path": "/"
+    },
+    {
+      "label": "众生之门 · 卡牌",
+      "service": "zszm",
+      "path": "/app/shell/m/cards",
+      "desc": "众生牌录 · 出行 / 重生之门 / 灵质回路"
+    },
+    {
+      "label": "灵境会馆",
+      "service": "zszm",
+      "path": "/app/shell/m/management",
+      "desc": "据点经营 · 建造 / 科技 / 远征"
+    }
+  ],
+  "archive": {
+    "endpoint": "/api/toy/archive"
+  },
   "bilibili": {
     "space_mid": "300067978",
     "tribee_id": "",

@@ -44,6 +44,10 @@
 
 设表的能力说明按「基础与身份 / 系别与技能 / 特殊限制」分组，分支标题统一称为分支技能。能力详解位于能力栏底部，使用默认折叠的原生 `details`；仍保留 `abilityDetailPanel`、`ability-detail-section` 及原有自动生成 / 自定义描述保存逻辑，不复制输入字段。首页表单说明、折叠和窄屏换行样式在 `homepage.css` 的 Registration guidance 段。
 
+## B站 Toy 档案摘要
+
+`GET /api/toy/archive` 给 B站 Toy 门庭页读取：公开同人人设按画廊顺序取前 10 条，官方档案取前 24 条，数量在服务端写死（`TOY_ARCHIVE_FAN_LIMIT` / `TOY_ARCHIVE_OFFICIAL_LIMIT`）。接口匿名：不读会话，不返回账号 id，响应 `Access-Control-Allow-Origin: *` 且不带凭据，缓存 5 分钟；图片只给已存档的上传文件地址，内联 Base64 不给。地址按请求所在根域生成，三根域行为一致。测试：`apps/huiguan/tests/test_toy_archive.py`。说明见 [docs/bilibili-toy.md](../../docs/bilibili-toy.md)。
+
 ## 账户服务配置
 
 ### OAuth 回归

@@ -25,6 +25,7 @@ EXCEPT_FILES = {
     "services/platform/tests/verify_portal.py": "route contract template, expanded to every approved root",
     "services/platform/tests/test_ingress_security.py": "ingress regression fixtures for the deployed canonical host",
     "tools/domains/check-domain-hardcodes.py": "this scanner",
+    "tools/toy/test-toy-bundle.mjs": "Toy safety-check fixtures exercise exact approved and refused hosts",
     "packages/shared-data/worldview.json": "historical export kept as a data record",
     "apps/www/links.json": "editable homepage content seed; runtime copy is persistent data",
     "services/platform/.env.example": "example operator configuration",
