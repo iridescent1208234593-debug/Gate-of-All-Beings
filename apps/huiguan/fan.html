@@ -231,7 +231,8 @@ button{font-family:inherit}
     <div class="co-group">
       申请<b>审核员</b>或<b>编辑</b>前，请先加入会馆交流群，方便沟通和互相照应：<br>
       QQ 群 <b id="groupQQ">878029597</b><button type="button" class="co-copy" id="copyQQ">复制群号</button>
-      · 微信群「<b>西木会馆-众生之门</b>」（二维码见页脚 / 群聊）
+      <a class="co-copy" href="https://blid.top/xmhg" target="_blank" rel="noopener" style="text-decoration:none">加入 QQ 群</a>
+      · 微信群「<b>西木会馆-众生之门</b>」<a class="co-copy" href="https://blid.top/xzhgwx" target="_blank" rel="noopener" style="text-decoration:none">加入微信群</a>
     </div>
   </section>
 
@@ -312,7 +313,7 @@ button{font-family:inherit}
 </div>
 
 <script src="reactions-fx.js?v=20261027z"></script>
-<script src="group-reminder.js?v=20261106a"></script>
+<script src="group-reminder.js?v=20261106b"></script>
 <script>
 const PAGE = 12;
 const $ = id => document.getElementById(id);
@@ -667,7 +668,7 @@ $('reviewerApplyBtn').onclick = () => {
   if (!currentUser || !currentUser.logged_in) { location.href = '/?openauth=1'; return; }
   openModal({
     title: '申请成为同人画廊审核员',
-    body: '申请前请先加入会馆交流群（QQ 群 <b>878029597</b> 或微信群「西木会馆-众生之门」）。<br>审核员决定哪些设表能在画廊展示，请公正、友善地对待每一位作者。<br>简单说说你的群昵称和想帮忙的原因：',
+    body: '申请前请先加入会馆交流群（<a href="https://blid.top/xmhg" target="_blank" rel="noopener">QQ 群 878029597</a> 或<a href="https://blid.top/xzhgwx" target="_blank" rel="noopener">微信群「西木会馆-众生之门」</a>）。<br>审核员决定哪些设表能在画廊展示，请公正、友善地对待每一位作者。<br>简单说说你的群昵称和想帮忙的原因：',
     input: true, minLength: 2, placeholder: '例如：群昵称小青，常看同人设，愿意帮忙审核', okText: '提交申请',
     onOk: async message => {
       const d = await postJSON('/api/fan/reviewer-apply', { message }).catch(() => ({ error: '网络错误，请稍后再试' }));

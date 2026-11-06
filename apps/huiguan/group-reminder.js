@@ -2,6 +2,7 @@
 (function () {
   'use strict';
   const QQ = '878029597';
+  const QQ_LINK = 'https://blid.top/xmhg', WECHAT_LINK = 'https://blid.top/xzhgwx';
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   function show(opts) {
     opts = opts || {};
@@ -17,7 +18,8 @@
       <div style="border:1px dashed var(--border,#d4cfbe);border-radius:10px;padding:12px 14px;font-size:13px;line-height:2;background:rgba(90,158,143,.06);">
         QQ 群：<strong id="hgQQ" style="letter-spacing:1px;">${QQ}</strong>
         <button type="button" id="hgCopy" style="margin-left:8px;font:inherit;font-size:12px;cursor:pointer;padding:2px 12px;border-radius:999px;border:1px solid var(--accent,#5a9e8f);background:transparent;color:var(--accent,#5a9e8f);">复制群号</button><br>
-        微信群：<strong>西木会馆-众生之门</strong><span style="color:var(--dim,var(--text-dim,#7a8a7e));font-size:12px;">（二维码见页脚 / 群聊）</span>
+        <a href="${QQ_LINK}" target="_blank" rel="noopener" style="color:var(--accent,#5a9e8f);font-size:12px;">点此加入 QQ 群</a><br>
+        微信群：<strong>西木会馆-众生之门</strong> <a href="${WECHAT_LINK}" target="_blank" rel="noopener" style="color:var(--accent,#5a9e8f);font-size:12px;">点此加入微信群</a>
       </div>
       <button type="button" id="hgOk" style="margin-top:16px;width:100%;padding:10px;border:none;border-radius:8px;background:var(--accent,#5a9e8f);color:var(--on-accent,#fff);font:inherit;font-size:14px;cursor:pointer;">好的，我会去的</button>
     </div>`;
@@ -33,5 +35,5 @@
       catch (_) { const r = document.createRange(); r.selectNode(m.querySelector('#hgQQ')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); this.textContent = '请长按复制'; }
     };
   }
-  window.HuiguanGroup = { show, QQ };
+  window.HuiguanGroup = { show, QQ, QQ_LINK, WECHAT_LINK };
 })();
