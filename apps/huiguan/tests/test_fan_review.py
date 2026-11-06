@@ -175,7 +175,7 @@ class FanReviewTest(unittest.TestCase):
         _, queue = reviewer.call("/api/fan/review/queue")
         item = next(r for r in queue["characters"] if r["code"] == "R-1")
         self.assertNotIn("user_uid", item)
-        status, result = reviewer.call("/api/fan/review/decide", {"id": item["id"], "decision": "approve"})
+        status, result = reviewer.call("/api/fan/review/decide", {"id": item["id"], "decision": "approve", "review_version": item["review_version"]})
         self.assertEqual((status, result["review_status"]), (200, "approved"))
         self.assertIn("R-1", self.codes())
 
@@ -184,12 +184,31 @@ class FanReviewTest(unittest.TestCase):
         self.assertEqual(self.my_row(author, "R-1")["review_status"], "pending")
         self.assertNotIn("R-1", self.codes())
 
+    def test_stale_review_cannot_approve_edited_content(self):
+        author, reviewer = self.login("author_user"), self.login("reviewer_user")
+        self.publish(author, sheet("R-STALE", "旧稿", "审核员看到的内容", upload(3)))
+        _, queue = reviewer.call("/api/fan/review/queue")
+        item = next(r for r in queue["characters"] if r["code"] == "R-STALE")
+        body = {"id": item["id"], "decision": "approve", "review_version": item["review_version"]}
+        self.assertEqual(author.call("/api/save-character", sheet("R-STALE", "新稿", "尚未审核的新内容", upload(3)))[0], 200)
+        self.assertEqual(reviewer.call("/api/fan/review/decide", body)[0], 409)
+        self.assertEqual(self.my_row(author, "R-STALE")["review_status"], "pending")
+        self.assertNotIn("R-STALE", self.codes())
+        self.assertEqual(reviewer.call("/api/fan/review/decide", {"id": item["id"], "decision": "approve"})[0], 409)
+        _, queue = reviewer.call("/api/fan/review/queue")
+        current = next(r for r in queue["characters"] if r["code"] == "R-STALE")
+        body["review_version"] = current["review_version"]
+        self.assertEqual(reviewer.call("/api/fan/review/decide", body)[0], 200)
+        self.assertIn("R-STALE", self.codes())
+
     def test_reject_needs_a_note_and_republish_resubmits(self):
         author, reviewer = self.login("author_user"), self.login("reviewer_user")
         self.publish(author, sheet("R-2", "赤羽", "设定", upload(2)))
         fid = self.my_row(author, "R-2")["id"]
+        _, queue = reviewer.call("/api/fan/review/queue")
+        version = next(r["review_version"] for r in queue["characters"] if r["id"] == fid)
         self.assertEqual(reviewer.call("/api/fan/review/decide", {"id": fid, "decision": "reject"})[0], 400)
-        status, _ = reviewer.call("/api/fan/review/decide", {"id": fid, "decision": "reject", "note": "立绘看不清，请换一张"})
+        status, _ = reviewer.call("/api/fan/review/decide", {"id": fid, "decision": "reject", "note": "立绘看不清，请换一张", "review_version": version})
         self.assertEqual(status, 200)
         row = self.my_row(author, "R-2")
         self.assertEqual((row["review_status"], row["review_note"]), ("rejected", "立绘看不清，请换一张"))
@@ -216,7 +235,9 @@ class FanReviewTest(unittest.TestCase):
         # 审核员把已通过的设表更正为 AI：移到 AI 分区
         reviewer = self.login("reviewer_user")
         fid = self.my_row(admin, "V-ART")["id"]
-        reviewer.call("/api/fan/review/decide", {"id": fid, "decision": "approve", "art_source": "ai"})
+        item = next(r for r in self.listed(client=reviewer)["characters"] if r["id"] == fid)
+        status, _ = reviewer.call("/api/fan/review/decide", {"id": fid, "decision": "approve", "art_source": "ai", "review_version": item["review_version"]})
+        self.assertEqual(status, 200)
         self.assertNotIn("V-ART", self.codes("art"))
         self.assertIn("V-ART", self.codes("ai"))
         # B站 Toy 与画廊默认分区同一口径

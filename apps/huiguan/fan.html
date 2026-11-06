@@ -631,7 +631,8 @@ async function loadQueue() {
   $('reviewList').innerHTML = list.length ? list.map(reviewItemHTML).join('') : '<div class="empty">暂时没有待审核的设表 🌿</div>';
 }
 async function decide(id, decision, extra) {
-  const d = await postJSON('/api/fan/review/decide', { id: Number(id), decision, ...extra }).catch(() => ({ error: '网络错误，请稍后再试' }));
+  const reviewed = rowCache.get(String(id)) || {};
+  const d = await postJSON('/api/fan/review/decide', { id: Number(id), decision, review_version: reviewed.review_version, ...extra }).catch(() => ({ error: '网络错误，请稍后再试' }));
   if (!d.ok) { toast(d.error || '操作失败'); return false; }
   toast(decision === 'approve' ? '已通过，已进入画廊 ✓' : '已退回，作者会看到你的理由');
   loadQueue(); reloadPublic();
@@ -643,7 +644,7 @@ function askReject(id, fromGallery) {
     title: (fromGallery ? '从画廊退回「' : '退回「') + (c.name || '') + '」',
     body: '写一句理由，作者会在「我的已登记人设」里看到。作者修改设表后会自动重新提交审核。',
     input: true, minLength: 2, placeholder: '例如：立绘疑似 AI，请在登记表里把立绘来源改为 AI', okText: '确认退回',
-    onOk: note => decide(id, 'reject', { note }),
+    onOk: note => decide(id, 'reject', { note, review_version: c.review_version }),
   });
 }
 $('reviewList').addEventListener('click', e => {

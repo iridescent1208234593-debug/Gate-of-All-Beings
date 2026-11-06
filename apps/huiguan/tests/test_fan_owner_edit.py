@@ -136,7 +136,7 @@ class FanOwnerEditTest(unittest.TestCase):
         _, queue = self.owner.call("/api/fan/review/queue")
         pending = [r for r in queue["characters"] if r["code"] == "B-1"]
         self.assertEqual([r["name"] for r in pending], ["冒名"])
-        self.assertEqual(self.owner.call("/api/fan/review/decide", {"id": pending[0]["id"], "decision": "approve"})[0], 200)
+        self.assertEqual(self.owner.call("/api/fan/review/decide", {"id": pending[0]["id"], "decision": "approve", "review_version": pending[0]["review_version"]})[0], 200)
         mine_flags = sorted((r["name"], r["is_mine"]) for r in self.public(self.other, "B-1"))
         self.assertEqual(mine_flags, [("冒名", True), ("林风", False)])
 

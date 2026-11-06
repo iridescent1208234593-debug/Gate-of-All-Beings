@@ -1035,6 +1035,12 @@ def fan_art_source(cd):
     return value if value in FAN_ART_SOURCES else ""
 
 
+def fan_review_version(row):
+    fields = (*FAN_SYNC_COLUMNS, "code", "art_source", "review_status")
+    content = [row[field] for field in fields]
+    return hashlib.sha256(json.dumps(content, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
 def fan_fields(cd):
     return {
         "name": (cd.get("name") or "").strip(),
@@ -5320,7 +5326,11 @@ class Handler(BaseStaticHandler):
                       for key, cond in FAN_VIEW_SQL.items()}
         finally:
             conn.close()
+        can_review = self._can_review_fan(viewer)
         chars = [dict(r, is_mine=bool(viewer and r["is_mine"])) for r in rows]
+        if can_review:
+            for character in chars:
+                character["review_version"] = fan_review_version(character)
         self._json(200, {"characters": chars, "total": counts[view], "counts": counts, "view": view,
                          "page": page, "limit": limit})
 
@@ -5328,7 +5338,7 @@ class Handler(BaseStaticHandler):
         """Public fan characters in gallery order (reactions, then newest); owner ids never leave."""
         self._ensure_fan_reaction_tables(conn)
         return conn.execute(
-            f"""SELECT id, '' AS user_kind, '' AS user_uid, user_name, name, type, species, gender, faction, ability, appearance, story, image_data, is_public, code, created_at, updated_at, art_source,
+            f"""SELECT id, '' AS user_kind, '' AS user_uid, user_name, name, type, species, gender, faction, ability, appearance, story, image_data, is_public, code, created_at, updated_at, art_source, review_status,
                       (user_kind=? AND user_uid=?) AS is_mine,
                       (SELECT COUNT(*) FROM fan_char_favorites fav WHERE fav.character_id=fan_characters.id)
                       + (SELECT COUNT(*) FROM fan_char_votes vote WHERE vote.character_id=fan_characters.id AND vote.vote=1)
@@ -5606,7 +5616,7 @@ class Handler(BaseStaticHandler):
             total = conn.execute("SELECT COUNT(*) FROM fan_characters WHERE is_public=1 AND review_status='pending'").fetchone()[0]
         finally:
             conn.close()
-        self._json(200, {"characters": [dict(r) for r in rows], "total": total})
+        self._json(200, {"characters": [dict(r, review_version=fan_review_version(r)) for r in rows], "total": total})
 
     def _api_fan_review_decide(self):
         """approve / reject 一条公开记录；approve 时可同时更正立绘来源。已通过的记录也可以被退回。"""
@@ -5632,9 +5642,12 @@ class Handler(BaseStaticHandler):
         with DB_LOCK:
             conn = db()
             try:
-                row = conn.execute("SELECT id, is_public FROM fan_characters WHERE id=?", (fid,)).fetchone()
+                conn.execute("BEGIN IMMEDIATE")
+                row = conn.execute("SELECT * FROM fan_characters WHERE id=?", (fid,)).fetchone()
                 if not row or not row["is_public"]:
                     self._json(404, {"error": "这条记录不存在或已取消公开"}); return
+                if body.get("review_version") != fan_review_version(row):
+                    self._json(409, {"error": "设表内容或审核状态已变化，请刷新后重新审核"}); return
                 status = "approved" if decision == "approve" else "rejected"
                 conn.execute(
                     "UPDATE fan_characters SET review_status=?, review_note=?, reviewed_by=?, reviewed_at=?, "

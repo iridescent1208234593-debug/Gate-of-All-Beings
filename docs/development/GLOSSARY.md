@@ -79,6 +79,8 @@ B站 Toy 平台上的西木会馆门庭页，源码在 `apps/bilibili-toy`，由
 ### Fan Review（同人审核）
 同人画廊（`/fan.html`）的上架审核。记录在 `fan_characters.review_status`：`pending`（待审）/ `approved`（通过）/ `rejected`（退回，理由在 `review_note`）。只有 `is_public=1 AND review_status='approved'` 的记录出现在 `/api/fan/list`、展示页兜底与 `/api/toy/archive`；作者改动已公开设表的内容会回到 `pending`。审核权（`can_review_fan`）= 管理员、长老或 `is_fan_reviewer=1` 的账号（`local_users` / `user_flags` 列），它与官方画廊的编辑（`edit_role='scribe'`）是两个互不包含的职位；两种申请共用 `executor_requests`，用 `requested_role`（`scribe` / `fan_reviewer`）区分。存量迁移（负责人 2026-11-06 决定）：列首次加入时，所有存量记录一律为 `pending`，公开设置与内容不变，由审核员在审核台逐个审核。
 
+审核队列与审核员读取的公开列表提供 `review_version`，它是本次查看的公开内容和审核状态的指纹。`POST /api/fan/review/decide` 必须带回该值，服务端在同一写事务内核对，内容或状态已变化时返回 409，要求重新查看后审核。
+
 ### Art Source（立绘来源）
 OC 数据与 `fan_characters` 上的 `art_source`：`''` 未声明、`human` 手绘 / 约稿 / 已授权、`ai` AI 生成或 AI 辅助。同人画廊按它与有无立绘分三个分区（`/api/fan/list?view=`）：`art` 有图且非 AI（默认，Toy 也用这个口径）、`text` 纯文字设（无图）、`ai` AI 立绘（页面默认折叠）。作者声明为 AI 会同步；已标为 AI 的不会因作者改声明自动变回，由审核员更正。
 
