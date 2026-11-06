@@ -29,6 +29,9 @@ const RALLY_TTL = 4;          // years a peaceful rally point lingers before cle
 const BASE_TREASURY_UPLIFT = 0.6; // +60% gold income at full mercantile focus (integrator contract)
 
 const POLICY_KEYS = { aggression: 1, expansion: 1, breed: 1, research: 1 };
+// City production focus — must match the yearly payout switch in sim.js and the
+// inspect-panel buttons. Held here so the symmetric API rejects unknown values.
+const CITY_FOCUSES = new Set(['growth', 'build', 'military', 'gold', 'research']);
 
 function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
 function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
@@ -152,6 +155,16 @@ export class Governance {
     let v = +value;
     if (!Number.isFinite(v)) v = 0;
     tribe.policy[key] = clamp(v, -1, 1);
+  }
+
+  // CITY PRODUCTION FOCUS: the symmetric human/AI setter for a settlement's
+  // yearly output. Human (inspect panel) and AI (aiTurn) go through this one
+  // call instead of writing s.focus directly; sim.js owns the payout. Returns
+  // the applied focus, or false for an unknown focus / missing settlement.
+  setCityFocus(sim, settlement, focus) {
+    if (!settlement || !CITY_FOCUSES.has(focus)) return false;
+    settlement.focus = focus;
+    return focus;
   }
 
   // bias the tribe's research toward a target tech (null/unknown clears it).
@@ -680,6 +693,24 @@ export class Governance {
     this.setPolicy(sim, tribe, 'expansion', expansion);
     this.setPolicy(sim, tribe, 'aggression', aggression);
     this.setPolicy(sim, tribe, 'research', research);
+
+    // --- city production focus --------------------------------------------
+    // AI cities use the SAME lever as the player's inspect panel. One decision
+    // per nation per year; integrator still owns the payout switch.
+    // Steer exactly ONE city: turning every city away from 'growth' drops its
+    // food blessing and measurably slows the long headless run. Keep to the O(1)
+    // payouts (gold/build); research/military accelerate tech + soldier churn.
+    const specializedFocus = (tribe.gold || 0) < 20 ? 'gold' : 'build';
+    const cityList = sim.settlements;
+    if (cityList) {
+      for (let ci = 0; ci < cityList.length; ci++) {
+        const city = cityList[ci];
+        if (city && city.tribeId === tribe.id) {
+          this.setCityFocus(sim, city, specializedFocus);
+          break;
+        }
+      }
+    }
 
     // --- choose what to research ------------------------------------------
     let kind;
