@@ -256,7 +256,7 @@ class FanReviewTest(unittest.TestCase):
 
 
 class FanReviewMigrationTest(unittest.TestCase):
-    """Entries already public before review existed stay public (owner decision); private ones need review."""
+    """Owner decision 2026-11-06: every entry from before review existed goes to review; none is deleted or unpublished."""
 
     @classmethod
     def setUpClass(cls):
@@ -266,11 +266,17 @@ class FanReviewMigrationTest(unittest.TestCase):
     def tearDownClass(cls):
         stop(cls)
 
-    def test_public_legacy_entries_are_kept_as_approved(self):
+    def test_legacy_entries_wait_for_review_and_keep_their_data(self):
         _, listing = Client(self.base).call("/api/fan/list?limit=60")
-        self.assertEqual([c["code"] for c in listing["characters"]], ["OLD-1"])
+        self.assertEqual(listing["characters"], [])
         with urllib.request.urlopen(self.base + "/api/toy/archive", timeout=10) as res:
-            self.assertEqual([c["code"] for c in json.loads(res.read())["fan"]], ["OLD-1"])
+            self.assertEqual(json.loads(res.read())["fan"], [])
+        import sqlite3
+        db = sqlite3.connect(next(Path(self.root.name).rglob("users.db")))
+        rows = db.execute("SELECT code, is_public, review_status, image_data FROM fan_characters ORDER BY code").fetchall()
+        db.close()
+        self.assertEqual([r[:3] for r in rows], [("OLD-1", 1, "pending"), ("OLD-2", 0, "pending")])
+        self.assertTrue(all(r[3] for r in rows))
 
 
 if __name__ == "__main__":

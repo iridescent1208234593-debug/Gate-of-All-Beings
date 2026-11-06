@@ -488,17 +488,14 @@ def init_user_db():
             except Exception:
                 pass
         # 同人审核（docs/development/GLOSSARY.md「Fan Review」）：画廊只展示 review_status='approved'。
-        # 列首次加入时，已经公开的记录视为审核前的存量直接记为通过（不让画廊和 Toy 突然变空）；
-        # 未公开的存量和之后的新公开都要先审核。
+        # 负责人决定（2026-11-06）：列首次加入时，所有存量记录（含已公开的）一律进入待审核；
+        # 记录和公开设置都保留，只是审核通过前不在画廊 / Toy 展示，审核台里逐个审。
         fan_cols = {r[1] for r in conn.execute("PRAGMA table_info(fan_characters)")}
         for col, decl in (("review_status", "TEXT DEFAULT 'pending'"), ("review_note", "TEXT DEFAULT ''"),
                           ("reviewed_by", "TEXT DEFAULT ''"), ("reviewed_at", "TEXT DEFAULT ''"),
                           ("art_source", "TEXT DEFAULT ''")):
             if col not in fan_cols:
                 conn.execute(f"ALTER TABLE fan_characters ADD COLUMN {col} {decl}")
-        if "review_status" not in fan_cols:
-            conn.execute("UPDATE fan_characters SET review_status='approved', reviewed_by='legacy', reviewed_at=? WHERE is_public=1",
-                         (now_iso(),))
         conn.execute("CREATE INDEX IF NOT EXISTS idx_fan_characters_review ON fan_characters(is_public, review_status)")
         # 同人审核员职位：与官方画廊的编辑（edit_role）并列、互不包含
         for tbl in ("local_users", "user_flags"):
