@@ -76,6 +76,13 @@
           <li data-crew="codex claude"><span class="history-date">10/27 早</span><h3>账号体系重做</h3><p>登录与注册彻底分开，登录不再自动建号；USSO 账号可以设置登录密码，用昵称或邮箱直接登录；邮箱成为找回密码的通道，USSO 与站内账号都支持；注册必填邮箱，发信失败时自动跳过验证、不阻塞注册；身份申请一律要求填写理由。</p></li>
           <li data-crew="codex claude"><span class="history-date">10/27 晚</span><h3>节气画廊终于亮起来</h3><p>查了很多轮才确认：画廊从来没走过构建流程，发上去的一直是源码，浏览器解析不了裸模块、CSS 与资源导入，所以永远空白。接入构建流程后，三千多张原图压成 384 张 WebP 预览，3D 画廊第一次完整显示；同时把「设表」数据从旧库补回——迁移时漏搬了一千多位用户的角色，幸好旧数据根还在。</p></li>
           <li data-crew="codex claude"><span class="history-date">10/28</span><h3>点赞、留言与两个停摆的服务</h3><p>画廊加入点赞与留言：每张贺图可赞一次、每人最多五张图，点过赞就能留言，每账号每 IP 六十分钟一条；留言以弹幕从下往上飘，点左下角的圆球可以写一句。账户页所有原生弹窗换成站点自己的样式。另外修好了两个悄悄停摆的后台——数值后台和灵质空间，它们的工作目录还指向迁移前的旧路径，导致部分玩法一直报「未启动」。</p></li>
+          <li data-crew="codex claude"><span class="history-date">10/29 → 10/30</span><h3>正式地址换成 iridescently.cn</h3><p>站点开始以 iridescently.cn 作为正式地址，旧地址会自动跳过来，带 www 的地址也能打开；公告里加了域名迁移预告和「名号规范」，官方角色名不再能用作账号名或设表名。迁移当天发现停留在旧地址页面上保存设表、上传图片会失败，当晚就修好了。</p></li>
+          <li data-crew="claude"><span class="history-date">10/31</span><h3>世界地图直达，门庭适配小屏</h3><p>在任意站点地址后面加上 /map 就能直接打开世界地图；众生之门门庭开场在小屏和矮屏上的提示、跳过按钮和署名不再被挡住或挤在一起。</p></li>
+          <li data-crew="claude codex"><span class="history-date">11/1 → 11/3</span><h3>又一轮安全巡检</h3><p>逐项检查并修好十几处隐患：保存设表时会先检查图片和内容，每个账号也有了上限；明显异常的游戏成绩先进待审，不直接上排行榜；账号封禁改为只有管理员能操作；会馆偶尔被前一个请求「串线」的问题也一并修好。</p></li>
+          <li data-crew="claude"><span class="history-date">11/3</span><h3>国内访问换了条快路</h3><p>iridescently.cn 改走新的加速线路，国内打开会馆和众生之门更稳更快。</p></li>
+          <li data-crew="claude"><span class="history-date">11/4</span><h3>搬进新的香港服务器</h3><p>正式站搬到一台新的香港服务器；从这次起，每次发布都封存成一个固定版本，出问题可以一键退回上一版，大家的数据不随代码替换。顺手修好了首页图库预览图的文件名。</p></li>
+          <li data-crew="claude"><span class="history-date">11/6</span><h3>西木会馆来到 B 站 Toy</h3><p>为 B 站 Toy 做了一张会馆门庭页，实时展示会馆里最受欢迎的同人角色和官方图鉴，并能直接跳回会馆、卡牌和灵境会馆；只读取公开画廊已经展示的内容。</p></li>
+          <li data-crew="claude"><span class="history-date">11/6</span><h3>会馆 LAB 试验场</h3><p>用 Godot 搭了一个可以多人同时在线的会馆测试世界，先在小范围里试玩，验证联机与在会馆里「到场」的玩法。</p></li>
           <li class="history-next" data-crew="codex claude"><span class="history-date">接下来</span><h3>还在继续折腾</h3><p>更多游戏与捏脸系统，继续探索中。</p></li>
         </ol>
       </section>
