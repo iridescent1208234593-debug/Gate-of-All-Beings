@@ -2159,9 +2159,14 @@ class Handler(BaseStaticHandler):
         if rate_blocked(f"reg:{ip}", 5, 3600):
             self._json(429, {"error": "注册过于频繁，请稍后再试"})
             return
+        # 表单填错（密码不足 12 位、用户名非法等）的提交不该消耗上面那 5 次/小时的注册额度：
+        # 另设一个宽松的总尝试上限防滥用，真正的注册配额只在全部校验通过后才计入（见下方）。
+        if rate_blocked(f"regtry:{ip}", 30, 3600):
+            self._json(429, {"error": "提交次数过多，请核对表单（密码至少 12 位、用户名 2-16 位）后稍后再试"})
+            return
         if not self._turnstile_passed(body, "register"):
             return
-        rate_add(f"reg:{ip}")
+        rate_add(f"regtry:{ip}")
 
         username = (body.get("username") or "").strip()
         password = body.get("password") or ""
@@ -2197,6 +2202,8 @@ class Handler(BaseStaticHandler):
         has_admin = bool(ADMIN_USSO_IDS) or n_local > 0
         role = "executor" if has_admin else "admin"
 
+        # 走到这里的注册才算真正成功，此时才占用 5 次/小时的注册额度
+        rate_add(f"reg:{ip}")
         pass_hash = hash_password(password)  # scrypt is slow: never hold DB_LOCK while hashing
         with DB_LOCK:
             conn = db()
