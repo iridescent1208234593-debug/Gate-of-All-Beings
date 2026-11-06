@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB 管理台</title>
+<link rel="stylesheet" href="/static/lab.css">
+</head>
+<body class="console">
+<h1>西木会馆 LAB 管理台 <small id="ver"></small></h1>
+<section id="login" hidden>
+  <p>管理台只在本机 127.0.0.1 打开，需要管理员密码（与测试码无关）。</p>
+  <input id="pw" type="password" placeholder="管理员密码" autocomplete="current-password">
+  <button id="loginBtn">登录</button> <span id="loginMsg"></span>
+</section>
+<section id="main" hidden>
+  <div class="grid" id="tiles"></div>
+
+  <h2>测试码</h2>
+  <div>
+    <input id="label" placeholder="备注（例如玩家名）" maxlength="60">
+    <select id="role"><option value="player">玩家</option><option value="monitor">只读监控</option><option value="art">美术上传</option></select>
+    <input id="count" type="number" min="1" max="50" value="1" style="width:70px">
+    <button id="mk">生成</button>
+  </div>
+  <div id="newCodes"></div>
+  <div class="scroll"><table id="codes"></table></div>
+
+  <h2>在线玩家</h2>
+  <div class="scroll"><table id="players"></table></div>
+
+  <h2>空间与世界</h2>
+  <div class="scroll"><table id="spaces"></table></div>
+  <p><button id="report">导出匿名测试报告</button> <button id="snap">查看会馆快照</button></p>
+  <pre id="snapshot" hidden></pre>
+
+  <h2>R4 世界模拟</h2>
+  <pre id="r4"></pre>
+
+  <h2>美术测试素材（待审核）</h2>
+  <div class="scroll"><table id="art"></table></div>
+
+  <h2>日志</h2>
+  <pre id="errors"></pre>
+  <pre id="security"></pre>
+  <pre id="audit"></pre>
+  <pre id="tail"></pre>
+</section>
+<script src="/static/admin.js"></script>
+</body>
+</html>

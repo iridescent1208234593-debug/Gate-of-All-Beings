@@ -1,0 +1,8 @@
+# runtime, secrets and build output never live in source control
+server/.venv/
+**/__pycache__/
+.pytest_cache/
+build/
+client/.godot/
+lab.config.json
+scratch-import.*

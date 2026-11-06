@@ -8,6 +8,7 @@
 | `apps/activation-core` | 独立 Next.js 应用，不由门户启动 |
 | `apps/shell` | 统一壳 `index.html` 与导航清单 `portal.json` |
 | `apps/bilibili-toy` | B站 Toy 门庭页源码与内容（`content.json`、`assets/assets.json`）；由负责人用自己的 B站账号发布，不进站点快照，见 `apps/bilibili-toy/README.md` |
+| `apps/huiguan-lab` | 西木会馆 LAB V2：本机 Windows 上的独立 Godot 联机测试世界（网关、测试码、R4 世界接入、Godot 2D/3D 客户端、启停脚本、文档）。不进站点快照，不由 build-modules 构建，也不随 Release 发布；运行数据在工作区 `labs/zszm-lab-v2-runtime`，见 `apps/huiguan-lab/README.md` |
 | `apps/<模块>` | 游戏源码；目录名即模块 key：cards、management、ecology、juling、aeon、world-map、slay、softie |
 | `services/platform` | 统一入口 `portal_server.py`、SSO/账户/安全、存储契约（`storage_paths.py` 与 `runtime-paths.cjs`）；测试在 `tests/` |
 | `packages/shared-*` | 设计系统、类型契约、只读事实、会话/存档（npm 包名仍为 `@lxh/*`） |

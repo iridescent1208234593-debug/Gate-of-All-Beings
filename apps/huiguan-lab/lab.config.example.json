@@ -1,0 +1,11 @@
+{
+  "_comment": "Copy to lab.config.json to override defaults. Paths may be relative to this file.",
+  "public_host": "pc-lab.iridescently.cn",
+  "port": 18300,
+  "admin_port": 18302,
+  "r4_port": 18301,
+  "runtime": "../zszm-lab-v2-runtime",
+  "r4_interval_seconds": 60,
+  "tunnel_enabled": true,
+  "max_players": 120
+}

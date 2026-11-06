@@ -1,0 +1,51 @@
+{
+  "schema": "zszm-lab-space/1",
+  "units": "metres",
+  "axes": "x east, y up, z south (ground plane x/z); 2D maps x,z to pixels, 3D uses x,0,z",
+  "player": {"radius": 0.3, "speed": 4.0, "run_speed": 6.5},
+  "templates": {
+    "hall": {
+      "title": "西木会馆",
+      "bounds": {"min": [0.5, 0, 0.5], "max": [31.5, 0, 21.5]},
+      "spawn": [15.5, 0, 17.5],
+      "spawn_spread": 2.0,
+      "ground": "grass",
+      "obstacles": [
+        {"id": "gate", "kind": "gate", "position": [15.5, 0, 2.2], "radius": 1.6},
+        {"id": "tree-nw", "kind": "tree", "position": [4.0, 0, 4.0], "radius": 0.9},
+        {"id": "tree-ne", "kind": "tree", "position": [27.0, 0, 4.5], "radius": 0.9},
+        {"id": "tree-w", "kind": "tree", "position": [3.0, 0, 13.0], "radius": 0.9},
+        {"id": "tree-c", "kind": "tree", "position": [10.0, 0, 9.0], "radius": 0.8},
+        {"id": "rock-1", "kind": "rock", "position": [21.0, 0, 8.0], "radius": 0.6},
+        {"id": "rock-2", "kind": "rock", "position": [7.5, 0, 17.5], "radius": 0.55},
+        {"id": "pond", "kind": "water", "position": [6.0, 0, 8.0], "radius": 1.8},
+        {"id": "campfire", "kind": "campfire", "position": [15.5, 0, 11.0], "radius": 0.7}
+      ],
+      "objects": [
+        {"id": "lantern-flower", "kind": "lantern", "name": "照林花", "position": [12.5, 0, 12.5], "radius": 1.6, "stages": 4},
+        {"id": "wind-bell", "kind": "bell", "name": "风铃", "position": [18.5, 0, 12.5], "radius": 1.6},
+        {"id": "rainbow-door", "kind": "portal", "name": "虹之间", "position": [15.5, 0, 4.6], "radius": 1.8},
+        {"id": "notice-board", "kind": "board", "name": "会馆告示", "position": [11.5, 0, 16.5], "radius": 1.6}
+      ],
+      "pasture": {"origin": [19.5, 0, 14.0], "cell_step": [1.4, 0, 0.9], "cells": [8, 8]}
+    },
+    "lingzhi": {
+      "title": "灵质空间",
+      "bounds": {"min": [0.5, 0, 0.5], "max": [17.5, 0, 13.5]},
+      "spawn": [9.0, 0, 10.5],
+      "spawn_spread": 1.2,
+      "ground": "spirit",
+      "obstacles": [
+        {"id": "pool", "kind": "water", "position": [4.0, 0, 4.5], "radius": 1.5},
+        {"id": "tree-a", "kind": "tree", "position": [14.0, 0, 3.5], "radius": 0.8},
+        {"id": "stone", "kind": "rock", "position": [12.5, 0, 9.0], "radius": 0.5}
+      ],
+      "objects": [
+        {"id": "return-door", "kind": "portal", "name": "回到会馆", "position": [9.0, 0, 2.0], "radius": 1.6},
+        {"id": "lantern-flower", "kind": "lantern", "name": "照林花", "position": [6.5, 0, 9.0], "radius": 1.6, "stages": 4}
+      ],
+      "pasture": {"origin": [9.0, 0, 4.0], "cell_step": [0.9, 0, 0.7], "cells": [8, 8]}
+    }
+  },
+  "emotes": ["wave", "bow", "heart", "laugh", "sleep", "surprise", "music", "sparkle"]
+}
