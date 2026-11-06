@@ -74,7 +74,7 @@
 玩家此刻是否身在某项托付的地点，界面上叫“到场”。由客户端上报 `{place, is_present}`；只有到场的时间计入托付。它不是登录在线状态。
 
 ### Bilibili Toy（B站 Toy 门庭）
-B站 Toy 平台上的西木会馆门庭页，源码在 `apps/bilibili-toy`，由 `tools/toy/build-toy-bundle.mjs` 构建成静态包。它是独立分发渠道，不是 Release、不是站点的一部分，也不访问会馆的账户、API 或数据；发布主体永远是项目方自己的 B站 账号。Toy 平台的 `toyOpenId` 只在当前 Toy 内有效，不能当作 Account、`uid` 或 `user_id`。
+B站 Toy 平台上的西木会馆门庭页，源码在 `apps/bilibili-toy`，由 `tools/toy/build-toy-bundle.mjs` 构建成静态包。它是独立分发渠道，不是 Release、不是站点的一部分；它不碰会馆账户，只读取匿名只读接口 `/api/toy/archive`（公开同人前十与官方档案摘要），并链接到 `content.json` 批准的根域页面；发布主体永远是项目方自己的 B站 账号。Toy 平台的 `toyOpenId` 只在当前 Toy 内有效，不能当作 Account、`uid` 或 `user_id`。
 
 ## 已知容易混淆的词
 

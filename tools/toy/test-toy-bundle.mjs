@@ -54,6 +54,12 @@ test('only B站 in-app navigation targets become links', () => {
 
 const refused = {
   'own domain': { 'index.html': '<p>请访问 huiguan.iridescently.xyz 注册</p>' },
+  'link to an unapproved root': { 'index.html': '<a href="https://huiguan.iridescently.xyz/">x</a>' },
+  'link to an unlisted service on the approved root': { 'index.html': '<a href="https://oc.iridescently.cn/">x</a>' },
+  'API route on an approved host': { 'index.html': '<a href="https://huiguan.iridescently.cn/api/user">x</a>' },
+  'admin page on an approved host': { 'index.html': '<a href="https://huiguan.iridescently.cn/admin/x">x</a>' },
+  'plain http to an approved host': { 'index.html': '<a href="http://huiguan.iridescently.cn/">x</a>' },
+  'fetch outside the page script': { 'other.js': 'fetch("https://huiguan.iridescently.cn/api/toy/archive")' },
   'own domain on another root': { 'a.js': 'const u = "iridescently.cn"' },
   'third-party URL': { 'index.html': '<a href="https://example.com/">x</a>' },
   'protocol-relative URL': { 'index.html': '<img src="//cdn.example.com/a.png">' },
@@ -75,6 +81,15 @@ for (const [name, files] of Object.entries(refused)) {
     assert.notDeepEqual(checkPackage(packageWith(files)), []);
   });
 }
+
+test('approved project pages and the archive endpoint pass', () => {
+  const dir = packageWith({
+    'index.html': '<a href="https://huiguan.iridescently.cn/show.html?code=A-1&amp;x=1">a</a><a href="https://zszm.iridescently.cn/app/shell/m/cards">b</a>',
+    'toy-page.js': 'fetch(config.archive, { credentials: "omit" })',
+    'cfg.json': '{"archive":"https://huiguan.iridescently.cn/api/toy/archive","hosts":["huiguan.iridescently.cn"]}',
+  });
+  assert.deepEqual(checkPackage(dir), []);
+});
 
 test('the official Toy SDK script is the one allowed external URL', () => {
   const dir = packageWith({ 'index.html': '<script src="https://s1.hdslb.com/bfs/seed/toy/app/sdk/toy-sdk.js"></script>' });

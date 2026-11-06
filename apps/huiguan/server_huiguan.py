@@ -1421,6 +1421,12 @@ def _sanitize_image_urls_in_text(value):
     return remote_url.sub(replace_remote, value)
 
 
+# What the B站 Toy page reads from /api/toy/archive: the top of the public fan gallery and the
+# head of the official archive. Fixed server-side so the endpoint cannot be used to page the site.
+TOY_ARCHIVE_FAN_LIMIT = 10
+TOY_ARCHIVE_OFFICIAL_LIMIT = 24
+
+
 def _sanitize_json_image_sources(value):
     if isinstance(value, dict):
         return {key: _sanitize_json_image_sources(item) for key, item in value.items()}
@@ -1748,6 +1754,8 @@ class Handler(BaseStaticHandler):
             return self._api_member_users()
         if path == "/api/fan/list":
             return self._api_fan_list(qs)
+        if path == "/api/toy/archive":
+            return self._api_toy_archive()
         if path == "/api/fan/my":
             return self._api_fan_my()
         if path == "/api/fan/check-suggest":
@@ -5190,8 +5198,18 @@ class Handler(BaseStaticHandler):
             where.append("type=?")
             params.append(ft)
         wc = " AND ".join(where)
+        rows = self._public_fan_rows(conn, wc, params, viewer, limit, offset)
+        total = conn.execute(
+            f"SELECT COUNT(*) FROM fan_characters WHERE {wc}", params
+        ).fetchone()[0]
+        conn.close()
+        chars = [dict(r, is_mine=bool(viewer and r["is_mine"])) for r in rows]
+        self._json(200, {"characters": chars, "total": total, "page": page, "limit": limit})
+
+    def _public_fan_rows(self, conn, wc, params, viewer, limit, offset):
+        """Public fan characters in gallery order (reactions, then newest); owner ids never leave."""
         self._ensure_fan_reaction_tables(conn)
-        rows = conn.execute(
+        return conn.execute(
             f"""SELECT id, '' AS user_kind, '' AS user_uid, user_name, name, type, species, gender, faction, ability, appearance, story, image_data, is_public, code, created_at, updated_at,
                       (user_kind=? AND user_uid=?) AS is_mine,
                       (SELECT COUNT(*) FROM fan_char_favorites fav WHERE fav.character_id=fan_characters.id)
@@ -5201,12 +5219,58 @@ class Handler(BaseStaticHandler):
                ORDER BY reaction_score DESC, created_at DESC, id DESC LIMIT ? OFFSET ?""",
             [viewer["kind"] if viewer else "", viewer["uid"] if viewer else ""] + params + [limit, offset]
         ).fetchall()
-        total = conn.execute(
-            f"SELECT COUNT(*) FROM fan_characters WHERE {wc}", params
-        ).fetchone()[0]
-        conn.close()
-        chars = [dict(r, is_mine=bool(viewer and r["is_mine"])) for r in rows]
-        self._json(200, {"characters": chars, "total": total, "page": page, "limit": limit})
+
+    def _api_toy_archive(self):
+        """Read-only archive digest for the B站 Toy page (docs/bilibili-toy.md).
+
+        Anonymous by construction: no cookie is read, nothing is credentialed, and only fields the
+        public gallery already shows are returned, so any origin may read it.
+        """
+        base = site_url("huiguan", host=request_host(self)).rstrip("/")
+        conn = db()
+        try:
+            rows = self._public_fan_rows(conn, "is_public=1", [], None, TOY_ARCHIVE_FAN_LIMIT, 0)
+        finally:
+            conn.close()
+        fan = []
+        for r in rows:
+            image = r["image_data"] or ""
+            # Only stored upload files; inline base64 is too large to hand to a Toy.
+            image = base + image if re.fullmatch(r"/assets/uploads/[A-Za-z0-9]{16,64}\.(?:png|jpe?g|webp|gif)", image) else ""
+            fan.append({"code": r["code"], "name": r["name"], "user_name": r["user_name"], "type": r["type"],
+                        "species": r["species"], "gender": r["gender"], "story": (r["story"] or "")[:300],
+                        "image": image, "url": f"{base}/show.html?code={urllib.parse.quote(r['code'] or '')}"})
+        official_rows = []
+        try:
+            conn = wv()
+        except sqlite3.Error as error:
+            # The worldview library is a separate store; the fan digest still answers without it.
+            print(f"[huiguan] toy archive: worldview unavailable: {error}", flush=True)
+            conn = None
+        try:
+            official_rows = conn.execute(
+                "SELECT id, name, type, thumb_path FROM v_character_gallery WHERE id NOT IN (SELECT id FROM characters WHERE merged_to IS NOT NULL) "
+                "AND id NOT IN (SELECT id FROM characters WHERE category='同人角色') "
+                "ORDER BY CASE WHEN type LIKE '%主角%' THEN 0 WHEN type LIKE '%核心%' THEN 1 "
+                "WHEN type LIKE '%重要%' OR type LIKE '%主要%' THEN 2 ELSE 3 END, "
+                "CASE WHEN thumb_path IS NOT NULL AND thumb_path != '' THEN 0 ELSE 1 END, name, id LIMIT ?",
+                (TOY_ARCHIVE_OFFICIAL_LIMIT,)).fetchall() if conn else []
+        except sqlite3.Error as error:
+            print(f"[huiguan] toy archive: official list unavailable: {error}", flush=True)
+        finally:
+            if conn:
+                conn.close()
+        official = [{"name": r["name"], "type": r["type"],
+                     "image": f"{base}/api/official/img?cid={urllib.parse.quote(str(r['id']))}&n=0&t=1" if r["thumb_path"] else "",
+                     "url": f"{base}/char.html?id={urllib.parse.quote(str(r['id']))}"} for r in official_rows]
+        body = json.dumps({"schema_version": 1, "fan": fan, "official": official}, ensure_ascii=False).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Cache-Control", "public, max-age=300")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def _api_fan_my(self):
         ident = self._require_ident()
