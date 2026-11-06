@@ -14,7 +14,7 @@ import time
 CURRENT_VERSION = "2026-11-07"
 
 # Where the agreement was given. Anything else is stored as "other".
-CONTEXTS = ("register", "oc-submit", "account", "reconsent")
+CONTEXTS = ("register", "oc-submit", "fan-publish", "account", "reconsent")
 
 
 def init_schema(conn):

@@ -129,3 +129,5 @@
 .auth-legal .legal-check { margin: 0; }
 .oc-legal { display: flex; justify-content: center; margin: 14px auto 2px; max-width: 560px; }
 .oc-legal .legal-check { margin: 0; }
+.fan-legal { margin-top: 8px; }
+.fan-legal .legal-check { margin: 0; }
