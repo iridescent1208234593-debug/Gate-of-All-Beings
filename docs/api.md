@@ -8,6 +8,9 @@
 登录/账号：
 `/api/register`、`/api/login`、`/api/logout`、`/api/user`、`/api/sso-user`、`/api/auth`、`/api/rename`、`/api/user/theme`、`/api/sso/role-theme`、`/api/security/<setup|question|change|reset|settings>`
 
+用户须知 / 隐私政策：
+`GET /api/legal`（当前 `legal_version`；登录时附 `is_accepted`、`accepted_at`）、`POST /api/legal/accept`（登录用户提交 `{legal_version, context}`，版本不是当前版返回 409 `legal_version_mismatch`）。`POST /api/register` 必须带 `legal_version` 且等于当前版，否则返回 400 `legal_consent_required`，不建号、不消耗 Turnstile。
+
 角色 / 官方资料：
 `/api/get-characters`、`/api/get-character`、`/api/save-character`、`/api/save-all-characters`、`/api/my-broken-characters`、`/api/official/characters`、`/api/official/character`、`/api/official/edit`、`/api/official/graph`、`/api/official/merge`、`/api/official/react`、`/api/official/reactions`、`/api/official/scribe-apply`、`/api/official/supplement`、`/api/official/avatar/set`
 

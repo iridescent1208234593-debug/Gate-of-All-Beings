@@ -14,7 +14,8 @@
 
 | 端点 | 作用 |
 | --- | --- |
-| `POST /api/register` | 站内注册（写入 `local_users`，密码哈希） |
+| `POST /api/register` | 站内注册（写入 `local_users`，密码哈希）；必须带当前 `legal_version`，同意记录写入 `legal_consents` |
+| `GET /api/legal` · `POST /api/legal/accept` | 《用户须知》《隐私政策》当前版本与本账号的同意记录（`services/platform/legal_consent.py`） |
 | `POST /api/login` | 站内登录 / 或跳转 USSO |
 | `GET /api/user` | 当前登录用户（USSO 或站内） |
 | `GET /api/sso-user` | 跨站 SSO 登录态 |

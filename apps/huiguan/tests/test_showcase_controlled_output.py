@@ -22,6 +22,9 @@ import server_huiguan as app
 from showcase_sanitizer import sanitize_showcase, controlled_showcase, RUNTIME_SCRIPTS
 from test_fan_owner_edit import Client
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
+from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
+
 TEMPLATE_LIKE = '''<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>A-1 | 人设表</title>
 <style>:root{--character-primary:#123456;--bg:#0a0b0c}
@@ -109,7 +112,7 @@ class PublicShowcase(unittest.TestCase):
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True); cls.thread.start()
         cls.base = 'http://127.0.0.1:' + str(cls.server.server_port)
         cls.client = Client(cls.base)
-        assert cls.client.call('/api/register', {'username': 'showcase_owner', 'password': 'test-only-password-123',
+        assert cls.client.call('/api/register', {"legal_version": LEGAL_VERSION, 'username': 'showcase_owner', 'password': 'test-only-password-123',
                                                  'nickname': 'showcase_owner', 'email': 'showcase@example.com'})[0] == 200
 
     @classmethod

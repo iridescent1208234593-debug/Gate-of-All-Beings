@@ -12,6 +12,9 @@ import urllib.request
 from http.cookies import SimpleCookie
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
+from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
+
 HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = r'''
 import http.server, sys
@@ -57,7 +60,7 @@ class EditorCodeTest(unittest.TestCase):
                 time.sleep(0.1)
         else:
             self.fail("test server did not become ready")
-        status, _ = self.call("/api/register", {"username": "editor_test", "password": "test-password-123",
+        status, _ = self.call("/api/register", {"legal_version": LEGAL_VERSION, "username": "editor_test", "password": "test-password-123",
                                                  "nickname": "editor_test", "email": "t@example.com"})
         self.assertEqual(status, 200)
 

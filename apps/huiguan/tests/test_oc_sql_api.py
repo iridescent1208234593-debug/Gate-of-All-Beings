@@ -26,6 +26,9 @@ os.environ['IRIDESCENTLY_OC_BACKEND'] = 'json'
 import server_huiguan as app
 from oc_store import atomic_json, open_database, digest
 from test_fan_owner_edit import Client, sheet
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
+from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
 atomic_json(Path(app.RUNTIME_DIR) / 'characters-storage-state.json', {'schema':1,'backend':'sqlite'})
 os.environ['IRIDESCENTLY_OC_BACKEND'] = 'sqlite'
 
@@ -42,7 +45,7 @@ class API(unittest.TestCase):
         cls.base = 'http://127.0.0.1:' + str(cls.server.server_port)
         cls.a, cls.b = Client(cls.base), Client(cls.base)
         for client, name in [(cls.a,'oc_owner'),(cls.b,'oc_other')]:
-            assert client.call('/api/register', {'username':name,'password':'test-only-password-123','nickname':name,'email':name+'@example.com'})[0] == 200
+            assert client.call('/api/register', {"legal_version": LEGAL_VERSION, 'username':name,'password':'test-only-password-123','nickname':name,'email':name+'@example.com'})[0] == 200
 
     @classmethod
     def tearDownClass(cls):

@@ -13,6 +13,9 @@ import urllib.request
 from http.cookies import SimpleCookie
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
+from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
+
 HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = r'''
 import sys, http.server
@@ -97,7 +100,7 @@ class OfficialTitleBlacklistTest(unittest.TestCase):
         cls.root.cleanup()
 
     def test_register_rejects_official_display_name(self):
-        status, result = self.client.call("/api/register", {
+        status, result = self.client.call("/api/register", {"legal_version": LEGAL_VERSION, 
             "username": "new_member", "password": "test-password-123", "nickname": "罗小黑", "email": "t@example.com"},
             client_ip="192.0.2.10")
         self.assertEqual(status, 400)
@@ -106,20 +109,20 @@ class OfficialTitleBlacklistTest(unittest.TestCase):
     def test_register_rejects_normalized_official_name_variants(self):
         for index, nickname in enumerate(("ＭＴ", "mT", "M\u200bT", "M T")):
             with self.subTest(nickname=nickname):
-                status, result = self.client.call("/api/register", {
+                status, result = self.client.call("/api/register", {"legal_version": LEGAL_VERSION, 
                     "username": f"variant_{index}", "password": "test-password-123", "nickname": nickname, "email": "t@example.com"},
                     client_ip=f"192.0.2.{20 + index}")
                 self.assertEqual(status, 400)
                 self.assertIn("官方世界观角色名", result["error"])
 
     def test_matching_remains_exact_after_normalization(self):
-        status, result = self.client.call("/api/register", {
+        status, result = self.client.call("/api/register", {"legal_version": LEGAL_VERSION, 
             "username": "near_match", "password": "test-password-123", "nickname": "余某", "email": "t@example.com"},
             client_ip="192.0.2.11")
         self.assertEqual(status, 200, result)
 
     def test_registration_keeps_existing_numeric_name_behavior(self):
-        status, result = self.client.call("/api/register", {
+        status, result = self.client.call("/api/register", {"legal_version": LEGAL_VERSION, 
             "username": "numeric_name", "password": "test-password-123", "nickname": "123456", "email": "t@example.com"},
             client_ip="192.0.2.15")
         self.assertEqual(status, 200, result)
@@ -141,7 +144,7 @@ class OfficialTitleBlacklistTest(unittest.TestCase):
         self.assertEqual((status, result.get("registered")), (200, False))
 
     def test_rename_rejects_official_and_numeric_names(self):
-        status, result = self.client.call("/api/register", {
+        status, result = self.client.call("/api/register", {"legal_version": LEGAL_VERSION, 
             "username": "rename_member", "password": "test-password-123", "nickname": "普通名号", "email": "t@example.com"},
             client_ip="192.0.2.14")
         self.assertEqual(status, 200, result)

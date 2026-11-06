@@ -25,6 +25,9 @@ from PIL import Image
 import server_huiguan as app
 from test_fan_owner_edit import Client, sheet
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
+from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
+
 
 class Quiet(app.Handler):
     def log_message(self, *_): pass
@@ -46,7 +49,7 @@ class SaveLimits(unittest.TestCase):
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True); cls.thread.start()
         cls.base = 'http://127.0.0.1:' + str(cls.server.server_port)
         cls.client = Client(cls.base)
-        status, _ = cls.client.call('/api/register', {'username': 'limits_owner', 'password': 'test-only-password-123',
+        status, _ = cls.client.call('/api/register', {"legal_version": LEGAL_VERSION, 'username': 'limits_owner', 'password': 'test-only-password-123',
                                                       'nickname': 'limits_owner', 'email': 'limits@example.com'})
         assert status == 200
 

@@ -31,6 +31,9 @@ import scraping_observer  # noqa: E402
 import server_huiguan as huiguan  # noqa: E402
 import oc_store  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
+from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
+
 USERS = 4
 SHEETS_PER_USER = 6
 
@@ -85,7 +88,7 @@ class ConcurrentCharacterWritesTest(unittest.TestCase):
         for index in range(USERS):
             client = Client(base)
             name = f"writer_{index}"
-            status, _ = client.call("/api/register", {"username": name, "password": "test-password-123", "nickname": name, "email": f"{name}@example.com"})
+            status, _ = client.call("/api/register", {"legal_version": LEGAL_VERSION, "username": name, "password": "test-password-123", "nickname": name, "email": f"{name}@example.com"})
             assert status == 200, status
             cls.clients.append(client)
 

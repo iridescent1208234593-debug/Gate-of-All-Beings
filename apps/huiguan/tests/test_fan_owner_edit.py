@@ -14,6 +14,9 @@ import urllib.request
 from http.cookies import SimpleCookie
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
+from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
+
 HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = (
     "import sys, http.server; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'services' / 'platform')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; "
@@ -78,7 +81,7 @@ class FanOwnerEditTest(unittest.TestCase):
                 time.sleep(0.1)
         cls.owner, cls.other = Client(cls.base), Client(cls.base)
         for client, name in ((cls.owner, "owner_test"), (cls.other, "other_test")):
-            status, _ = client.call("/api/register", {"username": name, "password": "test-password-123", "nickname": name, "email": "t@example.com"})
+            status, _ = client.call("/api/register", {"legal_version": LEGAL_VERSION, "username": name, "password": "test-password-123", "nickname": name, "email": "t@example.com"})
             assert status == 200, status
 
     @classmethod
