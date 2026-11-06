@@ -79,6 +79,7 @@ Windows 用户使用 PowerShell。仓库同时被 Linux CI 使用，脚本不要
 | `npm run check:world-map` | 世界地图模块单独检查 |
 | `python services/platform/tests/verify_portal.py` | 门户路由、Host 与 Origin 策略检查 |
 | `python tools/checks/regression.py --full` | 全量回归，只用临时 test 存储 |
+| `python tools/checks/regression.py --full --report <path>` | 全量回归并另存机器可读 JSON 摘要 |
 | `python tools/checks/local-smoke.py` | 本机运行时起来后的只读冒烟 |
 
 ---
@@ -234,7 +235,12 @@ npm run build:modules
 
 # 全量回归，只用临时 test 存储
 python tools/checks/regression.py --full --modules <candidate>/modules
+
+# 导出 JSON 汇总（不包含环境变量或凭据）
+python tools/checks/regression.py --full --modules <candidate>/modules --report <path>/regression.json
 ```
+
+`--report` 可选；省略时原有标准输出和退出码行为不变。摘要的 `checks` 数组逐项记录 `status`（`passed` / `failed` / `skipped`）、`seconds` 与原有 `passed` 布尔值；失败的子进程另含 argv 数组 `command` 和 `exit_code`，启动异常记录 `error`。跳过项含 `skipped` 原因。摘要不包含子进程环境变量或输出内容。
 
 ### 覆盖范围参考
 
