@@ -19,7 +19,8 @@
         QQ 群：<strong id="hgQQ" style="letter-spacing:1px;">${QQ}</strong>
         <button type="button" id="hgCopy" style="margin-left:8px;font:inherit;font-size:12px;cursor:pointer;padding:2px 12px;border-radius:999px;border:1px solid var(--accent,#5a9e8f);background:transparent;color:var(--accent,#5a9e8f);">复制群号</button><br>
         <a href="${QQ_LINK}" target="_blank" rel="noopener" style="color:var(--accent,#5a9e8f);font-size:12px;">点此加入 QQ 群</a><br>
-        微信群：<strong>西木会馆-众生之门</strong> <a href="${WECHAT_LINK}" target="_blank" rel="noopener" style="color:var(--accent,#5a9e8f);font-size:12px;">点此加入微信群</a><span style="color:var(--dim,var(--text-dim,#7a8a7e));font-size:12px;">（链接失效时看页脚 / 群聊里的二维码）</span>
+        微信群：<strong>西木会馆-众生之门</strong> <a href="${WECHAT_LINK}" target="_blank" rel="noopener" style="color:var(--accent,#5a9e8f);font-size:12px;">点此加入微信群</a><span style="color:var(--dim,var(--text-dim,#7a8a7e));font-size:12px;">（链接失效时扫下面的二维码）</span>
+        <details style="margin-top:4px;"><summary style="cursor:pointer;font-size:12px;color:var(--accent,#5a9e8f);">展开微信群二维码（11 月 14 日前有效）</summary><img src="/wechat-group-qr.png?v=20261106" alt="西木会馆-众生之门 微信群二维码" width="180" height="272" style="display:block;margin-top:6px;border-radius:8px;"></details>
       </div>
       <button type="button" id="hgOk" style="margin-top:16px;width:100%;padding:10px;border:none;border-radius:8px;background:var(--accent,#5a9e8f);color:var(--on-accent,#fff);font:inherit;font-size:14px;cursor:pointer;">好的，我会去的</button>
     </div>`;
