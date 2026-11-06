@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAB 美术测试素材</title><link rel="stylesheet" href="/static/lab.css"></head>
+<body class="console">
+<h1>美术测试素材上传</h1>
+<p>上传 PNG 或 WebP（≤10 MB，边长 ≤4096）。素材先进入待审核区，管理员通过后才会出现在共享测试资源里。原始协作文件请继续保存在素材库，这里只放测试用副本。</p>
+<p>
+  <select id="cat"><option value="tree">树木</option><option value="bridge">桥梁</option><option value="ground">地表</option><option value="building">建筑</option><option value="character">角色贴图</option><option value="prop">道具</option><option value="other">其他</option></select>
+  <input id="file" type="file" accept="image/png,image/webp"> <button id="up">上传</button> <span id="msg"></span>
+</p>
+<h2>已通过的共享测试素材</h2>
+<div id="list" class="grid"></div>
+<script src="/static/art.js"></script>
+</body></html>

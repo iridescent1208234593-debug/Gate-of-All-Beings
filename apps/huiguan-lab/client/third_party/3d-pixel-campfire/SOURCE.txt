@@ -1,0 +1,6 @@
+Upstream https://github.com/Wayoung7/3D-Pixel-Campfire
+Commit 47ab13299f94d511f445e1203db58f80de0c4cd6
+Downloaded 2026-11-06
+MIT License, Copyright (c) 2026 Y.Y Wang
+Original main.tscn and source files retained. campfire_scene.tscn changes only resource paths.
+The experiment extracts the Campfire subtree, lowers ray-march steps to 24, and reuses surface.gdshader for quantized materials.

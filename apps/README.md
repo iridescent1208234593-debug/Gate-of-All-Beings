@@ -8,6 +8,7 @@
 | `activation-core/` | 独立 Next.js 应用，不由门户启动 |
 | `shell/index.html` | 统一壳：History API 路径路由（`/app/shell/m/<名>`），七个 `embed: true` 模块挂入当前文档；世界地图等非 embed 入口用同域 iframe 隔离；`<base>` 按模块基址解析相对资源；`window.__iridescentlyDispose` 统一卸载 |
 | `shell/portal.json` | 门户清单（站点/游戏分组、URL、图标、`embed` 标记），导航唯一数据源 |
+| `huiguan-lab/` | 西木会馆 LAB V2（独立的本机 Godot 联机测试世界，不由门户启动、不进 Release），见其 README |
 | `<模块>/` | 游戏源码：cards、management、ecology、juling、aeon、world-map、slay、softie（目录名即模块 key） |
 | `../tools/build/build-modules.mjs` | 把各游戏构建/拷贝到外部 Release 根的 `candidate/modules/` |
 | Release 内 `dist/modules/<名>/` | 封存后的构建产物（不进 Git），`/app/modules/*` 从这里提供 |

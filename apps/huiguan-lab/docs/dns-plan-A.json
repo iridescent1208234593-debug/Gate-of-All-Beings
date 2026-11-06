@@ -1,0 +1,150 @@
+﻿{
+    "plan":  "A: keep .xyz pc-* for PC preview, delete .cn and .dpdns.org pc-*",
+    "snapshot":  "cloudflare-snapshot-20261106T143734Z.json",
+    "delete":  [
+                   {
+                       "zone":  "iridescently.cn",
+                       "zone_id":  "508706d88270cdb7b3a01b7db9545ce0",
+                       "id":  "974dcd8296dfe08ca4c8312c28356686",
+                       "name":  "pc-game.iridescently.cn",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.cn",
+                       "zone_id":  "508706d88270cdb7b3a01b7db9545ce0",
+                       "id":  "76aa9db6c5b8c9cbdc45e2daa05f514e",
+                       "name":  "pc-huiguan.iridescently.cn",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.cn",
+                       "zone_id":  "508706d88270cdb7b3a01b7db9545ce0",
+                       "id":  "270e7d5c7baa9b84ec112f825424b064",
+                       "name":  "pc.iridescently.cn",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.cn",
+                       "zone_id":  "508706d88270cdb7b3a01b7db9545ce0",
+                       "id":  "7c33ab40a621cf642d78ed5a5cfd0586",
+                       "name":  "pc-juling.iridescently.cn",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.cn",
+                       "zone_id":  "508706d88270cdb7b3a01b7db9545ce0",
+                       "id":  "d58bdd8d5497473f9eb864a31cafaaf6",
+                       "name":  "pc-lingjing.iridescently.cn",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.cn",
+                       "zone_id":  "508706d88270cdb7b3a01b7db9545ce0",
+                       "id":  "bd41cc7f11bf64eb20afc248806493ee",
+                       "name":  "pc-oc.iridescently.cn",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.cn",
+                       "zone_id":  "508706d88270cdb7b3a01b7db9545ce0",
+                       "id":  "5f4edf91788bfed89d80df65bbb37e9c",
+                       "name":  "pc-spirit.iridescently.cn",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.cn",
+                       "zone_id":  "508706d88270cdb7b3a01b7db9545ce0",
+                       "id":  "fb128c69a9c0f98c089aa22356a58a4f",
+                       "name":  "pc-www.iridescently.cn",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.cn",
+                       "zone_id":  "508706d88270cdb7b3a01b7db9545ce0",
+                       "id":  "886fb2cc7d8f6f0624f27443c1b70cc8",
+                       "name":  "pc-zszm.iridescently.cn",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.dpdns.org",
+                       "zone_id":  "3a8ef36ef4b3cc9be88427c1c3f0bff1",
+                       "id":  "0528d9f888a542d144f333bd42e622d2",
+                       "name":  "pc-game.iridescently.dpdns.org",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.dpdns.org",
+                       "zone_id":  "3a8ef36ef4b3cc9be88427c1c3f0bff1",
+                       "id":  "5ea4bc85f335693e3264b1de22f107a1",
+                       "name":  "pc-huiguan.iridescently.dpdns.org",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.dpdns.org",
+                       "zone_id":  "3a8ef36ef4b3cc9be88427c1c3f0bff1",
+                       "id":  "7591410b336716fa22198567584888b8",
+                       "name":  "pc.iridescently.dpdns.org",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.dpdns.org",
+                       "zone_id":  "3a8ef36ef4b3cc9be88427c1c3f0bff1",
+                       "id":  "bf433c070d6a234cb19a026540cc6c85",
+                       "name":  "pc-juling.iridescently.dpdns.org",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.dpdns.org",
+                       "zone_id":  "3a8ef36ef4b3cc9be88427c1c3f0bff1",
+                       "id":  "68b99e4fb2eacbde2e66e5a668d40a14",
+                       "name":  "pc-lingjing.iridescently.dpdns.org",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.dpdns.org",
+                       "zone_id":  "3a8ef36ef4b3cc9be88427c1c3f0bff1",
+                       "id":  "f2f5cec6b35c0f9680def2e8b1bcb5ce",
+                       "name":  "pc-oc.iridescently.dpdns.org",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.dpdns.org",
+                       "zone_id":  "3a8ef36ef4b3cc9be88427c1c3f0bff1",
+                       "id":  "c6597d8a1d44b67e131b3c202109faeb",
+                       "name":  "pc-spirit.iridescently.dpdns.org",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.dpdns.org",
+                       "zone_id":  "3a8ef36ef4b3cc9be88427c1c3f0bff1",
+                       "id":  "a043d1bb121cc5c8ec68781c8cc54a96",
+                       "name":  "pc-www.iridescently.dpdns.org",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   },
+                   {
+                       "zone":  "iridescently.dpdns.org",
+                       "zone_id":  "3a8ef36ef4b3cc9be88427c1c3f0bff1",
+                       "id":  "f2787dbc785b5a796d1808a2991566d8",
+                       "name":  "pc-zszm.iridescently.dpdns.org",
+                       "type":  "CNAME",
+                       "content":  "b79024ab-6d94-49f8-9583-5b32c8f55264.cfargotunnel.com"
+                   }
+               ]
+}
