@@ -65,6 +65,7 @@ git clone https://github.com/iridescent1208234593-debug/Gate-of-All-Beings.git r
 
 # 2. 依赖（Node 版本见 .nvmrc，Python 见 .python-version）
 cd repo
+python -m pip install Pillow==12.3.0  # Python 回归测试的图片依赖；CI 使用同一固定版本
 npm ci
 foreach ($m in 'cards','softie','management','ecology') { npm ci --prefix "apps/$m" }
 npm ci --prefix apps/www/gallery-engine
