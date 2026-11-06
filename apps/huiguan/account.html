@@ -154,6 +154,8 @@ function render(u,emailState){
       <div class="qc-hint">长老：御灵系可选 2 系、年龄上限 1500 岁；可管理执行者与编辑。需申请并经馆长批准。</div>
       <div class="row" style="margin-top:10px;"><span class="k">编辑（审查补充世界观）</span>${scribeBtn(u)}</div>
       <div class="qc-hint">编辑：可直接编辑/补充官方角色设定（所有改动留版本记录）。需申请并经长老/管理员批准。</div>
+      <div class="row" style="margin-top:10px;"><span class="k">同人画廊审核员</span>${reviewerBtn(u)}</div>
+      <div class="qc-hint">审核员：审核大家公开到<a href="/fan.html">同人画廊</a>的设表，通过后才会展示；可以更正 AI 立绘标记、写理由退回。需先进群，再申请并经管理员批准。</div>
       <div class="row" style="margin-top:10px;"><span class="k">突破年龄限制</span>${exemptBtn(u,'age')}</div>
       <div class="qc-hint">获批后，可在人设登记表"年龄"旁勾选突破年龄限制，解除 450/1500 岁上限。</div>
       <div class="row" style="margin-top:10px;"><span class="k">突破技能选择限制</span>${exemptBtn(u,'skill')}</div>
@@ -241,6 +243,24 @@ function scribeBtn(u){
   if(u.edit_role==='scribe'||u.is_admin) return '<span class="qc-tag qc-tag--accent">已有编辑权限</span>';
   if(u.scribe_pending) return '<span class="qc-tag">审核中</span>';
   return '<button class="qc-btn" onclick="applyScribe()">申请编辑</button>';
+}
+function reviewerBtn(u){
+  if(u.can_review_fan) return '<span class="qc-tag qc-tag--accent">已有审核权限</span>';
+  if(u.fan_reviewer_pending) return '<span class="qc-tag">审核中</span>';
+  return '<button class="qc-btn" onclick="applyReviewer()">申请审核员</button>';
+}
+async function applyReviewer(){
+  const ok = await window.qcDialog({title:'申请审核员前请确认', input:false,
+    subtitle:'1. 已加入西木会馆交流群（QQ群 878029597）；<br>2. 审核员决定哪些设表能在同人画廊展示，请公正、友善地对待每一位作者。',
+    okText:'确认继续', cancelText:'再想想'});
+  if(ok===null)return;
+  const msg=await window.qcDialog({title:'申请同人画廊审核员', subtitle:'简单说说你在群里的昵称和为什么想帮忙审核（至少 2 个字）', placeholder:'例如：群昵称小青，常看同人设，愿意帮忙', minLength:2, maxlength:300});
+  if(msg===null)return;
+  try{
+    const r=await fetch('/api/fan/reviewer-apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+    const d=await r.json();
+    if(d.ok){window.qcAlert(d.msg||'审核员申请已提交，等待管理员审批。', '已提交');init();}else{window.qcAlert(d.error||'提交失败', '申请失败');}
+  }catch(e){window.qcAlert('网络错误，请稍后再试', '申请失败');}
 }
 function exemptBtn(u,type){
   const has = type==='age' ? u.exempt_age : u.exempt_skill;

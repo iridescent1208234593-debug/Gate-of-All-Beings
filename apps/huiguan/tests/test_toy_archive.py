@@ -20,7 +20,8 @@ from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
 HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = (
     "import sys, http.server; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'services' / 'platform')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; "
-    "s.init_user_db(); http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()"
+    "s.init_user_db(); c = s.db(); c.execute(\"INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES ('toy_owner', ?, '作者甲', 'admin', 'active', '', '')\", (s.hash_password('test-password-123'),)); c.commit(); c.close(); "
+    "http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()"
 )
 
 
@@ -56,10 +57,12 @@ class Client:
                 return error.code, json.loads(error.read() or b"{}")
 
 
-def sheet(code, name, story, image=None):
+def sheet(code, name, story, image=None, art_source=None):
     data = {"code": code, "name": name, "story": story, "species": "猫妖"}
     if image:
         data["image"] = image
+    if art_source:
+        data["art_source"] = art_source
     return {"code": code, "data": data, "html": "<html><head></head><body>" + story + "</body></html>"}
 
 
@@ -83,18 +86,30 @@ class ToyArchiveTest(unittest.TestCase):
             except OSError:
                 time.sleep(0.1)
         cls.owner = Client(cls.base)
-        status, _ = cls.owner.call("/api/register", {"legal_version": LEGAL_VERSION, "username": "toy_owner", "password": "test-password-123", "nickname": "作者甲", "email": "t@example.com"})
+        status, _ = cls.owner.call("/api/auth", {"username": "toy_owner", "password": "test-password-123"})
         assert status == 200, status
+        # 管理员自己公开的直接通过审核
         codes = [f"T-{i:02d}" for i in range(12)]
-        for code in codes:
-            status, _ = cls.owner.call("/api/save-character", sheet(code, "角色" + code, "故事" * 200))
+        for i, code in enumerate(codes):
+            image = f"/assets/uploads/{i:032x}.png"
+            status, _ = cls.owner.call("/api/save-character", sheet(code, "角色" + code, "故事" * 200, image))
             assert status == 200, status
-        status, result = cls.owner.call("/api/fan/publish", {"character_codes": codes})
-        assert status == 200 and result["published"] == 12, result
+        # 纯文字设与 AI 立绘不进 Toy（与画廊默认分区同一口径）
+        cls.owner.call("/api/save-character", sheet("T-TEXT", "文字设", "只有文字"))
+        cls.owner.call("/api/save-character", sheet("T-AI", "AI 设", "AI 立绘", "/assets/uploads/" + "a" * 32 + ".png", "ai"))
+        status, result = cls.owner.call("/api/fan/publish", {"character_codes": codes + ["T-TEXT", "T-AI"]})
+        assert status == 200 and result["published"] == 14, result
         _, listing = cls.owner.call("/api/fan/list?limit=60")
         private = next(c for c in listing["characters"] if c["code"] == "T-11")
         status, _ = cls.owner.call("/api/fan/toggle", {"id": private["id"], "is_public": False})
         assert status == 200, status
+        # 普通作者公开后待审核，不进 Toy
+        cls.author = Client(cls.base)
+        status, _ = cls.author.call("/api/register", {"legal_version": LEGAL_VERSION, "username": "toy_author", "password": "test-password-123", "nickname": "作者乙", "email": "t@example.com"})
+        assert status == 200, status
+        cls.author.call("/api/save-character", sheet("T-PEND", "待审", "待审", "/assets/uploads/" + "b" * 32 + ".png"))
+        status, result = cls.author.call("/api/fan/publish", {"character_codes": ["T-PEND"]})
+        assert status == 200 and result["pending"] == 1, result
 
     @classmethod
     def tearDownClass(cls):
@@ -119,14 +134,16 @@ class ToyArchiveTest(unittest.TestCase):
         self.assertEqual(data["schema_version"], 1)
         fan = data["fan"]
         self.assertEqual(len(fan), 10)
-        self.assertNotIn("T-11", [c["code"] for c in fan])
+        listed = [c["code"] for c in fan]
+        for hidden in ("T-11", "T-TEXT", "T-AI", "T-PEND"):
+            self.assertNotIn(hidden, listed)
         allowed = {"code", "name", "user_name", "type", "species", "gender", "story", "image", "url"}
         for item in fan:
             self.assertEqual(set(item), allowed)
             self.assertLessEqual(len(item["story"]), 300)
             self.assertTrue(item["url"].startswith("https://huiguan."), item["url"])
             self.assertTrue(item["url"].endswith("/show.html?code=" + item["code"]))
-            self.assertEqual(item["image"], "")
+            self.assertRegex(item["image"], r"^https://huiguan\.[^/]+/assets/uploads/[0-9a-f]{32}\.png$")
         self.assertEqual(fan[0]["user_name"], "作者甲")
         self.assertIsInstance(data["official"], list)
 

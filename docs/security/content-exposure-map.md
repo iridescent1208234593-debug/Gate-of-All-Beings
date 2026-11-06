@@ -22,7 +22,7 @@ Checked 2026-10-16 (Asia/Singapore). Source review only; production routing and 
 
 ## Access Boundaries
 
-- The public fan list filters `is_public=1`. The authenticated `/api/fan/my` and `/api/get-characters` routes are separate account paths; their authorization behavior was not retested in this content-only stage.
+- The public fan list filters `is_public=1 AND review_status='approved'` (Fan Review, 2026-11-06) and a `view` partition (art / text / ai); the review queue `/api/fan/review/queue` is reviewer-only and never returns owner ids. The authenticated `/api/fan/my` and `/api/get-characters` routes are separate account paths; their authorization behavior was not retested in this content-only stage.
 - Public fan-list JSON previously included `user_kind` and `user_uid` from `SELECT *`, although the checked public page callers use display name/content fields only. The response now preserves those keys as empty strings to avoid exposing account identifiers while keeping the current response shape.
 - The unclassified-image page uses only `id` and `reason`; the public list no longer includes the internal `image_path`, source character ID, or timestamp.
 - `server/base_static.py` blocks directory listings and sensitive source/database suffixes. The Huiguan handler explicitly maps `/assets/uploads/` to the upload directory, so the path itself is intentionally readable; `robots.txt` does not change that.

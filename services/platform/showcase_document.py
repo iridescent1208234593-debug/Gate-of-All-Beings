@@ -34,7 +34,7 @@ def published_document(conn, code, ident=None):
         return document(title, image(row['img_ref'], title))
     # A public gallery record can outlive its original editable OC. Its published
     # fields remain real content; do not invent/recreate a missing private record.
-    row = conn.execute("SELECT * FROM fan_characters WHERE code=? AND is_public=1 AND type!='配色海报' ORDER BY id DESC LIMIT 1", (code,)).fetchone()
+    row = conn.execute("SELECT * FROM fan_characters WHERE code=? AND is_public=1 AND review_status='approved' AND type!='配色海报' ORDER BY id DESC LIMIT 1", (code,)).fetchone()
     if row is None:
         return None
     title = row['name'] or code

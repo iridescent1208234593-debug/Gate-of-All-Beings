@@ -129,7 +129,7 @@
   <div id="honorBox"><div class="state-box" style="margin-top:0;">加载中…</div></div>
   <h2 style="margin:30px 0 12px;font-size:16px;letter-spacing:2px;">补充审核</h2>
   <div id="suppBox"><div class="state-box" style="margin-top:0;">加载中…</div></div>
-  <h2 style="margin:30px 0 12px;font-size:16px;letter-spacing:2px;">编辑申请</h2>
+  <h2 style="margin:30px 0 12px;font-size:16px;letter-spacing:2px;">编辑 / 同人审核员申请</h2>
   <div id="scribeBox"><div class="state-box" style="margin-top:0;">加载中…</div></div>
   <h2 style="margin:30px 0 12px;font-size:16px;letter-spacing:2px;">豁免申请</h2>
   <div id="exemptBox"><div class="state-box" style="margin-top:0;">加载中…</div></div>
@@ -348,20 +348,23 @@ async function loadScribeRequests() {
     const d = await r.json();
     if (!r.ok) { box.innerHTML = '<div class="state-box" style="margin-top:0;">加载失败</div>'; return; }
     const list = d.requests || [];
-    if (!list.length) { box.innerHTML = '<div class="state-box" style="margin-top:0;">暂无编辑申请。</div>'; return; }
+    if (!list.length) { box.innerHTML = '<div class="state-box" style="margin-top:0;">暂无编辑 / 审核员申请。</div>'; return; }
     box.innerHTML = list.map(q => `
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;border:1px solid var(--border);border-radius:6px;margin-bottom:10px;">
         <strong>${escapeHtml(q.user_name||q.uid)}</strong>
+        <span class="tag">${q.requested_role==='fan_reviewer'?'同人画廊审核员':'官方画廊编辑'}</span>
         <span class="dim">${q.user_kind==='local'?'站内':'USSO'} · ${fmtTime(q.created_at)}</span>
         <span class="dim" style="flex:1;">${escapeHtml(q.message||'（无说明）')}</span>
-        <button class="op" onclick="decideScribe(${q.id},true)">批准</button>
-        <button class="op danger" onclick="decideScribe(${q.id},false)">驳回</button>
+        <button class="op" onclick="decideScribe(${q.id},true,'${q.requested_role==='fan_reviewer'?'fan_reviewer':'scribe'}')">批准</button>
+        <button class="op danger" onclick="decideScribe(${q.id},false,'${q.requested_role==='fan_reviewer'?'fan_reviewer':'scribe'}')">驳回</button>
       </div>`).join('');
   } catch(e) { box.innerHTML = '<div class="state-box" style="margin-top:0;">加载失败</div>'; }
 }
-async function decideScribe(id, approve) {
+async function decideScribe(id, approve, kind) {
   const verb = approve ? '批准' : '驳回';
-  if (!confirm(`确定${verb}该编辑申请吗？${approve?'批准后该用户可直接编辑角色设定。':''}`)) return;
+  const what = kind === 'fan_reviewer' ? '同人画廊审核员' : '编辑';
+  const effect = kind === 'fan_reviewer' ? '批准后该用户可审核同人画廊的公开申请。' : '批准后该用户可直接编辑角色设定。';
+  if (!confirm(`确定${verb}该${what}申请吗？${approve?effect:''}`)) return;
   if (await adminPost('/api/admin/scribe/decide', { id, approve })) loadScribeRequests();
 }
 

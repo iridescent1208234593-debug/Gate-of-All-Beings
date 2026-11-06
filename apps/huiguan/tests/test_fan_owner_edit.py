@@ -20,7 +20,8 @@ from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
 HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = (
     "import sys, http.server; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'services' / 'platform')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; "
-    "s.init_user_db(); http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()"
+    "s.init_user_db(); c = s.db(); c.execute(\"INSERT INTO local_users (username, pass_hash, nickname, role, status, is_fan_reviewer, created_at, last_login) VALUES ('owner_test', ?, 'owner_test', 'executor', 'active', 1, '', '')\", (s.hash_password('test-password-123'),)); c.commit(); c.close(); "
+    "http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()"
 )
 
 
@@ -80,9 +81,11 @@ class FanOwnerEditTest(unittest.TestCase):
             except OSError:
                 time.sleep(0.1)
         cls.owner, cls.other = Client(cls.base), Client(cls.base)
-        for client, name in ((cls.owner, "owner_test"), (cls.other, "other_test")):
-            status, _ = client.call("/api/register", {"legal_version": LEGAL_VERSION, "username": name, "password": "test-password-123", "nickname": name, "email": "t@example.com"})
-            assert status == 200, status
+        # owner_test 是同人审核员：自己的公开和修改直接通过；other_test 是普通作者，公开后要等审核
+        status, _ = cls.owner.call("/api/auth", {"username": "owner_test", "password": "test-password-123"})
+        assert status == 200, status
+        status, _ = cls.other.call("/api/register", {"legal_version": LEGAL_VERSION, "username": "other_test", "password": "test-password-123", "nickname": "other_test", "email": "t@example.com"})
+        assert status == 200, status
 
     @classmethod
     def tearDownClass(cls):
@@ -91,7 +94,8 @@ class FanOwnerEditTest(unittest.TestCase):
         cls.root.cleanup()
 
     def public(self, client, code):
-        _, listing = client.call("/api/fan/list?limit=60")
+        # 测试设表都没有立绘，属于「纯文字设」分区
+        _, listing = client.call("/api/fan/list?limit=60&view=text")
         return [c for c in listing["characters"] if c["code"] == code]
 
     def test_owner_edits_published_character_in_place(self):
@@ -131,6 +135,11 @@ class FanOwnerEditTest(unittest.TestCase):
         self.assertEqual([(r["name"], r["story"]) for r in self.public(self.owner, "B-1")], [("林风", "原文")])
         self.assertEqual(self.other.call("/api/fan/toggle", {"id": fid, "is_public": False})[0], 403)
         self.assertEqual(self.other.call("/api/fan/publish", {"character_codes": ["B-1"]})[1]["published"], 1)
+        self.assertEqual([r["name"] for r in self.public(self.other, "B-1")], ["林风"])  # 冒名的还在待审核
+        _, queue = self.owner.call("/api/fan/review/queue")
+        pending = [r for r in queue["characters"] if r["code"] == "B-1"]
+        self.assertEqual([r["name"] for r in pending], ["冒名"])
+        self.assertEqual(self.owner.call("/api/fan/review/decide", {"id": pending[0]["id"], "decision": "approve", "review_version": pending[0]["review_version"]})[0], 200)
         mine_flags = sorted((r["name"], r["is_mine"]) for r in self.public(self.other, "B-1"))
         self.assertEqual(mine_flags, [("冒名", True), ("林风", False)])
 
