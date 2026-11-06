@@ -20,7 +20,7 @@ from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
 HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = (
     "import sys, http.server; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'services' / 'platform')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; "
-    "s.init_user_db(); c = s.db(); c.execute(\"INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES ('toy_owner', ?, '作者甲', 'admin', 'active', '', '')\", (s.hash_password('test-password-123'),)); c.commit(); c.close(); "
+    "s.init_user_db(); c = s.db(); c.execute(\"INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES ('toy_owner', ?, '作者甲', 'admin', 'active', '', '')\", (s.hash_password('test-password-123'),)); s.legal_consent.record(c, 'local', c.execute(\"SELECT uid FROM local_users WHERE username='toy_owner'\").fetchone()[0]); c.commit(); c.close(); "
     "http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()"
 )
 
