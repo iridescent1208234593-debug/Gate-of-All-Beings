@@ -49,6 +49,16 @@ from account_profile import init_schema as init_profile_schema, get_profile, set
 import game_saves
 import account_progress
 import legal_consent
+
+# POST endpoints that upload or publish content: a logged-in Account must have agreed to the current
+# 《用户须知》/《隐私政策》 first (owner decision 2026-11-06: existing Accounts must agree too).
+LEGAL_GATED_POSTS = frozenset((
+    "/api/save-character", "/api/save-all-characters", "/api/account/avatar", "/api/avatars/upload",
+    "/api/images/upload", "/api/fan/submit", "/api/fan/publish", "/api/official/fanart/upload",
+    "/api/official/fanart/comment", "/api/official/sticker/upload", "/api/official/image/add",
+    "/api/official/supplement", "/api/official/edit", "/api/posters/save", "/api/posters/publish",
+    "/api/color-schemes",
+))
 import turnstile
 from showcase_document import published_document
 from showcase_sanitizer import controlled_showcase
@@ -1849,6 +1859,8 @@ class Handler(BaseStaticHandler):
         if path.startswith("/api/huiguan/"):
             path = "/api/" + path[len("/api/huiguan/"):]
 
+        if path in LEGAL_GATED_POSTS and self._legal_consent_missing():
+            return
         if path.startswith("/api/security/"):
             return handle_security(self, path.rsplit("/", 1)[-1], globals())
         if path.startswith("/api/account/email/"):
@@ -2491,6 +2503,25 @@ class Handler(BaseStaticHandler):
                    cookie=[self._session_cookie(session_id), self._sso_cookie(uid, "local", ident.get("name") or username)])
 
     # ---------- /api/legal（用户须知与隐私政策的版本与同意记录） ----------
+    def _legal_consent_missing(self):
+        """Logged-in Accounts must have agreed to the current version before uploading or publishing.
+
+        Visitors pass through: each endpoint still enforces its own login rule. Sends 403 and returns True when blocked.
+        """
+        ident = self._require_ident_optional()
+        if not ident:
+            return False
+        conn = db()
+        try:
+            at = legal_consent.accepted(conn, ident["kind"], ident["uid"])
+        finally:
+            conn.close()
+        if at is not None:
+            return False
+        self._json(403, {"error": "请先阅读并同意《用户须知》和《隐私政策》（刷新页面会弹出同意框）",
+                         "code": "legal_consent_required", "legal_version": legal_consent.CURRENT_VERSION})
+        return True
+
     def _api_legal_status(self):
         ident = self._require_ident_optional()
         conn = db()

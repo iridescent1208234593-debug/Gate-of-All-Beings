@@ -59,7 +59,7 @@
 仓库内被指定为唯一真身的实现或定义。新增能力应优先复用 canonical 实现，不复制平行版本。
 
 ### Legal Version / Legal Consent（条款版本 / 同意记录）
-《用户须知》（`apps/huiguan/terms.html`）与《隐私政策》（`apps/huiguan/privacy.html`）作为一组发布，共用一个版本号 `legal_version`（日期字符串，如 `2026-11-07`），唯一来源是 `services/platform/legal_consent.py` 的 `CURRENT_VERSION`，两页的 `data-legal-version` 由测试保持一致。Legal Consent 是某个 Account `(kind, uid)` 同意了某个版本的记录，存在 `legal_consents(kind, uid, legal_version, context, accepted_at)`，每个版本一行、首次同意为准，`context` 是 `register` / `oc-submit` / `fan-publish` / `account` / `reconsent` / `other`。注册必须同意当前版本；文本实质修改时升版本号，老账号会被提示重新同意。它不是站点公告（`infra/site-notice`），也不是 Cookie 偏好。
+《用户须知》（`apps/huiguan/terms.html`）与《隐私政策》（`apps/huiguan/privacy.html`）作为一组发布，共用一个版本号 `legal_version`（日期字符串，如 `2026-11-06`），唯一来源是 `services/platform/legal_consent.py` 的 `CURRENT_VERSION`，两页的 `data-legal-version` 由测试保持一致。Legal Consent 是某个 Account `(kind, uid)` 同意了某个版本的记录，存在 `legal_consents(kind, uid, legal_version, context, accepted_at)`，每个版本一行、首次同意为准，`context` 是 `register` / `oc-submit` / `fan-publish` / `account` / `reconsent` / `other`。注册必须同意当前版本；已登录但未同意当前版本的账号在会馆各页只能同意或退出登录，上传 / 发布类接口（`LEGAL_GATED_POSTS`）返回 403 `legal_consent_required`。文本实质修改时升版本号，所有账号需要重新同意。它不是站点公告（`infra/site-notice`），也不是 Cookie 偏好。
 
 ### Compatibility Alias
 为兼容旧客户端、旧数据库字段或历史接口而保留的名称。Alias 不代表推荐的新代码命名。

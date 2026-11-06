@@ -124,6 +124,14 @@ class LegalConsentTest(unittest.TestCase):
         status, _ = client.call("/api/login", {"username": "old_member", "password": "test-password-123"})
         self.assertEqual(status, 200)
         self.assertFalse(client.call("/api/legal")[1]["is_accepted"])
+        # Existing Accounts must agree before uploading or publishing anything.
+        sheet = {"code": "LC-1", "html": "", "data": {"code": "LC-1", "name": "同意前"}}
+        for path, body in (("/api/save-character", sheet), ("/api/fan/publish", {"character_codes": ["LC-1"]}),
+                           ("/api/save-all-characters", {"characters": [], "versions": {}})):
+            with self.subTest(path=path):
+                status, result = client.call(path, body)
+                self.assertEqual(status, 403)
+                self.assertEqual(result["code"], "legal_consent_required")
         status, result = client.call("/api/legal/accept", {"legal_version": "2000-01-01", "context": "reconsent"})
         self.assertEqual(status, 409)
         self.assertEqual(result["code"], "legal_version_mismatch")
@@ -135,6 +143,8 @@ class LegalConsentTest(unittest.TestCase):
         status, result = client.call("/api/legal/accept", {"legal_version": LEGAL_VERSION, "context": "oc-submit"})
         self.assertEqual(status, 200)
         self.assertEqual(result["accepted_at"], first)
+        status, result = client.call("/api/save-character", sheet)
+        self.assertEqual(status, 200, result)
 
     def test_reading_pages_match_server_version_and_carry_no_review_notes(self):
         client = Client(self.base)

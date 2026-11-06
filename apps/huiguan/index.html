@@ -647,7 +647,7 @@
 </style>
 <link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261027z">
 <link rel="stylesheet" href="/homepage.css?v=20261027z">
-<link rel="stylesheet" href="/legal.css?v=20261107">
+<link rel="stylesheet" href="/legal.css?v=20261106">
 <link rel="preload" as="script" href="/design-system/ui/lxh-intro.js?v=20261027z">
 <link rel="preload" as="script" href="/assets/gate/gate-scene.js?v=20261027z">
 <link rel="preload" as="script" href="/homepage.js?v=20261027z">
@@ -1384,7 +1384,7 @@
 <script src="/character-colors.js?v=20261027z"></script>
 <script src="/auth-next.js?v=20261027z"></script>
 <script src="/turnstile-widget.js?v=20261028"></script>
-<script src="/legal-consent.js?v=20261107"></script>
+<script src="/legal-consent.js?v=20261106"></script>
 <script>
 const STORAGE_KEY = 'luoxiaohei_characters';
 
@@ -1596,11 +1596,9 @@ async function authTurnstileReady(action, msg, label) {
 // 注册与提交登记都要勾选同意《用户须知》《隐私政策》；未加载脚本时保留上面的纯链接。
 const authLegal = window.HuiguanLegal && HuiguanLegal.mount(document.getElementById('authLegal'));
 const ocLegal = window.HuiguanLegal && HuiguanLegal.mount(document.getElementById('ocLegal'));
-// 已登录但还没同意当前版本的账号：每个浏览器会话提示一次，可以稍后再说。
+// 已登录但还没同意当前版本的账号：必须同意才能继续使用账号（负责人 2026-11-06 决定），也可以退出登录。
 function maybeLegalReconsent() {
-  if (!window.HuiguanLegal) return;
-  try { if (sessionStorage.getItem('huiguan_legal_prompted')) return; sessionStorage.setItem('huiguan_legal_prompted', '1'); } catch (e) {}
-  HuiguanLegal.ensureAccepted({ context: 'reconsent', lead: '会馆发布了《用户须知》和《隐私政策》。请阅读后勾选同意；暂不同意也可以继续浏览，提交登记时会再次请你确认。' }).catch(() => {});
+  if (window.HuiguanLegal) HuiguanLegal.requireForAccount();
 }
 async function submitRegister() {
   const username = document.getElementById('authUsername').value.trim();
@@ -1635,7 +1633,6 @@ async function submitRegister() {
       document.getElementById('authPassword').value = '';
       const em = document.getElementById('authEmail'); if (em) em.value = '';
       authLegal.reset();
-      try { sessionStorage.setItem('huiguan_legal_prompted', '1'); } catch (e) {}
       setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 400);
     } else {
       msg.textContent = d.error || '注册失败';

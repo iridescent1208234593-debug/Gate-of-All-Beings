@@ -11,7 +11,7 @@ revision adds a row instead of overwriting the earlier record.
 import time
 
 # Bump together with the version on both pages when either text changes in substance.
-CURRENT_VERSION = "2026-11-07"
+CURRENT_VERSION = "2026-11-06"
 
 # Where the agreement was given. Anything else is stored as "other".
 CONTEXTS = ("register", "oc-submit", "fan-publish", "account", "reconsent")

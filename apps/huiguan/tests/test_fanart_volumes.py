@@ -36,6 +36,8 @@ arts = {}
 for key, created in (("old", "2026-10-01"), ("mid", "2026-10-02"), ("new", "2026-10-03")):
     arts[key] = conn.execute("INSERT INTO official_fanart (character_id,user_kind,user_uid,user_name,image_url,caption,created_at) VALUES (1,'local',?,?,?,?,?)",
                              (str(sids["owner"]), "owner", "/assets/uploads/x.png", key, created)).lastrowid
+# Seeded Accounts have agreed to the current 《用户须知》/《隐私政策》 (uploads require it).
+for (uid,) in conn.execute("SELECT uid FROM local_users").fetchall(): s.legal_consent.record(conn, "local", uid)
 conn.commit(); conn.close()
 sessions = {n: s.create_session("local", str(uid)) for n, uid in sids.items()}
 srv = http.server.ThreadingHTTPServer(("127.0.0.1", 0), s.Handler)

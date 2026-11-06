@@ -2,7 +2,9 @@
  *
  *   HuiguanLegal.mount(el, { context })  在 el 里放一个必勾的同意框，返回 { checked(), nudge(), reset() }
  *   HuiguanLegal.open('terms' | 'privacy')  弹窗阅读全文（只读）
- *   HuiguanLegal.ensureAccepted({ context, lead })  弹窗读完并勾选后才 resolve(true)；已同意当前版本则直接 true
+ *   HuiguanLegal.ensureAccepted({ context, lead, force })  弹窗读完并勾选后才 resolve(true)；已同意当前版本则直接 true
+ *   HuiguanLegal.requireForAccount()  已登录但未同意当前版本：强制弹窗，只能同意或退出登录
+ *   <script src="legal-consent.js" data-require-consent>  页面载入时自动执行 requireForAccount()
  *   HuiguanLegal.accept(context)  登录用户记录同意（POST /api/legal/accept）
  *   HuiguanLegal.version()  当前版本号（GET /api/legal，带缓存）
  *
@@ -43,6 +45,13 @@
     });
   }
 
+  // Pages that only opt in to the account gate may not link legal.css themselves.
+  function ensureStyles() {
+    if (document.querySelector('link[href*="legal.css"]')) return;
+    var link = document.createElement('link'); link.rel = 'stylesheet'; link.href = '/legal.css?v=20261106';
+    document.head.appendChild(link);
+  }
+
   function el(tag, className, text) {
     var node = document.createElement(tag);
     if (className) node.className = className;
@@ -50,7 +59,7 @@
     return node;
   }
 
-  function label(onToggle) {
+  function label(onToggle, onOpen) {
     var wrap = el('label', 'legal-check');
     var box = el('input'); box.type = 'checkbox'; box.required = true;
     var span = el('span');
@@ -58,7 +67,7 @@
     ['terms', 'privacy'].forEach(function (key, i) {
       if (i) span.appendChild(document.createTextNode('和'));
       var link = el('button', '', '《' + DOCS[key].title + '》'); link.type = 'button';
-      link.addEventListener('click', function (event) { event.preventDefault(); open(key); });
+      link.addEventListener('click', function (event) { event.preventDefault(); (onOpen || open)(key); });
       span.appendChild(link);
     });
     wrap.appendChild(box); wrap.appendChild(span);
@@ -69,6 +78,7 @@
   function mount(container, options) {
     if (!container) return null;
     options = options || {};
+    ensureStyles();
     var made = label(options.onChange);
     container.innerHTML = '';
     container.appendChild(made.node);
@@ -109,6 +119,7 @@
   }
 
   function buildReader() {
+    ensureStyles();
     var root = el('div', 'legal-reader'); root.hidden = true;
     root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true'); root.setAttribute('aria-label', '用户须知与隐私政策');
     var box = el('div', 'legal-reader__box');
@@ -125,7 +136,7 @@
     head.appendChild(tabs); head.appendChild(openFull); head.appendChild(close);
     var scroll = el('div', 'legal-reader__scroll'); scroll.tabIndex = 0;
     var foot = el('div', 'legal-reader__foot'); foot.hidden = true;
-    var check = label(function (on) { agree.disabled = !on; });
+    var check = label(function (on) { agree.disabled = !on; }, function (key) { show(key); });
     var actions = el('div', 'legal-reader__actions');
     var later = el('button', 'legal-reader__later', '暂不同意'); later.type = 'button';
     var agree = el('button', 'legal-reader__agree', '同意并继续'); agree.type = 'button'; agree.disabled = true;
@@ -154,6 +165,8 @@
       });
     }
     function finish(result) {
+      // Forced consent (logged-in Account without the current version) closes only by agreeing or logging out.
+      if (!result && root.dataset.force === '1') return;
       root.hidden = true;
       document.removeEventListener('keydown', onKey, true);
       if (lastFocus && lastFocus.focus) lastFocus.focus();
@@ -162,7 +175,10 @@
     }
     function onKey(event) { if (event.key === 'Escape') { event.stopPropagation(); finish(false); } }
     close.addEventListener('click', function () { finish(false); });
-    later.addEventListener('click', function () { finish(false); });
+    later.addEventListener('click', function () {
+      if (root.dataset.force === '1') { location.href = '/api/logout'; return; }
+      finish(false);
+    });
     root.addEventListener('click', function (event) { if (event.target === root) finish(false); });
     agree.addEventListener('click', function () {
       if (!check.box.checked) return;
@@ -182,10 +198,13 @@
         check.box.checked = false; agree.disabled = true; msg.textContent = '';
         root.dataset.context = options.context || '';
         root.dataset.loggedIn = options.loggedIn ? '1' : '';
+        root.dataset.force = options.force ? '1' : '';
+        close.hidden = !!options.force;
+        later.textContent = options.force ? '不同意并退出登录' : '暂不同意';
         root.hidden = false;
         document.addEventListener('keydown', onKey, true);
         show(key || 'terms');
-        close.focus();
+        (options.force ? check.box : close).focus();
         return new Promise(function (resolve) { if (pending) pending(false); pending = resolve; });
       }
     };
@@ -196,14 +215,30 @@
     return reader.open(key, {});
   }
 
-  /** Logged-in Accounts that have not agreed to the current version get the dialog; resolves true once agreed. */
+  /** Shows the consent dialog unless the logged-in Account already agreed to the current version; resolves true once agreed.
+   *  options.force: only agreeing or logging out closes it (used for logged-in Accounts). */
   function ensureAccepted(options) {
     options = options || {};
     return status(true).then(function (s) {
       if (s.logged_in && s.is_accepted) return true;
+      if (options.loggedInOnly && !s.logged_in) return true;
       if (!reader) reader = buildReader();
-      return reader.open('terms', { consent: true, context: options.context, lead: options.lead, loggedIn: s.logged_in });
+      return reader.open('terms', { consent: true, context: options.context, lead: options.lead, loggedIn: s.logged_in,
+                                    force: !!options.force && s.logged_in });
     });
+  }
+
+  var FORCED_LEAD = '会馆的《用户须知》和《隐私政策》已于 2026 年 11 月 6 日生效。继续使用账号前，请阅读并勾选同意；不同意可以退出登录，以访客身份浏览。';
+  /** Logged-in Accounts must agree before using the account; visitors are not interrupted. */
+  function requireForAccount() {
+    if (window.self !== window.top) return Promise.resolve(true);  // embedded previews never gate
+    return ensureAccepted({ context: 'reconsent', lead: FORCED_LEAD, force: true, loggedInOnly: true }).catch(function () { return false; });
+  }
+  // Pages opt in with <script src="legal-consent.js" data-require-consent>.
+  var selfScript = document.currentScript;
+  if (selfScript && selfScript.hasAttribute('data-require-consent')) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', requireForAccount);
+    else requireForAccount();
   }
 
   // On the reading pages: highlight the section in view in the table of contents.
@@ -228,5 +263,5 @@
   if (document.body && document.body.classList.contains('legal-page')) tocSpy();
   else document.addEventListener('DOMContentLoaded', function () { if (document.body.classList.contains('legal-page')) tocSpy(); });
 
-  window.HuiguanLegal = { mount: mount, open: open, ensureAccepted: ensureAccepted, accept: accept, version: version, status: status };
+  window.HuiguanLegal = { mount: mount, open: open, ensureAccepted: ensureAccepted, requireForAccount: requireForAccount, accept: accept, version: version, status: status };
 })();
