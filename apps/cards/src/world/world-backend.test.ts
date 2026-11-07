@@ -1,10 +1,11 @@
 /**
- * 后端集成测试：用 fake-indexeddb 在 Node 里注入真实 IndexedDB 后端，
+ * 后端集成测试：用 fake-indexeddb 在 Node 里注入模拟的 IndexedDB 实现，
  * 跑通「出发 → 结算（出行） → 照料（过夜） → 续读」整条存档链路。
  *
  * 前一轮只测了纯函数（commitResult / nightResult），续读（saveWorld → 重新 openWorld）
  * 依赖 shared-session 的 IndexedDB 后端，Node 原生没有 indexedDB 会直接 reject，
- * 所以这条路一直没法验证。这里用 fake-indexeddb 把后端补上，确保存档真能落盘、真能读回。
+ * 所以这条路一直没法验证。这里用 fake-indexeddb 补上模拟环境，通过模拟 IndexedDB
+ * 验证存档的保存和读回；这不等于真实浏览器里的原生落盘行为。
  */
 import 'fake-indexeddb/auto';
 import { test } from 'node:test';
@@ -22,7 +23,7 @@ function freshDB() {
   (globalThis as unknown as { indexedDB: IDBFactory }).indexedDB = new IDBFactory();
 }
 
-test('出发 → 结算（胜利出行） → 照料（过夜） → 续读：存档经后端落盘并原样读回', async () => {
+test('出发 → 结算（胜利出行） → 照料（过夜） → 续读：通过模拟 IndexedDB 验证保存和读回', async () => {
   freshDB();
 
   // 出发：首次打开世界
