@@ -203,6 +203,19 @@ class FanReviewTest(unittest.TestCase):
         self.assertEqual(reviewer.call("/api/fan/review/decide", body)[0], 200)
         self.assertIn("R-STALE", self.codes())
 
+    def test_other_reviewer_cannot_overwrite_a_completed_review(self):
+        author = self.login("author_user")
+        first, second = self.login("reviewer_user"), self.login("elder_user")
+        self.publish(author, sheet("R-TWO", "双人审核", "设定", upload(8)))
+        _, queue = first.call("/api/fan/review/queue")
+        item = next(r for r in queue["characters"] if r["code"] == "R-TWO")
+        body = {"id": item["id"], "review_version": item["review_version"]}
+        self.assertEqual(first.call("/api/fan/review/decide", dict(body, decision="approve"))[0], 200)
+        self.assertEqual(second.call("/api/fan/review/decide", dict(body, decision="reject", note="旧页面退回"))[0], 409)
+        self.assertEqual(self.my_row(author, "R-TWO")["review_status"], "approved")
+        _, queue = second.call("/api/fan/review/queue")
+        self.assertNotIn(item["id"], [r["id"] for r in queue["characters"]])
+
     def test_reject_needs_a_note_and_republish_resubmits(self):
         author, reviewer = self.login("author_user"), self.login("reviewer_user")
         self.publish(author, sheet("R-2", "赤羽", "设定", upload(2)))

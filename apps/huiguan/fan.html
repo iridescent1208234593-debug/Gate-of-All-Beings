@@ -149,6 +149,7 @@ button{font-family:inherit}
 .review-desk>summary .count{background:var(--seal);color:#fff;border-radius:999px;font-size:12px;padding:0 9px}
 .review-desk>summary small{color:var(--dim);font-size:12px}
 .review-list{display:grid;gap:10px;padding:0 16px 16px}
+.review-sync{display:flex;gap:12px;align-items:center;padding:0 16px 12px;font-size:12px;color:var(--dim)}
 .review-item{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
 .review-thumb{width:96px;aspect-ratio:3/4;border-radius:6px;background:#ece4d6;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:12px}
 .review-thumb img{width:100%;height:100%;object-fit:cover;object-position:top}
@@ -242,6 +243,7 @@ button{font-family:inherit}
   <!-- 审核台（审核员 / 长老 / 管理员可见） -->
   <details class="review-desk" id="reviewDesk" hidden open>
     <summary><strong>审核台</strong><span class="count" id="reviewCount">0</span><small>先到先审 · 通过后进入画廊 · 退回需写理由</small></summary>
+    <div class="review-sync"><button type="button" class="mini-btn" id="reviewRefresh">刷新待审</button><span id="reviewSync" role="status">每 5 秒自动同步待审列表</span></div>
     <div class="review-list" id="reviewList"><div class="loading">加载中…</div></div>
   </details>
 
@@ -337,6 +339,7 @@ const rowCache = new Map();   // 公开卡片 id → 记录（事件委托用，
 async function getJSON(url, opts) {
   const r = await fetch(url, opts);
   const d = await r.json().catch(() => ({}));
+  if (!r.ok) d.httpStatus = r.status;
   if (!r.ok && !d.error) d.error = '请求失败（' + r.status + '）';
   return d;
 }
@@ -609,11 +612,13 @@ $('publishBtn').onclick = () => {
 };
 
 // ====== 审核台 ======
+let queueBusy = false, queueRefreshAgain = false;
+const pendingReviews = new Set();
 function reviewItemHTML(c) {
   rowCache.set(String(c.id), c);
   const meta = [c.type, c.species, c.gender, c.faction].filter(Boolean).join(' · ');
   const opts = Object.keys(ART_LABEL).map(k => `<option value="${k}"${(c.art_source || '') === k ? ' selected' : ''}>立绘：${ART_LABEL[k]}</option>`).join('');
-  return `<div class="review-item" data-review="${c.id}">
+  return `<div class="review-item" data-review="${c.id}" data-review-version="${esc(c.review_version)}">
     <div class="review-thumb">${c.image_data ? `<img data-original-image src="${esc(c.image_data)}" alt="${esc(c.name)}" loading="lazy" decoding="async">` : '纯文字设'}</div>
     <div class="review-main">
       <div class="t">${esc(c.name)} <span class="m">— ${esc(c.user_name || '匿名')}</span></div>
@@ -630,23 +635,67 @@ function reviewItemHTML(c) {
 }
 async function loadQueue() {
   if (!canReview) return;
+  if (queueBusy) { queueRefreshAgain = true; return; }
+  queueBusy = true;
   $('reviewDesk').hidden = false;
-  const d = await getJSON('/api/fan/review/queue').catch(() => ({ error: '加载失败' }));
-  if (d.error) { $('reviewList').innerHTML = `<div class="empty">${esc(d.error)}</div>`; return; }
-  const list = d.characters || [];
-  $('reviewCount').textContent = d.total || 0;
-  $('reviewList').innerHTML = list.length ? list.map(reviewItemHTML).join('') : '<div class="empty">暂时没有待审核的设表 🌿</div>';
+  $('reviewRefresh').disabled = true;
+  try {
+    const d = await getJSON('/api/fan/review/queue', { cache: 'no-store', signal: AbortSignal.timeout(15000) });
+    if (d.error) throw new Error(d.error);
+    const list = d.characters || [], container = $('reviewList');
+    const rows = new Map([...container.querySelectorAll('[data-review]')].map(row => [row.dataset.review, row]));
+    const ids = new Set(list.map(c => String(c.id)));
+    for (const [id, row] of rows) if (!ids.has(id)) row.remove();
+    container.querySelectorAll('.loading,.empty').forEach(el => el.remove());
+    list.forEach((c, index) => {
+      let row = rows.get(String(c.id));
+      // Keep unchanged rows, including the reviewer's unsaved art-source selection.
+      if (!row || row.dataset.reviewVersion !== c.review_version) {
+        const template = document.createElement('template');
+        template.innerHTML = reviewItemHTML(c);
+        const next = template.content.firstElementChild;
+        if (row) row.replaceWith(next);
+        row = next;
+      }
+      if (container.children[index] !== row) container.insertBefore(row, container.children[index] || null);
+      row.querySelectorAll('button,select').forEach(el => { el.disabled = pendingReviews.has(String(c.id)); });
+    });
+    $('reviewCount').textContent = d.total || 0;
+    if (!list.length) container.innerHTML = '<div class="empty">暂时没有待审核的设表 🌿</div>';
+    $('reviewSync').textContent = '已同步 · 每 5 秒自动更新';
+  } catch (e) {
+    $('reviewSync').textContent = '同步失败，将自动重试；也可点击刷新待审';
+  } finally {
+    queueBusy = false;
+    $('reviewRefresh').disabled = false;
+    if (queueRefreshAgain) { queueRefreshAgain = false; loadQueue(); }
+  }
 }
 async function decide(id, decision, extra) {
+  id = String(id);
+  if (pendingReviews.has(id)) return false;
+  pendingReviews.add(id);
+  const controls = document.querySelectorAll(`[data-review="${Number(id)}"] button,[data-review="${Number(id)}"] select,[data-reject="${Number(id)}"]`);
+  controls.forEach(el => { el.disabled = true; });
   const reviewed = rowCache.get(String(id)) || {};
-  const d = await postJSON('/api/fan/review/decide', { id: Number(id), decision, review_version: reviewed.review_version, ...extra }).catch(() => ({ error: '网络错误，请稍后再试' }));
-  if (!d.ok) { toast(d.error || '操作失败'); return false; }
-  toast(decision === 'approve' ? '已通过，已进入画廊 ✓' : '已退回，作者会看到你的理由');
-  loadQueue(); reloadPublic();
-  return true;
+  try {
+    const d = await postJSON('/api/fan/review/decide', { id: Number(id), decision, review_version: reviewed.review_version, ...extra }).catch(() => ({ error: '网络错误，请稍后再试' }));
+    if (!d.ok) {
+      if (d.httpStatus === 409 || d.httpStatus === 404) { closeModal(); loadQueue(); reloadPublic(); }
+      toast(d.error || '操作失败'); return false;
+    }
+    document.querySelector(`[data-review="${Number(id)}"]`)?.remove();
+    toast(decision === 'approve' ? '已通过，已进入画廊 ✓' : '已退回，作者会看到你的理由');
+    loadQueue(); reloadPublic();
+    return true;
+  } finally {
+    pendingReviews.delete(id);
+    controls.forEach(el => { el.disabled = false; });
+  }
 }
 function askReject(id, fromGallery) {
-  const c = rowCache.get(String(id)) || {};
+  const c = { ...(rowCache.get(String(id)) || {}) };
+  if (!fromGallery) c.review_version = document.querySelector(`[data-review="${Number(id)}"]`)?.dataset.reviewVersion;
   openModal({
     title: (fromGallery ? '从画廊退回「' : '退回「') + (c.name || '') + '」',
     body: '写一句理由，作者会在「我的已登记人设」里看到。作者修改设表后会自动重新提交审核。',
@@ -658,12 +707,20 @@ $('reviewList').addEventListener('click', e => {
   const ap = e.target.closest('[data-approve]');
   if (ap) {
     const sel = ap.closest('.review-item').querySelector('[data-art]');
-    decide(ap.dataset.approve, 'approve', sel ? { art_source: sel.value } : {});
+    decide(ap.dataset.approve, 'approve', { review_version: ap.closest('.review-item').dataset.reviewVersion, ...(sel ? { art_source: sel.value } : {}) });
     return;
   }
   const rj = e.target.closest('[data-reject]');
   if (rj) askReject(rj.dataset.reject, false);
 });
+function syncQueueIfVisible() {
+  if (document.visibilityState === 'visible' && $('reviewDesk').open) loadQueue();
+}
+$('reviewRefresh').onclick = () => loadQueue();
+$('reviewDesk').addEventListener('toggle', () => { if (!$('reviewDesk').hidden) syncQueueIfVisible(); });
+document.addEventListener('visibilitychange', syncQueueIfVisible);
+window.addEventListener('focus', syncQueueIfVisible);
+setInterval(syncQueueIfVisible, 5000);
 
 // ====== 共创：申请审核员 / 进群 ======
 function paintRecruit() {
