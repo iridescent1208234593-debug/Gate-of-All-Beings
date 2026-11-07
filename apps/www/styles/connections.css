@@ -844,6 +844,11 @@ a:hover {
   text-decoration: none;
 }
 
+.connections-footer__legal {
+  display: flex;
+  gap: 14px;
+}
+
 @media (max-width: 620px) {
   html {
     scroll-padding-top: 70px;

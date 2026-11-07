@@ -54,7 +54,9 @@
     ] },
     { title: '其他', items: [
       { host: new URL(domains.url('oc')).hostname, label: '佳霖馆长设定', path: '/' },
-      { host: new URL(domains.url('main')).hostname, label: '连接与鸣谢', path: '/connections.html' }
+      { host: new URL(domains.url('main')).hostname, label: '连接与鸣谢', path: '/connections.html' },
+      { host: new URL(domains.url('huiguan')).hostname, label: '用户须知', path: '/terms.html' },
+      { host: new URL(domains.url('huiguan')).hostname, label: '隐私政策', path: '/privacy.html' }
     ] }
   ];
   var LEGAL = '<summary>版权与免责声明</summary><p class="qc-copy">罗小黑战记相关 IP 版权归寒木春华动画工作室所有。</p>' +

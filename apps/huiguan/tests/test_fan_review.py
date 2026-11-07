@@ -34,6 +34,8 @@ for username, role, reviewer in (("admin_user", "admin", 0), ("reviewer_user", "
                                  ("elder_user", "elder", 0)):
     conn.execute("INSERT INTO local_users (username, pass_hash, nickname, role, status, is_fan_reviewer, created_at, last_login) VALUES (?,?,?,?,?,?,?,?)",
                  (username, s.hash_password("test-password-123"), username, role, "active", reviewer, s.now_iso(), s.now_iso()))
+# Seeded Accounts have agreed to the current 《用户须知》/《隐私政策》 (uploads require it).
+for (uid,) in conn.execute("SELECT uid FROM local_users").fetchall(): s.legal_consent.record(conn, "local", uid)
 conn.commit(); conn.close()
 http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()
 '''

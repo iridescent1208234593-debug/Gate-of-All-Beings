@@ -187,6 +187,7 @@ button{font-family:inherit}
 }
 @media(prefers-reduced-motion:reduce){.card,.folio,.card-figure img{transition:none}}
 </style>
+<link rel="stylesheet" href="/legal.css?v=20261106">
 </head>
 <body>
 <div class="nav-bar">
@@ -250,6 +251,7 @@ button{font-family:inherit}
     <div class="pb-text">
       <strong>从已登记人设中公开</strong>
       勾选下方角色，一键提交到同人画廊。审核员审核通过后会出现在画廊里；修改已公开的设表后也会重新审核。
+      <div class="fan-legal" id="fanLegal"><a href="/terms.html" target="_blank" rel="noopener">用户须知</a> · <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a></div>
     </div>
     <button type="button" class="pb-btn" id="publishBtn" disabled>公开到同人画廊</button>
   </div>
@@ -316,6 +318,7 @@ button{font-family:inherit}
 
 <script src="reactions-fx.js?v=20261027z"></script>
 <script src="group-reminder.js?v=20261106c"></script>
+<script src="legal-consent.js?v=20261106" data-require-consent></script>
 <script>
 const PAGE = 12;
 const $ = id => document.getElementById(id);
@@ -584,14 +587,18 @@ async function loadMy() {
     renderMy();
   } catch (e) { $('myGrid').innerHTML = '<div class="empty">加载我的角色失败，请刷新重试。</div>'; }
 }
+// 公开到同人画廊前必须勾选同意《用户须知》《隐私政策》（含第六条上传承诺）。
+const fanLegal = window.HuiguanLegal && HuiguanLegal.mount($('fanLegal'));
 $('publishBtn').onclick = () => {
   if (!selectedCodes.size) return;
+  if (fanLegal && !fanLegal.checked()) { toast('公开前请阅读并勾选同意《用户须知》和《隐私政策》'); fanLegal.nudge(); return; }
   const names = myChars.filter(c => selectedCodes.has(c.code)).map(c => '· ' + esc(c.name));
   openModal({
     title: '提交到同人画廊',
     body: `将提交以下 <strong>${names.length}</strong> 个角色：<br>${names.join('<br>')}<br><br><span style="color:var(--dim);font-size:13px">审核员审核通过后才会在画廊展示；用了 AI 立绘的请在登记表里把「立绘来源」选为 AI。</span>`,
     okText: '确认提交',
     onOk: async () => {
+      if (window.HuiguanLegal) await HuiguanLegal.accept('fan-publish').catch(() => {});
       const d = await postJSON('/api/fan/publish', { character_codes: [...selectedCodes] }).catch(() => ({ error: '网络错误，请稍后再试' }));
       if (!d.ok) { $('modalErr').textContent = d.error || '发布失败'; return false; }
       selectedCodes.clear();

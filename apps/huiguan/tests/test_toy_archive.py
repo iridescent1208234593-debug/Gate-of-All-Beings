@@ -14,10 +14,13 @@ import urllib.request
 from http.cookies import SimpleCookie
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
+from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
+
 HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = (
     "import sys, http.server; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'services' / 'platform')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; "
-    "s.init_user_db(); c = s.db(); c.execute(\"INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES ('toy_owner', ?, '作者甲', 'admin', 'active', '', '')\", (s.hash_password('test-password-123'),)); c.commit(); c.close(); "
+    "s.init_user_db(); c = s.db(); c.execute(\"INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES ('toy_owner', ?, '作者甲', 'admin', 'active', '', '')\", (s.hash_password('test-password-123'),)); s.legal_consent.record(c, 'local', c.execute(\"SELECT uid FROM local_users WHERE username='toy_owner'\").fetchone()[0]); c.commit(); c.close(); "
     "http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()"
 )
 
@@ -102,7 +105,7 @@ class ToyArchiveTest(unittest.TestCase):
         assert status == 200, status
         # 普通作者公开后待审核，不进 Toy
         cls.author = Client(cls.base)
-        status, _ = cls.author.call("/api/register", {"username": "toy_author", "password": "test-password-123", "nickname": "作者乙", "email": "t@example.com"})
+        status, _ = cls.author.call("/api/register", {"legal_version": LEGAL_VERSION, "username": "toy_author", "password": "test-password-123", "nickname": "作者乙", "email": "t@example.com"})
         assert status == 200, status
         cls.author.call("/api/save-character", sheet("T-PEND", "待审", "待审", "/assets/uploads/" + "b" * 32 + ".png"))
         status, result = cls.author.call("/api/fan/publish", {"character_codes": ["T-PEND"]})

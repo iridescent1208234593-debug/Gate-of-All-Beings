@@ -647,6 +647,7 @@
 </style>
 <link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261027z">
 <link rel="stylesheet" href="/homepage.css?v=20261027z">
+<link rel="stylesheet" href="/legal.css?v=20261106">
 <link rel="preload" as="script" href="/design-system/ui/lxh-intro.js?v=20261027z">
 <link rel="preload" as="script" href="/assets/gate/gate-scene.js?v=20261027z">
 <link rel="preload" as="script" href="/homepage.js?v=20261027z">
@@ -873,11 +874,12 @@
     <label class="auth-label" for="authPassword">密码</label>
     <input class="auth-input" id="authPassword" type="password" maxlength="128" autocomplete="current-password" placeholder="登录使用已有密码；新注册需至少 12 位">
     <div class="auth-turnstile" id="authTurnstile" hidden></div>
+    <div class="auth-legal" id="authLegal"><a href="/terms.html" target="_blank" rel="noopener">用户须知</a> · <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a></div>
     <div style="display:flex;gap:8px;margin-top:4px">
       <button type="button" class="auth-submit" id="authSubmit" onclick="submitAuth()" style="flex:2">登录</button>
       <button type="button" class="auth-submit" id="authRegister" onclick="submitRegister()" style="flex:1;font-size:13px;background:transparent;border:1px solid rgba(242,239,230,.55);color:#f2efe6">注册账号</button>
     </div>
-    <div class="auth-hint">登录仅校验已有账号，不会自动注册。需要新账号请点「注册账号」。密码区分大小写；新注册用户名不得使用官方世界观角色名。</div>
+    <div class="auth-hint">登录仅校验已有账号，不会自动注册。需要新账号请勾选同意上方两份文件后点「注册账号」。密码区分大小写；新注册用户名不得使用官方世界观角色名。</div>
     <a class="auth-usso" href="/security.html?mode=recover">找回账号 / 密码（已验证邮箱或找回问题）</a>
     <details class="auth-legacy"><summary>其他登录方式</summary><div class="auth-hint">USSO 外部登录已暂停；既有账户资料与角色数据保留。请使用会馆站内账号登录。</div></details>
   </div>
@@ -1344,6 +1346,7 @@
 
     <!-- ══════ 按钮 ══════ -->
     <div id="formFeedback" class="form-feedback" role="alert" hidden></div>
+    <div class="oc-legal" id="ocLegal"><a href="/terms.html" target="_blank" rel="noopener">用户须知</a> · <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a></div>
     <div class="btn-row">
       <button type="button" class="btn" onclick="resetForm()">重 置</button>
       <button type="submit" class="btn primary" id="btnSubmit">提 交 登 记</button>
@@ -1381,6 +1384,7 @@
 <script src="/character-colors.js?v=20261027z"></script>
 <script src="/auth-next.js?v=20261027z"></script>
 <script src="/turnstile-widget.js?v=20261028"></script>
+<script src="/legal-consent.js?v=20261106"></script>
 <script>
 const STORAGE_KEY = 'luoxiaohei_characters';
 
@@ -1479,6 +1483,7 @@ async function checkLogin() {
       renderAuthBar(u);
       await syncFromServer();
       fixBrokenShowcase();
+      maybeLegalReconsent();
       maybeGroupReminder();
       maybeFanGalleryReminder();
     } else {
@@ -1588,6 +1593,13 @@ async function authTurnstileReady(action, msg, label) {
   if (state === 'pending') { msg.textContent = '请先完成下方的人机验证，再点「' + label + '」'; return false; }
   return true;
 }
+// 注册与提交登记都要勾选同意《用户须知》《隐私政策》；未加载脚本时保留上面的纯链接。
+const authLegal = window.HuiguanLegal && HuiguanLegal.mount(document.getElementById('authLegal'));
+const ocLegal = window.HuiguanLegal && HuiguanLegal.mount(document.getElementById('ocLegal'));
+// 已登录但还没同意当前版本的账号：必须同意才能继续使用账号（负责人 2026-11-06 决定），也可以退出登录。
+function maybeLegalReconsent() {
+  if (window.HuiguanLegal) HuiguanLegal.requireForAccount();
+}
 async function submitRegister() {
   const username = document.getElementById('authUsername').value.trim();
   const password = document.getElementById('authPassword').value;
@@ -1599,13 +1611,17 @@ async function submitRegister() {
   if (password.length < 12) { msg.textContent = '密码至少 12 位'; return; }
   if (!email) { msg.textContent = '请填写邮箱（用于找回账号与重置密码）'; return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = '请输入有效邮箱地址'; return; }
+  if (!authLegal) { msg.textContent = '条款组件加载失败，请刷新页面后再注册'; return; }
+  if (!authLegal.checked()) { msg.textContent = '请先阅读并勾选同意《用户须知》和《隐私政策》'; authLegal.nudge(); return; }
+  let legalVersion = '';
+  try { legalVersion = await HuiguanLegal.version(); } catch (e) { msg.textContent = '条款版本读取失败，请检查网络后重试'; return; }
   if (!await authTurnstileReady('register', msg, '注册账号')) return;
   if (!confirm('确定用「' + username + '」注册账号？\n邮箱：' + email + '\n验证邮件将发到该邮箱。')) return;
   btn.disabled = true;
   try {
     const r = await fetch('/api/register', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password, email, turnstile: window.HuiguanTurnstile.token() })
+      body: JSON.stringify({ username, password, email, legal_version: legalVersion, turnstile: window.HuiguanTurnstile.token() })
     });
     const d = await r.json();
     window.HuiguanTurnstile.reset();
@@ -1616,6 +1632,7 @@ async function submitRegister() {
         : '注册成功（邮箱验证暂不可用，稍后可在账户页重试）；正在进入…';
       document.getElementById('authPassword').value = '';
       const em = document.getElementById('authEmail'); if (em) em.value = '';
+      authLegal.reset();
       setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 400);
     } else {
       msg.textContent = d.error || '注册失败';
@@ -3809,6 +3826,11 @@ document.getElementById('charForm').addEventListener('submit', function(e) {
     return;
   }
 
+  if (ocLegal && !ocLegal.checked()) {
+    showToast('error', '⚠ 提交前请阅读并勾选同意《用户须知》和《隐私政策》。', 6000);
+    ocLegal.nudge();
+    return;
+  }
   const data = collectData();
   const colors = selectedColor || COLOR_SCHEMES[4];
   try { generateAndSave(data, colors); } catch (error) { if (window.showSubmissionProblem) window.showSubmissionProblem('暂时无法生成展示页，填写内容已保留。请稍后重试。'); }
@@ -3851,6 +3873,8 @@ async function postSave(data, html, previousCode = '', version = OCRevisions.ver
   const label = button.textContent;
   button.textContent = '正在保存…';
   try {
+    // 表单上已勾选同意；这里把同意记到账号上（失败不挡保存，下次登录会再提示）。
+    if (window.HuiguanLegal) await HuiguanLegal.accept('oc-submit').catch(() => {});
     data = await HuiguanImages.character(data);
     html = generateShowcaseHTML(data, colorsFromData(data));
     const r = await fetch('/api/save-character', {

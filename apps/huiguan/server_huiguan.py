@@ -48,6 +48,17 @@ from account_recovery import init_schema as init_recovery_schema, handle_recover
 from account_profile import init_schema as init_profile_schema, get_profile, set_account_avatar, valid_asset_url, store_avatar_image as normalize_avatar_image
 import game_saves
 import account_progress
+import legal_consent
+
+# POST endpoints that upload or publish content: a logged-in Account must have agreed to the current
+# 《用户须知》/《隐私政策》 first (owner decision 2026-11-06: existing Accounts must agree too).
+LEGAL_GATED_POSTS = frozenset((
+    "/api/save-character", "/api/save-all-characters", "/api/account/avatar", "/api/avatars/upload",
+    "/api/images/upload", "/api/fan/submit", "/api/fan/publish", "/api/official/fanart/upload",
+    "/api/official/fanart/comment", "/api/official/sticker/upload", "/api/official/image/add",
+    "/api/official/supplement", "/api/official/edit", "/api/posters/save", "/api/posters/publish",
+    "/api/color-schemes",
+))
 import turnstile
 from showcase_document import published_document
 from showcase_sanitizer import controlled_showcase
@@ -330,6 +341,7 @@ def init_user_db():
             conn.execute("PRAGMA journal_mode=WAL")  # readers no longer block on the writer; persists in the file
         init_security_schema(conn)
         init_email_schema(conn)
+        legal_consent.init_schema(conn)
         init_recovery_schema(conn)
         init_profile_schema(conn)
         conn.execute("""
@@ -1749,6 +1761,8 @@ class Handler(BaseStaticHandler):
             return handle_email(self, "status", globals())
         if path == "/api/sso-user":
             return self._api_sso_user()
+        if path == "/api/legal":
+            return self._api_legal_status()
         if path == "/api/logout":
             return self._api_logout()
         if path == "/api/get-characters":
@@ -1845,6 +1859,8 @@ class Handler(BaseStaticHandler):
         if path.startswith("/api/huiguan/"):
             path = "/api/" + path[len("/api/huiguan/"):]
 
+        if path in LEGAL_GATED_POSTS and self._legal_consent_missing():
+            return
         if path.startswith("/api/security/"):
             return handle_security(self, path.rsplit("/", 1)[-1], globals())
         if path.startswith("/api/account/email/"):
@@ -1862,6 +1878,8 @@ class Handler(BaseStaticHandler):
             return self._api_auth()
         if path == "/api/register":
             return self._api_register()
+        if path == "/api/legal/accept":
+            return self._api_legal_accept()
         if path == "/api/delete-character":
             return self._api_delete_character()
         if path == "/api/save-character":
@@ -2231,6 +2249,11 @@ class Handler(BaseStaticHandler):
         if rate_blocked(f"reg:{ip}", 5, 3600):
             self._json(429, {"error": "注册过于频繁，请稍后再试"})
             return
+        if not legal_consent.is_current(body.get("legal_version")):
+            # Checked before the Turnstile token is spent and before the rate counter moves.
+            self._json(400, {"error": "请先阅读并勾选同意《用户须知》和《隐私政策》",
+                             "code": "legal_consent_required", "legal_version": legal_consent.CURRENT_VERSION})
+            return
         if not self._turnstile_passed(body, "register"):
             return
         rate_add(f"reg:{ip}")
@@ -2277,6 +2300,7 @@ class Handler(BaseStaticHandler):
                     "INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES (?,?,?,?,?,?,?)",
                     (username, pass_hash, nickname, role, "active", now_iso(), ""))
                 uid = cur.lastrowid
+                legal_consent.record(conn, "local", uid, body.get("legal_version"), "register")
             except sqlite3.IntegrityError:
                 conn.close()
                 self._json(409, {"error": "该用户名已被注册"})
@@ -2477,6 +2501,56 @@ class Handler(BaseStaticHandler):
         ident = resolve_identity("local", uid)
         self._json(200, {"ok": True, "registered": True, "user": ident},
                    cookie=[self._session_cookie(session_id), self._sso_cookie(uid, "local", ident.get("name") or username)])
+
+    # ---------- /api/legal（用户须知与隐私政策的版本与同意记录） ----------
+    def _legal_consent_missing(self):
+        """Logged-in Accounts must have agreed to the current version before uploading or publishing.
+
+        Visitors pass through: each endpoint still enforces its own login rule. Sends 403 and returns True when blocked.
+        """
+        ident = self._require_ident_optional()
+        if not ident:
+            return False
+        conn = db()
+        try:
+            at = legal_consent.accepted(conn, ident["kind"], ident["uid"])
+        finally:
+            conn.close()
+        if at is not None:
+            return False
+        self._json(403, {"error": "请先阅读并同意《用户须知》和《隐私政策》（刷新页面会弹出同意框）",
+                         "code": "legal_consent_required", "legal_version": legal_consent.CURRENT_VERSION})
+        return True
+
+    def _api_legal_status(self):
+        ident = self._require_ident_optional()
+        conn = db()
+        try:
+            payload = legal_consent.status(conn, ident)
+        finally:
+            conn.close()
+        self._json(200, payload)
+
+    def _api_legal_accept(self):
+        ident = self._require_ident()
+        if not ident:
+            return
+        body = self._read_json()
+        if body is None:
+            return
+        if not legal_consent.is_current(body.get("legal_version")):
+            self._json(409, {"error": "须知已更新，请刷新页面后重新阅读并勾选",
+                             "code": "legal_version_mismatch", "legal_version": legal_consent.CURRENT_VERSION})
+            return
+        with DB_LOCK:
+            conn = db()
+            try:
+                legal_consent.record(conn, ident["kind"], ident["uid"], body.get("legal_version"), body.get("context") or "")
+                conn.commit()
+                payload = legal_consent.status(conn, ident)
+            finally:
+                conn.close()
+        self._json(200, {"ok": True, **payload})
 
     # ---------- /api/sso-user（共享导航显示账户） ----------
     def _api_sso_user(self):
