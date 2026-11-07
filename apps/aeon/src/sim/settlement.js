@@ -114,7 +114,6 @@ export class Settlement {
     this.radius = 1;          // footprint radius in tiles (render hint)
     this.foundedYear = 0;
     this.starve = 0;          // years below ABANDON_MIN
-    this.empty = 0;           // consecutive years with NO residents (ghost-city timer)
     this.focus = 'growth';    // player/AI city production: growth|build|military|gold|research
     this.defense = 0;         // fortification (build focus) — helps hold the city vs conquest
     // per-year accumulators (filled during the agent scan, then consumed)
@@ -178,7 +177,7 @@ export class SettlementSystem {
     }
     s.pop = moved;
     s.focus = 'growth';      // a new colony prioritises growing
-    s.permanent = true;      // founded cities survive population dips, but an empty one is abandoned (GHOST-CITY)
+    s.permanent = true;      // a founded city does not get abandoned (Civ cities persist)
     // make the site a FOOD MAGNET so people stay & breed here (the reason to settle):
     // tilled, fertile land + a stock of food right now.
     const R = 6;
@@ -374,11 +373,6 @@ export class SettlementSystem {
       if (tribe) { s.hue = tribe.hue; s.era = eraOf(tribe); }
       this._grow(sim, s, s.era);
       if (s.pop < ABANDON_MIN) s.starve++; else s.starve = 0;
-      // A founded (permanent) city is shielded from the starvation rule above,
-      // but a city with NO residents is a GHOST: it still occupies the map and
-      // collects focus payouts forever. Only consecutive empty years count, so
-      // a temporary evacuation can be recovered before the city is abandoned.
-      if (s.pop <= 0) s.empty = (s.empty | 0) + 1; else s.empty = 0;
     }
 
     // --- cities reshape the land: urban core + cultivated farmland --------------
@@ -453,9 +447,7 @@ export class SettlementSystem {
       const s = list[r];
       const tribe = sim.tribes.get(s.tribeId);
       const gone = !tribe || tribe.members === 0;
-      const starvedOut = s.starve > MAX_STARVE && !s.permanent;
-      const ghost = s.permanent && (s.empty | 0) > MAX_STARVE;
-      if (gone || starvedOut || ghost) {
+      if (gone || (s.starve > MAX_STARVE && !s.permanent)) {
         sim.emit('abandon', `${s.name} lies abandoned`, s.x, s.y, s.hue);
         continue; // drop
       }
