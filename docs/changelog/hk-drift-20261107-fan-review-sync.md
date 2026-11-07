@@ -16,4 +16,4 @@
 
 香港候选实际运行 7 项审核、2 项作者编辑、2 项 Toy 接口测试，全部通过，并通过实际 Node 发布校验器。公网 `.cn` 页面去除既有三个服务端注入脚本及 Cloudflare 统计脚本后，与封存页面逐字节一致；浏览器确认同步函数与刷新按钮已加载、画廊显示正常、脚本错误为零。三个根域的香港本机 Host 检查通过；匿名待审接口仍返回 401。没有使用真实审核动作作验收。
 
-master 移植跟踪为 PR #128：<https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/pull/128>，尚未合并。完整证据追加保存在工作区 `evidence/fan-review-sync-hk-20261107/`。生产回退使用网站管家的代码回滚入口，恢复 previous 版本；本修复没有数据迁移。
+master 移植 PR #128 已于发布验收收尾时核实合并：<https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/pull/128>，合并提交 `131b3be362c0f8f472e544f4827b27eb4033b6d2`。重新获取 master 后，三个修复文件与已验证的开发分支无差异。本发布流程没有执行合并或改写其他会话的提交。完整证据追加保存在工作区 `evidence/fan-review-sync-hk-20261107/`。生产回退使用网站管家的代码回滚入口，恢复 previous 版本；本修复没有数据迁移。
