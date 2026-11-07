@@ -13,6 +13,7 @@ export class Agent {
     this.genome = null;
     this.energy = 0; this.health = 1; this.age = 0; this.maxAge = 1;
     this.tribeId = 0;
+    this.role = 0;        // 0 civilian · 1 soldier · 2 ranger (Sim.assignRoles)
     this.generation = 0;
     this.fitness = 0;     // lifetime score (food + offspring + survival)
     this.offspring = 0;
@@ -51,6 +52,11 @@ export class Agent {
   spawn(x, y, genome, tribeId, rng, generation = 0) {
     this.alive = true;
     this.id = _nextId++;
+    // A pooled slot may have died as a soldier or ranger. Rebirth is ALWAYS a
+    // civilian — assignRoles() promotes on merit next year. Without this the
+    // dead rank leaks into a newborn ("soldier babies") and that baby then
+    // counts as an existing soldier forever.
+    this.role = 0;
     this.x = x; this.y = y; this.vx = 0; this.vy = 0;
     this.genome = genome;
     this.tribeId = tribeId;
@@ -92,6 +98,7 @@ export class Agent {
     // warriors/rangers each year, sized by the nation's militarism (policy) and
     // biased by individual martial/keen propensity — so a society stays mostly
     // civilian and the player's aggression slider controls the army size.
+    // spawn()/kill() own the reset; this only guards bodies built off-pool.
     if (this.role === undefined) this.role = 0;
   }
 
@@ -136,6 +143,7 @@ export class Agent {
   kill() {
     this.alive = false;
     this.genome = null;
+    this.role = 0;           // don't leak the dead unit's rank into the free pool
     this.fear = 0;
     if (this.ctx) this.ctx.fill(0);          // wipe the mind so the pool can't
     if (this.ctxNext) this.ctxNext.fill(0);  // resurrect a dead creature's intent
