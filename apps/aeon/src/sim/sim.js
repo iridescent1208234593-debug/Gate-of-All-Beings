@@ -1,6 +1,6 @@
 // The simulation core. Owns the world, the population, the tribes, and the
 // per-tick loop: sense -> think (neural net) -> act -> live/die -> evolve.
-import { World, BIOME } from './world.js';
+import { World, BIOME, focusPayoutAllowed } from './world.js';
 import { AgentPool } from './agent.js';
 import { Tribe } from './tribe.js';
 import { TechSystem } from './tech.js';
@@ -329,16 +329,24 @@ export class Sim {
       // CITY PRODUCTION FOCUS — each city does what the player/AI set it to do
       for (let si = 0; si < this.settlements.length; si++) {
         const s = this.settlements[si];
-        const tr = this.tribes.get(s.tribeId);
-        if (!tr || tr.members === 0) continue;
-        switch (s.focus) {
-          case 'gold': tr.gold += 3; break;
-          case 'research': tr.tech.points += 4; break;
-          case 'growth': this.world.blessFood(s.x, s.y, 6); break;
-          case 'build': if (tr.stock.stone >= 2) { tr.stock.stone -= 2; s.defense = Math.min(50, (s.defense || 0) + 3); } break;
-          case 'military': this.trainSoldier(s, tr); break;
-        }
+        this.applyCityFocus(s, this.tribes.get(s.tribeId));
       }
+    }
+  }
+
+  // Yearly production for ONE settlement (split out of step() so the payout
+  // rules are testable headlessly). FOCUS-GATE-WIRE: an empty city is a ruin,
+  // not a treasury — a tribe can still have living members elsewhere, so the
+  // payout must gate on the city's own resident pop rather than tr.members.
+  applyCityFocus(s, tr) {
+    if (!tr || tr.members === 0) return;
+    if (!focusPayoutAllowed(s)) return;
+    switch (s.focus) {
+      case 'gold': tr.gold += 3; break;
+      case 'research': tr.tech.points += 4; break;
+      case 'growth': this.world.blessFood(s.x, s.y, 6); break;
+      case 'build': if (tr.stock.stone >= 2) { tr.stock.stone -= 2; s.defense = Math.min(50, (s.defense || 0) + 3); } break;
+      case 'military': this.trainSoldier(s, tr); break;
     }
   }
 
