@@ -12,6 +12,8 @@
 
 ## 本机服务：只有一条启动路径
 
+新成员从零配置与模块验证请看[本地开发环境与启动矩阵](development/local-onboarding.md)。以下命令是已准备好 development storage 和封存 Release 后的唯一完整 runtime 启动路径。
+
 ```powershell
 python tools/runtime/local-runtime.py start     # 校验 channel 选中的封存 Release，只在 127.0.0.1 启动五个服务
 python tools/checks/local-smoke.py              # 只读冒烟（三根域页面/API、Origin 与 WebSocket 拒绝、421）

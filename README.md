@@ -28,6 +28,8 @@
 
 ## 快速开始
 
+新成员从零安装、启动 Portal/Cards/会馆和独立游戏的完整步骤与实际验证矩阵见[本地开发环境与启动矩阵](docs/development/local-onboarding.md)。
+
 **只想看**：直接用上面的在线入口，不需要本地环境。
 
 **想改某个模块**：进入对应目录，按该目录自己的 README 启动。八个模块的技术栈并不统一（Vite + React、原生 JS + Canvas、Python 服务、Next.js），没有一条命令能覆盖全部。

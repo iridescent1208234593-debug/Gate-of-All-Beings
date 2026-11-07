@@ -2,6 +2,8 @@
 
 总览见根 [README.md](../README.md) 与 [services/platform/README.md](../services/platform/README.md)。
 
+新成员安装依赖、启动 Portal/Cards/会馆和独立游戏，以及每个模块的成功/失败验证结果，统一见[本地开发环境与启动矩阵](../docs/development/local-onboarding.md)。本页只保留模块结构与构建边界。
+
 | 路径 | 作用 |
 | --- | --- |
 | `www/`、`huiguan/`、`oc/` | 主站、会馆、人设站（由统一入口按 Host 分发） |

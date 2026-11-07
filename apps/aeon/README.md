@@ -1,5 +1,7 @@
 # AEON — a living world of evolving minds
 
+新成员完整环境、独立启动/停止和 Issue #72 实测矩阵见[本地开发环境与启动矩阵](../../docs/development/local-onboarding.md)。
+
 A god-game **and** civilization simulator where **every creature thinks with its own tiny
 neural network** — a real brain that mutates and evolves across generations. Nobody is
 scripted. They learn to survive, find water, gather, build, band into nations, research,

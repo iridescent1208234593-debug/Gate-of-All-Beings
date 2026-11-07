@@ -1,5 +1,7 @@
 # 西木会馆
 
+新成员完整环境、Portal 启动、临时测试数据、停止步骤和实测矩阵见[本地开发环境与启动矩阵](../../docs/development/local-onboarding.md)。
+
 正式入口：<https://huiguan.iridescently.xyz/>。`services/platform/portal_server.py` 按 Host 直接提供本目录的静态页面；不需要把参考项目搬入或另建路由框架。
 
 ## 首页维护入口

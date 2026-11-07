@@ -1,5 +1,7 @@
 
 
+本模块的完整环境、启动/停止命令和 Issue #72 实测矩阵见[本地开发环境与启动矩阵](../../docs/development/local-onboarding.md)。
+
 ---
 
 ## 在统一工作区中的位置
