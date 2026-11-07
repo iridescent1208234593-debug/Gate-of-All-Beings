@@ -5,7 +5,6 @@ import json
 import os
 from pathlib import Path
 import shutil
-import shlex
 import subprocess
 import sys
 import tempfile
@@ -18,11 +17,7 @@ from storage_paths import initialize_storage
 
 def run_check(results, name, command, *, cwd=ROOT, env=None):
     """Run one check and append a JSON-safe result without exposing its environment."""
-    command = [str(part) for part in command]
-    command_text = shlex.join(command)
     print(f"\n[{name}]", flush=True)
-    print(f"  command: {command_text}", flush=True)
-    print(f"  cwd: {Path(cwd).resolve()}", flush=True)
     started = time.monotonic()
 
     def elapsed():
@@ -33,25 +28,15 @@ def run_check(results, name, command, *, cwd=ROOT, env=None):
     except Exception as error:
         # A missing executable is a failed check, not a batch-level crash.
         results.append({"check": name, "passed": False, "status": "failed",
-                        "seconds": elapsed(), "command": command,
-                        "command_text": command_text,
-                        "cwd": str(Path(cwd).resolve()),
-                        "error": f"{type(error).__name__}: {error}",
-                        "diagnostic": "检查工具或其依赖未安装；请先完成 CI/工作区依赖安装"})
-        print(f"  result: FAIL ({type(error).__name__}: {error})", flush=True)
+                        "seconds": elapsed(), "command": [str(part) for part in command],
+                        "error": f"{type(error).__name__}: {error}"})
         return
     passed = result.returncode == 0
     item = {"check": name, "passed": passed, "status": "passed" if passed else "failed",
             "seconds": elapsed()}
     if not passed:
-        item["command"] = command
-        item["command_text"] = command_text
-        item["cwd"] = str(Path(cwd).resolve())
+        item["command"] = [str(part) for part in command]
         item["exit_code"] = result.returncode
-        item["diagnostic"] = "检查进程已退出；查看上方同名模块的子进程输出，并可复制 command 重跑"
-        print(f"  result: FAIL (exit code {result.returncode})", flush=True)
-    else:
-        print("  result: PASS", flush=True)
     results.append(item)
 
 
@@ -62,14 +47,6 @@ def main():
                         help="write the machine-readable JSON summary to this file")
     parser.add_argument("--modules", type=Path, help="built modules candidate for the all-roots portal routing check")
     args = parser.parse_args()
-    modules = None
-    if args.modules:
-        try:
-            modules = args.modules.resolve(strict=True)
-        except FileNotFoundError:
-            parser.error(f"--modules path does not exist: {args.modules}")
-        if not modules.is_dir():
-            parser.error(f"--modules path is not a directory: {modules}")
     results = []
     with tempfile.TemporaryDirectory(prefix="iridescently-batch6-checks-") as temporary:
         env = {k: v for k, v in os.environ.items() if not k.startswith("IRIDESCENTLY_")}
@@ -98,7 +75,7 @@ def main():
         for directory in (ROOT / "services/platform/tests", ROOT / "apps/huiguan/tests", ROOT / "apps/cards/tests"):
             for file in sorted(directory.glob("test_*.py")):
                 run(str(file.relative_to(ROOT)), [sys.executable, "-X", "utf8", str(file)])
-        node = shutil.which("node") or "node"
+        node = shutil.which("node")
         run("release boundary and hash contracts", [node, "tools/release/test-release-artifacts.mjs"])
         publisher_check = ROOT / "tools/release/test-publish-release.mjs"
         if publisher_check.exists():
@@ -106,10 +83,9 @@ def main():
         run("Bilibili Toy package safety", [node, "--test", "tools/toy/test-toy-bundle.mjs"])
         # activation-core (pnpm install required): its `test` script runs the tsx suites and the
         # route/credential suites from the app directory, where its tsconfig path aliases resolve.
-        npm_name = "npm.cmd" if os.name == "nt" else "npm"
-        npm = shutil.which(npm_name) or npm_name
-        run("activation-core", [npm, "test", "--prefix", "apps/activation-core"])
+        run("activation-core", [shutil.which("npm.cmd" if os.name == "nt" else "npm"), "test", "--prefix", "apps/activation-core"])
         if args.full:
+            npm = shutil.which("npm.cmd" if os.name == "nt" else "npm")
             commands = [
                 ("Cards frontend", [npm, "test", "--prefix", "apps/cards"]),
                 ("Cards backend", [npm, "run", "test:backend", "--prefix", "apps/cards"]),
@@ -125,8 +101,8 @@ def main():
             ])
             for name, command in commands:
                 run(name, command)
-            if modules:
-                modules = str(modules)
+            if args.modules:
+                modules = str(args.modules.resolve(strict=True))
                 run("Built modules contain no unreviewed own-domain URLs",
                     [sys.executable, "-X", "utf8", "tools/domains/check-domain-hardcodes.py", modules])
                 run("Portal routing on every approved root", [sys.executable, "-X", "utf8", "services/platform/tests/verify_portal.py"],

@@ -103,7 +103,7 @@ jobs:
           python tools/domains/check-domain-hardcodes.py
           "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/modules"
           "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/homepage"
-      - name: Regression suite (one module per process; print command diagnostics)
+      - name: Regression suite (one module per process, disposable test storage)
         run: >-
           python tools/checks/regression.py --full
           --modules "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/modules"
