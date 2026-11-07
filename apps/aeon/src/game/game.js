@@ -228,6 +228,21 @@ export class Game {
     this.gov.setPolicy(this.sim, this.playerTribe, key, val);
   }
 
+  // CITY FOCUS VERB: the inspect panel routes its five focus buttons through
+  // here, so the player uses the SAME GovernanceAPI lever an AI city uses and
+  // never mutates s.focus directly. Unlike setPolicy this is not legislation:
+  // the autopilot caretaker sets policies/tech but never rewrites a city's
+  // focus, so there is no council to stand down. Returns the applied focus, or
+  // false for a foreign/missing city or an unknown focus (no toast in that case).
+  setCityFocus(settlement, focus) {
+    const me = this.playerTribe;
+    if (!me || !settlement || settlement.tribeId !== me.id) return false;
+    const applied = this.gov.setCityFocus(this.sim, settlement, focus);
+    if (!applied) return false;
+    this.ui.toast({ type: 'info', msg: `${settlement.name || 'City'}: ${applied} focus` });
+    return applied;
+  }
+
   // ---------------------------------------------------------------- army command
   // toggle RTS command mode: drag a box to select your soldiers, click to order them
   musterArmy() {
