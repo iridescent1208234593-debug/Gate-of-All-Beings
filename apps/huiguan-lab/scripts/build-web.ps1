@@ -15,7 +15,8 @@ if ($p.ExitCode -ne 0 -or !(Test-Path (Join-Path $Out 'index.pck')) -or $errors)
 Copy-Item (Join-Path $Lab 'web\play\lab-bridge.js') $Out
 # Pre-compress the large files once so the gateway never compresses per request.
 & (Join-Path $Lab 'server\.venv\Scripts\python.exe') -c "import brotli,gzip,sys,pathlib; d=pathlib.Path(sys.argv[1]); [ (p.with_name(p.name+'.br').write_bytes(brotli.compress(p.read_bytes(), quality=9)), p.with_name(p.name+'.gz').write_bytes(gzip.compress(p.read_bytes(), 9))) for p in d.iterdir() if p.suffix in ('.wasm','.pck','.js')]" $Out
-$version = 'lab-client-2.0.0+' + (Get-Date -Format 'yyyyMMddHHmm')
+$base = ([regex]::Match((Get-Content -Raw (Join-Path $Client 'scripts\net.gd')), 'const VERSION := "([^"]+)"')).Groups[1].Value
+$version = $base + '+' + (Get-Date -Format 'yyyyMMddHHmm')
 $files = Get-ChildItem $Out -File | ForEach-Object { @{ name = $_.Name; bytes = $_.Length; sha256 = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower() } }
 @{ version = $version; built_at = (Get-Date).ToUniversalTime().ToString('o'); godot = '4.7.2.stable'; files = $files } | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $Out 'build-info.json') -Encoding UTF8
 Get-ChildItem $Out | Select-Object Name, @{ n = 'KB'; e = { [math]::Round($_.Length / 1KB) } } | Format-Table -AutoSize

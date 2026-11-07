@@ -37,6 +37,7 @@ var watch_every := 0.0
 var watch_t := 0.0
 var mobile := false
 var joystick: Control
+var interact_button: Button
 var chat_panel: Control
 var panel_scroll: ScrollContainer
 var next_oc_request_at := 0.0
@@ -191,6 +192,27 @@ func _build_hud() -> void:
 		joystick.offset_top = -156
 		joystick.offset_bottom = -16
 		root.add_child(joystick)
+	# Touch screens have no E key: a button appears while standing next to something interactive.
+	interact_button = Button.new()
+	interact_button.name = "InteractButton"
+	interact_button.focus_mode = Control.FOCUS_NONE
+	interact_button.anchor_left = 1.0
+	interact_button.anchor_right = 1.0
+	interact_button.anchor_top = 1.0
+	interact_button.anchor_bottom = 1.0
+	interact_button.offset_left = -196 if mobile else -220
+	interact_button.offset_right = -20
+	interact_button.offset_top = -120 if mobile else -84
+	interact_button.offset_bottom = -24
+	interact_button.add_theme_font_size_override("font_size", 24 if mobile else 18)
+	interact_button.visible = false
+	interact_button.pressed.connect(_interact)
+	root.add_child(interact_button)
+
+
+func _interact() -> void:
+	if near_object != "":
+		Net.send({"t": "interact", "object": near_object})
 
 
 func _layout_mobile() -> void:
@@ -681,7 +703,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			chat_input.grab_focus()
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_E and near_object != "":
-			Net.send({"t": "interact", "object": near_object})
+			_interact()
 		elif event.keycode == KEY_F3:
 			_toggle_view()
 
@@ -751,9 +773,12 @@ func _process(delta: float) -> void:
 	for o in world.template.get("objects", []):
 		if Vector2(world.me["x"], world.me["z"]).distance_to(Vector2(o["position"][0], o["position"][2])) <= float(o["radius"]):
 			near_object = o["id"]
-			hint_label.text = "按 E 互动：" + o["name"]
+			# On phones the button itself names the object; the hint line would overlap the joystick.
+			hint_label.text = "" if mobile else "按 E 或点按钮互动：" + o["name"]
+			interact_button.text = "互动 · " + o["name"]
 	if near_object == "":
 		hint_label.text = ""
+	interact_button.visible = near_object != "" and panel_holder.get_child_count() == 0
 	if Engine.get_process_frames() % 30 == 0:
 		_refresh_top()
 
@@ -797,6 +822,10 @@ func _run_auto(delta: float) -> void:
 		"chat": Net.send({"t": "chat", "text": parts[1].uri_decode()})
 		"emote": Net.send({"t": "emote", "id": parts[1]})
 		"interact": Net.send({"t": "interact", "object": parts[1]})
+		"button_rect":
+			var r := interact_button.get_global_rect()
+			print("LABBUTTON " + JSON.stringify({"visible": interact_button.visible, "x": r.position.x, "y": r.position.y,
+				"w": r.size.x, "h": r.size.y, "viewport": [get_viewport_rect().size.x, get_viewport_rect().size.y]}))
 		"view": Profile.view_mode = parts[1]; _apply_view()
 		"create": Net.send({"t": "space_create"})
 		"enter": Net.send({"t": "space_enter", "space": parts[1]})
