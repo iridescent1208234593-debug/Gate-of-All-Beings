@@ -66,7 +66,8 @@ func _draw_tex(tx: Texture2D, foot: Vector2, height_m: float, flip := false, mod
 	var h := height_m * PX
 	var w := h * float(tx.get_width()) / float(tx.get_height())
 	# A negative width flips the texture horizontally.
-	var rect := Rect2(foot.x + w * 0.5, foot.y - h, -w, h) if flip else Rect2(foot.x - w * 0.5, foot.y - h, w, h)
+	# Godot takes the absolute width without moving the rectangle's left edge.
+	var rect := Rect2(foot.x - w * 0.5, foot.y - h, -w if flip else w, h)
 	draw_texture_rect(tx, rect, false, modulate)
 
 
@@ -107,7 +108,19 @@ func _draw() -> void:
 		items.append([world.players[pid]["z"], "pl", pid])
 	items.append([world.me["z"], "me", world.me_pid])
 	items.sort_custom(func(a, b): return a[0] < b[0])
+	var visible_area: Rect2 = (get_canvas_transform().affine_inverse() * get_viewport_rect()).grow(240.0)
 	for it in items:
+		var foot: Vector2
+		if it[1] == "ob" or it[1] == "obj":
+			foot = world_to_px(it[2]["position"][0], it[2]["position"][2])
+		elif it[1] == "npc":
+			foot = world_to_px(it[2]["x"], it[2]["z"])
+		elif it[1] == "me":
+			foot = world_to_px(world.me["x"], world.me["z"])
+		else:
+			foot = world_to_px(world.players[it[2]]["x"], world.players[it[2]]["z"])
+		if not visible_area.has_point(foot):
+			continue
 		match it[1]:
 			"ob": _draw_obstacle(it[2], spirit)
 			"obj": _draw_object(it[2])

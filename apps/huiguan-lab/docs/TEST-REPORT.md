@@ -103,3 +103,7 @@
 | 栖风原 Phase 1C.3 `VerifyPhase1C3.ps1`，第一次重跑（21:40） | FAIL：服务端 25/25 PASS，原生客户端第 12 项 `nearby_interaction_enabled` 报 ERROR |
 | 同上，第二次重跑（22:55，机器负载较低） | FAIL：同一项 `nearby_interaction_enabled`。可以复现，不是偶发，是旧工程现有的回归问题（不影响 LAB V2）。演示服务已停止 |
 | R4 长时基准（`r4/run.ps1`） | NOT TESTED |
+
+## 2026-11-07 客户端与手机控制修复
+
+源码及构建 `lab-client-2.0.1+20261107041301` 已准备。服务端 12/12、桌面 14/14、手机触控模拟 11/11 通过，包含一次远端 OC 回复丢失后的恢复。用户已批准切换，但自动审批持续返回 blocked by policy，当前公网仍为旧客户端。现有 LAB 已启动，首页与健康检查为 200。完整范围、兼容处理、证据、回滚和人工应用步骤见 `E:\Iridescently\labs\zszm-lab-v2-runtime\evidence\client-fixes-20261107\RESULT.md`。

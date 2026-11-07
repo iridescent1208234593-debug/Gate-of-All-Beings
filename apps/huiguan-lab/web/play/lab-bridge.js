@@ -1,6 +1,27 @@
 // Small browser helpers for the Godot web client (loaded as an external script so the page CSP
 // needs no 'unsafe-eval'). Nothing here talks to any server except the LAB's own /api/logout.
 window.zszmLab = {
+  isMobile() {
+    return navigator.maxTouchPoints > 0 && matchMedia("(pointer: coarse)").matches;
+  },
+  promptText(title, initial) {
+    return window.prompt(title, initial || "");
+  },
+  async landscape(callback) {
+    try {
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+      if (!screen.orientation || !screen.orientation.lock) {
+        callback(false, "此浏览器不支持锁定横屏，请横握手机并开启自动旋转。");
+        return;
+      }
+      await screen.orientation.lock("landscape");
+      callback(true, "已切换横屏");
+    } catch (error) {
+      callback(false, "浏览器未允许锁定横屏，请横握手机并开启自动旋转。");
+    }
+  },
   pick(accept, callback) {
     const input = document.createElement("input");
     input.type = "file";

@@ -157,4 +157,12 @@ static func texture_from_png(png: PackedByteArray) -> Texture2D:
 	if img.load_png_from_buffer(png) != OK:
 		if img.load_webp_from_buffer(png) != OK:
 			return null
+	if img.get_width() > 2048 or img.get_height() > 2048:
+		return null
+	var used := img.get_used_rect()
+	if used.has_area():
+		img = img.get_region(used)
+	var scale := minf(1.0, 512.0 / maxf(img.get_width(), img.get_height()))
+	if scale < 1.0:
+		img.resize(maxi(1, roundi(img.get_width() * scale)), maxi(1, roundi(img.get_height() * scale)), Image.INTERPOLATE_LANCZOS)
 	return ImageTexture.create_from_image(img)

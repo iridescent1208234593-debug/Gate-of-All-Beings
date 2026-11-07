@@ -24,36 +24,52 @@ var viewport: SubViewport
 var canvas: Node2D
 var pickers := {}
 var font: Font
+var saving := false
+var scroll: ScrollContainer
+var row: BoxContainer
+var touch_ui := false
 
 
-func setup(f: Font, initial: Dictionary) -> void:
+func setup(f: Font, initial: Dictionary, mobile := false) -> void:
 	font = f
+	touch_ui = mobile
 	config = {"body": 0, "ears": 1, "eyes": 0, "hair": 1, "outfit": 0, "tail": 0, "accessory": 0, "expression": 0}
+	config["colors"] = COLORS.duplicate()
+	for k in OPTIONS:
+		if initial.get(k) is int or initial.get(k) is float:
+			config[k] = clampi(int(initial[k]), 0, OPTIONS[k].size() - 1)
+	var saved_colors: Dictionary = initial.get("colors", {}) if initial.get("colors") is Dictionary else {}
 	for k in COLORS:
-		config[k] = COLORS[k]
-	for k in initial:
-		config[k] = initial[k]
+		# Older profiles stored colors and choices under the same hair/outfit keys.
+		var value = saved_colors.get(k, initial.get(k, COLORS[k]))
+		if value is String and Color.html_is_valid(value):
+			config["colors"][k] = value
 	_build()
 
 
 func _build() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
 	bg.color = Color(0.1, 0.12, 0.1, 0.72)
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new()
+	add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var panel := PanelContainer.new()
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.custom_minimum_size = Vector2(760, 520)
-	panel.position = Vector2(-380, -260)
-	add_child(panel)
-	var row := HBoxContainer.new()
+	panel.name = "AvatarDialog"
+	center.add_child(panel)
+	scroll = ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	panel.add_child(scroll)
+	row = BoxContainer.new()
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation", 18)
-	panel.add_child(row)
+	scroll.add_child(row)
 	viewport = SubViewport.new()
 	viewport.size = Vector2i(W, H)
 	viewport.transparent_bg = true
-	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	canvas = Node2D.new()
 	canvas.draw.connect(_paint)
 	viewport.add_child(canvas)
@@ -66,9 +82,10 @@ func _build() -> void:
 	preview_box.add_child(checker)
 	var preview := TextureRect.new()
 	preview.texture = viewport.get_texture()
-	preview.custom_minimum_size = Vector2(W, H)
-	preview.position = Vector2.ZERO
+	preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	checker.add_child(preview)
+	preview.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var hint := Label.new()
 	hint.text = "预览（透明背景）"
 	preview_box.add_child(hint)
@@ -86,10 +103,14 @@ func _build() -> void:
 	for k in OPTIONS:
 		var l := Label.new(); l.text = labels[k]; grid.add_child(l)
 		var ob := OptionButton.new()
+		ob.name = "Choice_" + k
+		ob.get_popup().name = "Menu_" + k
+		if touch_ui:
+			ob.custom_minimum_size.y = 40
 		for item in OPTIONS[k]:
 			ob.add_item(item)
 		ob.selected = int(config[k])
-		ob.item_selected.connect(func(i): config[k] = i; canvas.queue_redraw())
+		ob.item_selected.connect(func(i): config[k] = i; _redraw_preview())
 		grid.add_child(ob)
 	var clabels := {"skin": "肤色", "fur": "毛色", "hair": "发色", "outfit": "衣色", "accent": "点缀", "eye": "瞳色"}
 	var cgrid := GridContainer.new()
@@ -98,36 +119,52 @@ func _build() -> void:
 	for k in COLORS:
 		var l := Label.new(); l.text = clabels[k]; cgrid.add_child(l)
 		var cp := ColorPickerButton.new()
-		cp.color = Color(config[k])
+		cp.color = Color(config["colors"][k])
 		cp.custom_minimum_size = Vector2(40, 28)
 		cp.edit_alpha = false
-		cp.color_changed.connect(func(c): config[k] = c.to_html(false); canvas.queue_redraw())
+		cp.color_changed.connect(func(color): config["colors"][k] = color.to_html(false); _redraw_preview())
 		cgrid.add_child(cp)
 	var rnd := Button.new(); rnd.text = "随机一个"; rnd.pressed.connect(_randomize); form.add_child(rnd)
 	var buttons := HBoxContainer.new()
 	form.add_child(buttons)
 	var ok := Button.new(); ok.text = "就用这个形象"; ok.name = "UseAvatar"; ok.pressed.connect(_finish); buttons.add_child(ok)
 	var cancel := Button.new(); cancel.text = "取消"; cancel.pressed.connect(func(): cancelled.emit()); buttons.add_child(cancel)
+	resized.connect(_layout)
+	_layout()
+	_redraw_preview()
+
+
+func _layout() -> void:
+	var available := get_viewport_rect().size - Vector2(32, 32)
+	scroll.custom_minimum_size = Vector2(minf(760, available.x), minf(520, available.y))
+	row.vertical = available.x < 700
+
+
+func _redraw_preview() -> void:
 	canvas.queue_redraw()
+	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 
 
 func _randomize() -> void:
 	for k in OPTIONS:
 		config[k] = randi() % OPTIONS[k].size()
 	for k in ["fur", "hair", "outfit", "accent"]:
-		config[k] = Color.from_hsv(randf(), randf_range(0.25, 0.6), randf_range(0.45, 0.9)).to_html(false)
-	canvas.queue_redraw()
+		config["colors"][k] = Color.from_hsv(randf(), randf_range(0.25, 0.6), randf_range(0.45, 0.9)).to_html(false)
+	_redraw_preview()
 
 
 func _finish() -> void:
-	canvas.queue_redraw()
+	if saving:
+		return
+	saving = true
+	_redraw_preview()
 	await RenderingServer.frame_post_draw
 	var img := viewport.get_texture().get_image()
-	finished.emit(img.save_png_to_buffer(), config.duplicate())
+	finished.emit(img.save_png_to_buffer(), config.duplicate(true))
 
 
 func c(key: String) -> Color:
-	return Color(config[key])
+	return Color(config["colors"][key])
 
 
 func _ellipse(center: Vector2, radii: Vector2, color: Color) -> void:

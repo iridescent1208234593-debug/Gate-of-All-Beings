@@ -6,7 +6,7 @@ extends Node
 signal message(msg: Dictionary)
 signal state_changed(state: String, detail: String)
 
-const VERSION := "lab-client-2.0.0"
+const VERSION := "lab-client-2.0.1"
 var socket := WebSocketPeer.new()
 var url := ""
 var cookie := ""

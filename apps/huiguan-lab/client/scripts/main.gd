@@ -23,6 +23,7 @@ var connected_once := false
 var welcomed := false
 var move_target = null
 var last_sent := Vector3.ZERO
+var last_anim := "idle"
 var send_timer := 0.0
 var seq := 0
 var requested_oc := {}
@@ -34,13 +35,23 @@ var auto_t := 0.0
 var pending_upload := false
 var watch_every := 0.0
 var watch_t := 0.0
+var mobile := false
+var joystick: Control
+var chat_panel: Control
+var panel_scroll: ScrollContainer
+var next_oc_request_at := 0.0
 
 
 func _ready() -> void:
+	mobile = WebBridge.is_mobile()
+	if mobile:
+		Engine.max_fps = 30
+		get_window().size_changed.connect(_layout_mobile)
+		_layout_mobile()
 	font = load("res://assets/fonts/NotoSansSC-lab.woff2")
 	var theme := Theme.new()
 	theme.default_font = font
-	theme.default_font_size = 16
+	theme.default_font_size = 18 if mobile else 16
 	self.theme = theme
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	view2d = load("res://scripts/hall2d.gd").new()
@@ -56,6 +67,7 @@ func _ready() -> void:
 	_apply_view()
 	Net.message.connect(_on_message)
 	Net.state_changed.connect(_on_net_state)
+	WebBridge.orientation_result.connect(func(_ok, detail): toast(detail, 6))
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--lab-auto="):
 			auto_actions = Array(arg.trim_prefix("--lab-auto=").split(";"))
@@ -78,22 +90,38 @@ func _build_hud() -> void:
 	var top := PanelContainer.new()
 	top.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	root.add_child(top)
-	var bar := HBoxContainer.new()
+	var bar: BoxContainer = VBoxContainer.new() if mobile else HBoxContainer.new()
 	top.add_child(bar)
 	top_label = Label.new()
 	top_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_label.text = "西木会馆 LAB"
 	bar.add_child(top_label)
-	for b in [["2D / 3D", _toggle_view], ["虹之间", _open_spaces], ["我的形象", _open_setup], ["本地数据", _open_data], ["退出", _logout]]:
+	var actions: Container = bar
+	if mobile:
+		top_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		actions = HFlowContainer.new()
+		bar.add_child(actions)
+	var buttons := [["视图" if mobile else "2D / 3D", _toggle_view], ["空间" if mobile else "虹之间", _open_spaces], ["形象" if mobile else "我的形象", _open_setup], ["数据" if mobile else "本地数据", _open_data], ["退出", _logout]]
+	if mobile:
+		buttons.append(["聊天", _toggle_mobile_chat])
+		buttons.append(["横屏", WebBridge.landscape])
+	for b in buttons:
 		var btn := Button.new()
 		btn.text = b[0]
+		if b[0] == "横屏":
+			btn.name = "Landscape"
 		btn.focus_mode = Control.FOCUS_NONE
+		if mobile:
+			btn.custom_minimum_size.y = 40
 		btn.pressed.connect(b[1])
-		bar.add_child(btn)
+		actions.add_child(btn)
 	var left := VBoxContainer.new()
 	left.anchor_top = 1.0; left.anchor_bottom = 1.0
 	left.offset_left = 12; left.offset_top = -260; left.offset_right = 430; left.offset_bottom = -12
 	root.add_child(left)
+	chat_panel = left
+	if mobile:
+		left.visible = false
 	chat_log = RichTextLabel.new()
 	chat_log.custom_minimum_size = Vector2(410, 170)
 	chat_log.scroll_following = true
@@ -111,6 +139,11 @@ func _build_hud() -> void:
 	chat_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	chat_input.text_submitted.connect(_send_chat)
 	crow.add_child(chat_input)
+	if mobile:
+		_add_button(crow, "发言", func():
+			var value = WebBridge.prompt_text("说点什么（最多 200 字）", chat_input.text)
+			if value != null:
+				_send_chat(str(value).substr(0, 200)))
 	var emotes := HBoxContainer.new()
 	left.add_child(emotes)
 	for e in ["wave", "bow", "heart", "laugh", "sleep", "surprise", "music", "sparkle"]:
@@ -148,6 +181,42 @@ func _build_hud() -> void:
 	panel_holder.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(panel_holder)
+	if mobile:
+		joystick = load("res://scripts/touch_joystick.gd").new()
+		joystick.name = "TouchPad"
+		joystick.anchor_top = 1.0
+		joystick.anchor_bottom = 1.0
+		joystick.offset_left = 16
+		joystick.offset_right = 156
+		joystick.offset_top = -156
+		joystick.offset_bottom = -16
+		root.add_child(joystick)
+
+
+func _layout_mobile() -> void:
+	var window := get_window()
+	var pixels := Vector2(WebBridge.viewport_size())
+	if pixels.x <= 0 or pixels.y <= 0:
+		return
+	var ratio := minf(1.0, 1280.0 / maxf(pixels.x, pixels.y))
+	if window.content_scale_mode != Window.CONTENT_SCALE_MODE_VIEWPORT:
+		window.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
+	var render_size := Vector2i(pixels * ratio)
+	if window.content_scale_size != render_size:
+		window.content_scale_size = render_size
+	_layout_panel.call_deferred()
+
+
+func _toggle_mobile_chat() -> void:
+	chat_panel.visible = not chat_panel.visible
+
+
+func _layout_panel() -> void:
+	if not is_instance_valid(panel_scroll):
+		return
+	var available := get_viewport_rect().size - Vector2(32, 32)
+	var content := panel_scroll.get_child(0) as Control
+	panel_scroll.custom_minimum_size = Vector2(minf(float(panel_scroll.get_meta("width")), available.x), minf(content.get_combined_minimum_size().y, available.y))
 
 
 func toast(text: String, seconds := 3.5) -> void:
@@ -156,7 +225,9 @@ func toast(text: String, seconds := 3.5) -> void:
 
 
 func _clear_panels() -> void:
+	panel_scroll = null
 	for c in panel_holder.get_children():
+		panel_holder.remove_child(c)
 		c.queue_free()
 
 
@@ -164,28 +235,37 @@ func _panel(title: String, width := 520.0) -> VBoxContainer:
 	_clear_panels()
 	var shade := ColorRect.new()
 	shade.color = Color(0, 0, 0, 0.35)
-	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel_holder.add_child(shade)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new()
+	panel_holder.add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var p := PanelContainer.new()
-	p.set_anchors_preset(Control.PRESET_CENTER)
-	p.custom_minimum_size = Vector2(width, 0)
-	p.position = Vector2(-width * 0.5, -230)
-	panel_holder.add_child(p)
+	p.name = "Dialog"
+	center.add_child(p)
+	panel_scroll = ScrollContainer.new()
+	panel_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	panel_scroll.set_meta("width", width)
+	p.add_child(panel_scroll)
 	var box := VBoxContainer.new()
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_theme_constant_override("separation", 8)
-	p.add_child(box)
+	panel_scroll.add_child(box)
 	var head := HBoxContainer.new()
 	box.add_child(head)
 	var l := Label.new(); l.text = title; l.add_theme_font_size_override("font_size", 20)
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(l)
 	var x := Button.new(); x.text = "关闭"; x.pressed.connect(_clear_panels); head.add_child(x)
+	_layout_panel.call_deferred()
 	return box
 
 
 func _add_button(box: Control, text: String, cb: Callable, name := "") -> Button:
 	var b := Button.new()
 	b.text = text
+	if mobile:
+		b.custom_minimum_size.y = 40
 	if name != "":
 		b.name = name
 	b.pressed.connect(cb)
@@ -199,7 +279,7 @@ func _open_setup() -> void:
 	var info := Label.new()
 	info.text = "OC 原图只保存在这台设备的浏览器中。联机时服务器只临时转发一份缩小的展示副本给同一空间的玩家，不建立素材库。"
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	info.custom_minimum_size = Vector2(520, 0)
+	info.custom_minimum_size = Vector2(minf(520, get_viewport_rect().size.x - 64), 0)
 	box.add_child(info)
 	var nick := LineEdit.new()
 	nick.name = "Nick"
@@ -207,16 +287,22 @@ func _open_setup() -> void:
 	nick.max_length = 16
 	nick.text = Profile.nick
 	box.add_child(nick)
+	if mobile:
+		_add_button(box, "输入昵称", func():
+			var value = WebBridge.prompt_text("输入昵称（1–16 字）", nick.text)
+			if value != null:
+				nick.text = str(value).strip_edges().substr(0, 16)
+				Profile.nick = nick.text, "NativeNick")
 	var preview := TextureRect.new()
 	preview.custom_minimum_size = Vector2(160, 200)
 	preview.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	preview.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	preview.texture = LabWorld.texture_from_png(Profile.oc_png) if Profile.oc_png.size() > 0 else null
 	box.add_child(preview)
-	var row := HBoxContainer.new()
+	var row: BoxContainer = VBoxContainer.new() if mobile else HBoxContainer.new()
 	box.add_child(row)
-	_add_button(row, "上传透明底 PNG / WebP", func(): _pick_oc(preview), "Upload")
-	_add_button(row, "用捏人编辑器", func(): _open_editor(), "Editor")
+	_add_button(row, "上传透明底 PNG / WebP", func(): Profile.nick = nick.text.strip_edges(); _pick_oc(preview), "Upload")
+	_add_button(row, "用捏人编辑器", func(): Profile.nick = nick.text.strip_edges(); _open_editor(), "Editor")
 	var go := _add_button(box, "进入会馆", func():
 		var n := nick.text.strip_edges()
 		if n == "":
@@ -283,7 +369,7 @@ func _open_editor() -> void:
 	_clear_panels()
 	editor = load("res://scripts/avatar_editor.gd").new()
 	panel_holder.add_child(editor)
-	editor.setup(font, Profile.editor_config)
+	editor.setup(font, Profile.editor_config, mobile)
 	editor.finished.connect(func(png, cfg):
 		Profile.editor_config = cfg
 		Profile.set_oc(png, "editor")
@@ -302,8 +388,13 @@ func _send_profile() -> void:
 
 func _send_oc() -> void:
 	if Profile.oc_png.size() > 0:
-		Net.send({"t": "oc_set", "data": Marshalls.raw_to_base64(Profile.oc_png), "source": Profile.oc_source})
 		world.my_texture = LabWorld.texture_from_png(Profile.oc_png)
+		if world.my_texture == null:
+			toast("形象无法解码，请重新选择图片")
+			return
+		# Keep the original on this device and transmit only the bounded display copy.
+		var display_png := world.my_texture.get_image().save_png_to_buffer()
+		Net.send({"t": "oc_set", "data": Marshalls.raw_to_base64(display_png), "source": Profile.oc_source})
 
 
 # ------------------------------------------------------------------ data panel
@@ -395,6 +486,7 @@ func _render_spaces() -> void:
 func _on_net_state(state: String, detail: String) -> void:
 	match state:
 		"connecting", "reconnecting":
+			welcomed = false
 			status_label.text = "正在连接西木会馆…" if not connected_once else "连接中断，正在重连…"
 			status_label.visible = true
 		"open":
@@ -409,7 +501,10 @@ func _on_net_state(state: String, detail: String) -> void:
 func _on_message(m: Dictionary) -> void:
 	match m.get("t"):
 		"welcome":
+			var first_welcome := not welcomed
 			welcomed = true
+			requested_oc.clear()
+			next_oc_request_at = 0.0
 			status_label.visible = false
 			world.me_pid = m["pid"]
 			world.set_space(m["space"])
@@ -427,7 +522,8 @@ func _on_message(m: Dictionary) -> void:
 			if Profile.nick == "" and m.get("nick", "") != "":
 				Profile.nick = m["nick"]
 			if Profile.has_profile():
-				_send_profile()
+				if first_welcome:
+					_send_profile()
 			else:
 				_open_setup()
 			_refresh_top()
@@ -436,6 +532,7 @@ func _on_message(m: Dictionary) -> void:
 			world.upsert_player(m["player"])
 			_chat_sys("%s 来了" % (m["player"].get("nick", "") if m["player"].get("nick", "") != "" else "一位旅人"))
 		"leave":
+			requested_oc.erase(m["pid"])
 			if world.players.has(m["pid"]):
 				world.players.erase(m["pid"])
 				if m.get("reason") != "replaced":
@@ -468,13 +565,19 @@ func _on_message(m: Dictionary) -> void:
 				target["emote_until"] = Time.get_ticks_msec() / 1000.0 + 2.5
 		"oc_changed":
 			world.oc_digest[m["pid"]] = m["digest"]
+			requested_oc.erase(m["pid"])
 		"oc":
 			var tx := LabWorld.texture_from_png(Marshalls.base64_to_raw(m["png"]))
 			if tx:
 				world.textures[m["digest"]] = tx
 				world.oc_digest[m["pid"]] = m["digest"]
+				requested_oc.erase(m["pid"])
+				if m["pid"] == world.me_pid:
+					world.my_texture = tx
 		"oc_result":
 			if m.get("ok"):
+				world.oc_digest[world.me_pid] = m["digest"]
+				Net.send({"t": "oc_get", "pid": world.me_pid})
 				toast("形象已同步给同一空间的玩家")
 			else:
 				toast("形象没有通过检查：" + str(m.get("reason")))
@@ -589,6 +692,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	if joystick:
+		joystick.visible = welcomed and panel_holder.get_child_count() == 0 and not chat_panel.visible
 	if Time.get_ticks_msec() / 1000.0 > toast_until:
 		toast_label.text = ""
 	if not welcomed:
@@ -601,6 +706,8 @@ func _process(delta: float) -> void:
 		if Input.is_key_pressed(KEY_D): wish.x += 1
 		if Input.is_key_pressed(KEY_W): wish.y -= 1
 		if Input.is_key_pressed(KEY_S): wish.y += 1
+		if joystick and joystick.visible and joystick.direction != Vector2.ZERO:
+			wish = joystick.direction
 	if wish != Vector2.ZERO:
 		move_target = null
 	elif move_target != null:
@@ -611,7 +718,7 @@ func _process(delta: float) -> void:
 			wish = to
 	var moving := wish.length() > 0.01
 	if moving:
-		var step := wish.normalized() * SPEED * minf(delta, 0.1)
+		var step := wish.limit_length(1.0) * SPEED * minf(delta, 0.1)
 		var from := Vector2(world.me["x"], world.me["z"])
 		var nxt := world.step_toward(from, step)
 		if nxt == from:
@@ -623,17 +730,23 @@ func _process(delta: float) -> void:
 		world.me["anim"] = "idle"
 	send_timer += delta
 	var cur := Vector3(world.me["x"], world.me["z"], world.me["dir"])
-	if send_timer >= 1.0 / SEND_HZ and cur.distance_to(last_sent) > 0.01:
+	if send_timer >= 1.0 / SEND_HZ and (cur.distance_to(last_sent) > 0.01 or world.me["anim"] != last_anim):
 		send_timer = 0.0
 		seq += 1
 		last_sent = cur
+		last_anim = world.me["anim"]
 		Net.send({"t": "move", "x": snappedf(cur.x, 0.001), "z": snappedf(cur.y, 0.001), "dir": snappedf(cur.z, 0.01), "anim": world.me["anim"], "seq": seq})
 	world.interpolate()
-	for pid in world.players:
-		var d = world.oc_digest.get(pid, null)
-		if d != null and not world.textures.has(d) and requested_oc.get(pid, "") != d:
-			requested_oc[pid] = d
-			Net.send({"t": "oc_get", "pid": pid})
+	var now := Time.get_ticks_msec() / 1000.0
+	if Net.state == "open" and now >= next_oc_request_at:
+		for pid in world.players:
+			var digest = world.oc_digest.get(pid, null)
+			var request: Dictionary = requested_oc.get(pid, {})
+			if digest != null and not world.textures.has(digest) and (request.get("digest") != digest or now >= float(request.get("retry_at", 0.0))):
+				requested_oc[pid] = {"digest": digest, "retry_at": now + maxf(3.0, Net.rtt_ms / 500.0)}
+				next_oc_request_at = now + 0.2
+				Net.send({"t": "oc_get", "pid": pid})
+				break
 	near_object = ""
 	for o in world.template.get("objects", []):
 		if Vector2(world.me["x"], world.me["z"]).distance_to(Vector2(o["position"][0], o["position"][2])) <= float(o["radius"]):
@@ -646,6 +759,24 @@ func _process(delta: float) -> void:
 
 
 # ------------------------------------------------------------------ scripted input (automated tests)
+func _ui_rect(name: String) -> Array:
+	var node := find_child(name, true, false)
+	if node is Window and node.visible:
+		return [node.position.x, node.position.y, node.size.x, node.size.y]
+	var control := node as Control
+	if control == null or not control.is_visible_in_tree():
+		return []
+	var rect := control.get_global_rect()
+	var ancestor := control.get_parent()
+	while ancestor:
+		if ancestor is Control and ancestor.clip_contents:
+			rect = rect.intersection(ancestor.get_global_rect())
+		ancestor = ancestor.get_parent()
+	if not rect.has_area():
+		return []
+	return [rect.position.x, rect.position.y, rect.size.x, rect.size.y]
+
+
 func _run_auto(delta: float) -> void:
 	if watch_every > 0.0:
 		watch_t -= delta
@@ -700,12 +831,19 @@ func _run_auto(delta: float) -> void:
 			_send_profile()
 		"report":
 			var seen := {}
+			var controls := {}
+			for name in ["Dialog", "AvatarDialog", "NativeNick", "Editor", "UseAvatar", "Enter", "Choice_hair", "Choice_outfit", "Menu_hair", "Menu_outfit", "TouchPad", "Landscape"]:
+				controls[name] = _ui_rect(name)
 			for pid in world.players:
 				var p: Dictionary = world.players[pid]
+				var texture := world.texture_for(pid)
 				seen[pid] = {"nick": p.get("nick", ""), "x": snappedf(p["x"], 0.01), "z": snappedf(p["z"], 0.01),
-					"has_oc_texture": world.texture_for(pid) != null}
+					"has_oc_texture": texture != null, "texture_size": [texture.get_width(), texture.get_height()] if texture else []}
 			print("LABSTATE " + JSON.stringify({"pid": world.me_pid, "space": world.space.get("id", ""),
 				"me": {"x": snappedf(world.me["x"], 0.01), "z": snappedf(world.me["z"], 0.01)}, "players": seen,
 				"view": Profile.view_mode, "npcs": world.npc_view.size(), "clock": world.clock,
 				"objects": world.objects, "chat": chat_log.get_parsed_text().right(300), "nick": Profile.nick,
-				"oc_bytes": Profile.oc_png.size(), "fps": Engine.get_frames_per_second(), "rtt": Net.rtt_ms}))
+				"oc_bytes": Profile.oc_png.size(), "fps": Engine.get_frames_per_second(), "rtt": Net.rtt_ms,
+				"mobile": mobile, "viewport_size": [get_viewport_rect().size.x, get_viewport_rect().size.y],
+				"texture_size": [world.my_texture.get_width(), world.my_texture.get_height()] if world.my_texture else [],
+				"editor_config": Profile.editor_config, "controls": controls}))

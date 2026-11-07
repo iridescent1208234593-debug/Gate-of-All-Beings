@@ -2,8 +2,45 @@ extends Node
 ## Browser integration (file picker, downloads, logout). Desktop builds use FileDialog instead.
 
 signal file_picked(name: String, data: PackedByteArray)
+signal orientation_result(ok: bool, detail: String)
 
 var _cb = null
+var _orientation_cb = null
+
+
+func is_mobile() -> bool:
+	if is_web():
+		var lab = JavaScriptBridge.get_interface("zszmLab")
+		return lab != null and bool(lab.isMobile())
+	return OS.has_feature("android") or OS.has_feature("ios")
+
+
+func viewport_size() -> Vector2i:
+	if is_web():
+		var browser = JavaScriptBridge.get_interface("window")
+		return Vector2i(int(browser.innerWidth), int(browser.innerHeight))
+	return get_window().size
+
+
+func prompt_text(title: String, initial: String):
+	if is_web():
+		var lab = JavaScriptBridge.get_interface("zszmLab")
+		if lab:
+			return lab.promptText(title, initial)
+	return null
+
+
+func landscape() -> void:
+	if is_web():
+		var lab = JavaScriptBridge.get_interface("zszmLab")
+		if lab:
+			_orientation_cb = JavaScriptBridge.create_callback(_on_orientation)
+			lab.landscape(_orientation_cb)
+
+
+func _on_orientation(args: Array) -> void:
+	if args.size() >= 2:
+		orientation_result.emit(bool(args[0]), str(args[1]))
 
 
 func is_web() -> bool:

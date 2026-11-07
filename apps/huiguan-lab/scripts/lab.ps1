@@ -37,10 +37,15 @@ switch ($Command) {
     'start' {
         $c = Cfg
         if (Running $c) { Write-Host 'LAB 已在运行，不会重复启动。'; break }
-        $p = Start-Process -FilePath $Pyw -ArgumentList @('-B', (Join-Path $Server 'supervisor.py')) -WorkingDirectory $Server -WindowStyle Hidden -PassThru
+        # Launch through WMI so the LAB does not live inside the caller's job object: a terminal,
+        # IDE or agent session that closes would otherwise take the whole LAB down with it.
+        $cmdline = '"' + $Pyw + '" -B "' + (Join-Path $Server 'supervisor.py') + '"'
+        $r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = $cmdline; CurrentDirectory = $Server }
+        if ($r.ReturnValue -ne 0) { throw "无法启动监督进程（Win32_Process.Create 返回 $($r.ReturnValue)）" }
+        $p = Get-Process -Id $r.ProcessId -ErrorAction SilentlyContinue
         $deadline = (Get-Date).AddSeconds(60)
         while (!(Health $c)) {
-            if ($p.HasExited) { throw "LAB 启动失败，查看 $($c.runtime)\logs\supervisor.log" }
+            if (!$p -or $p.HasExited) { throw "LAB 启动失败，查看 $($c.runtime)\logs\supervisor.log" }
             if ((Get-Date) -gt $deadline) { throw "LAB 60 秒内未就绪，查看 $($c.runtime)\logs" }
             Start-Sleep -Milliseconds 500
         }
@@ -67,6 +72,7 @@ switch ($Command) {
         $c = Cfg
         $s = State $c
         Write-Host ('运行中: ' + (Running $c) + '   网关健康: ' + (Health $c))
+        if ($s -and !(Running $c)) { Write-Host '（下列进程状态是上次运行留下的记录，监督进程已不在：LAB 被外部结束，需要重新 Start-LAB）' }
         if ($s) { $s.children.PSObject.Properties | ForEach-Object { '{0,-8} alive={1} failed={2} restarts={3} last_exit={4}' -f $_.Name, $_.Value.alive, $_.Value.failed, $_.Value.restarts, $_.Value.last_exit } }
         & $Py -B (Join-Path $Server 'labctl.py') status
         $task = Get-ScheduledTask -TaskName 'ZSZM-LAB-V2' -ErrorAction SilentlyContinue
