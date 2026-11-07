@@ -1,0 +1,39 @@
+# FRPC on A (Hong Kong production). Outbound only; publishes the read-only agent and nothing else.
+# Hong Kong's SSH (38073), nginx, the runtime service and every database stay exactly where they are:
+# no proxy here points at them. The existing Cloudflare Tunnel is not touched.
+
+user = "hk"
+serverAddr = "{{FRPS_PUBLIC_HOST}}"
+serverPort = {{FRPS_PUBLIC_PORT}}
+loginFailExit = false
+
+auth.method = "token"
+auth.token = "{{FRP_AUTH_TOKEN}}"
+auth.additionalScopes = ["HeartBeats", "NewWorkConns"]
+
+transport.protocol = "tcp"
+transport.tls.enable = true
+transport.tls.certFile = "{{PKI_DIR}}/frpc-hk.crt"
+transport.tls.keyFile = "{{PKI_DIR}}/frpc-hk.key"
+transport.tls.trustedCaFile = "{{PKI_DIR}}/ca.crt"
+transport.tls.serverName = "frps.ops.iridescently.internal"
+transport.heartbeatInterval = 30
+transport.heartbeatTimeout = 90
+
+webServer.addr = "127.0.0.1"
+webServer.port = 7400
+webServer.user = "admin"
+webServer.password = "{{FRPC_HK_ADMIN_PASSWORD}}"
+
+log.to = "{{FRP_LOG_DIR}}/frpc.log"
+log.level = "info"
+log.maxDays = 14
+
+[[proxies]]
+name = "agent"
+type = "stcp"
+secretKey = "{{STCP_KEY_HK_AGENT}}"
+allowUsers = ["ops-b"]
+localIP = "127.0.0.1"
+localPort = 18410
+transport.useEncryption = true

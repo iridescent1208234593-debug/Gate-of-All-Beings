@@ -1,0 +1,41 @@
+# FRPC on C (Windows workstation). Connects out to B; exposes nothing on any public port.
+# Proxies are STCP: only a visitor that knows secretKey AND is user "ops-b" can reach them.
+# By default C publishes ONLY its read-only agent. SSH to C is opt-in: see templates/optional/pc-ssh.md.
+
+user = "pc"
+serverAddr = "{{FRPS_PUBLIC_HOST}}"
+serverPort = {{FRPS_PUBLIC_PORT}}
+loginFailExit = false              # keep retrying when B is down or the network drops
+
+auth.method = "token"
+auth.token = "{{FRP_AUTH_TOKEN}}"
+auth.additionalScopes = ["HeartBeats", "NewWorkConns"]
+
+transport.protocol = "tcp"
+transport.tls.enable = true
+transport.tls.certFile = "{{PKI_DIR}}/frpc-pc.crt"
+transport.tls.keyFile = "{{PKI_DIR}}/frpc-pc.key"
+transport.tls.trustedCaFile = "{{PKI_DIR}}/ca.crt"    # verifies B's certificate: a fake FRPS is refused
+transport.tls.serverName = "frps.ops.iridescently.internal"
+transport.heartbeatInterval = 30
+transport.heartbeatTimeout = 90
+
+# Local admin API, read by the C agent for proxy status. Loopback only.
+webServer.addr = "127.0.0.1"
+webServer.port = 7400
+webServer.user = "admin"
+webServer.password = "{{FRPC_PC_ADMIN_PASSWORD}}"
+
+log.to = "{{FRP_LOG_DIR}}/frpc.log"
+log.level = "info"
+log.maxDays = 14
+
+# Read-only ops agent of C (LAB V2 status comes through it; LAB's own ports are not exposed).
+[[proxies]]
+name = "agent"
+type = "stcp"
+secretKey = "{{STCP_KEY_PC_AGENT}}"
+allowUsers = ["ops-b"]
+localIP = "127.0.0.1"
+localPort = 18410
+transport.useEncryption = true

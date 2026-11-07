@@ -1,0 +1,29 @@
+# A (Hong Kong) only. Outbound FRPC publishing the read-only agent as STCP. Touches no production unit.
+[Unit]
+Description=Iridescently ops FRPC (Hong Kong, outbound only)
+After=network-online.target iridescently-ops-agent.service
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+User=iridescently-ops
+Group=iridescently-ops
+ExecStartPre=/opt/iridescently-ops/frp/frpc verify -c /etc/iridescently-ops/frp/frpc-hk.toml
+ExecStart=/opt/iridescently-ops/frp/frpc -c /etc/iridescently-ops/frp/frpc-hk.toml
+Restart=on-failure
+RestartSec=2
+RestartSteps=4
+RestartMaxDelaySec=30
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/log/iridescently-ops
+CapabilityBoundingSet=
+# Never let ops traffic compete with production: small CPU and memory ceilings.
+CPUQuota=10%
+MemoryMax=128M
+
+[Install]
+WantedBy=multi-user.target

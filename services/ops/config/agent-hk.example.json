@@ -1,0 +1,26 @@
+{
+  "_comment": "A (Hong Kong production). Installed to /etc/iridescently-ops/agent.json, owned root:iridescently-ops 0640. Runs as the unprivileged user iridescently-ops: no sudo, no control command, no write anywhere except its own log. Paths marked VERIFY must be confirmed against the live server before install.",
+  "node": "hk",
+  "label": "Hong Kong A (production)",
+  "listen": "127.0.0.1:18410",
+  "interval_s": 20,
+  "readers_file": "/etc/iridescently-ops/agent-readers.json",
+  "disks": ["/", "/srv/iridescently"],
+  "ports": [
+    {"name": "runtime-8080", "port": 8080},
+    {"name": "nginx-443", "port": 443}
+  ],
+  "processes": ["cloudflared", "nginx", "frpc"],
+  "systemd": ["iridescently-runtime.service", "nginx.service", "cloudflared.service", "iridescently-ops-frpc.service"],
+  "frpc": {"url": "http://127.0.0.1:7400", "user": "admin", "password_file": "/etc/iridescently-ops/frp/frpc-admin-password.txt"},
+  "hk_release": {"control_config": "/srv/iridescently/control/next.json", "_comment": "read with the agent's own user; the files must be world- or group-readable (VERIFY)"},
+  "logs": [
+    {"path": "/var/log/iridescently-ops/frpc.log", "patterns": ["\\[E\\]", "login to server failed"]}
+  ],
+  "databases": [
+    {"path": "/srv/iridescently/runtime/production/data/huiguan/users.db", "stat_only": true, "_comment": "VERIFY path; size and mtime only, the file is never opened"}
+  ],
+  "backups": [
+    {"name": "production", "dir": "/srv/iridescently/runtime/production/backups", "max_age_hours": 26, "_comment": "VERIFY"}
+  ]
+}

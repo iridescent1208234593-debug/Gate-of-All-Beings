@@ -1,0 +1,36 @@
+# FRPS on B (ops server). Official frp v0.71.1, TOML. Rendered by infra/frp/render.py; the rendered file
+# lives in <secrets>/ops-frp/rendered/ and never in Git.
+#
+# Port facts to verify before go-live (docs/operations/three-node-ops.md, "B 端口映射核验"):
+#   public 8.148.14.4:55404  --(provider NAT, NOT yet verified)-->  B:4000 (bindPort below)
+
+bindAddr = "0.0.0.0"
+bindPort = {{FRPS_BIND_PORT}}
+
+# Clients prove themselves twice: the shared token and a client certificate signed by our own CA.
+auth.method = "token"
+auth.token = "{{FRP_AUTH_TOKEN}}"
+auth.additionalScopes = ["HeartBeats", "NewWorkConns"]
+
+transport.tls.force = true
+transport.tls.certFile = "{{PKI_DIR}}/frps.crt"
+transport.tls.keyFile = "{{PKI_DIR}}/frps.key"
+transport.tls.trustedCaFile = "{{PKI_DIR}}/ca.crt"
+transport.maxPoolCount = 5
+transport.tcpMux = true
+
+# Only STCP is used. Any TCP/UDP proxy a client might still register binds to B's loopback, never to a
+# public interface, and only one unprivileged port is allowed at all.
+proxyBindAddr = "127.0.0.1"
+allowPorts = [{ single = 17999 }]
+maxPortsPerClient = 1
+
+# Dashboard / admin API: loopback only, password from secrets. Reach it with ssh -L 7500:127.0.0.1:7500 B.
+webServer.addr = "127.0.0.1"
+webServer.port = 7500
+webServer.user = "admin"
+webServer.password = "{{FRPS_DASHBOARD_PASSWORD}}"
+
+log.to = "{{FRP_LOG_DIR}}/frps.log"
+log.level = "info"
+log.maxDays = 14

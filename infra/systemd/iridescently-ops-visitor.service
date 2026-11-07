@@ -1,0 +1,25 @@
+# B only. FRPC in visitor role: STCP visitors on 127.0.0.1:12410/12411 (12022 only if C SSH is opted in).
+[Unit]
+Description=Iridescently ops FRP visitors (B)
+After=iridescently-ops-frps.service
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+User=iridescently-ops
+Group=iridescently-ops
+ExecStartPre=/opt/iridescently-ops/frp/frpc verify -c /etc/iridescently-ops/frp/frpc-b-visitor.toml
+ExecStart=/opt/iridescently-ops/frp/frpc -c /etc/iridescently-ops/frp/frpc-b-visitor.toml
+Restart=on-failure
+RestartSec=2
+RestartSteps=4
+RestartMaxDelaySec=30
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/log/iridescently-ops
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

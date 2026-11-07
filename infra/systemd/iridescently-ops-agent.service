@@ -1,0 +1,26 @@
+# A and B. Read-only agent on 127.0.0.1:18410. Unprivileged, no sudo; executes only `systemctl show/is-active`.
+[Unit]
+Description=Iridescently ops read-only agent
+After=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+User=iridescently-ops
+Group=iridescently-ops
+WorkingDirectory=/opt/iridescently-ops/services/ops
+ExecStart=/usr/bin/python3 -B -m opsnode.agent --config /etc/iridescently-ops/agent.json
+Restart=on-failure
+RestartSec=2
+RestartSteps=4
+RestartMaxDelaySec=30
+NoNewPrivileges=yes
+ProtectSystem=strict
+CapabilityBoundingSet=
+ProtectHome=yes
+PrivateTmp=yes
+CPUQuota=10%
+MemoryMax=128M
+
+[Install]
+WantedBy=multi-user.target

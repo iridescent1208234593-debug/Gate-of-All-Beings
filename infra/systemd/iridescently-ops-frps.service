@@ -1,0 +1,27 @@
+# B only. Official frp v0.71.1 FRPS on 0.0.0.0:4000 (provider maps public 55404 -> 4000; verify first).
+[Unit]
+Description=Iridescently ops FRPS (B)
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=5
+
+[Service]
+User=iridescently-ops
+Group=iridescently-ops
+ExecStartPre=/opt/iridescently-ops/frp/frps verify -c /etc/iridescently-ops/frp/frps.toml
+ExecStart=/opt/iridescently-ops/frp/frps -c /etc/iridescently-ops/frp/frps.toml
+Restart=on-failure
+RestartSec=2
+RestartSteps=4
+RestartMaxDelaySec=30
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/log/iridescently-ops
+CapabilityBoundingSet=
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

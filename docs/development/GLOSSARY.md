@@ -61,6 +61,9 @@
 ### Legal Version / Legal Consent（条款版本 / 同意记录）
 《用户须知》（`apps/huiguan/terms.html`）与《隐私政策》（`apps/huiguan/privacy.html`）作为一组发布，共用一个版本号 `legal_version`（日期字符串，如 `2026-11-06`），唯一来源是 `services/platform/legal_consent.py` 的 `CURRENT_VERSION`，两页的 `data-legal-version` 由测试保持一致。Legal Consent 是某个 Account `(kind, uid)` 同意了某个版本的记录，存在 `legal_consents(kind, uid, legal_version, context, accepted_at)`，每个版本一行、首次同意为准，`context` 是 `register` / `oc-submit` / `fan-publish` / `account` / `reconsent` / `other`。注册必须同意当前版本；已登录但未同意当前版本的账号在会馆各页只能同意或退出登录，上传 / 发布类接口（`LEGAL_GATED_POSTS`）返回 403 `legal_consent_required`。文本实质修改时升版本号，所有账号需要重新同意。它不是站点公告（`infra/site-notice`），也不是 Cookie 偏好。
 
+### Ops Node / Ops Agent / Ops Hub（运维节点 / 只读 Agent / 汇总后端）
+三服务器运维里的节点固定为三个代号：`hk`（A，香港正式生产）、`b`（B，运维服务器，运行 FRPS 与 Hub）、`pc`（C，Windows 本机，LAB V2）。Ops Agent 是每个节点上只绑 127.0.0.1 的只读进程（`services/ops/opsnode/agent.py`，`GET /v1/status`，Bearer 令牌），Ops Hub 是 B 上汇总三节点状态的只读 API（`services/ops/opsnode/hub.py`）。节点代号只用于运维，与 Account、Release、域名根（xyz/cn/dpdns）无关。详见 `docs/three-node-ops.md`。
+
 ### Compatibility Alias
 为兼容旧客户端、旧数据库字段或历史接口而保留的名称。Alias 不代表推荐的新代码命名。
 

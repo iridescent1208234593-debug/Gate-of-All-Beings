@@ -1,0 +1,34 @@
+{
+  "_comment": "C (Windows). Copy to <workspace>/secrets/ops/agent-pc.json and adjust. Run with LAB's venv python (has psutil for network rates).",
+  "node": "pc",
+  "label": "Windows C (LAB V2)",
+  "listen": "127.0.0.1:18410",
+  "interval_s": 15,
+  "readers_file": "E:/Iridescently/secrets/ops/agent-readers.json",
+  "disks": ["C:/", "E:/"],
+  "ports": [
+    {"name": "lab-gateway", "port": 18300},
+    {"name": "lab-r4", "port": 18301},
+    {"name": "lab-admin", "port": 18302}
+  ],
+  "processes": ["cloudflared", "frpc"],
+  "frpc": {"url": "http://127.0.0.1:7400", "user": "admin", "password_file": "E:/Iridescently/secrets/ops-frp/frpc-pc-admin-password.txt"},
+  "logs": [
+    {"path": "E:/Iridescently/labs/zszm-lab-v2-runtime/logs/gateway.log"},
+    {"path": "E:/Iridescently/labs/zszm-lab-v2-runtime/logs/supervisor.log", "patterns": ["FAILED", "exited code=[1-9]"]},
+    {"path": "E:/Iridescently/runtime/ops/logs/frpc.log", "patterns": ["\\[E\\]", "login to server failed"]}
+  ],
+  "databases": [
+    {"path": "E:/Iridescently/labs/zszm-lab-v2-runtime/data/lab.sqlite"},
+    {"path": "E:/Iridescently/labs/zszm-lab-v2-runtime/r4/world.sqlite"}
+  ],
+  "backups": [
+    {"name": "lab-v2", "dir": "E:/Iridescently/labs/zszm-lab-v2-runtime/backups", "max_age_hours": 48}
+  ],
+  "version": {"files": ["E:/Iridescently/labs/zszm-lab-v2/build/web/build-info.json"]},
+  "lab": {
+    "base": "http://127.0.0.1:18300",
+    "supervisor_json": "E:/Iridescently/labs/zszm-lab-v2-runtime/state/supervisor.json",
+    "monitor_code_file": "E:/Iridescently/secrets/lab-v2/ops-monitor-code.txt"
+  }
+}

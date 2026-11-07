@@ -95,9 +95,11 @@ def main():
                             "error": "missing: " + ", ".join(missing)})
 
         # Separate processes avoid modules leaking import caches/environment fixtures.
-        for directory in (ROOT / "services/platform/tests", ROOT / "apps/huiguan/tests", ROOT / "apps/cards/tests"):
+        for directory in (ROOT / "services/platform/tests", ROOT / "apps/huiguan/tests", ROOT / "apps/cards/tests",
+                          ROOT / "services/ops/tests"):
             for file in sorted(directory.glob("test_*.py")):
                 run(str(file.relative_to(ROOT)), [sys.executable, "-X", "utf8", str(file)])
+        run("FRP config security invariants", [sys.executable, "-X", "utf8", "infra/frp/render.py", "check"])
         node = shutil.which("node") or "node"
         run("release boundary and hash contracts", [node, "tools/release/test-release-artifacts.mjs"])
         publisher_check = ROOT / "tools/release/test-publish-release.mjs"

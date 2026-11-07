@@ -44,6 +44,10 @@ python tools/runtime/local-runtime.py status | stop
 
 线上热修复必须同时进入 trunk，规则见 [分支策略](development/BRANCH_STRATEGY.md)。
 
+## 三服务器只读运维
+
+香港 A、运维服务器 B、本机 C 之间的 FRP 互联与只读监控见 [three-node-ops.md](three-node-ops.md)。第一阶段只读，未部署；B 与香港的安装需要负责人逐项批准。
+
 ## 数据维护
 
 - 持久数据在外部 data 根（`<data>/huiguan/users.db`、`<data>/juling/` 等），不在源码树。一致性快照：`python tools/runtime/backup-storage.py snapshot`；校验：`… verify <快照目录>`。

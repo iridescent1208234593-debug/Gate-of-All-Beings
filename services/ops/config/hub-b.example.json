@@ -1,0 +1,13 @@
+{
+  "_comment": "B: /etc/iridescently-ops/hub.json. Each node has its own token file; the agent stores only the digest.",
+  "listen": "127.0.0.1:18420",
+  "interval_s": 20,
+  "state_dir": "/var/lib/iridescently-ops/hub",
+  "readers_file": "/etc/iridescently-ops/hub-readers.json",
+  "frps": {"url": "http://127.0.0.1:7500", "user": "admin", "password_file": "/etc/iridescently-ops/frp/frps-dashboard-password.txt"},
+  "nodes": [
+    {"name": "hk", "label": "香港 A（生产）", "url": "http://127.0.0.1:12411", "token_file": "/etc/iridescently-ops/tokens/hk.token"},
+    {"name": "b",  "label": "运维 B", "url": "http://127.0.0.1:18410", "token_file": "/etc/iridescently-ops/tokens/b.token"},
+    {"name": "pc", "label": "本机 C（LAB V2）", "url": "http://127.0.0.1:12410", "token_file": "/etc/iridescently-ops/tokens/pc.token"}
+  ]
+}

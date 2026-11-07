@@ -1,0 +1,22 @@
+{
+  "_comment": "B (ops server). /etc/iridescently-ops/agent.json. Watches FRPS, the visitor and the hub on the same machine.",
+  "node": "b",
+  "label": "Ops server B",
+  "listen": "127.0.0.1:18410",
+  "interval_s": 15,
+  "readers_file": "/etc/iridescently-ops/agent-readers.json",
+  "disks": ["/"],
+  "ports": [
+    {"name": "frps-4000", "port": 4000},
+    {"name": "frps-dashboard", "port": 7500},
+    {"name": "visitor-pc-agent", "port": 12410},
+    {"name": "visitor-hk-agent", "port": 12411},
+    {"name": "hub", "port": 18420}
+  ],
+  "systemd": ["iridescently-ops-frps.service", "iridescently-ops-visitor.service", "iridescently-ops-hub.service"],
+  "frpc": {"url": "http://127.0.0.1:7401", "user": "admin", "password_file": "/etc/iridescently-ops/frp/frpc-admin-password.txt"},
+  "logs": [
+    {"path": "/var/log/iridescently-ops/frps.log", "patterns": ["\\[E\\]", "authorization failed", "tls"]},
+    {"path": "/var/log/iridescently-ops/frpc-visitor.log", "patterns": ["\\[E\\]"]}
+  ]
+}

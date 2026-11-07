@@ -1,0 +1,50 @@
+# FRPC (visitor role) on B, next to FRPS. Turns the remote STCP proxies into B-loopback ports for the hub.
+# Every bindAddr is 127.0.0.1: nothing here listens on B's public interface.
+#
+#   (127.0.0.1:12022 -> C OpenSSH 22 is opt-in, templates/optional/pc-ssh.md)
+#   127.0.0.1:12410  -> C ops agent
+#   127.0.0.1:12411  -> A ops agent
+
+user = "ops-b"
+serverAddr = "127.0.0.1"
+serverPort = {{FRPS_BIND_PORT}}
+loginFailExit = false
+
+auth.method = "token"
+auth.token = "{{FRP_AUTH_TOKEN}}"
+auth.additionalScopes = ["HeartBeats", "NewWorkConns"]
+
+transport.tls.enable = true
+transport.tls.certFile = "{{PKI_DIR}}/frpc-b.crt"
+transport.tls.keyFile = "{{PKI_DIR}}/frpc-b.key"
+transport.tls.trustedCaFile = "{{PKI_DIR}}/ca.crt"
+transport.tls.serverName = "frps.ops.iridescently.internal"
+
+webServer.addr = "127.0.0.1"
+webServer.port = 7401
+webServer.user = "admin"
+webServer.password = "{{FRPC_B_ADMIN_PASSWORD}}"
+
+log.to = "{{FRP_LOG_DIR}}/frpc-visitor.log"
+log.level = "info"
+log.maxDays = 14
+
+[[visitors]]
+name = "pc-agent"
+type = "stcp"
+serverUser = "pc"
+serverName = "agent"
+secretKey = "{{STCP_KEY_PC_AGENT}}"
+bindAddr = "127.0.0.1"
+bindPort = 12410
+transport.useEncryption = true
+
+[[visitors]]
+name = "hk-agent"
+type = "stcp"
+serverUser = "hk"
+serverName = "agent"
+secretKey = "{{STCP_KEY_HK_AGENT}}"
+bindAddr = "127.0.0.1"
+bindPort = 12411
+transport.useEncryption = true
