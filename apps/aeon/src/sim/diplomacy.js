@@ -378,12 +378,6 @@ export class Diplomacy {
       war.exhaust += EXHAUST_RATE;
       this.addGrievance(sim, a, b, WAR_GRIEVANCE);
       this.addGrievance(sim, b, a, WAR_GRIEVANCE);
-      // A war involving the player is player-authored: weariness still accrues
-      // (so the chronicle / UI can show it) but exhaustion must never force a
-      // peace on them. Only the player, or a wiped-out nation, ends such a war.
-      // AI<->AI wars keep both auto-peace paths below. Mirrors the isPlayer
-      // gate in the stance-drift loop (step 3).
-      if (A.isPlayer || B.isPlayer) continue;
       const pAB = this.warPressure(sim, A, B);
       const pBA = this.warPressure(sim, B, A);
       if ((pAB < PEACE_FLOOR && pBA < PEACE_FLOOR) || war.exhaust >= EXHAUST_CAP) {
