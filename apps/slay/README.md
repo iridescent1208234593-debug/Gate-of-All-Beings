@@ -1,5 +1,7 @@
 # Slay the Web
 
+新成员完整环境、依赖安装、启动/停止和 Issue #72 实测矩阵见[本地开发环境与启动矩阵](../../docs/development/local-onboarding.md)。
+
 This is a browser-based card game and engine based on Slay The Spire, a fantastic video game designed by [MegaCrit](https://www.megacrit.com/):
 
 > We fused card games and roguelikes together to make the best single player deckbuilder we could. Craft a unique deck, encounter bizarre creatures, discover relics of immense power, and Slay the Spire!

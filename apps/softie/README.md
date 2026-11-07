@@ -1,5 +1,7 @@
 # softie · 软乎乎。
 
+新成员完整环境、`TEST_URL` 隔离规则、启动/停止和 Issue #72 实测矩阵见[本地开发环境与启动矩阵](../../docs/development/local-onboarding.md)。
+
 <p align="center">
   <img src="docs/images/promo-poster.png" alt="softie · 软乎乎" width="520" />
 </p>

@@ -54,6 +54,8 @@ docs/       构建发布文档与维护索引
 
 ### 本地开发
 
+新成员请先阅读[本地开发环境与启动矩阵](docs/development/local-onboarding.md)，其中包含 Node 22 / Python 3.12、非生产存储、Portal/Cards/会馆/独立游戏启动、停止、失败矩阵与脱敏实测日志。
+
 ```powershell
 # 克隆仓库
 git clone https://github.com/iridescent1208234593-debug/Gate-of-All-Beings.git

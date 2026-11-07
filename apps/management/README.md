@@ -11,6 +11,8 @@ AIGC:
 
 # 灵境会馆（Lingjing Huiguan）
 
+新成员完整环境、非生产存储、启动/停止命令和实测矩阵见[本地开发环境与启动矩阵](../../docs/development/local-onboarding.md)。
+
 《罗小黑战记》世界观 · 灵质空间经营模拟（网页端 Demo）
 
 ## 技术栈
