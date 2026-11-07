@@ -1,0 +1,48 @@
+name: AEON
+
+# AEON is a zero-dependency, no-build browser app: its simulation core is
+# plain JavaScript, so the regression tests need no install step and run on a
+# bare Node runtime.
+#
+# This workflow exists so that every pull request touching AEON proves its
+# fix with the SAME command a reviewer can run locally:
+#
+#     cd apps/aeon && npm test
+#
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'apps/aeon/**'
+      - '.github/workflows/aeon.yml'
+  pull_request:
+    paths:
+      - 'apps/aeon/**'
+      - '.github/workflows/aeon.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aeon-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  aeon:
+    name: aeon regression suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Fast signal first: the per-fix regression tests under apps/aeon/test.
+      - name: Regression tests
+        working-directory: apps/aeon
+        run: node --test "test/*.test.mjs"
+      # Then the long world validation: 6000 ticks of a living, evolving sim.
+      - name: Headless world validation
+        working-directory: apps/aeon
+        run: node test/headless.mjs
