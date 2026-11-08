@@ -26,6 +26,16 @@
       return /^(https?:|data:)$/.test(url.protocol) && (url.protocol !== 'data:' || /^data:image\/(png|jpeg|webp|gif);/i.test(value)) ? url.href : '';
     } catch (error) { return ''; }
   }
+  // Fan cards use the 360px WebP thumbnail, like the official cards; data-full keeps the 1600px site version
+  // for the owner-only "查看原图" viewer. Only same-origin preview routes accept the t=1 flag.
+  function thumbURL(value) {
+    try {
+      var url = new URL(value, location.href);
+      if (url.origin !== location.origin || !/^\/api\/(uploads\/preview|image-preview)$/.test(url.pathname)) return value;
+      url.searchParams.set('t', '1');
+      return url.href;
+    } catch (error) { return value; }
+  }
   async function read(url) {
     var response = await fetch(url, { credentials: 'same-origin', signal: controller.signal });
     if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -38,7 +48,7 @@
     var href = type === 'official' ? '/char.html?id=' + encodeURIComponent(character.id)
       : '/show.html?code=' + encodeURIComponent(character.code || '');
     return '<a class="home-character" href="' + href + '"><figure>' +
-      (source ? '<img data-original-image src="' + esc(source) + '" alt="' + esc(character.name) + '" loading="lazy" decoding="async">' : '<span class="character-initial">' + esc((character.name || '档')[0]) + '</span>') +
+      (source ? '<img data-original-image src="' + esc(type === 'official' ? source : thumbURL(source)) + '" data-full="' + esc(source) + '" alt="' + esc(character.name) + '" loading="lazy" decoding="async">' : '<span class="character-initial">' + esc((character.name || '档')[0]) + '</span>') +
       '</figure><span class="character-name">' + esc(character.name) + '</span><small>' + esc(character.user_name || character.species || character.type || '角色档案') + '</small></a>';
   }
   async function loadOfficial(reset) {
