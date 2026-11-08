@@ -15,7 +15,7 @@ CLI: none. Mounted under /api/progress/chains by account_progress.handle.
 """
 import sqlite3
 
-from account_progress import _now, _owner
+from account_progress import _now, _owner, today
 
 
 # Each step reads one metric of one game ("*" = across every game):
@@ -110,6 +110,7 @@ def claim(conn, kind, uid, name, chain_id):
     chain = CHAINS[chain_id]  # KeyError for unknown ids
     kind, uid = _owner(kind, uid)
     name = str(name or "")[:60]
+    day = today()  # 记真实北京日期，让任务链积分进入按天统计（每日额度已排除 chain）
     conn.execute("BEGIN IMMEDIATE")
     try:
         mine = next(c for c in view(conn, kind, uid) if c["id"] == chain_id)
@@ -117,7 +118,7 @@ def claim(conn, kind, uid, name, chain_id):
         if unfinished:
             raise ValueError("任务链还没有完成：%s" % ", ".join(unfinished))
         cur = conn.execute("""INSERT OR IGNORE INTO account_point_events (kind, uid, day, rule, game, amount_x10, ref, created_at)
-            VALUES (?,?,?,?,?,?,?,?)""", (kind, uid, "", CHAIN_RULE, chain_id, chain["reward_x10"],
+            VALUES (?,?,?,?,?,?,?,?)""", (kind, uid, day, CHAIN_RULE, chain_id, chain["reward_x10"],
                                           "chain:" + chain_id, _now()))
         if cur.rowcount == 1:
             conn.execute("""INSERT INTO account_points (kind, uid, points_x10, display_name, updated_at)

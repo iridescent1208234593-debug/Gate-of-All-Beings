@@ -134,6 +134,40 @@ class Claim(unittest.TestCase):
         ledger = self.c.execute("SELECT COUNT(*) FROM account_point_events WHERE rule='chain' AND game='first-steps'").fetchone()[0]
         self.assertEqual(ledger, 1)
 
+    def test_claim_records_the_beijing_day(self):
+        for i, game in enumerate(("slay", "cards", "ecology")):
+            report(self.c, "local", "7", game=game, score=1, finished=True, won=(i == 0), ref=game)
+        tc.claim(self.c, "local", "7", "名七", "first-steps")
+        day = self.c.execute(
+            "SELECT day FROM account_point_events WHERE rule='chain' AND game='first-steps'").fetchone()[0]
+        self.assertEqual(day, ap.today())
+
+    def test_chain_award_does_not_consume_the_daily_cap(self):
+        # Ordinary rewards fill the day's cap first.
+        for g in ap.GAMES:
+            for i in range(10):
+                report(self.c, "local", "7", game=g, score=min(i + 1, ap.GAMES[g]["max"]),
+                       finished=True, won=True, ref=f"{g}{i}")
+        today = ap.today()
+        self.assertEqual(ap._earned_today(self.c, "local", "7", today), ap.DAILY_CAP_X10)
+        before = ap.get_points_x10(self.c, "local", "7")
+        tc.claim(self.c, "local", "7", "名七", "first-steps")
+        self.assertEqual(ap.get_points_x10(self.c, "local", "7"), before + 30)  # first-steps = 30 tenths
+        # The chain row carries a real day yet still leaves the quota untouched.
+        self.assertEqual(self.c.execute(
+            "SELECT day FROM account_point_events WHERE rule='chain'").fetchone()[0], today)
+        self.assertEqual(ap._earned_today(self.c, "local", "7", today), ap.DAILY_CAP_X10)
+        self.assertEqual(ap.summary(self.c, "local", "7")["today"]["earned"], ap.DAILY_CAP_X10 / 10.0)
+
+    def test_backfill_fills_legacy_chain_days(self):
+        self.c.execute("DELETE FROM account_progress_migrations WHERE name=?", (ap.CHAIN_DAY_MIGRATION,))
+        self.c.execute("INSERT INTO account_point_events (kind, uid, day, rule, game, amount_x10, ref, created_at) "
+                       "VALUES ('local','7','','chain','relay',50,'chain:relay','2026-11-07T15:30:00+00:00')")
+        self.assertEqual(ap.backfill_chain_days(self.c), 1)
+        self.assertEqual(self.c.execute(
+            "SELECT day FROM account_point_events WHERE ref='chain:relay'").fetchone()[0], "2026-11-07")
+        self.assertEqual(ap.backfill_chain_days(self.c), 0)  # idempotent
+
     def test_unknown_chain_is_keyerror(self):
         with self.assertRaises(KeyError):
             tc.claim(self.c, "local", "7", "名七", "nope")
