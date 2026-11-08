@@ -70,8 +70,7 @@ function GateFlow() {
       window.dispatchEvent(new Event('gate:install-ready'));
     };
   }, [showBar, profile.resolved, profile.loading, profile.account.logged_in]);
-  // Phones: landscape is forced only while the intro, door or onboarding is on screen; elsewhere
-  // (including the profile loading after a reload) the player's portrait choice stands.
+  // Phones enter a landscape viewport after five seconds. In game, keep the player's portrait choice.
   const inGame = appActive && !creatingNew && profile.resolved && identityComplete(profile.identity);
   const orientation = useOrientationGuard(gateVisible || doorVisible || onboarding ? 'opening' : 'game');
   // Playing keeps the intro window fresh, so a later reload in this tab or soon after lands in the hall.
