@@ -370,10 +370,16 @@ $('modal').addEventListener('click', e => { if (e.target === $('modal')) closeMo
 
 // ====== 卡片 ======
 function metaLine(c) { return [c.species || '', c.gender || '', c.faction || ''].filter(Boolean).join(' · '); }
+// 网格与审核列表只取 360px WebP 缩略图（与官方画廊同一做法）；灯箱和展示页才取 1600px 站点版。
+// data-full 指向站点版，站长点“查看原图”时由 original-image-viewer.js 换成 /api/original-image。
+function thumbSrc(src) { return /^\/api\/(?:uploads\/preview|image-preview)\?/.test(src || '') ? src + '&t=1' : (src || ''); }
+function previewImg(src, alt, extra) {
+  return `<img data-original-image src="${esc(thumbSrc(src))}" data-full="${esc(src)}" alt="${esc(alt)}" loading="lazy" decoding="async"${extra || ''}>`;
+}
 function figureHTML(c, isPoster) {
   const initial = esc((c.name || '?').slice(0, 1));
   return `<div class="card-figure${isPoster ? ' poster' : ''}">
-      <img data-original-image src="${esc(c.image_data)}" alt="${esc(c.name)}" loading="lazy" decoding="async" onerror="this.remove()">
+      ${previewImg(c.image_data, c.name, ' onerror="this.remove()"')}
       <div class="card-initial" aria-hidden="true">${initial}</div>
     </div>`;
 }
@@ -619,7 +625,7 @@ function reviewItemHTML(c) {
   const meta = [c.type, c.species, c.gender, c.faction].filter(Boolean).join(' · ');
   const opts = Object.keys(ART_LABEL).map(k => `<option value="${k}"${(c.art_source || '') === k ? ' selected' : ''}>立绘：${ART_LABEL[k]}</option>`).join('');
   return `<div class="review-item" data-review="${c.id}" data-review-version="${esc(c.review_version)}">
-    <div class="review-thumb">${c.image_data ? `<img data-original-image src="${esc(c.image_data)}" alt="${esc(c.name)}" loading="lazy" decoding="async">` : '纯文字设'}</div>
+    <div class="review-thumb">${c.image_data ? previewImg(c.image_data, c.name) : '纯文字设'}</div>
     <div class="review-main">
       <div class="t">${esc(c.name)} <span class="m">— ${esc(c.user_name || '匿名')}</span></div>
       ${meta ? `<div class="m">${esc(meta)}</div>` : ''}

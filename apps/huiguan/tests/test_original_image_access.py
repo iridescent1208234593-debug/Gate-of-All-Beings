@@ -193,6 +193,29 @@ class OriginalImageAccessTest(unittest.TestCase):
         with Image.open(io.BytesIO(body)) as image:
             self.assertLessEqual(image.width, 360)
 
+    def test_fan_upload_thumbnail_matches_official_thumbnail(self):
+        status, headers, body = self.get("/api/uploads/preview?name=" + urllib.parse.quote(upload_name) + "&t=1")
+        self.assertEqual((status, headers["Content-Type"]), (200, "image/webp"))
+        with Image.open(io.BytesIO(body)) as image:
+            self.assertLessEqual(max(image.size), 360)
+
+    def test_fan_cards_request_thumbnails_not_site_versions(self):
+        # Grids must ask for the 360px thumbnail (t=1), like the official gallery; the 1600px site
+        # version stays in data-full for lightboxes and the owner-only original viewer.
+        fan = (ROOT / "apps" / "huiguan" / "fan.html").read_text(encoding="utf-8")
+        self.assertIn("src=\"${esc(thumbSrc(src))}\" data-full=\"${esc(src)}\"", fan)
+        self.assertNotIn('src="${esc(c.image_data)}"', fan)
+        home = (ROOT / "apps" / "huiguan" / "homepage-content.js").read_text(encoding="utf-8")
+        self.assertIn("thumbURL(source)", home)
+        self.assertIn("url.searchParams.set('t', '1')", home)
+
+    def test_original_of_a_thumbnail_reference_is_still_the_source(self):
+        src = "/api/uploads/preview?name=" + urllib.parse.quote(upload_name)
+        path = "/api/original-image?src=" + urllib.parse.quote(src, safe="")
+        self.assertEqual(self.get(path, self.MEMBER)[0], 403)
+        status, _, body = self.get(path, self.OWNER)
+        self.assertEqual((status, body), (200, upload_original))
+
     def test_uncached_upload_first_request_generates_webp_and_second_hits_cache(self):
         new_name = "z" * 64 + ".png"
         source = UPLOADS / new_name
