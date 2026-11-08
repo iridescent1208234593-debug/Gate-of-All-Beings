@@ -888,6 +888,11 @@ def _rate_hits(key, window):
         return hits
 
 
+# /api/register: created Accounts per client IP per hour, and submissions per client IP per 10 minutes.
+REGISTER_CREATE_LIMIT = 10
+REGISTER_ATTEMPT_LIMIT = 30
+
+
 def rate_blocked(key, max_n, window):
     return len(_rate_hits(key, window)) >= max_n
 
@@ -2246,8 +2251,11 @@ class Handler(BaseStaticHandler):
         if body is None:
             return
         ip = self._client_ip()
-        if rate_blocked(f"reg:{ip}", 5, 3600):
-            self._json(429, {"error": "注册过于频繁，请稍后再试"})
+        # Two budgets per client IP. Attempts (any submission, typos included) only stop scripted
+        # floods; created Accounts are the real cap. A typo no longer spends the creation budget,
+        # and visitors behind one shared carrier/school address are not locked out by each other's mistakes.
+        if rate_blocked(f"reg-try:{ip}", REGISTER_ATTEMPT_LIMIT, 600) or rate_blocked(f"reg:{ip}", REGISTER_CREATE_LIMIT, 3600):
+            self._json(429, {"error": "注册过于频繁，请稍后再试", "code": "register_rate_limited"})
             return
         if not legal_consent.is_current(body.get("legal_version")):
             # Checked before the Turnstile token is spent and before the rate counter moves.
@@ -2256,7 +2264,7 @@ class Handler(BaseStaticHandler):
             return
         if not self._turnstile_passed(body, "register"):
             return
-        rate_add(f"reg:{ip}")
+        rate_add(f"reg-try:{ip}")
 
         username = (body.get("username") or "").strip()
         password = body.get("password") or ""
@@ -2307,6 +2315,7 @@ class Handler(BaseStaticHandler):
                 return
             conn.commit()
             conn.close()
+        rate_add(f"reg:{ip}")
 
         # 绑定邮箱（未验证）；发送验证邮件失败时直接跳过，注册照常完成
         email_sent = False
