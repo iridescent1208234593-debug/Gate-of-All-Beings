@@ -5438,23 +5438,32 @@ class Handler(BaseStaticHandler):
         public gallery already shows are returned, so any origin may read it.
         """
         base = site_url("huiguan", host=request_host(self)).rstrip("/")
-        conn = db()
+        conn = sqlite3.connect(Path(USER_DB).as_uri() + "?mode=ro", uri=True, timeout=30)
+        conn.row_factory = sqlite3.Row
         try:
-            # 与画廊默认分区同一口径：审核通过、有立绘、非 AI
-            rows = self._public_fan_rows(conn, FAN_APPROVED_SQL + " AND " + FAN_VIEW_SQL["art"], [], None, TOY_ARCHIVE_FAN_LIMIT, 0)
+            rows = conn.execute(
+                """SELECT name, type, species, gender, story, image_data, code, user_name,
+                          (SELECT COUNT(*) FROM fan_char_favorites fav WHERE fav.character_id=fan_characters.id)
+                          + (SELECT COUNT(*) FROM fan_char_votes vote WHERE vote.character_id=fan_characters.id AND vote.vote=1)
+                          - 2 * (SELECT COUNT(*) FROM fan_char_votes vote WHERE vote.character_id=fan_characters.id AND vote.vote=-1) AS reaction_score
+                   FROM fan_characters WHERE is_public=1 AND review_status='approved' AND COALESCE(image_data,'')!='' AND COALESCE(art_source,'')!='ai'
+                   ORDER BY reaction_score DESC, created_at DESC, id DESC LIMIT ?""",
+                (TOY_ARCHIVE_FAN_LIMIT,)).fetchall()
         finally:
             conn.close()
         fan = []
         for r in rows:
             image = r["image_data"] or ""
-            # Only stored upload files; inline base64 is too large to hand to a Toy.
-            image = base + image if re.fullmatch(r"/assets/uploads/[A-Za-z0-9]{16,64}\.(?:png|jpe?g|webp|gif)", image) else ""
+            # Reuse the gallery's WebP preview route for stored uploads.
+            image = _safe_image_reference(image) if re.fullmatch(r"/assets/uploads/[A-Za-z0-9]{16,64}\.(?:png|jpe?g|webp|gif)", image) else ""
+            image = base + image if image else ""
             fan.append({"code": r["code"], "name": r["name"], "user_name": r["user_name"], "type": r["type"],
                         "species": r["species"], "gender": r["gender"], "story": (r["story"] or "")[:300],
                         "image": image, "url": f"{base}/show.html?code={urllib.parse.quote(r['code'] or '')}"})
         official_rows = []
         try:
-            conn = wv()
+            conn = sqlite3.connect(Path(WV_DB).as_uri() + "?mode=ro", uri=True, timeout=10)
+            conn.row_factory = sqlite3.Row
         except sqlite3.Error as error:
             # The worldview library is a separate store; the fan digest still answers without it.
             print(f"[huiguan] toy archive: worldview unavailable: {error}", flush=True)
