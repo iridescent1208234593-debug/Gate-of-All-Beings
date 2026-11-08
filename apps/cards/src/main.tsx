@@ -1,9 +1,15 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import GameShell from './gate/GameShell';
+import {mountOrientationViewport} from './gate/OrientationViewport';
 import './index.css';
 
 function mount() {
+  const viewport = mountOrientationViewport();
+  if (viewport) {
+    (window as Window & { __iridescentlyDispose?: () => void }).__iridescentlyDispose = viewport;
+    return viewport;
+  }
   const root = createRoot(document.getElementById('root')!);
   root.render(<StrictMode><GameShell /></StrictMode>);
   let disposed = false;

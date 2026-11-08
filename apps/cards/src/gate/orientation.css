@@ -1,11 +1,8 @@
-/* 手机横屏引导：盖在开场 / 初始化 / 门庭之上，只在手机竖持时出现；视觉沿用开场的夜色与暖光 */
+/* 手机自动横屏前的五秒等待；视觉沿用开场的夜色与暖光。 */
 .orient-guard{position:fixed;inset:0;z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:max(24px,env(safe-area-inset-top)) 28px max(24px,env(safe-area-inset-bottom));background:radial-gradient(120% 80% at 50% 38%,#16241c 0%,#050807 72%);color:var(--lxh-entry-paper,#fdf9e4);font-family:var(--lxh-font,var(--serif,'Noto Serif SC','Songti SC',serif));text-align:center;animation:orient-in .35s ease}
 .orient-guard h2{margin:6px 0 0;font-size:19px;font-weight:500;letter-spacing:.18em;text-indent:.18em}
 .orient-guard p{margin:0;max-width:300px;font-size:12.5px;line-height:1.9;color:#fdfbe5b3}
 .orient-guard__phone{color:var(--lxh-entry-accent,#ffb649);animation:orient-turn 2.4s ease-in-out infinite}
-.orient-guard__actions{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:8px}
-.orient-guard__actions button{min-width:168px;min-height:42px;padding:10px 26px;font:inherit;font-size:13px;letter-spacing:.24em;text-indent:.24em;color:#fdfbe5cc;background:transparent;border:1px solid #fdfbe540;border-radius:999px;cursor:pointer}
-.orient-guard__actions .orient-guard__primary{color:var(--lxh-entry-paper,#fdf9e4);background:rgb(255 182 73 / 16%);border-color:rgb(255 182 73 / 72%)}
 .orient-toggle{position:fixed;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));z-index:1500;min-height:32px;padding:6px 13px;font:inherit;font-size:11px;letter-spacing:.12em;color:#fdf9e4;background:#050807a6;border:1px solid #fdfbe540;border-radius:999px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer}
 /* 灵境会馆的底栏按钮正好在左下角：改成贴在左缘中部的竖签，不再压住「营造」 */
 body:has(.management-frame) .orient-toggle{top:50%;bottom:auto;left:0;transform:translateY(-50%);min-height:0;padding:12px 5px;border-left:0;border-radius:0 10px 10px 0;writing-mode:vertical-rl;letter-spacing:.2em}
