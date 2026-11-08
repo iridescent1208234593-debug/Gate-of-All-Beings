@@ -225,6 +225,7 @@ def init_schema(conn):
         applied_at TEXT NOT NULL,
         summary_json TEXT NOT NULL
     )""")
+    backfill_chain_days(conn)
 
 
 def open_db(project_root=None):
@@ -249,9 +250,47 @@ def get_points_x10(conn, kind, uid):
 
 
 def _earned_today(conn, kind, uid, day):
-    row = conn.execute("SELECT COALESCE(SUM(amount_x10),0) FROM account_point_events WHERE kind=? AND uid=? AND day=?",
+    # rule='chain' 是一次性里程碑，设计上就绕过每日上限（见 task_chains 模块注释），
+    # 所以无论它们是否带日期，都不能计入当天的额度。
+    row = conn.execute("SELECT COALESCE(SUM(amount_x10),0) FROM account_point_events "
+                       "WHERE kind=? AND uid=? AND day=? AND rule<>'chain'",
                        (kind, uid, day)).fetchone()
     return int(row[0])
+
+
+CHAIN_DAY_MIGRATION = "chain-award-days-v1"
+
+
+def _beijing_day_of(stamp):
+    """ISO 时间戳对应的北京日期；解析失败返回空串。"""
+    try:
+        return datetime.fromisoformat(str(stamp)).astimezone(DAY_TZ).date().isoformat()
+    except (TypeError, ValueError):
+        return ""
+
+
+def backfill_chain_days(conn):
+    """给历史任务链奖励补上真实日期。
+
+    task_chains.claim() 早期把 day 写成空串，导致这部分积分不计入任何按天统计。
+    由于每日额度已排除 rule='chain'（见 _earned_today），补日期不会吃掉任何人的额度。
+    由 account_progress_migrations 去重，可重复调用。
+    """
+    if conn.execute("SELECT 1 FROM account_progress_migrations WHERE name=?",
+                    (CHAIN_DAY_MIGRATION,)).fetchone():
+        return 0
+    changed = 0
+    rows = conn.execute("SELECT rowid, created_at FROM account_point_events "
+                        "WHERE rule='chain' AND COALESCE(day,'')=''").fetchall()
+    for rowid, created in rows:
+        day = _beijing_day_of(created)
+        if day:
+            conn.execute("UPDATE account_point_events SET day=? WHERE rowid=?", (day, rowid))
+            changed += 1
+    conn.execute("""INSERT INTO account_progress_migrations (name, applied_at, summary_json) VALUES (?,?,?)
+        ON CONFLICT(name) DO UPDATE SET applied_at=excluded.applied_at, summary_json=excluded.summary_json""",
+                 (CHAIN_DAY_MIGRATION, _now(), json.dumps({"rows_filled": changed}, ensure_ascii=False)))
+    return changed
 
 
 def _rule_count(conn, kind, uid, day, rule, game=""):
