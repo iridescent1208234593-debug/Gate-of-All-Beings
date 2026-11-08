@@ -580,70 +580,116 @@
   }
   .auth-bar .sync-status.ok { color: #9fd6b5; }
 
-  /* 登录/注册弹窗 */
+  /* 登录/注册弹窗：配色全部取页面主题变量，五套主题与奶油色都跟随 */
   .auth-mask {
     position: fixed; inset: 0; z-index: 10002;
-    background: rgba(58,74,62,0.35); backdrop-filter: blur(2px);
+    background: color-mix(in srgb, var(--outline, #2a3a2e) 55%, transparent);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
     display: flex; align-items: center; justify-content: center;
+    padding: 16px; box-sizing: border-box; overflow-y: auto;
   }
   .auth-mask[hidden] { display: none; }
   .auth-modal {
-    width: 320px; max-width: calc(100vw - 48px);
-    background: var(--bg); border: 1.5px solid var(--outline, #2a3a2e);
-    border-radius: 8px; padding: 26px 26px 22px;
-    box-shadow: 0 12px 40px rgba(58,74,62,0.25);
-    position: relative;
+    width: 380px; max-width: 100%; margin: auto; box-sizing: border-box;
+    background: var(--bg); color: var(--text);
+    border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--border));
+    border-radius: 16px; padding: 26px 28px 22px;
+    box-shadow: 0 24px 64px rgba(20, 28, 24, 0.38), inset 0 0 0 4px color-mix(in srgb, var(--gold) 8%, transparent);
+    position: relative; animation: auth-in 0.22s ease-out;
   }
+  @keyframes auth-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .auth-modal { animation: none; } }
   .auth-close {
-    position: absolute; top: 10px; right: 12px;
-    background: none; border: none; font-size: 18px; cursor: pointer;
+    position: absolute; top: 10px; right: 10px; width: 32px; height: 32px;
+    background: none; border: none; border-radius: 50%; font-size: 20px; cursor: pointer;
     color: var(--text-dim); line-height: 1;
   }
-  .auth-close:hover { color: var(--text); }
+  .auth-close:hover { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); }
+  .auth-head { text-align: center; margin-bottom: 18px; }
+  .auth-seal {
+    width: 44px; height: 44px; margin: 0 auto 10px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Noto Serif SC', 'Songti SC', serif; font-size: 13px; letter-spacing: 1px;
+    color: var(--gold); border: 1.5px solid color-mix(in srgb, var(--gold) 70%, transparent);
+    writing-mode: vertical-rl;
+  }
   .auth-title {
-    font-size: 15px; letter-spacing: 2px; color: var(--text);
-    margin-bottom: 16px; text-align: center;
+    font-family: 'Noto Serif SC', 'Songti SC', serif;
+    font-size: 20px; letter-spacing: 6px; color: var(--text); padding-left: 6px;
   }
-  .auth-hint {
-    margin-top: 10px; text-align: center;
-    font-size: 11px; color: var(--text-dim); letter-spacing: 0.5px;
+  .auth-sub { margin-top: 4px; font-size: 12px; letter-spacing: 2px; color: var(--text-dim); }
+  .auth-tabs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 6px;
+    border-radius: 10px; background: color-mix(in srgb, var(--text) 7%, transparent);
   }
-  .auth-label { display: block; font-size: 12px; color: var(--text-dim); margin: 10px 0 4px; }
-  .auth-input {
-    width: 100%; box-sizing: border-box; padding: 8px 10px;
-    font-size: 13px; font-family: inherit; color: var(--text);
-    background: var(--paper, #fff); border: 1px solid var(--border); border-radius: 4px;
-    outline: none; transition: border-color 0.15s;
+  .auth-tab {
+    padding: 8px 0; border: none; border-radius: 7px; cursor: pointer;
+    font: inherit; font-size: 14px; letter-spacing: 2px;
+    color: var(--text-dim); background: transparent; transition: background 0.15s, color 0.15s;
   }
-  .auth-input:focus { border-color: var(--accent); }
-  .auth-msg { font-size: 12px; min-height: 16px; margin-top: 8px; color: #b3543f; }
+  .auth-tab:hover { color: var(--text); }
+  .auth-tab[aria-selected="true"] {
+    color: var(--text); background: var(--bg);
+    box-shadow: 0 1px 3px rgba(20, 28, 24, 0.18), 0 0 0 1px color-mix(in srgb, var(--gold) 35%, transparent);
+  }
+  .auth-msg { font-size: 12.5px; line-height: 1.6; min-height: 20px; margin: 6px 0 2px; color: #d9785f; }
   .auth-msg.ok { color: var(--accent); }
-  .auth-turnstile { margin: 10px 0 2px; min-height: 65px; }
+  .auth-msg:empty { min-height: 0; margin: 0; }
+  .auth-form[hidden] { display: none; }
+  .auth-field { display: block; margin-top: 12px; }
+  .auth-label { display: block; font-size: 12.5px; color: var(--text); opacity: 0.85; margin-bottom: 6px; letter-spacing: 0.5px; }
+  .auth-input {
+    width: 100%; box-sizing: border-box; height: 42px; padding: 0 12px;
+    font-size: 15px; font-family: inherit; color: var(--text);
+    background: color-mix(in srgb, var(--text) 5%, var(--bg));
+    border: 1px solid color-mix(in srgb, var(--text) 22%, transparent); border-radius: 9px;
+    outline: none; transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .auth-input::placeholder { color: var(--text-dim); opacity: 0.8; }
+  .auth-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+  .auth-input[aria-invalid="true"] { border-color: #d9785f; }
+  .auth-pass { position: relative; display: block; }
+  .auth-pass .auth-input { padding-right: 56px; }
+  .auth-eye {
+    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+    padding: 4px 8px; border: none; border-radius: 6px; background: transparent; cursor: pointer;
+    font: inherit; font-size: 12px; color: var(--text-dim);
+  }
+  .auth-eye:hover { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); }
+  .auth-note { display: block; margin-top: 5px; font-size: 11.5px; line-height: 1.5; color: var(--text-dim); }
+  .auth-note.bad { color: #d9785f; }
+  .auth-note.good { color: var(--accent); }
+  .auth-turnstile { margin: 14px 0 0; min-height: 65px; }
+  .auth-turnstile[hidden] { display: none; }
   .auth-submit {
-    width: 100%; margin-top: 14px; padding: 9px 0;
-    font-size: 13px; letter-spacing: 4px; font-family: inherit; cursor: pointer;
-    color: #fff; background: var(--accent); border: none; border-radius: 4px;
-    transition: filter 0.15s;
+    width: 100%; height: 44px; margin-top: 18px;
+    font-size: 15px; letter-spacing: 4px; font-family: inherit; font-weight: 600; cursor: pointer;
+    color: #1f2a22; background: var(--gold); border: none; border-radius: 10px;
+    transition: filter 0.15s, transform 0.05s;
   }
-  .auth-submit:hover { filter: brightness(1.08); }
+  .auth-submit:hover { filter: brightness(1.06); }
+  .auth-submit:active { transform: translateY(1px); }
   .auth-submit:disabled { opacity: 0.6; cursor: default; }
-  .auth-divider {
-    display: flex; align-items: center; gap: 10px;
-    margin: 16px 0 12px; color: var(--text-dim); font-size: 11px;
+  .auth-links {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin-top: 14px; font-size: 12.5px; color: var(--text-dim);
   }
-  .auth-divider::before, .auth-divider::after {
-    content: ""; flex: 1; height: 1px; background: var(--border);
+  .auth-links a { color: var(--text-dim); text-decoration: none; }
+  .auth-links a:hover { color: var(--text); text-decoration: underline; }
+  .auth-link { padding: 0; border: none; background: none; cursor: pointer; font: inherit; color: var(--gold); }
+  .auth-link:hover { text-decoration: underline; }
+  #authRegisterForm .auth-legal { margin-top: 16px; }
+  @media (max-width: 480px) {
+    .auth-mask { align-items: flex-end; padding: 0; }
+    .auth-modal {
+      width: 100%; margin: 0; border-radius: 18px 18px 0 0; border-bottom: none;
+      padding: 22px 20px calc(18px + env(safe-area-inset-bottom));
+      max-height: 92vh; overflow-y: auto;
+    }
+    .auth-head { margin-bottom: 14px; }
+    .auth-seal { display: none; }
+    .auth-input { font-size: 16px; }
   }
-  .auth-usso {
-    display: block; text-align: center; text-decoration: none;
-    font-size: 13px; color: var(--gold); letter-spacing: 1px;
-    border: 1.5px solid var(--outline, #2a3a2e); border-radius: 4px;
-    padding: 7px 0; transition: all 0.2s;
-  }
-  .auth-usso:hover { border-color: var(--gold); background: rgba(212,168,75,0.08); }
-  .auth-legacy { margin-top: 8px; text-align: center; }
-  .auth-legacy summary { cursor: pointer; color: var(--text-dim); font-size: 11px; }
-  .auth-legacy .auth-hint { margin: 6px 0 0; }
 </style>
 <link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261027z">
 <link rel="stylesheet" href="/homepage.css?v=20261027z">
@@ -861,27 +907,71 @@
   </section>
 </div>
 
-<!-- 登录/注册弹窗 -->
+<!-- 登录/注册弹窗：两个页签，各自一张表单 -->
 <div class="auth-mask" id="authMask" hidden onclick="if(event.target===this)closeAuthModal()">
-  <div class="auth-modal">
-    <button class="auth-close" onclick="closeAuthModal()" aria-label="关闭">×</button>
-    <div class="auth-title">西木会馆 · 账号</div>
-    <div class="auth-msg" id="authMsg"></div>
-    <label class="auth-label" for="authUsername">用户名</label>
-    <input class="auth-input" id="authUsername" maxlength="16" autocomplete="username" placeholder="2-16 位中英文 / 数字 / 下划线">
-    <label class="auth-label" for="authEmail">邮箱（注册必填）</label>
-    <input class="auth-input" id="authEmail" type="email" maxlength="254" autocomplete="email" placeholder="用于找回账号与重置密码">
-    <label class="auth-label" for="authPassword">密码</label>
-    <input class="auth-input" id="authPassword" type="password" maxlength="128" autocomplete="current-password" placeholder="登录使用已有密码；新注册需至少 12 位">
-    <div class="auth-turnstile" id="authTurnstile" hidden></div>
-    <div class="auth-legal" id="authLegal"><a href="/terms.html" target="_blank" rel="noopener">用户须知</a> · <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a></div>
-    <div style="display:flex;gap:8px;margin-top:4px">
-      <button type="button" class="auth-submit" id="authSubmit" onclick="submitAuth()" style="flex:2">登录</button>
-      <button type="button" class="auth-submit" id="authRegister" onclick="submitRegister()" style="flex:1;font-size:13px;background:transparent;border:1px solid rgba(242,239,230,.55);color:#f2efe6">注册账号</button>
+  <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <button type="button" class="auth-close" onclick="closeAuthModal()" aria-label="关闭">×</button>
+    <div class="auth-head">
+      <div class="auth-seal" aria-hidden="true">西木</div>
+      <div class="auth-title" id="authTitle">西木会馆</div>
+      <div class="auth-sub" id="authSub">欢迎回来</div>
     </div>
-    <div class="auth-hint">登录仅校验已有账号，不会自动注册。需要新账号请勾选同意上方两份文件后点「注册账号」。密码区分大小写；新注册用户名不得使用官方世界观角色名。</div>
-    <a class="auth-usso" href="/security.html?mode=recover">找回账号 / 密码（已验证邮箱或找回问题）</a>
-    <details class="auth-legacy"><summary>其他登录方式</summary><div class="auth-hint">USSO 外部登录已暂停；既有账户资料与角色数据保留。请使用会馆站内账号登录。</div></details>
+    <div class="auth-tabs" role="tablist">
+      <button type="button" role="tab" class="auth-tab" id="authTabLogin" data-auth-mode="login" aria-selected="true" aria-controls="authLoginForm">登录</button>
+      <button type="button" role="tab" class="auth-tab" id="authTabRegister" data-auth-mode="register" aria-selected="false" aria-controls="authRegisterForm">注册新账号</button>
+    </div>
+    <div class="auth-msg" id="authMsg" role="status" aria-live="polite"></div>
+
+    <form class="auth-form" id="authLoginForm" role="tabpanel" aria-labelledby="authTabLogin" novalidate onsubmit="event.preventDefault();submitAuth()">
+      <label class="auth-field">
+        <span class="auth-label">用户名</span>
+        <input class="auth-input" id="authUsername" name="username" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="你的会馆用户名">
+      </label>
+      <label class="auth-field">
+        <span class="auth-label">密码</span>
+        <span class="auth-pass">
+          <input class="auth-input" id="authPassword" name="password" type="password" maxlength="128" autocomplete="current-password" placeholder="区分大小写">
+          <button type="button" class="auth-eye" data-auth-eye aria-label="显示密码">显示</button>
+        </span>
+      </label>
+      <div class="auth-turnstile" id="authTurnstile" hidden></div>
+      <button type="submit" class="auth-submit" id="authSubmit">登录</button>
+      <div class="auth-links">
+        <a href="/security.html?mode=recover">忘记密码 / 找回账号</a>
+        <button type="button" class="auth-link" data-auth-mode="register">还没有账号？去注册</button>
+      </div>
+    </form>
+
+    <form class="auth-form" id="authRegisterForm" role="tabpanel" aria-labelledby="authTabRegister" hidden novalidate onsubmit="event.preventDefault();submitRegister()">
+      <label class="auth-field">
+        <span class="auth-label">用户名</span>
+        <input class="auth-input" id="authRegUsername" name="username" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="2-16 位中文、字母、数字或下划线">
+        <span class="auth-note" id="authRegUsernameNote">注册后用于登录；不能使用官方世界观角色名</span>
+      </label>
+      <label class="auth-field">
+        <span class="auth-label">邮箱</span>
+        <input class="auth-input" id="authEmail" name="email" type="email" inputmode="email" maxlength="254" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="name@example.com">
+        <span class="auth-note">用来验证身份、找回账号和重置密码</span>
+      </label>
+      <label class="auth-field">
+        <span class="auth-label">设置密码</span>
+        <span class="auth-pass">
+          <input class="auth-input" id="authRegPassword" name="new-password" type="password" maxlength="128" autocomplete="new-password" placeholder="至少 12 位">
+          <button type="button" class="auth-eye" data-auth-eye aria-label="显示密码">显示</button>
+        </span>
+        <span class="auth-note" id="authRegPasswordNote">至少 12 位，区分大小写</span>
+      </label>
+      <label class="auth-field">
+        <span class="auth-label">再输一次密码</span>
+        <input class="auth-input" id="authRegPassword2" name="confirm-password" type="password" maxlength="128" autocomplete="new-password" placeholder="与上面一致">
+      </label>
+      <div class="auth-legal" id="authLegal"><a href="/terms.html" target="_blank" rel="noopener">用户须知</a> · <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a></div>
+      <button type="submit" class="auth-submit" id="authRegister">创建账号</button>
+      <div class="auth-links">
+        <span>注册后会往邮箱发一封验证邮件</span>
+        <button type="button" class="auth-link" data-auth-mode="login">已有账号？去登录</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -1568,29 +1658,97 @@ async function renameUser() {
   } catch (e) { showToast('error', '⚠ 网络错误，改名未提交', 5000); }
 }
 
-// ---- 登录/注册弹窗（统一入口） ----
-function openAuthModal(notice) {
-  hideGuestReminder();
+// ---- 登录/注册弹窗：登录与注册是两个页签、两张表单 ----
+// openAuthModal(notice, mode)：mode 为 'register' 时直接打开注册页签，其余打开登录页签。
+const AUTH_USERNAME_RE = /^[一-龥A-Za-z0-9_]{2,16}$/;  // 与服务端 USERNAME_RE 一致
+const AUTH_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+let authMode = 'login';
+function authMsgSet(text, ok) {
   const m = document.getElementById('authMsg');
-  if (notice) { m.className = 'auth-msg ok'; m.textContent = notice; }
-  else { m.className = 'auth-msg'; m.textContent = ''; }
+  m.className = 'auth-msg' + (ok ? ' ok' : '');
+  m.textContent = text || '';
+}
+function setAuthMode(mode, keepMessage) {
+  authMode = mode === 'register' ? 'register' : 'login';
+  const login = authMode === 'login';
+  const open = !document.getElementById('authMask').hidden;
+  document.getElementById('authLoginForm').hidden = !login;
+  document.getElementById('authRegisterForm').hidden = login;
+  document.getElementById('authTabLogin').setAttribute('aria-selected', String(login));
+  document.getElementById('authTabRegister').setAttribute('aria-selected', String(!login));
+  document.getElementById('authSub').textContent = login ? '欢迎回来' : '创建一个会馆账号';
+  // 人机验证框（启用时）跟着当前表单走；服务端把 token 绑定到各自接口，切换后重新渲染。
+  const ts = document.getElementById('authTurnstile');
+  const form = document.getElementById(login ? 'authLoginForm' : 'authRegisterForm');
+  form.insertBefore(ts, form.querySelector('.auth-submit'));
+  if (open) {
+    window.HuiguanTurnstile.mount(ts, login ? 'login' : 'register').catch(() => {
+      authMsgSet('人机验证加载失败，请检查网络后重新打开此窗口');
+    });
+  }
+  if (!keepMessage) authMsgSet('');
+  // 从登录页签切过来时，带上已经填好的用户名
+  if (!login) {
+    const from = document.getElementById('authUsername').value.trim();
+    const to = document.getElementById('authRegUsername');
+    if (from && !to.value) { to.value = from; checkRegUsername(); }
+  }
+  const empty = Array.from(form.querySelectorAll('input.auth-input')).find(i => !i.value);
+  if (open && empty) empty.focus();
+}
+function openAuthModal(notice, mode) {
+  hideGuestReminder();
   document.getElementById('authMask').hidden = false;
-  window.HuiguanTurnstile.mount(document.getElementById('authTurnstile'), 'login').catch(() => {
-    m.className = 'auth-msg'; m.textContent = '人机验证加载失败，请检查网络后重新打开此窗口';
-  });
-  const u = document.getElementById('authUsername');
-  if (u) u.focus();
+  setAuthMode(mode || 'login');
+  if (notice) authMsgSet(notice, true);
 }
 function closeAuthModal() {
   document.getElementById('authMask').hidden = true;
   showGuestReminder();
 }
+document.querySelectorAll('#authMask [data-auth-mode]').forEach(btn => {
+  btn.addEventListener('click', () => setAuthMode(btn.dataset.authMode));
+});
+document.querySelectorAll('#authMask [data-auth-eye]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const input = btn.parentElement.querySelector('input');
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? '隐藏' : '显示';
+    btn.setAttribute('aria-label', show ? '隐藏密码' : '显示密码');
+  });
+});
+function checkRegUsername() {
+  const input = document.getElementById('authRegUsername');
+  const note = document.getElementById('authRegUsernameNote');
+  const v = input.value.trim();
+  const bad = !!v && !AUTH_USERNAME_RE.test(v);
+  input.setAttribute('aria-invalid', bad ? 'true' : 'false');
+  note.className = 'auth-note' + (bad ? ' bad' : '');
+  note.textContent = bad ? '只能用 2-16 位中文、字母、数字或下划线（不能有空格和符号）'
+    : '注册后用于登录；不能使用官方世界观角色名';
+  return !bad && !!v;
+}
+function checkRegPassword() {
+  const p1 = document.getElementById('authRegPassword');
+  const note = document.getElementById('authRegPasswordNote');
+  const n = p1.value.length;
+  note.className = 'auth-note' + (n === 0 ? '' : n < 12 ? ' bad' : ' good');
+  note.textContent = n === 0 ? '至少 12 位，区分大小写' : n < 12 ? '还差 ' + (12 - n) + ' 位' : '长度可以';
+  p1.setAttribute('aria-invalid', n > 0 && n < 12 ? 'true' : 'false');
+}
+document.getElementById('authRegUsername').addEventListener('input', checkRegUsername);
+document.getElementById('authRegPassword').addEventListener('input', checkRegPassword);
+document.getElementById('authRegPassword2').addEventListener('input', () => {
+  const p2 = document.getElementById('authRegPassword2');
+  p2.setAttribute('aria-invalid', p2.value && p2.value !== document.getElementById('authRegPassword').value ? 'true' : 'false');
+});
 // Login and register share one Turnstile widget but the server binds tokens to each endpoint;
 // switching endpoints re-renders the widget, and the visitor completes it before submitting.
-async function authTurnstileReady(action, msg, label) {
+async function authTurnstileReady(action, label) {
   const state = await window.HuiguanTurnstile.ensure(document.getElementById('authTurnstile'), action).catch(() => 'error');
-  if (state === 'error') { msg.textContent = '人机验证加载失败，请检查网络后重试'; return false; }
-  if (state === 'pending') { msg.textContent = '请先完成下方的人机验证，再点「' + label + '」'; return false; }
+  if (state === 'error') { authMsgSet('人机验证加载失败，请检查网络后重试'); return false; }
+  if (state === 'pending') { authMsgSet('请先完成下方的人机验证，再点「' + label + '」'); return false; }
   return true;
 }
 // 注册与提交登记都要勾选同意《用户须知》《隐私政策》；未加载脚本时保留上面的纯链接。
@@ -1601,83 +1759,88 @@ function maybeLegalReconsent() {
   if (window.HuiguanLegal) HuiguanLegal.requireForAccount();
 }
 async function submitRegister() {
-  const username = document.getElementById('authUsername').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const msg = document.getElementById('authMsg');
+  const username = document.getElementById('authRegUsername').value.trim();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authRegPassword').value;
+  const password2 = document.getElementById('authRegPassword2').value;
   const btn = document.getElementById('authRegister');
-  msg.className = 'auth-msg';
-  const email = (document.getElementById('authEmail') || {}).value ? document.getElementById('authEmail').value.trim() : '';
-  if (!username || !password) { msg.textContent = '请填写用户名和密码'; return; }
-  if (password.length < 12) { msg.textContent = '密码至少 12 位'; return; }
-  if (!email) { msg.textContent = '请填写邮箱（用于找回账号与重置密码）'; return; }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = '请输入有效邮箱地址'; return; }
-  if (!authLegal) { msg.textContent = '条款组件加载失败，请刷新页面后再注册'; return; }
-  if (!authLegal.checked()) { msg.textContent = '请先阅读并勾选同意《用户须知》和《隐私政策》'; authLegal.nudge(); return; }
+  const fail = (text, id) => { authMsgSet(text); if (id) document.getElementById(id).focus(); };
+  authMsgSet('');
+  if (!username) return fail('请填写用户名', 'authRegUsername');
+  if (!checkRegUsername()) return fail('用户名格式不对：2-16 位中文、字母、数字或下划线', 'authRegUsername');
+  if (!email) return fail('请填写邮箱（用于找回账号与重置密码）', 'authEmail');
+  if (!AUTH_EMAIL_RE.test(email)) return fail('邮箱格式不对，请检查一下', 'authEmail');
+  if (password.length < 12) return fail('密码至少 12 位', 'authRegPassword');
+  if (password !== password2) return fail('两次输入的密码不一致', 'authRegPassword2');
+  if (!authLegal) return fail('条款组件加载失败，请刷新页面后再注册');
+  if (!authLegal.checked()) { authLegal.nudge(); return fail('请先阅读并勾选同意《用户须知》和《隐私政策》'); }
   let legalVersion = '';
-  try { legalVersion = await HuiguanLegal.version(); } catch (e) { msg.textContent = '条款版本读取失败，请检查网络后重试'; return; }
-  if (!await authTurnstileReady('register', msg, '注册账号')) return;
-  if (!confirm('确定用「' + username + '」注册账号？\n邮箱：' + email + '\n验证邮件将发到该邮箱。')) return;
+  try { legalVersion = await HuiguanLegal.version(); } catch (e) { return fail('条款版本读取失败，请检查网络后重试'); }
+  if (!await authTurnstileReady('register', '创建账号')) return;
   btn.disabled = true;
+  btn.textContent = '正在创建…';
   try {
     const r = await fetch('/api/register', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password, email, legal_version: legalVersion, turnstile: window.HuiguanTurnstile.token() })
     });
-    const d = await r.json();
+    const d = await r.json().catch(() => ({}));
     window.HuiguanTurnstile.reset();
     if (d.ok) {
       hideGuestReminder();
-      msg.className = 'auth-msg ok';
-      msg.textContent = d.email_sent ? '注册成功，验证邮件已发送，请查收；正在进入…'
-        : '注册成功（邮箱验证暂不可用，稍后可在账户页重试）；正在进入…';
-      document.getElementById('authPassword').value = '';
-      const em = document.getElementById('authEmail'); if (em) em.value = '';
+      authMsgSet(d.email_sent ? '注册成功！验证邮件已发到 ' + email + '，请查收；正在进入…'
+        : '注册成功（验证邮件暂时没发出去，稍后可在账户页重发）；正在进入…', true);
+      ['authRegPassword', 'authRegPassword2', 'authEmail', 'authRegUsername'].forEach(id => { document.getElementById(id).value = ''; });
+      checkRegPassword();
       authLegal.reset();
-      setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 400);
+      setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 600);
     } else {
-      msg.textContent = d.error || '注册失败';
+      // 409「既有 USSO 账号」时顺手把用户名填到登录页签，切过去即可登录
+      if (r.status === 409) document.getElementById('authUsername').value = username;
+      authMsgSet((d.error || '注册失败，请稍后重试') + (r.status >= 500 ? '（服务器错误 ' + r.status + '）' : ''));
     }
-  } catch (e) { window.HuiguanTurnstile.reset(); msg.textContent = '网络错误，请重试'; }
+  } catch (e) { window.HuiguanTurnstile.reset(); authMsgSet('网络错误，请检查网络后重试'); }
   btn.disabled = false;
+  btn.textContent = '创建账号';
 }
 async function submitAuth() {
   const username = document.getElementById('authUsername').value.trim();
   const password = document.getElementById('authPassword').value;
-  const msg = document.getElementById('authMsg');
   const btn = document.getElementById('authSubmit');
-  msg.className = 'auth-msg';
-  if (!username || !password) { msg.textContent = '请填写用户名和密码'; return; }
-  if (!await authTurnstileReady('login', msg, '登录')) return;
+  authMsgSet('');
+  if (!username || !password) { authMsgSet('请填写用户名和密码'); return; }
+  if (!await authTurnstileReady('login', '登录')) return;
   btn.disabled = true;
+  btn.textContent = '正在登录…';
   try {
     const r = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password, turnstile: window.HuiguanTurnstile.token() })
     });
-    const d = await r.json();
+    const d = await r.json().catch(() => ({}));
     window.HuiguanTurnstile.reset();
     if (d.ok) {
       hideGuestReminder();
-      msg.className = 'auth-msg ok';
-      msg.textContent = '登录成功';
       document.getElementById('authPassword').value = '';
       // Re-validated at use: exact approved host on this page's own root (packages/site-domains/index.js).
       const next = window.__AUTH_NEXT && window.safeAuthNext(window.__AUTH_NEXT);
       if (next) {
-        msg.textContent += '，正在返回…';
+        authMsgSet('登录成功，正在返回…', true);
         setTimeout(() => { location.href = next; }, 400);
-        return;
+      } else {
+        authMsgSet('登录成功', true);
+        setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 300);
       }
-      setTimeout(async () => { await checkLogin(); closeAuthModal(); flushPending(); }, 300);
     } else {
-      msg.textContent = (d.error || '操作失败，请重试') + (r.status === 401 ? '（如需新账号，请点「注册账号」）' : '');
+      authMsgSet((d.error || '登录失败，请重试') + (r.status === 401 ? '。还没有账号的话，请切到「注册新账号」。' : ''));
     }
-  } catch(e) {
+  } catch (e) {
     window.HuiguanTurnstile.reset();
-    msg.textContent = '网络错误，请重试';
+    authMsgSet('网络错误，请检查网络后重试');
   }
   btn.disabled = false;
+  btn.textContent = '登录';
 }
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !document.getElementById('authMask').hidden) closeAuthModal();
