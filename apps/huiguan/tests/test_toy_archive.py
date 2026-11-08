@@ -21,6 +21,7 @@ HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = (
     "import sys, http.server; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'services' / 'platform')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; "
     "s.init_user_db(); c = s.db(); c.execute(\"INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES ('toy_owner', ?, '作者甲', 'admin', 'active', '', '')\", (s.hash_password('test-password-123'),)); s.legal_consent.record(c, 'local', c.execute(\"SELECT uid FROM local_users WHERE username='toy_owner'\").fetchone()[0]); c.commit(); c.close(); "
+    "from PIL import Image; __import__('pathlib').Path(s.UPLOAD_DIR).mkdir(parents=True, exist_ok=True); [Image.new('RGB', (800, 600), 'green').save(__import__('pathlib').Path(s.UPLOAD_DIR) / (format(i, '032x') + '.png')) for i in range(12)]; "
     "http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()"
 )
 
@@ -76,6 +77,7 @@ class ToyArchiveTest(unittest.TestCase):
                    HX_SSO_SECRET="test-only-secret")
         for key in ("DATA", "ASSETS", "CACHE", "RELEASE", "BACKUP", "PROJECT"):
             env.pop(f"IRIDESCENTLY_{key}_ROOT", None)
+        cls.test_env = env
         cls.proc = subprocess.Popen([sys.executable, "-c", LAUNCH, str(HUIGUAN), str(port)], env=env,
                                     stdout=subprocess.DEVNULL, stderr=None)
         cls.base = f"http://127.0.0.1:{port}"
@@ -143,9 +145,35 @@ class ToyArchiveTest(unittest.TestCase):
             self.assertLessEqual(len(item["story"]), 300)
             self.assertTrue(item["url"].startswith("https://huiguan."), item["url"])
             self.assertTrue(item["url"].endswith("/show.html?code=" + item["code"]))
-            self.assertRegex(item["image"], r"^https://huiguan\.[^/]+/assets/uploads/[0-9a-f]{32}\.png$")
+            self.assertRegex(item["image"], r"^https://huiguan\.[^/]+/api/uploads/preview\?name=[0-9a-f]{32}\.png$")
         self.assertEqual(fan[0]["user_name"], "作者甲")
         self.assertIsInstance(data["official"], list)
+
+    def test_connections_are_read_only(self):
+        # Run against this test's disposable database; writable helpers must never be called.
+        code = r"""
+import sys, io, sqlite3
+from unittest.mock import patch
+sys.path[:0] = [sys.argv[1], sys.argv[2]]
+import server_huiguan as s
+connect = sqlite3.connect
+calls = []
+def readonly(database, *args, **kwargs):
+    assert kwargs.get('uri') is True and str(database).endswith('?mode=ro'), database
+    calls.append(str(database))
+    return connect(database, *args, **kwargs)
+class Reply:
+    headers = {'Host': 'huiguan.iridescently.cn'}
+    wfile = io.BytesIO()
+    def send_response(self, status): assert status == 200
+    def send_header(self, *args): pass
+    def end_headers(self): pass
+with patch.object(s, 'db', side_effect=AssertionError('writable user connection')), patch.object(s, 'wv', side_effect=AssertionError('writable worldview connection')), patch.object(s.sqlite3, 'connect', readonly):
+    s.Handler._api_toy_archive(Reply())
+assert len(calls) == 2, calls
+"""
+        subprocess.run([sys.executable, '-c', code, str(HUIGUAN), str(HUIGUAN.parents[1] / 'services/platform')],
+                       env=self.test_env, check=True, timeout=15)
 
     def test_same_answer_with_or_without_a_session(self):
         self.assertEqual(self.fetch(self.owner.session)[1], self.fetch()[1])
