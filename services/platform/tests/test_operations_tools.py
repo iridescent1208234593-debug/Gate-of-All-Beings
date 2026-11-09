@@ -139,6 +139,34 @@ console.log(JSON.stringify(await sealRelease({ allowDirty: true })));
         self.assertEqual(self.runtime.stop(), {"stopped": True})
         self.assertFalse(any(self.data.rglob("local-runtime.json")))
 
+    def test_port_validation_and_status_use_saved_port(self):
+        for port in (0, 65536, 5174, 5178, 5177, 4173):
+            with self.subTest(port=port), self.assertRaises(ValueError):
+                self.runtime.start(port)
+        self.runtime._save({"portal_port": 18080, "services": {}})
+        plan = {"release": "test", "sourceHead": "test", "site": "test", "services": {}}
+        with patch.object(self.runtime, "launch_plan", return_value=plan) as launch:
+            self.runtime.status()
+            launch.assert_called_once_with(18080)
+        self.runtime._save({"services": {}})
+        with patch.object(self.runtime, "launch_plan", return_value=plan) as launch:
+            self.runtime.status()
+            launch.assert_called_once_with(8080)
+
+    def test_smoke_port_preserves_old_defaults(self):
+        smoke_path = ROOT / "tools/checks/local-smoke.py"
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("local_smoke", smoke_path)
+        smoke = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(smoke)
+        state = Path(self.temp.name) / "state.json"
+        self.assertEqual(smoke.select_port(None, None), 8080)
+        state.write_text('{"services": {}}', encoding="utf-8")
+        self.assertEqual(smoke.select_port(None, state), 8080)
+        state.write_text('{"portal_port": 18080}', encoding="utf-8")
+        self.assertEqual(smoke.select_port(None, state), 18080)
+        self.assertEqual(smoke.select_port(19090, state), 19090)
+
 
 if __name__ == "__main__":
     unittest.main()

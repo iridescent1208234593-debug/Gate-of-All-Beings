@@ -19,9 +19,9 @@ DOMAINS = json.loads((ROOT / "packages/site-domains/domains.json").read_text(enc
 PORTAL = 8080
 
 
-def request(host, path, method="GET", headers=None, port=PORTAL):
+def request(host, path, method="GET", headers=None, port=None):
     method, body = method if isinstance(method, tuple) else (method, None)
-    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=15)
+    connection = http.client.HTTPConnection("127.0.0.1", PORTAL if port is None else port, timeout=15)
     try:
         connection.request(method, path, body=body, headers={"Host": host, "X-Forwarded-Proto": "https", **(headers or {})})
         response = connection.getresponse()
@@ -58,10 +58,23 @@ def checks_for(root):
     ]
 
 
+def select_port(port, runtime_state):
+    if port is not None:
+        return port
+    if runtime_state and runtime_state.exists():
+        return json.loads(runtime_state.read_text(encoding="utf-8")).get("portal_port", 8080)
+    return 8080
+
+
 def main():
+    global PORTAL
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--report", type=Path)
+    parser.add_argument("--port", type=int)
+    parser.add_argument("--runtime-state", type=Path)
     args = parser.parse_args()
+    # 旧用法不依赖存储配置，指定状态文件时兼容没有端口的旧记录。
+    PORTAL = select_port(args.port, args.runtime_state)
     results = []
     for root in DOMAINS["roots"]:
         print(f"== {root}")

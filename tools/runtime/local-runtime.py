@@ -62,7 +62,7 @@ def _secrets(file):
     return result
 
 
-def launch_plan():
+def launch_plan(portal_port=8080):
     require_ready()
     layout = storage_layout()
     site, channel = selected_release()
@@ -73,7 +73,7 @@ def launch_plan():
     overrides = {f"IRIDESCENTLY_{name}_ROOT": os.environ[f"IRIDESCENTLY_{name}_ROOT"]
                  for name in ROOT_VARIABLES.values() if os.environ.get(f"IRIDESCENTLY_{name}_ROOT", "").strip()}
     specs = {
-        "portal": ([sys.executable, "-X", "utf8", "-u", str(site / "services/platform/portal_server.py")], 8080, "/api/sso-user", "site"),
+        "portal": ([sys.executable, "-X", "utf8", "-u", str(site / "services/platform/portal_server.py")], portal_port, "/api/sso-user", "site"),
         "zszm-oauth": ([sys.executable, "-X", "utf8", "-u", str(site / "apps/cards/server.py")], 5174, "/api/user", "cards"),
         "zszm-balance": ([node, str(site / "apps/cards/server/balance-service.mjs")], 5178, "/healthz", "cards"),
         "juling": ([node, str(site / "apps/juling/server.js")], 5177, "/api/state", "juling"),
@@ -140,7 +140,8 @@ def _save(state):
 
 
 def status():
-    plan, state = launch_plan(), _state()
+    state = _state()
+    plan = launch_plan(state.get("portal_port", 8080))
     return {"release": plan["release"], "sourceHead": plan["sourceHead"], "site": plan["site"],
             "services": {key: {"running": _alive(state["services"].get(key)), "healthy": _healthy(service),
                                "port": service["port"], "pid": state["services"].get(key, {}).get("pid")}
@@ -161,9 +162,13 @@ def stop():
     return {"stopped": True}
 
 
-def start():
-    plan, state = launch_plan(), _state()
+def start(portal_port=8080):
+    if not 1 <= portal_port <= 65535 or portal_port in (5174, 5178, 5177, 4173):
+        raise ValueError("入口端口须为 1 到 65535，且不能与其他托管服务端口相同")
+    plan, state = launch_plan(portal_port), _state()
     if any(_alive(record) for record in state["services"].values()):
+        if state.get("portal_port", 8080) != portal_port:
+            raise RuntimeError("服务已在其他端口运行，请先执行 make stop")
         if state.get("release") != plan["release"]:
             raise RuntimeError("stop the managed previous release before starting the new local release")
         if all(_alive(state["services"].get(key)) and _healthy(value) for key, value in plan["services"].items()):
@@ -173,7 +178,7 @@ def start():
         with socket.socket() as probe:
             if probe.connect_ex(("127.0.0.1", service["port"])) == 0:
                 raise RuntimeError(f"local port {service['port']} is occupied; no existing process was stopped")
-    state = {"release": plan["release"], "sourceHead": plan["sourceHead"], "services": {}}
+    state = {"release": plan["release"], "sourceHead": plan["sourceHead"], "portal_port": portal_port, "services": {}}
     _save(state)
     try:
         for key, service in plan["services"].items():
@@ -203,8 +208,9 @@ def start():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=("start", "stop", "status", "verify"))
+    parser.add_argument("--port", type=int, default=8080)
     args = parser.parse_args()
-    result = {"start": start, "stop": stop, "status": status,
+    result = {"start": lambda: start(args.port), "stop": stop, "status": status,
               "verify": lambda: {k: v for k, v in launch_plan().items() if k != "services"}}[args.command]()
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
