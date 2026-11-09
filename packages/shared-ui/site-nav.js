@@ -55,6 +55,7 @@
     { title: '其他', items: [
       { host: new URL(domains.url('oc')).hostname, label: '佳霖馆长设定', path: '/' },
       { host: new URL(domains.url('main')).hostname, label: '连接与鸣谢', path: '/connections.html' },
+      { host: 'feedback.acgn-world.com', label: '意见反馈', path: '/', external: true },
       { host: new URL(domains.url('huiguan')).hostname, label: '用户须知', path: '/terms.html' },
       { host: new URL(domains.url('huiguan')).hostname, label: '隐私政策', path: '/privacy.html' }
     ] }
@@ -206,6 +207,7 @@
       panel.appendChild(el('small', 'qc-panel-group', group.title));
       group.items.forEach(function (item) {
         var link = el('a', '', item.label); link.href = href(item);
+        if (item.external) { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
         if (item.unpublished) {
           var dot = el('span', 'qc-status'); dot.dataset.state = 'unpublished'; dot.title = '尚未并入本站';
           dot.setAttribute('role', 'img'); dot.setAttribute('aria-label', '尚未并入本站'); link.appendChild(dot);
