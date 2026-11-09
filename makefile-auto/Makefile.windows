@@ -1,0 +1,100 @@
+# 请从仓库根目录使用：make -f makefile-auto/Makefile.windows <目标>
+SHELL := cmd.exe
+# 所有本地环境和运行数据默认放在仓库同级目录。
+LOCAL_DEV ?= $(CURDIR)/../local-dev
+PYTHON_BOOTSTRAP ?= $(LOCALAPPDATA)/Programs/Python/Python312/python.exe
+VENV := $(LOCAL_DEV)/python-venv
+NODE_HOME ?= $(LOCAL_DEV)/node/node-v22.17.1-win-x64
+export PATH := $(NODE_HOME);$(VENV)/Scripts;$(PATH)
+override export IRIDESCENTLY_ENVIRONMENT := development
+override export IRIDESCENTLY_STORAGE_ROOT := $(LOCAL_DEV)/runtime
+override export PYTHON := $(VENV)/Scripts/python.exe
+export GALLERY_DIR ?= $(LOCAL_DEV)/gallery-placeholder
+unexport IRIDESCENTLY_DATA_ROOT IRIDESCENTLY_ASSETS_ROOT IRIDESCENTLY_CACHE_ROOT IRIDESCENTLY_RELEASE_ROOT IRIDESCENTLY_BACKUP_ROOT IRIDESCENTLY_PROJECT_ROOT IRIDESCENTLY_WORKSPACE_ROOT
+
+# 默认显示帮助；各目标名称不是实际文件。
+.PHONY: help doctor setup build seal start status smoke stop
+.DEFAULT_GOAL := help
+
+# 将 start 后的数字作为端口；拒绝其他附加参数。
+ifneq ($(filter start,$(MAKECMDGOALS)),)
+ifneq ($(word 2,$(MAKECMDGOALS)),)
+START_PORT := $(word 2,$(MAKECMDGOALS))
+ifneq ($(strip $(subst 9,,$(subst 8,,$(subst 7,,$(subst 6,,$(subst 5,,$(subst 4,,$(subst 3,,$(subst 2,,$(subst 1,,$(subst 0,,$(START_PORT)))))))))))),)
+$(error 端口必须是数字)
+endif
+ifneq ($(word 3,$(MAKECMDGOALS)),)
+$(error start 最多接收一个端口)
+endif
+$(START_PORT):
+	@rem 端口参数不单独执行
+endif
+endif
+
+help:
+	@echo 在仓库根目录执行：make 目标
+	@echo 也可执行：make -f makefile-auto/Makefile.windows 目标
+	@echo   help    显示帮助
+	@echo   doctor  检查所需工具和版本
+	@echo   setup   准备虚拟环境、依赖和本地示例数据
+	@echo   build   构建本地发布候选
+	@echo   seal    封存本地发布版本
+	@echo   start   启动本地服务
+	@echo   status  查看本地服务状态
+	@echo   smoke   执行本地冒烟检查
+	@echo   stop    停止本地服务
+	@echo 使用顺序：doctor -^> setup -^> build -^> seal -^> start -^> status -^> smoke
+	@echo 使用结束后：stop
+	@echo 自定义入口端口：make start 18080（默认 8080）
+
+# 检查工具及版本，不安装系统软件。
+doctor:
+	@echo === Checking Node 22, FFmpeg, Git and Python 3.12 ===
+	@node -e "if(!process.versions.node.startsWith('22.')){console.error('Node 22 required');process.exit(1)};console.log('Node',process.versions.node)"
+	@ffmpeg -version >nul
+	@git --version
+	@"$(PYTHON_BOOTSTRAP)" -c "import sys; print('Bootstrap Python',sys.version.split()[0]); sys.exit(sys.version_info[:2] != (3,12))"
+	@if exist "$(PYTHON)" ("$(PYTHON)" -c "import sys; print('venv',sys.version.split()[0]); sys.exit(sys.version_info[:2] != (3,12))") else (echo venv not created yet)
+
+# 初始化独立环境；已有目录、密钥和示例数据不覆盖。
+setup: doctor
+	@if exist "$(VENV)" if not exist "$(PYTHON)" (echo Existing venv directory has no Python; refusing to modify it. & exit /b 1)
+	@if not exist "$(PYTHON)" "$(PYTHON_BOOTSTRAP)" -m venv "$(VENV)"
+	@"$(PYTHON)" -m pip install Pillow==12.3.0
+	@if not exist "node_modules" (call npm ci) else (echo Root node_modules exists; keeping it. Run npm ci yourself if refresh is needed.)
+	@if not exist "apps\cards\node_modules" (call npm ci --prefix apps/cards) else (echo Cards node_modules exists; keeping it.)
+	@if not exist "apps\management\node_modules" (call npm ci --prefix apps/management) else (echo Management node_modules exists; keeping it.)
+	@if not exist "apps\ecology\node_modules" (call npm ci --prefix apps/ecology) else (echo Ecology node_modules exists; keeping it.)
+	@if not exist "apps\softie\node_modules" (call npm ci --prefix apps/softie) else (echo Softie node_modules exists; keeping it.)
+	@if not exist "apps\www\gallery-engine\node_modules" (call npm ci --prefix apps/www/gallery-engine) else (echo Gallery node_modules exists; keeping it.)
+	@"$(PYTHON)" -c "import sys;sys.path.insert(0,'services/platform');import storage_paths as s;p=s.data_root();m=p/s.MARKER;s.require_ready() if m.exists() else (s.initialize_storage() if not p.exists() or not any(p.iterdir()) else sys.exit('Existing data without readiness marker; refused'));print('Development storage ready')"
+	@"$(PYTHON)" -c "from pathlib import Path;import secrets;p=Path(r'$(IRIDESCENTLY_STORAGE_ROOT)')/'development/data/secrets/server.env';p.exists() or p.write_text('HX_SSO_SECRET='+secrets.token_urlsafe(48)+'\n',encoding='utf-8');print('Local secret file ready')"
+	@"$(PYTHON)" -c "from pathlib import Path;import base64;p=Path(r'$(LOCAL_DEV)')/'gallery-placeholder';p.mkdir(parents=True,exist_ok=True);f=p/'onboarding-placeholder.png';f.exists() or f.write_bytes(base64.b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='));print('Placeholder gallery ready')"
+	@if not exist "$(IRIDESCENTLY_STORAGE_ROOT)/development/data/worldview/worldview_luoxiaohei_v4.db" "$(PYTHON)" -c "import sqlite3;from pathlib import Path;p=Path(r'$(IRIDESCENTLY_STORAGE_ROOT)')/'development/data/worldview/worldview_luoxiaohei_v4.db';p.open('xb').close();c=sqlite3.connect(p);c.executescript('CREATE TABLE characters (id INTEGER PRIMARY KEY,name TEXT,aliases TEXT,category TEXT,merged_to TEXT,completeness INTEGER,type TEXT,thumb_path TEXT,avatar_id INTEGER);CREATE TABLE character_images (id INTEGER PRIMARY KEY,character_id INTEGER,image_path TEXT,image_type TEXT,description TEXT,sort_order INTEGER);CREATE VIEW v_character_gallery AS SELECT * FROM characters;');c.execute('INSERT INTO characters(id,name,category,completeness,type) VALUES(1,?,?,8,?)',('LOCAL TEST CHARACTER','TEST','TEST'));c.commit();c.close();print('Created minimal test-only worldview database')"
+	@echo Setup complete. Worldview fixture and placeholder image are not real data.
+
+# 从已提交源码构建候选；此操作会重建候选目录。
+build:
+	@call npm run build:site
+	@call npm run build:release
+
+# 封存候选到本地 development 发布通道。
+seal:
+	@call npm run release:seal
+
+# 管理本地服务并执行冒烟验证。
+start:
+	@"$(PYTHON)" tools/runtime/local-runtime.py start $(if $(START_PORT),--port $(START_PORT),)
+	@echo 本地服务已启动，或已处于正常运行状态。
+
+status:
+	@"$(PYTHON)" tools/runtime/local-runtime.py status
+	@echo 本地服务状态查询完成；请查看上方运行和健康状态。
+
+smoke:
+	@"$(PYTHON)" tools/checks/local-smoke.py --runtime-state "$(IRIDESCENTLY_STORAGE_ROOT)/development/cache/runtime/local-runtime.json"
+	@echo 本地冒烟检查通过。
+
+stop:
+	@"$(PYTHON)" tools/runtime/local-runtime.py stop >nul
+	@echo 本地托管服务已全部停止（如果之前没有运行，也会显示此提示）。
