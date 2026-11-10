@@ -44,7 +44,7 @@
   @media (max-width: 640px) { .shell-topbar a { padding: 0 9px; font-size: 13px; } .shell-topbar a.active::after { left: 9px; right: 9px; } }
 </style>
 <script src="/shared/shared-ui/site-nav.js?v=20261109a"></script>
-<script src="/shared/shared-ui/landscape-hint.js?v=20261027z" data-auto defer></script>
+<script src="/shared/shared-ui/landscape-hint.js?v=20261110a" defer></script>
 <script defer src="/shared/shared-ui/server-recovery.js"></script>
 </head>
 <body>
@@ -126,6 +126,9 @@ function navigate(path, replace) {
 }
 
 const TAB_ORDER = ['slay', 'juling', 'management', 'ecology', 'world-map', 'softie', 'aeon'];
+// 只有画面本身按横向排布的玩法才强制横屏；其余页面（首页、图鉴、经营、地图、灵体等）
+// 在竖屏下应当正常可用。新增玩法默认竖屏，确认必须横屏后再加进这个集合。
+const LANDSCAPE_MODULES = new Set(['cards', 'slay']);
 function renderNav() {
   navlinks.replaceChildren();
   const tabs = portal.links.filter(x => isInternal(x.url) && x.key !== 'cards')
@@ -291,11 +294,20 @@ function render() {
   if (activeMount) { releaseMount(activeMount); activeMount = null; }
   setBase(BASE_PATH);
   const r = route();
+  // 横屏提示跟随当前路由：离开玩法页立刻撤销，避免遮住竖屏可用的页面。
+  if (window.IridescentlyLandscape) {
+    const landscape = r.name === 'module' && LANDSCAPE_MODULES.has(r.key);
+    window.IridescentlyLandscape[landscape ? 'enable' : 'disable']();
+  }
   if (r.name === 'module') renderModule(r.key); else renderHome();
   for (const a of navlinks.querySelectorAll('a')) {
     const current = a.getAttribute('href') === location.pathname;
     a.classList.toggle('active', current);
-    if (current) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    if (current) {
+      a.setAttribute('aria-current', 'page');
+      // 竖屏下标签栏会横向溢出，直接打开靠后的模块时把当前页滚进可视区。
+      a.scrollIntoView({block: 'nearest', inline: 'center'});
+    } else a.removeAttribute('aria-current');
   }
   set('lastRoute', location.pathname);
 }

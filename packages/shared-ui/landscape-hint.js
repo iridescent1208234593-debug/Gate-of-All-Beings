@@ -16,6 +16,7 @@
 
   var ID = "__qc_rotate";
   var enabled = false;
+  var dismissed = false;
   var overlay = null;
 
   var CSS = [
@@ -35,12 +36,19 @@
     "#" + ID + " button{font:inherit;font-size:14px;letter-spacing:.08em;padding:11px 26px;border-radius:10px;cursor:pointer;",
     "border:1px solid rgba(230,192,106,.85);background:rgba(230,192,106,.14);color:#f4eedf;transition:background .18s}",
     "#" + ID + " button:hover{background:rgba(230,192,106,.26)}",
+    "#" + ID + " .rc-skip{margin-left:8px;border-color:rgba(244,238,223,.28);background:transparent;color:rgba(244,238,223,.7)}",
+    "#" + ID + " .rc-skip:hover{background:rgba(244,238,223,.08)}",
     "#" + ID + " .rc-tip{margin-top:14px;font-size:12px;color:rgba(244,238,223,.5)}",
     "@media (orientation:landscape){#" + ID + "{display:none !important}}"
   ].join("");
 
   function isTouchPhone() {
-    var touch = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
+    // 只用「主指针是否粗糙」判断触摸设备：带触屏的笔记本 maxTouchPoints 也大于 0，
+    // 用它会把这些设备在窄窗口下误判成手机。
+    var coarse = window.matchMedia ? window.matchMedia("(pointer: coarse)").matches : null;
+    var touch = coarse === null
+      ? (("ontouchstart" in window) || navigator.maxTouchPoints > 0)
+      : coarse;
     var small = Math.min(window.innerWidth, window.innerHeight) <= 820;
     return touch && small;
   }
@@ -68,9 +76,15 @@
         '<h2>请横屏游玩</h2>' +
         '<p>玩法画面按横屏设计，竖屏下按钮与画面会挤在一起。</p>' +
         '<button type="button">转到横屏</button>' +
+        '<button type="button" class="rc-skip">仍然竖屏浏览</button>' +
         '<div class="rc-tip">若没有自动旋转，请在系统中开启屏幕旋转后重新进入</div>' +
       "</div>";
     overlay.querySelector("button").addEventListener("click", goLandscape);
+    // 提示只该劝阻，不该把人锁在当前页面：竖屏下必须留一条能离开的出口。
+    overlay.querySelector(".rc-skip").addEventListener("click", function () {
+      dismissed = true;
+      overlay.classList.remove("on");
+    });
     document.body.appendChild(overlay);
     return overlay;
   }
@@ -86,7 +100,7 @@
 
   function sync() {
     if (!enabled) { if (overlay) overlay.classList.remove("on"); return; }
-    var need = isTouchPhone() && isPortrait();
+    var need = !dismissed && isTouchPhone() && isPortrait();
     if (need) {
       build();
       overlay.classList.add("on");
@@ -95,8 +109,9 @@
     }
   }
 
-  function enable() { enabled = true; sync(); }
+  function enable() { dismissed = false; enabled = true; sync(); }
   function disable() {
+    dismissed = false;
     enabled = false;
     if (overlay) overlay.classList.remove("on");
   }
