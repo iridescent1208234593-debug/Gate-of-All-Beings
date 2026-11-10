@@ -45,7 +45,8 @@
       { host: new URL(domains.url('huiguan')).hostname, label: '官方角色档案', path: '/works.html' },
       { host: new URL(domains.url('huiguan')).hostname, label: '表情包收录', path: '/stickers.html' },
       { host: new URL(domains.url('huiguan')).hostname, label: '人物关系图', path: '/relation.html' },
-      { host: new URL(domains.url('huiguan')).hostname, label: '配色海报工坊', path: '/haibao/' }
+      { host: new URL(domains.url('huiguan')).hostname, label: '配色海报工坊', path: '/haibao/' },
+      { host: new URL(domains.url('huiguan')).hostname, label: '会馆信息', path: '/info.html' }
     ] },
     { title: '玩法', items: [
       { host: new URL(domains.url('zszm')).hostname, label: '众生之门 · 门庭', path: '/' },

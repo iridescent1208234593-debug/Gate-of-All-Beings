@@ -1226,6 +1226,23 @@ SHOWCASE_HTML_LIMIT = 2 * 1024 * 1024
 SHOWCASE_REF_RE = re.compile(r"^(?:[a-f0-9]{32}|[a-f0-9]{64})\.html$")  # legacy MD5 or SHA-256 names
 
 
+def _public_display_name(gate_identity_json, nickname):
+    """对外显示名：优先角色卡的 display_name，其次昵称；都没有时返回「无名旅人」。
+
+    绝不回落到登录用户名——公开页面不得暴露账号名。
+    """
+    name = ""
+    if gate_identity_json:
+        try:
+            data = json.loads(gate_identity_json) or {}
+        except (TypeError, ValueError):
+            data = {}
+        name = str(data.get("display_name") or "").strip()
+    if not name:
+        name = str(nickname or "").strip()
+    return name or "无名旅人"
+
+
 def showcase_html_bytes(html):
     """Encode and bound a submitted showcase page before anything is written."""
     if not isinstance(html, str):
@@ -1754,6 +1771,8 @@ class Handler(BaseStaticHandler):
             return self._api_sso_login()
         if path in ("/", "/cb", "/api/callback") and (qs.get("code") or qs.get("error") or qs.get("state")):
             return self._api_callback(qs)
+        if path == "/api/site-info":
+            return self._api_site_info()
         if path == "/api/user":
             return self._api_user()
         if path == "/api/oc":
@@ -2624,6 +2643,58 @@ class Handler(BaseStaticHandler):
         self._json(200, {"ok": True, "avatar_asset_id": asset_url}, sanitize_images=False)
 
     # ---------- /api/user ----------
+    def _api_site_info(self):
+        """公开的会馆基础信息：成员数、设表数、各职位名单（只给对外显示名）。"""
+        conn = db()
+        try:
+            total_users = conn.execute(
+                "SELECT COUNT(*) FROM local_users WHERE status='active'").fetchone()[0]
+            sheets_total = conn.execute("SELECT COUNT(*) FROM fan_characters").fetchone()[0]
+            sheets_public = conn.execute(
+                "SELECT COUNT(*) FROM fan_characters WHERE is_public=1").fetchone()[0]
+            sheets_approved = conn.execute(
+                "SELECT COUNT(*) FROM fan_characters WHERE review_status='approved'").fetchone()[0]
+            rows = conn.execute("""
+                SELECT u.uid, u.nickname, u.role, COALESCE(u.edit_role,'') AS edit_role,
+                       u.is_fan_reviewer, p.gate_identity_json
+                FROM local_users u
+                LEFT JOIN account_profiles p
+                       ON p.kind='local' AND CAST(p.uid AS TEXT)=CAST(u.uid AS TEXT)
+                WHERE u.status='active'
+                  AND (u.role IN ('admin','elder')
+                       OR COALESCE(u.edit_role,'')='scribe'
+                       OR u.is_fan_reviewer=1)
+                ORDER BY u.uid
+            """).fetchall()
+        finally:
+            conn.close()
+
+        # 职级（管理员/长老）与附加身份（编辑/同人审核）彼此独立：同一个人可以同时出现在多份名单里。
+        buckets = {"admin": [], "elder": [], "scribe": [], "reviewer": []}
+        for r in rows:
+            name = _public_display_name(r["gate_identity_json"], r["nickname"])
+            if r["role"] == "admin":
+                buckets["admin"].append(name)
+            if r["role"] == "elder":
+                buckets["elder"].append(name)
+            if (r["edit_role"] or "") == "scribe":
+                buckets["scribe"].append(name)
+            if r["is_fan_reviewer"] == 1:
+                buckets["reviewer"].append(name)
+
+        self._json(200, {
+            "ok": True,
+            "generated_at": now_iso(),
+            "users": {"total": total_users},
+            "sheets": {"total": sheets_total, "public": sheets_public, "approved": sheets_approved},
+            "positions": [
+                {"key": "admin", "label": "管理员", "members": buckets["admin"]},
+                {"key": "elder", "label": "长老", "members": buckets["elder"]},
+                {"key": "scribe", "label": "编辑", "members": buckets["scribe"]},
+                {"key": "reviewer", "label": "同人审核", "members": buckets["reviewer"]},
+            ],
+        })
+
     def _api_user(self):
         sess = read_session(self._get_session())
         if not sess:
