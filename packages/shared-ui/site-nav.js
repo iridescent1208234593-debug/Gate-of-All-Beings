@@ -54,6 +54,7 @@
     ] },
     { title: '其他', items: [
       { host: new URL(domains.url('oc')).hostname, label: '佳霖馆长设定', path: '/' },
+      { host: new URL(domains.url('huiguan')).hostname, label: '会馆信息', path: '/info.html' },
       { host: new URL(domains.url('main')).hostname, label: '连接与鸣谢', path: '/connections.html' },
       { host: 'feedback.acgn-world.com', label: '意见反馈', path: '/', external: true },
       { host: new URL(domains.url('huiguan')).hostname, label: '用户须知', path: '/terms.html' },

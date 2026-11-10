@@ -170,6 +170,99 @@ OFFICIAL_NAME_ERROR = "该名号为官方世界观角色名，禁止用作名号
 def is_official_title_name(value):
     return _normalize_title_name(value) in OFFICIAL_NAME_BLACKLIST
 
+
+ADMIN_NAME_ERROR = "该名号已被会馆管理员占用，请另取一个"
+
+# 管理员占用的名字（用户名 / 昵称 / 角色卡对外名号）会被缓存，避免每次写操作都查库。
+_ADMIN_NAMES_CACHE = {"at": 0.0, "names": frozenset()}
+_ADMIN_NAMES_TTL = 60.0
+
+
+def _admin_reserved_names(force=False):
+    """全部管理员占用的规范化名字。查询失败时退回上一次缓存，绝不因报错而放行。"""
+    now_ts = time.time()
+    if not force and _ADMIN_NAMES_CACHE["at"] and now_ts - _ADMIN_NAMES_CACHE["at"] < _ADMIN_NAMES_TTL:
+        return _ADMIN_NAMES_CACHE["names"]
+    names = set()
+    try:
+        conn = db()
+        try:
+            rows = conn.execute(
+                "SELECT u.username, u.nickname, p.gate_identity_json "
+                "FROM local_users u "
+                "LEFT JOIN account_profiles p "
+                "       ON p.kind='local' AND CAST(p.uid AS TEXT)=CAST(u.uid AS TEXT) "
+                "WHERE u.role='admin'").fetchall()
+        finally:
+            conn.close()
+    except Exception:
+        return _ADMIN_NAMES_CACHE["names"]
+
+    for r in rows:
+        for value in (r["username"], r["nickname"]):
+            norm = _normalize_title_name(value)
+            if norm:
+                names.add(norm)
+        raw = r["gate_identity_json"] or ""
+        if raw:
+            try:
+                display = json.loads(raw).get("display_name") or ""
+            except (TypeError, ValueError):
+                display = ""
+            norm = _normalize_title_name(display)
+            if norm:
+                names.add(norm)
+
+    _ADMIN_NAMES_CACHE["at"] = now_ts
+    _ADMIN_NAMES_CACHE["names"] = frozenset(names)
+    return _ADMIN_NAMES_CACHE["names"]
+
+
+def _admin_own_names(uid):
+    """某个管理员自己的全部名字（改自己名字时豁免）。"""
+    names = set()
+    try:
+        conn = db()
+        try:
+            row = conn.execute(
+                "SELECT u.username, u.nickname, p.gate_identity_json "
+                "FROM local_users u "
+                "LEFT JOIN account_profiles p "
+                "       ON p.kind='local' AND CAST(p.uid AS TEXT)=CAST(u.uid AS TEXT) "
+                "WHERE u.role='admin' AND CAST(u.uid AS TEXT)=?", (str(uid),)).fetchone()
+        finally:
+            conn.close()
+    except Exception:
+        return names
+    if not row:
+        return names
+    for value in (row["username"], row["nickname"]):
+        norm = _normalize_title_name(value)
+        if norm:
+            names.add(norm)
+    raw = row["gate_identity_json"] or ""
+    if raw:
+        try:
+            display = json.loads(raw).get("display_name") or ""
+        except (TypeError, ValueError):
+            display = ""
+        norm = _normalize_title_name(display)
+        if norm:
+            names.add(norm)
+    return names
+
+
+def is_admin_reserved_name(value, exclude_uid=None):
+    """是否被某个管理员占用（exclude_uid 是自己时放行）。"""
+    norm = _normalize_title_name(value)
+    if not norm:
+        return False
+    if norm not in _admin_reserved_names():
+        return False
+    if exclude_uid is not None and norm in _admin_own_names(exclude_uid):
+        return False
+    return True
+
 def _worldview_connection():
     """The migrated worldview must exist; an empty replacement is never created."""
     return sqlite3.connect(Path(WV_DB).as_uri() + "?mode=rw", uri=True, timeout=10)
@@ -1084,6 +1177,30 @@ def fan_review_after_edit_sql(auto_approve):
     return f"review_status=CASE WHEN {fan_content_changed_sql()} THEN {target} ELSE review_status END"
 
 
+FAN_NAME_TAKEN_ERROR = "「%s」已有人设表使用，请换一个名字"
+
+
+def _fan_name_conflict(conn, name, kind, uid):
+    """人设表名字是否被别人占用。
+
+    规则：**别人已经占了、而我自己名下还没有这个名字**时才判为冲突。
+    这样既能让新表无法抢别人的名字，也不会把历史上已经重名的老表卡住改不动。
+    """
+    norm = _normalize_title_name(name)
+    if not norm:
+        return False
+    mine = False
+    other = False
+    for r in conn.execute("SELECT name, user_kind, user_uid FROM fan_characters").fetchall():
+        if _normalize_title_name(r["name"]) != norm:
+            continue
+        if r["user_kind"] == kind and str(r["user_uid"]) == str(uid):
+            mine = True
+        else:
+            other = True
+    return other and not mine
+
+
 def sync_fan_characters(conn, ident, code, cd, previous_code=None, auto_approve=False):
     """所有者保存人设后，原位刷新其画廊记录（不改公开状态、不新建副本）；只匹配本人 (kind, uid)。
 
@@ -1224,6 +1341,23 @@ class ShowcaseTooLarge(ValueError):
 
 SHOWCASE_HTML_LIMIT = 2 * 1024 * 1024
 SHOWCASE_REF_RE = re.compile(r"^(?:[a-f0-9]{32}|[a-f0-9]{64})\.html$")  # legacy MD5 or SHA-256 names
+
+
+def _public_display_name(gate_identity_json, nickname):
+    """对外显示名：优先角色卡的 display_name，其次昵称；都没有时返回「无名旅人」。
+
+    绝不回落到登录用户名——公开页面不得暴露账号名。
+    """
+    name = ""
+    if gate_identity_json:
+        try:
+            data = json.loads(gate_identity_json) or {}
+        except (TypeError, ValueError):
+            data = {}
+        name = str(data.get("display_name") or "").strip()
+    if not name:
+        name = str(nickname or "").strip()
+    return name or "无名旅人"
 
 
 def showcase_html_bytes(html):
@@ -1754,6 +1888,8 @@ class Handler(BaseStaticHandler):
             return self._api_sso_login()
         if path in ("/", "/cb", "/api/callback") and (qs.get("code") or qs.get("error") or qs.get("state")):
             return self._api_callback(qs)
+        if path == "/api/site-info":
+            return self._api_site_info()
         if path == "/api/user":
             return self._api_user()
         if path == "/api/oc":
@@ -2270,9 +2406,15 @@ class Handler(BaseStaticHandler):
         password = body.get("password") or ""
         nickname = (body.get("nickname") or "").strip()[:24]
 
-        if is_official_title_name(nickname or username):
-            self._json(400, {"error": OFFICIAL_NAME_ERROR})
-            return
+        for _value in (username, nickname):
+            if not _value:
+                continue
+            if is_official_title_name(_value):
+                self._json(400, {"error": OFFICIAL_NAME_ERROR})
+                return
+            if is_admin_reserved_name(_value):
+                self._json(400, {"error": ADMIN_NAME_ERROR})
+                return
         if not USERNAME_RE.match(username):
             self._json(400, {"error": "用户名需为 2-16 位中英文、数字或下划线"})
             return
@@ -2624,6 +2766,103 @@ class Handler(BaseStaticHandler):
         self._json(200, {"ok": True, "avatar_asset_id": asset_url}, sanitize_images=False)
 
     # ---------- /api/user ----------
+    def _api_site_info(self):
+        """公开的会馆基础信息：成员数、设表数、职位名单与最近身份变动（只给对外显示名）。"""
+        conn = db()
+        try:
+            total_users = conn.execute(
+                "SELECT COUNT(*) FROM local_users WHERE status='active'").fetchone()[0]
+            sheets_total = conn.execute("SELECT COUNT(*) FROM fan_characters").fetchone()[0]
+            sheets_public = conn.execute(
+                "SELECT COUNT(*) FROM fan_characters WHERE is_public=1").fetchone()[0]
+            sheets_approved = conn.execute(
+                "SELECT COUNT(*) FROM fan_characters WHERE review_status='approved'").fetchone()[0]
+            rows = conn.execute("""
+                SELECT u.uid, u.nickname, u.role, COALESCE(u.edit_role,'') AS edit_role,
+                       u.is_fan_reviewer, p.gate_identity_json
+                FROM local_users u
+                LEFT JOIN account_profiles p
+                       ON p.kind='local' AND CAST(p.uid AS TEXT)=CAST(u.uid AS TEXT)
+                WHERE u.status='active'
+                  AND (u.role IN ('admin','elder')
+                       OR COALESCE(u.edit_role,'')='scribe'
+                       OR u.is_fan_reviewer=1)
+                ORDER BY u.uid
+            """).fetchall()
+            # 告示栏：当前处于封禁状态的账号（表里没有封禁时间字段，只能给当前状态）
+            banned = conn.execute("""
+                SELECT u.nickname, p.gate_identity_json
+                FROM local_users u
+                LEFT JOIN account_profiles p
+                       ON p.kind='local' AND CAST(p.uid AS TEXT)=CAST(u.uid AS TEXT)
+                WHERE u.status='banned'
+                ORDER BY u.uid DESC LIMIT 10
+            """).fetchall()
+            # 告示栏：身份审核通过（执行者的编辑/同人审核，以及长老申请）
+            approved = conn.execute("""
+                SELECT er.requested_role AS detail,
+                       COALESCE(er.reviewed_at, er.created_at) AS at,
+                       u.nickname AS nick, p.gate_identity_json AS gj
+                FROM executor_requests er
+                LEFT JOIN local_users u
+                       ON er.user_kind='local' AND CAST(u.uid AS TEXT)=CAST(er.user_uid AS TEXT)
+                LEFT JOIN account_profiles p
+                       ON p.kind=er.user_kind AND CAST(p.uid AS TEXT)=CAST(er.user_uid AS TEXT)
+                WHERE er.status='approved'
+                UNION ALL
+                SELECT 'elder', el.created_at, u.nickname, p.gate_identity_json
+                FROM elder_requests el
+                LEFT JOIN local_users u
+                       ON el.kind='local' AND CAST(u.uid AS TEXT)=CAST(el.uid AS TEXT)
+                LEFT JOIN account_profiles p
+                       ON p.kind=el.kind AND CAST(p.uid AS TEXT)=CAST(el.uid AS TEXT)
+                WHERE el.status='approved'
+                ORDER BY at DESC
+                LIMIT 20
+            """).fetchall()
+        finally:
+            conn.close()
+
+        # 职级（管理员/长老）与附加身份（编辑/同人审核）彼此独立：同一个人可以同时出现在多份名单里。
+        buckets = {"admin": [], "elder": [], "scribe": [], "reviewer": []}
+        for r in rows:
+            name = _public_display_name(r["gate_identity_json"], r["nickname"])
+            if r["role"] == "admin":
+                buckets["admin"].append(name)
+            if r["role"] == "elder":
+                buckets["elder"].append(name)
+            if (r["edit_role"] or "") == "scribe":
+                buckets["scribe"].append(name)
+            if r["is_fan_reviewer"] == 1:
+                buckets["reviewer"].append(name)
+
+        label_map = {"scribe": "编辑", "fan_reviewer": "同人审核", "elder": "长老"}
+        events = []
+        for r in banned:
+            events.append({"type": "ban", "label": "封禁", "at": "",
+                           "name": _public_display_name(r["gate_identity_json"], r["nickname"])})
+        for r in approved:
+            detail = r["detail"] or ""
+            events.append({"type": "approve",
+                           "label": label_map.get(detail, detail or "身份"),
+                           "at": r["at"] or "",
+                           "name": _public_display_name(r["gj"], r["nick"])})
+        events.sort(key=lambda e: e.get("at") or "", reverse=True)
+
+        self._json(200, {
+            "ok": True,
+            "generated_at": now_iso(),
+            "users": {"total": total_users},
+            "sheets": {"total": sheets_total, "public": sheets_public, "approved": sheets_approved},
+            "positions": [
+                {"key": "admin", "label": "管理员", "members": buckets["admin"]},
+                {"key": "elder", "label": "长老", "members": buckets["elder"]},
+                {"key": "scribe", "label": "编辑", "members": buckets["scribe"]},
+                {"key": "reviewer", "label": "同人审核", "members": buckets["reviewer"]},
+            ],
+            "events": events[:20],
+        })
+
     def _api_user(self):
         sess = read_session(self._get_session())
         if not sess:
@@ -2922,6 +3161,20 @@ class Handler(BaseStaticHandler):
         html = body.get("html", "")
         data_field = body.get("data", {})
 
+        # 角色名同样受「官方名 + 管理员名」保护（这个接口原先完全没有校验）
+        _oc_name = (data_field.get("name") or "").strip() if isinstance(data_field, dict) else ""
+        if _oc_name:
+            if is_official_title_name(_oc_name):
+                self._json(400, {"error": "「" + _oc_name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
+            if is_admin_reserved_name(_oc_name):
+                self._json(400, {"error": "「" + _oc_name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
+            _chk = db()
+            try:
+                if _fan_name_conflict(_chk, _oc_name, ident["kind"], ident["uid"]):
+                    self._json(400, {"error": FAN_NAME_TAKEN_ERROR % _oc_name}); return
+            finally:
+                _chk.close()
+
         # Bound everything before the first write: a rejected save leaves no files behind.
         try:
             html_bytes = len(showcase_html_bytes(html)) if html else 0
@@ -2998,6 +3251,18 @@ class Handler(BaseStaticHandler):
                 if isinstance(c.get("images"), list): c["images"] = [store_data_uri(x) for x in c["images"]]
             except ValueError as error:
                 self._json(400, {"error": str(error)}); return
+            _oc_name = (c.get("name") or "").strip() if isinstance(c, dict) else ""
+            if _oc_name:
+                if is_official_title_name(_oc_name):
+                    self._json(400, {"error": "「" + _oc_name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
+                if is_admin_reserved_name(_oc_name):
+                    self._json(400, {"error": "「" + _oc_name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
+                _chk = db()
+                try:
+                    if _fan_name_conflict(_chk, _oc_name, ident["kind"], ident["uid"]):
+                        self._json(400, {"error": FAN_NAME_TAKEN_ERROR % _oc_name}); return
+                finally:
+                    _chk.close()
             new_chars.append({"code": c.get("code", ""), "data": c})
         auto_approve = self._can_review_fan(ident)
         with character_store().transaction(write=True) as session:
@@ -3600,6 +3865,9 @@ class Handler(BaseStaticHandler):
             return
         if is_official_title_name(newname):
             self._json(400, {"error": OFFICIAL_NAME_ERROR})
+            return
+        if is_admin_reserved_name(newname, exclude_uid=ident["uid"]):
+            self._json(400, {"error": ADMIN_NAME_ERROR})
             return
 
         kind, uid = ident["kind"], ident["uid"]
@@ -5297,6 +5565,11 @@ class Handler(BaseStaticHandler):
                 conn.close(); self._json(403, {"error": "只能操作自己的海报"}); return
             poster_code = f"poster-{pid}"
             gallery_name = (row["title"] or "配色海报") + (f"｜{row['char_name']}" if row["char_name"] else "")
+            _pname = gallery_name[:80]
+            if is_official_title_name(_pname) or is_admin_reserved_name(_pname):
+                conn.close(); self._json(400, {"error": "「" + _pname + "」不能用作公开名号，请改一下海报标题或绑定的人设"}); return
+            if _fan_name_conflict(conn, _pname, ident["kind"], ident["uid"]):
+                conn.close(); self._json(400, {"error": FAN_NAME_TAKEN_ERROR % _pname}); return
             story = ("配色：" + "×".join(x for x in (row["primary_name"], row["accent_name"]) if x)
                      + f"（{row['primary_color']} / {row['accent_color']}）") if (row["primary_name"] or row["accent_name"]) else ""
             fan = conn.execute(
@@ -5520,6 +5793,14 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "角色名过长（≤50字）"}); return
         if is_official_title_name(name):
             self._json(400, {"error": "「" + name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
+        if is_admin_reserved_name(name):
+            self._json(400, {"error": "「" + name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
+        _chk = db()
+        try:
+            if _fan_name_conflict(_chk, name, ident["kind"], ident["uid"]):
+                self._json(400, {"error": FAN_NAME_TAKEN_ERROR % name}); return
+        finally:
+            _chk.close()
         try:
             image_data = _persist_preview_reference((body.get("image_data") or "").strip())
         except ValueError as error:
@@ -5632,6 +5913,12 @@ class Handler(BaseStaticHandler):
                     if is_official_title_name(fields["name"]):
                         blocked.append(fields["name"])
                         continue
+                    if is_admin_reserved_name(fields["name"]):
+                        blocked.append(fields["name"])
+                        continue
+                    if _fan_name_conflict(conn, fields["name"], ident["kind"], ident["uid"]):
+                        blocked.append(fields["name"])
+                        continue
                     # 同一角色只保留一条画廊记录：先按编号找，旧记录（无编号）再按名字找
                     art = fan_art_source(cd)
                     values = [fields[col] for col in FAN_SYNC_COLUMNS]
@@ -5675,7 +5962,7 @@ class Handler(BaseStaticHandler):
                     published += 1
                     pending += review == "pending"
             if blocked:
-                self._json(400, {"error": "以下名号是官方世界观角色名，不能公开：" + "、".join(sorted(set(blocked))) + "；请先改成自建名号"}); return
+                self._json(400, {"error": "以下名号不能公开：" + "、".join(sorted(set(blocked))) + "；可能被官方角色名、管理员名占用，或已被他人的人设表使用"}); return
             self._json(200, {"ok": True, "published": published, "skipped": skipped, "pending": pending})
         except oc_store.OCError as error:
             self._json(error.status, {"error": error.code})
