@@ -3137,6 +3137,14 @@ class Handler(BaseStaticHandler):
         html = body.get("html", "")
         data_field = body.get("data", {})
 
+        # 角色名同样受「官方名 + 管理员名」保护（这个接口原先完全没有校验）
+        _oc_name = (data_field.get("name") or "").strip() if isinstance(data_field, dict) else ""
+        if _oc_name:
+            if is_official_title_name(_oc_name):
+                self._json(400, {"error": "「" + _oc_name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
+            if is_admin_reserved_name(_oc_name):
+                self._json(400, {"error": "「" + _oc_name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
+
         # Bound everything before the first write: a rejected save leaves no files behind.
         try:
             html_bytes = len(showcase_html_bytes(html)) if html else 0
@@ -3213,6 +3221,12 @@ class Handler(BaseStaticHandler):
                 if isinstance(c.get("images"), list): c["images"] = [store_data_uri(x) for x in c["images"]]
             except ValueError as error:
                 self._json(400, {"error": str(error)}); return
+            _oc_name = (c.get("name") or "").strip() if isinstance(c, dict) else ""
+            if _oc_name:
+                if is_official_title_name(_oc_name):
+                    self._json(400, {"error": "「" + _oc_name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
+                if is_admin_reserved_name(_oc_name):
+                    self._json(400, {"error": "「" + _oc_name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
             new_chars.append({"code": c.get("code", ""), "data": c})
         auto_approve = self._can_review_fan(ident)
         with character_store().transaction(write=True) as session:
