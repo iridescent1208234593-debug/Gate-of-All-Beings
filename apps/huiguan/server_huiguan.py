@@ -170,6 +170,99 @@ OFFICIAL_NAME_ERROR = "该名号为官方世界观角色名，禁止用作名号
 def is_official_title_name(value):
     return _normalize_title_name(value) in OFFICIAL_NAME_BLACKLIST
 
+
+ADMIN_NAME_ERROR = "该名号已被会馆管理员占用，请另取一个"
+
+# 管理员占用的名字（用户名 / 昵称 / 角色卡对外名号）会被缓存，避免每次写操作都查库。
+_ADMIN_NAMES_CACHE = {"at": 0.0, "names": frozenset()}
+_ADMIN_NAMES_TTL = 60.0
+
+
+def _admin_reserved_names(force=False):
+    """全部管理员占用的规范化名字。查询失败时退回上一次缓存，绝不因报错而放行。"""
+    now_ts = time.time()
+    if not force and _ADMIN_NAMES_CACHE["at"] and now_ts - _ADMIN_NAMES_CACHE["at"] < _ADMIN_NAMES_TTL:
+        return _ADMIN_NAMES_CACHE["names"]
+    names = set()
+    try:
+        conn = db()
+        try:
+            rows = conn.execute(
+                "SELECT u.username, u.nickname, p.gate_identity_json "
+                "FROM local_users u "
+                "LEFT JOIN account_profiles p "
+                "       ON p.kind='local' AND CAST(p.uid AS TEXT)=CAST(u.uid AS TEXT) "
+                "WHERE u.role='admin'").fetchall()
+        finally:
+            conn.close()
+    except Exception:
+        return _ADMIN_NAMES_CACHE["names"]
+
+    for r in rows:
+        for value in (r["username"], r["nickname"]):
+            norm = _normalize_title_name(value)
+            if norm:
+                names.add(norm)
+        raw = r["gate_identity_json"] or ""
+        if raw:
+            try:
+                display = json.loads(raw).get("display_name") or ""
+            except (TypeError, ValueError):
+                display = ""
+            norm = _normalize_title_name(display)
+            if norm:
+                names.add(norm)
+
+    _ADMIN_NAMES_CACHE["at"] = now_ts
+    _ADMIN_NAMES_CACHE["names"] = frozenset(names)
+    return _ADMIN_NAMES_CACHE["names"]
+
+
+def _admin_own_names(uid):
+    """某个管理员自己的全部名字（改自己名字时豁免）。"""
+    names = set()
+    try:
+        conn = db()
+        try:
+            row = conn.execute(
+                "SELECT u.username, u.nickname, p.gate_identity_json "
+                "FROM local_users u "
+                "LEFT JOIN account_profiles p "
+                "       ON p.kind='local' AND CAST(p.uid AS TEXT)=CAST(u.uid AS TEXT) "
+                "WHERE u.role='admin' AND CAST(u.uid AS TEXT)=?", (str(uid),)).fetchone()
+        finally:
+            conn.close()
+    except Exception:
+        return names
+    if not row:
+        return names
+    for value in (row["username"], row["nickname"]):
+        norm = _normalize_title_name(value)
+        if norm:
+            names.add(norm)
+    raw = row["gate_identity_json"] or ""
+    if raw:
+        try:
+            display = json.loads(raw).get("display_name") or ""
+        except (TypeError, ValueError):
+            display = ""
+        norm = _normalize_title_name(display)
+        if norm:
+            names.add(norm)
+    return names
+
+
+def is_admin_reserved_name(value, exclude_uid=None):
+    """是否被某个管理员占用（exclude_uid 是自己时放行）。"""
+    norm = _normalize_title_name(value)
+    if not norm:
+        return False
+    if norm not in _admin_reserved_names():
+        return False
+    if exclude_uid is not None and norm in _admin_own_names(exclude_uid):
+        return False
+    return True
+
 def _worldview_connection():
     """The migrated worldview must exist; an empty replacement is never created."""
     return sqlite3.connect(Path(WV_DB).as_uri() + "?mode=rw", uri=True, timeout=10)
@@ -2289,9 +2382,15 @@ class Handler(BaseStaticHandler):
         password = body.get("password") or ""
         nickname = (body.get("nickname") or "").strip()[:24]
 
-        if is_official_title_name(nickname or username):
-            self._json(400, {"error": OFFICIAL_NAME_ERROR})
-            return
+        for _value in (username, nickname):
+            if not _value:
+                continue
+            if is_official_title_name(_value):
+                self._json(400, {"error": OFFICIAL_NAME_ERROR})
+                return
+            if is_admin_reserved_name(_value):
+                self._json(400, {"error": ADMIN_NAME_ERROR})
+                return
         if not USERNAME_RE.match(username):
             self._json(400, {"error": "用户名需为 2-16 位中英文、数字或下划线"})
             return
@@ -3716,6 +3815,9 @@ class Handler(BaseStaticHandler):
             return
         if is_official_title_name(newname):
             self._json(400, {"error": OFFICIAL_NAME_ERROR})
+            return
+        if is_admin_reserved_name(newname, exclude_uid=ident["uid"]):
+            self._json(400, {"error": ADMIN_NAME_ERROR})
             return
 
         kind, uid = ident["kind"], ident["uid"]
@@ -5636,6 +5738,8 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "角色名过长（≤50字）"}); return
         if is_official_title_name(name):
             self._json(400, {"error": "「" + name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
+        if is_admin_reserved_name(name):
+            self._json(400, {"error": "「" + name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
         try:
             image_data = _persist_preview_reference((body.get("image_data") or "").strip())
         except ValueError as error:
@@ -5746,6 +5850,9 @@ class Handler(BaseStaticHandler):
                     if not fields["name"]:
                         continue
                     if is_official_title_name(fields["name"]):
+                        blocked.append(fields["name"])
+                        continue
+                    if is_admin_reserved_name(fields["name"]):
                         blocked.append(fields["name"])
                         continue
                     # 同一角色只保留一条画廊记录：先按编号找，旧记录（无编号）再按名字找
