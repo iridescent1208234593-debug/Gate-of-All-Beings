@@ -122,17 +122,23 @@ try {
   await page.locator('.map-node:not([disabled])').first().click();
 
   // 自动出牌直到离开战斗：遭遇、奖励、休憩三种房间都按文案处理。
+  // 房间切换是异步的，元素可能刚出现就被替换，所以每次点击都容错并回到循环重判。
+  const tryClick = async (locator, timeout = 4000) => {
+    try {
+      await locator.click({timeout});
+      return true;
+    } catch {
+      return false;
+    }
+  };
   const settled = page.getByRole('button', {name: '收好这些见闻'});
   const returnButton = page.getByRole('button', {name: /折返|离开/}).first();
   for (let step = 0; step < 60; step++) {
     if (await settled.isVisible().catch(() => false)) break;
     if (await returnButton.isVisible().catch(() => false)) break;
 
-    const reward = page.getByRole('button', {name: /不取新牌，继续旅途/});
-    if (await reward.isVisible().catch(() => false)) { await reward.click(); continue; }
-
-    const rest = page.getByRole('button', {name: /在树荫下休息/});
-    if (await rest.isVisible().catch(() => false)) { await rest.click(); continue; }
+    if (await tryClick(page.getByRole('button', {name: /不取新牌，继续旅途/}).first())) continue;
+    if (await tryClick(page.getByRole('button', {name: /在树荫下休息/}).first())) continue;
 
     const endTurn = page.getByRole('button', {name: '结束回合'});
     if (await endTurn.isVisible().catch(() => false)) {
@@ -141,7 +147,7 @@ try {
         if (await playable.count() === 0) break;
         await playable.click({timeout: 5000}).catch(() => {});
       }
-      await endTurn.click({timeout: 10000}).catch(() => {});
+      await tryClick(endTurn, 10000);
       continue;
     }
     await page.waitForTimeout(250);
@@ -159,6 +165,7 @@ try {
   assert(entriesAfter > entriesBefore, `结算未写入新见闻：${entriesBefore} → ${entriesAfter}`);
   checks.push(`结算产生新见闻：${entriesBefore} → ${entriesAfter} 条`);
   await page.screenshot({path: path.join(output, 'journal-settled.png')});
+  await page.locator('.journal-return').screenshot({path: path.join(output, 'journal-return-panel.png')});
   await page.getByRole('button', {name: '收好这些见闻'}).click();
 
   // ── 3. 照料（过一夜，结算当日安排）────────────────────────
