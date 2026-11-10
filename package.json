@@ -13,6 +13,7 @@
     "data:cards": "node --import ./apps/cards/node_modules/tsx/dist/loader.mjs packages/shared-data/export_cards.mjs",
     "verify:game-data": "node packages/shared-session/verify-game.mjs",
     "verify:game-ui": "node packages/shared-session/verify-game-ui.mjs",
+    "verify:journal-loop": "node packages/shared-session/verify-journal-loop.mjs",
     "prepare:gallery-engine": "npm ci --prefix apps/www/gallery-engine",
     "build:homepage": "npm run prepare:gallery-engine && node apps/www/scripts/build-homepage.mjs",
     "build:release": "npm run build:modules && npm run build:homepage",
