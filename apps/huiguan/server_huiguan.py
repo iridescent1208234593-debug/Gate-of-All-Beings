@@ -1177,6 +1177,30 @@ def fan_review_after_edit_sql(auto_approve):
     return f"review_status=CASE WHEN {fan_content_changed_sql()} THEN {target} ELSE review_status END"
 
 
+FAN_NAME_TAKEN_ERROR = "「%s」已有人设表使用，请换一个名字"
+
+
+def _fan_name_conflict(conn, name, kind, uid):
+    """人设表名字是否被别人占用。
+
+    规则：**别人已经占了、而我自己名下还没有这个名字**时才判为冲突。
+    这样既能让新表无法抢别人的名字，也不会把历史上已经重名的老表卡住改不动。
+    """
+    norm = _normalize_title_name(name)
+    if not norm:
+        return False
+    mine = False
+    other = False
+    for r in conn.execute("SELECT name, user_kind, user_uid FROM fan_characters").fetchall():
+        if _normalize_title_name(r["name"]) != norm:
+            continue
+        if r["user_kind"] == kind and str(r["user_uid"]) == str(uid):
+            mine = True
+        else:
+            other = True
+    return other and not mine
+
+
 def sync_fan_characters(conn, ident, code, cd, previous_code=None, auto_approve=False):
     """所有者保存人设后，原位刷新其画廊记录（不改公开状态、不新建副本）；只匹配本人 (kind, uid)。
 
@@ -3144,6 +3168,12 @@ class Handler(BaseStaticHandler):
                 self._json(400, {"error": "「" + _oc_name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
             if is_admin_reserved_name(_oc_name):
                 self._json(400, {"error": "「" + _oc_name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
+            _chk = db()
+            try:
+                if _fan_name_conflict(_chk, _oc_name, ident["kind"], ident["uid"]):
+                    self._json(400, {"error": FAN_NAME_TAKEN_ERROR % _oc_name}); return
+            finally:
+                _chk.close()
 
         # Bound everything before the first write: a rejected save leaves no files behind.
         try:
@@ -3227,6 +3257,12 @@ class Handler(BaseStaticHandler):
                     self._json(400, {"error": "「" + _oc_name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
                 if is_admin_reserved_name(_oc_name):
                     self._json(400, {"error": "「" + _oc_name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
+                _chk = db()
+                try:
+                    if _fan_name_conflict(_chk, _oc_name, ident["kind"], ident["uid"]):
+                        self._json(400, {"error": FAN_NAME_TAKEN_ERROR % _oc_name}); return
+                finally:
+                    _chk.close()
             new_chars.append({"code": c.get("code", ""), "data": c})
         auto_approve = self._can_review_fan(ident)
         with character_store().transaction(write=True) as session:
@@ -5754,6 +5790,12 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "「" + name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
         if is_admin_reserved_name(name):
             self._json(400, {"error": "「" + name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
+        _chk = db()
+        try:
+            if _fan_name_conflict(_chk, name, ident["kind"], ident["uid"]):
+                self._json(400, {"error": FAN_NAME_TAKEN_ERROR % name}); return
+        finally:
+            _chk.close()
         try:
             image_data = _persist_preview_reference((body.get("image_data") or "").strip())
         except ValueError as error:
