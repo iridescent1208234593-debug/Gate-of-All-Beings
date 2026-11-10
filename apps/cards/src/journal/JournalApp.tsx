@@ -177,7 +177,7 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
         return <span key={k}>{k === 'spirit' ? <Sparkles size={17} /> : k === 'herb' ? <Sprout size={17} /> : <Gem size={17} />}{RESOURCE_NAMES[k]} {store.ledger.resources[k]}{d ? <em className={`journal-delta ${d < 0 ? 'is-loss' : ''}`}>{d > 0 ? '+' : ''}{d}</em> : null}</span>;
       })}</div></div></div>
 
-    {unseen.length > 0 && <ReturnPanel entries={unseen} summary={summary} onDone={() => void persist(markSeen)} onOpenCollection={onOpenCollection} />}
+    {unseen.length > 0 && <ReturnPanel entries={unseen} summary={summary} store={store} onDone={() => void persist(markSeen)} onOpenCollection={onOpenCollection} />}
 
     <div className="hall-actions journal-actions">
       <div><strong>{morning ? '今天去哪里走走？' : '天色晚了，回会馆歇下吧。'}</strong>
@@ -225,10 +225,36 @@ export function JournalApp({ onOpenCollection }: { onOpenCollection?: () => void
   </>;
 }
 
-function ReturnPanel({ entries, summary, onDone, onOpenCollection }: { entries: JournalEntry[]; summary: ReturnType<typeof summarize>; onDone: () => void; onOpenCollection?: () => void }) {
+function ReturnPanel({ entries, summary, store, onDone, onOpenCollection }: { entries: JournalEntry[]; summary: ReturnType<typeof summarize>; store: WorldStore; onDone: () => void; onOpenCollection?: () => void }) {
   const chips: Change[] = [];
   for (const [k, v] of Object.entries(summary.resources)) if (isShownResource(k as ResourceKey)) chips.push({ kind: 'resource', key: k as ResourceKey, amount: v! });
   for (const e of entries) for (const c of e.changes) if (c.kind === 'wound' || c.kind === 'fall' || c.kind === 'recover' || c.kind === 'place' || c.kind === 'seal' || c.kind === 'world-event') chips.push(c);
+
+  // M01：归来只讲三件事——发生了什么、同行者现在能/不能做什么、下一次有哪些实际选择。
+  // 不写推荐、不虚构新奖励；数值全部读当前档，缺数据时不补造。
+  const world = store.snapshot.world;
+  const spirit = store.ledger.resources.spirit ?? 0;
+  const companions = Object.entries(world.companions).map(([id, care]) => {
+    const cid = Number(id);
+    const record = store.ledger.characters[cid] ?? {};
+    const bond = record.bond ?? 0;
+    const condition = care.condition === 'fallen' ? '暂时无法同行' : care.condition === 'wounded' ? '重伤 · 生命上限减半' : '可以同行';
+    const needBond = Math.max(0, RULES.sealBond - bond);
+    const needSpirit = Math.max(0, RULES.sealSpirit - spirit);
+    const seal = record.sealed
+      ? '已封灵'
+      : needBond === 0 && needSpirit === 0
+        ? '可以封灵'
+        : `距封灵还差 ${[needBond > 0 ? `${needBond} 默契` : '', needSpirit > 0 ? `${needSpirit} 灵质` : ''].filter(Boolean).join('、')}`;
+    return `${nameOf(cid)}：${condition}，默契 ${bond}；${seal}`;
+  });
+  const canGo = canStartExpedition(world);
+  const options = [
+    canGo.ok ? '再走一趟林间小径，占用今天' : `今天不能再出行：${canGo.reason}`,
+    '去重生之门或灵质回路，同样占用今天',
+    `留在会馆过一夜：种植 +${RULES.gardenHerbs} 草药、修习 +${RULES.practiceBond} 默契、休息 +${RULES.restSpirit} 灵质，重伤者休养 ${RULES.healNights} 夜痊愈`,
+  ];
+
   return <section className="journal-return" role="status" aria-label="新的见闻">
     <span className="round-emblem"><Sparkles /></span>
     <div>
@@ -237,6 +263,16 @@ function ReturnPanel({ entries, summary, onDone, onOpenCollection }: { entries: 
       {entries.at(-1)!.note && <p>{entries.at(-1)!.note}</p>}
       <ul className="journal-chips">{chips.map((c, i) => <li key={i} className={`is-${tone(c)}`}>{changeText(c)}</li>)}</ul>
       {summary.newCards.length > 0 && <div className="offer-cards compact">{summary.newCards.slice(0, 6).map(id => <CardTile key={id} small card={{ uid: id, card: id, upgraded: false }} onClick={onOpenCollection} label="图鉴新增" />)}</div>}
+
+      {companions.length > 0 && <div className="journal-next">
+        <h3>同行者现在</h3>
+        <ul>{companions.map((line, i) => <li key={i}>{line}</li>)}</ul>
+      </div>}
+      <div className="journal-next">
+        <h3>下一步可以</h3>
+        <ul>{options.map((line, i) => <li key={i}>{line}</li>)}</ul>
+      </div>
+
       <button className="text-button" onClick={onDone}>收好这些见闻 <Check size={16} /></button>
     </div>
   </section>;

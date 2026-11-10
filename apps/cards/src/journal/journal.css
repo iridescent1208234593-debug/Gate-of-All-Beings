@@ -75,3 +75,12 @@
 
 .journal-choice-note { margin-top: -6px; line-height: 1.7; }
 .journal-shop-goods { display: grid; gap: 10px; width: min(560px, 100%); margin: 6px auto 14px; }
+
+/* M01：归来面板的「同行者现在 / 下一步可以」两块 */
+.journal-next { margin: 14px 0 6px; }
+.journal-next h3 {
+  margin: 0 0 6px; font-size: 12px; font-weight: 600;
+  letter-spacing: .12em; color: var(--muted, #7c8b7f);
+}
+.journal-next ul { margin: 0; padding-left: 18px; }
+.journal-next li { font-size: 13px; line-height: 1.95; }
