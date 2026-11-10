@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>会馆信息 · 西木会馆</title>
-<meta name="description" content="西木会馆 · 众生之门 的基础信息：登记成员数、人设设表数，以及管理员、长老、编辑与同人审核名单。">
+<meta name="description" content="西木会馆 · 众生之门 的基础信息：登记成员数、人设设表数、职位名单与告示栏。">
 <link rel="icon" href="favicon.png">
 <style>
 :root{--bg:#f5f0e8;--panel:#fbf8f2;--border:#d4cfbe;--text:#3a4a3e;--dim:#7a8a7e;--accent:#5a9e8f;--gold:#d4a840;--danger:#b3543f}
@@ -15,21 +15,33 @@ body{background:var(--bg);color:var(--text);font-family:"Noto Serif SC","Source 
 .wrap{max-width:1080px;margin:0 auto}
 .back{display:inline-block;margin-bottom:14px;color:var(--dim);font-size:13px;text-decoration:none}
 .back:hover{color:var(--accent)}
-.hero{margin-bottom:26px}
-.kicker{font-size:12px;letter-spacing:3px;color:var(--dim);text-transform:uppercase}
+.hero{margin-bottom:22px}
+.kicker{font-size:12px;letter-spacing:3px;color:var(--dim)}
 h1{font-size:24px;letter-spacing:4px;margin:6px 0 8px}
-.sub{font-size:13px;color:var(--dim);line-height:1.8;max-width:620px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 30px}
+.sub{font-size:13px;color:var(--dim);line-height:1.8;max-width:640px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0 24px}
 .stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 14px;text-align:center}
-.stat .num{font-size:28px;color:var(--gold);font-weight:600;letter-spacing:1px;line-height:1.1}
-.stat .unit{font-size:12px;color:var(--dim);margin-left:2px;letter-spacing:0;font-weight:400}
+.stat .num{font-size:28px;color:var(--gold);font-weight:600;line-height:1.1}
+.stat .unit{font-size:12px;color:var(--dim);margin-left:2px;font-weight:400}
 .stat .label{font-size:12px;color:var(--dim);margin-top:6px;letter-spacing:1px}
-.stat .note{font-size:11px;color:var(--dim);margin-top:4px;opacity:.8}
+.board{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:22px}
+.board-head{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed var(--border)}
+.board-title{font-size:15px;letter-spacing:2px}
+.board-note{font-size:12px;color:var(--dim)}
+.board-list{list-style:none}
+.board-list li{display:flex;align-items:baseline;gap:8px;padding:7px 0;border-bottom:1px dashed rgba(212,207,190,.6);font-size:13px;line-height:1.6}
+.board-list li:last-child{border-bottom:none}
+.dot{width:7px;height:7px;border-radius:50%;flex:none;transform:translateY(-1px)}
+.dot.approve{background:var(--accent)}
+.dot.ban{background:var(--danger)}
+.who{color:var(--text)}
+.what{color:var(--dim)}
+.when{margin-left:auto;color:var(--dim);font-size:12px;white-space:nowrap}
+.board-empty{font-size:13px;color:var(--dim)}
 .pos{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin-bottom:14px}
 .pos-head{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed var(--border)}
 .pos-title{font-size:15px;letter-spacing:2px}
 .pos-cnt{font-size:12px;color:var(--gold)}
-.pos-desc{font-size:12px;color:var(--dim);margin-bottom:10px;line-height:1.7}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{display:inline-block;padding:5px 12px;border:1px solid var(--border);border-radius:999px;font-size:13px;background:rgba(255,255,255,.5);color:var(--text)}
 .chip.unset{color:var(--dim);border-style:dashed;background:transparent}
@@ -42,10 +54,12 @@ h1{font-size:24px;letter-spacing:4px;margin:6px 0 8px}
 .foot{margin-top:26px;text-align:center;font-size:12px;color:var(--dim);line-height:1.9}
 .foot a{color:var(--dim);text-decoration:none;border-bottom:1px solid var(--border)}
 .foot a:hover{color:var(--accent)}
+.refresh{display:inline-block;margin-left:6px;color:var(--dim)}
 @media (max-width:760px){
   .stats{grid-template-columns:repeat(2,1fr)}
   h1{font-size:20px;letter-spacing:2px}
   body{padding:72px 14px 56px}
+  .when{display:none}
 }
 </style>
 </head>
@@ -55,7 +69,7 @@ h1{font-size:24px;letter-spacing:4px;margin:6px 0 8px}
   <div class="hero">
     <p class="kicker">西木会馆 · 众生之门</p>
     <h1>会馆信息</h1>
-    <p class="sub">本站为非官方同人爱好者社区。以下为会馆当前的登记规模与职位名单，数据实时读取自会馆主库。</p>
+    <p class="sub">本站为非官方同人爱好者社区。以下为会馆当前的登记规模、职位名单与最近的身份变动，每 60 秒自动刷新。</p>
   </div>
 
   <div id="content"><div class="state-box">加载中…</div></div>
@@ -65,7 +79,7 @@ h1{font-size:24px;letter-spacing:4px;margin:6px 0 8px}
     · 名单只显示成员的<strong>对外显示名</strong>（角色卡名号或昵称），不展示登录用户名。<br>
     · 尚未设置对外名号的成员显示为「无名旅人」；如需修改，可在账号页设置昵称或创建角色卡。<br>
     · 默认职位的「执行者」人数已计入上方成员总数，不再单独列出。<br>
-    · 同一成员按最高职位归属，不重复出现在多份名单中。
+    · 管理员/长老是职级，编辑/同人审核是附加身份，同一成员可能同时出现在多份名单中。
   </div>
 
   <div class="foot">
@@ -78,6 +92,9 @@ h1{font-size:24px;letter-spacing:4px;margin:6px 0 8px}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmt(n){return Number(n||0).toLocaleString('zh-CN');}
 const POS_CLASS={admin:'admin',elder:'elder'};
+const REFRESH_MS=60000;
+let timer=null, firstLoad=true;
+
 async function init(){
   const box=document.getElementById('content');
   try{
@@ -85,12 +102,33 @@ async function init(){
     const d=await r.json();
     if(!r.ok||!d.ok) throw new Error(d.error||'加载失败');
     render(d);
+    if(firstLoad){ firstLoad=false; }
   }catch(e){
-    box.innerHTML='<div class="state-box">信息加载失败，请刷新重试。</div>';
+    if(firstLoad) box.innerHTML='<div class="state-box">信息加载失败，请刷新重试。</div>';
+    const stamp=document.getElementById('stamp');
+    if(stamp) stamp.innerHTML='<span class="refresh">刷新失败，稍后自动重试</span>';
   }
+  if(timer===null) timer=setInterval(init, REFRESH_MS);
 }
+
 function render(d){
   const u=d.users||{}, s=d.sheets||{};
+  const events=(d.events||[]).slice(0,12);
+  const board = '<section class="board"><div class="board-head">'+
+      '<span class="board-title">告示栏</span>'+
+      '<span class="board-note">最近的身份变动</span></div>'+
+      (events.length
+        ? '<ul class="board-list">'+events.map(e=>{
+            const isBan=(e.type==='ban');
+            return '<li><span class="dot '+(isBan?'ban':'approve')+'"></span>'+
+                   '<span class="who">'+esc(e.name)+'</span>'+
+                   '<span class="what">'+esc(isBan?'被封禁':('的「'+e.label+'」身份审核通过'))+'</span>'+
+                   (e.at?'<span class="when">'+esc((e.at||'').slice(0,10))+'</span>':'')+
+                   '</li>';
+          }).join('')+'</ul>'
+        : '<div class="board-empty">暂无新的身份变动</div>')+
+  '</section>';
+
   document.getElementById('content').innerHTML=
     '<div class="stats">'+
       card(fmt(u.total),'位','登记成员')+
@@ -98,6 +136,7 @@ function render(d){
       card(fmt(s.public),'份','公开设表')+
       card(fmt(s.approved),'份','已过审设表')+
     '</div>'+
+    board+
     (d.positions||[]).map(pos=>{
       const cls=POS_CLASS[pos.key]||'';
       const members=(pos.members||[]);
@@ -110,16 +149,21 @@ function render(d){
       return '<section class="pos"><div class="pos-head"><span class="pos-title">'+esc(pos.label)+'</span>'+
              '<span class="pos-cnt">'+fmt(members.length)+' 位</span></div>'+body+'</section>';
     }).join('');
+
   document.getElementById('legend').style.display='';
-  if(d.generated_at){
+  const stamp=document.getElementById('stamp');
+  if(stamp && d.generated_at){
     const t=new Date(d.generated_at);
-    document.getElementById('stamp').textContent='数据读取于 '+t.toLocaleString('zh-CN',{hour12:false});
+    stamp.innerHTML='数据读取于 '+esc(t.toLocaleString('zh-CN',{hour12:false}))+
+      '<span class="refresh"> · 每 60 秒自动刷新</span>';
   }
 }
+
 function card(num,unit,label){
   return '<div class="stat"><div class="num">'+num+'<span class="unit">'+unit+'</span></div>'+
          '<div class="label">'+label+'</div></div>';
 }
+
 init();
 </script>
 </body>

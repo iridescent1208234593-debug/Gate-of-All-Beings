@@ -2644,7 +2644,7 @@ class Handler(BaseStaticHandler):
 
     # ---------- /api/user ----------
     def _api_site_info(self):
-        """公开的会馆基础信息：成员数、设表数、各职位名单（只给对外显示名）。"""
+        """公开的会馆基础信息：成员数、设表数、职位名单与最近身份变动（只给对外显示名）。"""
         conn = db()
         try:
             total_users = conn.execute(
@@ -2666,6 +2666,37 @@ class Handler(BaseStaticHandler):
                        OR u.is_fan_reviewer=1)
                 ORDER BY u.uid
             """).fetchall()
+            # 告示栏：当前处于封禁状态的账号（表里没有封禁时间字段，只能给当前状态）
+            banned = conn.execute("""
+                SELECT u.nickname, p.gate_identity_json
+                FROM local_users u
+                LEFT JOIN account_profiles p
+                       ON p.kind='local' AND CAST(p.uid AS TEXT)=CAST(u.uid AS TEXT)
+                WHERE u.status='banned'
+                ORDER BY u.uid DESC LIMIT 10
+            """).fetchall()
+            # 告示栏：身份审核通过（执行者的编辑/同人审核，以及长老申请）
+            approved = conn.execute("""
+                SELECT er.requested_role AS detail,
+                       COALESCE(er.reviewed_at, er.created_at) AS at,
+                       u.nickname AS nick, p.gate_identity_json AS gj
+                FROM executor_requests er
+                LEFT JOIN local_users u
+                       ON er.user_kind='local' AND CAST(u.uid AS TEXT)=CAST(er.user_uid AS TEXT)
+                LEFT JOIN account_profiles p
+                       ON p.kind=er.user_kind AND CAST(p.uid AS TEXT)=CAST(er.user_uid AS TEXT)
+                WHERE er.status='approved'
+                UNION ALL
+                SELECT 'elder', el.created_at, u.nickname, p.gate_identity_json
+                FROM elder_requests el
+                LEFT JOIN local_users u
+                       ON el.kind='local' AND CAST(u.uid AS TEXT)=CAST(el.uid AS TEXT)
+                LEFT JOIN account_profiles p
+                       ON p.kind=el.kind AND CAST(p.uid AS TEXT)=CAST(el.uid AS TEXT)
+                WHERE el.status='approved'
+                ORDER BY at DESC
+                LIMIT 20
+            """).fetchall()
         finally:
             conn.close()
 
@@ -2682,6 +2713,19 @@ class Handler(BaseStaticHandler):
             if r["is_fan_reviewer"] == 1:
                 buckets["reviewer"].append(name)
 
+        label_map = {"scribe": "编辑", "fan_reviewer": "同人审核", "elder": "长老"}
+        events = []
+        for r in banned:
+            events.append({"type": "ban", "label": "封禁", "at": "",
+                           "name": _public_display_name(r["gate_identity_json"], r["nickname"])})
+        for r in approved:
+            detail = r["detail"] or ""
+            events.append({"type": "approve",
+                           "label": label_map.get(detail, detail or "身份"),
+                           "at": r["at"] or "",
+                           "name": _public_display_name(r["gj"], r["nick"])})
+        events.sort(key=lambda e: e.get("at") or "", reverse=True)
+
         self._json(200, {
             "ok": True,
             "generated_at": now_iso(),
@@ -2693,6 +2737,7 @@ class Handler(BaseStaticHandler):
                 {"key": "scribe", "label": "编辑", "members": buckets["scribe"]},
                 {"key": "reviewer", "label": "同人审核", "members": buckets["reviewer"]},
             ],
+            "events": events[:20],
         })
 
     def _api_user(self):
