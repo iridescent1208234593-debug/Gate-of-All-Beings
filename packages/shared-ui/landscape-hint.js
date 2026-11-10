@@ -83,7 +83,7 @@
     // 提示只该劝阻，不该把人锁在当前页面：竖屏下必须留一条能离开的出口。
     overlay.querySelector(".rc-skip").addEventListener("click", function () {
       dismissed = true;
-      overlay.classList.remove("on");
+      hide();
     });
     document.body.appendChild(overlay);
     return overlay;
@@ -94,26 +94,90 @@
     var tip = overlay && overlay.querySelector(".rc-tip");
     if (tip) tip.textContent = "请把手机横向转动；若画面没有跟着转，请打开系统的「自动旋转」";
     var btn = overlay && overlay.querySelector("button");
-    if (btn) { btn.textContent = "知道了"; btn.onclick = function () { overlay.classList.remove("on"); }; }
+    if (btn) { btn.textContent = "知道了"; btn.onclick = hide; }
     sync();
   }
 
+  // 对话框打开时把背景设为 inert：模块 iframe 挂载后会把焦点抢走，
+  // 不隔离的话键盘用户会直接落进被遮住的玩法里，Esc 也收不到。
+  function setBackgroundInert(on) {
+    var kids = document.body ? document.body.children : [];
+    for (var i = 0; i < kids.length; i++) {
+      var el = kids[i];
+      if (el === overlay || el.tagName === "SCRIPT" || el.tagName === "STYLE") continue;
+      if (on) el.setAttribute("inert", "");
+      else el.removeAttribute("inert");
+    }
+  }
+
+  // 模块以同源 iframe 挂载时，键盘事件落在 iframe 文档里，宿主 document 收不到。
+  // 打开期间有界地把 Esc 处理器挂到同源 iframe 上；跨源会被 try/catch 跳过。
+  var frameTimer = 0;
+  function bindFrames() {
+    for (var i = 0; i < window.frames.length; i++) {
+      try {
+        var doc = window.frames[i].document;
+        if (doc && !doc.__qcEscBound) {
+          doc.__qcEscBound = true;
+          doc.addEventListener("keydown", onEscape, true);
+        }
+      } catch (error) { /* 跨源 iframe，跳过 */ }
+    }
+  }
+  function onEscape(event) {
+    if (event.key !== "Escape" || !overlay || !overlay.classList.contains("on")) return;
+    dismissed = true;
+    hide();
+  }
+  function watchFrames(on) {
+    if (frameTimer) { clearInterval(frameTimer); frameTimer = 0; }
+    if (!on) return;
+    var tries = 0;
+    frameTimer = setInterval(function () {
+      bindFrames();
+      if (++tries > 10) { clearInterval(frameTimer); frameTimer = 0; }
+    }, 200);
+  }
+
+  function focusDialog() {
+    if (!overlay || !overlay.classList.contains("on")) return;
+    // inert 只阻止新的聚焦；iframe 可能已经先拿到了焦点，必须先让它松手。
+    var active = document.activeElement;
+    if (active && active !== document.body && !overlay.contains(active) && typeof active.blur === "function") {
+      try { active.blur(); } catch (error) { /* 忽略跨源 iframe 的失焦失败 */ }
+    }
+    var first = overlay.querySelector("button");
+    if (first && document.activeElement !== first) first.focus({ preventScroll: true });
+  }
+
   function sync() {
-    if (!enabled) { if (overlay) overlay.classList.remove("on"); return; }
+    if (!enabled) { hide(); return; }
     var need = !dismissed && isTouchPhone() && isPortrait();
     if (need) {
       build();
-      overlay.classList.add("on");
-    } else if (overlay) {
-      overlay.classList.remove("on");
-    }
+      if (!overlay.classList.contains("on")) {
+        overlay.classList.add("on");
+        setBackgroundInert(true);
+        watchFrames(true);
+        focusDialog();
+        // 模块 iframe 可能在之后才挂载并抢走焦点，补一次。
+        setTimeout(focusDialog, 400);
+      }
+    } else hide();
+  }
+
+  function hide() {
+    if (!overlay) return;
+    overlay.classList.remove("on");
+    setBackgroundInert(false);
+    watchFrames(false);
   }
 
   function enable() { dismissed = false; enabled = true; sync(); }
   function disable() {
     dismissed = false;
     enabled = false;
-    if (overlay) overlay.classList.remove("on");
+    hide();
   }
 
   window.IridescentlyLandscape = { enable: enable, disable: disable, active: function () { return enabled; } };
@@ -127,4 +191,12 @@
 
   window.addEventListener("resize", sync, { passive: true });
   window.addEventListener("orientationchange", function () { setTimeout(sync, 120); }, { passive: true });
+  // Esc 等同「仍然竖屏浏览」：模态对话框不该把键盘用户关在里面。
+  document.addEventListener("keydown", onEscape, true);
+
+  // 模块 iframe 挂载时机不确定，可能反复抢焦点：只要焦点离开对话框就拉回来。
+  document.addEventListener("focusin", function (event) {
+    if (!overlay || !overlay.classList.contains("on")) return;
+    if (!overlay.contains(event.target)) focusDialog();
+  }, true);
 })();

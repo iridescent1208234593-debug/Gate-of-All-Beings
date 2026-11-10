@@ -129,6 +129,8 @@ const TAB_ORDER = ['slay', 'juling', 'management', 'ecology', 'world-map', 'soft
 // 只有画面本身按横向排布的玩法才强制横屏；其余页面（首页、图鉴、经营、地图、灵体等）
 // 在竖屏下应当正常可用。新增玩法默认竖屏，确认必须横屏后再加进这个集合。
 const LANDSCAPE_MODULES = new Set(['cards', 'slay']);
+// 记录上一次的横屏状态：只在变化时调用，避免同一路由重复 render 把用户关掉的提示重新打开。
+let landscapeState = false;
 function renderNav() {
   navlinks.replaceChildren();
   const tabs = portal.links.filter(x => isInternal(x.url) && x.key !== 'cards')
@@ -297,7 +299,10 @@ function render() {
   // 横屏提示跟随当前路由：离开玩法页立刻撤销，避免遮住竖屏可用的页面。
   if (window.IridescentlyLandscape) {
     const landscape = r.name === 'module' && LANDSCAPE_MODULES.has(r.key);
-    window.IridescentlyLandscape[landscape ? 'enable' : 'disable']();
+    if (landscape !== landscapeState) {
+      landscapeState = landscape;
+      window.IridescentlyLandscape[landscape ? 'enable' : 'disable']();
+    }
   }
   if (r.name === 'module') renderModule(r.key); else renderHome();
   for (const a of navlinks.querySelectorAll('a')) {
