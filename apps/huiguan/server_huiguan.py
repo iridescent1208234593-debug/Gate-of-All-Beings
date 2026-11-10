@@ -5565,6 +5565,11 @@ class Handler(BaseStaticHandler):
                 conn.close(); self._json(403, {"error": "只能操作自己的海报"}); return
             poster_code = f"poster-{pid}"
             gallery_name = (row["title"] or "配色海报") + (f"｜{row['char_name']}" if row["char_name"] else "")
+            _pname = gallery_name[:80]
+            if is_official_title_name(_pname) or is_admin_reserved_name(_pname):
+                conn.close(); self._json(400, {"error": "「" + _pname + "」不能用作公开名号，请改一下海报标题或绑定的人设"}); return
+            if _fan_name_conflict(conn, _pname, ident["kind"], ident["uid"]):
+                conn.close(); self._json(400, {"error": FAN_NAME_TAKEN_ERROR % _pname}); return
             story = ("配色：" + "×".join(x for x in (row["primary_name"], row["accent_name"]) if x)
                      + f"（{row['primary_color']} / {row['accent_color']}）") if (row["primary_name"] or row["accent_name"]) else ""
             fan = conn.execute(
@@ -5911,6 +5916,9 @@ class Handler(BaseStaticHandler):
                     if is_admin_reserved_name(fields["name"]):
                         blocked.append(fields["name"])
                         continue
+                    if _fan_name_conflict(conn, fields["name"], ident["kind"], ident["uid"]):
+                        blocked.append(fields["name"])
+                        continue
                     # 同一角色只保留一条画廊记录：先按编号找，旧记录（无编号）再按名字找
                     art = fan_art_source(cd)
                     values = [fields[col] for col in FAN_SYNC_COLUMNS]
@@ -5954,7 +5962,7 @@ class Handler(BaseStaticHandler):
                     published += 1
                     pending += review == "pending"
             if blocked:
-                self._json(400, {"error": "以下名号是官方世界观角色名，不能公开：" + "、".join(sorted(set(blocked))) + "；请先改成自建名号"}); return
+                self._json(400, {"error": "以下名号不能公开：" + "、".join(sorted(set(blocked))) + "；可能被官方角色名、管理员名占用，或已被他人的人设表使用"}); return
             self._json(200, {"ok": True, "published": published, "skipped": skipped, "pending": pending})
         except oc_store.OCError as error:
             self._json(error.status, {"error": error.code})
