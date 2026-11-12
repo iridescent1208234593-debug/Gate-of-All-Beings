@@ -14,7 +14,6 @@ Gate of All Beings / 众生之门 工作区文档。总览见根 [README.md](../
 | [workspace.md](workspace.md) | 本机工程工作区：目录角色、`iridescently-workspace.json`、存储根与运维根的解析、runtime 搬迁 |
 | [operations.md](operations.md) | 谁在哪里运行；本机唯一的服务启动路径、端口、香港发布、排障 |
 | [development/local-onboarding.md](development/local-onboarding.md) | Node 22 / Python 3.12 本地环境、Portal/Cards/会馆/游戏启动矩阵、日志与排障 |
-| [development/module-test-baseline.md](development/module-test-baseline.md) | 八个游戏模块的构建、单测、最小交互入口与未验证项基线（Issue #73），含只读诊断脚本 |
 | [recovery.md](recovery.md) | 恢复手册：Git、退役分支、本机运行数据、迁移原件、Release 的副本位置与恢复/演练命令 |
 | [development/BRANCH_STRATEGY.md](development/BRANCH_STRATEGY.md) | 分支策略：trunk、短期分支、线上热修复移植、归档 tag 与删除规则 |
 | [development/AI_DEVELOPMENT.md](development/AI_DEVELOPMENT.md) | Claude / Codex / Copilot 等 AI 的统一开发规则与交付要求 |
