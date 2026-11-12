@@ -1,0 +1,20 @@
+# /etc/logrotate.d/iridescently
+#
+# 生产机上的应用日志此前完全没有轮转：portal.log 在 2026-11-12 已达 112 MB，
+# 而磁盘只剩 5.8 G（81% 已用）。这里按天切分 + 单文件 100 MB 上限兜底。
+#
+# copytruncate 是必须的：portal 等进程长期持有该文件的句柄，直接 rename 会让
+# 它们继续写进已被移走的 inode，日志从此丢失。
+# su 让轮转以目录属主身份执行，避免 root 建出的文件把后续写入顶掉。
+
+/srv/iridescently/runtime/*/cache/logs/*/*.log {
+    daily
+    maxsize 100M
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+    su iridescently iridescently
+}
