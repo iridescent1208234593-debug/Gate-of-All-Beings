@@ -59,6 +59,11 @@ with tempfile.TemporaryDirectory() as directory:
     send = Handler({"email": "User@Example.com"})
     assert handle_email(send, "send", api) == (200, {"ok": True, "message": "验证链接已发送，30 分钟内有效"})
     assert sent and sent[0][0] == "User@Example.com"
+    # 非 ASCII 地址必须在校验阶段被拒，否则 smtplib 会因缺少 SMTPUTF8 抛错、发信被静默跳过
+    non_ascii = Handler({"email": "西木@qq.com"})
+    assert handle_email(non_ascii, "send", api)[0] == 400
+    non_ascii_domain = Handler({"email": "someone@西木.com"})
+    assert handle_email(non_ascii_domain, "send", api)[0] == 400
     unauthenticated_send = Handler({"email": "other@example.com"}, authenticated=False)
     assert handle_email(unauthenticated_send, "send", api)[0] == 401
     verify = Handler({"token": sent[0][1]}, authenticated=False)

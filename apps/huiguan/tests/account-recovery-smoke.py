@@ -29,6 +29,9 @@ class Handler:
     def _client_ip(self):
         return self.ip
 
+    def _session_clear_cookie(self):
+        return "sid=; Max-Age=0"
+
     def _sso_clear_cookie(self):
         return "hx_sso=; Max-Age=0"
 
@@ -46,6 +49,7 @@ with tempfile.TemporaryDirectory() as directory:
         init_email_schema(conn)
         init_recovery_schema(conn)
         conn.executescript("""
+            CREATE TABLE users (user_id INTEGER PRIMARY KEY, nickname TEXT, email TEXT);
             CREATE TABLE local_users (uid INTEGER PRIMARY KEY, username TEXT, pass_hash TEXT, email TEXT, status TEXT);
             CREATE TABLE sessions_db (sid TEXT PRIMARY KEY, kind TEXT, uid TEXT);
             INSERT INTO local_users VALUES (1, 'test-user', 'old-hash', 'legacy@example.com', 'active');
@@ -66,6 +70,8 @@ with tempfile.TemporaryDirectory() as directory:
     found = Handler({"email": "User@Example.com"})
     result = handle_recovery(found, "send", api)
     assert result[0] == 200 and sent[0][0] == "User@Example.com" and sent[0][2] == "test-user"
+    # 非 ASCII 地址在校验阶段即拒绝（SMTP 中继不支持 SMTPUTF8）
+    assert handle_recovery(Handler({"email": "西木@qq.com"}, ip="127.0.0.9"), "send", api)[0] == 400
 
     unknown = Handler({"email": "unknown@example.com"}, ip="127.0.0.2")
     assert handle_recovery(unknown, "send", api) == result

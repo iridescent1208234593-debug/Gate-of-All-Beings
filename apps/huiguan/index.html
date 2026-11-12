@@ -1661,7 +1661,7 @@ async function renameUser() {
 // ---- 登录/注册弹窗：登录与注册是两个页签、两张表单 ----
 // openAuthModal(notice, mode)：mode 为 'register' 时直接打开注册页签，其余打开登录页签。
 const AUTH_USERNAME_RE = /^[一-龥A-Za-z0-9_]{2,16}$/;  // 与服务端 USERNAME_RE 一致
-const AUTH_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const AUTH_EMAIL_RE = /^[\x21-\x3f\x41-\x7e]+@[\x21-\x3f\x41-\x7e]+\.[\x21-\x3f\x41-\x7e]+$/;  // 仅 ASCII，与服务端 EMAIL_RE 一致
 let authMode = 'login';
 function authMsgSet(text, ok) {
   const m = document.getElementById('authMsg');
@@ -1769,7 +1769,7 @@ async function submitRegister() {
   if (!username) return fail('请填写用户名', 'authRegUsername');
   if (!checkRegUsername()) return fail('用户名格式不对：2-16 位中文、字母、数字或下划线', 'authRegUsername');
   if (!email) return fail('请填写邮箱（用于找回账号与重置密码）', 'authEmail');
-  if (!AUTH_EMAIL_RE.test(email)) return fail('邮箱格式不对，请检查一下', 'authEmail');
+  if (!AUTH_EMAIL_RE.test(email)) return fail('邮箱只能用英文、数字和常见符号，不支持中文或全角字符', 'authEmail');
   if (password.length < 12) return fail('密码至少 12 位', 'authRegPassword');
   if (password !== password2) return fail('两次输入的密码不一致', 'authRegPassword2');
   if (!authLegal) return fail('条款组件加载失败，请刷新页面后再注册');

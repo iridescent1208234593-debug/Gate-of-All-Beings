@@ -12,7 +12,11 @@ from site_domains import site_url, request_host, request_origin_allowed
 from storage_paths import secrets_dir
 
 
-EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
+# 邮箱整串必须是 ASCII：发信用的 SMTP 中继不提供 SMTPUTF8 扩展，含中文等非 ASCII
+# 字符的地址会让 smtplib 抛 SMTPNotSupportedError，注册/找回流程只能静默跳过发信。
+# 旧写法 [^\s@] 会放行任意 Unicode 字符（如「西木@qq.com」），因此这里显式限定可打印 ASCII。
+_ASCII_ADDR = r"[\x21-\x3f\x41-\x7e]"  # 可打印 ASCII，去掉空格与 @
+EMAIL_RE = re.compile(rf"^{_ASCII_ADDR}+@{_ASCII_ADDR}+\.{_ASCII_ADDR}+$")
 
 
 def init_schema(conn):
@@ -56,6 +60,11 @@ def _send_message(email, subject, content):
     sender = setting("ACCOUNT_EMAIL_FROM", username).strip()
     if not all((host, username, password, sender)):
         raise RuntimeError("email service is not configured")
+    # 生效路径也可能收到历史遗留的非 ASCII 地址；这里给出可读的错误，
+    # 而不是让 smtplib 抛 SMTPNotSupportedError 之后被上层静默吞掉。
+    for label, address in (("发件人", sender), ("收件人", email)):
+        if not str(address).isascii():
+            raise RuntimeError(f"{label}地址包含非 ASCII 字符，当前 SMTP 中继不支持 SMTPUTF8")
     try:
         port = int(setting("ACCOUNT_EMAIL_SMTP_PORT", "465"))
     except ValueError as exc:
