@@ -16,6 +16,7 @@
 
   var ID = "__qc_rotate";
   var enabled = false;
+  var dismissed = false;
   var overlay = null;
 
   var CSS = [
@@ -35,12 +36,19 @@
     "#" + ID + " button{font:inherit;font-size:14px;letter-spacing:.08em;padding:11px 26px;border-radius:10px;cursor:pointer;",
     "border:1px solid rgba(230,192,106,.85);background:rgba(230,192,106,.14);color:#f4eedf;transition:background .18s}",
     "#" + ID + " button:hover{background:rgba(230,192,106,.26)}",
+    "#" + ID + " .rc-skip{margin-left:8px;border-color:rgba(244,238,223,.28);background:transparent;color:rgba(244,238,223,.7)}",
+    "#" + ID + " .rc-skip:hover{background:rgba(244,238,223,.08)}",
     "#" + ID + " .rc-tip{margin-top:14px;font-size:12px;color:rgba(244,238,223,.5)}",
     "@media (orientation:landscape){#" + ID + "{display:none !important}}"
   ].join("");
 
   function isTouchPhone() {
-    var touch = ("ontouchstart" in window) || navigator.maxTouchPoints > 0;
+    // 只用「主指针是否粗糙」判断触摸设备：带触屏的笔记本 maxTouchPoints 也大于 0，
+    // 用它会把这些设备在窄窗口下误判成手机。
+    var coarse = window.matchMedia ? window.matchMedia("(pointer: coarse)").matches : null;
+    var touch = coarse === null
+      ? (("ontouchstart" in window) || navigator.maxTouchPoints > 0)
+      : coarse;
     var small = Math.min(window.innerWidth, window.innerHeight) <= 820;
     return touch && small;
   }
@@ -68,9 +76,15 @@
         '<h2>请横屏游玩</h2>' +
         '<p>玩法画面按横屏设计，竖屏下按钮与画面会挤在一起。</p>' +
         '<button type="button">转到横屏</button>' +
+        '<button type="button" class="rc-skip">仍然竖屏浏览</button>' +
         '<div class="rc-tip">若没有自动旋转，请在系统中开启屏幕旋转后重新进入</div>' +
       "</div>";
     overlay.querySelector("button").addEventListener("click", goLandscape);
+    // 提示只该劝阻，不该把人锁在当前页面：竖屏下必须留一条能离开的出口。
+    overlay.querySelector(".rc-skip").addEventListener("click", function () {
+      dismissed = true;
+      hide();
+    });
     document.body.appendChild(overlay);
     return overlay;
   }
@@ -80,25 +94,90 @@
     var tip = overlay && overlay.querySelector(".rc-tip");
     if (tip) tip.textContent = "请把手机横向转动；若画面没有跟着转，请打开系统的「自动旋转」";
     var btn = overlay && overlay.querySelector("button");
-    if (btn) { btn.textContent = "知道了"; btn.onclick = function () { overlay.classList.remove("on"); }; }
+    if (btn) { btn.textContent = "知道了"; btn.onclick = hide; }
     sync();
   }
 
-  function sync() {
-    if (!enabled) { if (overlay) overlay.classList.remove("on"); return; }
-    var need = isTouchPhone() && isPortrait();
-    if (need) {
-      build();
-      overlay.classList.add("on");
-    } else if (overlay) {
-      overlay.classList.remove("on");
+  // 对话框打开时把背景设为 inert：模块 iframe 挂载后会把焦点抢走，
+  // 不隔离的话键盘用户会直接落进被遮住的玩法里，Esc 也收不到。
+  function setBackgroundInert(on) {
+    var kids = document.body ? document.body.children : [];
+    for (var i = 0; i < kids.length; i++) {
+      var el = kids[i];
+      if (el === overlay || el.tagName === "SCRIPT" || el.tagName === "STYLE") continue;
+      if (on) el.setAttribute("inert", "");
+      else el.removeAttribute("inert");
     }
   }
 
-  function enable() { enabled = true; sync(); }
+  // 模块以同源 iframe 挂载时，键盘事件落在 iframe 文档里，宿主 document 收不到。
+  // 打开期间有界地把 Esc 处理器挂到同源 iframe 上；跨源会被 try/catch 跳过。
+  var frameTimer = 0;
+  function bindFrames() {
+    for (var i = 0; i < window.frames.length; i++) {
+      try {
+        var doc = window.frames[i].document;
+        if (doc && !doc.__qcEscBound) {
+          doc.__qcEscBound = true;
+          doc.addEventListener("keydown", onEscape, true);
+        }
+      } catch (error) { /* 跨源 iframe，跳过 */ }
+    }
+  }
+  function onEscape(event) {
+    if (event.key !== "Escape" || !overlay || !overlay.classList.contains("on")) return;
+    dismissed = true;
+    hide();
+  }
+  function watchFrames(on) {
+    if (frameTimer) { clearInterval(frameTimer); frameTimer = 0; }
+    if (!on) return;
+    var tries = 0;
+    frameTimer = setInterval(function () {
+      bindFrames();
+      if (++tries > 10) { clearInterval(frameTimer); frameTimer = 0; }
+    }, 200);
+  }
+
+  function focusDialog() {
+    if (!overlay || !overlay.classList.contains("on")) return;
+    // inert 只阻止新的聚焦；iframe 可能已经先拿到了焦点，必须先让它松手。
+    var active = document.activeElement;
+    if (active && active !== document.body && !overlay.contains(active) && typeof active.blur === "function") {
+      try { active.blur(); } catch (error) { /* 忽略跨源 iframe 的失焦失败 */ }
+    }
+    var first = overlay.querySelector("button");
+    if (first && document.activeElement !== first) first.focus({ preventScroll: true });
+  }
+
+  function sync() {
+    if (!enabled) { hide(); return; }
+    var need = !dismissed && isTouchPhone() && isPortrait();
+    if (need) {
+      build();
+      if (!overlay.classList.contains("on")) {
+        overlay.classList.add("on");
+        setBackgroundInert(true);
+        watchFrames(true);
+        focusDialog();
+        // 模块 iframe 可能在之后才挂载并抢走焦点，补一次。
+        setTimeout(focusDialog, 400);
+      }
+    } else hide();
+  }
+
+  function hide() {
+    if (!overlay) return;
+    overlay.classList.remove("on");
+    setBackgroundInert(false);
+    watchFrames(false);
+  }
+
+  function enable() { dismissed = false; enabled = true; sync(); }
   function disable() {
+    dismissed = false;
     enabled = false;
-    if (overlay) overlay.classList.remove("on");
+    hide();
   }
 
   window.IridescentlyLandscape = { enable: enable, disable: disable, active: function () { return enabled; } };
@@ -112,4 +191,12 @@
 
   window.addEventListener("resize", sync, { passive: true });
   window.addEventListener("orientationchange", function () { setTimeout(sync, 120); }, { passive: true });
+  // Esc 等同「仍然竖屏浏览」：模态对话框不该把键盘用户关在里面。
+  document.addEventListener("keydown", onEscape, true);
+
+  // 模块 iframe 挂载时机不确定，可能反复抢焦点：只要焦点离开对话框就拉回来。
+  document.addEventListener("focusin", function (event) {
+    if (!overlay || !overlay.classList.contains("on")) return;
+    if (!overlay.contains(event.target)) focusDialog();
+  }, true);
 })();
