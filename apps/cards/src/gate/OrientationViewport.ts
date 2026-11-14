@@ -43,6 +43,13 @@ export function mountOrientationViewport(): (() => void) | null {
   const beforeInstall = (event: Event) => { event.preventDefault(); installOffer = event; offer(); };
   const installed = () => { installOffer = null; frame.contentWindow?.dispatchEvent(new Event('appinstalled')); };
   frame.addEventListener('load', offer);
+  // iframe 内整页换目标（回到门庭、跳到别的站点）时先复位竖屏；
+  // 仍需要横屏的页面会重新请求，不会一直停留在横屏。
+  const resetOnLoad = () => {
+    orientation = 'portrait';
+    sync();
+  };
+  frame.addEventListener('load', resetOnLoad);
   window.addEventListener('beforeinstallprompt', beforeInstall);
   window.addEventListener('appinstalled', installed);
   window.addEventListener('resize', sync);
@@ -54,6 +61,7 @@ export function mountOrientationViewport(): (() => void) | null {
     window.removeEventListener('beforeinstallprompt', beforeInstall);
     window.removeEventListener('appinstalled', installed);
     frame.removeEventListener('gate:orientation', change);
+    frame.removeEventListener('load', resetOnLoad);
     frame.remove();
   };
 }
