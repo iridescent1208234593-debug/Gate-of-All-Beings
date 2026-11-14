@@ -30,6 +30,14 @@ export function useOrientationGuard(phase: OrientationPhase) {
     const orientation = ready && !portraitAllowed ? 'landscape' : 'portrait';
     window.frameElement?.dispatchEvent(new CustomEvent('gate:orientation', { detail: orientation }));
   }, [phone, ready, portraitAllowed]);
+  // 离开玩法时把外层旋转交还竖屏；否则切到其它模块/回到门庭后整个门户仍是横着的。
+  useEffect(() => {
+    if (!phone) return;
+    const frame = window.frameElement;
+    return () => {
+      frame?.dispatchEvent(new CustomEvent('gate:orientation', { detail: 'portrait' }));
+    };
+  }, [phone]);
   const choose = useCallback((next: Orientation) => {
     try { sessionStorage.setItem(PREF_KEY, next); } catch { /* private mode: this page only */ }
     setPref(next);
