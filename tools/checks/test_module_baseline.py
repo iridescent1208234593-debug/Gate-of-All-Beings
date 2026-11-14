@@ -1,6 +1,13 @@
 """模块基线盘点与入口探测 URL 映射的单元测试。"""
+import argparse
+import contextlib
+import ctypes
+import io
+import os
 import subprocess
 import sys
+import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -130,7 +137,8 @@ class RunTestsIsolationTests(unittest.TestCase):
                 patch.object(module_baseline, "run",
                              return_value={"status": module_baseline.PASS,
                                            "command": ["npm", "run", "x"], "seconds": 0.0}):
-            module_baseline.run_tests(rows, {}, {row["module"] for row in rows})
+            module_baseline.run_tests(rows, {}, {row["module"] for row in rows},
+                                      module_baseline._Budget(module_baseline.TOTAL_TIMEOUT))
         by_key = {row["module"]: row for row in rows}
         self.assertEqual(sorted(by_key["cards"]["extra_results"]), ["后端单测", "类型检查"])
         self.assertEqual(by_key["world-map"]["unit"], module_baseline.SKIP)
@@ -164,6 +172,152 @@ class StatusTests(unittest.TestCase):
         text = module_baseline.markdown(rows, None)
         # 表头 + 分隔行 + 每个模块一行
         self.assertEqual(len([line for line in text.splitlines() if line.startswith("| ")]), len(rows) + 2)
+
+
+class CommandTimeoutTests(unittest.TestCase):
+    def test_timeout_kills_the_whole_process_tree(self):
+        """npm 会派生 node：超时后孙进程也要一起终止，不能留下还在跑的测试。"""
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+            tmp = Path(tmp)
+            heartbeat = tmp / "heartbeat"
+            beat = tmp / "beat.py"
+            beat.write_text("import sys, time\n"
+                            "for _ in range(600):\n"
+                            "    open(sys.argv[1], 'a').write('x')\n"
+                            "    time.sleep(0.1)\n", encoding="utf-8")
+            outer = tmp / "outer.py"
+            outer.write_text("import subprocess, sys, time\n"
+                             f"subprocess.Popen([sys.executable, {str(beat)!r}, {str(heartbeat)!r}])\n"
+                             "time.sleep(60)\n", encoding="utf-8")
+            started = time.monotonic()
+            result = module_baseline.run([sys.executable, str(outer)], dict(os.environ), timeout=2)
+            self.assertEqual(result["status"], module_baseline.FAIL)
+            self.assertEqual(result["timeout"], 2)
+            self.assertIn("未结束", result["error"])
+            self.assertLess(time.monotonic() - started, 30)
+            size = heartbeat.stat().st_size
+            time.sleep(1.2)
+            self.assertEqual(heartbeat.stat().st_size, size, "孙进程仍在运行")
+
+    def test_detached_job_falls_back_to_killing_the_child(self):
+        """job 没接管进程（创建/分配失败）时不能空等 KILL_TIMEOUT，要直接杀子进程。"""
+
+        class DetachedJob:
+            def terminate(self):
+                raise AssertionError("未接管的 job 不应被使用")
+
+            def attached(self):
+                return False
+
+        with tempfile.TemporaryFile() as output:
+            process = module_baseline._start(
+                [sys.executable, "-c", "import time; time.sleep(30)"], dict(os.environ), output)
+            started = time.monotonic()
+            module_baseline._terminate(process, DetachedJob())
+        self.assertLess(time.monotonic() - started, module_baseline.KILL_TIMEOUT)
+
+    def test_exit_code_and_output_tail_are_still_reported(self):
+        result = module_baseline.run([sys.executable, "-c", "print('ok')"], dict(os.environ))
+        self.assertEqual(result["status"], module_baseline.PASS)
+        self.assertEqual(result["exit_code"], 0)
+        self.assertEqual(result["tail"], ["ok"])
+        self.assertNotIn("timeout", result)
+
+    def test_markdown_says_a_test_timed_out_instead_of_failed(self):
+        rows = module_baseline.inventory()
+        rows[0].update({"unit": module_baseline.FAIL, "unit_timeout": module_baseline.COMMAND_TIMEOUT,
+                        "unit_detail": f"超过 {module_baseline.COMMAND_TIMEOUT}s 未结束，已终止整棵进程树"})
+        text = module_baseline.markdown(rows, None)
+        self.assertIn("单测超时", text)
+
+
+class BudgetTests(unittest.TestCase):
+    def test_a_command_never_gets_more_time_than_the_budget_has_left(self):
+        budget = module_baseline._Budget(5)
+        self.assertLessEqual(budget.take(), 5)
+        self.assertLess(budget.take(), module_baseline.COMMAND_TIMEOUT)
+        self.assertFalse(budget.exhausted)
+
+    def test_exhausted_budget_starts_no_command_and_marks_the_run_incomplete(self):
+        rows = module_baseline.inventory()
+        for row in rows:
+            row["dependencies_installed"] = True
+        budget = module_baseline._Budget(0)
+        with patch.object(module_baseline, "run") as fake:
+            module_baseline.run_tests(rows, {}, {row["module"] for row in rows}, budget)
+        fake.assert_not_called()
+        self.assertTrue(budget.exhausted)
+        # 预算耗尽时既不伪造 PASS/FAIL，也不把 unit 改成别的状态：保持 NOT RUN。
+        self.assertTrue(all(row["unit"] == module_baseline.NOT_RUN for row in rows))
+        self.assertIn("预算", module_baseline.markdown(rows, None, budget))
+
+    def test_command_timeout_can_be_set_from_the_command_line(self):
+        budget = module_baseline._Budget(60, 30)
+        self.assertLessEqual(budget.take(), 30)
+
+    def test_time_options_reject_non_positive_values(self):
+        self.assertEqual(module_baseline.positive_seconds("45"), 45)
+        for text in ("0", "-5"):
+            with self.assertRaises(argparse.ArgumentTypeError):
+                module_baseline.positive_seconds(text)
+
+    def test_main_hands_the_time_options_to_the_budget(self):
+        seen = {}
+
+        def fake_build(rows, env, root, budget):
+            seen["budget"] = budget
+            return None
+
+        with patch.object(module_baseline, "inventory", return_value=[]), \
+                patch.object(module_baseline, "_version", return_value="v22"), \
+                patch.object(module_baseline, "run_build", side_effect=fake_build), \
+                patch.object(module_baseline, "run_tests"), \
+                contextlib.redirect_stdout(io.StringIO()):
+            module_baseline.main(["--run", "--command-timeout", "7", "--total-timeout", "70"])
+        self.assertEqual(seen["budget"].command_timeout, 7)
+        self.assertEqual(seen["budget"].seconds, 70)
+
+    def test_a_command_cap_larger_than_the_budget_is_clamped_not_rejected(self):
+        """--command-timeout 600 + --total-timeout 300 合法：总预算是硬上限，命令只拿 300 秒。"""
+        self.assertEqual(module_baseline._Budget(300, 600).take(), 300)
+
+    def test_total_timeout_alone_is_not_rejected(self):
+        """只给 --total-timeout 时默认命令上限更大，main 不能因此报错。"""
+        with patch.object(module_baseline, "inventory", return_value=[]), \
+                patch.object(module_baseline, "_version", return_value="v22"), \
+                contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(module_baseline.main(["--total-timeout", "300"]), 0)
+
+    def test_build_is_not_started_when_the_budget_is_gone(self):
+        # 0 秒是测试夹具，表示「截止时间已过」这种运行中真实会到达的状态；
+        # positive_seconds 只校验命令行输入，不约束内部构造。
+        rows = module_baseline.inventory()
+        budget = module_baseline._Budget(0)
+        with patch.object(module_baseline, "run") as fake:
+            self.assertIsNone(module_baseline.run_build(rows, {}, Path("unused"), budget))
+        fake.assert_not_called()
+
+
+class WindowsJobTests(unittest.TestCase):
+    def test_job_creation_failure_warns_once_and_falls_back(self):
+        """job 建不起来时要明确警告，而不是无声地只杀直接子进程。"""
+
+        class FakeKernel32:
+            def CreateJobObjectW(self, attributes, name):
+                return 0
+
+            def AssignProcessToJobObject(self, handle, process):
+                raise AssertionError("句柄为 0 时不应分配进程")
+
+        stderr = io.StringIO()
+        with patch.object(ctypes, "WinDLL", create=True, return_value=FakeKernel32()), \
+                patch.object(ctypes, "get_last_error", create=True, return_value=5), \
+                patch.object(module_baseline._WindowsJob, "_warned", False), \
+                contextlib.redirect_stderr(stderr):
+            job = module_baseline._WindowsJob(object())
+            module_baseline._WindowsJob(object())  # 第二轮不应重复刷警告
+        self.assertFalse(job.attached())
+        self.assertEqual(stderr.getvalue().count("job 对象"), 1)
 
 
 class VersionTests(unittest.TestCase):

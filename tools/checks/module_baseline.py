@@ -7,9 +7,17 @@
 状态沿用 Issue 要求的四个值，含义就是：
 
 ``PASS``    命令退出码 0；或入口页面与它引用的资源全部返回 200。
-``FAIL``    命令退出码非 0；或引用的资源缺失。
+``FAIL``    命令退出码非 0、超过单命令时限被终止；或引用的资源缺失。
 ``SKIP``    检查不适用或当前无法运行（无 test 脚本、依赖未安装、没有构建产物）。跳过不计为通过。
 ``NOT RUN`` 本轮没有尝试执行，也是盘点模式的默认值。
+
+``--run`` 的每条命令（聚合构建、各模块测试、附加检查）都有 ``COMMAND_TIMEOUT`` 秒上限：超时
+会终止 npm 及其派生的整棵进程树，记 FAIL 并在结果里带 ``timeout`` 字段，与「测试失败」分开，
+避免一个卡住的模块让基线命令永远不退出。整轮还有 ``TOTAL_TIMEOUT`` 秒墙钟预算：每条命令的
+上限会被剩余预算压低（所以 ``--command-timeout`` 大于 ``--total-timeout`` 是合法配置，不是
+错误）；用尽后不再启动新命令，剩余检查保持 NOT RUN，整轮以非 0 退出，避免「跑完了」和
+「没跑完」看起来一样。两个上限都可以在命令行覆盖（``--command-timeout`` / ``--total-timeout``，
+单位秒）。
 
 DSH 受限沙箱无法派发 Node 测试工作进程或浏览器进程，``--run`` 与 ``--serve`` 请在普通终端或
 CI 任务里运行。
@@ -19,6 +27,7 @@ CI 任务里运行。
     python tools/checks/module_baseline.py                       # 只盘点（Markdown）
     python tools/checks/module_baseline.py --run                 # 构建 + 单元测试
     python tools/checks/module_baseline.py --run --serve          # 再探测各模块入口
+    python tools/checks/module_baseline.py --run --command-timeout 300 --total-timeout 600
     python tools/checks/module_baseline.py --json out.json --markdown out.md
 """
 import argparse
@@ -26,6 +35,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -38,6 +48,16 @@ from urllib.parse import unquote, urljoin, urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 PASS, FAIL, SKIP, NOT_RUN = "PASS", "FAIL", "SKIP", "NOT RUN"
+
+# 单条命令的上限。AEON 的 headless 用例本机约 124 秒，600 秒留足余量；卡住的模块会被终止并
+# 记为带 ``timeout`` 标记的 FAIL，基线不会因为一条命令挂死而一直不退出。
+COMMAND_TIMEOUT = 600
+KILL_TIMEOUT = 10
+
+# 整轮 ``--run`` 的墙钟预算：10 条命令各自 600 秒的最坏情况是 100 分钟，正常一轮约 5 分钟。
+# 预算用尽后不再启动新命令，剩余检查保持 NOT RUN，整轮以非 0 退出：不能让「跑完了」和
+# 「没跑完」在报表上看起来一样。
+TOTAL_TIMEOUT = 1800
 
 # 聚合构建是门户实际发布的唯一产物来源；juling、aeon、slay 没有独立构建步骤，所以它们的
 # 构建状态取自同一次运行。启动器只解析一次：Windows 的 CreateProcess 不会为 "npm" 搜索 PATHEXT。
@@ -246,26 +266,139 @@ def inventory():
     return rows
 
 
-def run(command, env):
-    started = time.monotonic()
+def _tail(text):
+    return [line for line in text.splitlines() if line.strip()][-12:]
+
+
+class _WindowsJob:
+    """在 Windows 上把子进程放进 job 对象：终止它等于终止 npm 派生出的整棵进程树。
+
+    ``taskkill`` 需要重新打开子进程，在受限令牌下会得到 Access denied；job 对象用的是
+    ``Popen`` 已经持有的句柄，不需要额外权限。创建或分配失败时退化为只终止直接子进程，
+    并打印一次警告：不能让「以为杀了整棵树、其实只杀了 npm」变成无声降级。
+    """
+
+    _warned = False
+
+    def __init__(self, process):
+        import ctypes
+        self._kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+        self._handle = self._kernel32.CreateJobObjectW(None, None)
+        error = None
+        if not self._handle:
+            error = ctypes.get_last_error()
+        elif not self._kernel32.AssignProcessToJobObject(self._handle, int(process._handle)):
+            error = ctypes.get_last_error()
+            self.close()
+        if error is not None and not _WindowsJob._warned:
+            _WindowsJob._warned = True
+            print(f"警告：无法把子进程放进 job 对象（WinError {error}）；"
+                  f"超时只能终止直接子进程，孙进程可能残留。", file=sys.stderr)
+
+    def terminate(self):
+        if self._handle:
+            self._kernel32.TerminateJobObject(self._handle, 1)
+
+    def attached(self):
+        """job 是否真的接管了进程；创建或分配失败时为 False，调用方要退回直接杀子进程。"""
+        return bool(self._handle)
+
+    def close(self):
+        if self._handle:
+            self._kernel32.CloseHandle(self._handle)
+            self._handle = None
+
+
+def _start(command, env, output):
+    """启动命令，输出写临时文件而不是管道。
+
+    管道写端会被 npm 派生的 node 孙进程继承；只杀 npm 时读端等不到 EOF，``subprocess.run``
+    的 timeout 反而会卡在收集输出上（实测会等到孙进程自己结束）。写文件就没有这个问题。
+    POSIX 上另起会话，便于把整棵进程树一起终止。
+    """
+    options = {"cwd": ROOT, "env": env, "stdout": output, "stderr": subprocess.STDOUT}
+    if os.name != "nt":
+        options["start_new_session"] = True
+    return subprocess.Popen(command, **options)
+
+
+def _terminate(process, job):
+    """终止整棵进程树：npm 会派生子进程，只杀 npm 会留下仍在跑的测试。"""
+    if job is not None and job.attached():
+        job.terminate()
+    elif os.name == "nt":
+        process.kill()
+    else:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except OSError:
+            process.kill()
     try:
-        completed = subprocess.run(command, cwd=ROOT, env=env, capture_output=True, text=True,
-                                   encoding="utf-8", errors="replace")
-    except OSError as error:
-        return {"status": FAIL, "command": command, "seconds": 0.0, "error": str(error)}
-    tail = [line for line in (completed.stdout or completed.stderr or "").splitlines() if line.strip()][-12:]
+        process.wait(timeout=KILL_TIMEOUT)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=KILL_TIMEOUT)
+
+
+def run(command, env, timeout=COMMAND_TIMEOUT):
+    started = time.monotonic()
+    with tempfile.TemporaryFile() as output:
+        try:
+            process = _start(command, env, output)
+        except OSError as error:
+            return {"status": FAIL, "command": command, "seconds": 0.0, "error": str(error)}
+        job = _WindowsJob(process) if os.name == "nt" else None
+        try:
+            code = process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            _terminate(process, job)
+            output.seek(0)
+            return {
+                "status": FAIL,
+                "command": command,
+                "seconds": round(time.monotonic() - started, 2),
+                "timeout": timeout,
+                "error": f"超过 {timeout}s 未结束，已终止整棵进程树",
+                "tail": _tail(output.read().decode("utf-8", "replace")),
+            }
+        finally:
+            if job is not None:
+                job.close()
+        output.seek(0)
+        tail = _tail(output.read().decode("utf-8", "replace"))
     return {
-        "status": classify_exit(completed.returncode),
+        "status": classify_exit(code),
         "command": command,
         "seconds": round(time.monotonic() - started, 2),
-        "exit_code": completed.returncode,
+        "exit_code": code,
         "tail": tail,
     }
 
 
-def run_build(rows, env, storage_root):
+class _Budget:
+    """整轮 ``--run`` 的墙钟预算：给每条命令分配不超过剩余时间的上限。"""
+
+    def __init__(self, seconds, command_timeout=COMMAND_TIMEOUT):
+        self.seconds = seconds
+        self.command_timeout = command_timeout
+        self.exhausted = False
+        self._deadline = time.monotonic() + seconds
+
+    def take(self):
+        """返回下一条命令可用的秒数；预算不够再启动一条命令时返回 None。"""
+        remaining = int(self._deadline - time.monotonic())
+        if remaining < 1:
+            self.exhausted = True
+            return None
+        return min(self.command_timeout, remaining)
+
+
+def run_build(rows, env, storage_root, budget):
     """只构建一次，再按这次运行产出的候选文件逐个判定模块。"""
-    result = run(AGGREGATE_BUILD, env)
+    timeout = budget.take()
+    if timeout is None:
+        return None
+    result = run(AGGREGATE_BUILD, env, timeout=timeout)
     candidate = storage_root / "test" / "releases" / "candidate" / "modules"
     for row in rows:
         entry = candidate / row["module"] / "index.html"
@@ -278,7 +411,13 @@ def run_build(rows, env, storage_root):
     return result
 
 
-def run_tests(rows, env, only):
+def _not_run(budget):
+    """整轮预算用尽时，未启动的附加检查仍要在结果里出现，不能悄悄省略。"""
+    return {"status": NOT_RUN, "seconds": 0.0, "timeout": None,
+            "detail": f"整轮预算 {budget.seconds}s 已用尽，未执行"}
+
+
+def run_tests(rows, env, only, budget):
     for row in rows:
         spec = next(spec for spec in MODULES if spec["key"] == row["module"])
         if row["module"] not in only:
@@ -286,22 +425,35 @@ def run_tests(rows, env, only):
         if not row["dependencies_installed"]:
             row["unit"] = SKIP
             continue
+        timeout = budget.take()
+        if timeout is None:
+            # 预算耗尽：unit 保持 inventory 给的 NOT RUN；附加检查也要留下 NOT RUN 记录。
+            if row["extra_commands"]:
+                row["extra_results"] = {label: _not_run(budget) for label in row["extra_commands"]}
+            continue
         if row["test_command"]:
-            result = run(npm_command(spec["test_script"], row["module"]), env)
+            result = run(npm_command(spec["test_script"], row["module"]), env, timeout=timeout)
             row["unit"] = result["status"]
             row["unit_command"] = " ".join(result["command"])
             row["unit_seconds"] = result["seconds"]
             if result["status"] == FAIL:
                 row["unit_detail"] = result.get("error") or result.get("tail")
+                if result.get("timeout"):
+                    row["unit_timeout"] = result["timeout"]
         else:
             row["unit"] = SKIP
         # 附加检查与该模块有没有 test 脚本无关：world-map 唯一的自动化检查就是这条 tsc。
         if row["extra_commands"]:
             row["extra_results"] = {}
             for label in row["extra_commands"]:
-                extra = run(npm_command(spec["extra_scripts"][label], row["module"]), env)
+                timeout = budget.take()
+                if timeout is None:
+                    row["extra_results"][label] = _not_run(budget)
+                    continue
+                extra = run(npm_command(spec["extra_scripts"][label], row["module"]), env, timeout=timeout)
                 row["extra_results"][label] = {
                     "status": extra["status"], "seconds": extra["seconds"],
+                    "timeout": extra.get("timeout"),
                     "detail": None if extra["status"] == PASS else extra.get("error") or extra.get("tail"),
                 }
 
@@ -397,7 +549,7 @@ def serve_probe(rows, modules_root, packages_root):
         server.server_close()
 
 
-def markdown(rows, aggregate):
+def markdown(rows, aggregate, budget=None):
     lines = [
         "| 模块 | 构建 | 单元测试 | 最小交互入口 | 测试文件 | 说明 |",
         "| --- | --- | --- | --- | --- | --- |",
@@ -406,15 +558,22 @@ def markdown(rows, aggregate):
         notes = list(row["notes"])
         if row.get("extra_results"):
             notes.append("；".join(f"{label} {value['status']}"
+                                   f"{'（超时已终止）' if value.get('timeout') else ''}"
                                    for label, value in row["extra_results"].items()))
-        if row.get("unit_detail"):
+        if row.get("unit_timeout"):
+            notes.append(f"单测超时（上限 {row['unit_timeout']}s），已终止")
+        elif row.get("unit_detail"):
             notes.append("单测失败，详见 JSON 的 unit_detail")
         notes_text = "；".join(notes)
         lines.append(f"| {row['module']} | {row['build']} | {row['unit']} | "
                      f"{row['entry_check']} | {row['test_file_count']} | {notes_text} |")
     if aggregate:
+        detail = (f"超时上限 {aggregate['timeout']}s，已终止" if aggregate.get("timeout")
+                  else f"exit {aggregate.get('exit_code')}")
         lines += ["", f"聚合构建：`{' '.join(aggregate['command'])}` → {aggregate['status']}"
-                      f"（{aggregate['seconds']}s，exit {aggregate.get('exit_code')}）"]
+                      f"（{aggregate['seconds']}s，{detail}）"]
+    if budget is not None and budget.exhausted:
+        lines += ["", f"整轮预算 {budget.seconds}s 已用尽：剩余检查记为 NOT RUN，本轮不算通过。"]
     return "\n".join(lines)
 
 
@@ -423,6 +582,14 @@ class ChineseHelpFormatter(argparse.HelpFormatter):
 
     def add_usage(self, usage, actions, groups, prefix=None):
         super().add_usage(usage, actions, groups, prefix or "用法：")
+
+
+def positive_seconds(text):
+    """时间参数只接受正整数秒：0 或负数会让命令刚启动就被终止。"""
+    value = int(text)
+    if value < 1:
+        raise argparse.ArgumentTypeError(f"需要正整数秒，收到 {text!r}")
+    return value
 
 
 def main(argv=None):
@@ -435,6 +602,14 @@ def main(argv=None):
     parser.add_argument("--modules", type=Path, help="--serve 使用的已构建模块目录")
     parser.add_argument("--json", type=Path, help="把机器可读矩阵写到这个路径")
     parser.add_argument("--markdown", type=Path, help="把 Markdown 矩阵写到这个路径")
+    parser.add_argument("--command-timeout", type=positive_seconds, default=COMMAND_TIMEOUT,
+                        metavar="秒",
+                        help=(f"每条命令的上限，超时终止整棵进程树并记 FAIL；"
+                              f"整轮剩余预算更少时按剩余预算执行（默认 {COMMAND_TIMEOUT}）"))
+    parser.add_argument("--total-timeout", type=positive_seconds, default=TOTAL_TIMEOUT,
+                        metavar="秒",
+                        help=(f"整轮 --run 的墙钟预算，它是硬上限；用尽后剩余检查记 NOT RUN"
+                              f"（默认 {TOTAL_TIMEOUT}）"))
     parser._optionals.title = "可选参数"
     args = parser.parse_args(argv)
     if hasattr(sys.stdout, "reconfigure"):  # Windows 控制台默认用旧代码页
@@ -442,6 +617,7 @@ def main(argv=None):
 
     rows = inventory()
     aggregate = None
+    budget = None
     selected = set(args.module)
     if args.run or args.serve:
         storage_root = Path(tempfile.mkdtemp(prefix="module-baseline-"))
@@ -450,8 +626,9 @@ def main(argv=None):
         env["IRIDESCENTLY_ENVIRONMENT"] = "test"
         try:
             if args.run:
-                aggregate = run_build(rows, env, storage_root)
-                run_tests(rows, env, selected or {row["module"] for row in rows})
+                budget = _Budget(args.total_timeout, args.command_timeout)
+                aggregate = run_build(rows, env, storage_root, budget)
+                run_tests(rows, env, selected or {row["module"] for row in rows}, budget)
             if args.serve:
                 modules_root = (args.modules or
                                 storage_root / "test" / "releases" / "candidate" / "modules").resolve()
@@ -466,7 +643,7 @@ def main(argv=None):
         finally:
             shutil.rmtree(storage_root, ignore_errors=True)
 
-    text = markdown(rows, aggregate)
+    text = markdown(rows, aggregate, budget)
     print(text)
     payload = {
         "schema": 1,
@@ -477,13 +654,17 @@ def main(argv=None):
     }
     if aggregate:
         payload["aggregate_build"] = {key: aggregate.get(key)
-                                      for key in ("status", "seconds", "exit_code", "error")}
+                                      for key in ("status", "seconds", "exit_code", "error", "timeout")}
+    if budget is not None:
+        payload["budget"] = {"seconds": budget.seconds, "exhausted": budget.exhausted}
     if args.json:
         args.json.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if args.markdown:
         args.markdown.write_text(text + "\n", encoding="utf-8")
+    # entry_check 只在 --serve 时由 serve_probe 写入；未探测时保持 NOT RUN，不会误触发非 0。
     failed = any(row[field] == FAIL for row in rows for field in ("build", "unit", "entry_check"))
-    return 1 if failed else 0
+    # 预算用尽时矩阵不完整，不能因为剩下的检查恰好都还没记 FAIL 就返回 0。
+    return 1 if failed or (budget is not None and budget.exhausted) else 0
 
 
 def _version(command):

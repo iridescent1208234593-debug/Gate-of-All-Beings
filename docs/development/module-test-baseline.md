@@ -22,9 +22,12 @@ python tools/checks/module_baseline.py
 
 # 执行聚合构建 + 各模块单测，并挂载构建产物做入口探测
 python tools/checks/module_baseline.py --run --serve --json baseline.json --markdown baseline.md
+
+# 收紧时间上限：每条命令 300 秒、整轮 --run 600 秒（默认 600 / 1800）
+python tools/checks/module_baseline.py --run --command-timeout 300 --total-timeout 600
 ```
 
-`--run` 用 `IRIDESCENTLY_ENVIRONMENT=test` 和一次性临时根运行；`--serve` 在随机回环端口按门户路径（`/app/modules/<名>/`、`/shared/`）托管构建产物，抓取每个入口及它自己引用的资源。脚本的单元测试：
+`--run` 用 `IRIDESCENTLY_ENVIRONMENT=test` 和一次性临时根运行；`--serve` 在随机回环端口按门户路径（`/app/modules/<名>/`、`/shared/`）托管构建产物，抓取每个入口及它自己引用的资源。`--run` 的每条命令（聚合构建、各模块测试、附加检查）上限 600 秒（`COMMAND_TIMEOUT`，可用 `--command-timeout` 覆盖）：超时会终止 npm 及其派生的整棵进程树、记 FAIL 并在 JSON 里带 `timeout` 字段，与「测试失败」分开，避免一个卡住的模块让基线命令永远不退出。整轮 `--run` 另有 1800 秒（`TOTAL_TIMEOUT`，可用 `--total-timeout` 覆盖）墙钟预算：命令上限会被剩余预算压低（`--command-timeout` 大于 `--total-timeout` 合法，总预算是硬上限），用尽后不再启动新命令，剩余检查记为 NOT RUN，整轮以非 0 退出。脚本的单元测试：
 
 ```powershell
 python -m unittest discover -s tools/checks -p 'test_module_baseline.py'
@@ -35,11 +38,11 @@ python -m unittest discover -s tools/checks -p 'test_module_baseline.py'
 | 状态 | 含义 |
 | --- | --- |
 | PASS | 命令退出码 0；或入口页面及其引用的同源资源都返回 200 |
-| FAIL | 命令退出码非 0；或入口引用的资源缺失 |
+| FAIL | 命令退出码非 0、或超过 600 秒上限被终止（JSON 带 `timeout`）；或入口引用的资源缺失 |
 | SKIP | 检查不适用或当前无法运行（无 test 脚本、依赖未安装、没有构建产物） |
 | NOT RUN | 本轮没有尝试执行 |
 
-SKIP 与 NOT RUN 都不等于通过；缺少依赖导致的失败不会被记为 PASS。
+SKIP 与 NOT RUN 都不等于通过；缺少依赖导致的失败不会被记为 PASS。整轮预算用尽时剩余检查记 NOT RUN，整轮以非 0 退出，不把不完整的矩阵当成通过。
 
 ## 3. 测试与可运行性矩阵
 
