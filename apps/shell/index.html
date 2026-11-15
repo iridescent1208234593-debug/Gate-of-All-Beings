@@ -21,6 +21,7 @@
   .shell-topbar a:hover { color: var(--qc-text, #3a4a3e); }
   .shell-topbar a.active { color: #4f6a4b; font-weight: 600; }
   .shell-topbar a.active::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 0; height: 2px;
+    .shell-topbar .nav-badge { margin-left: 4px; padding: 1px 5px; font-size: 10px; line-height: 1.5; border-radius: 6px; color: #7a6a2f; background: #f2e7c4; border: 1px solid #e3d3a0; white-space: nowrap; }
             border-radius: 2px 2px 0 0; background: #c4943f; }
   .shell-topbar .shell-return { color: #4f6a4b; padding-left: 0; margin-right: 8px; }
   .shell-topbar .shell-return::before { content: ''; width: 7px; height: 7px; margin-right: 8px; border: solid currentColor;
@@ -136,7 +137,10 @@ function renderNav() {
   const tabs = portal.links.filter(x => isInternal(x.url) && x.key !== 'cards')
     .sort((a, b) => (TAB_ORDER.indexOf(a.key) + 1 || 99) - (TAB_ORDER.indexOf(b.key) + 1 || 99));
   for (const l of tabs) {
-    navlinks.append(Object.assign(document.createElement('a'), { className: 'nav', href: moduleHref(l.key), textContent: l.name }));
+    const navItem = Object.assign(document.createElement('a'), { className: 'nav', href: moduleHref(l.key) });
+        navItem.append(document.createTextNode(l.name));
+        if (l.badge) navItem.append(Object.assign(document.createElement('span'), { className: 'nav-badge', textContent: l.badge }));
+        navlinks.append(navItem);
   }
 }
 
