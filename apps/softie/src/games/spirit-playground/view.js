@@ -594,13 +594,13 @@ export function mountSpiritPlayground(root) {
     await loadingSettings; if (disposed) return;
     setMode(mode);
     if (mode === 'debug' && !debugAllowed) return;
-    if (!navigator.gpu) throw new Error('当前浏览器未提供 WebGPU，请使用支持 WebGPU 的桌面浏览器。');
+    if (!navigator.gpu) throw new Error('当前浏览器没有 WebGPU，灵体试验场无法运行。请用 Chrome / Edge / Safari 的新版打开；微信、QQ 等内置浏览器通常不支持，可复制链接到系统浏览器再打开。');
     renderer = new THREE.Renderer(new THREE.WebGPUBackend({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' }), { antialias: true, alpha: false, getFallback: null });
     renderer.library = new THREE.StandardNodeLibrary(); renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.NoToneMapping;
     await renderer.init();
     if (disposed) { renderer.dispose(); return; }
     setSceneAnimation(renderer, null);
-    if (!renderer.backend.isWebGPUBackend) throw new Error('灵体试验场需要原生 WebGPU。');
+    if (!renderer.backend.isWebGPUBackend) throw new Error('当前浏览器只提供软件模拟的 WebGPU，灵体试验场无法运行。请换用 Chrome / Edge / Safari 的新版打开。');
     renderer.backend.device.lost.then(info => { if (!disposed && info.reason !== 'destroyed') fail('图形设备连接中断，请刷新页面重试。'); });
     studio = makeStudio(renderer, scene, { spirit: true });
     spirit = new SpiritInstance({ id: 'player', appearance: settings, environment: scene.environment }); scene.add(spirit.root);
