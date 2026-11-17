@@ -48,6 +48,22 @@ class HuiguanOAuthSessionTest(unittest.TestCase):
         self.assertIn("SameSite=Lax", cookie)
         self.assertIn("Secure", cookie)
 
+    def test_shared_cookie_scope_and_audience_follow_each_root(self):
+        roots = ("iridescently.xyz", "iridescently.cn", "iridescently.dpdns.org")
+        for root in roots:
+            with self.subTest(root=root):
+                request = FakeRequest("huiguan." + root)
+                sso = app.Handler._sso_cookie(request, "unit-user", "usso", "Unit User")
+                self.assertIn("Path=/; Domain=." + root, sso)
+                token = sso.split("hx_sso=", 1)[1].split(";", 1)[0]
+                payload = app.hx_sso.verify_token(token, root)
+                self.assertEqual((payload["uid"], payload["aud"]), ("unit-user", root))
+                for other in set(roots) - {root}:
+                    self.assertIsNone(app.hx_sso.verify_token(token, other))
+                self.assertIn("Path=/; Domain=." + root,
+                              app.Handler._session_cookie(request, "test-session"))
+                self.assertIn("Domain=." + root, app.Handler._sso_clear_cookie(request))
+
     def test_sessions_are_bound_to_the_root_that_issued_them(self):
         sid = app.create_session("local", "unit-root-user", "iridescently.cn")
         self.assertEqual(app.read_session(sid, "iridescently.cn"), {"kind": "local", "uid": "unit-root-user"})
