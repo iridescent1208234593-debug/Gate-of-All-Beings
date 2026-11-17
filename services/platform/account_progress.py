@@ -47,16 +47,16 @@ RESET_MIGRATION = "points-reset-v2"
 #   account held when the day began before the new best is held for review instead of
 #   ranked. Defaults to STEP_RATIO of the ceiling; the "sum" board is capped per day already.
 GAMES = {
-    "cards": {"name": "众生牌录 · 入世历练", "metric": "最深层数", "unit": "层", "agg": "best", "max": 60},
-    "slay": {"name": "重生之门", "metric": "最高层数", "unit": "层", "agg": "best", "max": 80},
-    "lingzhi": {"name": "灵质回路", "metric": "最高层数", "unit": "层", "agg": "best", "max": 60},
+    "cards": {"name": "众生牌录 · 入世历练", "metric": "最深层数", "unit": "层", "agg": "best", "max": 60, "min_interval": 60},
+    "slay": {"name": "重生之门", "metric": "最高层数", "unit": "层", "agg": "best", "max": 80, "min_interval": 60},
+    "lingzhi": {"name": "灵质回路", "metric": "最高层数", "unit": "层", "agg": "best", "max": 60, "min_interval": 15},
     "shore": {"name": "雾隐浅滩", "metric": "单次探索节点", "unit": "处", "agg": "best", "max": 200},
     "juling": {"name": "聚灵", "metric": "修行评分", "unit": "分", "agg": "best", "max": 2000},
     "management": {"name": "灵境会馆经营", "metric": "建成建筑", "unit": "座", "agg": "best", "max": 500},
     "ecology": {"name": "灵境生态", "metric": "同存物种", "unit": "种", "agg": "best", "max": 500},
     "softie": {"name": "灵体互动", "metric": "累计相处", "unit": "分钟", "agg": "sum", "max": 5, "day_max": 120},
     "aeon": {"name": "AEON", "metric": "最高演化代数", "unit": "代", "agg": "best", "max": 100000},
-    "shengsheng-shoot": {"name": "省省海滩射击", "metric": "最高得分", "unit": "分", "agg": "best", "max": 1000000},
+    "shengsheng-shoot": {"name": "省省海滩射击", "metric": "最高得分", "unit": "分", "agg": "best", "max": 1000000, "min_interval": 3},
 }
 
 # Award rules, all in tenths of a point. "cap" is how many times the rule may pay per
@@ -75,10 +75,11 @@ RULES = {
 DAILY_CAP_X10 = 80          # 每个账户每天最多 8 分
 MAX_REPORTS_PER_GAME_DAY = 300
 STEP_RATIO = 0.3            # 单日个人最佳最多上升该玩法上限的 30%，超出进入人工复核
+MIN_RUN_INTERVAL_DEFAULT = 0  # 同一账号同一玩法两局之间的最小间隔（秒）；各玩法可用 min_interval 覆盖
 # Report rate limits per rolling minute: (bucket scope, limit). A normal client sends one
 # report per finished run and at most one progress report per 5 minutes per game.
 RATE_WINDOW_SECONDS = 60
-RATE_LIMITS = {"account-game": 12, "ip-game": 40, "ip": 120}
+RATE_LIMITS = {"account-game": 5, "ip-game": 20, "ip": 120}
 EXPLORE_GAMES = 3
 TASKS = ("task-finish", "task-explore")
 
@@ -88,8 +89,8 @@ def step_for(game):
     return int(cfg.get("step") or max(1, int(cfg["max"] * STEP_RATIO)))
 
 
-def _now():
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+def _now(now=None):
+    return (now or datetime.now(timezone.utc)).isoformat(timespec="seconds")
 
 
 def today(now=None):
@@ -433,10 +434,26 @@ def record_report(conn, kind, uid, name, report, now=None):
     kind, uid = _owner(kind, uid)
     name = str(name or "")[:60]
     game, score, cfg = report["game"], report["score"], GAMES[report["game"]]
-    day, stamp = today(now), _now()
+    day, stamp = today(now), _now(now)
     awarded = []
+    min_interval = int(cfg.get("min_interval", MIN_RUN_INTERVAL_DEFAULT) or 0)
     conn.execute("BEGIN IMMEDIATE")
     try:
+        # 同一账号同一玩法两局之间必须有最小间隔：正常客户端一局只上报一次，
+        # 一个人不可能在同一秒里连续通关两个 roguelike 玩法。
+        if report["finished"] and min_interval > 0:
+            last_run = conn.execute(
+                "SELECT created_at FROM game_runs WHERE kind=? AND uid=? AND game=? "
+                "ORDER BY created_at DESC LIMIT 1", (kind, uid, game)).fetchone()
+            if last_run:
+                try:
+                    prev_at = datetime.fromisoformat(str(last_run[0]))
+                    cur_at = datetime.fromisoformat(stamp)
+                    if (cur_at - prev_at).total_seconds() < min_interval:
+                        conn.execute("ROLLBACK")
+                        return {"ok": False, "error": "两局间隔过短，请正常游玩后再上报", "status": 429}
+                except ValueError:
+                    pass
         daily = conn.execute("SELECT reports, summed FROM game_score_daily WHERE kind=? AND uid=? AND game=? AND day=?",
                              (kind, uid, game, day)).fetchone()
         reports, summed = (daily["reports"], daily["summed"]) if daily else (0, 0)

@@ -11,6 +11,7 @@ import sys
 import tempfile
 import threading
 import unittest
+from datetime import datetime, timedelta, timezone
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
@@ -50,8 +51,19 @@ def conn():
     return ap.open_db(DATA)
 
 
+# 同一 (账号, 玩法) 连续上报时按该玩法的最小间隔推进时间（并至少 12 秒一跳，
+# 避免撞上每分钟 5 次的上报限速），模拟真实玩家一局一局地玩。
+_REPORT_CLOCK = {}
+
+
 def report(c, kind, uid, **body):
-    return ap.record_report(c, kind, uid, "名" + uid, ap.clean_report(body))
+    game = body.get("game")
+    key = (kind, uid, game)
+    interval = int(ap.GAMES[game].get("min_interval", ap.MIN_RUN_INTERVAL_DEFAULT) or 0) if game in ap.GAMES else 0
+    previous = _REPORT_CLOCK.get(key)
+    at = datetime.now(timezone.utc) if previous is None else previous + timedelta(seconds=max(interval + 1, 12))
+    _REPORT_CLOCK[key] = at
+    return ap.record_report(c, kind, uid, "名" + uid, ap.clean_report(body), now=at)
 
 
 def my_view(c, chain_id, kind="local", uid="7"):
@@ -221,7 +233,8 @@ class Http(unittest.TestCase):
         for game in ("slay", "cards", "ecology"):
             self.call("POST", "/api/progress/report", {"game": game, "score": 1, "finished": True, "ref": game},
                       cookie=token)
-        self.call("POST", "/api/progress/report", {"game": "slay", "score": 2, "finished": True, "won": True,
+        # 赢下一局允许任意玩法：用没有最小局间隔的 juling，避免 HTTP 测试里连续两次 slay 上报被拒。
+        self.call("POST", "/api/progress/report", {"game": "juling", "score": 2, "finished": True, "won": True,
                                                    "ref": "win"}, cookie=token)
         status, chains = self.call("GET", "/api/progress/chains", cookie=token)
         self.assertEqual(status, 200)
