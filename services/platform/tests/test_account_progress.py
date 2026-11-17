@@ -12,7 +12,7 @@ import sys
 import tempfile
 import threading
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 
@@ -50,8 +50,21 @@ def conn():
     return ap.open_db(DATA)
 
 
+# 同一 (账号, 玩法) 用同一个 now 连续上报时，自动按该玩法的最小间隔向后推进，
+# 模拟真实玩家一局一局地玩；显式传入更晚的 now（如次日）时按传入值。
+_REPORT_CLOCKS = {}
+
+
 def report(c, kind, uid, now=NOON, **body):
-    return ap.record_report(c, kind, uid, "名" + uid, ap.clean_report(body), now=now)
+    game = body.get("game")
+    key = (kind, uid, game)
+    interval = int(ap.GAMES[game].get("min_interval", ap.MIN_RUN_INTERVAL_DEFAULT) or 0) if game in ap.GAMES else 0
+    state = _REPORT_CLOCKS.get(key)
+    at = now
+    if state and state[0] == now:
+        at = state[1] + timedelta(seconds=interval + 1)
+    _REPORT_CLOCKS[key] = (now, at)
+    return ap.record_report(c, kind, uid, "名" + uid, ap.clean_report(body), now=at)
 
 
 class LevelCurve(unittest.TestCase):
@@ -181,6 +194,22 @@ class AbuseControls(unittest.TestCase):
         self.assertEqual(self.best("8", "cards"), 2 * step)
         self.assertEqual(ap.pending_reviews(self.c), [])
 
+    def test_runs_too_close_are_rejected(self):
+        # slay 的最小间隔是 60 秒：紧接着的下一局被拒绝且不记分，间隔够了才放行。
+        first = ap.record_report(self.c, "local", "9", "名9",
+                                 ap.clean_report({"game": "slay", "score": 5, "finished": True, "ref": "close-1"}),
+                                 now=NOON)
+        self.assertTrue(first["ok"])
+        second = ap.record_report(self.c, "local", "9", "名9",
+                                  ap.clean_report({"game": "slay", "score": 6, "finished": True, "ref": "close-2"}),
+                                  now=NOON + timedelta(seconds=5))
+        self.assertFalse(second["ok"])
+        self.assertEqual(second["status"], 429)
+        self.assertEqual(self.c.execute("SELECT COUNT(*) FROM game_runs WHERE uid='9'").fetchone()[0], 1)
+        third = ap.record_report(self.c, "local", "9", "名9",
+                                 ap.clean_report({"game": "slay", "score": 7, "finished": True, "ref": "close-3"}),
+                                 now=NOON + timedelta(seconds=65))
+        self.assertTrue(third["ok"])
     def test_jump_is_held_but_the_run_still_pays(self):
         report(self.c, "local", "8", game="cards", score=4, finished=True, ref="a")
         r = report(self.c, "local", "8", game="cards", score=60, finished=True, won=True, ref="b")
