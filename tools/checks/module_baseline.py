@@ -72,7 +72,8 @@ MODULES = (
         "build_script": "build",
         "test_script": "test",
         "extra_scripts": {"类型检查": "check:game", "后端单测": "test:backend"},
-        "test_globs": ("src/game/core/*.test.ts", "src/world/*.test.ts",
+        "test_globs": ("src/game/core/*.test.ts", "src/gate/*.test.ts",
+                       "src/onboarding/*.test.ts", "src/world/*.test.ts",
                        "src/activities/*/*.test.ts", "server/*.test.ts"),
     },
     {
