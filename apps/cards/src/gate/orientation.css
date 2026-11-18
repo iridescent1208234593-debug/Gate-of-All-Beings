@@ -3,9 +3,9 @@
 .orient-guard h2{margin:6px 0 0;font-size:19px;font-weight:500;letter-spacing:.18em;text-indent:.18em}
 .orient-guard p{margin:0;max-width:300px;font-size:12.5px;line-height:1.9;color:#fdfbe5b3}
 .orient-guard__phone{color:var(--lxh-entry-accent,#ffb649);animation:orient-turn 2.4s ease-in-out infinite}
-.orient-toggle{position:fixed;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));z-index:1500;min-height:32px;padding:6px 13px;font:inherit;font-size:11px;letter-spacing:.12em;color:#fdf9e4;background:#050807a6;border:1px solid #fdfbe540;border-radius:999px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer}
-/* 灵境会馆的底栏按钮正好在左下角：改成贴在左缘中部的竖签，不再压住「营造」 */
-body:has(.management-frame) .orient-toggle{top:50%;bottom:auto;left:0;transform:translateY(-50%);min-height:0;padding:12px 5px;border-left:0;border-radius:0 10px 10px 0;writing-mode:vertical-rl;letter-spacing:.2em}
+.orient-toggle{position:fixed;left:0;top:50%;bottom:auto;transform:translateY(-50%);z-index:1500;min-height:0;padding:12px 5px;font:inherit;font-size:11px;letter-spacing:.2em;color:#fdf9e4;background:#050807a6;border:1px solid #fdfbe540;border-left:0;border-radius:0 10px 10px 0;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);cursor:pointer;writing-mode:vertical-rl}
+/* 旋转按钮统一贴在左缘中部：左下角被「切换服务器」药丸（fixed + 极高 z-index）占住，
+   原先放左下会被整个盖住点不到；灵境会馆的「营造」也在左下，同样避开。 */
 @keyframes orient-in{from{opacity:0}to{opacity:1}}
 @keyframes orient-turn{0%,22%{transform:rotate(0)}48%,74%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
 @media(prefers-reduced-motion:reduce){.orient-guard{animation:none}.orient-guard__phone{animation:none;transform:rotate(-90deg)}}
