@@ -18,6 +18,29 @@
     <link rel="stylesheet" href="./styles/chrome.css" />
     <link rel="stylesheet" href="./styles/responsive.css" />
     <title>Iridescently · 节气之间，自有天气</title>
+  
+    <!-- MXANA 站点统计：只在公开图库页加载，不进入账号/登录页 -->
+    <script>
+      (function () {
+        try {
+          var url = new URL(location.href), dirty = false;
+          ["code", "token", "state", "email", "uid", "openid"].forEach(function (key) {
+            if (url.searchParams.has(key)) { url.searchParams.delete(key); dirty = true; }
+          });
+          if (dirty) history.replaceState(null, "", url.pathname + url.search + url.hash);
+        } catch (e) {}
+        var s = document.createElement("script");
+        s.id = "MXA_COLLECT";
+        s.async = true;
+        s.src = "/__mxana-sdk.js";
+        s.onload = function () {
+          if (window.MXA && typeof window.MXA.init === "function") {
+            window.MXA.init({ id: "c2-lCwEAOte", useHeatMap: true, useHash: true, useErrorLog: true });
+          }
+        };
+        document.head.appendChild(s);
+      })();
+    </script>
   </head>
   <body class="site-home" data-gallery-state="starting">
     <a class="skip-link" href="#gallery">跳至节气图库</a>
