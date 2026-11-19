@@ -5,20 +5,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>隐私政策 · 西木会馆</title>
-<meta name="description" content="西木会馆 · 众生之门《隐私政策》，版本 2026-11-06。">
+<meta name="description" content="西木会馆 · 众生之门《隐私政策》，版本 2026-11-19。">
 <link rel="icon" href="favicon.png">
 <link rel="stylesheet" href="/design-system/design-system.css">
 <link rel="stylesheet" href="legal.css?v=20261106">
 </head>
 <!-- Text source: the owner's 隐私政策 docx, revision 2026-11-07. Keep data-legal-version equal to
      services/platform/legal_consent.CURRENT_VERSION; bump both when the text changes in substance. -->
-<body class="qc-body legal-page" data-legal-version="2026-11-06" data-legal-doc="privacy">
+<body class="qc-body legal-page" data-legal-version="2026-11-19" data-legal-doc="privacy">
 <a class="legal-skip" href="#legal-article">跳到正文</a>
 <header class="legal-hero">
   <div class="legal-hero__inner">
     <p class="legal-kicker">西木会馆 · 众生之门</p>
     <h1>隐私政策</h1>
-    <p class="legal-meta"><span>生效日期 2026 年 11 月 6 日</span><span>版本 2026-11-06</span></p>
+    <p class="legal-meta"><span>生效日期 2026 年 11 月 19 日</span><span>版本 2026-11-19</span></p>
     <nav class="legal-switch" aria-label="条款文档">
       <a href="/terms.html">用户须知</a>
       <a href="/privacy.html" aria-current="page">隐私政策</a>
@@ -50,7 +50,7 @@
       <ul>
 <li>只收集提供服务必需的信息：用户名、密码哈希、邮箱、角色卡与上传图片。</li>
 <li>密码与找回答案都只保存加盐哈希，任何人都看不到原文。</li>
-<li>不卖、不租你的个人信息，不做广告追踪；Cookie 只用于登录与偏好。</li>
+<li>不卖、不租你的个人信息，不做广告追踪；Cookie 用于登录、偏好与公开页的访问统计。</li>
 <li>你可以查阅、更正、删除自己的内容，或联系站长删除账号。</li>
       </ul>
       <p class="legal-summary__note">摘要只是帮助理解，以下正文为准。加粗部分请特别留意。</p>
@@ -101,9 +101,10 @@
 <tr><td>会话 Cookie</td><td>维持站内登录状态</td><td>仅服务端可读、限制跨站发送，HTTPS 下加密传输</td><td>30 天</td></tr>
 <tr><td>共享会话 Cookie</td><td>同一项目组各子站间的共享登录状态</td><td>仅服务端可读</td><td>随会话</td></tr>
 <tr><td>主题偏好</td><td>记住您选择的浅色 / 深色 / 跟随系统，在各子站间保持一致</td><td>不含身份信息</td><td>1 年</td></tr>
-<tr><td>公告已读标记</td><td>记住您已看过某期站点公告，避免重复弹出</td><td>不含身份信息</td><td>1 小时</td></tr>
+  <tr><td>访问统计标识</td><td>区分独立访客，统计公开图库页的访问与前端错误（见 4.9）</td><td>仅公开图库页写入，不关联账号</td><td>由统计服务设置</td></tr>
+  <tr><td>公告已读标记</td><td>记住您已看过某期站点公告，避免重复弹出</td><td>不含身份信息</td><td>1 小时</td></tr>
 </tbody></table></div>
-<p class="clause"><span class="clause-no">3.2</span>上述 Cookie 用于登录及必要的服务运行，不用于广告定向投放。您可以通过浏览器设置清除 Cookie，但清除后可能退出登录。部分页面加载了网络安全服务商（见 4.1）提供的匿名访问统计脚本，用于了解页面访问量与加载速度；它不设置 Cookie、不关联您的账号，也不用于广告。本站没有接入广告追踪组件；如未来新增其他统计或追踪组件，将先更新本政策。</p>
+<p class="clause"><span class="clause-no">3.2</span>上述 Cookie 用于登录及必要的服务运行，不用于广告定向投放。您可以通过浏览器设置清除 Cookie，但清除后可能退出登录。部分页面加载了网络安全服务商（见 4.1）提供的匿名访问统计脚本，用于了解页面访问量与加载速度；它不设置 Cookie、不关联您的账号，也不用于广告。本站没有接入广告追踪组件；如未来新增其他统计或追踪组件，将先更新本政策。此外，<strong>公开图库页</strong>加载了站点统计服务（MXANA，见 4.9）的脚本，用于统计该页面的访问量与前端错误；该脚本会在您的浏览器中写入用于区分独立访客的统计标识 Cookie（<code>__mxau__</code> 等，有效期由该服务设置），不关联您的站内账号，也不用于广告。</p>
 <p class="clause"><span class="clause-no">3.3</span>浏览器本地存储可能用于保存表单草稿、临时形象等偏好数据。<strong>仅保存在本地、未启用云端同步的内容</strong>通常不会因本地存储本身而上传；您主动执行云端保存、上传或同步时，相应内容将按第一、二条约定由服务器处理。请以对应功能的实际提示为准。</p>
 </section>
 <section id="s5" aria-labelledby="s5-h"><h2 id="s5-h">第四条 第三方服务、公开展示与信息访问</h2>
@@ -121,7 +122,8 @@
 <p class="clause"><span class="clause-no">4.5</span><strong>外部链接与第三方内容</strong>：本站可能包含指向第三方网站的链接或第三方提供的内容。您访问外部网站后，其个人信息处理活动由对应服务提供者依据适用法律和隐私政策负责；本站建议您访问前先阅读相关规则。对本站自行嵌入或集成第三方功能所涉及的数据处理，本站仍应承担其依法应负的义务。</p>
 <p class="clause"><span class="clause-no">4.6</span><strong>依法提供或配合处理</strong>：在法律法规规定或有权机关依法要求的范围内，本站可能依法提供必要信息。</p>
 <p class="clause"><span class="clause-no">4.7</span><strong>其他信息共享</strong>：如增加新的第三方服务、独立数据接收方或其他依法需要单独告知、同意的处理情形，本站将按适用规定履行告知及同意等程序，不以本条概括性表述替代法定要求。</p>
-<p class="clause"><span class="clause-no">4.8</span><strong>非商业项目与版权边界</strong>：本站为非官方爱好者交流项目，不以收费、作品售卖、广告或集资等方式开展营利性运营；「连接与鸣谢」页的自愿赞赏不换取任何站内权益，本站不因赞赏收集额外的个人信息（赞赏通过第三方支付平台完成，适用该平台的规则）。非商业性质不代表本站对原版权方的作品拥有授权，也不当然构成法定合理使用。涉及用户上传内容、商业化限制、著作权及权利投诉等事项，请参阅《用户须知》第六条；本条不替代本政策关于个人信息保护的规定。</p>
+<p class="clause"><span class="clause-no">4.8</span><strong>非商业项目与版权边界</strong>：本站为非官方爱好者交流项目，不以收费、作品售卖、广告或集资等方式开展营利性运营；「连接与鸣谢」页的自愿赞赏不换取任何站内权益，本站不因赞赏收集额外的个人信息（赞赏通过第三方支付平台完成，适用该平台的规则）。非商业性质不代表本站对原版权方的作品拥有授权，也不当然构成法定合理使用。涉及用户上传内容、商业化限制、著作权及权利投诉等事项，请参阅《用户须知》第六条；本条不替代本政策关于个人信息保护的规定。</p>  <p class="clause"><span class="clause-no">4.9</span><strong>站点统计服务（MXANA）</strong>：公开图库页（<code>/gallery.html</code>）加载了由 MXANA（四川随客信息技术有限公司）提供的访问统计脚本，用于了解该页面的访问量、来路、访问环境与前端错误。该脚本运行在您的浏览器中，可能收集页面地址、来源页、浏览器与设备信息、屏幕分辨率、语言与前端报错信息，并由 MXANA 的服务器记录您的网络地址（IP）；同时会写入用于区分独立访客的统计 Cookie（见第三条）。本站<strong>仅在该公开页面启用</strong>该脚本，不在账号、登录、邮箱绑定以及站内功能页面加载，该统计不关联您的站内账号，也不用于广告投放。MXANA 对其自身处理的数据适用该服务商的隐私政策；您可以通过浏览器设置或拦截类扩展阻止其运行，不影响本站功能。</p>
+
 </section>
 <section id="s6" aria-labelledby="s6-h"><h2 id="s6-h">第五条 信息的存储与保护</h2>
 <p class="clause"><span class="clause-no">5.1</span><strong>存储位置与方式</strong>：账号、会话、邮箱绑定、角色卡等数据由服务端数据库或数据文件保存；上传图片按内容哈希寻址存储。实际存储可能涉及本站管理的租用服务器、网络服务和必要的备份设施。网络安全及邮件等第三方处理见第四条。<strong><strong>本站服务器位于中国香港特别行政区</strong>，<strong>完整的用户数据库只保存在该服务器上</strong>，账号、角色卡与上传图片均存放于此；访问流量可能经由第三方网络安全及内容分发服务转发。</p>
