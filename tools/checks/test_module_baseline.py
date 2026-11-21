@@ -3,6 +3,7 @@ import argparse
 import contextlib
 import ctypes
 import io
+import json
 import os
 import subprocess
 import sys
@@ -172,6 +173,33 @@ class StatusTests(unittest.TestCase):
         text = module_baseline.markdown(rows, None)
         # 表头 + 分隔行 + 每个模块一行
         self.assertEqual(len([line for line in text.splitlines() if line.startswith("| ")]), len(rows) + 2)
+
+
+class TestGlobCoverageTests(unittest.TestCase):
+    """``npm test`` 的匹配范围必须覆盖模块里所有的 test 文件。
+
+    cards 曾经因为 glob 只列了部分目录，``src/gate`` 与 ``src/onboarding`` 下的测试没有进
+    ``npm test``，盘点计数也跟着少算：矩阵显示通过，实际这些文件根本没跑。
+    """
+
+    def _cards_spec(self):
+        return next(spec for spec in module_baseline.MODULES if spec["key"] == "cards")
+
+    def test_cards_test_globs_cover_every_ts_test_file_under_src(self):
+        module_dir = module_baseline.ROOT / "apps" / "cards"
+        on_disk = {path.relative_to(module_dir).as_posix()
+                   for path in (module_dir / "src").rglob("*.test.ts")}
+        matched = set(module_baseline.count_test_files(module_dir, self._cards_spec()["test_globs"]))
+        self.assertEqual(sorted(on_disk - matched), [])
+
+    def test_cards_npm_test_script_runs_the_inventoried_globs(self):
+        """盘点用的 glob 与 ``npm test`` 实际匹配范围必须一致，否则矩阵计数不是跑过的范围。"""
+        package = json.loads((module_baseline.ROOT / "apps" / "cards" / "package.json")
+                             .read_text("utf-8"))
+        for pattern in self._cards_spec()["test_globs"]:
+            # server/ 由 test:backend 单独跑：同一张矩阵里是「后端单测」这一行。
+            script = "test:backend" if pattern.startswith("server/") else "test"
+            self.assertIn(pattern, package["scripts"][script])
 
 
 class CommandTimeoutTests(unittest.TestCase):
