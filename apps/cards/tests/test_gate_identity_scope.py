@@ -59,7 +59,7 @@ class GateIdentityScopeTest(unittest.TestCase):
         self.write_roster = Mock()
         self.upload = Mock(return_value="/assets/uploads/" + "a" * 64 + ".webp")
         self.fixtures = {
-            uid: {"kind": "local", "uid": uid, "name": f"Player {uid}", "picture": "", "account_avatar_url": "", "gate_identity": {"schema_version": 1, "display_name": f"Saved {uid}", "species_name": "猫妖", "avatar_asset_id": "", "avatar_frame_id": "r02", "avatar_mode": "default", "source_oc_id": ""}}
+            uid: {"kind": "local", "uid": uid, "name": f"Player {uid}", "picture": "", "account_avatar_url": "", "gate_identity": {"schema_version": 1, "display_name": f"Saved {uid}", "species_name": "猫妖", "avatar_asset_id": "/assets/uploads/" + (uid.lower() * 64) + ".webp", "avatar_frame_id": "r02", "avatar_mode": "default", "source_oc_id": ""}}
             for uid in ("A", "B")
         }
         # A synthetic header is understood ONLY by this patched test resolver.
@@ -136,6 +136,54 @@ class GateIdentityScopeTest(unittest.TestCase):
                 self.assertEqual(result["owner"], {"kind": "local", "user_id": uid})
                 self.assertEqual(result["identity"]["display_name"], f"Saved {uid}")
         self.assert_no_persistence()
+
+    def test_switch_between_accounts_keeps_avatar_and_profile_isolated(self):
+        status, a_before = self.request(account="A")
+        status_b, b_before = self.request(account="B")
+        self.assertEqual((status, status_b), (200, 200))
+        self.assertNotEqual(a_before["identity"]["avatar_asset_id"], b_before["identity"]["avatar_asset_id"])
+        self.assertEqual(a_before["identity"]["avatar_url"], a_before["identity"]["avatar_asset_id"])
+
+        draft_a = self.draft(owner="A")
+        draft_a["display_name"] = "账户 A 新形象"
+        draft_a["avatar_asset_id"] = "/assets/uploads/" + "c" * 64 + ".webp"
+        status, a_saved = self.request(account="A", identity=draft_a)
+        self.assertEqual(status, 200)
+        self.fixtures["A"].update(gate_identity=a_saved["identity"], gate_identities=a_saved["identities"])
+
+        # B must still read its own profile and avatar after A saved.
+        status, b_after_a = self.request(account="B")
+        self.assertEqual(status, 200)
+        self.assertEqual(b_after_a["identity"]["display_name"], "Saved B")
+        self.assertEqual(b_after_a["identity"]["avatar_asset_id"], b_before["identity"]["avatar_asset_id"])
+
+        draft_b = self.draft(owner="B")
+        draft_b["display_name"] = "账户 B 新形象"
+        draft_b["avatar_asset_id"] = "/assets/uploads/" + "d" * 64 + ".webp"
+        status, b_saved = self.request(account="B", identity=draft_b)
+        self.assertEqual(status, 200)
+        self.fixtures["B"].update(gate_identity=b_saved["identity"], gate_identities=b_saved["identities"])
+
+        # A refresh keeps A's latest profile and never adopts B's avatar.
+        status, a_after = self.request(account="A")
+        self.assertEqual(status, 200)
+        self.assertEqual(a_after["identity"]["display_name"], "账户 A 新形象")
+        self.assertEqual(a_after["identity"]["avatar_asset_id"], a_saved["identity"]["avatar_asset_id"])
+        self.assertNotEqual(a_after["identity"]["avatar_asset_id"], b_saved["identity"]["avatar_asset_id"])
+
+        # A stale A draft arriving with B's authenticated session must not overwrite B.
+        writes_before = self.write.call_count
+        status, _ = self.request(account="B", identity=self.draft(owner="A"))
+        self.assertEqual(status, 409)
+        self.assertEqual(self.write.call_count, writes_before)
+        self.assertEqual(self.request(account="B")[1]["identity"]["display_name"], "账户 B 新形象")
+
+        # Logout has no profile and cannot fall back to either account's draft.
+        status, guest = self.request(account=None)
+        self.assertEqual(status, 200)
+        self.assertFalse(guest["logged_in"])
+        self.assertIsNone(guest["owner"])
+        self.assertIsNone(guest["identity"])
 
     def test_matching_owner_saves_only_the_current_account(self):
         status, result = self.request(account="A", identity=self.draft())
