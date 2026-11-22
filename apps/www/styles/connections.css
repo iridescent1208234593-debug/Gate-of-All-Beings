@@ -1064,3 +1064,28 @@ a:hover {
 @media (prefers-reduced-motion: reduce) {
   .connections-section--thanks .thanks-group .special-thanks__item, .thanks-group .special-thanks__item a { transition: none; }
 }
+
+
+/* 共创档案 uses the existing connections page's daytime and nighttime palette. */
+.creator-directory__filters { display: flex; flex-wrap: wrap; gap: 12px 16px; margin: 18px 0 12px; }
+.creator-directory__filters[hidden] { display: none; }
+.creator-directory__filters label { display: grid; flex: 1 1 130px; gap: 6px; color: var(--connections-muted); font-size: 13px; min-width: 0; }
+.creator-directory__filters label:first-child { flex-basis: 210px; }
+.creator-directory :is(input, select, button) { min-height: 42px; padding: 7px 10px; border: 1px solid var(--connections-line); border-radius: 6px; background: var(--connections-canvas); color: var(--connections-ink); font: inherit; }
+.creator-directory :is(button, summary) { cursor: pointer; }
+.creator-directory :is(input, select, button, a, summary):focus-visible { outline: 2px solid var(--connections-focus); outline-offset: 3px; }
+.creator-directory__cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: 12px; align-items: start; }
+.creator-card { min-width: 0; padding: 14px 16px; border: 1px solid var(--connections-line); border-radius: 10px; background: var(--connections-glass); overflow-wrap: anywhere; scroll-margin-top: 100px; }
+.creator-card__head { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; }
+.creator-card__avatar { display: grid; flex: none; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: var(--connections-panel); color: var(--connections-accent); font-weight: 600; overflow: hidden; }
+.creator-card__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.creator-card__name, .creator-card h4 { margin: 0; }
+.creator-card__kind { display: block; color: var(--connections-accent); font-size: .8rem; }
+.creator-card p, .creator-card ul { color: var(--connections-muted); font-size: .875rem; line-height: 1.6; }
+.creator-card p { margin: 8px 0; white-space: pre-wrap; }
+.creator-card ul { padding-inline-start: 1.2em; }
+.creator-card details { border-top: 1px solid var(--connections-line); margin-top: 12px; padding-top: 8px; }
+.creator-card summary { color: var(--connections-ink); padding-block: 5px; }
+.creator-card a, .creator-directory__credits a { text-decoration: underline; text-underline-offset: .18em; }
+.creator-directory__credits { margin-top: 18px; color: var(--connections-muted); overflow-wrap: anywhere; }
+.creator-directory__credits li { margin-block: 6px; }

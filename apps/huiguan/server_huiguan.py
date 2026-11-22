@@ -49,6 +49,10 @@ from account_profile import init_schema as init_profile_schema, get_profile, set
 import game_saves
 import account_progress
 import legal_consent
+import creator_directory
+import lab_account_broker
+
+CREATORS_ENABLED = os.environ.get("IRIDESCENTLY_CREATORS_ENABLED") == "1"
 
 # POST endpoints that upload or publish content: a logged-in Account must have agreed to the current
 # 《用户须知》/《隐私政策》 first (owner decision 2026-11-06: existing Accounts must agree too).
@@ -435,6 +439,10 @@ def init_user_db():
         init_security_schema(conn)
         init_email_schema(conn)
         legal_consent.init_schema(conn)
+        if CREATORS_ENABLED:
+            creator_directory.init_schema(conn)
+        if LAB_ACCOUNT_BROKER.enabled:
+            lab_account_broker.init_schema(conn)
         init_recovery_schema(conn)
         init_profile_schema(conn)
         conn.execute("""
@@ -849,6 +857,16 @@ def resolve_identity(kind, uid):
         }
 
 
+_LAB_AUTH_ORIGINS = {"https://" + host: host.split(".", 1)[1]
+                     for host in PRODUCTION_HOSTS if host.startswith("huiguan.")}
+_LAB_AUTH_ORIGIN = os.environ.get("IRIDESCENTLY_LAB_ACCOUNT_BROKER_ORIGIN", "")
+LAB_ACCOUNT_BROKER = lab_account_broker.LabAccountBroker(
+    db, DB_LOCK, resolve_identity,
+    os.environ.get("IRIDESCENTLY_LAB_ACCOUNT_BROKER_BEARER", ""),
+    _LAB_AUTH_ORIGIN, _LAB_AUTH_ORIGINS.get(_LAB_AUTH_ORIGIN), legal_consent.accepted,
+)
+
+
 def security_email(kind, uid):
     """账号的安全邮箱（用于收验证码等）：站内绑定优先，其次 USSO 自带。"""
     conn = db()
@@ -950,6 +968,8 @@ def destroy_user_sessions(kind, uid):
     with DB_LOCK:
         conn = db()
         conn.execute("DELETE FROM sessions_db WHERE kind=? AND uid=?", (kind, str(uid)))
+        if LAB_ACCOUNT_BROKER.enabled:
+            lab_account_broker.invalidate_account(conn, kind, str(uid))
         conn.commit()
         conn.close()
 
@@ -1868,10 +1888,22 @@ class Handler(BaseStaticHandler):
         p = self.path.split("?")[0]
         return p.startswith("/api/") or p in ("/", "/cb")
 
+    def _lab_auth_route(self, path):
+        if not path.startswith(lab_account_broker.PREFIX):
+            return False
+        # Do not serve the authentication flow under sibling sites or migrated aliases.
+        if (not LAB_ACCOUNT_BROKER.enabled or
+                "https://" + (request_host(self) or "") != _LAB_AUTH_ORIGIN):
+            self._json(503, {"error": "lab_account_disabled"})
+            return True
+        return LAB_ACCOUNT_BROKER.handle(self, self.command, path)
+
     # ---------- 路由 ----------
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
+        if self._lab_auth_route(path):
+            return
         qs = urllib.parse.parse_qs(parsed.query)
 
         if path == "/api/original-image":
@@ -1883,6 +1915,11 @@ class Handler(BaseStaticHandler):
 
         if path.startswith("/api/huiguan/"):
             path = "/api/" + path[len("/api/huiguan/"):]
+
+        if CREATORS_ENABLED and (path in (creator_directory.PUBLIC, creator_directory.ME)
+                                 or path.startswith(creator_directory.ADMIN)):
+            return creator_directory.handle(self, path, qs, globals(), avatar_url=_safe_image_reference,
+                broker=lab_account_broker if LAB_ACCOUNT_BROKER.enabled else None)
 
         if path == "/api/login":
             return self._api_sso_login()
@@ -1997,8 +2034,15 @@ class Handler(BaseStaticHandler):
 
     def do_POST(self):
         path = urllib.parse.urlparse(self.path).path
+        if self._lab_auth_route(path):
+            return
         if path.startswith("/api/huiguan/"):
             path = "/api/" + path[len("/api/huiguan/"):]
+
+        if CREATORS_ENABLED and (path in (creator_directory.PUBLIC, creator_directory.ME)
+                                 or path.startswith(creator_directory.ADMIN)):
+            return creator_directory.handle(self, path, {}, globals(), avatar_url=_safe_image_reference,
+                broker=lab_account_broker if LAB_ACCOUNT_BROKER.enabled else None)
 
         if path in LEGAL_GATED_POSTS and self._legal_consent_missing():
             return
@@ -3842,6 +3886,9 @@ class Handler(BaseStaticHandler):
                 conn.execute("DELETE FROM users WHERE user_id=?", (uid,))
                 conn.execute("DELETE FROM user_flags WHERE kind='usso' AND uid=?", (uid,))
             conn.execute("DELETE FROM sessions_db WHERE kind=? AND uid=?", (kind, uid))
+            if conn.execute("SELECT 1 FROM sqlite_master WHERE name='lab_auth_access' AND type='table'").fetchone():
+                lab_account_broker.set_access(conn, kind, uid, False)
+            creator_directory.withdraw_deleted_account(conn, admin, (kind, uid))
             session.delete_owner({"kind": kind, "uid": uid})
         self._json(200, {"ok": True})
 
@@ -6265,6 +6312,9 @@ class Handler(BaseStaticHandler):
         self.end_headers()
 
     def log_message(self, fmt, *args):
+        if self.path.startswith(lab_account_broker.PREFIX):
+            print(f"[huiguan-8089] {self.command} {self.path.partition('?')[0]}", flush=True)
+            return
         print(f"[huiguan-8089] {args[0]}", flush=True)
 
 
