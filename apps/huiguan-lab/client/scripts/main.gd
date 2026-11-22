@@ -56,6 +56,10 @@ func _ready() -> void:
 	_apply_view()
 	Net.message.connect(_on_message)
 	Net.state_changed.connect(_on_net_state)
+	Net.account_link_prompt.connect(_show_account_link)
+	Net.account_link_result.connect(func(ok: bool):
+		_clear_panels()
+		toast("已绑定，游戏进度不变。" if ok else "未绑定。此测试码可能不在迁移名单，或会馆授权未完成。"))
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--lab-auto="):
 			auto_actions = Array(arg.trim_prefix("--lab-auto=").split(";"))
@@ -319,6 +323,7 @@ func _open_data() -> void:
 		if not WebBridge.file_picked.is_connected(_on_file_picked):
 			WebBridge.file_picked.connect(_on_file_picked)
 		WebBridge.pick_file("application/json,.json"))
+	_add_button(box, "绑定旧测试码进度", _confirm_account_link)
 	var names := CheckBox.new(); names.text = "显示名字"; names.button_pressed = Profile.show_names
 	names.toggled.connect(func(on): Profile.show_names = on; Profile.save_local())
 	box.add_child(names)
@@ -330,9 +335,59 @@ func _open_data() -> void:
 		_open_setup())
 
 
+func _confirm_account_link() -> void:
+	var box := _panel("绑定旧测试码进度", 520)
+	var note := Label.new()
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.custom_minimum_size.x = 455
+	note.text = "绑定成功后，旧进度和 OC 归入会馆账号；旧测试码不再单独登录。已有两个档案时不会合并。"
+	box.add_child(note)
+	_add_button(box, "确认开始绑定", func():
+		if WebBridge.is_web():
+			JavaScriptBridge.get_interface("window").open("/account-link", "_self")
+		else:
+			Net.login_account_native(Net.http_base(), true))
+
+
+func _show_account_link(match_code: String) -> void:
+	var box := _panel("到会馆确认绑定，匹配码：" + match_code, 500)
+	_add_button(box, "打开会馆网站", func(): OS.shell_open(Net.account_approval_url))
+	_add_button(box, "取消", func():
+		Net.cancel_account_login(true)
+		_clear_panels())
+
+
 func _logout() -> void:
-	Net.close()
-	WebBridge.logout()
+	if WebBridge.is_web():
+		Net.close()
+		WebBridge.logout()
+	elif not Net.cookie.is_empty():
+		Net.logout_native()
+
+
+func _native_login_form(detail: String) -> void:
+	var box := _panel("登录西木会馆", 460.0)
+	panel_holder.move_to_front()
+	var server := LineEdit.new()
+	server.name = "NativeServer"
+	server.placeholder_text = "服务器地址（https://…）"
+	server.text = Net.http_base()
+	box.add_child(server)
+	var code := LineEdit.new()
+	code.name = "NativeCode"
+	code.placeholder_text = "输入 LAB 测试码"
+	code.secret = true
+	code.max_length = 64
+	box.add_child(code)
+	var hint := Label.new()
+	hint.text = detail
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(hint)
+	var submit := func(): Net.login_native(server.text, code.text)
+	_add_button(box, "登录", submit, "NativeLogin")
+	code.text_submitted.connect(func(_value): submit.call())
+	_add_button(box, "使用西木会馆账号", func(): Net.login_account_native(server.text), "NativeAccountLogin")
+	code.grab_focus()
 
 
 # ------------------------------------------------------------------ spaces
@@ -394,12 +449,30 @@ func _render_spaces() -> void:
 # ------------------------------------------------------------------ messages
 func _on_net_state(state: String, detail: String) -> void:
 	match state:
+		"login":
+			welcomed = false
+			hud.layer = 20
+			status_label.visible = false
+			_native_login_form(detail)
+		"account_approval":
+			welcomed = false
+			hud.layer = 20
+			var box := _panel("请在会馆网站确认，并输入匹配码：" + Net.account_match_code, 460.0)
+			_add_button(box, "打开会馆网站", func(): OS.shell_open(Net.account_approval_url))
+			_add_button(box, "取消", Net.cancel_account_login)
+		"authenticating", "logging_out":
+			welcomed = false
+			hud.layer = 20
+			_panel("正在登录…" if state == "authenticating" else "正在退出…", 460.0)
 		"connecting", "reconnecting":
 			status_label.text = "正在连接西木会馆…" if not connected_once else "连接中断，正在重连…"
 			status_label.visible = true
 		"open":
 			connected_once = true
 		"unauthorized":
+			if not WebBridge.is_web():
+				Net.require_login("会话已失效，请重新登录。")
+				return
 			status_label.text = "测试码已失效或会话已过期，请重新输入测试码"
 			status_label.visible = true
 			await get_tree().create_timer(2.0).timeout
@@ -409,6 +482,7 @@ func _on_net_state(state: String, detail: String) -> void:
 func _on_message(m: Dictionary) -> void:
 	match m.get("t"):
 		"welcome":
+			_clear_panels()
 			welcomed = true
 			status_label.visible = false
 			world.me_pid = m["pid"]
