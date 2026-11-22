@@ -121,9 +121,8 @@ def fence(directory, exclusive=True):
     with lock, open(path, "a+b") as stream:
         if sys.platform == "win32":
             import msvcrt
-            stream.seek(0)
-            if not stream.read(1):
-                stream.write(b"0"); stream.flush()
+            # Windows locks are mandatory: a read/write of the first byte fails while another
+            # process holds it. Locking byte 0 works on an empty file too, so do not pre-fill it.
             stream.seek(0)
             msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
         else:
@@ -136,6 +135,26 @@ def fence(directory, exclusive=True):
                 stream.seek(0); msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
             else:
                 fcntl.flock(stream, fcntl.LOCK_UN)
+
+
+def _rollback(connection, owned):
+    """Roll back without masking the mapped storage error if the handle already dropped."""
+    if connection is None or not owned:
+        return
+    try:
+        connection.rollback()
+    except sqlite3.Error:
+        # SQLite already rolled the missing connection back; close() below is a no-op.
+        pass
+
+
+def _close(connection, owned):
+    if connection is None or not owned:
+        return
+    try:
+        connection.close()
+    except sqlite3.Error:
+        pass
 
 
 def state(directory):
@@ -206,19 +225,19 @@ class Store:
                 if connection is not None and owned:
                     connection.commit()
             except sqlite3.IntegrityError:
-                if connection is not None and owned: connection.rollback()
+                _rollback(connection, owned)
                 raise OCError(409, "oc_constraint_conflict") from None
             except sqlite3.Error:
-                if connection is not None and owned: connection.rollback()
+                _rollback(connection, owned)
                 raise OCError(503, "oc_database_unavailable") from None
             except (OSError, ValueError, TypeError):
-                if connection is not None and owned: connection.rollback()
+                _rollback(connection, owned)
                 raise OCError(503, "oc_storage_unavailable") from None
             except Exception:
-                if connection is not None and owned: connection.rollback()
+                _rollback(connection, owned)
                 raise
             finally:
-                if connection is not None and owned: connection.close()
+                _close(connection, owned)
 
     def snapshot(self):
         with self.transaction() as session:

@@ -150,6 +150,19 @@ class ConcurrentCharacterWritesTest(unittest.TestCase):
                    if ("save_data(" in line or "open(DATA_FILE" in line or "atomic_json(" in line) and "def " not in line]
         self.assertEqual(callers, [], "write characters.json only through oc_store transactions")
 
+    def test_character_file_is_only_referenced_by_oc_store(self):
+        # Reading the whole file outside the transaction is as unsafe as writing it: an
+        # edit made from that snapshot can silently replace concurrent saves.
+        source = (ROOT / "apps" / "huiguan" / "server_huiguan.py").read_text(encoding="utf-8")
+        references = [line.strip() for line in source.splitlines()
+                      if ("DATA_FILE" in line or "characters.json" in line)
+                      and not line.strip().startswith("#")]
+        allowed = ("DATA_FILE = os.path.join(RUNTIME_DIR, \"characters.json\")",
+                   "return oc_store.Store(Path(DATA_FILE).parent",
+                   "BLOCKED_STATIC_NAMES = {\"characters.json\", \"game_saves.json\"}")
+        self.assertEqual([line for line in references if not line.startswith(allowed)], [],
+                         "read/write characters.json only through oc_store transactions")
+
 
 if __name__ == "__main__":
     unittest.main()

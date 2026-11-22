@@ -80,6 +80,111 @@ class StoreTest(unittest.TestCase):
         with ProcessPoolExecutor(4) as pool: self.assertEqual(len(list(pool.map(process_save, [(str(self.root), i) for i in range(24)]))), 24)
         self.assertEqual(len(self.store.list(A)) + len(self.store.list(B)), 24)
 
+    def test_concurrent_duplicate_create_keeps_one_record(self):
+        # Two tabs (or a retried request) both send the create version 0 for the same code.
+        # Exactly one insert may win; the other is a conflict and must not refresh the record.
+        def save(index):
+            try:
+                with self.store.transaction(write=True) as tx: tx.save(A, record("duplicate", writer=index), 0)
+                return 200
+            except OCError as error: return error.status
+        with ThreadPoolExecutor(8) as pool: statuses = list(pool.map(save, range(8)))
+        self.assertEqual((statuses.count(200), statuses.count(409)), (1, 7))
+        records = self.store.list(A)
+        self.assertEqual([x["code"] for x in records], ["duplicate"])
+        self.assertEqual((records[0]["_oc_version"], records[0]["writer"]), (1, statuses.index(200)))
+        # A late retry carrying the stale create version is still rejected.
+        with self.assertRaises(OCError) as error:
+            with self.store.transaction(write=True) as tx: tx.save(A, record("duplicate", writer=99), 0)
+        self.assertEqual(error.exception.status, 409)
+        self.assertEqual(self.store.get(A, "duplicate")["writer"], statuses.index(200))
+
+    def test_stale_edit_never_overwrites_the_winning_content(self):
+        self.create(A, "C")
+        def save(index):
+            try:
+                with self.store.transaction(write=True) as tx: tx.save(A, record("C", writer=index), 1)
+                return 200
+            except OCError as error: return error.status
+        with ThreadPoolExecutor(6) as pool: statuses = list(pool.map(save, range(6)))
+        self.assertEqual((statuses.count(200), statuses.count(409)), (1, 5))
+        current = self.store.get(A, "C")
+        self.assertEqual((current["_oc_version"], current["writer"]), (2, statuses.index(200)))
+        with self.assertRaises(OCError) as error:
+            with self.store.transaction(write=True) as tx: tx.save(A, record("C", writer=99), 1)
+        self.assertEqual(error.exception.status, 409)
+        self.assertEqual(self.store.get(A, "C")["writer"], statuses.index(200))
+
+    def test_same_code_under_two_owners_stays_two_records(self):
+        jobs = [(A, "shared"), (B, "shared")]
+        jobs += [(A, "a-" + str(index)) for index in range(6)]
+        jobs += [(B, "b-" + str(index)) for index in range(6)]
+        def save(job):
+            ident, code = job
+            with self.store.transaction(write=True) as tx: tx.save(ident, record(code), 0)
+            return 200
+        with ThreadPoolExecutor(len(jobs)) as pool: self.assertEqual(list(pool.map(save, jobs)), [200] * len(jobs))
+        self.assertEqual(sorted(x["code"] for x in self.store.list(A)),
+                         sorted(["shared"] + ["a-" + str(index) for index in range(6)]))
+        self.assertEqual(sorted(x["code"] for x in self.store.list(B)),
+                         sorted(["shared"] + ["b-" + str(index) for index in range(6)]))
+        self.assertNotEqual(self.store.get(A, "shared")["_oc_id"], self.store.get(B, "shared")["_oc_id"])
+
+    def test_interrupted_connection_rolls_back_and_recovers(self):
+        self.create(A, "C")
+        def factory(): return open_database(self.path)
+        store = Store(self.root, factory, "sqlite")
+        with self.assertRaises(OCError) as error:
+            with store.transaction(write=True) as tx:
+                tx.save(A, record("C", writer="uncommitted"), 1)
+                tx.save(A, record("partial"), 0)
+                tx.conn.close()  # simulate the connection dropping before commit
+        self.assertEqual((error.exception.status, error.exception.code), (503, "oc_database_unavailable"))
+        self.assertEqual(self.store.get(A, "C")["_oc_version"], 1)
+        self.assertIsNone(self.store.get(A, "partial"))
+        with self.store.transaction(write=True) as tx:
+            saved, created = tx.save(A, record("C", writer="recovered"), 1)
+        self.assertEqual((created, saved["_oc_version"]), (False, 2))
+        self.assertEqual(self.store.get(A, "C")["writer"], "recovered")
+
+    def test_connection_open_failure_is_503_and_recovers(self):
+        attempts = []
+        def factory():
+            attempts.append(1)
+            if len(attempts) == 1: raise sqlite3.OperationalError("synthetic open failure")
+            return open_database(self.path)
+        store = Store(self.root, factory, "sqlite")
+        with self.assertRaises(OCError) as error: store.list(A)
+        self.assertEqual((error.exception.status, error.exception.code), (503, "oc_database_unavailable"))
+        with store.transaction(write=True) as tx:
+            saved, _ = tx.save(A, record("after-open-failure"), 0)
+        self.assertEqual(saved["code"], "after-open-failure")
+
+    def test_failed_bulk_replace_rolls_back_deletes_and_updates(self):
+        self.create(A, "C"); self.create(A, "D")
+        with self.assertRaises(OCError) as error:
+            with self.store.transaction(write=True) as tx:
+                tx.replace(A, [record("C", changed=True)], {"C": 1, "D": 1})
+                raise sqlite3.OperationalError("synthetic mid-bulk failure")
+        self.assertEqual(error.exception.status, 503)
+        self.assertEqual(sorted((x["code"], x["_oc_version"]) for x in self.store.list(A)),
+                         [("C", 1), ("D", 1)])
+        self.assertNotIn("changed", self.store.get(A, "C"))
+        self.assertIsNotNone(self.store.get(A, "D"))
+
+    def test_store_entry_points_all_use_the_transaction_boundary(self):
+        from contextlib import contextmanager
+        original, calls = self.store.transaction, []
+        @contextmanager
+        def spy(*args, **kwargs):
+            calls.append(bool(kwargs.get("write")))
+            with original(*args, **kwargs) as session: yield session
+        self.store.transaction = spy
+        self.addCleanup(setattr, self.store, "transaction", original)
+        self.store.snapshot(); self.store.list(A); self.store.get(A, "C")
+        self.store.public_records("C"); self.store.admin_rows()
+        self.assertEqual(calls, [False] * 5)
+
     def test_missing_version_and_bulk_stale_snapshot_are_rejected(self):
         self.create()
         with self.assertRaises(OCError) as error:

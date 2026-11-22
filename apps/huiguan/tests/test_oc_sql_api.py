@@ -26,11 +26,18 @@ os.environ['IRIDESCENTLY_OC_BACKEND'] = 'json'
 import server_huiguan as app
 from oc_store import atomic_json, open_database, digest
 from test_fan_owner_edit import Client, sheet
+import scraping_observer
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
 from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
 atomic_json(Path(app.RUNTIME_DIR) / 'characters-storage-state.json', {'schema':1,'backend':'sqlite'})
 os.environ['IRIDESCENTLY_OC_BACKEND'] = 'sqlite'
+
+
+class Server(ThreadingHTTPServer):
+    # The default backlog of 5 resets some simultaneous connections opened by the
+    # concurrency regressions below; production portal_server uses a larger backlog.
+    request_queue_size = 1024
 
 
 class Quiet(app.Handler):
@@ -40,7 +47,7 @@ class Quiet(app.Handler):
 class API(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.server = ThreadingHTTPServer(('127.0.0.1', 0), Quiet)
+        cls.server = Server(('127.0.0.1', 0), Quiet)
         cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True); cls.thread.start()
         cls.base = 'http://127.0.0.1:' + str(cls.server.server_port)
         cls.a, cls.b = Client(cls.base), Client(cls.base)
@@ -49,7 +56,14 @@ class API(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.server.shutdown(); cls.server.server_close(); cls.thread.join(); TEMP.cleanup()
+        cls.server.shutdown(); cls.server.server_close(); cls.thread.join()
+        # The observe logger holds its file open; Windows cannot remove the temp tree until it closes.
+        logger = scraping_observer._logger
+        if logger:
+            for handler in list(logger.handlers):
+                logger.removeHandler(handler); handler.close()
+            scraping_observer._logger = None
+        TEMP.cleanup()
 
     def setUp(self):
         # Functional saves here are not about throttling; each test starts with a fresh save budget.
@@ -107,6 +121,71 @@ class API(unittest.TestCase):
         self.assertEqual(sorted(statuses),[200,409])
         _, own = self.a.call('/api/get-characters')
         self.assertEqual(len([x for x in own['characters'] if x['code'].startswith('parallel-')]),12)
+
+    def test_duplicate_create_and_stale_edit_are_rejected_without_overwrite(self):
+        self.assertEqual(self.save(self.a, 'duplicate')[0], 200)
+        stale = sheet('duplicate', '角色duplicate', 'stale-create'); stale['version'] = 0
+        self.assertEqual(self.a.call('/api/save-character', stale)[0], 409)
+        records = [x for x in self.a.call('/api/get-characters')[1]['characters'] if x['code'] == 'duplicate']
+        self.assertEqual([(x['_oc_version'], x['data']['story']) for x in records], [(1, '原始内容')])
+        winner = sheet('duplicate', '角色duplicate', 'winning-edit'); winner['version'] = 1
+        self.assertEqual(self.a.call('/api/save-character', winner)[0], 200)
+        stale = sheet('duplicate', '角色duplicate', 'stale-edit'); stale['version'] = 1
+        self.assertEqual(self.a.call('/api/save-character', stale)[0], 409)
+        records = [x for x in self.a.call('/api/get-characters')[1]['characters'] if x['code'] == 'duplicate']
+        self.assertEqual([(x['_oc_version'], x['data']['story']) for x in records], [(2, 'winning-edit')])
+
+    def test_parallel_duplicate_creates_leave_one_record(self):
+        def save(index):
+            body = sheet('duplicate-race', '角色duplicate-race', 'writer-' + str(index)); body['version'] = 0
+            return self.a.call('/api/save-character', body)[0]
+        with ThreadPoolExecutor(8) as pool: statuses = list(pool.map(save, range(8)))
+        self.assertEqual((statuses.count(200), statuses.count(409)), (1, 7))
+        records = [x for x in self.a.call('/api/get-characters')[1]['characters'] if x['code'] == 'duplicate-race']
+        self.assertEqual([(x['_oc_version'], x['data']['story']) for x in records],
+                         [(1, 'writer-' + str(statuses.index(200)))])
+
+    def test_concurrent_saves_keep_same_code_separate_across_owners(self):
+        jobs = [(self.a, 'owner-race'), (self.b, 'owner-race')]
+        jobs += [(self.a, 'a-' + str(index)) for index in range(5)]
+        jobs += [(self.b, 'b-' + str(index)) for index in range(5)]
+        def save(job):
+            client, code = job
+            body = sheet(code, '角色' + code, 'story-' + code); body['version'] = 0
+            return client.call('/api/save-character', body)[0]
+        with ThreadPoolExecutor(len(jobs)) as pool: self.assertEqual(list(pool.map(save, jobs)), [200] * len(jobs))
+        for client, prefix in ((self.a, 'a-'), (self.b, 'b-')):
+            records = [x for x in client.call('/api/get-characters')[1]['characters']
+                       if x['code'] == 'owner-race' or x['code'].startswith(prefix)]
+            self.assertEqual(sorted(x['code'] for x in records),
+                             sorted(['owner-race'] + [prefix + str(index) for index in range(5)]))
+        shared_a = next(x for x in self.a.call('/api/get-characters')[1]['characters'] if x['code'] == 'owner-race')
+        shared_b = next(x for x in self.b.call('/api/get-characters')[1]['characters'] if x['code'] == 'owner-race')
+        self.assertNotEqual(shared_a['_oc_id'], shared_b['_oc_id'])
+
+    def test_bulk_replace_and_single_edit_conflict_atomically(self):
+        self.assertEqual(self.save(self.a, 'bulk-race')[0], 200)
+        def bulk():
+            body = sheet('bulk-race', '角色bulk-race', 'bulk-writer')['data']
+            return self.a.call('/api/save-all-characters', {'characters': [body], 'versions': {'bulk-race': 1}})[0]
+        def single():
+            body = sheet('bulk-race', '角色bulk-race', 'single-writer'); body['version'] = 1
+            return self.a.call('/api/save-character', body)[0]
+        with ThreadPoolExecutor(2) as pool:
+            statuses = [future.result() for future in [pool.submit(bulk), pool.submit(single)]]
+        self.assertEqual(sorted(statuses), [200, 409])
+        records = [x for x in self.a.call('/api/get-characters')[1]['characters'] if x['code'] == 'bulk-race']
+        self.assertEqual([(x['_oc_version'], x['data']['story']) for x in records],
+                         [(2, ('bulk-writer', 'single-writer')[statuses.index(200)])])
+
+    def test_connection_failure_returns_503_and_recovers(self):
+        from unittest.mock import patch
+        with patch.object(app.oc_store, 'open_database', side_effect=sqlite3.OperationalError('synthetic failure detail')):
+            status, body = self.save(self.a, 'connection-down')
+            self.assertEqual((status, body), (503, {'error': 'oc_database_unavailable'}))
+            self.assertNotIn('synthetic', json.dumps(body))
+            self.assertEqual(self.a.call('/api/get-characters')[0], 503)
+        self.assertEqual(self.save(self.a, 'connection-down')[0], 200)
 
     def test_gallery_rename_sync_rollback_and_public_html(self):
         self.save(self.a,'gallery-1')
