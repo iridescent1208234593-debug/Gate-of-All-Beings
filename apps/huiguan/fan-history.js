@@ -1,0 +1,250 @@
+(() => {
+  "use strict";
+  const panel = document.getElementById("fanHistory");
+  const form = document.getElementById("fanHistoryForm");
+  const input = document.getElementById("fanHistoryInput");
+  const mode = document.getElementById("fanHistoryMode");
+  const inputLabel = document.getElementById("fanHistoryInputLabel");
+  const status = document.getElementById("fanHistoryStatus");
+  const output = document.getElementById("fanHistoryOutput");
+  let activeRequest;
+  let enabled = false;
+
+  const fields = {
+    name: "角色名", type: "分类", species: "物种", gender: "性别", faction: "阵营",
+    ability: "能力", appearance: "外貌", story: "故事",
+  };
+  const art = { human: "手绘 / 约稿", ai: "AI 立绘", "": "未声明" };
+  const actions = {
+    review_approve: "审核通过", review_reject: "审核退回",
+    owner_submit: "提交公开审核", owner_publish: "提交公开",
+    owner_unpublish: "作者取消公开", owner_edit: "作者修改设表",
+    owner_link_removed: "作者移除设表关联", admin_link_removed: "管理员移除设表关联",
+  };
+  const roles = { author: "作者", owner: "作者", admin: "管理员", elder: "长老", reviewer: "审核员", system: "系统" };
+  const states = { approved: "已通过", pending: "待审核", rejected: "已退回" };
+
+  function node(tag, label, className) {
+    const element = document.createElement(tag);
+    if (label != null) element.textContent = label;
+    if (className) element.className = className;
+    return element;
+  }
+
+  function field(container, label, value) {
+    if (typeof value === "string" && value) container.append(node("dt", label), node("dd", value));
+  }
+
+  function displayDate(value) {
+    if (typeof value !== "string" || !value) return "时间未记录";
+    return value;
+  }
+
+  function snapshot(entry, idx) {
+    const box = node("details", null, "fan-history-block");
+    const content = entry.content || {};
+    const title = entry.legacy_observed
+      ? `历史基线（通过时间未知） · 记录于 ${displayDate(entry.recorded_at)}`
+      : `公开版本 ${idx + 1}${idx === 0 ? "（最近）" : ""} · 通过于 ${displayDate(entry.approved_at)}`;
+    box.append(node("summary", title));
+    const values = node("dl");
+    for (const [key, label] of Object.entries(fields)) field(values, label, content[key]);
+    if (Object.hasOwn(art, content.art_source ?? "")) field(values, "立绘来源", art[content.art_source ?? ""]);
+    if (content.image_data) field(values, "立绘", "此版本附有图片，历史面板不加载图片。");
+    box.append(values);
+    const abbreviated = Array.isArray(entry.truncated_fields)
+      ? entry.truncated_fields.filter((key) => Object.hasOwn(fields, key)).map((key) => fields[key]) : [];
+    if (abbreviated.length) box.append(node("p", "超长内容仅保留部分：" + abbreviated.join("、") + "。"));
+    return box;
+  }
+
+  function visibility(value) {
+    if (value === true || value === 1) return "已申请公开";
+    if (value === false || value === 0) return "不公开";
+    return "未记录";
+  }
+
+  function moderationState(value) {
+    return Object.hasOwn(states, value) ? states[value] : value || "未记录";
+  }
+
+  function eventItem(entry) {
+    const item = node("li", null, "fan-history-block");
+    const action = Object.hasOwn(actions, entry.action) ? actions[entry.action] : "审核操作";
+    const actorRole = Object.hasOwn(roles, entry.actor_role) ? roles[entry.actor_role] : (entry.actor_role || "");
+    const actor = [actorRole, entry.actor_name, entry.actor_tag].filter(Boolean).join(" · ");
+    item.append(node("strong", action), node("p", [displayDate(entry.created_at), actor || "操作人未记录"].join(" · ")));
+    const details = node("dl");
+    if (entry.previous_status != null || entry.new_status != null) {
+      field(details, "审核状态", `${moderationState(entry.previous_status)} → ${moderationState(entry.new_status)}`);
+    }
+    if (entry.previous_public != null || entry.new_public != null) {
+      field(details, "公开开关", `${visibility(entry.previous_public)} → ${visibility(entry.new_public)}`);
+    }
+    field(details, "理由", entry.reason);
+    if (details.childElementCount) item.append(details);
+    return item;
+  }
+
+  const history = "/api/admin/fan/history";
+  const galleryId = (value) => /^[1-9][0-9]{0,18}$/.test(String(value)) ? String(value) : "";
+
+  function cursorValue(raw) {
+    return typeof raw === "string" || Number.isSafeInteger(raw) ? galleryId(raw) : "";
+  }
+
+  function errorFor(statusCode) {
+    if (statusCode === 401 || statusCode === 403) return "管理员会话已失效或没有查看权限。请重新登录。";
+    if (statusCode === 404) return "没有找到这个设表或相关记录。";
+    if (statusCode === 400) return "查找条件无效，请核对后重试。";
+    return "审核历史暂不可用，请稍后再试。";
+  }
+
+  async function request(url, options = {}) {
+    activeRequest?.abort();
+    const current = new AbortController();
+    activeRequest = current;
+    const timeout = setTimeout(() => current.abort(), 15000);
+    try {
+      let response;
+      try {
+        response = await fetch(url, {
+          cache: "no-store", credentials: "same-origin", signal: current.signal, ...options,
+        });
+      } catch {
+        if (activeRequest !== current) return null;
+        throw new Error(errorFor(0));
+      }
+      if (activeRequest !== current || current.signal.aborted) return null;
+      if (!response.ok) throw new Error(errorFor(response.status));
+      let data;
+      try { data = await response.json(); }
+      catch { throw new Error(errorFor(0)); }
+      return activeRequest === current && !current.signal.aborted ? data : null;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  function render(payload, id) {
+    const snapshots = payload.snapshots.slice(0, 3);
+    const events = payload.events;
+    let next = cursorValue(payload.next_before);
+    output.append(node("h3", "最近 3 个正式公开版本"));
+    if (snapshots.length) output.append(...snapshots.map(snapshot));
+    else output.append(node("p", "没有已记录的公开版本。启用记录前的版本不会自动补齐。"));
+
+    output.append(node("h3", "审核与公开状态变更"));
+    const items = node("ol");
+    items.append(...events.map(eventItem));
+    if (events.length) output.append(items);
+    else output.append(node("p", "暂时没有审核或公开状态变更记录。"));
+    const button = node("button", "加载更早记录", "mini-btn");
+    button.type = "button";
+    const note = node("p");
+    note.setAttribute("role", "status");
+    if (next) output.append(button, note);
+    button.addEventListener("click", async () => {
+      if (!next || button.disabled) return;
+      button.disabled = true;
+      note.textContent = "正在读取更早记录…";
+      try {
+        const remaining = await request(history + "?" + new URLSearchParams({ id, before: next }));
+        if (!remaining || !button.isConnected) return;
+        if (!Array.isArray(remaining.events)) throw new Error(errorFor(0));
+        items.append(...remaining.events.map(eventItem));
+        const following = cursorValue(remaining.next_before);
+        next = following === next ? "" : following;
+        button.hidden = !next;
+        note.textContent = remaining.events.length ? `已加载 ${remaining.events.length} 条更早记录。` : "没有更早记录。";
+      } catch (error) {
+        note.textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+    status.textContent = `画廊 #${id}：${snapshots.length} 个留存版本、${events.length} 条变更记录。`;
+  }
+
+  function renderMatches(data) {
+    if (!Array.isArray(data.matches)) throw new Error(errorFor(0));
+    const items = node("ul");
+    for (const match of data.matches) {
+      const id = galleryId(match.id);
+      if (!id || typeof match.name !== "string") continue;
+      const item = node("li");
+      const button = node("button", `${match.name} · 画廊 #${id}`, "mini-btn");
+      button.type = "button";
+      button.dataset.fanHistoryId = id;
+      item.append(button);
+      items.append(item);
+    }
+    if (items.childElementCount) {
+      status.textContent = data.truncated ? "有较多同名设表。请按画廊编号进一步定位。" : "请选择要查看的设表。";
+      output.append(items);
+    } else status.textContent = "没有找到完全同名的设表。";
+  }
+
+  async function load(rawValue, byName = false) {
+    if (!enabled) return;
+    activeRequest?.abort();
+    activeRequest = null;
+    const value = String(rawValue || "").trim();
+    output.replaceChildren();
+    if (!value || (!byName && !galleryId(value))) {
+      status.textContent = byName ? "请输入完整角色名。" : "请输入有效的画廊数字编号。";
+      input.focus();
+      return;
+    }
+
+    status.textContent = "正在读取审核记录…";
+    try {
+      if (byName) {
+        const matches = await request(history + "/find", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: value }),
+        });
+        if (matches) renderMatches(matches);
+      } else {
+        const data = await request(history + "?" + new URLSearchParams({ id: value }));
+        if (!data) return;
+        if (!Array.isArray(data.snapshots) || !Array.isArray(data.events)) throw new Error(errorFor(0));
+        render(data, value);
+      }
+    } catch (error) {
+      status.textContent = error.message;
+    }
+  }
+
+  function configureSearch() {
+    const byName = mode.value === "name";
+    inputLabel.textContent = byName ? "完整角色名" : "画廊编号";
+    input.inputMode = byName ? "text" : "numeric";
+    input.maxLength = byName ? 256 : 19;
+    input.placeholder = byName ? "输入设表的完整公开名称" : "画廊数字编号";
+  }
+  mode.addEventListener("change", configureSearch);
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    void load(input.value, mode.value === "name");
+  });
+  document.addEventListener("click", (event) => {
+    if (!enabled) return;
+    const button = event.target.closest("[data-fan-history-id]");
+    if (!button) return;
+    panel.closest("#reviewDesk").open = true;
+    panel.open = true;
+    mode.value = "id";
+    configureSearch();
+    input.value = button.dataset.fanHistoryId;
+    panel.scrollIntoView({ block: "start" });
+    panel.querySelector("summary").focus({ preventScroll: true });
+    void load(input.value);
+  });
+  window.HuiguanFanHistory = {
+    enable() {
+      enabled = true;
+      panel.hidden = false;
+    },
+  };
+})();

@@ -145,3 +145,10 @@ character_id 表示多个不同对象
 - 复用 Account `(kind, uid)`，不按昵称或邮箱合并。共创身份、职责、LAB 测试资格及后台权限各自独立。
 - 私有路由用于有权限的组织管理与成员授权；公开路由通过显式投影返回数据，不返回账户 ID、邮箱、登录记录或权限细节。
 - 名录、数据和回滚见 [HUIGUAN_CREATOR_ROLLOUT.md](HUIGUAN_CREATOR_ROLLOUT.md)；会馆与 LAB 认证协议见 [LAB_ACCOUNT_BROKER.md](LAB_ACCOUNT_BROKER.md)。
+
+
+## 11. 同人画廊历史与公开排序
+
+- 画廊卡片 ID 属于 `fan_characters.id`，不能和账号 ID、OC 编号互换；历史与点赞都绑定此 ID。
+- `like_count` 是 `fan_char_votes.vote=1` 的计数，不是喜欢、踩或旧综合 `reaction_score`；`published_at` 与 `updated_at` 是不同时间。
+- 审核操作记录、版本留存、API 与回滚见 [FAN_GALLERY_HISTORY.md](FAN_GALLERY_HISTORY.md)。

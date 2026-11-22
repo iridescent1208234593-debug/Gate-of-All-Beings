@@ -1,0 +1,139 @@
+"""Private, forward-only gallery audit; callers own the write transaction."""
+from datetime import datetime, timezone
+from hashlib import sha256
+import json
+import re
+
+CONTENT_FIELDS = ("name", "type", "species", "gender", "faction", "ability",
+                  "appearance", "story", "image_data", "art_source")
+IMAGE = re.compile(r"/assets/uploads/[A-Za-z0-9]{16,64}\.(?:png|jpe?g|webp|gif)", re.I)
+CONTACT = re.compile(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|(?<!\w)\+?[0-9][0-9 -]{7,}[0-9](?!\w)")
+RETAIN = 3
+
+
+def init_schema(conn):
+    conn.execute("""CREATE TABLE IF NOT EXISTS fan_history_snapshots(
+        id INTEGER PRIMARY KEY AUTOINCREMENT, card_id INTEGER NOT NULL,
+        recorded_at TEXT NOT NULL, fingerprint TEXT NOT NULL, content TEXT NOT NULL,
+        legacy_observed INTEGER NOT NULL, truncated_fields TEXT NOT NULL)""")
+    conn.execute("""CREATE INDEX IF NOT EXISTS idx_fan_history_snapshots_card
+                   ON fan_history_snapshots(card_id,id DESC)""")
+    conn.execute("""CREATE TABLE IF NOT EXISTS fan_history_events(
+        id INTEGER PRIMARY KEY AUTOINCREMENT, card_id INTEGER NOT NULL, action TEXT NOT NULL,
+        actor_kind TEXT NOT NULL, actor_uid TEXT NOT NULL, actor_role TEXT NOT NULL, actor_name TEXT NOT NULL,
+        created_at TEXT NOT NULL, previous_status TEXT, new_status TEXT,
+        previous_public INTEGER, new_public INTEGER, reason TEXT NOT NULL)""")
+    conn.execute("""CREATE INDEX IF NOT EXISTS idx_fan_history_events_card
+                   ON fan_history_events(card_id,id DESC)""")
+    conn.execute("""CREATE INDEX IF NOT EXISTS idx_fan_history_events_actor
+                   ON fan_history_events(actor_kind,actor_uid,id)""")
+
+
+def load(conn, card_id):
+    return conn.execute("SELECT * FROM fan_characters WHERE id=?", (card_id,)).fetchone()
+
+
+def _content(row):
+    result = {field: str(row[field] or "") for field in CONTENT_FIELDS}
+    result["image_data"] = result["image_data"] if IMAGE.fullmatch(result["image_data"]) else ""
+    return result
+
+
+def _safe(text):
+    return CONTACT.sub("[隐去联系信息]", text)
+
+
+def _public_approved(row):
+    return row is not None and row["is_public"] == 1 and row["review_status"] == "approved"
+
+
+def _state(row):
+    return (row["review_status"], row["is_public"]) if row is not None else (None, None)
+
+
+def _snapshot(conn, row, now, *, observed=False):
+    if not _public_approved(row):
+        return
+    raw = _content(row)
+    content = {k: v[:16384] for k, v in raw.items()}
+    truncated = [k for k, v in raw.items() if len(v) > len(content[k])]
+    packed = json.dumps(content, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    fingerprint = sha256(json.dumps({k: str(row[k] or "") for k in CONTENT_FIELDS},
+                                    ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+    latest = conn.execute("SELECT fingerprint FROM fan_history_snapshots WHERE card_id=? ORDER BY id DESC LIMIT 1",
+                          (row["id"],)).fetchone()
+    if latest and latest[0] == fingerprint:
+        return
+    conn.execute("""INSERT INTO fan_history_snapshots(card_id,recorded_at,fingerprint,content,legacy_observed,truncated_fields)
+                    VALUES(?,?,?,?,?,?)""", (row["id"], now, fingerprint, packed, int(observed), json.dumps(truncated)))
+    conn.execute("""DELETE FROM fan_history_snapshots WHERE card_id=? AND id NOT IN
+                    (SELECT id FROM fan_history_snapshots WHERE card_id=? ORDER BY id DESC LIMIT ?)""",
+                 (row["id"], row["id"], RETAIN))
+
+
+def record(conn, actor, action, before, after, *, reason="", explicit=False):
+    """Persist an attributable transition in the same transaction as the active row."""
+    if before is None and after is None:
+        return
+    if not explicit and before is not None and after is not None:
+        if _state(before) == _state(after) and all(before[k] == after[k] for k in CONTENT_FIELDS):
+            return
+    # Caller must already have a write transaction, preventing partial history+active writes.
+    if not conn.in_transaction:
+        raise RuntimeError("Gallery history requires an active write transaction")
+    now = datetime.now(timezone.utc).isoformat()
+    _snapshot(conn, before, now, observed=True)
+    _snapshot(conn, after, now)
+    old_status, old_public = _state(before)
+    new_status, new_public = _state(after)
+    kind, uid = str(actor["kind"]), str(actor["uid"])
+    identity = conn.execute("SELECT nickname FROM local_users WHERE uid=?" if kind == "local" else
+                            "SELECT nickname FROM users WHERE user_id=?", (uid,)).fetchone()
+    nickname = _safe(str(identity[0] or "")[:80]) if identity else ""
+    conn.execute("""INSERT INTO fan_history_events(card_id,action,actor_kind,actor_uid,actor_role,actor_name,created_at,
+                    previous_status,new_status,previous_public,new_public,reason)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""", (
+                        (after if after is not None else before)["id"], action, kind,
+                        uid, str(actor.get("role") or ""), nickname, now,
+                        old_status, new_status, old_public, new_public, str(reason or "")[:200]))
+
+
+def unpublish_link(conn, actor, action, owner, code, *, include_posters=False):
+    where = "user_kind=? AND user_uid=? AND code=? AND is_public=1"
+    if not include_posters:
+        where += " AND COALESCE(type,'')!='配色海报'"
+    args = (*owner, code)
+    before = conn.execute(f"SELECT * FROM fan_characters WHERE {where}", args).fetchall()
+    if not before:
+        return
+    conn.execute(f"UPDATE fan_characters SET is_public=0 WHERE {where}", args)
+    for row in before:
+        record(conn, actor, action, row, load(conn, row["id"]))
+
+
+def history(conn, card_id, *, before_event=None):
+    snapshots = []
+    for row in conn.execute("""SELECT id,recorded_at,content,legacy_observed,truncated_fields FROM fan_history_snapshots
+                               WHERE card_id=? ORDER BY id DESC LIMIT ?""", (card_id, RETAIN)):
+        content = json.loads(row["content"])
+        snapshots.append({"id": row["id"], "approved_at": None if row["legacy_observed"] else row["recorded_at"],
+                          "recorded_at": row["recorded_at"], "legacy_observed": bool(row["legacy_observed"]),
+                          "truncated_fields": json.loads(row["truncated_fields"]),
+                          "content": {k: _safe(v) if k != "image_data" else v for k, v in content.items()}})
+    events = []
+    rows = conn.execute("""SELECT e.*,
+                 (SELECT MIN(a.id) FROM fan_history_events a
+                   WHERE a.actor_kind=e.actor_kind AND a.actor_uid=e.actor_uid) AS actor_label
+               FROM fan_history_events e WHERE e.card_id=? AND (? IS NULL OR e.id<?)
+               ORDER BY e.id DESC LIMIT 51""", (card_id,before_event,before_event)).fetchall()
+    for r in rows[:50]:
+        events.append({**{k:r[k] for k in ("action","actor_kind","actor_role","created_at","previous_status",
+                                          "new_status","previous_public","new_public")},
+                       "actor_name": r["actor_name"], "actor_tag": f"#{r['actor_label']}", "reason": _safe(r["reason"])})
+    return {"snapshots": snapshots, "events": events, "next_before": rows[49]["id"] if len(rows)>50 else None}
+
+
+def find(conn, name):
+    rows = conn.execute("""SELECT id,name FROM fan_characters WHERE name=? COLLATE BINARY
+                         AND COALESCE(type,'')!='配色海报' ORDER BY id LIMIT 21""", (name,)).fetchall()
+    return {"matches": [{"id": r["id"], "name": _safe(r["name"])} for r in rows[:20]], "truncated": len(rows)>20}

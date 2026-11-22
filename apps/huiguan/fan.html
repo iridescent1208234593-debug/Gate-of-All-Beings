@@ -64,6 +64,10 @@ button{font-family:inherit}
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
 .search{flex:1;min-width:200px;font-family:inherit;font-size:14px;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:var(--panel);color:var(--text);outline:none}
 .search:focus{border-color:var(--accent)}
+.fan-sort{display:inline-flex;align-items:center;gap:6px;line-height:1.4;font-size:13px;color:var(--dim)}
+.fan-sort select{max-width:100%;min-height:38px;padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--panel);color:var(--text);font:inherit}
+.fan-sort select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.load-more:disabled{opacity:.6;cursor:wait}
 .filter-btns{display:flex;gap:6px;flex-wrap:wrap}
 .fbtn{font-size:12px;cursor:pointer;padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:var(--panel);color:var(--dim);transition:all .15s}
 .fbtn:hover{border-color:var(--accent);color:var(--accent)}
@@ -159,6 +163,22 @@ button{font-family:inherit}
 .review-main .s{font-size:12px;line-height:1.7;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .review-ops{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:auto}
 .review-ops select{font-family:inherit;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--panel);color:var(--text)}
+/* 管理员审核历史：不改动待审队列或画廊卡片内容。 */
+.fan-history{margin:0 16px 16px;padding:12px 0 0;border-top:1px solid var(--line);scroll-margin-top:76px}
+.fan-history>summary,.fan-history details>summary{padding:6px 0;cursor:pointer;font-weight:600;overflow-wrap:anywhere}
+.fan-history p{margin:6px 0;color:var(--dim);font-size:13px;line-height:1.65}
+.fan-history form{display:flex;flex-wrap:wrap;align-items:end;gap:8px 12px;margin:10px 0}
+.fan-history form label{display:grid;gap:4px;font-size:13px;flex:1 1 135px;min-width:0}
+.fan-history form label:nth-child(2){flex-basis:220px}
+.fan-history :is(input,select){width:100%;min-height:38px;background:var(--paper);border:1px solid var(--border);border-radius:6px;color:inherit;font:inherit;padding:6px 8px}
+.fan-history :is(summary,input,select,button):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.fan-history .fan-history-block{padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);margin:8px 0;overflow-wrap:anywhere}
+.fan-history h3{margin:12px 0 6px;font-size:14px}
+.fan-history li,.fan-history dl{margin:8px 0;line-height:1.65;font-size:13px}
+.fan-history dl{display:grid;grid-template-columns:72px minmax(0,1fr);gap:5px 10px}
+.fan-history dt{color:var(--dim)}
+.fan-history dd{white-space:pre-wrap}
+.fan-history :is(ul,ol){padding-inline-start:22px}
 
 /* 灯箱与弹窗 */
 #posterLightbox{position:fixed;inset:0;z-index:9999;background:rgba(15,20,17,.82);display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;padding:24px;cursor:zoom-out}
@@ -245,6 +265,22 @@ button{font-family:inherit}
     <summary><strong>审核台</strong><span class="count" id="reviewCount">0</span><small>先到先审 · 通过后进入画廊 · 退回需写理由</small></summary>
     <div class="review-sync"><button type="button" class="mini-btn" id="reviewRefresh">刷新待审</button><span id="reviewSync" role="status">每 5 秒自动同步待审列表</span></div>
     <div class="review-list" id="reviewList"><div class="loading">加载中…</div></div>
+    <details class="fan-history" id="fanHistory" hidden>
+      <summary>公开版本与审核记录（仅管理员）</summary>
+      <p>按画廊编号或完整角色名定位设表，包括不再公开的设表。也可从现有画廊卡片或待审列表直接打开。这里只读，不恢复旧版、不更改当前公开状态。</p>
+      <form id="fanHistoryForm">
+        <label>查找方式
+          <select id="fanHistoryMode">
+            <option value="id">画廊编号</option>
+            <option value="name">完整角色名</option>
+          </select>
+        </label>
+        <label><span id="fanHistoryInputLabel">画廊编号</span><input id="fanHistoryInput" type="text" inputmode="numeric" maxlength="19" autocomplete="off" required placeholder="画廊数字编号"></label>
+        <button type="submit" class="pb-btn ghost">查找记录</button>
+      </form>
+      <p id="fanHistoryStatus" role="status" aria-live="polite"></p>
+      <div id="fanHistoryOutput"></div>
+    </details>
   </details>
 
   <!-- 我的已登记人设 -->
@@ -272,6 +308,12 @@ button{font-family:inherit}
   <p class="tab-hint" id="tabHint"></p>
   <div class="toolbar">
     <input class="search" id="search" type="search" placeholder="搜索角色名…" aria-label="搜索角色名">
+    <label class="fan-sort">排序
+      <select id="gallerySort">
+        <option value="likes" selected>点赞数（从高到低）</option>
+        <option value="newest">最新审核公开</option>
+      </select>
+    </label>
     <div class="filter-btns" id="typeFilters">
       <button type="button" class="fbtn active" data-type="">全部</button>
       <button type="button" class="fbtn" data-type="妖精">妖精</button>
@@ -321,6 +363,7 @@ button{font-family:inherit}
 <script src="reactions-fx.js?v=20261027z"></script>
 <script src="group-reminder.js?v=20261106c"></script>
 <script src="legal-consent.js?v=20261106" data-require-consent></script>
+<script src="fan-history.js?v=20261122a"></script>
 <script>
 const PAGE = 12;
 const $ = id => document.getElementById(id);
@@ -332,7 +375,7 @@ const showHref = code => 'show.html?code=' + encodeURIComponent(code || '');
 const ART_LABEL = { '': '未声明', human: '手绘 / 约稿', ai: 'AI 立绘' };
 
 let currentUser = null, canReview = false;
-let curType = '', curQ = '', curTab = 'art', searchTimer = null;
+let curType = '', curQ = '', curTab = 'art', curSort = 'likes', searchTimer = null;
 let myChars = [], fanByKey = {}, selectedCodes = new Set();
 const rowCache = new Map();   // 公开卡片 id → 记录（事件委托用，不把数据拼进内联脚本）
 
@@ -383,10 +426,17 @@ function figureHTML(c, isPoster) {
       <div class="card-initial" aria-hidden="true">${initial}</div>
     </div>`;
 }
+function historyButton(c) {
+  if (c.type === '配色海报') return '';
+  const id = String(c.id);
+  return /^[1-9][0-9]{0,18}$/.test(id)
+    ? `<button type="button" class="mini-btn" data-fan-history-id="${id}">审核记录</button>` : '';
+}
 function ownerActions(c) {
   const isPoster = c.type === '配色海报';
   let html = '';
   if (c.is_mine && !isPoster && c.code) html += `<a class="mini-btn" href="${esc(editHref(c.code))}" data-stop>编辑</a>`;
+  if (currentUser?.logged_in && currentUser.is_admin) html += historyButton(c);
   if (canReview) html += `<button type="button" class="mini-btn danger" data-act="revoke" data-id="${c.id}">退回</button>`;
   return html ? `<div class="card-actions">${html}</div>` : '';
 }
@@ -398,7 +448,7 @@ function artCardHTML(c, rank) {
   return `<article class="card" tabindex="0" data-open="${c.id}" aria-label="${esc(c.name)}">
     <div style="position:relative">${figureHTML(c, isPoster)}
       <div class="card-chips">${chips}</div>
-      ${rank && rank <= 3 ? `<span class="card-rank" title="人气第 ${rank}">${rank}</span>` : ''}
+      ${rank && rank <= 3 ? `<span class="card-rank" title="点赞第 ${rank}">${rank}</span>` : ''}
     </div>
     <div class="card-body">
       <div class="card-name">${esc(c.name)}</div>
@@ -434,32 +484,49 @@ const VIEWS = {
 };
 const listState = {};
 async function loadView(view, reset) {
-  const v = VIEWS[view], st = listState[view] || (listState[view] = { page: 1, loaded: 0, total: 0, busy: false });
-  if (st.busy) return;
-  const grid = $(v.grid);
-  if (reset) { st.page = 1; st.loaded = 0; grid.innerHTML = '<div class="loading">加载中…</div>'; }
-  st.busy = true;
-  const params = new URLSearchParams({ limit: PAGE, page: st.page, view });
-  if (curQ) params.set('q', curQ);
-  if (curType && !(view === 'text' && curType === '配色海报')) params.set('type', curType);
+  const v = VIEWS[view], st = listState[view] || (listState[view] = { page: 0, loaded: 0 });
+  if (st.request && !reset) return;
+  st.request?.abort();
+  const request = st.request = new AbortController();
+  const grid = $(v.grid), more = $(v.more);
+  const page = reset ? 1 : st.page + 1;
+  const q = curQ, type = curType, sort = curSort;
+  const stillCurrent = () => st.request === request && q === curQ && type === curType && sort === curSort;
+  if (reset) {
+    st.stale = false;
+    st.page = 0;
+    st.loaded = 0;
+    more.hidden = true;
+    grid.innerHTML = '<div class="loading">加载中…</div>';
+  }
+  more.disabled = true;
+  const params = new URLSearchParams({ limit: PAGE, page, view, sort });
+  if (q) params.set('q', q);
+  if (type && !(view === 'text' && type === '配色海报')) params.set('type', type);
   try {
-    const d = await getJSON('/api/fan/list?' + params);
+    const d = await getJSON('/api/fan/list?' + params, { cache: 'no-cache', signal: request.signal });
+    if (!stillCurrent()) return;
     if (d.error) throw new Error(d.error);
     const list = d.characters || [];
-    st.total = d.total || 0;
     if (d.counts) paintCounts(d.counts);
     if (reset) grid.innerHTML = '';
-    if (reset && !list.length) grid.innerHTML = `<div class="empty">${curQ || curType ? '没有符合条件的设表。' : v.empty}</div>`;
-    const sortedByScore = !curQ && !curType && view === 'art';
-    grid.insertAdjacentHTML('beforeend', list.map((c, i) => v.render(c, sortedByScore ? st.loaded + i + 1 : 0)).join(''));
+    if (reset && !list.length) grid.innerHTML = `<div class="empty">${q || type ? '没有符合条件的设表。' : v.empty}</div>`;
+    const ranked = d.sort === 'likes' && sort === 'likes' && !q && !type && view === 'art';
+    grid.insertAdjacentHTML('beforeend', list.map((c, i) => v.render(c, ranked && c.like_count > 0 ? st.loaded + i + 1 : 0)).join(''));
+    st.page = page;
     st.loaded += list.length;
-    const more = $(v.more);
-    more.hidden = st.loaded >= st.total;
-    more.textContent = `加载更多 · 已显示 ${st.loaded}/${st.total}`;
-  } catch (e) {
+    more.hidden = st.loaded >= (d.total || 0);
+    more.textContent = `加载更多 · 已显示 ${st.loaded}/${d.total || 0}`;
+  } catch {
+    if (!stillCurrent()) return;
     if (reset) grid.innerHTML = '<div class="empty">加载失败，请刷新重试。</div>';
+    else more.textContent = '加载失败 · 点击重试';
+  } finally {
+    if (st.request === request) {
+      st.request = null;
+      more.disabled = false;
+    }
   }
-  st.busy = false;
 }
 function paintCounts(c) {
   $('nArt').textContent = c.art; $('nText').textContent = c.text; $('nAi').textContent = '（' + c.ai + '）';
@@ -472,13 +539,13 @@ function reloadPublic() {
   if (curTab === 'art' && $('aiFold').open) loadView('ai', true);
   else if (listState.ai) listState.ai.stale = true;
 }
-Object.keys(VIEWS).forEach(view => { $(VIEWS[view].more).onclick = () => { listState[view].page++; loadView(view, false); }; });
+Object.keys(VIEWS).forEach(view => { $(VIEWS[view].more).onclick = () => loadView(view, false); });
 $('aiFold').addEventListener('toggle', () => {
-  if ($('aiFold').open && (!listState.ai || listState.ai.stale)) { loadView('ai', true); listState.ai.stale = false; }
+  if ($('aiFold').open && (!listState.ai || listState.ai.stale)) loadView('ai', true);
 });
 
 const TAB_HINT = {
-  art: '默认只展示有立绘、非 AI 的设表，按人气排序；AI 立绘收在最下方的折叠区。',
+  art: '这里展示有立绘的非 AI 设表；AI 立绘收在最下方的折叠区。',
   text: '只有文字、没有立绘的设表收在这本展册里，适合慢慢翻阅。',
 };
 function setTab(tab) {
@@ -488,7 +555,7 @@ function setTab(tab) {
   $('tabHint').textContent = TAB_HINT[tab];
   document.querySelectorAll('[data-art-only]').forEach(b => { b.hidden = tab !== 'art'; });
   if (tab === 'text' && curType === '配色海报') setType('');
-  else loadView(tab, true);
+  else reloadPublic();
 }
 function setType(t) {
   curType = t;
@@ -498,6 +565,11 @@ function setType(t) {
 document.querySelectorAll('.tab').forEach(b => b.onclick = () => setTab(b.dataset.tab));
 $('typeFilters').addEventListener('click', e => { const b = e.target.closest('.fbtn'); if (b) setType(b.dataset.type); });
 $('search').addEventListener('input', e => { curQ = e.target.value.trim(); clearTimeout(searchTimer); searchTimer = setTimeout(reloadPublic, 300); });
+$('gallerySort').addEventListener('change', e => {
+  curSort = e.target.value === 'newest' ? 'newest' : 'likes';
+  clearTimeout(searchTimer);
+  reloadPublic();
+});
 
 // 打开卡片：配色海报进灯箱，其余进展示页；卡片里的按钮、链接、点赞条不触发
 function openCard(el) {
@@ -635,6 +707,7 @@ function reviewItemHTML(c) {
         ${c.image_data ? `<select aria-label="立绘来源" data-art>${opts}</select>` : ''}
         <button type="button" class="pb-btn green" data-approve="${c.id}">通过</button>
         <button type="button" class="pb-btn ghost" data-reject="${c.id}">退回…</button>
+        ${currentUser?.logged_in && currentUser.is_admin ? historyButton(c) : ''}
       </div>
     </div>
   </div>`;
@@ -762,6 +835,7 @@ $('copyQQ').onclick = async function () {
 async function init() {
   currentUser = await getJSON('/api/user').catch(() => null);
   canReview = !!(currentUser && currentUser.logged_in && currentUser.can_review_fan);
+  if (currentUser?.logged_in && currentUser.is_admin) window.HuiguanFanHistory?.enable();
   paintRecruit();
   if (currentUser && currentUser.logged_in) await loadMy();
   else {
