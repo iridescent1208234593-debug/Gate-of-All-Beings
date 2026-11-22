@@ -19,6 +19,7 @@ import hashlib
 import io
 import json
 import logging
+import os
 import re
 import secrets
 import time
@@ -28,6 +29,7 @@ from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from PIL import Image
 
+from . import account_broker
 from . import config as config_mod
 from .auth import SESSION_COOKIE, Auth, load_pepper
 from .oc import OCCache, OCRejected, sniff
@@ -52,6 +54,20 @@ class Lab:
         self.store = Store(cfg.db_path)
         self.pepper = load_pepper(cfg.secrets)
         self.auth = Auth(self.store, self.pepper, cfg.session_days)
+        self.account = None
+        if cfg.account_issuer:
+            credential = (cfg.secrets / "account-broker.key").read_text(encoding="utf-8").strip()
+            if not re.fullmatch(r"[A-Za-z0-9_-]{32,200}", credential):
+                raise ValueError("Invalid account broker credential")
+            migration_file = cfg.secrets / "account-migration.json"
+            ids = json.loads(migration_file.read_text(encoding="utf-8")) if migration_file.is_file() else []
+            if not isinstance(ids, list) or not all(isinstance(cid, str) and re.fullmatch(r"c_[0-9a-f]{10}", cid) for cid in ids):
+                raise ValueError("Invalid account migration allowlist")
+            self.account = account_broker.Broker(self.auth, cfg.account_issuer, credential, migratable=ids,
+                                                 loopback=os.environ.get("LAB_ACCOUNT_TEST_LOOPBACK") == "1")
+        elif self.store.one("SELECT 1 FROM sqlite_master WHERE name='account_sessions' AND type='table'"):
+            # Turning the feature off leaves legacy sessions and linked saves intact.
+            self.store.exec("DELETE FROM sessions WHERE digest IN (SELECT digest FROM account_sessions)")
         self.oc = OCCache(cfg.oc_dir, cfg.oc_cache_budget_bytes, cfg.oc_ttl_seconds)
         self.r4 = R4Bridge(cfg.r4_port, cfg.secrets, cfg.r4_enabled)
         self.hub = Hub(self.store, SPACES_FILE, self.oc, self.r4, config_mod.VERSION)
@@ -74,6 +90,8 @@ class Lab:
         loop = asyncio.get_running_loop()
         self.tasks = [loop.create_task(self.hub.tick_loop()), loop.create_task(self.hub.persist_loop()),
                       loop.create_task(self.hub.r4_loop()), loop.create_task(self.hub.housekeeping_loop(self.auth))]
+        if self.account:
+            self.tasks.append(loop.create_task(self.account.maintain(self.hub)))
 
     async def stop(self) -> None:
         for c in list(self.hub.conns.values()):
@@ -139,6 +157,9 @@ def create_app(lab: Lab) -> FastAPI:
             resp.headers["Strict-Transport-Security"] = "max-age=31536000"
         return resp
 
+    if lab.account:
+        account_broker.install(app, lab, lab.account)
+
     @app.get("/healthz")
     async def healthz():
         return {"ok": True, "version": config_mod.VERSION}
@@ -187,7 +208,13 @@ def create_app(lab: Lab) -> FastAPI:
 
     @app.post("/api/logout")
     async def logout(request: Request):
-        lab.auth.logout(request.cookies.get(SESSION_COOKIE))
+        token = request.cookies.get(SESSION_COOKIE)
+        lab.auth.logout(token)
+        if lab.account:
+            for c in list(lab.hub.conns.values()):
+                if token and secrets.compare_digest(c.token, token):
+                    await lab.hub.detach(c, "logged_out")
+            await lab.account.close(token)
         resp = JSONResponse({"ok": True})
         resp.delete_cookie(SESSION_COOKIE, path="/")
         return resp

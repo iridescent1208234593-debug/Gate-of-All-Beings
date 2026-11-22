@@ -37,6 +37,7 @@ class Config:
     oc_cache_budget_bytes: int = 256 * 1024 * 1024
     oc_ttl_seconds: int = 6 * 3600
     max_players: int = 120
+    account_issuer: str = ""
     r4_enabled: bool = True
     r4_python: Path = field(default_factory=lambda: (_workspace_root(SOURCE_ROOT) or SOURCE_ROOT.parents[1]) / "labs" / "iridescently-labs" / "research" / "experiments" / "zhongsheng-world-lab" / ".venv" / "Scripts" / "python.exe")
     r4_service_dir: Path = field(default_factory=lambda: (_workspace_root(SOURCE_ROOT) or SOURCE_ROOT.parents[1]) / "labs" / "iridescently-labs" / "research" / "experiments" / "living-world" / "r4")
