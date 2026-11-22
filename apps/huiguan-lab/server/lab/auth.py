@@ -96,6 +96,7 @@ class Auth:
         self.store, self.pepper = store, pepper
         self.session_seconds = session_days * 86400
         self.limiter = RateLimiter()
+        self.protect_linked_codes = False
 
     def code_digest(self, code: str) -> str:
         return hmac.new(self.pepper, normalize(code).encode(), hashlib.sha256).hexdigest()
@@ -132,6 +133,10 @@ class Auth:
         return removed
 
     # --- login / sessions ------------------------------------------------------------
+    def account_owns_code(self, code_id: str) -> bool:
+        return self.protect_linked_codes and self.store.one(
+            "SELECT 1 FROM account_links WHERE code_id=?", (code_id,)) is not None
+
     def login(self, code: str, ip_key: str) -> tuple[str | None, str, float]:
         """Returns (session_token|None, reason, retry_after)."""
         wait = self.limiter.locked(ip_key)
@@ -142,7 +147,7 @@ class Auth:
         row = None
         if 16 <= len(norm) <= 24:
             row = self.store.one("SELECT * FROM codes WHERE digest=?", (self.code_digest(code),))
-        if not row or row["status"] != "active":
+        if not row or row["status"] != "active" or self.account_owns_code(row["id"]):
             locked = self.limiter.fail(ip_key)
             self.store.security("login_failed", ip_hint=ip_key, code_id=row["id"] if row else None,
                                 reason="inactive" if row else "unknown", locked=locked)
@@ -151,6 +156,8 @@ class Auth:
         token = secrets.token_urlsafe(32)
         now = time.time()
         with self.store.tx() as s:
+            if self.account_owns_code(row["id"]):
+                return None, "invalid", 0
             s.db.execute("INSERT INTO sessions VALUES(?,?,?,?,?)",
                          (self.token_digest(token), row["id"], now, now + self.session_seconds, now))
             s.db.execute("UPDATE codes SET last_used_at=?, last_ip_hint=?, use_count=use_count+1 WHERE id=?",
@@ -167,7 +174,9 @@ class Auth:
         if not row:
             return None
         now = time.time()
-        if row["status"] != "active" or row["expires_at"] < now:
+        if (row["status"] != "active" or row["expires_at"] < now or
+                (self.account_owns_code(row["code_id"]) and not self.store.one(
+                    "SELECT 1 FROM account_sessions WHERE digest=?", (row["digest"],)))):
             self.store.exec("DELETE FROM sessions WHERE digest=?", (row["digest"],))
             return None
         self.store.exec("UPDATE sessions SET last_seen_at=? WHERE digest=?", (now, row["digest"]))

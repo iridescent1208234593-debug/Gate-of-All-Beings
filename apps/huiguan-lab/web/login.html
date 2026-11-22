@@ -11,7 +11,7 @@
 <main class="card">
   <p class="eyebrow">众生之门 · 测试世界</p>
   <h1>西木会馆 LAB</h1>
-  <p class="lede">这里是独立的测试世界，与正式站点的账号和数据完全分开。请输入管理员发给你的测试码。</p>
+  <p class="lede">这里是独立的测试世界，测试数据与会馆网站分开保存。你可以使用管理员发给你的有效测试码。</p>
   <form id="f" autocomplete="off">
     <label for="code">测试码</label>
     <input id="code" name="code" inputmode="text" spellcheck="false" placeholder="ZSZM-XXXX-XXXX-XXXX-XXXX" maxlength="40" required autofocus>
@@ -19,7 +19,14 @@
     <p id="msg" role="status" aria-live="polite"></p>
   </form>
   <p class="fine">登录后 7 天内免输入。你的 OC 图片只保存在这台设备的浏览器里，联机时只临时展示给同一空间的玩家。</p>
+<section id="account-entry" hidden>
+    <p class="fine">会馆账号须另外开通 LAB 测试资格。注册或获得共创身份不会自动开通。普通登录不会自动绑定旧档。</p>
+    <button type="button" id="account-start">用西木会馆账号登录</button>
+    <p id="account-hint" aria-live="polite"></p>
+    <a id="account-approve" rel="noopener noreferrer" target="_blank" hidden>打开会馆网站确认</a>
+</section>
 </main>
 <script src="/static/login.js"></script>
+<script src="/static/account-login.js"></script>
 </body>
 </html>
