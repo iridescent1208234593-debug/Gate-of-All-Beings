@@ -95,3 +95,14 @@ OC 数据与 `fan_characters` 上的 `art_source`：`''` 未声明、`human` 手
 - `character`：可能指 OC、玩法角色或世界 Actor。新代码应优先使用更精确术语，禁止仅用 `character_id` 表达一个未定义的跨系统概念。
 
 若新术语会被多个模块使用，必须先加入本文件再进入公共代码。
+
+## 共创与 LAB 账户准入
+
+### Creator Membership（共创身份）
+绑定会馆 Account 的组织关系。驻馆共创者 `resident_creator` 对应编内；客席共创者 `guest_creator` 对应编外；无身份用空值表示。小组和职能是可多选的组织职责，不是站务、游戏权限或物种职业。历史贡献记录及公开授权独立保存。
+
+### Creator Profile（共创档案）
+成员明确授权公开的署名、个人简介、组织资料、头像、链接和贡献，作为原《联系与鸣谢》中的版块，不是独立公共路由。公开标识 `profile_slug` 是随机值，与 Account `(kind,uid)` 不同。
+
+### LAB Access（LAB 测试资格）
+会馆针对 Account 单独授予的测试准入。不会由注册、共创身份或站务身份隐式产生。会馆只把服务专用稳定 `sub` 与短效授权交给 LAB 后端，LAB 的 `player_id` 和已有角色归属不变。

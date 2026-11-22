@@ -14,7 +14,7 @@
     <script>
       (function(){try{var m=document.cookie.match(/(?:^|;\s*)hx_theme=(light|dark|auto)/);var p=m?m[1]:'auto';document.documentElement.dataset.theme=p==='auto'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;}catch(e){}})();
     </script>
-    <link rel="stylesheet" href="./styles/connections.css?v=20261027z" />
+    <link rel="stylesheet" href="./styles/connections.css?v=20261122a" />
     <title>连接与鸣谢 · Iridescently</title>
   </head>
   <body>
@@ -31,6 +31,7 @@
           网站、会馆和设表系统，是大家一起折腾出来的。这里记下项目的进展、借助的开源项目、相邻的站点，以及一路提出建议、帮忙测试和陪伴的朋友。
         </p>
         <nav class="connections-index" aria-label="本页目录">
+          <a href="#creator-directory" data-creator-nav hidden>共创档案</a>
           <a href="#project-history">项目足迹</a>
           <a href="#open-source">开源与构建</a>
           <a href="#neighbors">友站与邻居</a>
@@ -101,6 +102,25 @@
           <p>眼下最想遇到会画画的朋友：角色头像、卡面、场景、像素小人、界面图标，哪怕只画一张也很好。不画画也一样欢迎——做 UI 或动效、写网页和小游戏、整理设定和世界观、帮忙试玩找 bug、随口提个想法，都是在一起建这个地方。</p>
           <p>这是一个长期、慢慢做的同人项目，代码也在一点点开源（主站画廊已经公开）。不用勉强自己，按自己的节奏来就好；被采用的作品和想法会在对应页面联合署名，并一直留在这一页的鸣谢里。想聊聊的话，微信、QQ 私信或者来 QQ 群 878029597 打个招呼就行。</p>
         </div>
+      </section>
+
+      <section class="connections-section creator-directory" id="creator-directory" hidden aria-labelledby="creator-directory-title">
+        <header class="connections-section__heading">
+          <p class="connections-eyebrow">CO-CREATION ARCHIVE</p>
+          <h2 id="creator-directory-title">共创档案</h2>
+          <p>认识正在一起做会馆的人，也看看已经留下的作品和贡献。这里只展示本人同意公开、并通过确认的资料。</p>
+          <p><a href="/account.html#creator-profile" data-site-service="huiguan" data-site-path="/account.html#creator-profile">在西木会馆管理我的共创档案</a></p>
+        </header>
+        <div class="creator-directory__filters" data-creator-filters hidden>
+          <label>搜索档案<input type="search" placeholder="名字、分工或作品" data-creator-search /></label>
+          <label>共创身份<select data-creator-kind><option value="">全部身份</option></select></label>
+          <label>分组<select data-creator-group><option value="">全部分组</option></select></label>
+        </div>
+        <p class="connections-loading" data-creator-status role="status" aria-live="polite">正在读取共创档案……</p>
+        <button type="button" data-creator-retry hidden>重新加载档案</button>
+        <div class="creator-directory__cards" data-creator-cards></div>
+        <div data-creator-credits hidden></div>
+        <noscript><p>启用 JavaScript 后可以查看共创档案；本页其他联系与鸣谢信息仍可阅读。</p></noscript>
       </section>
 
       <section class="connections-section" id="open-source">
@@ -563,5 +583,6 @@
     </footer>
 
     <script type="module" src="./scripts/connections.js?v=20261027z"></script>
+    <script type="module" src="./scripts/creators-directory.js?v=20261122b"></script>
   </body>
 </html>
