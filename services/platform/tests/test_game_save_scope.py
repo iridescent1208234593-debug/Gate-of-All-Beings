@@ -67,11 +67,14 @@ def legacy_sha():
 
 
 class Server:
-    def __init__(self, ident):
-        identity = dict(ident)
+    def __init__(self, ident=None):
+        identity = dict(ident) if ident is not None else None
 
         class Handler(huiguan.Handler):
             def _require_ident(self):
+                if identity is None:
+                    self._json(401, {"error": "未登录"})
+                    return None
                 return dict(identity)
 
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
@@ -99,8 +102,11 @@ class Server:
         path = "/api/game/save" + (f"?scope={scope}" if scope else "")
         request = urllib.request.Request(self.base + path, data=json.dumps({"state": state}).encode(),
                                          headers={"Content-Type": "application/json"}, method="POST")
-        with urllib.request.urlopen(request) as response:
-            return response.status, json.load(response)
+        try:
+            with urllib.request.urlopen(request) as response:
+                return response.status, json.load(response)
+        except urllib.error.HTTPError as error:
+            return error.code, json.load(error)
 
 
 LOCAL_7 = {"kind": "local", "uid": "7", "nickname": "", "username": "iridescent"}
@@ -151,6 +157,30 @@ class OwnershipTest(unittest.TestCase):
         for ident in ({"kind": "local", "uid": "9"}, {"kind": "usso", "uid": "9"}, {"kind": "local", "uid": "404"}):
             with Server(ident) as server:
                 self.assertEqual(server.load()[0], 404, ident)
+
+    def test_switching_accounts_keeps_each_save_and_refresh_visible(self):
+        account_a = {"kind": "local", "uid": "700", "nickname": "甲"}
+        account_b = {"kind": "local", "uid": "701", "nickname": "乙"}
+        with Server(account_a) as server:
+            self.assertEqual(server.save({"management": "a"})[0], 200)
+            self.assertEqual(server.save({"skin": "a"}, "softie")[0], 200)
+        with Server(account_b) as server:
+            self.assertEqual(server.load()[0], 404, "B must not see A's save")
+            self.assertEqual(server.load("softie")[0], 404, "B must not see A's softie save")
+            self.assertEqual(server.save({"management": "b"})[0], 200)
+            self.assertEqual(server.save({"skin": "b"}, "softie")[0], 200)
+        # A fresh request stands in for a page reload; saved state must still be A's.
+        with Server(account_a) as server:
+            self.assertEqual(server.load()[1]["state"], {"management": "a"})
+            self.assertEqual(server.load("softie")[1]["state"], {"skin": "a"})
+        with Server(account_b) as server:
+            self.assertEqual(server.load()[1]["state"], {"management": "b"})
+            self.assertEqual(server.load("softie")[1]["state"], {"skin": "b"})
+
+    def test_guest_has_no_cloud_save_access(self):
+        with Server() as server:
+            self.assertEqual(server.load()[0], 401)
+            self.assertEqual(server.save({"management": "guest"})[0], 401)
 
     def test_scopes_are_independent(self):
         ident = {"kind": "local", "uid": "500", "nickname": "灵主"}

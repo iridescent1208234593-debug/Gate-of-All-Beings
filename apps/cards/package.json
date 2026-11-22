@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "lint": "tsc --noEmit",
-    "test": "node --import tsx --test src/game/core/*.test.ts src/world/*.test.ts src/activities/*/*.test.ts",
+    "test": "node --import tsx --test src/game/core/*.test.ts src/gate/*.test.ts src/onboarding/*.test.ts src/world/*.test.ts src/activities/*/*.test.ts",
     "test:backend": "node --import tsx --test server/*.test.ts",
     "check:game": "tsc --project tsconfig.game.json --noEmit",
     "build:modules": "node scripts/build-modules.mjs",

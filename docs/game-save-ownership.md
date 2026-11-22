@@ -77,9 +77,11 @@ python services/platform/game_saves.py export --out E:\backup\game_saves.rollbac
 
 ## 测试
 
-`python -m unittest server.test_game_save_scope`（从项目根目录运行），共 10 项。测试在导入会馆模块前把 `IRIDESCENTLY_PROJECT_ROOT` 指向临时目录，不会打开真实 `users.db`。覆盖：
+`python services/platform/tests/test_game_save_scope.py`（从项目根目录运行），共 12 项。测试在导入会馆模块前把 `IRIDESCENTLY_PROJECT_ROOT` 指向临时目录，不会打开真实 `users.db`。覆盖：
 
 - 同号不同 kind 隔离
+- 账户 A/B 切换后各自存档可见，刷新/新请求后仍保持
+- 未登录访客不能读写云存档
 - 隔离项不可读
 - scope 独立、无回退
 - 未知 scope 拒绝

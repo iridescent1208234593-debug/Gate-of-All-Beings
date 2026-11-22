@@ -21,6 +21,22 @@ h1 small{font-size:var(--qc-fs-sm);color:var(--qc-dim);margin-left:10px;letter-s
 .qc-card{margin-bottom:var(--qc-sp-4)}
 .qc-hint{line-height:1.6;margin-top:6px}
 .qc-err{min-height:18px;margin-top:var(--qc-sp-2)}
+#creator-profile{scroll-margin-top:96px}
+.creator-profile-preview{margin-top:12px;padding:10px;border:1px solid var(--qc-border);border-radius:var(--qc-r-md);overflow-wrap:anywhere}
+.creator-profile-preview :is(h3,h4){font-size:var(--qc-fs-base);margin:0 0 4px}
+.creator-profile-preview h4{margin-top:10px}
+.creator-profile-preview ul{padding-inline-start:1.3em;margin-block:4px;font-size:var(--qc-fs-sm)}
+.creator-profile-preview p{white-space:pre-wrap}
+.creator-profile-form{display:grid;gap:10px;margin-top:12px}
+.creator-profile-form label{display:grid;gap:4px;min-width:0}
+.creator-profile-form label:has(input[type="checkbox"]){display:flex;align-items:center;gap:8px;padding-block:5px}
+.creator-profile-form textarea{min-height:80px;resize:vertical}
+.creator-profile-form fieldset{display:grid;gap:7px;min-width:0;padding:10px;border:1px solid var(--qc-border);border-radius:var(--qc-r-md)}
+.creator-profile-form legend{padding-inline:5px}
+.creator-profile-links{display:grid;gap:8px}
+.creator-profile-link{display:grid;grid-template-columns:minmax(90px,1fr) minmax(150px,2fr) auto;align-items:end;gap:6px}
+.creator-profile-link .qc-input{width:100%}
+@media(max-width:460px){.creator-profile-link{grid-template-columns:1fr minmax(70px,auto)}.creator-profile-link>label{grid-column:1/-1}}
 .row{display:flex;justify-content:space-between;align-items:center;gap:var(--qc-sp-2);padding:6px 0;font-size:var(--qc-fs-base)}
 .row .k{color:var(--qc-dim)}
 .field-row{display:flex;gap:var(--qc-sp-2);margin-top:10px}.field-row .qc-input{flex:1;min-width:0}
@@ -50,6 +66,7 @@ input[type=color]{width:42px;height:var(--qc-tap);border:1px solid var(--qc-bord
 </div>
 <script src="/image-upload.js?v=20261027z"></script>
 <script src="/avatar-cropper.js?v=20261027z"></script>
+<script src="/creator-profile.js?v=20261122b"></script>
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 const roleName={executor:'执行者',elder:'长老',admin:'管理员'};
@@ -150,6 +167,11 @@ function render(u,emailState,justVerified){
       <div class="row"><span class="k">会馆身份</span><span class="qc-tag ${isAdmin?'qc-tag--gold':isElder?'qc-tag--accent':''}">${roleName[u.role]||'执行者'}</span></div>
       <div class="row"><span class="k">编辑权限</span><span class="qc-tag ${isScribe?'qc-tag--accent':''}">${isScribe?'编辑（可直接修订设定）':'无'}</span></div>
     </div>
+    <section class="qc-card" id="creator-profile" hidden aria-labelledby="creator-profile-title">
+      <h2 class="qc-h2" id="creator-profile-title">我的共创档案</h2>
+      <p class="qc-hint">共创身份由会馆维护，与管理员、长老等会馆权限无关。你可以决定公开哪些资料。</p>
+      <div data-creator-account><p class="qc-hint" role="status">正在读取共创档案…</p></div>
+    </section>
     <div class="qc-card">
       <h2 class="qc-h2">等级与积分</h2>
       <div class="row"><span class="k">当前等级</span><span class="qc-tag qc-tag--gold">Lv.${u.level||0}</span></div>
@@ -204,6 +226,7 @@ function render(u,emailState,justVerified){
     </div>
   `;
   updatePrev();
+  window.HuiguanCreatorProfile?.load();
 }
 document.addEventListener('click',async event=>{
   const id=event.target?.id;
