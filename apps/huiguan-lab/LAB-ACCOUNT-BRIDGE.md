@@ -4,7 +4,9 @@ Nothing is enabled by default. Do not configure a live issuer or deploy this
 candidate as part of local verification.
 
 - LAB: set account_issuer to one approved Westwood Hall HTTPS origin in the
-  isolated lab.config.json. Use a distinct service token in the existing
+  isolated lab.config.json. Carry the existing repository registry
+  packages/site-domains/domains.json when distributing an enabled gateway.
+  The browser accepts only the exact issuer reported by its own gateway. Use a distinct service token in the existing
   restricted LAB_SECRETS directory as account-broker.key (32–200 base64url
   characters); inject corresponding issuer-side configuration independently.
 - A test fixture can explicitly set LAB_ACCOUNT_TEST_LOOPBACK=1 and use

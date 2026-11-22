@@ -4,8 +4,17 @@
   const hint = document.getElementById("account-hint");
   const approve = document.getElementById("account-approve");
   const mode = location.pathname === "/account-link" ? "link" : "login";
+  let issuerOrigin;
   try {
-    if (!(await fetch("/api/account/available", {cache: "no-store"})).ok) return;
+    const response = await fetch("/api/account/available", {cache: "no-store", redirect: "error"});
+    if (!response.ok) return;
+    const availability = await response.json();
+    const issuer = new URL(availability.issuer);
+    const fixture = location.protocol === "http:" && location.hostname === "127.0.0.1" &&
+      issuer.protocol === "http:" && issuer.hostname === "127.0.0.1";
+    if (!availability.enabled || availability.issuer !== issuer.origin ||
+        (issuer.protocol !== "https:" && !fixture)) return;
+    issuerOrigin = issuer.origin;
   } catch { return; }
   box.hidden = false;
   if (mode === "link") {
@@ -24,10 +33,7 @@
       if (!start.ok) throw Error();
       const m = await start.json();
       const url = new URL(m.approval_url);
-      const approved = ["https://huiguan.iridescently.cn", "https://huiguan.iridescently.xyz"].includes(url.origin)
-        || (location.protocol === "http:" && location.hostname === "127.0.0.1" &&
-            url.protocol === "http:" && url.hostname === "127.0.0.1");
-      if (!approved || url.username || url.password ||
+      if (url.origin !== issuerOrigin || url.username || url.password ||
           !/^\?request_id=[A-Za-z0-9_-]{12,200}$/.test(url.search) || url.hash ||
           url.pathname !== "/api/lab-auth/approve" || !/^[0-9]{6}$/.test(m.match_code)) throw Error();
       approve.href = url.href;

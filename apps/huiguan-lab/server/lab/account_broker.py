@@ -4,10 +4,12 @@ from __future__ import annotations
 import asyncio
 import base64
 import hashlib
+import json
 import re
 import secrets
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from urllib.parse import urlencode, urlsplit
 
 import httpx
@@ -18,9 +20,15 @@ from fastapi.responses import JSONResponse
 
 ID = re.compile(r"[A-Za-z0-9_-]{12,200}")
 POLL = re.compile(r"[A-Za-z0-9_-]{43}")
-ISSUERS = {"https://huiguan.iridescently.cn", "https://huiguan.iridescently.xyz"}
 MAX_PENDING = 256
 LEASE = 45
+
+
+def approved_issuers():
+    source = Path(__file__).resolve().parents[4] / "packages" / "site-domains" / "domains.json"
+    domains = json.loads(source.read_text(encoding="utf-8"))
+    prefix = domains["services"]["huiguan"]
+    return {f"https://{prefix}.{root}" for root in domains["roots"]}
 
 
 class Denied(Exception):
@@ -51,8 +59,8 @@ class Broker:
         u = urlsplit(issuer)
         if not u.hostname or u.username or u.password or u.path not in ("", "/") or u.query or u.fragment:
             raise ValueError("LAB account issuer must be a fixed origin")
-        if issuer.rstrip("/") not in ISSUERS and not (
-                loopback and u.scheme == "http" and u.hostname == "127.0.0.1" and u.port):
+        is_fixture = loopback and u.scheme == "http" and u.hostname == "127.0.0.1" and u.port
+        if not is_fixture and issuer.rstrip("/") not in approved_issuers():
             raise ValueError("LAB account issuer requires an approved origin")
         self.issuer = issuer.rstrip("/")
         self.auth = auth
@@ -229,7 +237,6 @@ def install(app, lab, broker):
     starts = asyncio.Semaphore(8)
 
     async def parse(request):
-        import json
         raw = bytearray()
         async for chunk in request.stream():
             if len(raw) + len(chunk) > 2048:
@@ -253,7 +260,7 @@ def install(app, lab, broker):
 
     @app.get("/api/account/available")
     async def available():
-        return JSONResponse({"enabled": True}, headers=no_cache)
+        return JSONResponse({"enabled": True, "issuer": broker.issuer}, headers=no_cache)
 
     @app.post("/api/account/start")
     async def start(request: Request):

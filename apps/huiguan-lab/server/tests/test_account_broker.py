@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from lab.app import Lab, create_app
 from lab.config import Config
 from lab.auth import SESSION_COOKIE
+from lab.account_broker import Broker, approved_issuers
 
 
 def make_lab(tmp_path, monkeypatch, enabled=True):
@@ -50,7 +51,7 @@ def test_account_preserves_legacy_room_and_separate_revocation(tmp_path, monkeyp
         assert client.post("/api/login", json={"code": code}).status_code == 200
         old_cookie = client.cookies.get(SESSION_COOKIE)
         assert client.get("/account-link").status_code == 200
-        assert client.get("/api/account/available").json() == {"enabled": True}
+        assert client.get("/api/account/available").json() == {"enabled": True, "issuer": lab.account.issuer}
         post = lambda action, **kw: client.post("/api/account/"+action, json={"mode":"link", **kw})
         start = post("start")
         assert start.status_code == 200
@@ -88,3 +89,14 @@ def test_feature_disabled_keeps_old_entry(tmp_path, monkeypatch):
         _, code = lab.auth.create_code()
         assert client.post("/api/login", json={"code": code}).status_code == 200
         assert client.get("/api/me").status_code == 200
+
+
+def test_issuer_uses_repository_domain_registry(tmp_path, monkeypatch):
+    import pytest
+
+    lab = make_lab(tmp_path, monkeypatch, enabled=False)
+    allowed = sorted(approved_issuers())
+    assert allowed and all(value.startswith("https://huiguan.") for value in allowed)
+    assert Broker(lab.auth, allowed[0], "a" * 43).issuer == allowed[0]
+    with pytest.raises(ValueError):
+        Broker(lab.auth, "https://unknown.example.invalid", "a" * 43)
