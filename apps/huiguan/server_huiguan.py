@@ -2643,7 +2643,7 @@ class Handler(BaseStaticHandler):
         ident = resolve_identity("local", u["uid"])
         self._json(200, {"ok": True, "user": ident}, cookie=[self._session_cookie(session_id), self._sso_cookie(u["uid"], "local", ident.get("name") or username)])
 
-    # ---------- /api/auth（统一入口：存在即登录，不存在即注册） ----------
+    # ---------- /api/auth（旧客户端兼容：仅登录） ----------
     def _api_auth(self):
         body = self._read_json()
         if body is None:
@@ -2718,48 +2718,7 @@ class Handler(BaseStaticHandler):
             self._json(409, {"error": "「" + username + "」是既有的 USSO 账号，请改用「登录」入口，不要走注册"}); return
 
         # /api/auth 不再承担注册职责：未知用户名一律拒绝，避免任何客户端误建账号
-        self._json(410, {"error": "该入口只用于登录；没有账号请使用「注册账号」入口"}); return
-
-        # —— 注册（用户名不存在） ——
-        # 新账号默认以用户名作为名号；已有账号登录不会经过此检查。
-        if is_official_title_name(username):
-            self._json(400, {"error": OFFICIAL_NAME_ERROR})
-            return
-        if rate_blocked(f"reg:{ip}", 5, 3600):
-            self._json(429, {"error": "注册过于频繁，请稍后再试"})
-            return
-        if not USERNAME_RE.match(username):
-            self._json(400, {"error": "用户名需为 2-16 位中英文、数字或下划线"})
-            return
-        if len(password) < 12 or len(password) > 128:
-            self._json(400, {"error": "密码长度需在 12-128 位之间"})
-            return
-        rate_add(f"reg:{ip}")
-
-        conn = db()
-        n_local = conn.execute("SELECT COUNT(*) c FROM local_users").fetchone()["c"]
-        conn.close()
-        has_admin = bool(ADMIN_USSO_IDS) or n_local > 0
-        role = "executor" if has_admin else "admin"
-
-        with DB_LOCK:
-            conn = db()
-            try:
-                cur = conn.execute(
-                    "INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES (?,?,?,?,?,?,?)",
-                    (username, hash_password(password), "", role, "active", now_iso(), now_iso()))
-                uid = cur.lastrowid
-            except sqlite3.IntegrityError:
-                conn.close()
-                self._json(409, {"error": "该用户名已被注册"})
-                return
-            conn.commit()
-            conn.close()
-
-        session_id = create_session("local", uid, request_root(self))
-        ident = resolve_identity("local", uid)
-        self._json(200, {"ok": True, "registered": True, "user": ident},
-                   cookie=[self._session_cookie(session_id), self._sso_cookie(uid, "local", ident.get("name") or username)])
+        self._json(410, {"error": "该入口只用于登录；没有账号请使用「注册账号」入口"})
 
     # ---------- /api/legal（用户须知与隐私政策的版本与同意记录） ----------
     def _legal_consent_missing(self):
