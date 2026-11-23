@@ -372,6 +372,8 @@ const toast = msg => (window.RFX && RFX.toast ? RFX.toast(msg) : alert(msg));
 // #charForm：首页跳过开场并直接展开登记表单
 const editHref = code => '/?edit=' + encodeURIComponent(code || '') + '#charForm';
 const showHref = code => 'show.html?code=' + encodeURIComponent(code || '');
+const ownedHref = code => showHref(code) + '&owned=1';
+const reviewHref = c => 'show.html?' + new URLSearchParams({ review: c.id, version: c.review_version });
 const ART_LABEL = { '': '未声明', human: '手绘 / 约稿', ai: 'AI 立绘' };
 
 let currentUser = null, canReview = false;
@@ -617,7 +619,10 @@ function myCardHTML(c, idx) {
       ${published ? `<div><span class="status ${status}">${STATUS_TEXT[status] || '审核中'}</span></div>` : '<div class="card-meta">未公开 · 点击勾选</div>'}
       ${status === 'rejected' && rec.review_note ? `<div class="reject-note">退回理由：${esc(rec.review_note)}<br>修改设表后会自动重新提交审核。</div>` : ''}
       ${status === 'pending' ? '<div class="card-meta">审核通过后出现在画廊</div>' : ''}
-      ${published ? `<div class="card-actions"><a class="mini-btn" href="${esc(editHref(c.code))}" data-stop>编辑</a><button type="button" class="mini-btn danger" data-unpublish="${idx}">取消公开</button></div>` : ''}
+      <div class="card-actions">
+        <a class="mini-btn" href="${esc(ownedHref(c.code))}" data-stop>查看设表</a>
+        ${published ? `<a class="mini-btn" href="${esc(editHref(c.code))}" data-stop>编辑</a><button type="button" class="mini-btn danger" data-unpublish="${idx}">取消公开</button>` : ''}
+      </div>
     </div>
   </article>`;
 }
@@ -637,7 +642,7 @@ $('myGrid').addEventListener('click', e => {
   const card = e.target.closest('[data-my]');
   if (!card) return;
   const c = myChars[card.dataset.my], rec = fanRecord(c);
-  if (rec && rec.is_public) { location.href = editHref(c.code); return; }
+  if (rec && rec.is_public) { location.href = ownedHref(c.code); return; }
   selectedCodes.has(c.code) ? selectedCodes.delete(c.code) : selectedCodes.add(c.code);
   renderMy();
 });
@@ -703,7 +708,7 @@ function reviewItemHTML(c) {
       ${meta ? `<div class="m">${esc(meta)}</div>` : ''}
       ${c.story ? `<div class="s">${esc(c.story)}</div>` : ''}
       <div class="review-ops">
-        ${c.type === '配色海报' ? '' : `<a class="mini-btn" href="${esc(showHref(c.code))}" target="_blank" rel="noopener">查看完整设表</a>`}
+        ${c.type === '配色海报' ? '' : `<a class="mini-btn" href="${esc(reviewHref(c))}" target="_blank" rel="noopener">查看待审设表</a>`}
         ${c.image_data ? `<select aria-label="立绘来源" data-art>${opts}</select>` : ''}
         <button type="button" class="pb-btn green" data-approve="${c.id}">通过</button>
         <button type="button" class="pb-btn ghost" data-reject="${c.id}">退回…</button>

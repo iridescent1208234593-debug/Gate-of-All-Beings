@@ -31,11 +31,14 @@ body{background:var(--bg);font-family:"Noto Serif SC","Source Han Serif SC",seri
 (function(){
 var params=new URLSearchParams(location.search);
 var code=params.get('code');
-if(!code){location.replace('/');return;}
+var review=params.get('review');
+if(!code&&!review){location.replace('/');return;}
 
-var apiBase='/api/huiguan';
+var endpoint=review
+  ? '/api/huiguan/fan/review/preview?'+new URLSearchParams({id:review,version:params.get('version')||''})
+  : '/api/huiguan/get-character?'+new URLSearchParams(params.get('owned')==='1'?{code:code,owned:'1'}:{code:code});
 
-fetch(apiBase+'/get-character?code='+encodeURIComponent(code))
+fetch(endpoint,{cache:'no-store'})
 .then(function(r){if(!r.ok)throw r;return r.text();})
 .then(function(html){
   var w=document.getElementById('wrap');
@@ -49,6 +52,12 @@ fetch(apiBase+'/get-character?code='+encodeURIComponent(code))
   w.appendChild(iframe);
 })
 .catch(function(error){
+  if(review&&error.status===409){
+    IridescentlyRecovery.render(document.getElementById('wrap'),{
+      title:'待审设表已更新',message:'请回到审核台刷新待审列表，再打开最新提交。'
+    });
+    return;
+  }
   IridescentlyRecovery.render(document.getElementById('wrap'), {
     title: error.status === 404 ? '未找到这份公开展示资料' : '展示服务暂时无法读取',
     message: error.status === 404 ? '该链接可能已撤回公开或不存在；已保存的资料不会因此被清除。' : '暂时无法连接资料服务，请重试。无需重新生成或覆盖你的设表。'

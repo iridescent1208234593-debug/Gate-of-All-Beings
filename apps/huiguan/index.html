@@ -4305,7 +4305,7 @@ function renderList() {
         </div>
       </div>
       <div class="card-actions">
-        <a class="btn-show" href="/show.html?code=${encodeURIComponent(c.code)}" target="_blank" rel="noopener">展示页</a>
+        <a class="btn-show" href="/show.html?code=${encodeURIComponent(c.code)}${currentUser ? '&amp;owned=1' : ''}" target="_blank" rel="noopener">展示页</a>
         <button class="btn-edit" onclick="editChar(${i})">编辑</button>
         <button class="btn-del" onclick="delChar(${i})">删除</button>
       </div>
