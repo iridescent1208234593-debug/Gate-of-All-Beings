@@ -69,6 +69,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes ffmpeg
+      - name: Shell navigation isolated browser
+        run: node apps/shell/tests/navigation-save-smoke.cjs
       - name: Create isolated gallery build fixture
         shell: bash
         run: |
