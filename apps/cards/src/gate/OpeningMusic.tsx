@@ -45,6 +45,8 @@ export function OpeningMusicProvider({ children }: { children: ReactNode }) {
   const cache = useRef(new Map<string, AudioBuffer>());
   const loading = useRef(new Map<string, Promise<AudioBuffer>>());
   const voice = useRef<AudioVoice | null>(null);
+  const fetches = useRef<AbortController | null>(null);
+  const retireTimers = useRef(new Set<number>());
   const [started, setStarted] = useState(false);
   const muted = choice === 'mute';
 
@@ -71,6 +73,7 @@ export function OpeningMusicProvider({ children }: { children: ReactNode }) {
       out.gain.value = 0;
       out.connect(ctx.destination);
       context.current = ctx;
+      fetches.current = new AbortController();
       master.current = out;
       return ctx;
     } catch { return null; }
@@ -84,13 +87,15 @@ export function OpeningMusicProvider({ children }: { children: ReactNode }) {
     if (pending) return pending;
     const ctx = ensureAudio();
     if (!ctx) return Promise.reject(new Error('Audio unavailable'));
-    const request = fetch(url).then(response => {
+    const request = fetch(url, { signal: fetches.current?.signal }).then(response => {
       if (!response.ok) throw new Error(`Audio request failed: ${response.status}`);
       return response.arrayBuffer();
     }).then(data => ctx.decodeAudioData(data)).then(buffer => {
-      cache.current.set(url, buffer);
+      if (context.current === ctx) cache.current.set(url, buffer);
       return buffer;
-    }).finally(() => loading.current.delete(url));
+    }).finally(() => {
+      if (loading.current.get(url) === request) loading.current.delete(url);
+    });
     loading.current.set(url, request);
     return request;
   }, [ensureAudio]);
@@ -112,7 +117,12 @@ export function OpeningMusicProvider({ children }: { children: ReactNode }) {
       else segmentGain.gain.setValueAtTime(1, when);
       segmentGain.gain.setValueCurveAtTime(down, when + length - plan.crossfade, plan.crossfade);
       source.start(when, offset); source.stop(when + length + 0.05);
-      active.sources.add(source); source.onended = () => active.sources.delete(source);
+      active.sources.add(source);
+      source.onended = () => {
+        active.sources.delete(source);
+        source.disconnect();
+        segmentGain.disconnect();
+      };
       const next = when + length - plan.crossfade;
       active.timer = window.setTimeout(() => schedule(next, plan.from, plan.crossfade), Math.max(0, (next - ctx.currentTime - 1.5) * 1000));
     };
@@ -125,7 +135,15 @@ export function OpeningMusicProvider({ children }: { children: ReactNode }) {
       gain.gain.setValueAtTime(gain.gain.value, now);
       gain.gain.linearRampToValueAtTime(0, now + seconds);
       for (const source of active.sources) { try { source.stop(now + seconds + 0.05); } catch { /* already stopped */ } }
-      window.setTimeout(() => gain.disconnect(), (seconds + 0.2) * 1000);
+      if (!seconds) {
+        gain.disconnect();
+        return;
+      }
+      const timer = window.setTimeout(() => {
+        retireTimers.current.delete(timer);
+        gain.disconnect();
+      }, (seconds + 0.2) * 1000);
+      retireTimers.current.add(timer);
     };
     return active;
   }, []);
@@ -140,15 +158,16 @@ export function OpeningMusicProvider({ children }: { children: ReactNode }) {
   }, [started]);
 
   const start = useCallback(async (fadeIn = 3) => {
-    if (started || choiceRef.current === 'mute') return;
+    if (started || document.hidden || choiceRef.current === 'mute') return;
     const ctx = ensureAudio();
     if (!ctx) return;
     try { await ctx.resume(); } catch { return; }
+    if (context.current !== ctx || document.hidden) return;
     let plan = getPlan();
     try {
       await getBuffer(plan.track);
       let latest = getPlan();
-      while (latest.track !== plan.track) {
+      while (context.current === ctx && latest.track !== plan.track) {
         plan = latest;
         await getBuffer(plan.track);
         latest = getPlan();
@@ -157,7 +176,7 @@ export function OpeningMusicProvider({ children }: { children: ReactNode }) {
     } catch { return; }
     // The choice can change while decodeAudioData is pending; read the mutable ref again.
     const currentChoice = choiceRef.current as MusicChoice;
-    if (ctx.state !== 'running' || currentChoice === 'mute' || voice.current) return;
+    if (context.current !== ctx || document.hidden || ctx.state !== 'running' || currentChoice === 'mute' || voice.current) return;
     const out = master.current!;
     const now = ctx.currentTime + 0.05;
     out.gain.setValueAtTime(0, now);
@@ -217,11 +236,34 @@ export function OpeningMusicProvider({ children }: { children: ReactNode }) {
   useEffect(() => { void start(); }, [start]);
   useEffect(() => {
     const onGesture = () => { void startRef.current(); };
+    const onVisibility = () => {
+      const ctx = context.current;
+      if (!ctx) return;
+      if (document.hidden) void ctx.suspend().catch(() => {});
+      else if (voice.current) void ctx.resume().catch(() => {});
+      else void startRef.current();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('pointerdown', onGesture, { once: true, capture: true });
     window.addEventListener('keydown', onGesture, { once: true, capture: true });
     return () => {
       window.removeEventListener('pointerdown', onGesture, { capture: true });
       window.removeEventListener('keydown', onGesture, { capture: true });
+      document.removeEventListener('visibilitychange', onVisibility);
+      ++sequence.current;
+      voice.current?.stop(0);
+      voice.current = null;
+      for (const timer of retireTimers.current) window.clearTimeout(timer);
+      retireTimers.current.clear();
+      fetches.current?.abort();
+      fetches.current = null;
+      loading.current.clear();
+      cache.current.clear();
+      const ctx = context.current;
+      context.current = null;
+      master.current?.disconnect();
+      master.current = null;
+      if (ctx && ctx.state !== 'closed') void ctx.close().catch(() => {});
     };
   }, []);
 
