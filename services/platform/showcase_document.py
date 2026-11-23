@@ -20,6 +20,15 @@ def image(source, title):
     return '<img src="' + escape(source, quote=True) + '" alt="' + escape(title, quote=True) + '" decoding="async">'
 
 
+def gallery_document(row, label):
+    title = row['name'] or row['code']
+    fields = [('species', '种族'), ('gender', '性别'), ('faction', '阵营'), ('ability', '能力'),
+              ('appearance', '外貌'), ('story', '故事')]
+    details = ''.join('<p><strong>' + name + '</strong> ' + escape(str(row[key])) + '</p>'
+                      for key, name in fields if row[key])
+    return document(title, '<small>' + escape(label) + '</small>' + image(row['image_data'], title) + details)
+
+
 def published_document(conn, code, ident=None):
     """Use the poster's own ID/visibility, or an explicitly public gallery snapshot."""
     match = re.fullmatch(r'poster-([1-9][0-9]{0,9})', code)
@@ -37,8 +46,4 @@ def published_document(conn, code, ident=None):
     row = conn.execute("SELECT * FROM fan_characters WHERE code=? AND is_public=1 AND review_status='approved' AND type!='配色海报' ORDER BY id DESC LIMIT 1", (code,)).fetchone()
     if row is None:
         return None
-    title = row['name'] or code
-    details = ''.join('<p><strong>' + label + '</strong> ' + escape(str(row[key])) + '</p>'
-                      for key, label in [('species', '种族'), ('gender', '性别'), ('faction', '阵营'), ('ability', '能力'), ('appearance', '外貌'), ('story', '故事')]
-                      if row[key])
-    return document(title, '<small>原始设表已不在当前资料中，以下为保留的已公开画廊资料。</small>' + image(row['image_data'], title) + details)
+    return gallery_document(row, '原始设表已不在当前资料中，以下为保留的已公开画廊资料。')

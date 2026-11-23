@@ -65,7 +65,7 @@ LEGAL_GATED_POSTS = frozenset((
     "/api/color-schemes",
 ))
 import turnstile
-from showcase_document import published_document
+from showcase_document import gallery_document, published_document
 from showcase_sanitizer import controlled_showcase
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 from storage_paths import (project_root as resolve_project_root, data_root, huiguan_data_dir,
@@ -2041,6 +2041,8 @@ class Handler(BaseStaticHandler):
             return self._api_admin_fan_history(qs)
         if path == "/api/fan/review/queue":
             return self._api_fan_review_queue(qs)
+        if path == "/api/fan/review/preview":
+            return self._api_fan_review_preview(qs)
         if path == "/api/color-schemes":
             return self._api_color_schemes()
         if path == "/api/color-schemes/mine":
@@ -3102,26 +3104,18 @@ class Handler(BaseStaticHandler):
         if not code:
             self._json(400, {"error": "缺少 code 参数"})
             return
-        # Codes are unique per owner only; like the legacy scan, the first public record wins.
-        data = {"public": character_store().public_records(code)}
-        for uid, chars in data.items():
-            for c in chars:
-                if c.get("code") == code:
-                    html = get_record_html(c)
-                    if html:
-                        data = c.get("data") or {}
-                        primary, accent = data.get("colorPrimary"), data.get("colorAccent")
-                        index = data.get("colorIndex")
-                        has_hex = all(isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", value) for value in (primary, accent))
-                        has_index = isinstance(index, int) and not isinstance(index, bool) and 0 <= index < 19
-                        theme = None
-                        if has_hex or has_index:
-                            # HEX is authoritative; the shared preset map covers index-only snapshots.
-                            theme = json.dumps({"colorPrimary": primary if has_hex else None, "colorAccent": accent if has_hex else None, "colorIndex": index if has_index else None})
-                        # [M7] Saved HTML is rebuilt from an allowlist; only server scripts run on it.
-                        html = controlled_showcase(html, theme, REMOTE_IMAGE_HOSTS)
-                        self._send_html(html)
-                        return
+        if qs.get("owned") == ["1"]:
+            ident = self._require_ident()
+            if ident is None:
+                return
+            record = character_store().get(ident, code)
+            if record is None or not self._send_character_document(record, private=True):
+                self._json(404, {"error": "oc_not_found"})
+            return
+        # Public links predate owner-scoped codes and keep their existing lookup order.
+        for record in character_store().public_records(code):
+            if record.get("code") == code and self._send_character_document(record):
+                return
         conn = db()
         try:
             published = published_document(conn, code, self._require_ident_optional())
@@ -3137,7 +3131,24 @@ class Handler(BaseStaticHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _send_html(self, html):
+    def _send_character_document(self, record, *, private=False):
+        html = get_record_html(record)
+        if not html:
+            return False
+        data = record.get("data") or {}
+        primary, accent = data.get("colorPrimary"), data.get("colorAccent")
+        index = data.get("colorIndex")
+        has_hex = all(isinstance(value, str) and re.fullmatch(r"#[0-9a-fA-F]{6}", value) for value in (primary, accent))
+        has_index = isinstance(index, int) and not isinstance(index, bool) and 0 <= index < 19
+        theme = None
+        if has_hex or has_index:
+            theme = json.dumps({"colorPrimary": primary if has_hex else None,
+                                "colorAccent": accent if has_hex else None,
+                                "colorIndex": index if has_index else None})
+        self._send_html(controlled_showcase(html, theme, REMOTE_IMAGE_HOSTS), private=private)
+        return True
+
+    def _send_html(self, html, *, private=False):
         html = _sanitize_image_urls_in_text(html)
         body = html.encode("utf-8")
         accept = (self.headers.get("Accept-Encoding") or "")
@@ -3147,6 +3158,8 @@ class Handler(BaseStaticHandler):
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Security-Policy", "sandbox allow-popups")
+        if private:
+            self.send_header("Cache-Control", "private, no-store")
         if use_gzip:
             self.send_header("Content-Encoding", "gzip")
             self.send_header("Vary", "Accept-Encoding")
@@ -6101,6 +6114,27 @@ class Handler(BaseStaticHandler):
         finally:
             conn.close()
         self._json(200, {"characters": [dict(r, review_version=fan_review_version(r)) for r in rows], "total": total})
+
+    def _api_fan_review_preview(self, qs):
+        if not self._require_fan_reviewer():
+            return
+        fid, version = _first(qs, "id"), _first(qs, "version")
+        if not fid or not re.fullmatch(r"[1-9][0-9]{0,18}", fid) or int(fid) > 2**63 - 1:
+            self._json(400, {"error": "invalid_fan_id"})
+            return
+        conn = db()
+        try:
+            row = conn.execute("SELECT * FROM fan_characters WHERE id=? AND is_public=1 AND review_status='pending' AND COALESCE(type,'')!='配色海报'",
+                               (int(fid),)).fetchone()
+        finally:
+            conn.close()
+        if row is None:
+            self._json(404, {"error": "fan_review_not_found"})
+            return
+        if version != fan_review_version(row):
+            self._json(409, {"error": "fan_review_changed"})
+            return
+        self._send_html(gallery_document(row, '审核中的提交版本'), private=True)
 
     def _api_fan_review_decide(self):
         """approve / reject 一条公开记录；approve 时可同时更正立绘来源。已通过的记录也可以被退回。"""
