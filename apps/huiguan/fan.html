@@ -153,8 +153,9 @@ button{font-family:inherit}
 .review-desk>summary .count{background:var(--seal);color:#fff;border-radius:999px;font-size:12px;padding:0 9px}
 .review-desk>summary small{color:var(--dim);font-size:12px}
 .review-list{display:grid;gap:10px;padding:0 16px 16px}
-.review-sync{display:flex;gap:12px;align-items:center;padding:0 16px 12px;font-size:12px;color:var(--dim)}
+.review-sync{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:0 16px 12px;font-size:12px;color:var(--dim)}
 .review-item{display:grid;grid-template-columns:96px 1fr;gap:12px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+.review-item[hidden],.review-empty-filter[hidden]{display:none}
 .review-thumb{width:96px;aspect-ratio:3/4;border-radius:6px;background:#ece4d6;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:12px}
 .review-thumb img{width:100%;height:100%;object-fit:cover;object-position:top}
 .review-main{display:flex;flex-direction:column;gap:5px;min-width:0}
@@ -263,8 +264,12 @@ button{font-family:inherit}
   <!-- 审核台（审核员 / 长老 / 管理员可见） -->
   <details class="review-desk" id="reviewDesk" hidden open>
     <summary><strong>审核台</strong><span class="count" id="reviewCount">0</span><small>先到先审 · 通过后进入画廊 · 退回需写理由</small></summary>
-    <div class="review-sync"><button type="button" class="mini-btn" id="reviewRefresh">刷新待审</button><span id="reviewSync" role="status">每 5 秒自动同步待审列表</span></div>
+    <div class="review-sync"><button type="button" class="mini-btn" id="reviewRefresh">刷新待审</button><label>待审类型 <select id="reviewType">
+      <option value="all">全部</option><option value="art">非 AI 立绘</option><option value="text">纯文字设</option>
+      <option value="ai">AI 立绘</option><option value="poster">配色海报</option>
+    </select></label><span id="reviewSync" role="status">每 5 秒自动同步待审列表</span></div>
     <div class="review-list" id="reviewList"><div class="loading">加载中…</div></div>
+    <p class="empty review-empty-filter" id="reviewEmptyFilter" hidden>当前待审窗口没有这类稿件。</p>
     <details class="fan-history" id="fanHistory" hidden>
       <summary>公开版本与审核记录（仅管理员）</summary>
       <p>按画廊编号或完整角色名定位设表，包括不再公开的设表。也可从现有画廊卡片或待审列表直接打开。不恢复旧版或更改作者的公开设置。符合条件的退回稿可由管理员填写理由送回复审。</p>
@@ -734,7 +739,8 @@ function reviewItemHTML(c) {
   rowCache.set(String(c.id), c);
   const meta = [c.type, c.species, c.gender, c.faction].filter(Boolean).join(' · ');
   const opts = Object.keys(ART_LABEL).map(k => `<option value="${k}"${(c.art_source || '') === k ? ' selected' : ''}>立绘：${ART_LABEL[k]}</option>`).join('');
-  return `<div class="review-item" data-review="${c.id}" data-review-version="${esc(c.review_version)}">
+  const reviewType = c.type === '配色海报' ? 'poster' : !c.image_data ? 'text' : c.art_source === 'ai' ? 'ai' : 'art';
+  return `<div class="review-item" data-review-type="${reviewType}" data-review="${c.id}" data-review-version="${esc(c.review_version)}">
     <div class="review-thumb">${c.image_data ? previewImg(c.image_data, c.name) : '纯文字设'}</div>
     <div class="review-main">
       <div class="t">${esc(c.name)} <span class="m">— ${esc(c.user_name || '匿名')}</span></div>
@@ -750,6 +756,17 @@ function reviewItemHTML(c) {
     </div>
   </div>`;
 }
+function filterReviewQueue() {
+  const kind = $('reviewType').value;
+  let shown = 0;
+  for (const row of $('reviewList').querySelectorAll('[data-review-type]')) {
+    row.hidden = kind !== 'all' && row.dataset.reviewType !== kind;
+    if (!row.hidden) shown++;
+  }
+  $('reviewEmptyFilter').hidden = kind === 'all' || shown > 0 ||
+    !$('reviewList').querySelector('[data-review-type]');
+}
+$('reviewType').addEventListener('change', filterReviewQueue);
 async function loadQueue() {
   if (!canReview) return;
   if (queueBusy) { queueRefreshAgain = true; return; }
@@ -779,6 +796,7 @@ async function loadQueue() {
     });
     $('reviewCount').textContent = d.total || 0;
     if (!list.length) container.innerHTML = '<div class="empty">暂时没有待审核的设表 🌿</div>';
+    filterReviewQueue();
     $('reviewSync').textContent = '已同步 · 每 5 秒自动更新';
   } catch (e) {
     $('reviewSync').textContent = '同步失败，将自动重试；也可点击刷新待审';
@@ -823,8 +841,15 @@ function askReject(id, fromGallery) {
 $('reviewList').addEventListener('click', e => {
   const ap = e.target.closest('[data-approve]');
   if (ap) {
-    const sel = ap.closest('.review-item').querySelector('[data-art]');
-    decide(ap.dataset.approve, 'approve', { review_version: ap.closest('.review-item').dataset.reviewVersion, ...(sel ? { art_source: sel.value } : {}) });
+    const row = ap.closest('.review-item');
+    const sel = row.querySelector('[data-art]');
+    const target = { review_version: row.dataset.reviewVersion, ...(sel ? { art_source: sel.value } : {}) };
+    openModal({
+      title: '确认通过这份设表',
+      body: '通过后，这份设表会在同人画廊公开。请确认已检查内容及立绘来源。',
+      okText: '确认通过',
+      onOk: () => decide(ap.dataset.approve, 'approve', target),
+    });
     return;
   }
   const rj = e.target.closest('[data-reject]');
