@@ -23,7 +23,7 @@ def run():
   origin = site_url('huiguan')
   with closing(s.db()) as db,db:
    ids={}
-   for label,role in (('owner','executor'),('admin','admin')):
+   for label,role in (('owner','executor'),('other','executor'),('admin','admin')):
     ident=db.execute("INSERT INTO local_users(username,nickname,pass_hash,role) VALUES(?,?,?,?)",(label+'-private-login',label.title(),'fixture',role)).lastrowid
     ids[label]=str(ident)
     s.legal_consent.record(db,'local',ident)
@@ -47,12 +47,24 @@ def run():
    found=ok('/api/admin/fan/history/find','admin',{'name':title})[1]
    assert found['matches']==[{'id':fid,'name':title}]
    pending=ok('/api/fan/review/queue','admin')[1]['characters'][0]
+   assert submitted['review_status']=='pending'
+   assert ok('/api/fan/list?view=text')[1]['total']==0
+   assert call('/api/fan/my')[0]==401
+   assert ok('/api/fan/my','other')[1]['characters']==[]
+   assert ok('/api/fan/my','owner')[1]['characters'][0]['id']==fid
+   assert call('/api/fan/toggle','other',{'id':fid,'is_public':False})[0]==403
+   assert call('/api/fan/review/queue','other')[0]==403
+   assert call('/api/fan/review/decide','other',{'id':fid,'decision':'approve','review_version':pending['review_version']})[0]==403
+   assert ok('/api/fan/list?view=text')[1]['total']==0
    ok('/api/fan/review/decide','admin',{'id':fid,'decision':'approve','review_version':pending['review_version']})
    listed=ok('/api/fan/list?view=text','admin')[1]['characters'][0]
    assert listed['name']==title
    assert listed['review_status']=='approved'
    ok('/api/fan/review/decide','admin',{'id':fid,'decision':'reject','note':'Please revise','review_version':listed['review_version']})
    assert ok('/api/fan/list?view=text')[1]['total']==0
+   rejected=ok('/api/fan/my','owner')[1]['characters'][0]
+   assert rejected['review_status']=='rejected' and rejected['review_note']=='Please revise'
+   assert 'reviewed_by' not in rejected
    ok('/api/fan/toggle','owner',{'id':fid,'is_public':False})
    ok('/api/fan/toggle','owner',{'id':fid,'is_public':False})
    headers,report=ok(scope,'admin')
@@ -62,7 +74,7 @@ def run():
    assert report['snapshots'][0]['content']['story']=='fixture history'
    assert 'private-login' not in str(report)
    srv.shutdown()
-  print('PASS actual Hall HTTP: real owner/admin session scope, exact-title find, approve and reject, unchanged public filter, no-op toggle, cache and attribution')
+  print('PASS actual Hall HTTP: real owner/admin session scope, exact-title find, approve and reject, unchanged public filter, visibility and owner isolation, non-reviewer rejection, private review reason, no-op revoke, cache and attribution')
 
 
 if __name__ == "__main__":
