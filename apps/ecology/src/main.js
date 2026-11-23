@@ -263,6 +263,11 @@ on(window, 'resize', () => {
   trendChart.update(state);
 });
 
+// Replacing an unchanged textContent recreates the HUD text node on every frame.
+function updateHudText(element, value) {
+  if (element.textContent !== value) element.textContent = value;
+}
+
 let last = performance.now();
 let frames = 0;
 let fpsTime = 0;
@@ -294,20 +299,20 @@ function loop(now) {
   // stage-16：文明与科技面板每帧刷新（进度条/三类资源/研究点/科技/采集单位），建城资料页按 civic 状态自动弹出
   civPanel.update(state);
 
-  hudCells.textContent = `细胞: ${state.cells.length}`;
-  hudFood.textContent = `食物: ${state.foods.length}`;
-  hudEnergy.textContent = `平均能量: ${Math.round(state.stats.avgEnergy)}`;
-  hudSplit.textContent = `分裂: ${state.stats.split}`;
-  hudCulled.textContent = `淘汰: ${state.stats.culled}`;
-  hudEvoPoints.textContent = `进化点: ${state.evoPoints}`;
+  updateHudText(hudCells, `细胞: ${state.cells.length}`);
+  updateHudText(hudFood, `食物: ${state.foods.length}`);
+  updateHudText(hudEnergy, `平均能量: ${Math.round(state.stats.avgEnergy)}`);
+  updateHudText(hudSplit, `分裂: ${state.stats.split}`);
+  updateHudText(hudCulled, `淘汰: ${state.stats.culled}`);
+  updateHudText(hudEvoPoints, `进化点: ${state.evoPoints}`);
   // stage-15：群体读数每帧刷新（群体数/成员/公共能量池/指令中/禁繁拦截），
   // 放在逐帧段而非每秒段：这样即使浏览器虚拟时间被压缩，读数也立刻可见。
   if (hudTribe) {
     const ts = state.tribeStats || {};
     const s = tribeSummary(state.tribes || []);
-    hudTribe.textContent =
+    updateHudText(hudTribe,
       `群体: ${s.count}群 成员${s.members} · 池${Math.round(s.pooled)} ` +
-      `· 移动${s.moving} 采集${s.gathering} · 禁繁${s.banned}(拦${ts.blocked || 0})`;
+      `· 移动${s.moving} 采集${s.gathering} · 禁繁${s.banned}(拦${ts.blocked || 0})`);
   }
   // stage-16：文明读数每帧刷新（进度/阶段/研究点/科技/采集单位与作用点），同样放在逐帧段
   if (hudCiv) {
@@ -315,10 +320,10 @@ function loop(now) {
     const techs = civ
       ? [civ.techs?.fire ? '火种' : null, civ.techs?.tools ? '工具' : null].filter(Boolean).join('+') || '无'
       : '无';
-    hudCiv.textContent = civ
+    updateHudText(hudCiv, civ
       ? `文明: ${Math.round((civ.progress || 0) * 100)}%（${civ.stageCn}）· 研究${Math.round(civ.research || 0)} ` +
         `· 科技${techs} · 采集${civ.units || 0}单位/${civ.activeNodes || 0}点${civ.built ? ' · 已建城' : ''}`
-      : '文明: --';
+      : '文明: --');
   }
 
   frames++;

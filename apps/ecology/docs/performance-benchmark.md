@@ -25,9 +25,33 @@ Node 清理测试另用 Three.js 的真实几何、材质及纹理对象计数�
 离场前通知 controls、renderer、丢弃上下文这三个入口，并停止信号绑定的事件。GPU 入口是桩，
 不是已释放真实显存或已跑通完整 Shell 切换的证据。
 
-## 待做的浏览器测量
+## 浏览器基准和 Shell 进出验证
 
-需在支持 WebGL 的隔离本地浏览器里以同 seed、开局规模和时长记录
-FPS、heap、活跃场景对象和 WebGL 资源；前台取样后切后台，确认 RAF 暂停，
-恢复前台检查无补帧并通过 Shell 退出和重新进入，比较释放前后资源及对象数量。
-本次运行环境的 Chromium 启动限制导致未测量这些指标。没有据此修改物种、模拟规则或渲染逻辑。
+```sh
+npx playwright install chromium
+npm run build --prefix apps/ecology
+node apps/ecology/tests/benchmark-browser.mjs 12
+```
+
+浏览器脚本使用实际 Shell 源码和本地构建的 Ecology 页面，在独立会话拦截所有网络请求，
+以本地文件提供程序，使用假门户清单和一个邻接玩法占位页来专门验证 Ecology 进出。
+同样三档种子和开局对象数，在 960×540 视口前台各执行约 12 个实际秒，每约 4 秒测量一次。
+输出实测 RAF 回调频率（作为本方案的 FPS 指标）、实际 HUD 对象数、CDP JavaScript 堆和 DOM 数，
+以及 Three.js 所用 WebGL2 API 的创建与删除调用计数。此计数不是显存字节数。
+基准在软件 WebGL Chromium 153.0.8010.0、Linux x64 运行。另一个支持 WebGL 的 Chromium
+可使用 `CHROMIUM_EXECUTABLE_PATH` 和 JSON 数组形式的 `CHROMIUM_ARGS`，不替换生产依赖。
+
+| 档位 | 修复前 / 后 FPS | 修复前 / 后重复 HUD 写入 | 修复前堆首/末 | 修复后堆首/末 |
+|---|---:|---:|---:|---:|
+| 低 | 11.6 / 10.4 | 863 / 0 | 8,465 / 9,791 KiB | 8,471 / 9,775 KiB |
+| 常规 | 10.9 / 11.2 | 831 / 0 | 9,241 / 15,386 KiB | 9,022 / 9,926 KiB |
+| 上限 | 10.2 / 9.8 | 711 / 0 | 7,089 / 12,390 KiB | 9,674 / 16,308 KiB |
+
+原来每帧无条件赋值会替换内容未变化的 HUD 文本节点。只调整这八个读数的 DOM 写入条件，
+未改世界状态、物种、刷新频率、可见数值或渲染效果。这组结果验证了重复写入被消除，
+未证明 FPS 或内存有稳定改善。三档修复前后稳定采样均观察到 4 个纹理、60 个 buffer、7 个 program、
+16 个 VAO 的创建，未持续增加。测试通过构造页面可见性事件验证处理器暂停 RAF、再恢复，
+没有模拟操作系统切后台的全部调度机制。随后在真正的 Shell 导航中退出游戏并重新进入：
+旧 WebGL2 上下文触发浏览器 context-lost；离场后无 RAF 增长；回来只有一个未丢失的上下文。
+挂载过程中不把 Chromium 垃圾回收抖动误认作泄漏。对照旧包可用
+`ECOLOGY_BUILD_DIR=<旧构建目录> ECOLOGY_PROBE_BASELINE=1 node apps/ecology/tests/benchmark-browser.mjs 12`。
