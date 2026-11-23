@@ -63,12 +63,12 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Shell lifecycle browser fixture
         run: node apps/shell/tests/lifecycle.mjs
-      - name: Shell navigation isolated browser
-        run: node apps/shell/tests/navigation-save-smoke.cjs
       - name: Install gallery preview encoder
         run: |
           sudo apt-get update
           sudo apt-get install --yes ffmpeg
+      - name: Shell navigation isolated browser
+        run: node apps/shell/tests/navigation-save-smoke.cjs
       - name: Create isolated gallery build fixture
         shell: bash
         run: |
