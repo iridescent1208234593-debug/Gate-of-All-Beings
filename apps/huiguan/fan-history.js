@@ -9,6 +9,7 @@
   const output = document.getElementById("fanHistoryOutput");
   let activeRequest;
   let enabled = false;
+  let reopenPending = false;
 
   const fields = {
     name: "角色名", type: "分类", species: "物种", gender: "性别", faction: "阵营",
@@ -16,7 +17,7 @@
   };
   const art = { human: "手绘 / 约稿", ai: "AI 立绘", "": "未声明" };
   const actions = {
-    review_approve: "审核通过", review_reject: "审核退回",
+    review_approve: "审核通过", review_reject: "审核退回", moderation_reopen: "管理员送回复审",
     owner_submit: "提交公开审核", owner_publish: "提交公开",
     owner_unpublish: "作者取消公开", owner_edit: "作者修改设表",
     owner_link_removed: "作者移除设表关联", admin_link_removed: "管理员移除设表关联",
@@ -126,10 +127,93 @@
     }
   }
 
+  function reopenForm(eligible, id) {
+    if (!eligible || typeof eligible.review_version !== "string" || !eligible.review_version) return null;
+    const cardId = Number(id);
+    if (!Number.isSafeInteger(cardId) || cardId <= 0) return null;
+    const box = node("section", null, "fan-history-block");
+    box.append(node("h3", "已退回设表 · 送回复审"));
+    const details = node("dl");
+    field(details, "当前退回理由", eligible.rejection_reason || "未记录");
+    box.append(details, node("p", "将这份原设表交回复审队列，记录为管理员操作。不会代作者提交、修改设表或直接公开。"));
+
+    const controls = node("form");
+    const label = node("label", "本次复审理由（必填）");
+    const reason = node("textarea", null, "modal-input");
+    reason.required = true;
+    reason.minLength = 2;
+    reason.maxLength = 200;
+    reason.rows = 2;
+    label.append(reason);
+    const submit = node("button", "送回复审", "pb-btn ghost");
+    submit.type = "submit";
+    controls.append(label, submit);
+    const note = node("p");
+    note.setAttribute("role", "status");
+    box.append(controls, note);
+
+    controls.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (!enabled || reopenPending || submit.disabled || !box.isConnected) return;
+      const text = reason.value.trim();
+      if (text.length < reason.minLength || text.length > reason.maxLength) {
+        note.textContent = "请填写符合长度要求的复审理由。";
+        reason.focus();
+        return;
+      }
+      if (!window.confirm(`确定将画廊 #${id} 的当前退回版本送回复审？这不会直接公开设表。`)) return;
+
+      reopenPending = true;
+      submit.disabled = true;
+      reason.disabled = true;
+      note.textContent = "正在提交复审请求…";
+      let result = "";
+      const request = new AbortController();
+      const timeout = setTimeout(() => request.abort(), 15000);
+      try {
+        const response = await fetch(history + "/reopen", {
+          method: "POST",
+          cache: "no-store",
+          credentials: "same-origin",
+          signal: request.signal,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: cardId, review_version: eligible.review_version, reason: text }),
+        });
+        if (response.status === 409) {
+          result = "设表状态或版本已变化，没有提交复审。";
+        } else if (response.status === 401 || response.status === 403) {
+          result = "管理员会话已失效或没有复审权限。";
+        } else if (response.status === 404) {
+          result = "找不到原设表，没有提交复审。";
+        } else if (response.status === 400) {
+          note.textContent = "复审理由或请求不符合要求，未提交复审。";
+          submit.disabled = false;
+          reason.disabled = false;
+          return;
+        } else {
+          const data = response.ok ? await response.json() : null;
+          if (!data?.ok || String(data.id) !== id || data.review_status !== "pending") throw new Error();
+          result = "已送回复审，尚未公开。";
+          void window.loadQueue?.();
+        }
+      } catch {
+        result = "未能确认是否已送回复审，请核对当前状态后再操作。";
+      } finally {
+        clearTimeout(timeout);
+        reopenPending = false;
+      }
+
+      await load(id, false, result);
+    });
+    return box;
+  }
+
   function render(payload, id) {
     const snapshots = payload.snapshots.slice(0, 3);
     const events = payload.events;
     let next = cursorValue(payload.next_before);
+    const action = reopenForm(payload.reopen, id);
+    if (action) output.append(action);
     output.append(node("h3", "最近 3 个正式公开版本"));
     if (snapshots.length) output.append(...snapshots.map(snapshot));
     else output.append(node("p", "没有已记录的公开版本。启用记录前的版本不会自动补齐。"));
@@ -145,7 +229,7 @@
     note.setAttribute("role", "status");
     if (next) output.append(button, note);
     button.addEventListener("click", async () => {
-      if (!next || button.disabled) return;
+      if (!next || button.disabled || reopenPending) return;
       button.disabled = true;
       note.textContent = "正在读取更早记录…";
       try {
@@ -185,8 +269,8 @@
     } else status.textContent = "没有找到完全同名的设表。";
   }
 
-  async function load(rawValue, byName = false) {
-    if (!enabled) return;
+  async function load(rawValue, byName = false, notice = "") {
+    if (!enabled || reopenPending) return;
     activeRequest?.abort();
     activeRequest = null;
     const value = String(rawValue || "").trim();
@@ -210,9 +294,10 @@
         if (!data) return;
         if (!Array.isArray(data.snapshots) || !Array.isArray(data.events)) throw new Error(errorFor(0));
         render(data, value);
+        if (notice) status.textContent = notice + " " + status.textContent;
       }
     } catch (error) {
-      status.textContent = error.message;
+      status.textContent = (notice ? notice + " " : "") + error.message;
     }
   }
 
@@ -229,7 +314,7 @@
     void load(input.value, mode.value === "name");
   });
   document.addEventListener("click", (event) => {
-    if (!enabled) return;
+    if (!enabled || reopenPending) return;
     const button = event.target.closest("[data-fan-history-id]");
     if (!button) return;
     panel.closest("#reviewDesk").open = true;

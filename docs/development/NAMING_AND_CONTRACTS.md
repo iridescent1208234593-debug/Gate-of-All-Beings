@@ -152,3 +152,5 @@ character_id 表示多个不同对象
 - 画廊卡片 ID 属于 `fan_characters.id`，不能和账号 ID、OC 编号互换；历史与点赞都绑定此 ID。
 - `like_count` 是 `fan_char_votes.vote=1` 的计数，不是喜欢、踩或旧综合 `reaction_score`；`published_at` 与 `updated_at` 是不同时间。
 - 审核操作记录、版本留存、API 与回滚见 [FAN_GALLERY_HISTORY.md](FAN_GALLERY_HISTORY.md)。
+
+- 管理员送回复审使用原画廊卡片 ID、当前复审版本及必填理由，事件名为 `moderation_reopen`。保留独立的复审与审核通过动作，详见 [同人画廊契约](FAN_GALLERY_HISTORY.md)。

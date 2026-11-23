@@ -2182,6 +2182,8 @@ class Handler(BaseStaticHandler):
             return self._api_fan_publish()
         if path == "/api/fan/react":
             return self._api_fan_react()
+        if path == "/api/admin/fan/history/reopen":
+            return self._api_admin_fan_history_reopen()
         if path == "/api/admin/fan/history/find":
             return self._api_admin_fan_history_find()
         if path == "/api/fan/review/decide":
@@ -6179,6 +6181,13 @@ class Handler(BaseStaticHandler):
                 conn.close()
         self._json(200, {"ok": True, "id": fid, "review_status": status})
 
+    @staticmethod
+    def _fan_reopen_revision(row):
+        if row is None or not row["is_public"] or row["review_status"] != "rejected" or row["type"] == "配色海报":
+            return None
+        data = [row["id"], fan_review_version(row), row["updated_at"], row["reviewed_at"], row["reviewed_by"], row["review_note"]]
+        return hashlib.sha256(json.dumps(data, ensure_ascii=False).encode("utf-8")).hexdigest()
+
     def _api_admin_fan_history(self, qs):
         if not self._require_admin():
             return
@@ -6201,7 +6210,51 @@ class Handler(BaseStaticHandler):
         if (current is None or current["type"] == "配色海报") and not result["events"] and not result["snapshots"]:
             self._json(404, {"error": "找不到该同人设表"})
             return
+        revision = self._fan_reopen_revision(current)
+        result["reopen"] = ({"review_version": revision, "rejection_reason": fan_gallery_history.safe_text(current["review_note"])}
+                            if revision else None)
         self._json(200, result)
+
+    def _api_admin_fan_history_reopen(self):
+        ident = self._require_admin()
+        if not ident:
+            return
+        if not request_origin_allowed(self, missing=False, same_service=True):
+            self._json(403, {"error": "请求来源无效"})
+            return
+        body = self._read_json(max_bytes=4096)
+        if body is None:
+            return
+        fid = body.get("id") if isinstance(body, dict) else None
+        version = body.get("review_version") if isinstance(body, dict) else None
+        reason = body.get("reason") if isinstance(body, dict) else None
+        if (type(fid) is not int or not 0 < fid < 2**63 or
+                not isinstance(version, str) or re.fullmatch("[a-f0-9]{64}", version) is None or
+                not isinstance(reason, str) or not 2 <= len(reason.strip()) <= self.FAN_REVIEW_NOTE_MAX):
+            self._json(400, {"error": "必须提供原画廊编号、审核版本与复审理由（2–200 字）"})
+            return
+        with DB_LOCK:
+            conn = db()
+            try:
+                conn.execute("BEGIN IMMEDIATE")
+                current = fan_gallery_history.load(conn, fid)
+                if current is None:
+                    self._json(404, {"error": "找不到该同人设表"})
+                    return
+                if self._fan_reopen_revision(current) != version:
+                    self._json(409, {"error": "仅可复审仍申请公开的退回稿；状态或版本变化时请刷新"})
+                    return
+                # Leave the original moderation fields intact until the separate review decision.
+                conn.execute("UPDATE fan_characters SET review_status='pending', updated_at=? WHERE id=?",
+                             (now_iso(), fid))
+                evidence = {key: current[key] for key in ("review_note", "reviewed_at", "reviewed_by")}
+                fan_gallery_history.record(conn, ident, "moderation_reopen", current,
+                                           fan_gallery_history.load(conn, fid), reason=reason.strip(),
+                                           explicit=True, prior_review=evidence)
+                conn.commit()
+            finally:
+                conn.close()
+        self._json(200, {"ok": True, "id": fid, "review_status": "pending"})
 
     def _api_admin_fan_history_find(self):
         if not self._require_admin():
