@@ -30,12 +30,14 @@ class UploadContract(unittest.TestCase):
         from storage_paths import initialize_storage
         initialize_storage()
         import server_huiguan as site
+        from site_domains import SITE_DOMAIN, site_url
         cls.site = site
+        cls.origin = site_url("huiguan")
         with closing(site.db()) as conn, conn:
             uid = conn.execute("INSERT INTO local_users(username,nickname,pass_hash,role) VALUES(?,?,?,?)",
                                ("upload-fixture", "Fixture", "fixture", "executor")).lastrowid
             site.legal_consent.record(conn, "local", uid)
-        cls.session = site.create_session("local", str(uid), "iridescently.cn")
+        cls.session = site.create_session("local", str(uid), SITE_DOMAIN)
         cls.server = ThreadingHTTPServer(("127.0.0.1", 0), site.Handler)
         threading.Thread(target=cls.server.serve_forever, daemon=True).start()
         cls.addClassCleanup(cls.server.server_close)
@@ -54,7 +56,7 @@ class UploadContract(unittest.TestCase):
         opening = (prefix + f"--{boundary}\r\nContent-Disposition: form-data; name=\"image\"; filename=\"{filename}\"\r\n"
                    f"Content-Type: {mime}\r\n\r\n").encode()
         body = opening + raw + f"\r\n--{boundary}--\r\n".encode()
-        headers = {"Host": "huiguan.iridescently.cn", "Origin": "https://huiguan.iridescently.cn",
+        headers = {"Host": self.origin.split("://", 1)[1], "Origin": self.origin,
                    "Content-Type": f"multipart/form-data; boundary={boundary}"}
         if authenticated:
             headers["Cookie"] = f"session={self.session}"
