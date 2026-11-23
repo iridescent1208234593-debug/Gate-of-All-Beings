@@ -2464,11 +2464,13 @@ class Handler(BaseStaticHandler):
             self._json(500, userinfo_result)
             return
 
-        user = userinfo_result.get("data", {})
-        user_id = str(user.get("id", user.get("sub", user.get("social_uid", ""))))
-
-        if not user_id:
-            self._json(500, {"error": "USSO 未返回用户 ID"})
+        user = userinfo_result.get("data")
+        subject = user.get("id", user.get("sub", user.get("social_uid"))) if isinstance(user, dict) else None
+        # Keep exact opaque subjects (including leading zeros); do not coerce containers, bools, or floats.
+        # Accept existing numeric IDs and URL-safe opaque string subjects without delimiters or controls.
+        user_id = str(subject) if type(subject) is int else subject
+        if not isinstance(user_id, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._~-]{0,254}", user_id):
+            self._json(502, {"error": "USSO 用户 ID 格式无效"})
             return
 
         flag = get_flag("usso", user_id)

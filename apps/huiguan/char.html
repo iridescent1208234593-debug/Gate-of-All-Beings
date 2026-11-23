@@ -587,6 +587,12 @@ async function uploadImg(cid){
 // ---- 合并重复角色 ----
 function initMerge(keepName){
   document.getElementById('mergeKeepName').textContent=keepName||'';
+  document.getElementById('mergeResults').onclick = event => {
+    const button = event.target.closest('button[data-merge-id]');
+    if (!button) return;
+    const id = Number(button.dataset.mergeId);
+    if (Number.isSafeInteger(id) && id > 0) pickMerge(id, button.dataset.mergeName);
+  };
   _mergeTarget=null;
   document.getElementById('mergeBtn').disabled=true;
   document.getElementById('mergeTarget').innerHTML='';
@@ -604,8 +610,8 @@ async function mergeSearch(q){
     const d=await r.json();
     const list=(d.characters||[]).filter(c=>String(c.id)!==String(_editCharId));
     box.innerHTML=list.length?list.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;">
-      <span style="flex:1;font-size:13px;">${esc(c.name)} <span style="color:var(--dim);font-size:11px;">id=${c.id} · ${esc(c.type||'')}</span></span>
-      <button type="button" class="fbtn" style="padding:3px 12px;font-size:12px;" onclick="pickMerge(${c.id},'${escAttr(c.name)}')">选择</button>
+      <span style="flex:1;font-size:13px;">${esc(c.name)} <span style="color:var(--dim);font-size:11px;">id=${esc(c.id)} · ${esc(c.type||'')}</span></span>
+      <button type="button" class="fbtn" style="padding:3px 12px;font-size:12px;" data-merge-id="${escAttr(c.id)}" data-merge-name="${escAttr(c.name)}">选择</button>
     </div>`).join(''):'<div style="color:var(--dim);font-size:12px;">无匹配角色</div>';
   }catch(e){box.innerHTML='<div style="color:var(--dim);font-size:12px;">搜索失败</div>';}
 }

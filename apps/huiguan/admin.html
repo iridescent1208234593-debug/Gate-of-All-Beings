@@ -244,11 +244,6 @@ function roleTagText(role) {
     : role === 'elder' ? '<span class="tag admin">长老</span>'
     : '<span class="tag local">执行者</span>';
 }
-function roleSelect(u) {
-  const opts = ['executor', 'elder', 'admin'].map(r =>
-    `<option value="${r}" ${u.role === r ? 'selected' : ''}>${r === 'admin' ? '管理员' : r === 'elder' ? '长老' : '执行者'}</option>`).join('');
-  return `<select class="role-sel" onchange="setRole('${u.kind}','${u.uid}',this.value)">${opts}</select>`;
-}
 function toggleExpand(kind, uid) {
   const k = kind + ':' + uid;
   if (expanded.has(k)) expanded.delete(k); else expanded.add(k);
