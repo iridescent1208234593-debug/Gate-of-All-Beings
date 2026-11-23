@@ -125,7 +125,18 @@ const cid = Number(new URLSearchParams(location.search).get('cid')) || 0;
 function setState(el, text, role, retry){
   if (!text) { el.hidden = true; return; }
   el.hidden = false; el.setAttribute('role', role || 'status');
-  el.innerHTML = esc(text) + (retry ? `<div class="qc-loading__actions"><a href="#" onclick="${retry};return false">重新读取</a></div>` : '');
+  el.textContent = text;
+  if (typeof retry === 'function') {
+    const actions = document.createElement('div');
+    actions.className = 'qc-loading__actions';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'qc-btn qc-btn--sm qc-btn--ghost';
+    button.textContent = '重新读取';
+    button.addEventListener('click', retry);
+    actions.append(button);
+    el.append(actions);
+  }
 }
 
 // ---------- 全部角色（与主册同一份角色、同一顺序） ----------
@@ -159,7 +170,7 @@ async function loadRoles(reset = true){
     $('roleMore').hidden = roleLoaded >= roleTotal;
     $('roleMore').textContent = `加载更多 · 已显示 ${roleLoaded}/${roleTotal}`;
   } catch (e) {
-    if (reset) setState($('listState'), '角色列表没有读到，可能是网络不稳。', 'alert', 'loadRoles(true)');
+    if (reset) setState($('listState'), '角色列表没有读到，可能是网络不稳。', 'alert', () => loadRoles(true));
     else { rolePage--; RFX.toast('⚠ 加载更多失败，请稍后再试'); }
   }
   roleBusy = false;
@@ -196,7 +207,7 @@ async function loadArt(reset = true){
     $('artMore').hidden = artOffset >= artTotal;
     $('artMore').textContent = `加载更多 · 还有 ${artTotal - artOffset} 张`;
   } catch (e) {
-    if (reset) setState($('artState'), '同人图没有读到，可能是网络不稳。', 'alert', 'loadArt(true)');
+    if (reset) setState($('artState'), '同人图没有读到，可能是网络不稳。', 'alert', () => loadArt(true));
     else RFX.toast('⚠ 加载更多失败，请稍后再试');
   }
   artBusy = false;
