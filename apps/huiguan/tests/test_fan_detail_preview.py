@@ -74,9 +74,74 @@ def test_owner_and_reviewer_previews_do_not_use_public_code_lookup(tmp_path, mon
     assert 'QUEUED_TEXT' in content and 'OWNER_SHEET' not in content
     assert request(review)[0] == 401
     assert request(review, 'owner')[0] == 403
+    assert '仅显示提交时保留的字段' in content
+    import json
+    from html import escape
+
+    def versioned(id_, revision):
+        return '/api/huiguan/fan/review/preview?' + urlencode({'id': id_, 'version': revision})
+
+    def current_version(id_):
+        with closing(site.db()) as conn:
+            return site.fan_review_version(conn.execute('SELECT * FROM fan_characters WHERE id=?',(id_,)).fetchone())
+
+    match = dict(name='Review submission', code='shared-code', type='妖精', story='QUEUED_TEXT',
+                 age='OWNER_AGE<42>', height='OWNER_HEIGHT', customDetails={'fire':'Custom lore'},
+                 private_email='NEVER_RENDER_EMAIL', is_elder='NEVER_RENDER_ROLE')
+    owner_ident = {'kind':'local','uid':ids['owner']}
+    with site.character_store().transaction(write=True) as store:
+        store.save({'kind':'local','uid':ids['other']}, {'code':'shared-code','data':dict(match, age='OTHER_AGE')})
+        store.save(owner_ident, {'code':'shared-code','data':match})
+        site.sync_fan_characters(store.conn, owner_ident, 'shared-code', match)
+    new_version = current_version(fan_id)
+    assert request(review, 'reviewer')[0] == 409
+    new_url = versioned(fan_id,new_version)
+    status, cache, page = request(new_url,'reviewer')
+    assert status == 200 and 'no-store' in cache
+    assert escape(match['age']) in page and 'OWNER_HEIGHT' in page and 'Custom lore' in page
+    for hidden in ('OTHER_AGE','OWNER_SHEET','NEVER_RENDER_EMAIL','NEVER_RENDER_ROLE'):
+        assert hidden not in page
+    match['age'] = 'OWNER_AGE_NEW'
+    with site.character_store().transaction(write=True) as store:
+        store.save(owner_ident, {'code':'shared-code','data':match})
+        site.sync_fan_characters(store.conn, owner_ident, 'shared-code', match)
+    assert request(new_url,'reviewer')[0] == 409
+    newest = versioned(fan_id,current_version(fan_id))
+    assert 'OWNER_AGE_NEW' in request(newest,'reviewer')[2]
+    listing = json.loads(request('/api/huiguan/fan/list?view=text')[2])
+    assert listing['total'] == 0
+    with closing(site.db()) as conn, conn:
+        conn.execute("UPDATE fan_characters SET review_status='approved' WHERE id=?", (fan_id,))
+    listing = json.loads(request('/api/huiguan/fan/list?view=text')[2])
+    assert listing['total'] == 1 and 'age' not in listing['characters'][0]
+    assert request(newest,'reviewer')[0] == 404
+    with closing(site.db()) as conn, conn:
+        conn.execute("UPDATE fan_characters SET review_status='pending', updated_at=NULL WHERE id=?", (fan_id,))
+    review = versioned(fan_id,current_version(fan_id))
+
     with closing(site.db()) as conn, conn:
         conn.execute("UPDATE fan_characters SET story='Changed' WHERE id=?", (fan_id,))
     assert request(review, 'reviewer')[0] == 409
     with closing(site.db()) as conn, conn:
         conn.execute("UPDATE fan_characters SET is_public=0 WHERE id=?", (fan_id,))
     assert request(review, 'reviewer')[0] == 404
+
+
+if __name__ == "__main__":
+    import sys
+    import tempfile
+    from unittest.mock import patch
+
+    class StandaloneEnvironment:
+        def setenv(self, key, value):
+            os.environ[key] = value
+
+        def delenv(self, key):
+            os.environ.pop(key)
+
+        def syspath_prepend(self, path):
+            sys.path.insert(0, path)
+
+    with tempfile.TemporaryDirectory(prefix="fan-review-detail-fixture-") as tmp, patch.dict(os.environ):
+        test_owner_and_reviewer_previews_do_not_use_public_code_lookup(Path(tmp), StandaloneEnvironment())
+    print("PASS exact owner, existing fields, stale age-only edit, permissions and public projection")
