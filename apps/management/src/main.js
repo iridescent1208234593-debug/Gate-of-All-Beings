@@ -13,7 +13,7 @@ import { reducer } from './core/reducer.js';
 import { GameLoop } from './core/gameLoop.js';
 import { RenderEngine } from './render/threeRenderer.js';
 import { UIManager } from './ui/uiManager.js';
-import { loadGame, hasSave, loadCloudSave, saveGame } from './systems/saveGame.js';
+import { openSave, readLocalSave, sameOwner, saveGame } from './systems/saveGame.js';
 import { restoreSession, currentUser } from './systems/account.js';
 import { getCurrentTheme, applyThemeToDom } from './core/theme.js';
 
@@ -28,16 +28,17 @@ const events = createEventSystem();
 let state = createInitialState();
 let ui = null;
 let bootReady = false;
-let saveWritable = true;
+let slot = null;
+let switchingAccount = false;
 let lastAutoSave = performance.now();
 document.getElementById('app').inert = true;
 
 /** 唯一写入口：Action → reducer → 新 state */
 function dispatch(action) {
-  if (!bootReady) throw new Error('会馆存档正在恢复，请稍后操作。');
-  if(action.type==='IMPORT_ECOLOGY'&&!saveWritable)throw new Error('现有存档无法读取，收获已保留，请先处理存档。');
+  if (!bootReady || switchingAccount) throw new Error('会馆存档正在恢复，请稍后操作。');
+  if(action.type==='IMPORT_ECOLOGY'&&!slot?.writable)throw new Error('现有存档无法读取，收获已保留，请先处理存档。');
   const next = reducer(state, action);
-  if (action.type === 'IMPORT_ECOLOGY' && !saveGame(next)) throw new Error('本地保存失败，收获尚未入库，请稍后重试。');
+  if (action.type === 'IMPORT_ECOLOGY' && !saveGame(next, slot)) throw new Error('本地保存失败，收获尚未入库，请稍后重试。');
   state = next;
   engine.setState(state);
   if (ui) ui.refresh();
@@ -59,6 +60,9 @@ ui = new UIManager({
   dispatch,
   getState: () => state,
   engine,
+  onSave: () => saveCurrent(),
+  onReadSave: () => loadCurrent(),
+  onAccountChange: changeAccount,
   onLoad: (loaded) => {
     ui.cancelPlacement();
     engine.setSelected(null);
@@ -74,8 +78,8 @@ const loop = new GameLoop({
   tickFn: () => {
     state = reducer(state, { type: 'TICK' });
     ui.onTick(state);
-    if(saveWritable&&performance.now()-lastAutoSave>15000){
-      if(!saveGame(state))ui.flashSaveHint('自动保存失败，请检查浏览器存储');
+    if(!switchingAccount && slot?.writable && performance.now()-lastAutoSave>15000){
+      if(!saveGame(state, slot))ui.flashSaveHint('自动保存失败，请核对账号与浏览器存储');
       lastAutoSave=performance.now();
     }
   },
@@ -87,30 +91,60 @@ const loop = new GameLoop({
   isPaused: () => state.paused,
 });
 
+function saveCurrent() {
+  if (switchingAccount || !slot?.writable) return slot?.hint || '存档正在恢复，请稍后再试';
+  return saveGame(state, slot) ? '已存档' : '存档失败，请核对账号与浏览器存储';
+}
+function loadCurrent() {
+  if (switchingAccount || !slot || !sameOwner(slot.user, currentUser())) {
+    return {reason: '账号已变更，请重新进入后再读档'};
+  }
+  return readLocalSave(slot.user);
+}
+async function enterSlot(user) {
+  const next = await openSave(user);
+  if (engine.disposed) return;
+  slot = next;
+  ui.cancelPlacement();
+  engine.setSelected(null);
+  state = next?.state || createInitialState();
+  lastAutoSave = performance.now();
+  engine.setState(state);
+  ui.onUserChange(currentUser());
+  ui.refresh();
+  ui.flashSaveHint(next?.hint || (next ? '' : '账号已变更，请重新进入后再存档'), !!next && !next.writable);
+}
+async function changeAccount(change) {
+  if (switchingAccount || engine.disposed) return;
+  // Persist the outgoing slot before its cookie changes, then suspend all saves.
+  if (slot?.writable) saveGame(state, slot, {localOnly: true});
+  switchingAccount = true;
+  loop.stop();
+  try {
+    const user = await change();
+    await enterSlot(user);
+  } finally {
+    switchingAccount = false;
+    if (!engine.disposed) loop.start();
+  }
+}
+
 // Restore once before ticking so late account responses cannot replace live progress.
 const ready = (async () => {
   try {
-    const user = await restoreSession();
-    const cloud = user ? await loadCloudSave() : null;
-    const existing=hasSave();
-    const loaded = cloud || (existing ? loadGame() : null);
-    if(existing&&!loaded){saveWritable=false;ui.flashSaveHint('旧存档读取失败，当前临时游玩；原存档已保留');}
-    if (loaded) state = loaded;
+    await enterSlot(await restoreSession());
   } finally {
     if (engine.disposed) return;
-    engine.setState(state);
-    ui.onUserChange(currentUser());
-    ui.refresh();
     bootReady = true;
     document.getElementById('app').inert = false;
-    if (!engine.disposed) loop.start();
+    loop.start();
   }
 })();
 
 // 暴露调试句柄（控制台可用）
 const disposeBridge=mountHubBridge({getState:()=>state,dispatch,isReady:()=>bootReady});
 const onPageHide = e => { if (!e.persisted) dispose(); };
-function dispose() { if(engine.disposed)return;window.removeEventListener("pagehide", onPageHide);if(window.__lingjing?.engine===engine)delete window.__lingjing;loop.stop();if(bootReady&&saveWritable)saveGame(state);disposeBridge();ui.dispose();engine.dispose(); }
+function dispose() { if(engine.disposed)return;window.removeEventListener("pagehide", onPageHide);if(window.__lingjing?.engine===engine)delete window.__lingjing;loop.stop();if(bootReady&&!switchingAccount&&slot?.writable)saveGame(state, slot);disposeBridge();ui.dispose();engine.dispose(); }
 // 供统一壳无 iframe 挂载时卸载
 window.__iridescentlyDispose = dispose;
 window.addEventListener('pagehide', onPageHide);
