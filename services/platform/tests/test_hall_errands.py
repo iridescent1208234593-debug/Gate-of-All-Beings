@@ -11,6 +11,7 @@ import sys
 import tempfile
 import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from http.server import ThreadingHTTPServer
 from pathlib import Path
@@ -98,6 +99,12 @@ class Accept(Base):
         self.assertEqual(run["status"], "active")
         self.assertIsNone(he.board(self.c, ("local", "7"), now=later)["active"])
 
+    def test_hold_survives_at_24_hours_then_expires(self):
+        he.accept(self.c, "local", "7", HERBS, now=at(0))
+        boundary = he.HOLD_MAX_SECONDS
+        self.assertIsNotNone(he.board(self.c, ("local", "7"), now=at(boundary))["active"])
+        self.assertIsNone(he.board(self.c, ("local", "7"), now=at(boundary + 1))["active"])
+
     def test_unknown_errand(self):
         with self.assertRaises(KeyError):
             he.accept(self.c, "local", "7", "nope", now=at(0))
@@ -123,6 +130,13 @@ class Presence(Base):
         self.assertEqual(self.ping(180, present=False)["credited_seconds"], 0)
         self.assertEqual(self.ping(240)["credited_seconds"], 0)
         self.assertEqual(self.ping(300)["present_seconds"], 60)
+
+    def test_inactive_then_return_resumes_without_crediting_absence(self):
+        self.ping(0)
+        self.assertEqual(self.ping(90)["credited_seconds"], 90)
+        self.assertEqual(self.ping(91, present=False)["present_seconds"], 90)
+        self.assertEqual(self.ping(151)["credited_seconds"], 0)
+        self.assertEqual(self.ping(242)["credited_seconds"], 90)
 
     def test_no_active_errand(self):
         with self.assertRaises(LookupError):
@@ -230,6 +244,57 @@ class Http(unittest.TestCase):
         mine = self.call("GET", "/api/errands", cookie=self.token)[1]["active"]
         self.assertEqual(mine["errand_id"], HERBS)
         self.assertEqual(self.call("POST", "/api/errands/abandon", {}, cookie=self.token)[0], 200)
+
+    def simultaneous(self, *requests):
+        gate = threading.Barrier(len(requests))
+
+        def submit(request):
+            gate.wait(timeout=5)
+            path, body, token = request
+            return self.call("POST", "/api/errands/" + path, body, cookie=token)
+
+        with ThreadPoolExecutor(max_workers=len(requests)) as pool:
+            return list(pool.map(submit, requests))
+
+    def test_two_accounts_competing_for_one_errand(self):
+        other = hx_sso.make_token("8", "local", "eight")
+        result = self.simultaneous(("accept", {"errand_id": HERBS}, self.token),
+                                   ("accept", {"errand_id": HERBS}, other))
+        self.assertEqual(sorted(status for status, _ in result), [200, 409])
+        winner = self.token if result[0][0] == 200 else other
+        loser = other if winner == self.token else self.token
+        self.assertIsNotNone(self.call("GET", "/api/errands", cookie=winner)[1]["active"])
+        self.assertIsNone(self.call("GET", "/api/errands", cookie=loser)[1]["active"])
+        self.assertEqual(self.call("POST", "/api/errands/presence",
+                                   {"place": PLACE, "is_present": True}, cookie=loser)[0], 409)
+        self.assertEqual(self.call("POST", "/api/errands/report", {}, cookie=loser)[0], 409)
+
+    def test_same_account_competing_for_two_errands(self):
+        result = self.simultaneous(("accept", {"errand_id": HERBS}, self.token),
+                                   ("accept", {"errand_id": GATE}, self.token))
+        self.assertEqual(sorted(status for status, _ in result), [200, 409])
+        c = he.open_db(DATA)
+        try:
+            self.assertEqual(c.execute("SELECT COUNT(*) FROM hall_errand_runs WHERE status='active'").fetchone()[0], 1)
+        finally:
+            c.close()
+
+    def test_simultaneous_reports_and_repeat_award_only_once(self):
+        now = datetime.now(timezone.utc)
+        c = he.open_db(DATA)
+        try:
+            start = now - timedelta(seconds=130)
+            run = he.accept(c, "local", "7", HERBS, now=start)
+            for offset in (0, 60, 120):
+                he.presence(c, "local", "7", PLACE, True, now=start + timedelta(seconds=offset))
+            result = self.simultaneous(("report", {}, self.token), ("report", {}, self.token))
+            self.assertEqual(sorted(status for status, _ in result), [200, 409])
+            self.assertEqual(self.call("POST", "/api/errands/report", {}, cookie=self.token)[0], 409)
+            self.assertEqual(c.execute("SELECT status FROM hall_errand_runs WHERE id=?", (run["run_id"],)).fetchone()[0], "done")
+            self.assertEqual(c.execute("SELECT COUNT(*) FROM account_point_events WHERE rule='errand'").fetchone()[0], 1)
+            self.assertEqual(ap.get_points_x10(c, "local", "7"), ap.RULES["errand"]["x10"])
+        finally:
+            c.close()
 
     def test_guards(self):
         self.assertEqual(self.call("POST", "/api/errands/accept", {"errand_id": "nope"}, cookie=self.token)[0], 400)
