@@ -346,9 +346,10 @@ button{font-family:inherit}
 </div>
 
 <!-- 配色海报灯箱 -->
-<div id="posterLightbox">
+<div id="posterLightbox" role="dialog" aria-modal="true" aria-label="配色海报预览">
   <img decoding="async" id="lbImg" src="" alt="配色海报">
   <div class="lb-cap"><span id="lbCap"></span><br><small id="lbSub"></small></div>
+  <button type="button" class="pb-btn" id="lbClose">关闭预览</button>
 </div>
 
 <!-- 通用弹窗：确认公开 / 退回理由 / 审核员申请 -->
@@ -357,7 +358,7 @@ button{font-family:inherit}
     <button type="button" class="modal-close" id="modalClose" aria-label="关闭">&times;</button>
     <div class="modal-title" id="modalTitle"></div>
     <div class="modal-body" id="modalBody"></div>
-    <textarea class="modal-input" id="modalInput" maxlength="300" hidden></textarea>
+    <textarea class="modal-input" id="modalInput" aria-labelledby="modalTitle" maxlength="300" hidden></textarea>
     <div class="modal-err" id="modalErr" role="alert"></div>
     <div class="modal-actions">
       <button type="button" class="pb-btn ghost" id="modalCancel">取消</button>
@@ -397,7 +398,22 @@ async function getJSON(url, opts) {
 const postJSON = (url, body) => getJSON(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
 
 // ====== 通用弹窗 ======
+let modalOpener, lightboxOpener;
+function restoreDialogFocus(opener) {
+  if (opener?.isConnected && !opener.disabled) opener.focus();
+}
+function containDialogTab(event, dialog) {
+  if (event.key !== 'Tab') return;
+  const controls = [...dialog.querySelectorAll('button:not(:disabled),textarea:not([hidden]),a[href]')];
+  if (!controls.length) return;
+  const first = controls[0], last = controls[controls.length - 1];
+  if ((event.shiftKey && document.activeElement === first) || (!event.shiftKey && document.activeElement === last)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  }
+}
 function openModal({ title, body, input, placeholder, okText, minLength, onOk }) {
+  if (!$('modal').classList.contains('is-open')) modalOpener = document.activeElement;
   $('modalTitle').textContent = title;
   $('modalBody').innerHTML = body || '';
   const ta = $('modalInput');
@@ -415,7 +431,13 @@ function openModal({ title, body, input, placeholder, okText, minLength, onOk })
   $('modal').classList.add('is-open');
   (input ? ta : ok).focus();
 }
-function closeModal() { $('modal').classList.remove('is-open'); }
+function closeModal() {
+  if (!$('modal').classList.contains('is-open')) return;
+  $('modal').classList.remove('is-open');
+  restoreDialogFocus(modalOpener);
+  modalOpener = null;
+}
+$('modal').addEventListener('keydown', event => containDialogTab(event, $('modal')));
 $('modalClose').onclick = $('modalCancel').onclick = closeModal;
 $('modal').addEventListener('click', e => { if (e.target === $('modal')) closeModal(); });
 
@@ -583,7 +605,7 @@ $('gallerySort').addEventListener('change', e => {
 function openCard(el) {
   const c = rowCache.get(el.dataset.open);
   if (!c) return;
-  if (c.type === '配色海报') openPosterView(c.image_data, c.name, c.user_name);
+  if (c.type === '配色海报') openPosterView(c.image_data, c.name, c.user_name, el);
   else location.href = showHref(c.code);
 }
 document.addEventListener('click', e => {
@@ -599,14 +621,23 @@ document.addEventListener('keydown', e => {
 });
 
 // ====== 配色海报灯箱 ======
-function openPosterView(img, cap, sub) {
+function openPosterView(img, cap, sub, opener) {
   if (!img) return;
+  lightboxOpener = opener || document.activeElement;
+  $('lbImg').alt = cap ? '配色海报：' + cap : '配色海报';
   $('lbImg').src = img; $('lbCap').textContent = cap || '';
   $('lbSub').textContent = sub ? 'by ' + sub + ' · 点击任意处关闭' : '';
   $('posterLightbox').classList.add('is-open');
+  $('lbClose').focus();
 }
-function closePosterView() { $('posterLightbox').classList.remove('is-open'); }
+function closePosterView() {
+  if (!$('posterLightbox').classList.contains('is-open')) return;
+  $('posterLightbox').classList.remove('is-open');
+  restoreDialogFocus(lightboxOpener);
+  lightboxOpener = null;
+}
 $('posterLightbox').onclick = closePosterView;
+$('posterLightbox').addEventListener('keydown', event => containDialogTab(event, $('posterLightbox')));
 
 // ====== 我的已登记人设 ======
 // 画廊记录按编号对应；早期无编号的记录按名字对应
