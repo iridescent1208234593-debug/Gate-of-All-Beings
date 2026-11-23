@@ -20,13 +20,44 @@ def image(source, title):
     return '<img src="' + escape(source, quote=True) + '" alt="' + escape(title, quote=True) + '" decoding="async">'
 
 
-def gallery_document(row, label):
+def gallery_document(row, label, *, extra=""):
     title = row['name'] or row['code']
     fields = [('species', '种族'), ('gender', '性别'), ('faction', '阵营'), ('ability', '能力'),
               ('appearance', '外貌'), ('story', '故事')]
     details = ''.join('<p><strong>' + name + '</strong> ' + escape(str(row[key])) + '</p>'
                       for key, name in fields if row[key])
-    return document(title, '<small>' + escape(label) + '</small>' + image(row['image_data'], title) + details)
+    return document(title, '<small>' + escape(label) + '</small>' + image(row['image_data'], title) + details + extra)
+
+
+# Existing showcase form fields only. Never render raw stored HTML or identity metadata.
+REVIEW_DETAIL_FIELDS = (
+    ("age", "年龄"), ("height", "身高"), ("species_type", "物种类别"),
+    ("org", "组织"), ("personality", "性格"), ("likes", "喜好"),
+    ("dislikes", "不喜欢"), ("food", "饮食"), ("weapon", "武器"),
+    ("intro", "简介"), ("notes", "备注"),
+)
+
+
+def gallery_review_document(row, data):
+    if data is None:
+        return gallery_document(row, "审核中的提交版本 · 未找到匹配的原设表，仅显示提交时保留的字段。")
+    details = []
+    for key, label in REVIEW_DETAIL_FIELDS:
+        value = data.get(key)
+        if key == "age" and value in (None, ""):
+            value = data.get("ageNum")
+        if isinstance(value, (str, int, float)) and not isinstance(value, bool) and str(value).strip():
+            details.append("<p><strong>" + label + "</strong> " + escape(str(value)[:16384]) + "</p>")
+    custom = data.get("customDetails")
+    if isinstance(custom, dict):
+        ability_details = [str(value)[:2048] for value in list(custom.values())[:32]
+                           if isinstance(value, str) and value.strip()]
+        if ability_details:
+            details.append("<p><strong>能力补充</strong> " + escape("\n".join(ability_details)) + "</p>")
+    if not details:
+        return gallery_document(row, "审核中的提交版本 · 原设表未填写补充字段。")
+    return gallery_document(row, "审核中的提交版本",
+                            extra="<section><h2>原设表补充资料</h2>" + "".join(details) + "</section>")
 
 
 def published_document(conn, code, ident=None):

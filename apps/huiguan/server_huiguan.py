@@ -7,6 +7,7 @@
 使用方式: python server_huiguan.py
 """
 
+import contextlib
 import hashlib
 import hmac
 import gzip
@@ -65,7 +66,7 @@ LEGAL_GATED_POSTS = frozenset((
     "/api/color-schemes",
 ))
 import turnstile
-from showcase_document import gallery_document, published_document
+from showcase_document import gallery_document, published_document, gallery_review_document
 from showcase_sanitizer import controlled_showcase
 from base_static import BaseStaticHandler, static_allowed as _base_static_allowed, SECURITY_HEADERS
 from storage_paths import (project_root as resolve_project_root, data_root, huiguan_data_dir,
@@ -1186,9 +1187,13 @@ def fan_art_source(cd):
 
 
 def fan_review_version(row):
-    fields = (*FAN_SYNC_COLUMNS, "code", "art_source", "review_status")
+    fields = (*FAN_SYNC_COLUMNS, "id", "code", "art_source", "review_status", "updated_at")
     content = [row[field] for field in fields]
     return hashlib.sha256(json.dumps(content, ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+def fan_revision_time():
+    return datetime.now(timezone.utc).astimezone().isoformat(timespec="microseconds")
 
 
 def fan_fields(cd):
@@ -1264,7 +1269,7 @@ def sync_fan_characters(conn, ident, code, cd, previous_code=None, auto_approve=
         f"UPDATE fan_characters SET {sets}, code=?, updated_at=?, {fan_review_after_edit_sql(auto_approve)}, "
         "art_source=CASE WHEN ?='ai' OR COALESCE(art_source,'')='ai' THEN 'ai' ELSE ? END "
         f"WHERE user_kind=? AND user_uid=? AND COALESCE(type,'')!='配色海报' AND code IN ({qm})",
-        values + [code, now_iso()] + values + [art, art, ident["kind"], ident["uid"]] + codes)
+        values + [code, fan_revision_time()] + values + [art, art, ident["kind"], ident["uid"]] + codes)
     for row in before:
         fan_gallery_history.record(conn, ident, "owner_edit", row, fan_gallery_history.load(conn, row["id"]))
     return cur.rowcount
@@ -6050,7 +6055,7 @@ class Handler(BaseStaticHandler):
                             f"UPDATE fan_characters SET {sets}, code=?, is_public=1, updated_at=?, "
                             f"review_status=CASE WHEN review_status='approved' AND NOT {fan_content_changed_sql()} THEN 'approved' ELSE ? END, "
                             "art_source=CASE WHEN ?='ai' OR COALESCE(art_source,'')='ai' THEN 'ai' ELSE ? END WHERE id=?",
-                            values + [to_str(code), now_iso()] + values + [review, art, art, existing["id"]]
+                            values + [to_str(code), fan_revision_time()] + values + [review, art, art, existing["id"]]
                         )
                         new_gallery = fan_gallery_history.load(conn, existing["id"])
                         if old_gallery["type"] != "配色海报":
@@ -6124,19 +6129,35 @@ class Handler(BaseStaticHandler):
         if not fid or not re.fullmatch(r"[1-9][0-9]{0,18}", fid) or int(fid) > 2**63 - 1:
             self._json(400, {"error": "invalid_fan_id"})
             return
-        conn = db()
+        row = None
+        details = None
         try:
-            row = conn.execute("SELECT * FROM fan_characters WHERE id=? AND is_public=1 AND review_status='pending' AND COALESCE(type,'')!='配色海报'",
-                               (int(fid),)).fetchone()
-        finally:
-            conn.close()
+            with contextlib.closing(db()) as conn:
+                # Keep the normalized gallery row and exact owner/code lookup coherent.
+                with character_store().transaction(conn=conn) as store:
+                    conn.execute("BEGIN")
+                    row = conn.execute("SELECT * FROM fan_characters WHERE id=? AND is_public=1 AND review_status='pending' AND COALESCE(type,'')!='配色海报'",
+                                       (int(fid),)).fetchone()
+                    if row is not None and version == fan_review_version(row) and row["code"]:
+                        linked = store.get({"kind": row["user_kind"], "uid": row["user_uid"]}, code=row["code"])
+                        data = linked.get("data") if isinstance(linked, dict) else None
+                        if isinstance(data, dict):
+                            try:
+                                projection = fan_fields(data)
+                            except (AttributeError, TypeError, KeyError, IndexError):
+                                projection = None
+                            if projection and all((row[key] or "") == projection[key] for key in FAN_SYNC_COLUMNS):
+                                details = data
+        except oc_store.OCError as error:
+            self._json(error.status, {"error": error.code})
+            return
         if row is None:
             self._json(404, {"error": "fan_review_not_found"})
             return
         if version != fan_review_version(row):
             self._json(409, {"error": "fan_review_changed"})
             return
-        self._send_html(gallery_document(row, '审核中的提交版本'), private=True)
+        self._send_html(gallery_review_document(row, details), private=True)
 
     def _api_fan_review_decide(self):
         """approve / reject 一条公开记录；approve 时可同时更正立绘来源。已通过的记录也可以被退回。"""
@@ -6246,7 +6267,7 @@ class Handler(BaseStaticHandler):
                     return
                 # Leave the original moderation fields intact until the separate review decision.
                 conn.execute("UPDATE fan_characters SET review_status='pending', updated_at=? WHERE id=?",
-                             (now_iso(), fid))
+                             (fan_revision_time(), fid))
                 evidence = {key: current[key] for key in ("review_note", "reviewed_at", "reviewed_by")}
                 fan_gallery_history.record(conn, ident, "moderation_reopen", current,
                                            fan_gallery_history.load(conn, fid), reason=reason.strip(),
