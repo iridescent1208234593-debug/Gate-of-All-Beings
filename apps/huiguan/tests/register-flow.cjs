@@ -20,7 +20,7 @@ function between(start, end) {
   assert(from >= 0 && to > from, 'Registration fixture markers changed');
   return source.slice(from, to);
 }
-const fixture = '<!doctype html><html lang="zh-CN"><head><meta name="viewport" content="width=device-width, initial-scale=1">' +
+const fixture = '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
   between('<style>', '</style>') + '</style></head><body>' +
   between('<!-- 登录/注册弹窗：', '<!-- 全局弹出提示 -->') + '<div id="ocLegal"></div><script src="/legal-consent.js"></script><script>' +
   "window.HuiguanTurnstile={mount:async()=>{}, ensure:async()=>'disabled', token:()=>'', reset:()=>{}};" +
@@ -32,6 +32,8 @@ async function run(browser, width) {
   const context = await browser.newContext({viewport: {width, height: 900}, reducedMotion: 'reduce'});
   try {
     const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
     let submitted = 0;
     let response = 400;
     await page.route('**/*', route => {
@@ -70,8 +72,8 @@ async function run(browser, width) {
     await page.locator(confirm).fill(password);
     await submit(/勾选同意.*用户须知.*隐私政策/);
     assert.equal(submitted, 0);
-    assert.equal(await page.getByRole('button', {name:'《用户须知》'}).count(), 1);
-    assert.equal(await page.getByRole('button', {name:'《隐私政策》'}).count(), 1);
+    assert.equal(await page.locator('#authLegal').getByRole('button', {name:'《用户须知》'}).count(), 1);
+    assert.equal(await page.locator('#authLegal').getByRole('button', {name:'《隐私政策》'}).count(), 1);
     const consent = page.locator('#authLegal input[type=checkbox]');
     await consent.focus();
     await consent.press('Space');
@@ -91,16 +93,19 @@ async function run(browser, width) {
     assert.equal(await page.locator(pass).inputValue(), '');
     assert.equal(await consent.isChecked(), false);
     await page.locator('#authMask').waitFor({state:'hidden'});
+    assert.deepEqual(errors, []);
     console.log('PASS registration UI at width', width);
   } finally {
     await context.close();
   }
 }
 (async () => {
-  const browser = await chromium.launch({headless:true});
-  try {
-    for (const width of [1440,390]) await run(browser, width);
-  } finally {
-    await browser.close();
+  for (const width of [1440,390]) {
+    const browser = await chromium.launch({headless:true});
+    try {
+      await run(browser, width);
+    } finally {
+      await browser.close();
+    }
   }
 })().catch(err => { console.error(err); process.exitCode = 1; });
