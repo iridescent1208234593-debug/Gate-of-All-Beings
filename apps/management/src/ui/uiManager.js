@@ -28,7 +28,6 @@ import {
 import { MENTAL_STATES, cultivationName } from '../systems/colonist.js';
 import { getTrait } from '../content/traits.js';
 import { GIFT_REPUTATION, GIFT_INTERVAL_TICKS } from '../systems/relations.js';
-import { saveGame, loadGame, hasSave } from '../systems/saveGame.js';
 import { login as accountLogin, logout as accountLogout, currentUser } from '../systems/account.js';
 import { mountTurnstile, turnstileToken, resetTurnstile } from '../systems/turnstile.js';
 import { COLOR_SCHEMES, getCurrentTheme, setTheme, applyThemeToDom } from '../core/theme.js';
@@ -73,11 +72,14 @@ export class UIManager {
    * @param {import('../render/threeRenderer.js').RenderEngine} opts.engine
    * @param {(state: object) => void} [opts.onLoad]
    */
-  constructor({ dispatch, getState, engine, onLoad }) {
+  constructor({ dispatch, getState, engine, onLoad, onSave, onReadSave, onAccountChange }) {
     this.dispatch = dispatch;
     this.getState = getState;
     this.engine = engine;
     this.onLoad = onLoad || null;
+    this.onSave = onSave;
+    this.onReadSave = onReadSave;
+    this.onAccountChange = onAccountChange;
     this.placement = null; // 当前建造中的 buildingId
     this.moveMode = false; // 移动模式
     this.moveBuilding = null; // 移动模式中已选中的建筑 id
@@ -174,27 +176,24 @@ export class UIManager {
         this.el.loginError.textContent = '请输入用户名和密码';
         return;
       }
+      if (this.el.loginOk.disabled) return;
+      this.el.loginOk.disabled = true;
       this.el.loginError.textContent = '登录中…';
       const token = turnstileToken();
       resetTurnstile();
       try {
-        const { user, registered } = await accountLogin(username, password, token);
+        await this.onAccountChange(async () => {
+          const {user} = await accountLogin(username, password, token);
+          if (!user) throw new Error('登录失败');
+          return user;
+        });
         this.el.loginModal.classList.add('hidden');
         this.el.loginUsername.value = '';
         this.el.loginPassword.value = '';
-        this.onUserChange(user);
-        this.flashSaveHint(registered ? `已注册并登录：${user.name}` : `欢迎回来：${user.name}`);
-        // 登录后云存档优先读档
-        const { loadCloudSave, saveGame } = await import('../systems/saveGame.js');
-        const cloud = await loadCloudSave();
-        if (cloud && this.onLoad) {
-          this.onLoad(cloud);
-          this.flashSaveHint('已读取云端存档');
-        } else {
-          saveGame(this.getState()); // 首次登录把当前进度同步上云
-        }
       } catch (err) {
         this.el.loginError.textContent = err.message || '登录失败';
+      } finally {
+        this.el.loginOk.disabled = false;
       }
     };
     this.el.loginOk.addEventListener('click', submit);
@@ -202,9 +201,15 @@ export class UIManager {
       if (e.key === 'Enter') submit();
     });
     this.el.btnLogout.addEventListener('click', async () => {
-      await accountLogout();
-      this.onUserChange(null);
-      this.flashSaveHint('已退出登录');
+      if (this.el.btnLogout.disabled) return;
+      this.el.btnLogout.disabled = true;
+      try {
+        await this.onAccountChange(async () => { await accountLogout(); return null; });
+      } catch {
+        this.flashSaveHint('未能退出登录，请稍后重试');
+      } finally {
+        this.el.btnLogout.disabled = false;
+      }
     });
   }
 
@@ -374,13 +379,12 @@ export class UIManager {
 
   bindSaveControls() {
     this.el.btnSave.addEventListener('click', () => {
-      const ok = saveGame(this.getState());
-      this.flashSaveHint(ok ? '已存档' : '存档失败');
+      this.flashSaveHint(this.onSave());
     });
     this.el.btnLoad.addEventListener('click', () => {
-      const loaded = loadGame();
+      const {state: loaded, reason} = this.onReadSave();
       if (!loaded) {
-        this.flashSaveHint('没有可用存档');
+        this.flashSaveHint(reason || '没有可用存档');
         return;
       }
       if (this.onLoad) this.onLoad(loaded);
@@ -389,7 +393,7 @@ export class UIManager {
     });
   }
 
-  flashSaveHint(msg) {
+  flashSaveHint(msg, persistent = false) {
     let hint = document.getElementById('save-hint');
     if (!hint) {
       hint = document.createElement('span');
@@ -399,6 +403,7 @@ export class UIManager {
     }
     hint.textContent = msg;
     clearTimeout(this._hintTimer);
+    if (persistent) return;
     this._hintTimer = setTimeout(() => {
       hint.textContent = '';
     }, 3500);

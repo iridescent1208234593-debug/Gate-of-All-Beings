@@ -74,6 +74,10 @@ export async function restoreSession() {
       persistUser(user);
       return user;
     }
+    if (data?.logged_in === false) {
+      persistUser(null);
+      return null;
+    }
   } catch {
     /* 网络失败时退回本地缓存 */
   }
@@ -82,11 +86,7 @@ export async function restoreSession() {
 
 /** 退出登录 */
 export async function logout() {
-  try {
-    await api('/api/logout');
-  } catch {
-    /* 忽略 */
-  }
+  await api('/api/logout');
   persistUser(null);
 }
 
@@ -101,6 +101,12 @@ export async function saveCloud(state) {
 
 /** 云存档：读取当前用户存档，无存档返回 null */
 export async function loadCloud() {
-  const data = await api('/api/game/load');
-  return data && data.state ? data.state : null;
+  try {
+    const data = await api('/api/game/load');
+    if (!data?.ok || !data.state) throw new Error('云端存档响应不完整');
+    return data.state;
+  } catch (err) {
+    if (err.status === 404 && err.message === '暂无云存档') return null;
+    throw err;
+  }
 }
