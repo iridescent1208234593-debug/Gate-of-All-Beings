@@ -182,9 +182,11 @@ class API(unittest.TestCase):
         from unittest.mock import patch
         with patch.object(app.oc_store, 'open_database', side_effect=sqlite3.OperationalError('synthetic failure detail')):
             status, body = self.save(self.a, 'connection-down')
-            self.assertEqual((status, body), (503, {'error': 'oc_database_unavailable'}))
+            self.assertEqual((status, body.get('error'), body.get('code')),
+                             (503, 'oc_database_unavailable', 'oc_database_unavailable'))
+            self.assertIn('保留编辑内容', body['message'])
             self.assertNotIn('synthetic', json.dumps(body))
-            self.assertEqual(self.a.call('/api/get-characters')[0], 503)
+            self.assertEqual(self.a.call('/api/get-characters'), (503, {'error': 'oc_database_unavailable'}))
         self.assertEqual(self.save(self.a, 'connection-down')[0], 200)
 
     def test_gallery_rename_sync_rollback_and_public_html(self):
