@@ -23,6 +23,8 @@ def init_schema(conn):
         actor_kind TEXT NOT NULL, actor_uid TEXT NOT NULL, actor_role TEXT NOT NULL, actor_name TEXT NOT NULL,
         created_at TEXT NOT NULL, previous_status TEXT, new_status TEXT,
         previous_public INTEGER, new_public INTEGER, reason TEXT NOT NULL)""")
+    if "prior_review" not in {row[1] for row in conn.execute("PRAGMA table_info(fan_history_events)")}:
+        conn.execute("ALTER TABLE fan_history_events ADD COLUMN prior_review TEXT")
     conn.execute("""CREATE INDEX IF NOT EXISTS idx_fan_history_events_card
                    ON fan_history_events(card_id,id DESC)""")
     conn.execute("""CREATE INDEX IF NOT EXISTS idx_fan_history_events_actor
@@ -31,6 +33,11 @@ def init_schema(conn):
 
 def load(conn, card_id):
     return conn.execute("SELECT * FROM fan_characters WHERE id=?", (card_id,)).fetchone()
+
+
+def safe_text(text):
+    """Sanitize moderation text for the private admin response."""
+    return _safe(str(text or ""))
 
 
 def _content(row):
@@ -71,7 +78,7 @@ def _snapshot(conn, row, now, *, observed=False):
                  (row["id"], row["id"], RETAIN))
 
 
-def record(conn, actor, action, before, after, *, reason="", explicit=False):
+def record(conn, actor, action, before, after, *, reason="", explicit=False, prior_review=None):
     """Persist an attributable transition in the same transaction as the active row."""
     if before is None and after is None:
         return
@@ -91,11 +98,12 @@ def record(conn, actor, action, before, after, *, reason="", explicit=False):
                             "SELECT nickname FROM users WHERE user_id=?", (uid,)).fetchone()
     nickname = _safe(str(identity[0] or "")[:80]) if identity else ""
     conn.execute("""INSERT INTO fan_history_events(card_id,action,actor_kind,actor_uid,actor_role,actor_name,created_at,
-                    previous_status,new_status,previous_public,new_public,reason)
-                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""", (
+                    previous_status,new_status,previous_public,new_public,reason,prior_review)
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
                         (after if after is not None else before)["id"], action, kind,
                         uid, str(actor.get("role") or ""), nickname, now,
-                        old_status, new_status, old_public, new_public, str(reason or "")[:200]))
+                        old_status, new_status, old_public, new_public, str(reason or "")[:200],
+                        json.dumps(prior_review, ensure_ascii=False) if prior_review is not None else None))
 
 
 def unpublish_link(conn, actor, action, owner, code, *, include_posters=False):
