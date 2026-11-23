@@ -630,8 +630,10 @@ function myCardHTML(c, idx) {
 function renderMy() {
   $('myGrid').innerHTML = myChars.map(myCardHTML).join('');
   const pub = myChars.filter(c => { const r = fanRecord(c); return r && r.is_public; });
-  const pending = pub.filter(c => fanRecord(c).review_status === 'pending').length;
-  $('myCount').textContent = `（共 ${myChars.length} 个，已公开 ${pub.length - pending} 个${pending ? '，审核中 ' + pending + ' 个' : ''}）`;
+  const approved = pub.filter(c => fanRecord(c).review_status === 'approved').length;
+  const rejected = pub.filter(c => fanRecord(c).review_status === 'rejected').length;
+  const pending = pub.length - approved - rejected;
+  $('myCount').textContent = `（共 ${myChars.length} 个，已公开 ${approved} 个${pending ? '，审核中 ' + pending + ' 个' : ''}${rejected ? '，已退回 ' + rejected + ' 个' : ''}）`;
   const btn = $('publishBtn');
   btn.disabled = selectedCodes.size === 0;
   btn.textContent = selectedCodes.size ? `送审到同人画廊（${selectedCodes.size}）` : '送审到同人画廊';
@@ -645,13 +647,22 @@ $('myGrid').addEventListener('click', e => {
   const c = myChars[card.dataset.my], rec = fanRecord(c);
   if (rec && rec.is_public) { location.href = ownedHref(c.code); return; }
   selectedCodes.has(c.code) ? selectedCodes.delete(c.code) : selectedCodes.add(c.code);
+  const focused = document.activeElement === card;
+  const index = Number(card.dataset.my);
   renderMy();
+  if (focused) $('myGrid').querySelector(`[data-my="${index}"]`)?.focus();
+});
+$('myGrid').addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[data-my]')) {
+    e.preventDefault();
+    e.target.click();
+  }
 });
 async function unpublish(c) {
   const rec = c && fanRecord(c);
   if (!rec) { toast('找不到该角色的公开记录'); return; }
   const d = await postJSON('/api/fan/toggle', { id: rec.id, is_public: false }).catch(() => ({ error: '网络错误，请稍后再试' }));
-  if (!d.ok) { toast(d.error || '操作失败'); return; }
+  if (!d.ok) { toast(d.message || d.error || '没有取消公开，请稍后重试'); return; }
   await loadMy(); reloadPublic();
 }
 async function loadMy() {
