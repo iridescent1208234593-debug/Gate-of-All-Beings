@@ -98,3 +98,16 @@ npm run verify:stubs   # 里程碑标记：combat/tech/relations/expedition 已�
 - 构建挂载：Vite base `/app/modules/management/`；统一壳内挂载，卸载用 `window.__lingjing.dispose`。
 - 存档：统一存档（`@lxh/shared-session`）+ 会馆云存档 `/api/game/save|load`。
 - 测试：`npm test`。
+
+### 固定 tick 长程回归
+
+运行 `npm test --prefix apps/management`；目前没有 Management 的 `npm run verify` 入口。单独运行：
+`node --test apps/management/tests/long-run.test.js`。测试使用临时内存状态，以固定种子 38491
+执行同一组动作及 5,001 个 reducer tick 两次；逐 tick 检查资源、建筑占用、人口需求和生命值、科研、
+事件、远征及游戏时间，并对完整轨迹作比较。测试还独立检查时代进阶的门槛，不依赖一个固定种子恰好升级。
+
+地形生成器有自己的种子工具；当前运行时的实际初始资源点和性格、闲逛和精神状态、随机事件和战斗、
+空间扩张和资源再生、远征目标与结算仍消耗 `Math.random`。测试仅在同步回放范围内临时用项目的
+`createRng` 替换这个来源并恢复原函数。因此结果验证的是同一随机序列驱动的 reducer 轨迹，
+不保证默认浏览器、生产存档恢复、渲染帧率或不同引擎间的可重放性；本测试不改变运行时随机来源、
+存档格式或游戏数值。`Date.now()` 的存档时间戳和 RAF 时序不在此回归范围内。
