@@ -80,6 +80,13 @@ class LoginThrottleTest(unittest.TestCase):
             with error:
                 return error.code
 
+    def test_legacy_auth_only_logs_in_existing_accounts(self):
+        ip = "198.51.100.71"
+        self.assertEqual(self.login("/api/auth", "unknown_fixture", "test-password-123", ip), 410)
+        self.assertEqual(self.login("/api/login", "unknown_fixture", "test-password-123", ip), 401)
+        self.assertEqual(self.login("/api/auth", "bystander", "wrong-password-0", ip), 401)
+        self.assertEqual(self.login("/api/auth", "bystander", "test-password-123", ip), 200)
+
     def test_one_ip_sweeping_many_usernames_is_limited(self):
         ip = "198.51.100.7"
         for index in range(30):
