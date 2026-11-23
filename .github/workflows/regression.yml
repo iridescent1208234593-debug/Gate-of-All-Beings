@@ -63,6 +63,8 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Shell lifecycle browser fixture
         run: node apps/shell/tests/lifecycle.mjs
+      - name: Hall registration isolated browser
+        run: node apps/huiguan/tests/register-flow.cjs
       - name: Install gallery preview encoder
         run: |
           sudo apt-get update
