@@ -1491,6 +1491,11 @@
 
     <!-- ══════ 按钮 ══════ -->
     <p class="hint registration-submit-hint">登记和画廊公开是两步。提交登记不会直接把新设表放上同人画廊；已公开设表修改后会重新审核。</p>
+    <div id="characterTextDraft" hidden>
+      <p class="hint">此标签页有一份未提交的文字草稿（保留 12 小时）。恢复会替换本页相应文字，不会改动已登记的角色；不保存编号、姓名、立绘、备注或能力选择。</p>
+      <button id="characterTextDraftRestore" type="button" class="btn">恢复文字草稿</button>
+      <button id="characterTextDraftDiscard" type="button" class="btn">丢弃草稿</button>
+    </div>
     <div id="formFeedback" class="form-feedback" role="alert" hidden></div>
     <div class="oc-legal" id="ocLegal"><a href="/terms.html" target="_blank" rel="noopener">用户须知</a> · <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a></div>
     <div class="btn-row">
@@ -1531,6 +1536,7 @@
 <script src="/auth-next.js?v=20261027z"></script>
 <script src="/turnstile-widget.js?v=20261028"></script>
 <script src="/legal-consent.js?v=20261106"></script>
+<script src="/character-text-draft.js?v=20261123a"></script>
 <script>
 const STORAGE_KEY = 'luoxiaohei_characters';
 
@@ -1618,10 +1624,26 @@ function maybeFanGalleryReminder() {
   }).catch(() => {});
 }
 
+let draftLoginAttempt = 0;
+let registrationAccountVerified = false;
 async function checkLogin() {
+  const attempt = ++draftLoginAttempt;
+  registrationAccountVerified = false;
+  characterTextDraft?.suspend();
   try {
-    const r = await fetch('/api/user');
+    const r = await fetch('/api/user', {cache:'no-store'});
+    if (!r.ok) throw new Error('account lookup failed');
     const u = await r.json();
+    if (attempt !== draftLoginAttempt) return;
+    if (typeof u?.logged_in !== 'boolean') throw new Error('invalid account snapshot');
+    registrationAccountVerified = true;
+    characterTextDraft?.setIdentity(u, (prior, next) => {
+      const explicitGuestSubmission = prior === 'guest' && next !== 'guest' && pendingSave;
+      if (!explicitGuestSubmission) {
+        pendingSave = null;
+        resetForm();
+      }
+    });
     if (u.logged_in) {
       currentUser = u;
       guestReminderDismissed = false;
@@ -1638,6 +1660,9 @@ async function checkLogin() {
       showGuestReminder();
     }
   } catch(e) {
+    if (attempt !== draftLoginAttempt) return;
+    registrationAccountVerified = false;
+    characterTextDraft?.suspend();
     currentUser = null;
     renderAuthBar(null);
   }
@@ -4059,6 +4084,11 @@ document.getElementById('charForm').addEventListener('submit', function(e) {
 });
 
 function generateAndSave(data, colors) {
+  if (!registrationAccountVerified) {
+    showToast('error', '暂时无法确认登录状态。填写内容仍在本页，请稍后重试。', 6000);
+    checkLogin();
+    return;
+  }
   data.colorPrimary = colors.primary;
   data.colorAccent = colors.accent;
   data.colorIndex = COLOR_SCHEMES.findIndex(theme => theme.primary.toLowerCase() === colors.primary.toLowerCase() && theme.accent.toLowerCase() === colors.accent.toLowerCase());
@@ -4079,16 +4109,16 @@ function generateAndSave(data, colors) {
   saveAll(all);
 
   if (currentUser && currentUser.logged_in) {
-    postSave(data, html, previousCode, version);
+    postSave(data, html, previousCode, version, characterTextDraft?.ticket());
   } else {
     // 未登录：暂存并强制登录，登录后自动补交
-    pendingSave = { data, html, previousCode, version };
+    pendingSave = { data, html, previousCode, version, draftTicket: characterTextDraft?.ticket() };
     showToast('success', '✔ 展示页已生成！登录 / 注册后即可收录进会馆名册。', 5000);
     openAuthModal('登录 / 注册后，你的人设将自动保存并绑定到你的账户。');
   }
 }
 
-async function postSave(data, html, previousCode = '', version = OCRevisions.version(previousCode || data.code)) {
+async function postSave(data, html, previousCode = '', version = OCRevisions.version(previousCode || data.code), draftTicket = null) {
   const button = document.getElementById('btnSubmit');
   if (button.disabled) return false;
   button.disabled = true;
@@ -4116,6 +4146,7 @@ async function postSave(data, html, previousCode = '', version = OCRevisions.ver
     document.getElementById('successMsg').innerHTML = '登记成功！<a href="' + result.url + '" target="_blank">查看展示页</a>';
     showToast('success', '✔ 登记成功！「' + escapeHtml(data.name || data.code) + '」已收录至会馆名册。', 7000);
     pendingSave = null;
+    characterTextDraft?.clearTicket(draftTicket);
     const local = loadAll();
     const index = local.findIndex(item => item.code === data.code);
     if (index >= 0) { local[index] = data; saveAll(local); }
@@ -4136,9 +4167,9 @@ async function postSave(data, html, previousCode = '', version = OCRevisions.ver
 }
 
 function flushPending() {
-  if (pendingSave) {
+  if (registrationAccountVerified && currentUser?.logged_in && pendingSave) {
     const p = pendingSave;
-    postSave(p.data, p.html, p.previousCode, p.version);
+    postSave(p.data, p.html, p.previousCode, p.version, p.draftTicket);
   }
 }
 
@@ -4171,6 +4202,7 @@ function resetForm() {
   window.renderFormFeedback?.();
   // 退出编辑模式
   editingIndex = null;
+  characterTextDraft?.setEditing(false);
   document.getElementById('editTip').style.display = 'none';
   document.getElementById('btnSubmit').textContent = '提 交 登 记';
   // 恢复默认配色
@@ -4331,6 +4363,7 @@ function editChar(i) {
   fillFormFromData(c);
   // 进入编辑模式
   editingIndex = i;
+  characterTextDraft?.setEditing(true);
   editingOCVersion = OCRevisions.version(c.code);
   document.getElementById('btnSubmit').textContent = '更 新 登 记';
   const tip = document.getElementById('editTip');
@@ -4462,7 +4495,18 @@ loadUserSchemes();
 applyFormTheme(COLOR_SCHEMES[selectedColorIdx]);
 renderList();
 window.__HUIGUAN_OWN_AUTH = true;
+let characterTextDraft = null;
+try {
+  characterTextDraft = window.HuiguanCharacterTextDraft?.create({
+    form: document.getElementById('charForm'),
+    panel: document.getElementById('characterTextDraft'),
+    restore: document.getElementById('characterTextDraftRestore'),
+    discard: document.getElementById('characterTextDraftDiscard'),
+    storage: window.sessionStorage,
+  });
+} catch { /* Storage can be unavailable in private or locked-down tabs. */ }
 const initialLoginCheck = checkLogin();
+window.addEventListener('pageshow', event => { if (event.persisted) checkLogin(); });
 window.__AUTH_NEXT = window.safeAuthNext(new URLSearchParams(location.search).get('next') || '');
 // 从同人画廊「编辑」进入：?edit=<编号>，登录同步完成后打开该人设的编辑表单
 const editFromQuery = new URLSearchParams(location.search).get('edit');
