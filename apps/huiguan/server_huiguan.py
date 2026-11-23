@@ -1284,15 +1284,41 @@ def load_data():
     return character_store().snapshot()
 
 
+OC_ACTION_ERRORS = {
+    "invalid_oc_record": ("code", "角色编号或设表格式不正确，请返回编辑页检查后再保存。"),
+    "invalid_oc_json": (None, "设表数据无法读取，请保留未保存内容、刷新后重试。"),
+    "oc_version_required": ("version", "请从「我的已登记人设」重新打开原设表再保存，以免覆盖新版本。"),
+    "oc_versions_required": ("version", "请重新打开角色记录后再导入，不要覆盖较新的设表。"),
+    "invalid_oc_version": ("version", "设表版本无效，请从角色列表重新打开原设表。"),
+    "oc_version_conflict": ("version", "设表已在别处更新。请先复制未保存内容，再重新打开最新版本。"),
+    "oc_code_conflict": ("code", "已有相同角色编号，请打开原设表编辑或为新角色使用新的编号。"),
+    "oc_constraint_conflict": ("code", "角色资料发生冲突，请刷新角色列表，确认要编辑的是原设表。"),
+    "duplicate_oc_code": ("code", "待保存资料含重复角色编号，请保留一份后重试。"),
+    "oc_owner_unavailable": (None, "当前登录账号不能保存这份资料，请确认已登录原作者账号。"),
+}
+OC_STORAGE_MESSAGE = "设表服务暂时无法保存。请先保留编辑内容，稍后重试；持续失败请联系会馆管理员。"
+OC_ACTION_ROUTES = {"_api_save_character", "_api_save_all", "_api_fan_submit"}
+
+
 def oc_api(function):
     @wraps(function)
     def guarded(self, *args, **kwargs):
         try:
             return function(self, *args, **kwargs)
         except oc_store.OCError as error:
-            self._json(error.status, {"error": error.code})
+            if function.__name__ in OC_ACTION_ROUTES:
+                self._oc_action_store_error(error)
+            else:
+                self._json(error.status, {"error": error.code})
         except sqlite3.Error:
-            self._json(503, {"error": "oc_database_unavailable"})
+            if function.__name__ in OC_ACTION_ROUTES:
+                self._oc_action_error(503, "oc_database_unavailable", OC_STORAGE_MESSAGE, legacy="oc_database_unavailable")
+            else:
+                self._json(503, {"error": "oc_database_unavailable"})
+        except OSError:
+            if function.__name__ not in OC_ACTION_ROUTES:
+                raise
+            self._oc_action_error(503, "oc_storage_unavailable", OC_STORAGE_MESSAGE, legacy="oc_storage_unavailable")
     return guarded
 
 
@@ -3244,9 +3270,9 @@ class Handler(BaseStaticHandler):
         if not ident:
             return
         if oc_save_throttled(ident, "save-character"):
-            self._json(429, {"error": "提交太频繁，请稍等一会儿再试"}); return
+            self._oc_action_error(429, "oc_save_rate_limited", "提交太频繁，请稍等一会儿再试"); return
         # New clients upload image files first; the bounded allowance supports cached legacy imports.
-        body = self._read_json(max_bytes=64 * 1024 * 1024)
+        body = self._read_json(max_bytes=64 * 1024 * 1024, oc_action=True)
         if body is None:
             return
 
@@ -3254,51 +3280,57 @@ class Handler(BaseStaticHandler):
         html = body.get("html", "")
         data_field = body.get("data", {})
 
-        # 角色名同样受「官方名 + 管理员名」保护（这个接口原先完全没有校验）
-        _oc_name = (data_field.get("name") or "").strip() if isinstance(data_field, dict) else ""
-        if _oc_name:
-            if is_official_title_name(_oc_name):
-                self._json(400, {"error": "「" + _oc_name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
-            if is_admin_reserved_name(_oc_name):
-                self._json(400, {"error": "「" + _oc_name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
-            _chk = db()
-            try:
-                if _fan_name_conflict(_chk, _oc_name, ident["kind"], ident["uid"]):
-                    self._json(400, {"error": FAN_NAME_TAKEN_ERROR % _oc_name}); return
-            finally:
-                _chk.close()
+        if not isinstance(code, str) or not code.strip() or code != code.strip():
+            self._oc_action_error(400, "invalid_oc_record", "角色编号为空或格式不正确，请从角色列表重新打开设表。", "code", legacy="invalid_oc_record")
+            return
+        if not isinstance(data_field, dict):
+            self._oc_action_error(400, "invalid_oc_record", "设表数据格式不正确，请保留编辑内容并刷新页面。", legacy="invalid_oc_record")
+            return
+        if not isinstance(html, str):
+            self._oc_action_error(400, "invalid_showcase_html", "展示页格式无效，请重新生成展示页后保存。", "html")
+            return
+        name = data_field.get("name")
+        if name is not None and not isinstance(name, str):
+            self._oc_action_error(400, "invalid_oc_name", "角色名必须为文字。", "name")
+            return
+        problem = self._oc_name_problem((name or "").strip(), ident)
+        if problem:
+            self._oc_action_error(400, *problem, "name")
+            return
 
         # Bound everything before the first write: a rejected save leaves no files behind.
         try:
             html_bytes = len(showcase_html_bytes(html)) if html else 0
         except ShowcaseTooLarge as error:
-            self._json(413, {"error": str(error)}); return
+            self._oc_action_error(413, "showcase_too_large", "展示页超过 2 MB，请减少图片或重新生成展示页。", "html", legacy=str(error)); return
         except ValueError as error:
-            self._json(400, {"error": str(error)}); return
+            self._oc_action_error(400, "invalid_showcase_html", "展示页格式无效，请重新生成展示页后保存。", "html"); return
         if not oc_storage_charge(ident, html_bytes + oc_incoming_image_bytes(data_field), "save-character"):
-            self._json(429, {"error": "今日保存的图片和展示页已达上限，请明天再试"}); return
+            self._oc_action_error(429, "oc_storage_daily_limit", "今日保存的图片和展示页已达上限，请明天再试"); return
 
+        if data_field.get("avatar_asset_id") is not None and not isinstance(data_field["avatar_asset_id"], str):
+            self._oc_action_error(400, "invalid_oc_avatar", "头像资源格式无效，请重新选择头像。", "avatar_asset_id")
+            return
+        if data_field.get("avatar_display_shape") not in (None, "", "square", "circle"):
+            self._oc_action_error(400, "invalid_oc_avatar_shape", "请选择圆形或方形头像。", "avatar_display_shape")
+            return
         try:
             normalize_oc_avatar(data_field)
-        except ValueError as error:
-            self._json(400, {"error": str(error)}); return
+        except ValueError:
+            self._oc_action_error(400, "invalid_oc_avatar", "头像图片无效、过期或无法读取，请重新选择头像。", "avatar_asset_id")
+            return
 
-        # 审核权限在进入 OC 写事务前读好（同一个库，避免事务里再开连接）
         auto_approve = self._can_review_fan(ident)
-        # 外置大字段：展示页 HTML -> 文件；base64 图片 -> 校验后独立文件 URL
         html_ref = store_showcase_html(html) if html else None
-        if isinstance(data_field, dict):
+        for field in ("image", "images"):
             try:
-                if isinstance(data_field.get("image"), str):
-                    data_field["image"] = _persist_preview_reference(data_field["image"])
-                if isinstance(data_field.get("images"), list):
-                    data_field["images"] = [_persist_preview_reference(x) if isinstance(x, str) else x for x in data_field["images"]]
-                if isinstance(data_field.get("image"), str):
-                    data_field["image"] = store_data_uri(data_field["image"])
-                if isinstance(data_field.get("images"), list):
-                    data_field["images"] = [store_data_uri(x) for x in data_field["images"]]
+                if field == "image" and isinstance(data_field.get(field), str):
+                    data_field[field] = store_data_uri(_persist_preview_reference(data_field[field]))
+                if field == "images" and isinstance(data_field.get(field), list):
+                    data_field[field] = [store_data_uri(_persist_preview_reference(x)) for x in data_field[field]]
             except ValueError as error:
-                self._json(400, {"error": str(error)}); return
+                self._oc_action_image_error(error, field)
+                return
 
         previous_code = body.get("previous_code") or ""
         rec = {"code": code, "data": data_field}
@@ -5889,60 +5921,61 @@ class Handler(BaseStaticHandler):
         # 审核员是谁不下发给作者；作者只看到状态和退回理由
         self._json(200, {"characters": [{k: v for k, v in dict(r).items() if k != "reviewed_by"} for r in rows]})
 
+    @oc_api
     def _api_fan_submit(self):
         ident = self._require_ident()
         if not ident:
             return
-        body = self._read_json()
+        body = self._read_json(oc_action=True)
         if body is None:
             return
-        name = (body.get("name") or "").strip()
+        raw_name = body.get("name")
+        name = raw_name.strip() if isinstance(raw_name, str) else ""
         if not name:
-            self._json(400, {"error": "角色名不能为空"}); return
+            self._oc_action_error(400, "oc_name_required", "请输入角色名。", "name", legacy="角色名不能为空")
+            return
         if len(name) > 50:
-            self._json(400, {"error": "角色名过长（≤50字）"}); return
-        if is_official_title_name(name):
-            self._json(400, {"error": "「" + name + "」是官方世界观角色名，不能用作自建角色名，请另取一个"}); return
-        if is_admin_reserved_name(name):
-            self._json(400, {"error": "「" + name + "」已被会馆管理员占用，不能用作自建角色名，请另取一个"}); return
-        _chk = db()
-        try:
-            if _fan_name_conflict(_chk, name, ident["kind"], ident["uid"]):
-                self._json(400, {"error": FAN_NAME_TAKEN_ERROR % name}); return
-        finally:
-            _chk.close()
+            self._oc_action_error(400, "oc_name_too_long", "角色名最多 50 字，请缩短。", "name", legacy="角色名过长（≤50字）")
+            return
+        problem = self._oc_name_problem(name, ident)
+        if problem:
+            self._oc_action_error(400, *problem, "name")
+            return
+        for field in ("type", "species", "gender", "faction", "ability", "appearance", "story", "image_data"):
+            if body.get(field) is not None and not isinstance(body[field], str):
+                self._oc_action_error(400, "invalid_fan_field", "该项格式无效，请重新填写。", field)
+                return
         try:
             image_data = _persist_preview_reference((body.get("image_data") or "").strip())
         except ValueError as error:
-            self._json(400, {"error": str(error)}); return
+            self._oc_action_image_error(error, "image_data")
+            return
         review = "approved" if self._can_review_fan(ident) else "pending"
         art = fan_art_source(body)
-        conn = db()
-        conn.execute(
-            """INSERT INTO fan_characters
-               (user_kind, user_uid, user_name, name, type, species, gender, faction,
-                ability, appearance, story, image_data, is_public, created_at, updated_at, review_status, art_source)
-               VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-            (ident["kind"], ident["uid"],
-             ident.get("nickname") or ident.get("username") or "",
-             name,
-             (body.get("type") or "").strip(),
-             (body.get("species") or "").strip(),
-             (body.get("gender") or "").strip(),
-             (body.get("faction") or "").strip(),
-             (body.get("ability") or "").strip(),
-             (body.get("appearance") or "").strip(),
-             (body.get("story") or "").strip(),
-             image_data,
-             1 if body.get("is_public", True) else 0,
-             now_iso(), now_iso(), review, art)
-        )
-        fid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
-        submitted = fan_gallery_history.load(conn, fid)
-        if submitted["type"] != "配色海报":
-            fan_gallery_history.record(conn, ident, "owner_submit", None, submitted)
-        conn.commit()
-        conn.close()
+        with contextlib.closing(db()) as conn, conn:
+            conn.execute(
+                """INSERT INTO fan_characters
+                   (user_kind, user_uid, user_name, name, type, species, gender, faction,
+                    ability, appearance, story, image_data, is_public, created_at, updated_at, review_status, art_source)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (ident["kind"], ident["uid"],
+                 ident.get("nickname") or ident.get("username") or "",
+                 name,
+                 (body.get("type") or "").strip(),
+                 (body.get("species") or "").strip(),
+                 (body.get("gender") or "").strip(),
+                 (body.get("faction") or "").strip(),
+                 (body.get("ability") or "").strip(),
+                 (body.get("appearance") or "").strip(),
+                 (body.get("story") or "").strip(),
+                 image_data,
+                 1 if body.get("is_public", True) else 0,
+                 now_iso(), now_iso(), review, art)
+            )
+            fid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+            submitted = fan_gallery_history.load(conn, fid)
+            if submitted["type"] != "配色海报":
+                fan_gallery_history.record(conn, ident, "owner_submit", None, submitted)
         self._json(200, {"ok": True, "id": fid, "review_status": review})
 
     def _api_fan_toggle(self):
@@ -6004,13 +6037,16 @@ class Handler(BaseStaticHandler):
             ident = self._require_ident()
             if not ident:
                 return
-            body = self._read_json()
+            body = self._read_json(oc_action=True)
             if body is None:
                 return
             codes = body.get("character_codes") or []
-            if not codes:
-                self._json(400, {"error": "请选择要公开的角色"}); return
-            blocked = []
+            if not isinstance(codes, list) or not codes or any(not isinstance(c, str) or not c for c in codes):
+                self._oc_action_error(400, "invalid_fan_selection", "请从「我的已登记人设」重新勾选要公开的角色。", "character_codes",
+                                      legacy="请选择要公开的角色")
+                return
+            remaining = dict.fromkeys(codes)
+            issues = []
             auto_approve = self._can_review_fan(ident)
             review = "approved" if auto_approve else "pending"
             pending = 0
@@ -6022,19 +6058,15 @@ class Handler(BaseStaticHandler):
                 for c in chars:
                     cd = c.get("data") or c
                     code = cd.get("code")
-                    if code not in codes:
+                    if not isinstance(code, str) or code not in remaining:
                         continue
+                    remaining.pop(code)
                     fields = fan_fields(cd)
-                    if not fields["name"]:
-                        continue
-                    if is_official_title_name(fields["name"]):
-                        blocked.append(fields["name"])
-                        continue
-                    if is_admin_reserved_name(fields["name"]):
-                        blocked.append(fields["name"])
-                        continue
-                    if _fan_name_conflict(conn, fields["name"], ident["kind"], ident["uid"]):
-                        blocked.append(fields["name"])
+                    problem = (self._oc_name_problem(fields["name"], ident, conn=conn) if fields["name"] else
+                               ("oc_name_required", "请编辑这份设表并填写角色名，再提交公开。"))
+                    if problem:
+                        problem_code, message = problem
+                        issues.append({"character_code": code, "code": problem_code, "message": message})
                         continue
                     # 同一角色只保留一条画廊记录：先按编号找，旧记录（无编号）再按名字找
                     art = fan_art_source(cd)
@@ -6086,13 +6118,21 @@ class Handler(BaseStaticHandler):
                         fan_gallery_history.record(conn, ident, "owner_publish", None, created_gallery)
                     published += 1
                     pending += review == "pending"
-            if blocked:
-                self._json(400, {"error": "以下名号不能公开：" + "、".join(sorted(set(blocked))) + "；可能被官方角色名、管理员名占用，或已被他人的人设表使用"}); return
-            self._json(200, {"ok": True, "published": published, "skipped": skipped, "pending": pending})
+            issues.extend({"character_code": code, "code": "oc_not_found",
+                           "message": "该角色不在当前账号的登记列表中，请刷新后重新选择。"} for code in remaining)
+            counts = {"published": published, "skipped": skipped, "pending": pending}
+            if issues:
+                self._oc_action_error(400, "fan_publish_partial" if published or skipped else "fan_publish_blocked",
+                                      "部分角色未能提交，请查看各角色的原因。" if published or skipped
+                                      else "所选角色未能提交，请查看各角色的原因。",
+                                      "character_codes", partial=bool(published or skipped), issues=issues, **counts)
+                return
+            self._json(200, {"ok": True, **counts})
         except oc_store.OCError as error:
-            self._json(error.status, {"error": error.code})
-        except Exception:
-            self._json(500, {"error": "发布失败"})
+            self._oc_action_store_error(error)
+        except (sqlite3.Error, OSError):
+            self._oc_action_error(503, "fan_publish_unavailable", "画廊暂时无法提交。请刷新角色状态，稍后再试。",
+                                  legacy="发布失败")
 
     # ---------- 同人审核（Fan Review） ----------
     FAN_REVIEW_NOTE_MAX = 200
@@ -6466,20 +6506,59 @@ class Handler(BaseStaticHandler):
             self._json(400, {"error": "图片或上传格式无效，图片≤8MB / 动图≤5MB"})
             return None
 
-    def _read_json(self, max_bytes=8 * 1024 * 1024):
+    def _oc_action_error(self, status, code, message, field=None, *, legacy=None, **details):
+        result = {"error": legacy if legacy is not None else message, "code": code, "message": message, **details}
+        if field:
+            result["field"] = field
+        self._json(status, result)
+
+    def _oc_action_store_error(self, error):
+        field, message = OC_ACTION_ERRORS.get(error.code, (None, OC_STORAGE_MESSAGE))
+        self._oc_action_error(error.status, error.code, message, field, legacy=error.code)
+
+    def _oc_action_image_error(self, error, field):
+        if "预览已过期" in str(error):
+            code, message = "oc_image_preview_expired", "图片预览已过期，请重新选择并上传原图。"
+        else:
+            code, message = "invalid_oc_image", "图片无法读取、格式不支持或超出大小上限，请重新选择或压缩后上传。"
+        self._oc_action_error(400, code, message, field)
+
+    def _oc_name_problem(self, name, ident, *, conn=None):
+        if not name:
+            return None
+        if is_official_title_name(name):
+            return "oc_name_official", "该角色名属于官方世界观角色，请另取一个名字。"
+        if is_admin_reserved_name(name):
+            return "oc_name_reserved", "该角色名已被会馆预留，请另取一个名字。"
+        if conn is None:
+            with contextlib.closing(db()) as conn:
+                taken = _fan_name_conflict(conn, name, ident["kind"], ident["uid"])
+        else:
+            taken = _fan_name_conflict(conn, name, ident["kind"], ident["uid"])
+        if taken:
+            return "oc_name_taken", "该角色名已用于其他人的设表，请换一个名字。"
+        return None
+
+    def _read_json(self, max_bytes=8 * 1024 * 1024, *, oc_action=False):
         try:
             length = int(self.headers.get("Content-Length", 0))
             if length < 0:
                 raise ValueError("invalid Content-Length")
             if length > max_bytes:
-                self._json(413, {"error": "请求内容过大"})
+                if oc_action:
+                    self._oc_action_error(413, "oc_payload_too_large", "请求整体太大，请先单独上传或压缩图片，再保存设表。", legacy="请求内容过大")
+                else:
+                    self._json(413, {"error": "请求内容过大"})
                 return None
             body = json.loads(self.rfile.read(length).decode("utf-8"))
             if not isinstance(body, dict):
                 raise ValueError("JSON body must be an object")
             return body
         except Exception:
-            self._json(400, {"error": "请求数据格式错误"})
+            if oc_action:
+                self._oc_action_error(400, "invalid_oc_payload", "设表请求格式不正确，请保留编辑内容、刷新页面后重试。", legacy="请求数据格式错误")
+            else:
+                self._json(400, {"error": "请求数据格式错误"})
             return None
 
     def _static_allowed(self, path):

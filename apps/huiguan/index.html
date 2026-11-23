@@ -690,6 +690,18 @@
     .auth-seal { display: none; }
     .auth-input { font-size: 16px; }
   }
+/* Optional writing help uses the same tokens and native disclosure as registration. */
+.registration-guide{margin:0 0 18px;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:var(--paper)}
+.registration-guide details>summary,.writing-guide>summary{cursor:pointer;color:var(--text);line-height:1.5}
+.registration-guide details>summary:focus-visible,.writing-guide>summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.registration-guide__lead,.registration-guide__steps,.registration-guide__notes,.writing-guide__body{font-size:13px;line-height:1.65;color:var(--text-dim)}
+.registration-guide__lead{margin:0 0 7px}
+.registration-guide__steps{display:grid;gap:7px;margin:9px 0 12px;padding-inline-start:1.5em}
+.registration-guide__notes{margin:6px 0}
+.writing-guide{margin:7px 0 4px;font-size:12px}
+.writing-guide__body{display:grid;gap:5px;margin:6px 0;padding:8px 10px;border-inline-start:2px solid var(--accent);overflow-wrap:anywhere}
+.writing-guide__body p{margin:0}
+.registration-submit-hint{margin:8px 0 12px}
 </style>
 <link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261027z">
 <link rel="stylesheet" href="/homepage.css?v=20261027z">
@@ -1074,6 +1086,19 @@
   <div class="sub">为角色写下一份档案，让它在会馆里留下名字。</div>
 </header>
 <div class="container">
+  <div class="registration-guide" id="registrationGuide">
+    <p class="registration-guide__lead">第一次登记？可以只填标有 <span class="req">*</span> 的项目。能力、喜好和个人介绍没有想好，可以先留空。</p>
+    <details>
+      <summary>展开新手指引 <span class="hint">（可跳过，随时回来查看）</span></summary>
+      <ol class="registration-guide__steps">
+        <li><strong>从一句话开始。</strong> 代号放角色的称呼或档案标题，名字放角色名；不必从完整故事写起。</li>
+        <li><strong>写出能认出它的特点。</strong> 纯文字设写外貌即可；有立绘可以用图代替外貌描述。背景先写「从哪里来、发生了什么、现在想做什么」。</li>
+        <li><strong>登记后再决定要不要公开。</strong> 点击「提交登记」并登录，看到「登记成功」才表示存进账户。想参加同人画廊，再到<a href="/fan.html">同人画廊</a>提交公开，审核通过才会出现在画廊。</li>
+      </ol>
+      <p class="registration-guide__notes"><strong>还没写完：</strong> 未提交的内容不保证换设备或关页后还能找回；可以先把长段文字存到自己的笔记里。</p>
+      <p class="registration-guide__notes"><strong>注意隐私：</strong> 角色档案里请用角色信息或笔名。不要填自己的手机号、邮箱、住址等资料，也别把登记当成加密笔记。</p>
+    </details>
+  </div>
   <form id="charForm" novalidate>
     <div class="edit-tip" id="editTip" style="display:none;margin-bottom:14px;padding:10px 14px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-glow);color:var(--accent);font-size:13px;"></div>
 
@@ -1169,6 +1194,13 @@
           <input type="text" name="species_detail" id="speciesDetail" placeholder="妖精种族（科级，如鸦科）" disabled>
         </div>
         <div class="hint" id="speciesHint">妖精请填写详细种族，以物种科为代表（如犬科、鸦科、猫科等），也可自设；数据库参考：妖精、猫、豹子、花精灵、团鼠、神兽</div>
+        <details class="writing-guide">
+          <summary>人类和妖精可以怎么写？</summary>
+          <div class="writing-guide__body">
+            <p><strong>人类：</strong> 可以写职业、日常和与会馆相遇的经过。不必为角色硬加一项超自然能力。</p>
+            <p><strong>妖精：</strong> 选择妖精后补充种族，可以是现有物种或自设。若有多种形态，先写常用形态，再补充切换条件或辨认特征。</p>
+          </div>
+        </details>
         <div class="err"></div>
       </div>
 
@@ -1230,15 +1262,23 @@
       <div class="form-row" id="row-appearance">
         <label>外貌描述（或上传人设图） <span class="req">*</span></label>
         <textarea name="appearance" rows="3" placeholder="请描述角色的外貌特征与衣着风格。如有人设图可直接上传图片代替文字"></textarea>
+        <details class="writing-guide">
+          <summary>看外貌示例：纯文字设 / 有立绘</summary>
+          <div class="writing-guide__body">
+            <p><strong>纯文字设：</strong> 试试「轮廓 ＋ 颜色 ＋ 一个显眼的细节」，例如：常披青色短斗篷，说话时一只耳朵会竖起来。</p>
+            <p><strong>有立绘：</strong> 上传自己创作或获准使用的图片，并如实选择来源。可以另写图上看不见的特征，例如不同形态、声音或常带的饰物。</p>
+          </div>
+        </details>
         <div class="err"></div>
       </div>
-      <div class="form-row">
+      <div class="form-row" id="row-images">
         <label>人设图片 <span style="color:var(--text-dim);font-size:11px">（选填）</span></label>
-        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('imgInput').click()">
+        <div class="upload-zone" id="uploadZone" tabindex="-1" onclick="document.getElementById('imgInput').click()">
           <div class="icon">&#x1F5BC;</div>
           <div class="tip">点击上传人设图，可多选，支持 JPG / PNG / WebP（单张≤8MB）</div>
           <input type="file" id="imgInput" name="image" accept="image/jpeg,image/png,image/webp" multiple onchange="handleImage(event)">
         </div>
+        <div class="err"></div>
         <div id="imgGallery" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
         <fieldset class="art-source" style="border:0;padding:0;margin:12px 0 0;">
           <legend style="font-size:13px;margin-bottom:6px;">立绘来源 <span style="color:var(--text-dim);font-size:11px">（有图时请选，公开到同人画廊时会用到）</span></legend>
@@ -1280,6 +1320,14 @@
         <p><strong>系别与技能</strong>最多可再选两个大系。空间系只能选一个特殊能力，其他系别最多选两个能力。双系合璧技能（如画灵＝造物×生灵）占用两个大系、计 2 个分支名额。</p>
         <p><strong>特殊限制</strong>治愈系与空间系互斥。选治愈系后，生灵系还可再选 1 个分支，其他大系分支不可选；名额受限时会自动取消治愈系。选择治愈系或空间系后会弹出限定提示。</p>
       </div>
+
+      <details class="writing-guide">
+        <summary>自设能力怎么写得好懂？</summary>
+        <div class="writing-guide__body">
+          <p>先说明「能做什么、怎么触发、何时失效」。例如：能用触碰过的纸片辨认来路；纸一破，方向感就会消失。</p>
+          <p>可以不选额外系别；如果选了，记得补上该系的分支或自定义技能，再用「能力详解」核对描述。</p>
+        </div>
+      </details>
 
       <div class="ability-panel">
         <!-- 御灵系 - 必选 -->
@@ -1370,6 +1418,13 @@
       <h2>背景 <span class="req">*</span></h2>
       <div class="form-row" id="row-bg">
         <textarea name="background" rows="4" placeholder="请描述角色的出身、过往经历等"></textarea>
+        <details class="writing-guide">
+          <summary>看背景示例：日常型 / 故事型</summary>
+          <div class="writing-guide__body">
+            <p><strong>日常型：</strong> 「以前在山脚替人修伞，后来到会馆帮忙修补旧物。现在最想学会做一把不漏雨的纸伞。」</p>
+            <p><strong>故事型：</strong> 写一件改变角色选择的事，再留一个当下的目标。不用写完一整部小说。</p>
+          </div>
+        </details>
         <div class="hint">妖精不可参与人类战争；非食人族现代妖精不可捕食人类（若需此设定，可为被追捕中或已被捉拿，但不建议）</div>
         <div class="err"></div>
       </div>
@@ -1435,6 +1490,7 @@
     </div>
 
     <!-- ══════ 按钮 ══════ -->
+    <p class="hint registration-submit-hint">登记和画廊公开是两步。提交登记不会直接把新设表放上同人画廊；已公开设表修改后会重新审核。</p>
     <div id="formFeedback" class="form-feedback" role="alert" hidden></div>
     <div class="oc-legal" id="ocLegal"><a href="/terms.html" target="_blank" rel="noopener">用户须知</a> · <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a></div>
     <div class="btn-row">
@@ -2695,9 +2751,11 @@ function handleImage(e) {
         }
         done();
       };
-      img.onerror = function() { alert('「' + file.name + '」读取失败'); done(); };
+      img.onerror = failure;
       img.src = ev.target.result;
     };
+    function failure() { alert('「' + file.name + '」无法读取，请换用有效的 JPG、PNG 或 WebP。'); done(); }
+    reader.onerror = reader.onabort = failure;
     reader.readAsDataURL(file);
   });
 }
@@ -2760,7 +2818,6 @@ function validate() {
   if (!f.appearance.value.trim() && !imageList.length) err('appearance', '请填写外貌描述或上传人设图');
   else clr('appearance');
 
-  const royalCbs = document.querySelectorAll('input[name="ability_royal"]:checked');
   const abilityErr = document.getElementById('abilityErr');
   abilityErr.textContent = '';
 
@@ -2784,10 +2841,9 @@ function validate() {
   else clr('weapon');
 
   // 垃圾内容过筛
-  let junkHit = false;
   JUNK_FIELDS.forEach(([id, label]) => {
     const el = f.elements.namedItem(id === 'bg' ? 'background' : id); if (!el) return;
-    if (isJunk(el.value)) { err(id, label + '请至少填写两个汉字或字母，不要只填数字或标点'); junkHit = true; }
+    if (isJunk(el.value)) { err(id, label + '请至少填写两个汉字或字母，不要只填数字或标点'); }
   });
   if (window.renderFormFeedback) window.renderFormFeedback();
   return ok;
@@ -3981,6 +4037,8 @@ function showToast(type, html, ms) {
 // ========== 提交 ==========
 document.getElementById('charForm').addEventListener('submit', function(e) {
   e.preventDefault();
+  if (document.getElementById('btnSubmit').disabled) return;
+  window.clearSubmissionProblem?.();
   if (!validate()) {
     const n = document.querySelectorAll('.form-row.error').length +
       (document.getElementById('abilityErr').textContent.trim() ? 1 : 0);
@@ -3992,6 +4050,7 @@ document.getElementById('charForm').addEventListener('submit', function(e) {
   if (ocLegal && !ocLegal.checked()) {
     showToast('error', '⚠ 提交前请阅读并勾选同意《用户须知》和《隐私政策》。', 6000);
     ocLegal.nudge();
+    window.showSubmissionProblem?.('请先勾选同意《用户须知》和《隐私政策》，再提交登记。');
     return;
   }
   const data = collectData();
@@ -4038,16 +4097,19 @@ async function postSave(data, html, previousCode = '', version = OCRevisions.ver
   try {
     // 表单上已勾选同意；这里把同意记到账号上（失败不挡保存，下次登录会再提示）。
     if (window.HuiguanLegal) await HuiguanLegal.accept('oc-submit').catch(() => {});
-    data = await HuiguanImages.character(data);
+    try { data = await HuiguanImages.character(data); }
+    catch (error) {
+      if (!error.field && !error.status && error.name !== 'TypeError') error.field = 'images';
+      throw error;
+    }
     html = generateShowcaseHTML(data, colorsFromData(data));
     const r = await fetch('/api/save-character', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: data.code, previous_code: previousCode, html, data, version }), signal: AbortSignal.timeout(30000)
+      body: JSON.stringify({ code: data.code, previous_code: previousCode, html, data, version }), signal: typeof AbortSignal.timeout === 'function' ? AbortSignal.timeout(30000) : undefined
     });
     const result = await r.json().catch(() => ({}));
     if (!r.ok || !result.ok || !result.url) {
-      const messages = { 409: '这份人设已被另一个页面更新。请保留当前内容，重新读取服务器版本后再编辑。', 428: '请先重新读取服务器上的这份人设，再保存修改。', 401: '登录已过期，请重新登录后提交。', 403: '当前账户无法登记，请联系馆长确认账户状态。', 413: '图片和展示页的总大小超出限制，请减少图片数量或压缩图片后重试。', 429: '提交太频繁，请稍等一会儿再试。' };
-      throw new Error(messages[r.status] || (r.status >= 500 ? '会馆保存服务暂时不可用，请稍后重试。' : '这次登记未被接受，请检查设表内容；仍有问题可联系馆长。'));
+      throw window.ocSaveProblem?.(result || {}, r.status) || new Error('这次没有保存成功，请刷新页面后重试。');
     }
     if (result.character) OCRevisions.renamed(previousCode, result.character);
     document.getElementById('successMsg').classList.add('show');
@@ -4058,12 +4120,13 @@ async function postSave(data, html, previousCode = '', version = OCRevisions.ver
     const index = local.findIndex(item => item.code === data.code);
     if (index >= 0) { local[index] = data; saveAll(local); }
     resetForm();
-    if (window.renderFormFeedback) window.renderFormFeedback();
     renderList();
     return true;
   } catch (error) {
-    const message = error.name === 'TypeError' || error.name === 'TimeoutError' ? '暂时连接不上会馆保存服务，请检查网络后重试。' : error.message;
-    if (window.showSubmissionProblem) window.showSubmissionProblem(message + ' 填写内容已保留，不用重新填写。');
+    const message = error.name === 'TypeError' || error.name === 'TimeoutError' || error.name === 'AbortError'
+      ? '暂时连接不上会馆保存服务，请检查网络后重试。'
+      : (error.message || '这次没有保存成功，请稍后重试。');
+    window.showSubmissionProblem?.(message + ' 本页填写内容已保留，不用重新填写。', error.field, message);
     showToast('error', escapeHtml(message) + ' 填写内容已保留。', 7000);
     return false;
   } finally {
@@ -4081,6 +4144,7 @@ function flushPending() {
 
 // ========== 重置 ==========
 function resetForm() {
+  window.clearSubmissionProblem?.();
   document.getElementById('charForm').reset();
   imageList = [];
   clearOCAvatar();
@@ -4103,6 +4167,8 @@ function resetForm() {
   document.getElementById('sliderVal').textContent = '50';
   document.getElementById('factionLabel').textContent = '中立';
   document.querySelectorAll('.form-row.error').forEach(r => r.classList.remove('error'));
+  document.getElementById('abilityErr').textContent = '';
+  window.renderFormFeedback?.();
   // 退出编辑模式
   editingIndex = null;
   document.getElementById('editTip').style.display = 'none';
@@ -4119,6 +4185,7 @@ let editingIndex = null;
 let editingOCVersion = 0;
 
 function fillFormFromData(c) {
+  window.clearSubmissionProblem?.();
   const f = document.getElementById('charForm');
   f.reset();
   // 基础字段
@@ -4451,6 +4518,6 @@ if (new URLSearchParams(location.search).get('openauth')) initialLoginCheck.then
   setTimeout(function () { clearInterval(blink); type(); }, 2400);
 })();
 </script>
-<script src="/form-feedback.js?v=20261027z"></script>
+<script src="/form-feedback.js?v=20261123b"></script>
 </body>
 </html>

@@ -287,12 +287,13 @@ button{font-family:inherit}
   <div class="section-title">我的已登记人设 <small id="myCount"></small></div>
   <div class="publish-bar" id="publishBar" hidden>
     <div class="pb-text">
-      <strong>从已登记人设中公开</strong>
+      <strong>将已登记的设表送审</strong>
       勾选下方角色，一键提交到同人画廊。审核员审核通过后会出现在画廊里；修改已公开的设表后也会重新审核。
       <div class="fan-legal" id="fanLegal"><a href="/terms.html" target="_blank" rel="noopener">用户须知</a> · <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a></div>
     </div>
-    <button type="button" class="pb-btn" id="publishBtn" disabled>公开到同人画廊</button>
+    <button type="button" class="pb-btn" id="publishBtn" disabled>送审到同人画廊</button>
   </div>
+  <div id="publishFeedback" class="card-meta" role="status" hidden></div>
   <div class="grid" id="myGrid"><div class="loading">加载中…</div></div>
 
   <a class="official-link" href="gallery.html" style="margin-top:24px">
@@ -352,7 +353,7 @@ button{font-family:inherit}
     <div class="modal-title" id="modalTitle"></div>
     <div class="modal-body" id="modalBody"></div>
     <textarea class="modal-input" id="modalInput" maxlength="300" hidden></textarea>
-    <div class="modal-err" id="modalErr"></div>
+    <div class="modal-err" id="modalErr" role="alert"></div>
     <div class="modal-actions">
       <button type="button" class="pb-btn ghost" id="modalCancel">取消</button>
       <button type="button" class="pb-btn" id="modalOk">确定</button>
@@ -633,7 +634,7 @@ function renderMy() {
   $('myCount').textContent = `（共 ${myChars.length} 个，已公开 ${pub.length - pending} 个${pending ? '，审核中 ' + pending + ' 个' : ''}）`;
   const btn = $('publishBtn');
   btn.disabled = selectedCodes.size === 0;
-  btn.textContent = selectedCodes.size ? `公开到同人画廊（${selectedCodes.size}）` : '公开到同人画廊';
+  btn.textContent = selectedCodes.size ? `送审到同人画廊（${selectedCodes.size}）` : '送审到同人画廊';
 }
 $('myGrid').addEventListener('click', e => {
   const un = e.target.closest('[data-unpublish]');
@@ -677,18 +678,50 @@ async function loadMy() {
 const fanLegal = window.HuiguanLegal && HuiguanLegal.mount($('fanLegal'));
 $('publishBtn').onclick = () => {
   if (!selectedCodes.size) return;
+  $('publishFeedback').hidden = true;
   if (fanLegal && !fanLegal.checked()) { toast('公开前请阅读并勾选同意《用户须知》和《隐私政策》'); fanLegal.nudge(); return; }
-  const names = myChars.filter(c => selectedCodes.has(c.code)).map(c => '· ' + esc(c.name));
+  const codes = [...selectedCodes];
+  const names = myChars.filter(c => codes.includes(c.code)).map(c => '· ' + esc(c.name));
   openModal({
     title: '提交到同人画廊',
     body: `将提交以下 <strong>${names.length}</strong> 个角色：<br>${names.join('<br>')}<br><br><span style="color:var(--dim);font-size:13px">审核员审核通过后才会在画廊展示；用了 AI 立绘的请在登记表里把「立绘来源」选为 AI。</span>`,
     okText: '确认提交',
     onOk: async () => {
       if (window.HuiguanLegal) await HuiguanLegal.accept('fan-publish').catch(() => {});
-      const d = await postJSON('/api/fan/publish', { character_codes: [...selectedCodes] }).catch(() => ({ error: '网络错误，请稍后再试' }));
-      if (!d.ok) { $('modalErr').textContent = d.error || '发布失败'; return false; }
+      const d = await postJSON('/api/fan/publish', { character_codes: codes }).catch(() => ({ error: '网络错误，请稍后再试' }));
+      if (!d.ok) {
+        const issues = Array.isArray(d.issues) ? d.issues : [];
+        const errorText = d.message || d.error || '没有送审成功，请稍后重试。';
+        if (!issues.length) { $('modalErr').textContent = errorText; return false; }
+        // Some cards may already be in review even when other cards were blocked.
+        const feedback = $('publishFeedback');
+        feedback.replaceChildren();
+        feedback.textContent = d.partial
+          ? `部分设表已处理，其中 ${d.pending || 0} 张正在审核；以下设表需要修改：`
+          : '以下设表没有送审，请按提示修改后再提交：';
+        const list = document.createElement('ul');
+        issues.forEach(issue => {
+          const item = document.createElement('li');
+          const character = myChars.find(c => c.code === issue.character_code);
+          item.textContent = (character?.name || issue.character_code || '设表') + '：' + (issue.message || errorText) + ' ';
+          if (character) {
+            const edit = document.createElement('a');
+            edit.href = editHref(character.code); edit.textContent = '打开编辑';
+            item.append(edit);
+          }
+          list.append(item);
+        });
+        feedback.append(list); feedback.hidden = false;
+        selectedCodes.clear();
+        await loadMy(); reloadPublic(); loadQueue();
+        feedback.scrollIntoView({ block: 'center' });
+        return;
+      }
       selectedCodes.clear();
-      toast(d.pending ? `已提交 ${d.pending} 个设表，等审核员审核通过后就会出现在画廊～` : '已公开到同人画廊 ✨');
+      const feedback = $('publishFeedback');
+      feedback.textContent = d.pending ? `已提交 ${d.pending} 张设表，审核通过后才会在画廊公开。` : (d.published ? '已公开到同人画廊。' : '所选设表已处理，没有新增公开。');
+      feedback.hidden = false;
+      toast(feedback.textContent);
       await loadMy(); reloadPublic(); loadQueue();
     },
   });
