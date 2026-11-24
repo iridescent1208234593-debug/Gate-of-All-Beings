@@ -34,6 +34,9 @@ var auto_t := 0.0
 var pending_upload := false
 var watch_every := 0.0
 var watch_t := 0.0
+var guide                          # life_guide.gd: 新人引导「开始生活」
+var hud_buttons := {}
+var emote_row: Control
 
 
 func _ready() -> void:
@@ -53,6 +56,18 @@ func _ready() -> void:
 	layer3d.add_child(view3d)
 	view3d.setup(world, font)
 	_build_hud()
+	guide = load("res://scripts/life_guide.gd").new()
+	add_child(guide)
+	guide.setup(font, func(msg): Net.send(msg))
+	guide.register_target("chat", func(): return chat_input.get_global_rect())
+	guide.register_target("emotes", func(): return emote_row.get_global_rect())
+	guide.register_target("hint", func(): return hint_label.get_global_rect() if hint_label.text != "" else Rect2())
+	guide.register_target("spaces", func(): return hud_buttons["虹之间"].get_global_rect())
+	guide.register_target("view", func(): return hud_buttons["2D / 3D"].get_global_rect())
+	guide.register_target("top", func(): return top_label.get_global_rect())
+	guide.register_target("player", func():
+		var c := get_viewport().get_visible_rect().size * 0.5
+		return Rect2(c + Vector2(-42, -96), Vector2(84, 112)))
 	_apply_view()
 	Net.message.connect(_on_message)
 	Net.state_changed.connect(_on_net_state)
@@ -88,9 +103,10 @@ func _build_hud() -> void:
 	top_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top_label.text = "西木会馆 LAB"
 	bar.add_child(top_label)
-	for b in [["2D / 3D", _toggle_view], ["虹之间", _open_spaces], ["我的形象", _open_setup], ["本地数据", _open_data], ["退出", _logout]]:
+	for b in [["2D / 3D", _toggle_view], ["虹之间", _open_spaces], ["我的形象", _open_setup], ["新手引导", _open_guide], ["本地数据", _open_data], ["退出", _logout]]:
 		var btn := Button.new()
 		btn.text = b[0]
+		hud_buttons[b[0]] = btn
 		btn.focus_mode = Control.FOCUS_NONE
 		btn.pressed.connect(b[1])
 		bar.add_child(btn)
@@ -116,13 +132,16 @@ func _build_hud() -> void:
 	chat_input.text_submitted.connect(_send_chat)
 	crow.add_child(chat_input)
 	var emotes := HBoxContainer.new()
+	emote_row = emotes
 	left.add_child(emotes)
 	for e in ["wave", "bow", "heart", "laugh", "sleep", "surprise", "music", "sparkle"]:
 		var eb := Button.new()
 		eb.text = EMOTE_TEXT[e]
 		eb.focus_mode = Control.FOCUS_NONE
 		eb.add_theme_font_size_override("font_size", 13)
-		eb.pressed.connect(func(): Net.send({"t": "emote", "id": e}))
+		eb.pressed.connect(func():
+			Net.send({"t": "emote", "id": e})
+			guide.on_event("emoted"))
 		emotes.add_child(eb)
 	hint_label = Label.new()
 	hint_label.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -232,7 +251,8 @@ func _open_setup() -> void:
 		Profile.nick = n
 		Profile.save_local()
 		_send_profile()
-		_clear_panels(), "Enter")
+		_clear_panels()
+		guide.on_event("profile_ready"), "Enter")
 	go.add_theme_font_size_override("font_size", 18)
 	setup_panel = box
 
@@ -394,6 +414,27 @@ func _native_login_form(detail: String) -> void:
 func _open_spaces() -> void:
 	Net.send({"t": "spaces"})
 	_render_spaces()
+	guide.on_event("spaces_opened")
+
+
+# ------------------------------------------------------------------ guide panel (pause / resume / review)
+func _open_guide() -> void:
+	var box := _panel("新手引导 · 开始生活", 520)
+	var l := Label.new()
+	l.text = "边玩边学：走路、聊天、互动、虹之间。每样东西第一次用到时，会有一点灵光来提示。
+" + guide.summary()
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size = Vector2(480, 0)
+	box.add_child(l)
+	var row := HBoxContainer.new()
+	box.add_child(row)
+	if guide.status == "paused":
+		_add_button(row, "继续引导", func(): _clear_panels(); guide.resume(), "GuideResume")
+	elif not guide.is_finished():
+		_add_button(row, "暂停引导", func(): _clear_panels(); guide.pause(), "GuidePause")
+	_add_button(row, "重新查看", func(): _clear_panels(); guide.review(), "GuideReview")
+	if not guide.is_finished():
+		_add_button(row, "不需要引导", func(): _clear_panels(); guide.skip(), "GuideSkip")
 
 
 func _render_spaces() -> void:
@@ -500,12 +541,15 @@ func _on_message(m: Dictionary) -> void:
 				_chat_line(c)
 			if Profile.nick == "" and m.get("nick", "") != "":
 				Profile.nick = m["nick"]
+			guide.apply_server_state(m.get("guide", {}))
 			if Profile.has_profile():
 				_send_profile()
+				guide.on_event("welcome")
 			else:
 				_open_setup()
 			_refresh_top()
 			toast("来到 " + str(m["space"]["title"]))
+			guide.on_event("space_entered", m["space"].get("kind", "public"))
 		"join":
 			world.upsert_player(m["player"])
 			_chat_sys("%s 来了" % (m["player"].get("nick", "") if m["player"].get("nick", "") != "" else "一位旅人"))
@@ -563,6 +607,8 @@ func _on_message(m: Dictionary) -> void:
 			world.objects[m["id"]] = m["state"]
 			if m["state"].has("rings"):
 				world.objects[m["id"]]["_rung_at"] = Time.get_ticks_msec() / 1000.0
+		"guide":
+			guide.apply_server_state(m)
 		"board":
 			var box := _panel("会馆告示", 480)
 			var l := Label.new(); l.text = m["text"]; l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -610,6 +656,7 @@ func _send_chat(text: String) -> void:
 	text = text.strip_edges()
 	if text != "":
 		Net.send({"t": "chat", "text": text})
+		guide.on_event("chatted")
 	chat_input.text = ""
 	chat_input.release_focus()
 
@@ -630,6 +677,7 @@ func _toggle_view() -> void:
 	Profile.save_local()
 	_apply_view()
 	Net.send({"t": "hello_view", "client": Profile.view_mode})
+	guide.on_event("view_toggled", Profile.view_mode)
 
 
 func _apply_view() -> void:
@@ -653,6 +701,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_E and near_object != "":
 			Net.send({"t": "interact", "object": near_object})
+			guide.on_event("interacted")
 		elif event.keycode == KEY_F3:
 			_toggle_view()
 
@@ -690,6 +739,7 @@ func _process(delta: float) -> void:
 		var nxt := world.step_toward(from, step)
 		if nxt == from:
 			move_target = null
+		guide.on_event("moved", from.distance_to(nxt))
 		world.me["x"] = nxt.x; world.me["z"] = nxt.y
 		world.me["dir"] = atan2(wish.y, wish.x)
 		world.me["anim"] = "walk"
@@ -708,11 +758,14 @@ func _process(delta: float) -> void:
 		if d != null and not world.textures.has(d) and requested_oc.get(pid, "") != d:
 			requested_oc[pid] = d
 			Net.send({"t": "oc_get", "pid": pid})
+	var was_near := near_object
 	near_object = ""
 	for o in world.template.get("objects", []):
 		if Vector2(world.me["x"], world.me["z"]).distance_to(Vector2(o["position"][0], o["position"][2])) <= float(o["radius"]):
 			near_object = o["id"]
 			hint_label.text = "按 E 互动：" + o["name"]
+	if near_object != "" and was_near == "":
+		guide.on_event("near_object", near_object)
 	if near_object == "":
 		hint_label.text = ""
 	if Engine.get_process_frames() % 30 == 0:
@@ -739,7 +792,7 @@ func _run_auto(delta: float) -> void:
 		"goto": move_target = Vector2(float(parts[1]), float(parts[2])); auto_t = 0.1
 		"chat": Net.send({"t": "chat", "text": parts[1].uri_decode()})
 		"emote": Net.send({"t": "emote", "id": parts[1]})
-		"interact": Net.send({"t": "interact", "object": parts[1]})
+		"interact": Net.send({"t": "interact", "object": parts[1]}); guide.on_event("interacted")
 		"view": Profile.view_mode = parts[1]; _apply_view()
 		"create": Net.send({"t": "space_create"})
 		"enter": Net.send({"t": "space_enter", "space": parts[1]})
@@ -772,6 +825,7 @@ func _run_auto(delta: float) -> void:
 		"done":
 			_clear_panels()
 			_send_profile()
+			guide.on_event("profile_ready")
 		"report":
 			var seen := {}
 			for pid in world.players:
@@ -782,4 +836,5 @@ func _run_auto(delta: float) -> void:
 				"me": {"x": snappedf(world.me["x"], 0.01), "z": snappedf(world.me["z"], 0.01)}, "players": seen,
 				"view": Profile.view_mode, "npcs": world.npc_view.size(), "clock": world.clock,
 				"objects": world.objects, "chat": chat_log.get_parsed_text().right(300), "nick": Profile.nick,
-				"oc_bytes": Profile.oc_png.size(), "fps": Engine.get_frames_per_second(), "rtt": Net.rtt_ms}))
+				"oc_bytes": Profile.oc_png.size(), "fps": Engine.get_frames_per_second(), "rtt": Net.rtt_ms,
+				"guide": {"status": guide.status, "seen": guide.seen, "showing": guide._current.get("key", "")}}))

@@ -72,6 +72,16 @@ class Geometry:
         return (round(p["origin"][0] + cell[0] * p["cell_step"][0], 2), round(p["origin"][2] + cell[1] * p["cell_step"][2], 2))
 
 
+# 新人引导「开始生活」章 (Onboarding Progress, chapter "life"; see docs/development/GLOSSARY.md).
+# Stored against the LAB player, so Web, Windows and Android share one record.
+GUIDE_STATUSES = ("active", "paused", "completed", "skipped")
+GUIDE_FINISHED = ("completed", "skipped", "veteran")
+GUIDE_MAX_SEEN = 32
+GUIDE_KEY = re.compile(r"^[a-z0-9][a-z0-9._-]{0,23}$")
+# Players last active before the guide shipped are treated as veterans (2026-11-25 00:00 UTC+8).
+GUIDE_ROLLOUT_AT = 1795536000.0
+
+
 @dataclass
 class Conn:
     ws: object
@@ -286,7 +296,45 @@ class Hub:
                 "players": [self.player_view(m) for m in self.members(c.space) if m.pid != c.pid],
                 "objects": self.objects_state(c.space), "npcs": self.npcs(c.space),
                 "chat": list(self.chat.get(c.space, [])), "spaces": self.visible_spaces(c.pid),
-                "clock": self.clock(c.space), "emotes": sorted(self.emotes), "tick_hz": TICK_HZ}
+                "clock": self.clock(c.space), "emotes": sorted(self.emotes), "tick_hz": TICK_HZ,
+                "guide": self.guide_state(c)}
+
+    # ------------------------------------------------------------------ life guide
+    def guide_state(self, c: Conn) -> dict:
+        row = self.store.one("SELECT status, seen FROM life_guide WHERE pid=?", (c.pid,))
+        if not row:
+            rec = self.store.one("SELECT nickname, updated_at FROM players WHERE pid=?", (c.pid,))
+            veteran = bool(rec and rec["nickname"] and float(rec["updated_at"] or 0) < GUIDE_ROLLOUT_AT)
+            self.store.exec("INSERT OR IGNORE INTO life_guide(pid,status,seen,updated_at) VALUES(?,?,?,?)",
+                            (c.pid, "veteran" if veteran else "new", "[]", time.time()))
+            row = self.store.one("SELECT status, seen FROM life_guide WHERE pid=?", (c.pid,))
+        try:
+            seen = [k for k in json.loads(row["seen"]) if isinstance(k, str)]
+        except ValueError:
+            seen = []
+        return {"status": row["status"], "seen": seen}
+
+    async def on_guide(self, c: Conn, m: dict, now: float) -> None:
+        """Client reports a finished step, a status change or a reset ("重新查看")."""
+        state = self.guide_state(c)
+        status, seen = state["status"], state["seen"]
+        if m.get("reset") is True:
+            status, seen = "active", []
+        add = m.get("seen", [])
+        if not isinstance(add, list):
+            raise ValueError("seen must be a list")
+        for key in add[:GUIDE_MAX_SEEN]:
+            if isinstance(key, str) and GUIDE_KEY.match(key) and key not in seen and len(seen) < GUIDE_MAX_SEEN:
+                seen.append(key)
+        if "status" in m:
+            if m["status"] not in GUIDE_STATUSES:
+                raise ValueError("unknown status")
+            status = m["status"]
+        elif status == "new" and seen:
+            status = "active"
+        self.store.exec("UPDATE life_guide SET status=?, seen=?, updated_at=? WHERE pid=?",
+                        (status, json.dumps(seen), now, c.pid))
+        self.send(c, {"t": "guide", "status": status, "seen": seen})
 
     def space_info(self, row) -> dict:
         return {"id": row["id"], "kind": row["kind"], "title": row["title"], "template": row["template"],

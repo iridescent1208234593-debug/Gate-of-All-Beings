@@ -52,6 +52,9 @@ CREATE TABLE IF NOT EXISTS audit(
 CREATE TABLE IF NOT EXISTS security_events(
   id INTEGER PRIMARY KEY AUTOINCREMENT, at REAL NOT NULL, kind TEXT NOT NULL, ip_hint TEXT NOT NULL DEFAULT '',
   code_id TEXT, detail TEXT NOT NULL DEFAULT '{}');
+CREATE TABLE IF NOT EXISTS life_guide(
+  pid TEXT PRIMARY KEY, status TEXT NOT NULL CHECK(status IN ('new','active','paused','completed','skipped','veteran')),
+  seen TEXT NOT NULL DEFAULT '[]', updated_at REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS art_assets(
   id TEXT PRIMARY KEY, uploader TEXT NOT NULL, category TEXT NOT NULL, filename TEXT NOT NULL,
   mime TEXT NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL, bytes INTEGER NOT NULL,
