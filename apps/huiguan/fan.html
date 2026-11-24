@@ -272,7 +272,7 @@ button{font-family:inherit}
     <p class="empty review-empty-filter" id="reviewEmptyFilter" hidden>当前待审窗口没有这类稿件。</p>
     <details class="fan-history" id="fanHistory" hidden>
       <summary>公开版本与审核记录（仅管理员）</summary>
-      <p>按画廊编号或完整角色名定位设表，包括不再公开的设表。也可从现有画廊卡片或待审列表直接打开。不恢复旧版或更改作者的公开设置。符合条件的退回稿可由管理员填写理由送回复审。</p>
+      <p>按画廊编号或完整角色名定位设表，包括不再公开的设表。可核对批准公开的审核人、时间与公开版本；历史缺少记录时会明确标出。也可从现有画廊卡片或待审列表直接打开。不恢复旧版或更改作者的公开设置。符合条件的退回稿可由管理员填写理由送回复审。</p>
       <form id="fanHistoryForm">
         <label>查找方式
           <select id="fanHistoryMode">
@@ -370,7 +370,7 @@ button{font-family:inherit}
 <script src="reactions-fx.js?v=20261027z"></script>
 <script src="group-reminder.js?v=20261106c"></script>
 <script src="legal-consent.js?v=20261106" data-require-consent></script>
-<script src="fan-history.js?v=20261124-review"></script>
+<script src="fan-history.js?v=20261124-approval"></script>
 <script>
 const PAGE = 12;
 const $ = id => document.getElementById(id);
