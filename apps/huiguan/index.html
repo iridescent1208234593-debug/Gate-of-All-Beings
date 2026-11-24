@@ -1490,7 +1490,7 @@
     </div>
 
     <!-- ══════ 按钮 ══════ -->
-    <p class="hint registration-submit-hint">登记和画廊公开是两步。提交登记不会直接把新设表放上同人画廊；已公开设表修改后会重新审核。</p>
+    <p class="hint registration-submit-hint">登记和画廊公开是两步。提交登记不会直接把新设表放上同人画廊；已送审设表修改了画廊内容后会重新审核，审核通过前暂不在画廊展示。</p>
     <div id="characterTextDraft" hidden>
       <p class="hint">此标签页有一份未提交的文字草稿（保留 12 小时）。恢复会替换本页相应文字，不会改动已登记的角色；不保存编号、姓名、立绘、备注或能力选择。</p>
       <button id="characterTextDraftRestore" type="button" class="btn">恢复文字草稿</button>
@@ -4142,9 +4142,18 @@ async function postSave(data, html, previousCode = '', version = OCRevisions.ver
       throw window.ocSaveProblem?.(result || {}, r.status) || new Error('这次没有保存成功，请刷新页面后重试。');
     }
     if (result.character) OCRevisions.renamed(previousCode, result.character);
-    document.getElementById('successMsg').classList.add('show');
-    document.getElementById('successMsg').innerHTML = '登记成功！<a href="' + result.url + '" target="_blank">查看展示页</a>';
-    showToast('success', '✔ 登记成功！「' + escapeHtml(data.name || data.code) + '」已收录至会馆名册。', 7000);
+    const success = document.getElementById('successMsg');
+    const reviewPending = result.fan_review_pending === true;
+    const reviewNotice = '画廊内容已送回复审，审核通过前暂不在同人画廊展示。';
+    const pageLink = document.createElement('a');
+    pageLink.href = result.url;
+    pageLink.target = '_blank';
+    pageLink.rel = 'noopener';
+    pageLink.textContent = '查看展示页';
+    success.replaceChildren(reviewPending ? '登记成功！' + reviewNotice + ' ' : '登记成功！', pageLink);
+    success.classList.add('show');
+    showToast('success', reviewPending ? '✔ 登记成功！' + reviewNotice
+      : '✔ 登记成功！「' + escapeHtml(data.name || data.code) + '」已收录至会馆名册。', 7000);
     pendingSave = null;
     characterTextDraft?.clearTicket(draftTicket);
     const local = loadAll();

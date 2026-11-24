@@ -91,8 +91,9 @@ def test_owner_and_reviewer_previews_do_not_use_public_code_lookup(tmp_path, mon
     owner_ident = {'kind':'local','uid':ids['owner']}
     with site.character_store().transaction(write=True) as store:
         store.save({'kind':'local','uid':ids['other']}, {'code':'shared-code','data':dict(match, age='OTHER_AGE')})
+        before = store.get(owner_ident, 'shared-code')['data']
         store.save(owner_ident, {'code':'shared-code','data':match})
-        site.sync_fan_characters(store.conn, owner_ident, 'shared-code', match)
+        site.sync_fan_characters(store.conn, owner_ident, 'shared-code', match, previous_data=before)
     new_version = current_version(fan_id)
     assert request(review, 'reviewer')[0] == 409
     new_url = versioned(fan_id,new_version)
@@ -103,8 +104,9 @@ def test_owner_and_reviewer_previews_do_not_use_public_code_lookup(tmp_path, mon
         assert hidden not in page
     match['age'] = 'OWNER_AGE_NEW'
     with site.character_store().transaction(write=True) as store:
+        before = store.get(owner_ident, 'shared-code')['data']
         store.save(owner_ident, {'code':'shared-code','data':match})
-        site.sync_fan_characters(store.conn, owner_ident, 'shared-code', match)
+        site.sync_fan_characters(store.conn, owner_ident, 'shared-code', match, previous_data=before)
     assert request(new_url,'reviewer')[0] == 409
     newest = versioned(fan_id,current_version(fan_id))
     assert 'OWNER_AGE_NEW' in request(newest,'reviewer')[2]

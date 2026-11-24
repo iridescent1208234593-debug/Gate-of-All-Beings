@@ -20,6 +20,7 @@
     review_approve: "审核通过", review_reject: "审核退回", moderation_reopen: "管理员送回复审",
     owner_submit: "提交公开审核", owner_publish: "提交公开",
     owner_unpublish: "作者取消公开", owner_edit: "作者修改设表",
+    owner_revision_submitted: "作者修改设表并送回复审",
     owner_link_removed: "作者移除设表关联", admin_link_removed: "管理员移除设表关联",
   };
   const roles = { author: "作者", owner: "作者", admin: "管理员", elder: "长老", reviewer: "审核员", system: "系统" };

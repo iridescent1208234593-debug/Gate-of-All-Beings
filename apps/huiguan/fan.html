@@ -293,7 +293,7 @@ button{font-family:inherit}
   <div class="publish-bar" id="publishBar" hidden>
     <div class="pb-text">
       <strong>将已登记的设表送审</strong>
-      勾选下方角色，一键提交到同人画廊。审核员审核通过后会出现在画廊里；修改已公开的设表后也会重新审核。
+      勾选下方角色，一键提交到同人画廊。审核员审核通过后会出现在画廊里；已送审设表的画廊内容改动后会重新审核，通过前暂不展示。
       <div class="fan-legal" id="fanLegal"><a href="/terms.html" target="_blank" rel="noopener">用户须知</a> · <a href="/privacy.html" target="_blank" rel="noopener">隐私政策</a></div>
     </div>
     <button type="button" class="pb-btn" id="publishBtn" disabled>送审到同人画廊</button>
@@ -370,7 +370,7 @@ button{font-family:inherit}
 <script src="reactions-fx.js?v=20261027z"></script>
 <script src="group-reminder.js?v=20261106c"></script>
 <script src="legal-consent.js?v=20261106" data-require-consent></script>
-<script src="fan-history.js?v=20261123a"></script>
+<script src="fan-history.js?v=20261124-review"></script>
 <script>
 const PAGE = 12;
 const $ = id => document.getElementById(id);
@@ -654,8 +654,8 @@ function myCardHTML(c, idx) {
     <div class="card-body">
       <div class="card-name">${esc(c.name)}</div>
       ${published ? `<div><span class="status ${status}">${STATUS_TEXT[status] || '审核中'}</span></div>` : '<div class="card-meta">未公开 · 点击勾选</div>'}
-      ${status === 'rejected' && rec.review_note ? `<div class="reject-note">退回理由：${esc(rec.review_note)}<br>修改设表后会自动重新提交审核。</div>` : ''}
-      ${status === 'pending' ? '<div class="card-meta">审核通过后出现在画廊</div>' : ''}
+      ${status === 'rejected' && rec.review_note ? `<div class="reject-note">退回理由：${esc(rec.review_note)}<br>修改画廊内容后会自动重新提交审核。</div>` : ''}
+      ${status === 'pending' ? '<div class="card-meta">审核通过前暂不在画廊展示</div>' : ''}
       <div class="card-actions">
         <a class="mini-btn" href="${esc(ownedHref(c.code))}" data-stop>查看设表</a>
         ${published ? `<a class="mini-btn" href="${esc(editHref(c.code))}" data-stop>编辑</a><button type="button" class="mini-btn danger" data-unpublish="${idx}">取消公开</button>` : ''}
@@ -777,22 +777,26 @@ $('publishBtn').onclick = () => {
 // ====== 审核台 ======
 let queueBusy = false, queueRefreshAgain = false;
 const pendingReviews = new Set();
+function reviewControlDisabled(control, review, busy) {
+  return busy || ((control.hasAttribute('data-approve') || control.hasAttribute('data-reject')) && review.can_approve === false);
+}
 function reviewItemHTML(c) {
   rowCache.set(String(c.id), c);
   const meta = [c.type, c.species, c.gender, c.faction].filter(Boolean).join(' · ');
   const opts = Object.keys(ART_LABEL).map(k => `<option value="${k}"${(c.art_source || '') === k ? ' selected' : ''}>立绘：${ART_LABEL[k]}</option>`).join('');
   const reviewType = c.type === '配色海报' ? 'poster' : !c.image_data ? 'text' : c.art_source === 'ai' ? 'ai' : 'art';
-  return `<div class="review-item" data-review-type="${reviewType}" data-review="${c.id}" data-review-version="${esc(c.review_version)}">
+  return `<div class="review-item" data-review-type="${reviewType}" data-review="${c.id}" data-review-version="${esc(c.review_version)}" data-independent="${c.needs_independent_review === true}" data-can-approve="${c.can_approve !== false}">
     <div class="review-thumb">${c.image_data ? previewImg(c.image_data, c.name) : '纯文字设'}</div>
     <div class="review-main">
       <div class="t">${esc(c.name)} <span class="m">— ${esc(c.user_name || '匿名')}</span></div>
       ${meta ? `<div class="m">${esc(meta)}</div>` : ''}
       ${c.story ? `<div class="s">${esc(c.story)}</div>` : ''}
+      ${c.needs_independent_review === true ? `<div class="m">${c.can_approve === false ? '这是你提交的修订，需要其他审核员处理。' : '这是修改后重新送审的版本。'}</div>` : ''}
       <div class="review-ops">
         ${c.type === '配色海报' ? '' : `<a class="mini-btn" href="${esc(reviewHref(c))}" target="_blank" rel="noopener">查看待审设表</a>`}
         ${c.image_data ? `<select aria-label="立绘来源" data-art>${opts}</select>` : ''}
-        <button type="button" class="pb-btn green" data-approve="${c.id}">通过</button>
-        <button type="button" class="pb-btn ghost" data-reject="${c.id}">退回…</button>
+        <button type="button" class="pb-btn green" data-approve="${c.id}"${c.can_approve === false ? ' disabled' : ''}>通过</button>
+        <button type="button" class="pb-btn ghost" data-reject="${c.id}"${c.can_approve === false ? ' disabled' : ''}>退回…</button>
         ${currentUser?.logged_in && currentUser.is_admin ? historyButton(c) : ''}
       </div>
     </div>
@@ -826,7 +830,9 @@ async function loadQueue() {
     list.forEach((c, index) => {
       let row = rows.get(String(c.id));
       // Keep unchanged rows, including the reviewer's unsaved art-source selection.
-      if (!row || row.dataset.reviewVersion !== c.review_version) {
+      if (!row || row.dataset.reviewVersion !== c.review_version ||
+          row.dataset.independent !== String(c.needs_independent_review === true) ||
+          row.dataset.canApprove !== String(c.can_approve !== false)) {
         const template = document.createElement('template');
         template.innerHTML = reviewItemHTML(c);
         const next = template.content.firstElementChild;
@@ -834,7 +840,8 @@ async function loadQueue() {
         row = next;
       }
       if (container.children[index] !== row) container.insertBefore(row, container.children[index] || null);
-      row.querySelectorAll('button,select').forEach(el => { el.disabled = pendingReviews.has(String(c.id)); });
+      rowCache.set(String(c.id), c);
+      row.querySelectorAll('button,select').forEach(el => { el.disabled = reviewControlDisabled(el, c, pendingReviews.has(String(c.id))); });
     });
     $('reviewCount').textContent = d.total || 0;
     if (!list.length) container.innerHTML = '<div class="empty">暂时没有待审核的设表 🌿</div>';
@@ -851,10 +858,11 @@ async function loadQueue() {
 async function decide(id, decision, extra) {
   id = String(id);
   if (pendingReviews.has(id)) return false;
+  const reviewed = rowCache.get(id) || {};
+  if (reviewed.can_approve === false) return false;
   pendingReviews.add(id);
   const controls = document.querySelectorAll(`[data-review="${Number(id)}"] button,[data-review="${Number(id)}"] select,[data-reject="${Number(id)}"]`);
   controls.forEach(el => { el.disabled = true; });
-  const reviewed = rowCache.get(String(id)) || {};
   try {
     const d = await postJSON('/api/fan/review/decide', { id: Number(id), decision, review_version: reviewed.review_version, ...extra }).catch(() => ({ error: '网络错误，请稍后再试' }));
     if (!d.ok) {
@@ -867,7 +875,7 @@ async function decide(id, decision, extra) {
     return true;
   } finally {
     pendingReviews.delete(id);
-    controls.forEach(el => { el.disabled = false; });
+    controls.forEach(el => { el.disabled = reviewControlDisabled(el, reviewed, false); });
   }
 }
 function askReject(id, fromGallery) {
@@ -875,14 +883,14 @@ function askReject(id, fromGallery) {
   if (!fromGallery) c.review_version = document.querySelector(`[data-review="${Number(id)}"]`)?.dataset.reviewVersion;
   openModal({
     title: (fromGallery ? '从画廊退回「' : '退回「') + (c.name || '') + '」',
-    body: '写一句理由，作者会在「我的已登记人设」里看到。作者修改设表后会自动重新提交审核。',
+    body: '写一句理由，作者会在「我的已登记人设」里看到。作者修改画廊内容后会自动重新提交审核。',
     input: true, minLength: 2, placeholder: '例如：立绘疑似 AI，请在登记表里把立绘来源改为 AI', okText: '确认退回',
     onOk: note => decide(id, 'reject', { note, review_version: c.review_version }),
   });
 }
 $('reviewList').addEventListener('click', e => {
   const ap = e.target.closest('[data-approve]');
-  if (ap) {
+  if (ap && !ap.disabled) {
     const row = ap.closest('.review-item');
     const sel = row.querySelector('[data-art]');
     const target = { review_version: row.dataset.reviewVersion, ...(sel ? { art_source: sel.value } : {}) };
@@ -895,7 +903,7 @@ $('reviewList').addEventListener('click', e => {
     return;
   }
   const rj = e.target.closest('[data-reject]');
-  if (rj) askReject(rj.dataset.reject, false);
+  if (rj && !rj.disabled) askReject(rj.dataset.reject, false);
 });
 function syncQueueIfVisible() {
   if (document.visibilityState === 'visible' && $('reviewDesk').open) loadQueue();
