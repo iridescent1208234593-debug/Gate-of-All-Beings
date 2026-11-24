@@ -3978,7 +3978,13 @@ function showToast(type, html, ms) {
 })();
 
 // ========== 提交 ==========
-document.getElementById('charForm').addEventListener('submit', function(e) {
+const registrationForm = document.getElementById('charForm');
+let registrationFormRevision = 0;
+for (const event of ['input', 'change', 'reset']) {
+  registrationForm.addEventListener(event, () => { registrationFormRevision++; });
+}
+document.getElementById('characterTextDraftRestore').addEventListener('click', () => { registrationFormRevision++; });
+registrationForm.addEventListener('submit', function(e) {
   e.preventDefault();
   if (document.getElementById('btnSubmit').disabled) return;
   window.clearSubmissionProblem?.();
@@ -4039,6 +4045,7 @@ function generateAndSave(data, colors) {
 async function postSave(data, html, previousCode = '', version = OCRevisions.version(previousCode || data.code), draftTicket = null) {
   const button = document.getElementById('btnSubmit');
   if (button.disabled) return false;
+  const submittedFormRevision = registrationFormRevision;
   button.disabled = true;
   const label = button.textContent;
   button.textContent = '正在保存…';
@@ -4077,7 +4084,8 @@ async function postSave(data, html, previousCode = '', version = OCRevisions.ver
     const local = loadAll();
     const index = local.findIndex(item => item.code === data.code);
     if (index >= 0) { local[index] = data; saveAll(local); }
-    resetForm();
+    // An older success must not erase input typed, restored, or opened while it was pending.
+    if (registrationFormRevision === submittedFormRevision) resetForm();
     renderList();
     return true;
   } catch (error) {
