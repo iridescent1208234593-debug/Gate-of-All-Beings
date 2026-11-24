@@ -22,26 +22,74 @@ jobs:
   regression:
     # A distinct name keeps the merge result's check apart from the head branch's push run.
     name: ${{ github.event_name == 'pull_request' && 'merge-gate' || 'regression' }}
-    runs-on: ubuntu-latest
+    # One short-lived, isolated Linux runner per job for this reviewed same-repository PR.
+    # Routing is not an authorization boundary: keep the custom runner offline otherwise.
+    runs-on: >-
+      ${{ github.repository == 'iridescent1208234593-debug/Gate-of-All-Beings'
+        && github.repository_id == '1405756808'
+        && ((github.event_name == 'push' && github.ref == 'refs/heads/fix/fan-approval-attribution')
+          || (github.event_name == 'pull_request'
+            && github.ref == 'refs/pull/201/merge'
+            && github.event.number == 201
+            && github.event.pull_request.head.repo.id == 1405756808
+            && github.event.pull_request.head.ref == 'fix/fan-approval-attribution'
+            && github.event.pull_request.base.repo.id == 1405756808
+            && github.event.pull_request.base.ref == 'master'
+            && github.event.pull_request.base.sha == '5154cb2f1703c8759e094ae61e7bbba8511bcef1'))
+        && 'gate-pr201-full-5ed4c8a3' || 'ubuntu-latest' }}
     timeout-minutes: 45
     # Every build and test step uses disposable storage; CI never sees production data.
     env:
       IRIDESCENTLY_ENVIRONMENT: test
     steps:
+      - name: Verify disposable Linux runner prerequisites
+        if: runner.environment == 'self-hosted'
+        run: |
+          test "$(uname -s)" = Linux
+          test "$(id -u)" -ne 0
+          test ! -e /var/run/docker.sock
+          ffmpeg -version
+          python - <<'PYVER'
+          import sys
+          import PIL
+          assert sys.version_info[:2] == (3, 12), sys.version
+          assert PIL.__version__ == "12.3.0", PIL.__version__
+          PYVER
+          node -e 'if (process.versions.node.split(".")[0] !== "22") process.exit(1); console.log(process.version)'
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: ${{ runner.environment == 'github-hosted' }}
+          fetch-depth: ${{ runner.environment == 'self-hosted' && 2 || 1 }}
       - name: Name the merge checkout
         # The merge commit is checked out detached; release manifests must record a branch.
         if: github.event_name == 'pull_request'
         run: git checkout -B "${GITHUB_REF#refs/}"
+      - name: Verify the assigned GitHub checkout
+        if: runner.environment == 'self-hosted'
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain)"
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            test "$GITHUB_REF" = refs/pull/201/merge
+            test "$(git rev-parse HEAD^1)" = 5154cb2f1703c8759e094ae61e7bbba8511bcef1
+            expected_pr_head=$(python -c 'import json,os; print(json.load(open(os.environ["GITHUB_EVENT_PATH"]))["pull_request"]["head"]["sha"])')
+            test "$(git rev-parse HEAD^2)" = "$expected_pr_head"
+          else
+            test "$GITHUB_EVENT_NAME" = push
+            test "$GITHUB_REF" = refs/heads/fix/fan-approval-attribution
+          fi
       - name: Select disposable storage
         # The runner context is not available in job-level env, so it is set here.
         run: echo "IRIDESCENTLY_STORAGE_ROOT=$RUNNER_TEMP/iridescently-storage" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
+        if: runner.environment == 'github-hosted'
         with:
           python-version: '3.12'
       - name: Install Python test image dependency
+        if: runner.environment == 'github-hosted'
         run: python -m pip install Pillow==12.3.0
       - uses: actions/setup-node@v4
+        if: runner.environment == 'github-hosted'
         with:
           node-version: '22'
           cache: npm
@@ -60,12 +108,36 @@ jobs:
           done
           # activation-core is a pnpm project (pnpm-lock.yaml), installed for its route tests.
           npx --yes pnpm@10.28.0 install --frozen-lockfile --dir apps/activation-core
-      - run: npx playwright install --with-deps chromium
+      - if: runner.environment == 'github-hosted'
+        run: npx playwright install --with-deps chromium
+      - name: Verify preinstalled Chromium matches the locked Playwright package
+        if: runner.environment == 'self-hosted'
+        run: |
+          node <<'NODE'
+          const assert = require('node:assert/strict');
+          const { readFileSync, accessSync, constants } = require('node:fs');
+          const { dirname, join } = require('node:path');
+          const { chromium } = require('playwright');
+          const pkg = dirname(require.resolve('playwright-core/package.json'));
+          const { browsers } = JSON.parse(readFileSync(join(pkg, 'browsers.json'), 'utf8'));
+          for (const name of ['chromium', 'chromium-headless-shell']) {
+            assert.equal(browsers.find(browser => browser.name === name)?.revision, '1248');
+          }
+          const browsersPath = process.env.PLAYWRIGHT_BROWSERS_PATH;
+          assert.ok(browsersPath && browsersPath.startsWith('/'));
+          const binary = join(browsersPath, 'chromium_headless_shell-1248', 'chrome-headless-shell-linux64', 'chrome-headless-shell');
+          accessSync(binary, constants.X_OK);
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            try { console.log(browser.version()); } finally { await browser.close(); }
+          })().catch(error => { console.error(error); process.exitCode = 1; });
+          NODE
       - name: Shell lifecycle browser fixture
         run: node apps/shell/tests/lifecycle.mjs
       - name: Hall registration isolated browser
         run: node apps/huiguan/tests/register-flow.cjs
       - name: Install gallery preview encoder
+        if: runner.environment == 'github-hosted'
         run: |
           sudo apt-get update
           sudo apt-get install --yes ffmpeg
