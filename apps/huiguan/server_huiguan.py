@@ -1211,15 +1211,32 @@ def fan_fields(cd):
     }
 
 
-def fan_content_changed_sql(prefix=""):
-    """SQL 条件：本行的公开内容与将写入的值不同（参数顺序同 FAN_SYNC_COLUMNS）。SET 子句里引用的是旧值。"""
-    return "(" + " OR ".join(f"COALESCE({prefix}{col},'')!=?" for col in FAN_SYNC_COLUMNS) + ")"
+# Saved OC fields rendered in the showcase/reviewer view but absent from fan_characters.
+FAN_REVIEW_DETAILS = ("age", "ageNum", "height", "species_type", "personality", "likes", "dislikes", "food",
+                      "weapon", "org", "intro", "notes", "customDetails", "images",
+                      "colorPrimary", "colorAccent", "colorIndex", "avatar_asset_id", "avatar_display_shape")
+
+# A transactional audit action distinguishes new revisions from original submissions without
+# interpreting old history as a new obligation or storing a second moderation state.
+FAN_REVISION_ACTION = "owner_revision_submitted"
+FAN_REVISION_PENDING_SQL = """COALESCE((
+    SELECT action FROM fan_history_events WHERE card_id=fan_characters.id
+      AND action IN ('owner_revision_submitted','review_approve') ORDER BY id DESC LIMIT 1
+), '') = 'owner_revision_submitted'"""
 
 
-def fan_review_after_edit_sql(auto_approve):
-    """内容有变就重新进入审核（审核员 / 管理员自己的改动直接通过）；内容没变保持原状态。"""
-    target = "'approved'" if auto_approve else "'pending'"
-    return f"review_status=CASE WHEN {fan_content_changed_sql()} THEN {target} ELSE review_status END"
+def fan_needs_independent_review(conn, card_id):
+    return bool(conn.execute(f"SELECT {FAN_REVISION_PENDING_SQL} FROM fan_characters WHERE id=?", (card_id,)).fetchone()[0])
+
+
+def fan_revision_art(existing, submitted):
+    # Author cannot clear a prior AI designation by changing their declaration.
+    return "ai" if "ai" in (existing["art_source"], submitted) else submitted
+
+
+def fan_review_content_changed(row, fields, code, art, details_changed=False):
+    return (details_changed or (row["code"] or "") != code or (row["art_source"] or "") != art
+            or any((row[col] or "") != fields[col] for col in FAN_SYNC_COLUMNS))
 
 
 FAN_NAME_TAKEN_ERROR = "「%s」已有人设表使用，请换一个名字"
@@ -1246,33 +1263,37 @@ def _fan_name_conflict(conn, name, kind, uid):
     return other and not mine
 
 
-def sync_fan_characters(conn, ident, code, cd, previous_code=None, auto_approve=False):
-    """所有者保存人设后，原位刷新其画廊记录（不改公开状态、不新建副本）；只匹配本人 (kind, uid)。
-
-    内容有改动时该记录回到待审核（auto_approve=True 时直接通过），审核前不在画廊展示。
-    owner 自己声明 AI 时同步为 AI；已标为 AI 的记录不会因为 owner 改声明而自动变回非 AI，交给审核员。
-    """
+def sync_fan_characters(conn, ident, code, cd, previous_code=None, *, previous_data=None):
+    """Update the same owned gallery row and requeue material revisions for a different reviewer."""
     if not code or not isinstance(cd, dict):
-        return 0
+        return False
     fields = fan_fields(cd)
     if not fields["name"]:
-        return 0
+        return False
+    previous_data = previous_data if isinstance(previous_data, dict) else None
+    details_changed = previous_data is not None and any(
+        (previous_data.get(key) if previous_data.get(key) not in (None, "") else None)
+        != (cd.get(key) if cd.get(key) not in (None, "") else None) for key in FAN_REVIEW_DETAILS
+    )
     codes = [code] + ([previous_code] if previous_code and previous_code != code else [])
     qm = ",".join("?" * len(codes))
+    rows = conn.execute(f"""SELECT * FROM fan_characters WHERE user_kind=? AND user_uid=?
+                        AND COALESCE(type,'')!='配色海报' AND code IN ({qm})""",
+                        (ident["kind"], ident["uid"], *codes)).fetchall()
     values = [fields[col] for col in FAN_SYNC_COLUMNS]
-    sets = ", ".join(f"{col}=?" for col in FAN_SYNC_COLUMNS)
-    art = fan_art_source(cd)
-    target = f"user_kind=? AND user_uid=? AND COALESCE(type,'')!='配色海报' AND code IN ({qm})"
-    before = conn.execute(f"SELECT * FROM fan_characters WHERE {target}",
-                          (ident["kind"], ident["uid"], *codes)).fetchall()
-    cur = conn.execute(
-        f"UPDATE fan_characters SET {sets}, code=?, updated_at=?, {fan_review_after_edit_sql(auto_approve)}, "
-        "art_source=CASE WHEN ?='ai' OR COALESCE(art_source,'')='ai' THEN 'ai' ELSE ? END "
-        f"WHERE user_kind=? AND user_uid=? AND COALESCE(type,'')!='配色海报' AND code IN ({qm})",
-        values + [code, fan_revision_time()] + values + [art, art, ident["kind"], ident["uid"]] + codes)
-    for row in before:
-        fan_gallery_history.record(conn, ident, "owner_edit", row, fan_gallery_history.load(conn, row["id"]))
-    return cur.rowcount
+    assignments = ", ".join(f"{col}=?" for col in FAN_SYNC_COLUMNS)
+    public_pending = False
+    for row in rows:
+        art = fan_revision_art(row, fan_art_source(cd))
+        if not fan_review_content_changed(row, fields, code, art, details_changed):
+            continue
+        conn.execute(f"""UPDATE fan_characters SET {assignments}, code=?, updated_at=?, art_source=?,
+                        review_status='pending' WHERE id=?""",
+                     values + [code, fan_revision_time(), art, row["id"]])
+        fan_gallery_history.record(conn, ident, FAN_REVISION_ACTION, row, fan_gallery_history.load(conn, row["id"]),
+                                   explicit=True)
+        public_pending |= bool(row["is_public"])
+    return public_pending
 
 def character_store():
     return oc_store.Store(Path(DATA_FILE).parent, lambda: oc_store.open_database(USER_DB),
@@ -3279,7 +3300,6 @@ class Handler(BaseStaticHandler):
             self._oc_action_error(400, "invalid_oc_avatar", "头像图片无效、过期或无法读取，请重新选择头像。", "avatar_asset_id")
             return
 
-        auto_approve = self._can_review_fan(ident)
         html_ref = store_showcase_html(html) if html else None
         for field in ("image", "images"):
             try:
@@ -3296,14 +3316,16 @@ class Handler(BaseStaticHandler):
         if html_ref: rec["html_ref"] = html_ref
         awarded = []
         with character_store().transaction(write=True) as session:
+            prior = session.get(ident, previous_code or code)
             saved, created = session.save(ident, rec, body.get("version"), previous_code)
-            sync_fan_characters(session.conn, ident, code, data_field, previous_code, auto_approve=auto_approve)
+            pending = sync_fan_characters(session.conn, ident, code, data_field, previous_code,
+                                          previous_data=(prior or {}).get("data"))
             if created:
                 custom = bool(data_field.get("colorPrimary")) and data_field.get("colorIndex") in (None, "", -1)
                 awarded = account_progress.award_sheet(session.conn, ident["kind"], ident["uid"],
                                                        ident.get("nickname") or ident.get("username") or "", code, custom)
         self._json(200, {"ok": True, "url": f"/show.html?code={urllib.parse.quote(code)}",
-                         "character": saved, "version": saved.get("_oc_version"),
+                         "character": saved, "version": saved.get("_oc_version"), "fan_review_pending": pending,
                          "earned": round(sum(a["amount"] for a in awarded), 1), "awarded": awarded,
                          **self._level_fields(ident)})
 
@@ -3348,7 +3370,6 @@ class Handler(BaseStaticHandler):
                 finally:
                     _chk.close()
             new_chars.append({"code": c.get("code", ""), "data": c})
-        auto_approve = self._can_review_fan(ident)
         with character_store().transaction(write=True) as session:
             old = session.list(ident)
             old_map = {c["code"]: c for c in old}
@@ -3364,8 +3385,11 @@ class Handler(BaseStaticHandler):
                 if rec["code"] not in incoming:
                     fan_gallery_history.unpublish_link(session.conn, ident, "owner_link_removed",
                                                        (ident["kind"], str(ident["uid"])), rec["code"])
-            for rec in saved: sync_fan_characters(session.conn, ident, rec["code"], rec["data"], auto_approve=auto_approve)
-        self._json(200, {"ok": True, "characters": saved})
+            pending = False
+            for rec in saved:
+                pending |= sync_fan_characters(session.conn, ident, rec["code"], rec["data"],
+                                               previous_data=old_map.get(rec["code"], {}).get("data"))
+        self._json(200, {"ok": True, "characters": saved, "fan_review_pending": pending})
 
     @oc_api
     def _api_owned_character(self, qs):
@@ -5592,7 +5616,7 @@ class Handler(BaseStaticHandler):
                 self._json(400, {"error": "海报图片无效或超过8MB"}); return
         user_name = ident.get("nickname") or ident.get("username") or ""
         updated_character = None
-        auto_approve = self._can_review_fan(ident)
+        pending = False
         with DB_LOCK, character_store().transaction(write=True) as session:
             character = session.get(ident, char_code) if char_code else None
             if char_code and character is None:
@@ -5606,10 +5630,11 @@ class Handler(BaseStaticHandler):
                  primary_name, accent_name, primary, accent, state_json, img_ref, 0, now_iso(), now_iso()))
             pid = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
             if character is not None:
+                previous_data = dict(character["data"])
                 character["data"].update(colorPrimary=primary, colorAccent=accent, colorIndex=-1)
                 updated_character, _ = session.save(ident, character, body.get("character_version"))
-                sync_fan_characters(conn, ident, char_code, character["data"], auto_approve=auto_approve)
-        self._json(200, {"ok": True, "id": pid, "character": updated_character})
+                pending = sync_fan_characters(conn, ident, char_code, character["data"], previous_data=previous_data)
+        self._json(200, {"ok": True, "id": pid, "character": updated_character, "fan_review_pending": pending})
 
     def _api_posters_delete(self):
         ident = self._require_ident()
@@ -5959,7 +5984,7 @@ class Handler(BaseStaticHandler):
         if is_public and review == "rejected":
             review = "pending"  # 重新公开 = 重新提交审核
         conn.execute("UPDATE fan_characters SET is_public=?, updated_at=?, review_status=? WHERE id=?",
-                     (is_public, now_iso(), review, fid))
+                     (is_public, fan_revision_time(), review, fid))
         if row["type"] != "配色海报":
             action = "owner_publish" if is_public else "owner_unpublish"
             fan_gallery_history.record(conn, ident, action, row, fan_gallery_history.load(conn, fid))
@@ -6034,26 +6059,27 @@ class Handler(BaseStaticHandler):
                         "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND code=? AND COALESCE(type,'')!='配色海报' ORDER BY id LIMIT 1",
                         (ident["kind"], ident["uid"], code)
                     ).fetchone() or conn.execute(
-                        "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND name=? AND COALESCE(code,'')='' ORDER BY id LIMIT 1",
+                        "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND name=? AND COALESCE(code,'')='' AND COALESCE(type,'')!='配色海报' ORDER BY id LIMIT 1",
                         (ident["kind"], ident["uid"], fields["name"])
                     ).fetchone()
                     if existing:
-                        # 已公开：跳过；曾公开后取消：重新公开。两种情况都顺带刷新为最新资料。
-                        # 已通过且内容没变的保持通过；被退回的、内容变了的重新进入审核。
                         sets = ", ".join(f"{col}=?" for col in FAN_SYNC_COLUMNS)
                         old_gallery = fan_gallery_history.load(conn, existing["id"])
-                        conn.execute(
-                            f"UPDATE fan_characters SET {sets}, code=?, is_public=1, updated_at=?, "
-                            f"review_status=CASE WHEN review_status='approved' AND NOT {fan_content_changed_sql()} THEN 'approved' ELSE ? END, "
-                            "art_source=CASE WHEN ?='ai' OR COALESCE(art_source,'')='ai' THEN 'ai' ELSE ? END WHERE id=?",
-                            values + [to_str(code), fan_revision_time()] + values + [review, art, art, existing["id"]]
-                        )
-                        new_gallery = fan_gallery_history.load(conn, existing["id"])
-                        if old_gallery["type"] != "配色海报":
-                            action = "owner_edit" if existing["is_public"] else "owner_publish"
-                            fan_gallery_history.record(conn, ident, action, old_gallery, new_gallery)
-                        if new_gallery["review_status"] == "pending":
-                            pending += 1
+                        art = fan_revision_art(old_gallery, art)
+                        changed = fan_review_content_changed(old_gallery, fields, to_str(code), art)
+                        independent = changed or fan_needs_independent_review(conn, existing["id"])
+                        status = ("pending" if independent else
+                                  "approved" if old_gallery["review_status"] == "approved" else review)
+                        if changed or not existing["is_public"] or status != old_gallery["review_status"]:
+                            conn.execute(
+                                f"""UPDATE fan_characters SET {sets}, code=?, is_public=1, updated_at=?,
+                                review_status=?, art_source=? WHERE id=?""",
+                                values + [to_str(code), fan_revision_time(), status, art, existing["id"]]
+                            )
+                            action = FAN_REVISION_ACTION if changed else "owner_publish"
+                            fan_gallery_history.record(conn, ident, action, old_gallery,
+                                                       fan_gallery_history.load(conn, existing["id"]), explicit=changed)
+                        pending += status == "pending"
                         if existing["is_public"]:
                             skipped += 1
                         else:
@@ -6112,14 +6138,24 @@ class Handler(BaseStaticHandler):
         conn = db()
         try:
             rows = conn.execute(
-                """SELECT id, user_name, name, type, species, gender, faction, ability, appearance, story, image_data,
-                          code, art_source, review_status, created_at, updated_at
+                f"""SELECT id, user_name, name, type, species, gender, faction, ability, appearance, story, image_data,
+                           code, art_source, review_status, created_at, updated_at,
+                           ({FAN_REVISION_PENDING_SQL}) AS needs_independent_review,
+                           (user_kind=? AND user_uid=?) AS is_own_revision
                    FROM fan_characters WHERE is_public=1 AND review_status='pending'
-                   ORDER BY updated_at, id LIMIT 100""").fetchall()
+                   ORDER BY updated_at, id LIMIT 100""",
+                (ident["kind"], str(ident["uid"]))).fetchall()
             total = conn.execute("SELECT COUNT(*) FROM fan_characters WHERE is_public=1 AND review_status='pending'").fetchone()[0]
         finally:
             conn.close()
-        self._json(200, {"characters": [dict(r, review_version=fan_review_version(r)) for r in rows], "total": total})
+        characters = []
+        for row in rows:
+            item = dict(row, review_version=fan_review_version(row))
+            own = item.pop("is_own_revision")
+            item["needs_independent_review"] = bool(item["needs_independent_review"])
+            item["can_approve"] = not (own and item["needs_independent_review"])
+            characters.append(item)
+        self._json(200, {"characters": characters, "total": total})
 
     def _api_fan_review_preview(self, qs):
         if not self._require_fan_reviewer():
@@ -6188,6 +6224,10 @@ class Handler(BaseStaticHandler):
                     self._json(404, {"error": "这条记录不存在或已取消公开"}); return
                 if body.get("review_version") != fan_review_version(row):
                     self._json(409, {"error": "设表内容或审核状态已变化，请刷新后重新审核"}); return
+                if (row["user_kind"] == ident["kind"] and str(row["user_uid"]) == str(ident["uid"])
+                        and fan_needs_independent_review(conn, fid)):
+                    self._json(403, {"code": "fan_revision_self_review_forbidden",
+                                     "error": "自己修改的设表需由另一名审核员审核。"}); return
                 status = "approved" if decision == "approve" else "rejected"
                 conn.execute(
                     "UPDATE fan_characters SET review_status=?, review_note=?, reviewed_by=?, reviewed_at=?, "
