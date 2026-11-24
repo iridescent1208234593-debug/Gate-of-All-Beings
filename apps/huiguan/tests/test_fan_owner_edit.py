@@ -210,6 +210,26 @@ class FanOwnerEditTest(unittest.TestCase):
         mine_flags = sorted((r["name"], r["is_mine"]) for r in self.public(self.other, "B-1"))
         self.assertEqual(mine_flags, [("冒名", True), ("林风", False)])
 
+    def test_unpublished_draft_keeps_first_submission_rule(self):
+        # 从未公开过的草稿：作者本人是审核员时，改稿不需要另一位审核员。
+        code = "D-1"
+        self.assertEqual(self.owner.call("/api/save-character", sheet(code, "草稿角色", "初稿"))[0], 200)
+        self.assertFalse(self.owner.call("/api/save-character", sheet(code, "草稿角色", "改过一遍"))[1]["fan_review_pending"])
+        body = self.publish(code)[1]
+        self.assertEqual((body["published"], body["pending"]), (1, 0))
+        published = self.public(self.other, code)
+        self.assertEqual(len(published), 1)
+        fid = published[0]["id"]
+
+        # 公开之后再改，才要求另一位审核员处理。
+        self.assertTrue(self.owner.call("/api/save-character", sheet(code, "草稿角色", "公开后再改"))[1]["fan_review_pending"])
+        self.assertEqual(self.public(self.other, code), [])
+        self.assertTrue(self.queue_item(self.reviewer, fid)["needs_independent_review"])
+        self.assertFalse(self.queue_item(self.owner, fid)["can_approve"])
+        self.assertEqual(self.decide(self.owner, self.queue_item(self.owner, fid))[1]["code"], "fan_revision_self_review_forbidden")
+        self.assertEqual(self.decide(self.reviewer, self.queue_item(self.reviewer, fid))[0], 200)
+        self.assertEqual(self.public(self.other, code)[0]["id"], fid)
+
 
 if __name__ == "__main__":
     unittest.main()
