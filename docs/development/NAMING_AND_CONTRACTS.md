@@ -155,3 +155,10 @@ character_id 表示多个不同对象
 
 - 管理员送回复审使用原画廊卡片 ID、当前复审版本及必填理由，事件名为 `moderation_reopen`。保留独立的复审与审核通过动作，详见 [同人画廊契约](FAN_GALLERY_HISTORY.md)。
 - 作者修改复审的保存响应字段为 `fan_review_pending`；审核队列以 `needs_independent_review` 表示卡片须独立复审、以 `can_approve` 表示当前审核员能否通过该版本。复用现有审核状态、画廊卡片 ID 和版本，不引入新的 owner 或状态。见 [同人画廊契约](FAN_GALLERY_HISTORY.md)。
+
+## 12. 新人引导进度
+
+- `GET /api/onboarding`（会馆同源，`/api/huiguan/onboarding` 亦可）：访客返回 `{logged_in:false, chapters:{}}`；登录后返回 `chapters.world` / `chapters.identity`，各含 `status`（未开始为 `new`）与 `seen`。首次读取时服务端判定老用户并写入 `veteran`。
+- `POST /api/onboarding`，JSON `{chapter, status?, seen?, reset?, merge?}`：`seen` 只做并集；`reset:true` 重新开始该章；`merge:true` 用于把访客本地进度并入账户，已完成的章不会被重新打开。客户端不能写 `veteran`。错误 `400 {code: unknown_chapter|unknown_status}`，未登录 `401`。
+- 步骤键限 40 个 `[A-Za-z0-9._-]` 字符，每章最多 64 个；与 OC、画廊卡片、托付的 ID 无关。浏览器本地键为 `iridescently.onboarding.v1`。
+- LAB 的 `life` 章不经过此接口：LAB 网关按 LAB `player_id` 保存，见 `apps/huiguan-lab/docs/ARCHITECTURE.md`。

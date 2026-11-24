@@ -100,6 +100,9 @@ B站 Toy 平台上的西木会馆门庭页，源码在 `apps/bilibili-toy`，由
 ### Art Source（立绘来源）
 OC 数据与 `fan_characters` 上的 `art_source`：`''` 未声明、`human` 手绘 / 约稿 / 已授权、`ai` AI 生成或 AI 辅助。同人画廊按它与有无立绘分三个分区（`/api/fan/list?view=`）：`art` 有图且非 AI（默认，Toy 也用这个口径）、`text` 纯文字设（无图）、`ai` AI 立绘（页面默认折叠）。作者声明为 AI 会同步；已标为 AI 的不会因作者改声明自动变回，由审核员更正。
 
+### Onboarding Progress（新人引导进度）
+新人引导分三章，教的内容互不重复：`world`（主站·认识世界）、`identity`（西木会馆·建立身份）、`life`（LAB·开始生活）。前两章的 owner 是 Account `(kind, uid)`，存在 `onboarding_progress(kind, uid, chapter, status, seen_json, started_at, updated_at)`，每章一行；访客在浏览器本地保存同形数据，登录后以 `merge` 方式并入，只能前进不会倒退。`status` 为 `active` / `paused` / `completed` / `skipped` / `veteran`；`veteran` 只由服务端判定（引导上线前已有 OC 或已同意须知的账号），保证版本更新不会让老用户重走引导。`seen` 是已看过的步骤键。`life` 章由 LAB 服务器按 LAB 自己的玩家记录保存（LAB 不接触 Account），Web、Windows、Android 共用同一服务器所以不会重复教学。它不是每日任务、任务链或托付，也不是众生之门的 Gate Identity 创建流程。代码见 `services/platform/onboarding_progress.py`，接口见 `NAMING_AND_CONTRACTS.md`。
+
 ## 已知容易混淆的词
 
 - `uid`：部分认证/SSO 层使用的用户标识字段；不能脱离 `kind` 单独作为跨系统 owner。
