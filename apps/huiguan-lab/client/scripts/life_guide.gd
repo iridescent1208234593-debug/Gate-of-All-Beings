@@ -75,7 +75,9 @@ func register_target(name: String, getter: Callable) -> void:
 
 func apply_server_state(state: Dictionary) -> void:
 	status = str(state.get("status", "new"))
-	seen = Array(state.get("seen", []))
+	for k in state.get("seen", []):          # union: a late echo must not drop a newer local key
+		if not k in seen:
+			seen.append(k)
 	changed.emit(status, seen)
 	if is_finished() or status == "paused":
 		_hide()
@@ -227,7 +229,7 @@ func review() -> void:
 	status = "active"
 	seen = []
 	_moved = 0.0
-	if send.is_valid(): send.call({"t": "guide", "reset": true})
+	if send.is_valid(): send.call({"t": "guide", "reset": true})   # the echo has seen = [] too
 	changed.emit(status, seen)
 	on_event("welcome")
 
@@ -322,7 +324,7 @@ func _build() -> void:
 	_primary.add_theme_stylebox_override("pressed", ph)
 	_primary.add_theme_color_override("font_color", Color.WHITE)
 	_primary.add_theme_color_override("font_hover_color", Color.WHITE)
-	_primary.pressed.connect(func(): _done(_current.get("key", "")) if _current.get("ack", false) else _dismiss())
+	_primary.pressed.connect(_dismiss)
 	row.add_child(_primary)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -368,15 +370,20 @@ func _show(step: Dictionary) -> void:
 	_tween.tween_property(_light, "position", to, 0.7).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	_tween.tween_property(_note, "modulate:a", 1.0, 0.35).set_delay(0.2)
 	_ring_t = 0.0
-	_tween.tween_method(func(v): _ring_t = v; _ring.queue_redraw(), 0.0, 1.0, 0.6).set_delay(0.55)
+	_tween.tween_method(_set_ring, 0.0, 1.0, 0.6).set_delay(0.55)
+
+
+func _set_ring(v: float) -> void:
+	_ring_t = v
+	_ring.queue_redraw()
 
 
 func _dismiss() -> void:
-	# "好 / 收起" on a do-it step: the player has read it; the step stays open to be done later
-	if not _current.get("ack", false) and _current.get("key", "") in ["move", "chat"]:
-		_hide()
+	# "好 / 收起": the player has read the note. An explanation (ack) is then learned; a do-it step
+	# (walk, chat, emote, interact, 虹之间) stays open and finishes only when the player does it.
+	if _current.get("ack", false):
+		_done(_current.get("key", ""))     # hides and moves on by itself
 		return
-	_done(_current.get("key", ""))
 	_hide()
 	_next_in_queue()
 

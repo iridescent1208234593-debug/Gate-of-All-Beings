@@ -156,6 +156,48 @@ async function waitNote(p, ms = 14000) { try { await p.waitForSelector('.ling-gu
     await ctx.close();
   }
 
+  // J. a veteran account opening the form gets no hints, and stays veteran.
+  {
+    const { ctx, page } = await ctxFor(browser, { session: sessions.old });
+    await page.goto(HALL); await page.waitForTimeout(9000);
+    await page.evaluate(() => document.dispatchEvent(new CustomEvent('huiguan:select-archive', { detail: { key: 'character' } })));
+    await page.waitForTimeout(3500);
+    await page.focus('#registrationBasics input[name="code"]').catch(() => {});
+    await page.waitForTimeout(2500);
+    const server = await api(page);
+    check('J1 veteran: no hints on the form', (await noteTitle(page)) === null, await noteTitle(page));
+    check('J2 veteran stays veteran', server.chapters.identity.status === 'veteran', server.chapters.identity);
+    await ctx.close();
+  }
+
+  // K. Esc on a hint closes that hint only; typing keeps focus.
+  {
+    const { ctx, page } = await ctxFor(browser, { storage: { [KEY]: JSON.stringify({ v: 1, chapters: { world: { status: 'completed', seen: [] } } }) } });
+    await page.goto(HALL); await page.waitForTimeout(9000);
+    await page.evaluate(() => document.dispatchEvent(new CustomEvent('huiguan:browse-registration')));
+    await page.click('#registrationBasics input[name="code"]');
+    await page.waitForTimeout(2600);
+    const focusKept = await page.evaluate(() => document.activeElement && document.activeElement.name === 'code');
+    check('K1 a hint never steals focus from the field being typed in', focusKept && (await noteTitle(page)) !== null, await noteTitle(page));
+    await page.focus('.ling-guide__note [data-guide=next]'); await page.keyboard.press('Escape'); await page.waitForTimeout(400);
+    const l = await local(page);
+    check('K2 Esc on a hint does not pause the chapter', l.chapters.identity.status !== 'paused', l.chapters.identity);
+    await ctx.close();
+  }
+
+  // L. one browser, two accounts: A's progress never reaches B.
+  {
+    const { ctx, page } = await ctxFor(browser, { session: sessions.fresh });
+    await page.goto(HALL); await page.waitForTimeout(2500);
+    await ctx.clearCookies();
+    await ctx.addCookies([{ name: 'session', value: sessions.other, domain: '.iridescently.cn', path: '/', secure: true, httpOnly: true }]);
+    await page.goto(HALL);
+    check('L1 the next account still gets its own walk', await waitNote(page));
+    const server = await api(page);
+    check('L2 nothing merged from the previous account', server.chapters.world.status === 'active' && server.chapters.identity.status === 'new', server.chapters);
+    await ctx.close();
+  }
+
   await browser.close();
   fs.writeFileSync(path.join(OUT, 'results.json'), JSON.stringify(results, null, 1));
   const failed = results.filter(r => !r.ok).length;

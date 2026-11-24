@@ -24,7 +24,7 @@ const fixture = '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><
   between('<style>', '</style>') + '</style></head><body>' +
   between('<!-- 登录/注册弹窗：', '<!-- 全局弹出提示 -->') + '<div id="ocLegal"></div><script src="/legal-consent.js"></script><script>' +
   "window.HuiguanTurnstile={mount:async()=>{}, ensure:async()=>'disabled', token:()=>'', reset:()=>{}};" +
-  'function hideGuestReminder(){} function showGuestReminder(){} async function checkLogin(){} function flushPending(){}' +
+  'async function checkLogin(){} function flushPending(){}' +
   between('const AUTH_USERNAME_RE', 'async function submitAuth()') +
   "openAuthModal('', 'register');</script></body></html>";
 

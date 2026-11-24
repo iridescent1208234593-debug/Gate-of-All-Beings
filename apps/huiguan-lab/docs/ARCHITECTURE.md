@@ -53,7 +53,7 @@
 | oc_set / oc_get / oc_clear | data(base64) / pid | 见 SECURITY.md。只能取同一空间玩家的 OC |
 | space_create / space_enter / space_invite / space_revoke / spaces / space_time | … | 开辟空间和从会馆进入灵质空间都要站在虹之间附近。只有拥有者能邀请、撤销和调整时间。进入私人空间要么是拥有者，要么在访问名单上 |
 | ping / rtt | id / ms | 测量往返延迟 |
-| guide | seen?, status?, reset? | 新人引导「开始生活」章。`seen` 只做并集，键为 `[a-z0-9._-]`、最多 32 个；`status` 只接受 active/paused/completed/skipped（`veteran` 只由服务端判定）；`reset:true` 重新开始。回 `guide` |
+| guide | seen?, status?, reset? | 新人引导「开始生活」章。`seen` 只做并集，键为小写 `[a-z0-9._-]`、1–24 字符、最多 32 个；`status` 只接受 active/paused/completed/skipped（`veteran` 只由服务端判定）；`reset:true` 重新开始。回 `guide` |
 
 服务端推送：`welcome`（空间、自己、在场玩家、物件、NPC、最近聊天、可见空间、时钟、`guide` 引导进度），`guide`，`s`（每秒 10 次的位置快照：只发变化的玩家，每 2 秒发一次全量），`join`、`leave`、`profile`、`chat`、`emote`、`object`、`npcs`（每秒一次，有变化才发）、`clock`、`oc_changed`、`oc`、`oc_result`、`portal`、`spaces`、`space_created`、`invited`、`notice`、`correct`、`kicked`、`error`。
 
@@ -73,7 +73,7 @@
 
 ## 新人引导「开始生活」
 
-三章引导的最后一章（前两章在主站和会馆网页，见仓库 `docs/development/GLOSSARY.md` 的 Onboarding Progress）。进度存在 LAB 数据库 `life_guide(pid, status, seen, updated_at)`，按 LAB 玩家保存，所以同一玩家在 Web、Windows、Android 上不会重复学。没有引导记录、且玩家资料在引导上线（2026-11-25）前已有昵称的老玩家，首次连上时记为 `veteran`，不会被带着重走。
+三章引导的最后一章（前两章在主站和会馆网页，见仓库 `docs/development/GLOSSARY.md` 的 Onboarding Progress）。进度存在 LAB 数据库 `life_guide(pid, status, seen, updated_at)`，按 LAB 玩家保存，所以同一玩家在 Web、Windows、Android 上不会重复学。新玩家第一次进入时还没有昵称；引导第一次见到某位玩家时，如果他已经有昵称，说明是引导上线前就在玩的老玩家，记为 `veteran`，不会被带着重走。
 
 `life_guide.gd` 自成一体：外壳只做两件事——`register_target(名字, 取矩形的函数)` 告诉它 HUD 控件在哪，`on_event(事件, 数据)` 告诉它玩家刚做了什么。每一步在第一次用得上时出现、只讲一件事，玩家真的做到后才算完成；游戏不暂停、输入不被拦，提示条在宽屏靠右、手机在顶部，不挡场景中央。玩家刚做的事（切视图、进自己的空间、拿起园艺工具、打开小游戏或手记、走到可互动物件旁）对应的说明会优先出现，正在等待的建议稍后再回来。
 

@@ -14,11 +14,13 @@ browser (``localStorage``) and the page merges it in after sign-in with ``merge=
 only move a chapter forward, never back.
 
 Accounts that already used the site before the guide existed are "veteran": the first read
-records the chapter as finished so a release never forces anyone through it again. A chapter can
-always be reopened from the guide menu (``reset``), which is the "重新查看" action.
+records the chapter as finished so a release never forces anyone through it again. A finished
+chapter only gains step keys afterwards; its status changes only through ``reset``, the
+"重新查看" action in the guide menu.
 """
 
 import json
+import re
 import time
 
 CHAPTERS = ("world", "identity")
@@ -29,11 +31,12 @@ STATUSES = ("active", "paused", "completed", "skipped", "veteran")
 FINISHED = ("completed", "skipped", "veteran")
 
 MAX_SEEN_COUNT = 64
-MAX_STEP_KEY_LENGTH = 40
+STEP_KEY = re.compile(r"^[A-Za-z0-9._-]{1,40}$")
 
-# Accounts that accepted the terms before this moment existed before the guide shipped.
-# Unix seconds; 2026-11-25 00:00 UTC+8.
-ROLLOUT_AT = 1795536000.0
+# The first time the server sees an Account under the guide, an Account that is already older
+# than this was in use before the guide reached it (every registration records a Legal Consent).
+# Anchoring on first contact instead of a release date works whenever the release happens.
+VETERAN_ACCOUNT_AGE_SECONDS = 24 * 3600
 
 
 def init_schema(conn):
@@ -60,9 +63,7 @@ def clean_seen(value):
         if not isinstance(item, str):
             continue
         key = item.strip()
-        if not key or len(key) > MAX_STEP_KEY_LENGTH:
-            continue
-        if not all(ch.isalnum() or ch in "-_." for ch in key):
+        if not STEP_KEY.match(key):
             continue
         if key not in out:
             out.append(key)
@@ -100,21 +101,22 @@ def _write(conn, kind, uid, chapter, status, seen, now):
     )
 
 
-def is_veteran(conn, kind, uid, has_oc=False):
-    """True when the Account was in use before the guide shipped.
+def is_veteran(conn, kind, uid, has_oc=False, now=None):
+    """True when the Account was already in use when the guide first met it.
 
-    Signals: owns at least one OC, or accepted the terms before ``ROLLOUT_AT`` (every
-    registration records a Legal Consent, so this covers accounts without an OC too).
+    Signals: owns at least one OC (``has_oc`` may be a callable, read only when needed), or its
+    earliest Legal Consent is older than ``VETERAN_ACCOUNT_AGE_SECONDS``.
     """
-    if has_oc:
-        return True
     try:
         row = conn.execute(
             "SELECT MIN(accepted_at) FROM legal_consents WHERE kind=? AND uid=?", (str(kind), str(uid))
         ).fetchone()
     except Exception:  # legal_consents not initialised in this database
-        return False
-    return bool(row and row[0] is not None and float(row[0]) < ROLLOUT_AT)
+        row = None
+    stamp = float(now if now is not None else time.time())
+    if row and row[0] is not None and stamp - float(row[0]) > VETERAN_ACCOUNT_AGE_SECONDS:
+        return True
+    return bool(has_oc() if callable(has_oc) else has_oc)
 
 
 def status(conn, ident, has_oc=False, now=None):
@@ -128,7 +130,7 @@ def status(conn, ident, has_oc=False, now=None):
         return out
     kind, uid = ident["kind"], ident["uid"]
     rows = {chapter: _row(conn, kind, uid, chapter) for chapter in CHAPTERS}
-    if not any(rows.values()) and is_veteran(conn, kind, uid, has_oc):
+    if not any(rows.values()) and is_veteran(conn, kind, uid, has_oc, now):
         stamp = float(now if now is not None else time.time())
         for chapter in CHAPTERS:
             _write(conn, kind, uid, chapter, "veteran", [], stamp)
@@ -161,7 +163,9 @@ def update(conn, ident, chapter, *, status=None, seen=None, reset=False, merge=F
         return _shape(_row(conn, kind, uid, chapter))
     new_status = current["status"] if current["status"] != "new" else "active"
     if status is not None:
-        if merge and current["status"] in FINISHED:
+        if current["status"] in FINISHED and status not in FINISHED:
+            pass  # only reset reopens a finished chapter
+        elif merge and current["status"] in FINISHED:
             pass
         elif merge and status == "paused" and current["status"] == "active":
             pass

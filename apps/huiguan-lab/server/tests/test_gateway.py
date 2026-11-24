@@ -308,11 +308,11 @@ def test_life_guide_veteran_players_are_not_walked_through(gateway):
     s, w = enter(gateway, c, "老玩家")
     s.close()
     time.sleep(0.3)
-    # simulate a player from before the guide existed: drop the guide row, age the player record
+    # simulate a player from before the guide existed: they have a nickname but no guide row yet
     db = sqlite3.connect(gateway.tmp / "runtime" / "data" / "lab.sqlite")
     with db:
         db.execute("DELETE FROM life_guide WHERE pid=?", (w["pid"],))
-        db.execute("UPDATE players SET nickname='老玩家', updated_at=1700000000 WHERE pid=?", (w["pid"],))
+        db.execute("UPDATE players SET nickname='老玩家' WHERE pid=?", (w["pid"],))
     db.close()
     _, w2 = enter(gateway, c, "老玩家")
     assert w2["guide"]["status"] == "veteran"

@@ -8,6 +8,7 @@ import os
 import sys
 import tempfile
 import threading
+import time
 
 
 def run():
@@ -31,9 +32,9 @@ def run():
                                  (label + '-private-login', label, 'fixture', 'user')).lastrowid
                 ids[label] = str(uid)
             # Registered after the guide shipped vs. long before it.
-            s.legal_consent.record(db, 'local', ids['newcomer'], now=op.ROLLOUT_AT + 60)
-            s.legal_consent.record(db, 'local', ids['skipper'], now=op.ROLLOUT_AT + 60)
-            s.legal_consent.record(db, 'local', ids['veteran'], now=op.ROLLOUT_AT - 86400 * 30)
+            s.legal_consent.record(db, 'local', ids['newcomer'], now=time.time() - 60)
+            s.legal_consent.record(db, 'local', ids['skipper'], now=time.time() - 60)
+            s.legal_consent.record(db, 'local', ids['veteran'], now=time.time() - 86400 * 30)
         sessions = {label: s.create_session('local', uid, SITE_DOMAIN) for label, uid in ids.items()}
         with http.server.ThreadingHTTPServer(('127.0.0.1', 0), s.Handler) as srv:
             threading.Thread(target=srv.serve_forever, daemon=True).start()
@@ -84,6 +85,14 @@ def run():
             assert {c['status'] for c in data['chapters'].values()} == {'veteran'}, data
             # …and stay veteran on later reads.
             assert call('/api/onboarding', 'veteran')[1]['chapters']['identity']['status'] == 'veteran'
+            # Marking a step on a finished chapter keeps it finished (no hints come back).
+            status, data = call('/api/onboarding', 'veteran', {'chapter': 'identity', 'seen': ['account'], 'status': 'active'})
+            assert data['status'] == 'veteran' and data['seen'] == ['account'], data
+            status, data = call('/api/onboarding', 'skipper', {'chapter': 'identity', 'status': 'active'})
+            assert data['status'] == 'skipped', data
+            # Step keys are ASCII only, as the contract says.
+            status, data = call('/api/onboarding', 'newcomer', {'chapter': 'identity', 'seen': ['测试', 'ok-key']})
+            assert 'ok-key' in data['seen'] and '测试' not in data['seen'], data
             # …but may reopen it themselves.
             assert call('/api/onboarding', 'veteran', {'chapter': 'identity', 'reset': True})[1]['status'] == 'active'
 

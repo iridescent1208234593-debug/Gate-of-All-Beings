@@ -2820,7 +2820,7 @@ class Handler(BaseStaticHandler):
 
     def _api_onboarding_status(self):
         ident = self._require_ident_optional()
-        has_oc = self._onboarding_has_oc(ident) if ident else False
+        has_oc = (lambda: self._onboarding_has_oc(ident)) if ident else False   # read only for a first visit
         with DB_LOCK:
             conn = db()
             try:
@@ -2840,7 +2840,7 @@ class Handler(BaseStaticHandler):
         status_value = body.get("status")
         if status_value is not None and not isinstance(status_value, str):
             return self._json(400, {"error": "请求数据格式错误", "code": "unknown_status"})
-        has_oc = self._onboarding_has_oc(ident)
+        has_oc = lambda: self._onboarding_has_oc(ident)
         with DB_LOCK:
             conn = db()
             try:

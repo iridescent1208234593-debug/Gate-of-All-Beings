@@ -78,8 +78,6 @@ GUIDE_STATUSES = ("active", "paused", "completed", "skipped")
 GUIDE_FINISHED = ("completed", "skipped", "veteran")
 GUIDE_MAX_SEEN = 32
 GUIDE_KEY = re.compile(r"^[a-z0-9][a-z0-9._-]{0,23}$")
-# Players last active before the guide shipped are treated as veterans (2026-11-25 00:00 UTC+8).
-GUIDE_ROLLOUT_AT = 1795536000.0
 
 
 @dataclass
@@ -303,8 +301,10 @@ class Hub:
     def guide_state(self, c: Conn) -> dict:
         row = self.store.one("SELECT status, seen FROM life_guide WHERE pid=?", (c.pid,))
         if not row:
-            rec = self.store.one("SELECT nickname, updated_at FROM players WHERE pid=?", (c.pid,))
-            veteran = bool(rec and rec["nickname"] and float(rec["updated_at"] or 0) < GUIDE_ROLLOUT_AT)
+            # A new player reaches the first welcome before choosing a nickname; a player who already
+            # has one when the guide first meets them was here before the guide.
+            rec = self.store.one("SELECT nickname FROM players WHERE pid=?", (c.pid,))
+            veteran = bool(rec and rec["nickname"])
             self.store.exec("INSERT OR IGNORE INTO life_guide(pid,status,seen,updated_at) VALUES(?,?,?,?)",
                             (c.pid, "veteran" if veteran else "new", "[]", time.time()))
             row = self.store.one("SELECT status, seen FROM life_guide WHERE pid=?", (c.pid,))

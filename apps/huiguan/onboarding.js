@@ -92,7 +92,7 @@
     }
 
     // 建立身份 · account: when a visitor first reaches for the registration, not on page load.
-    function accountHint() {
+    function accountHint(quiet) {
       if (signedIn()) { if (!G.seen('identity', 'account')) G.mark('identity', 'account'); return; }
       if (G.active()) return;
       G.hint('identity', 'account', {
@@ -100,9 +100,9 @@
         title: '先有一个会馆账号',
         body: '不登录也能写，但只会存在这个浏览器里：清缓存、换设备就找不回了。登录后，登记会跟着账号走。',
         action: { label: '登录 / 注册', run: function () { if (window.openAuthModal) openAuthModal('登录后，登记会跟着账号走。'); } }
-      });
+      }, { quiet: !!quiet });
     }
-    function formHint() {
+    function formHint(quiet) {
       if (G.active()) return;
       var first = visible('#registrationBasics input[name="code"]');
       if (!first) return;
@@ -112,7 +112,7 @@
         body: '只填带 * 的几项就能登记。能力、喜好、介绍没想好，先空着，以后随时可以改。',
         tryText: '档案里请写角色的事，不要填自己的手机号、邮箱或住址。',
         doneOn: 'input', doneText: '对，就这样。慢慢写，写完点页面下方的「提交登记」。'
-      }, { onClose: function () { if (!signedIn()) setTimeout(accountHint, 400); } });
+      }, { quiet: !!quiet, onClose: function () { if (!signedIn()) setTimeout(function () { accountHint(true); }, 400); } });
     }
     document.addEventListener('huiguan:select-archive', function (e) {
       var key = e.detail && (e.detail.key || e.detail);
@@ -121,8 +121,8 @@
     document.addEventListener('huiguan:browse-registration', function () { setTimeout(formHint, 900); });
     document.addEventListener('focusin', function (e) {
       if (e.target.closest && e.target.closest('#charForm')) {
-        if (!G.seen('identity', 'oc-form')) formHint();
-        else if (!signedIn() && !G.seen('identity', 'account')) accountHint();
+        if (!G.seen('identity', 'oc-form')) formHint(true);
+        else if (!signedIn() && !G.seen('identity', 'account')) accountHint(true);
       }
     });
 

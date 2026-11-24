@@ -71,8 +71,9 @@
     if (account && account.chapters) {
       account.chapters[id] = { status: p.status, seen: p.seen.slice() };
       post(Object.assign({ chapter: id }, change));
+    } else {
+      setLocal(id, p);   // guest progress only: account progress never lands in the shared browser copy
     }
-    setLocal(id, p);
     emit();
   }
   function emit() { listeners.forEach(function (fn) { try { fn(); } catch (e) {} }); renderMenu(); }
@@ -84,8 +85,15 @@
     var def = chapters[id];
     var required = def && (def.required || (def.steps || []).map(function (s) { return s.key; }));
     var done = required && required.length && required.every(function (k) { return p.seen.indexOf(k) >= 0; });
-    if (done && !FINISHED[p.status]) p.status = 'completed';
-    save(id, p, done ? { seen: [key], status: 'completed' } : { seen: [key], status: p.status === 'paused' ? undefined : 'active' });
+    var change = { seen: [key] };
+    if (FINISHED[p.status] || p.status === 'paused') {
+      // finished or paused: record the key, leave the status exactly as it is
+    } else if (done) {
+      p.status = 'completed'; change.status = 'completed';
+    } else {
+      change.status = 'active';
+    }
+    save(id, p, change);
   }
   function setStatus(id, status) {
     var p = progress(id);
@@ -131,6 +139,11 @@
     if (html != null) n.innerHTML = html;
     return n;
   }
+  var wispSeq = 0;
+  function wispSvg() {
+    var gid = 'lingWispGlow' + (++wispSeq);
+    return WISP_SVG.replace(/lingWispGlow/g, gid);
+  }
   var WISP_SVG = '<svg viewBox="0 0 40 40" aria-hidden="true" focusable="false">' +
     '<defs><radialGradient id="lingWispGlow"><stop offset="0" stop-color="#fffbe6"/><stop offset=".35" stop-color="#f6e7a4" stop-opacity=".9"/>' +
     '<stop offset="1" stop-color="#cfe6a6" stop-opacity="0"/></radialGradient></defs>' +
@@ -150,7 +163,7 @@
     ringPath.setAttribute('pathLength', '1');
     ringSvg.appendChild(ringPath);
     for (var i = 0; i < 3; i++) { var t = el('span', 'ling-guide__trail'); trail.push(t); root.appendChild(t); }
-    wisp = el('div', 'ling-guide__wisp', WISP_SVG);
+    wisp = el('div', 'ling-guide__wisp', wispSvg());
     note = el('section', 'ling-guide__note');
     note.setAttribute('role', 'dialog');
     note.setAttribute('aria-modal', 'false');
@@ -159,7 +172,7 @@
     live = el('p', 'ling-visually-hidden');
     live.setAttribute('aria-live', 'polite');
     root.appendChild(lamp); root.appendChild(ringSvg); root.appendChild(wisp); root.appendChild(note); root.appendChild(live);
-    menuBtn = el('button', 'ling-guide__menu-btn', WISP_SVG + '<span class="ling-visually-hidden">新手引导</span>');
+    menuBtn = el('button', 'ling-guide__menu-btn', wispSvg() + '<span class="ling-visually-hidden">新手引导</span>');
     menuBtn.type = 'button';
     menuBtn.setAttribute('aria-haspopup', 'dialog');
     menuBtn.setAttribute('aria-expanded', 'false');
@@ -180,7 +193,10 @@
   function onKey(e) {
     if (e.key === 'Escape') {
       if (!menuPanel.hidden) { closeMenu(true); e.stopPropagation(); return; }
-      if (current && !note.hidden && note.contains(doc.activeElement)) { pause(); e.stopPropagation(); }
+      if (current && !note.hidden && note.contains(doc.activeElement)) {
+        if (current.mode === 'tour') pause(); else finishStep(true);
+        e.stopPropagation();
+      }
     }
   }
 
@@ -461,13 +477,19 @@
   function go(index) {
     var c = current;
     if (!c || c.mode !== 'tour') return;
-    for (var i = index; i >= 0 && i < c.steps.length; i += (index >= c.index ? 1 : -1)) {
+    var back = index < c.index;
+    var shown = 0;
+    for (var i = index; i >= 0 && i < c.steps.length; i += back ? -1 : 1) {
       var step = c.steps[i];
       if (step.when && !step.when()) continue;
       var nextC = { id: c.id, mode: 'tour', steps: c.steps, index: i, step: step };
       if (present(nextC)) return;
     }
-    complete(c.id);
+    if (back) return;                       // nothing earlier to show: stay on the current note
+    var p = progress(c.id);
+    var anySeen = c.steps.some(function (st) { return p.seen.indexOf(st.key) >= 0; });
+    if (anySeen) complete(c.id);            // walked to the end
+    else hide(true);                        // nothing on this page could be shown: try again another time
   }
   function next() {
     var c = current;
@@ -602,6 +624,7 @@
       if (!def || !def.steps) return false;
       var p = progress(id);
       if (!(opts && opts.force) && (FINISHED[p.status] || p.status === 'paused')) return false;
+      if (current) hide(false);
       if (p.status === 'new') setStatus(id, 'active');
       var start = 0;
       while (start < def.steps.length - 1 && p.seen.indexOf(def.steps[start].key) >= 0 && !(opts && opts.force)) start++;

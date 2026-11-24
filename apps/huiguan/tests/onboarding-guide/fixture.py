@@ -1,4 +1,5 @@
-import os, sys, json, pathlib
+"""Fixture accounts for the onboarding browser scenarios. Test storage only: python fixture.py <repo> <storage>."""
+import os, sys, json, pathlib, time
 root = pathlib.Path(sys.argv[1]); store = sys.argv[2]
 for k in list(os.environ):
     if k.startswith(('IRIDESCENTLY_','LAB_','USSO_','HX_','TURNSTILE_')): os.environ.pop(k)
@@ -9,7 +10,7 @@ from site_domains import SITE_DOMAIN
 from contextlib import closing
 out = {}
 with closing(s.db()) as db, db:
-    for label, when in (('fresh', op.ROLLOUT_AT + 3600), ('old', op.ROLLOUT_AT - 86400 * 90), ('merge', op.ROLLOUT_AT + 3600)):
+    for label, when in (('fresh', time.time()), ('old', time.time() - 86400 * 90), ('merge', time.time()), ('other', time.time())):
         row = db.execute("SELECT uid FROM local_users WHERE username=?", ('guide-' + label,)).fetchone()
         uid = row[0] if row else db.execute("INSERT INTO local_users(username,nickname,pass_hash,role,status) VALUES(?,?,?,?,?)",
                                             ('guide-' + label, '测试' + label, 'fixture', 'user', 'active')).lastrowid

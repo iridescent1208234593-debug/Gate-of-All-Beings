@@ -160,5 +160,6 @@ character_id 表示多个不同对象
 
 - `GET /api/onboarding`（会馆同源，`/api/huiguan/onboarding` 亦可）：访客返回 `{logged_in:false, chapters:{}}`；登录后返回 `chapters.world` / `chapters.identity`，各含 `status`（未开始为 `new`）与 `seen`。首次读取时服务端判定老用户并写入 `veteran`。
 - `POST /api/onboarding`，JSON `{chapter, status?, seen?, reset?, merge?}`：`seen` 只做并集；`reset:true` 重新开始该章；`merge:true` 用于把访客本地进度并入账户，已完成的章不会被重新打开。客户端不能写 `veteran`。错误 `400 {code: unknown_chapter|unknown_status}`，未登录 `401`。
-- 步骤键限 40 个 `[A-Za-z0-9._-]` 字符，每章最多 64 个；与 OC、画廊卡片、托付的 ID 无关。浏览器本地键为 `iridescently.onboarding.v1`。
-- LAB 的 `life` 章不经过此接口：LAB 网关按 LAB `player_id` 保存，见 `apps/huiguan-lab/docs/ARCHITECTURE.md`。
+- 已完成的章（completed / skipped / veteran）收到 `status` 时保持原状态，只有 `reset:true` 能重新打开。
+- 步骤键为 1–40 个 ASCII `[A-Za-z0-9._-]` 字符，每章最多 64 个；与 OC、画廊卡片、托付的 ID 无关。浏览器本地键为 `iridescently.onboarding.v1`，只保存访客进度；登录后的进度只存在账号上。
+- LAB 的 `life` 章不经过此接口：LAB 网关按 LAB 玩家保存（LAB 库里该列名为 `pid`，即 LAB 自己的玩家 ID，不是 Account ID），步骤键为小写 `[a-z0-9._-]`、1–24 字符，见 `apps/huiguan-lab/docs/ARCHITECTURE.md`。
