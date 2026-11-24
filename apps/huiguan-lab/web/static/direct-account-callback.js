@@ -20,6 +20,30 @@
             return;
         }
         const result = await response.json();
+        if (typeof result.native_callback === "string") {
+            const native = new URL(result.native_callback);
+            if (native.origin === "https://pc-lab.iridescently.cn" && native.origin === location.origin &&
+                native.pathname === "/account/native/android/callback" && !native.search &&
+                !native.username && !native.password) {
+                const grant = "[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]";
+                if (!new RegExp("^#code=" + grant + "&state=" + grant + "$").test(native.hash))
+                    throw new Error("unexpected_result");
+                status.textContent = "授权完成，点下方返回游戏。";
+                const button = document.createElement("a");
+                button.href = native.href;
+                button.textContent = "返回 LAB";
+                button.referrerPolicy = "no-referrer";
+                status.after(button);
+                return;
+            }
+            if (native.protocol !== "http:" || native.hostname !== "127.0.0.1" ||
+                Number(native.port) < 49152 || native.pathname !== "/lab-account/callback" ||
+                native.searchParams.size !== 2 || !native.searchParams.has("code") ||
+                !native.searchParams.has("state") || native.username || native.password || native.hash)
+                throw new Error("unexpected_result");
+            location.replace(native.href);
+            return;
+        }
         if (!["/play/", "/admission"].includes(result.next)) throw new Error("unexpected_result");
         location.replace(result.next);
     } catch (_) {
