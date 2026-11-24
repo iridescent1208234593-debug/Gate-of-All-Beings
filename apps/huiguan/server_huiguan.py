@@ -1192,6 +1192,30 @@ def fan_review_version(row):
     return hashlib.sha256(json.dumps(content, ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
+
+def fan_approval_content_digest(store, row):
+    """Hash the authoritative approved content, including detail-only OC data outside the gallery row."""
+    if row is None or row["type"] == "配色海报":
+        return None
+    details = None
+    if row["code"]:
+        linked = store.get({"kind": row["user_kind"], "uid": row["user_uid"]}, code=row["code"])
+        details = linked.get("data") if isinstance(linked, dict) else None
+        if not isinstance(details, dict):
+            return None
+        try:
+            projection = fan_fields(details)
+        except (AttributeError, TypeError, KeyError, IndexError):
+            return None
+        if any((row[key] or "") != projection[key] for key in FAN_SYNC_COLUMNS):
+            return None
+    # No mutable counters/timestamps/state. Account-scoped identity prevents a re-link
+    # to differently owned OC content from inheriting the previous approval.
+    fields = (*FAN_SYNC_COLUMNS, "id", "user_kind", "user_uid", "code", "art_source")
+    data = [[row[field] for field in fields], details]
+    return hashlib.sha256(json.dumps(data, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
+
+
 def fan_revision_time():
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="microseconds")
 
@@ -6212,6 +6236,7 @@ class Handler(BaseStaticHandler):
             return
         self._send_html(gallery_review_document(row, details), private=True)
 
+    @oc_api
     def _api_fan_review_decide(self):
         """approve / reject 一条公开记录；approve 时可同时更正立绘来源。已通过的记录也可以被退回。"""
         ident = self._require_fan_reviewer()
@@ -6236,26 +6261,29 @@ class Handler(BaseStaticHandler):
         with DB_LOCK:
             conn = db()
             try:
-                conn.execute("BEGIN IMMEDIATE")
-                row = conn.execute("SELECT * FROM fan_characters WHERE id=?", (fid,)).fetchone()
-                if not row or not row["is_public"]:
-                    self._json(404, {"error": "这条记录不存在或已取消公开"}); return
-                if body.get("review_version") != fan_review_version(row):
-                    self._json(409, {"error": "设表内容或审核状态已变化，请刷新后重新审核"}); return
-                if (row["user_kind"] == ident["kind"] and str(row["user_uid"]) == str(ident["uid"])
-                        and fan_needs_independent_review(conn, fid)):
-                    self._json(403, {"code": "fan_revision_self_review_forbidden",
-                                     "error": "自己修改的设表需由另一名审核员审核。"}); return
-                status = "approved" if decision == "approve" else "rejected"
-                conn.execute(
-                    "UPDATE fan_characters SET review_status=?, review_note=?, reviewed_by=?, reviewed_at=?, "
-                    "art_source=COALESCE(?, art_source) WHERE id=?",
-                    (status, "" if status == "approved" else note, f"{ident['kind']}:{ident['uid']}", now_iso(), art, fid))
-                if row["type"] != "配色海报":
-                    fan_gallery_history.record(conn, ident, "review_" + decision, row,
-                                               fan_gallery_history.load(conn, fid), reason=note, explicit=True,
-                                               review_version=fan_review_version(row))
-                conn.commit()
+                with character_store().transaction(conn=conn) as store:
+                    conn.execute("BEGIN IMMEDIATE")
+                    row = conn.execute("SELECT * FROM fan_characters WHERE id=?", (fid,)).fetchone()
+                    if not row or not row["is_public"]:
+                        self._json(404, {"error": "这条记录不存在或已取消公开"}); return
+                    if body.get("review_version") != fan_review_version(row):
+                        self._json(409, {"error": "设表内容或审核状态已变化，请刷新后重新审核"}); return
+                    if (row["user_kind"] == ident["kind"] and str(row["user_uid"]) == str(ident["uid"])
+                            and fan_needs_independent_review(conn, fid)):
+                        self._json(403, {"code": "fan_revision_self_review_forbidden",
+                                         "error": "自己修改的设表需由另一名审核员审核。"}); return
+                    status = "approved" if decision == "approve" else "rejected"
+                    conn.execute(
+                        "UPDATE fan_characters SET review_status=?, review_note=?, reviewed_by=?, reviewed_at=?, "
+                        "art_source=COALESCE(?, art_source) WHERE id=?",
+                        (status, "" if status == "approved" else note, f"{ident['kind']}:{ident['uid']}", now_iso(), art, fid))
+                    if row["type"] != "配色海报":
+                        approved_row = fan_gallery_history.load(conn, fid)
+                        digest = fan_approval_content_digest(store, approved_row) if decision == "approve" else None
+                        fan_gallery_history.record(conn, ident, "review_" + decision, row, approved_row,
+                                                   reason=note, explicit=True, review_version=fan_review_version(row),
+                                                   content_digest=digest)
+                    conn.commit()
             finally:
                 conn.close()
         self._json(200, {"ok": True, "id": fid, "review_status": status})
@@ -6267,6 +6295,7 @@ class Handler(BaseStaticHandler):
         data = [row["id"], fan_review_version(row), row["updated_at"], row["reviewed_at"], row["reviewed_by"], row["review_note"]]
         return hashlib.sha256(json.dumps(data, ensure_ascii=False).encode("utf-8")).hexdigest()
 
+    @oc_api
     def _api_admin_fan_history(self, qs):
         if not self._require_admin():
             return
@@ -6281,9 +6310,21 @@ class Handler(BaseStaticHandler):
             return
         conn = db()
         try:
-            conn.execute("BEGIN")
-            result = fan_gallery_history.history(conn, fid, before_event=cursor)
-            current = fan_gallery_history.load(conn, fid)
+            try:
+                with character_store().transaction(conn=conn) as store:
+                    conn.execute("BEGIN")
+                    current = fan_gallery_history.load(conn, fid)
+                    digest = (fan_approval_content_digest(store, current)
+                              if current and current["is_public"] and current["review_status"] == "approved" else None)
+                    result = fan_gallery_history.history(conn, fid, before_event=cursor, content_digest=digest)
+            except oc_store.OCError:
+                # Preserve access to recorded history, but never vouch for the current draft
+                # if the authoritative linked OC cannot be read.
+                if conn.in_transaction:
+                    conn.rollback()
+                conn.execute("BEGIN")
+                current = fan_gallery_history.load(conn, fid)
+                result = fan_gallery_history.history(conn, fid, before_event=cursor)
         finally:
             conn.close()
         if (current is None or current["type"] == "配色海报") and not result["events"] and not result["snapshots"]:

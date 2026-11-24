@@ -71,7 +71,7 @@ APPROVAL_EVENT_SQL = """SELECT id FROM fan_history_events
    ORDER BY id DESC LIMIT 1"""
 
 
-def _snapshot(conn, row, now, *, observed=False, explicit_approval=False, fresh_revision=False):
+def _snapshot(conn, row, now, *, observed=False, explicit_approval=False, fresh_revision=False, content_digest=None):
     if not _public_approved(row):
         return
     raw = _content(row)
@@ -82,8 +82,13 @@ def _snapshot(conn, row, now, *, observed=False, explicit_approval=False, fresh_
     latest = conn.execute(f"""SELECT s.id, s.fingerprint, ({APPROVAL_EVENT_SQL}) AS approval_event_id
                               FROM fan_history_snapshots s WHERE card_id=? ORDER BY id DESC LIMIT 1""",
                           (row["id"],)).fetchone()
+    prior_digest = None
+    if explicit_approval and latest and latest["approval_event_id"] is not None:
+        metadata = conn.execute("SELECT prior_review FROM fan_history_events WHERE id=?",
+                                (latest["approval_event_id"],)).fetchone()
+        prior_digest = json.loads(metadata[0]).get("approval_content_digest")
     if (latest and latest["fingerprint"] == fingerprint and not fresh_revision
-            and (not explicit_approval or latest["approval_event_id"] is not None)):
+            and (not explicit_approval or (prior_digest is not None and prior_digest == content_digest))):
         return latest["id"] if explicit_approval else None
     snapshot = conn.execute("""INSERT INTO fan_history_snapshots(card_id,recorded_at,fingerprint,content,legacy_observed,
                                truncated_fields) VALUES(?,?,?,?,?,?)""",
@@ -94,7 +99,7 @@ def _snapshot(conn, row, now, *, observed=False, explicit_approval=False, fresh_
     return snapshot.lastrowid
 
 
-def record(conn, actor, action, before, after, *, reason="", explicit=False, prior_review=None, review_version=None):
+def record(conn, actor, action, before, after, *, reason="", explicit=False, prior_review=None, review_version=None, content_digest=None):
     """Persist an attributable transition in the same transaction as the active row."""
     if before is None and after is None:
         return
@@ -116,9 +121,10 @@ def record(conn, actor, action, before, after, *, reason="", explicit=False, pri
     # A pending-to-approved transition can approve an age/lore edit absent from this
     # compact projection. Retain its own evidence even when the projection is unchanged.
     snapshot_id = _snapshot(conn, after, now, explicit_approval=approved,
-                            fresh_revision=approved and old_status != "approved")
+                            fresh_revision=approved and old_status != "approved", content_digest=content_digest)
     if approved and snapshot_id is not None:
-        prior_review = {"approval_snapshot_id": snapshot_id, "review_version": review_version}
+        prior_review = {"approval_snapshot_id": snapshot_id, "review_version": review_version,
+                        "approval_content_digest": content_digest}
     conn.execute("""INSERT INTO fan_history_events(card_id,action,actor_kind,actor_uid,actor_role,actor_name,created_at,
                     previous_status,new_status,previous_public,new_public,reason,prior_review)
                     VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
@@ -141,7 +147,7 @@ def unpublish_link(conn, actor, action, owner, code, *, include_posters=False):
         record(conn, actor, action, row, load(conn, row["id"]))
 
 
-def history(conn, card_id, *, before_event=None):
+def history(conn, card_id, *, before_event=None, content_digest=None):
     snapshots = []
     current = load(conn, card_id)
     current_approval = None
@@ -149,6 +155,7 @@ def history(conn, card_id, *, before_event=None):
     latest_approval_id = conn.execute("""SELECT MAX(id) FROM fan_history_events
                                         WHERE card_id=? AND action='review_approve'""", (card_id,)).fetchone()[0]
     for row in conn.execute(f"""SELECT s.*, e.id AS approval_event_id, e.created_at AS approval_time, e.actor_name, e.actor_role,
+                                      e.prior_review AS approval_metadata,
                                       (SELECT MIN(a.id) FROM fan_history_events a
                                         WHERE a.actor_kind=e.actor_kind AND a.actor_uid=e.actor_uid) AS actor_label
                                FROM fan_history_snapshots s LEFT JOIN fan_history_events e
@@ -159,7 +166,9 @@ def history(conn, card_id, *, before_event=None):
                      "actor_tag": f"#{row['actor_label']}", "approved_at": row["approval_time"]}
                     if row["actor_label"] is not None else None)
         if (not snapshots and row["fingerprint"] == current_fingerprint
-                and row["approval_event_id"] == latest_approval_id):
+                and row["approval_event_id"] == latest_approval_id and content_digest is not None
+                and row["approval_metadata"] is not None
+                and json.loads(row["approval_metadata"]).get("approval_content_digest") == content_digest):
             current_approval = ({**approval, "snapshot_id": row["id"]} if approval else None)
         snapshots.append({"id": row["id"], "approved_at": (approval["approved_at"] if approval else
                           (None if row["legacy_observed"] else row["recorded_at"])),

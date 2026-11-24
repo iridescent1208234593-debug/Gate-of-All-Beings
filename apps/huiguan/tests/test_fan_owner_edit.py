@@ -73,6 +73,7 @@ class FanOwnerEditTest(unittest.TestCase):
                    HX_SSO_SECRET="test-only-secret")
         for key in ("DATA", "ASSETS", "CACHE", "RELEASE", "BACKUP", "PROJECT"):
             env.pop(f"IRIDESCENTLY_{key}_ROOT", None)
+        cls.env = env
         cls.proc = subprocess.Popen([sys.executable, "-c", LAUNCH, str(HUIGUAN), str(port)], env=env,
                                     stdout=subprocess.DEVNULL, stderr=None)
         cls.base = f"http://127.0.0.1:{port}"
@@ -265,6 +266,43 @@ class FanOwnerEditTest(unittest.TestCase):
         after = self.reviewer.call(path)[1]
         self.assertEqual(after["current_approval"], current["current_approval"])
         self.assertEqual(after["snapshots"], current["snapshots"])
+
+    def test_approval_does_not_follow_unreviewed_detail_only_legacy_write(self):
+        code = "legacy-approved-in-place"
+        original = sheet(code, "旧版原位修改", "画廊摘要未变")
+        original["data"]["age"] = 42
+        self.assertEqual(self.other.call("/api/save-character", original)[0], 200)
+        self.assertEqual(self.other.call("/api/fan/publish", {"character_codes": [code]})[1]["pending"], 1)
+        row = next(r for r in self.reviewer.call("/api/fan/review/queue")[1]["characters"] if r["code"] == code)
+        fid = row["id"]
+        self.assertEqual(self.decide(self.reviewer, row)[0], 200)
+        path = f"/api/admin/fan/history?id={fid}"
+        first = self.reviewer.call(path)[1]
+        self.assertEqual(first["current_approval"]["actor_name"], "Moderator Fixture")
+        # Simulate an older writer committing an OC-only age edit without re-queuing the
+        # gallery row. Use the exact Store and test storage, not any real account/database.
+        script = LAUNCH.split("s.init_user_db();", 1)[0] + """
+with s.character_store().transaction(write=True) as store:
+    row = store.conn.execute("SELECT * FROM fan_characters WHERE id=?", (int(sys.argv[2]),)).fetchone()
+    owner = {"kind": row["user_kind"], "uid": row["user_uid"]}
+    record = store.get(owner, code=row["code"])
+    record["data"]["age"] += 1
+    store.save(owner, record, record.get("_oc_version"))
+"""
+        subprocess.run([sys.executable, "-c", script, str(HUIGUAN), str(fid)],
+                       env=self.env, check=True, timeout=10)
+        result = self.reviewer.call(path)[1]
+        self.assertTrue(result["current_is_public"])
+        self.assertEqual(result["current_review_status"], "approved")
+        self.assertIsNone(result["current_approval"])
+        self.assertEqual(result["snapshots"], first["snapshots"])
+        self.assertEqual(result["events"], first["events"])
+        self.assertNotIn("approval_content_digest", json.dumps(result))
+        self.assertEqual(self.decide(self.owner, self.public(self.owner, code)[0])[0], 200)
+        reapproved = self.reviewer.call(path)[1]
+        self.assertEqual(reapproved["current_approval"]["actor_name"], "owner_test")
+        self.assertEqual(reapproved["snapshots"][1], first["snapshots"][0])
+        self.assertEqual(reapproved["snapshots"][0]["content"], first["snapshots"][0]["content"])
 
     def test_legacy_snapshot_keeps_unknown_actor_and_old_schema(self):
         with sqlite3.connect(":memory:") as conn:
