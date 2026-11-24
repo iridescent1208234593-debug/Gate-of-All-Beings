@@ -91,12 +91,17 @@ class RateLimiter:
         self.failures.pop(key, None)
 
 
+class PlayerTestCodesClosed(ValueError):
+    """Issuing a new player test code is disabled by configuration."""
+
+
 class Auth:
-    def __init__(self, store: Store, pepper: bytes, session_days: int = 7):
+    def __init__(self, store: Store, pepper: bytes, session_days: int = 7, *, player_test_codes_enabled=True):
         self.store, self.pepper = store, pepper
         self.session_seconds = session_days * 86400
         self.limiter = RateLimiter()
         self.protect_linked_codes = False
+        self.player_test_codes_enabled = player_test_codes_enabled is True
 
     def code_digest(self, code: str) -> str:
         return hmac.new(self.pepper, normalize(code).encode(), hashlib.sha256).hexdigest()
@@ -109,6 +114,8 @@ class Auth:
     def create_code(self, label: str = "", role: str = "player", actor: str = "admin") -> tuple[str, str]:
         if role not in ("player", "monitor", "art"):
             raise ValueError("bad role")
+        if role == "player" and not self.player_test_codes_enabled:
+            raise PlayerTestCodesClosed("player_test_codes_closed")
         code = new_code()
         cid = "c_" + secrets.token_hex(5)
         self.store.exec("INSERT INTO codes(id,digest,label,role,created_at) VALUES(?,?,?,?,?)",
@@ -147,7 +154,9 @@ class Auth:
         row = None
         if 16 <= len(norm) <= 24:
             row = self.store.one("SELECT * FROM codes WHERE digest=?", (self.code_digest(code),))
-        if not row or row["status"] != "active" or self.account_owns_code(row["id"]):
+        if (not row or row["status"] != "active" or
+                (row["role"] == "player" and not self.player_test_codes_enabled) or
+                self.account_owns_code(row["id"])):
             locked = self.limiter.fail(ip_key)
             self.store.security("login_failed", ip_hint=ip_key, code_id=row["id"] if row else None,
                                 reason="inactive" if row else "unknown", locked=locked)
@@ -174,9 +183,11 @@ class Auth:
         if not row:
             return None
         now = time.time()
-        if (row["status"] != "active" or row["expires_at"] < now or
-                (self.account_owns_code(row["code_id"]) and not self.store.one(
-                    "SELECT 1 FROM account_sessions WHERE digest=?", (row["digest"],)))):
+        account_only = (row["role"] == "player" and not self.player_test_codes_enabled
+                        or self.account_owns_code(row["code_id"]))
+        is_account = (account_only and self.protect_linked_codes and self.store.one(
+            "SELECT 1 FROM account_sessions WHERE digest=?", (row["digest"],)))
+        if row["status"] != "active" or row["expires_at"] < now or (account_only and not is_account):
             self.store.exec("DELETE FROM sessions WHERE digest=?", (row["digest"],))
             return None
         self.store.exec("UPDATE sessions SET last_seen_at=? WHERE digest=?", (now, row["digest"]))

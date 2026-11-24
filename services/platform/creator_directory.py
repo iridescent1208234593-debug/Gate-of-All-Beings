@@ -299,7 +299,7 @@ def directory(conn, avatar_url=lambda s: s):
     return {"members": members, "credits": credits}
 
 
-def handle(handler, path, qs, ns, *, broker=None, avatar_url=lambda s: s):
+def handle(handler, path, qs, ns, *, broker=None, lab_default_all=False, avatar_url=lambda s: s):
     post = handler.command == "POST"
     if path == PUBLIC and not post:
         with closing(ns["db"]()) as conn:
@@ -373,7 +373,10 @@ def handle(handler, path, qs, ns, *, broker=None, avatar_url=lambda s: s):
                           "contributions": [dict(r, approved=bool(r["approved"]), public_consent=bool(r["public_consent"]))
                                             for r in rows],
                           "lab_available": broker is not None,
-                          "lab_access": owner != (None, None) and broker.get_access(conn, *owner) if broker else False}
+                          "lab_access": owner != (None, None) and account_exists(conn, owner)
+                          and broker.get_access(conn, *owner, default_all=lab_default_all) if broker else False,
+                          "lab_access_override": broker.access_override(conn, *owner)
+                          if broker and owner != (None, None) else None}
             elif action == "contribution":
                 result = {"id": _save_contribution(conn, actor, owner, body)}
             else:
@@ -382,10 +385,12 @@ def handle(handler, path, qs, ns, *, broker=None, avatar_url=lambda s: s):
                 enabled = _flag(body.get("enabled"))
                 if enabled and not account_exists(conn, owner):
                     raise PermissionError("该账户不可用")
-                before = broker.get_access(conn, *owner)
+                before = broker.get_access(conn, *owner, default_all=lab_default_all)
+                override = broker.access_override(conn, *owner)
                 broker.set_access(conn, *owner, enabled)
-                if before != enabled:
-                    audit(conn, actor, owner, "lab_access", {"before": before, "after": enabled})
+                if override is None or before != enabled:
+                    audit(conn, actor, owner, "lab_access", {"before": before, "after": enabled,
+                                                           "inherited_before": override is None})
                 result = {"lab_access": enabled}
         return handler._json(200, {"ok": True, **result}, sanitize_images=False)
     except RuntimeError as e:

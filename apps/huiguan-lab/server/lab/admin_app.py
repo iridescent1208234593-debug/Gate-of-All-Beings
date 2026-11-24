@@ -16,7 +16,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 
 from . import config as config_mod
-from .auth import ADMIN_COOKIE, RateLimiter, check_admin_password
+from .auth import ADMIN_COOKIE, PlayerTestCodesClosed, RateLimiter, check_admin_password
 from .metrics import process_metrics, system_metrics
 
 ADMIN_TTL = 12 * 3600
@@ -113,7 +113,11 @@ def create_admin_app(lab, supervisor_status=None) -> FastAPI:
         count = int(body.get("count", 1))
         if not 1 <= count <= 50:
             return JSONResponse({"error": "count 1..50"}, status_code=400)
-        created = [lab.auth.create_code(str(body.get("label", ""))[:60], body.get("role", "player")) for _ in range(count)]
+        try:
+            created = [lab.auth.create_code(str(body.get("label", ""))[:60], body.get("role", "player"))
+                       for _ in range(count)]
+        except PlayerTestCodesClosed:
+            return JSONResponse({"error": "player_test_codes_closed"}, status_code=409)
         # Plaintext codes are returned once, to the admin's screen only; they are never stored or logged.
         return {"created": [{"id": cid, "code": code} for cid, code in created]}
 

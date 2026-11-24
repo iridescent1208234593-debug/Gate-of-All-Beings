@@ -35,6 +35,18 @@ class Denied(Exception):
     pass
 
 
+class LegacyClaimConflict(Denied):
+    """An identity is already linked; do not merge or switch profiles."""
+
+
+@dataclass(frozen=True)
+class LegacyClaim:
+    # Server-side only. Never return digest/code_id in an HTTP response.
+    session_digest: str
+    code_id: str
+    expires_at: float
+
+
 @dataclass
 class Pending:
     request_id: str
@@ -52,6 +64,7 @@ class Grant:
     grant: str
     token_digest: str
     retry_at: float
+    service_prefix: str = ""
 
 
 class Broker:
@@ -117,6 +130,59 @@ class Broker:
         self.pending[self.auth.token_digest(key)] = Pending(rid, state, verifier, time.monotonic()+wait, legacy)
         return {"poll_key": key, "approval_url": f"{self.issuer}/api/lab-auth/approve?" + urlencode({"request_id": rid}),
                 "expires_in": wait, "match_code": match_code}
+
+    def _claimable_legacy_session(self, store, digest, now):
+        return store.one("""SELECT c.id, s.expires_at FROM sessions AS s
+            JOIN codes AS c ON c.id=s.code_id JOIN players AS p ON p.code_id=c.id
+            WHERE s.digest=? AND s.expires_at>? AND c.status='active' AND c.role='player'
+              AND NOT EXISTS(SELECT 1 FROM account_sessions WHERE digest=s.digest)
+              AND NOT EXISTS(SELECT 1 FROM account_links WHERE code_id=c.id)""", (digest, now))
+
+    def prepare_legacy_claim(self, token):
+        """Secret-cookie proof for use only in a server-side direct-login transaction."""
+        if not isinstance(token, str) or not POLL.fullmatch(token):
+            return None
+        digest = self.auth.token_digest(token)
+        now = time.time()
+        row = self._claimable_legacy_session(self.auth.store, digest, now)
+        if not row or row["id"] not in self.migratable:
+            return None
+        # Shortest of the existing session and the direct transaction's expected TTL.
+        return LegacyClaim(digest, row["id"], min(float(row["expires_at"]), now + 300))
+
+    def finish_legacy_claim(self, subject, claim, token, *, restore_confirmed):
+        """Call only with verified direct callback and upstream Hall subject.
+
+        restore_confirmed comes from the server-validated Hall approval result;
+        clients cannot send the subject, claim or confirmation directly here.
+        """
+        if (restore_confirmed is not True or not isinstance(claim, LegacyClaim)
+                or not isinstance(token, str) or not POLL.fullmatch(token)
+                or not isinstance(subject, str) or not ID.fullmatch(subject)
+                or not secrets.compare_digest(self.auth.token_digest(token), claim.session_digest)):
+            raise Denied
+        recovery_token = secrets.token_urlsafe(32)
+        new_digest = self.auth.token_digest(recovery_token)
+        with self.auth.store.tx() as store:
+            now = time.time()
+            if claim.expires_at <= now:
+                raise Denied
+            if store.one("SELECT 1 FROM account_links WHERE issuer=? AND subject=?", (self.issuer, subject)):
+                raise LegacyClaimConflict
+            if store.one("SELECT 1 FROM account_links WHERE code_id=?", (claim.code_id,)):
+                raise LegacyClaimConflict
+            row = self._claimable_legacy_session(store, claim.session_digest, now)
+            if not row or row["id"] != claim.code_id or row["id"] not in self.migratable:
+                raise Denied
+            cid = row["id"]
+            store.exec("INSERT INTO account_links VALUES(?,?,?)", (self.issuer, subject, cid))
+            removed = store.exec("""DELETE FROM sessions WHERE code_id=? AND NOT EXISTS(
+                SELECT 1 FROM account_sessions WHERE digest=sessions.digest)""", (cid,)).rowcount
+            store.exec("INSERT INTO sessions VALUES(?,?,?,?,?)", (new_digest, cid, now, now + LEASE, now))
+            store.exec("INSERT INTO account_sessions VALUES(?)", (new_digest,))
+            store.audit("hall-account", "account.claim_legacy_player", cid,
+                        legacy_sessions_invalidated=removed)
+        return recovery_token, new_digest
 
     def resolve_identity(self, subject, legacy):
         now = time.time()
@@ -191,13 +257,13 @@ class Broker:
             grant = self.grants.pop(self.auth.token_digest(token), None)
             if grant:
                 try:
-                    await self.request("revoke", sub=grant.subject, grant=grant.grant)
+                    await self.request(grant.service_prefix + "revoke", sub=grant.subject, grant=grant.grant)
                 except (Denied, httpx.HTTPError, ValueError):
                     pass
 
     async def refresh(self, g):
         try:
-            r = await self.request("introspect", sub=g.subject, grant=g.grant)
+            r = await self.request(g.service_prefix + "introspect", sub=g.subject, grant=g.grant)
             if self.grants.get(g.token_digest) is not g:
                 return
             if r.get("active") is not True:

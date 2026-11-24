@@ -60,7 +60,7 @@ class CreatorDirectoryTest(unittest.TestCase):
         cls.port, cls.accounts, cls.database = cls.launch(broker=True)
 
     @classmethod
-    def launch(cls, *, broker):
+    def launch(cls, *, broker, default_all=False, direct_web=False, direct_all=False):
         storage = tempfile.TemporaryDirectory(prefix="huiguan-directory-test-")
         cls.addClassCleanup(storage.cleanup)
         state = Path(storage.name) / "test-server.json"
@@ -76,7 +76,10 @@ class CreatorDirectoryTest(unittest.TestCase):
         )
         if broker:
             env.update(IRIDESCENTLY_LAB_ACCOUNT_BROKER_ORIGIN=ORIGIN,
-                       IRIDESCENTLY_LAB_ACCOUNT_BROKER_BEARER=BROKER_BEARER)
+                       IRIDESCENTLY_LAB_ACCOUNT_BROKER_BEARER=BROKER_BEARER,
+                       IRIDESCENTLY_LAB_ACCOUNT_DEFAULT_ALL=str(int(default_all)),
+                       IRIDESCENTLY_LAB_ACCOUNT_DIRECT_WEB=str(int(direct_web)),
+                       IRIDESCENTLY_LAB_ACCOUNT_DIRECT_WEB_DEFAULT_ALL=str(int(direct_all)))
         proc = subprocess.Popen(
             [sys.executable, "-B", "-c", LAUNCH, str(state)], env=env,
             stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True,
@@ -287,6 +290,37 @@ class CreatorDirectoryTest(unittest.TestCase):
         self.assertTrue(self.ok(BROKER + "introspect", payload=opaque, service=True)["active"])
         entitlement("visitor", False)
         self.assertFalse(self.ok(BROKER + "introspect", payload=opaque, service=True)["active"])
+
+    def test_broad_policy_is_a_player_eligibility_default_not_admin_or_creator_membership(self):
+        self.port, self.accounts, self.database = self.launch(broker=True, default_all=True)
+        target = {"kind": "local", "uid": self.accounts["visitor"]["uid"]}
+        lookup = ACCOUNT + "?" + urlencode(target)
+        admin = self.ok(lookup, "admin")
+        self.assertTrue(admin["lab_access"])
+        self.assertIsNone(admin["lab_access_override"])
+        self.assertIsNone(admin["membership"])
+        self.assertEqual(self.request(lookup, "visitor")[0], 403)
+        self.assertEqual(self.request(LAB_ACCESS, "visitor", {**target, "enabled": False},
+                                      admin["csrf"])[0], 403)
+        verifier = secrets.token_urlsafe(32)
+        challenge = urlsafe_b64encode(sha256(verifier.encode("ascii")).digest()).decode().rstrip("=")
+        tx = self.ok(BROKER + "start", payload={"challenge": challenge}, service=True)
+        page = self.ok(tx["approval_path"], "visitor")
+        csrf = re.search(r'name="csrf" value="([A-Za-z0-9_-]+)"', page)[1]
+        self.ok(BROKER + "approve", "visitor", form=True, payload={
+            "request_id": tx["request_id"], "csrf": csrf,
+            "match_code": tx["match_code"], "decision": "approve",
+        })
+        state = {key: tx[key] for key in ("request_id", "state")}
+        polled = self.ok(BROKER + "poll", payload=state, service=True)
+        grant = self.ok(BROKER + "redeem", payload={**state, "code": polled["code"], "verifier": verifier}, service=True)
+        self.assertEqual(set(grant), {"sub", "grant", "expires_in"})
+        self.ok(LAB_ACCESS, "admin", {**target, "enabled": False}, admin["csrf"])
+        changed = self.ok(lookup, "admin")
+        self.assertFalse(changed["lab_access"])
+        self.assertIs(changed["lab_access_override"], False)
+        self.assertFalse(self.ok(BROKER + "introspect",
+                                 payload={key: grant[key] for key in ("sub", "grant")}, service=True)["active"])
 
     def test_directory_remains_available_with_broker_disabled(self):
         self.port, self.accounts, self.database = self.launch(broker=False)

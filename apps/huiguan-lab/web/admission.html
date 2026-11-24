@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>众生之门 · 等候入场</title><link rel="stylesheet" href="/static/lab.css">
+</head>
+<body class="gate">
+<main class="card" id="admission" data-mode="__LAB_QUEUE_MODE__">
+ <p class="eyebrow">众生之门 · 测试世界</p><h1>等候入场</h1>
+ <p id="admission-status" role="status" aria-live="polite">正在查看入场状态…</p>
+ <button type="button" id="admission-retry" hidden>重新排队</button>
+ <a id="admission-enter" href="/play/" hidden>进入游戏</a>
+ <form id="admission-priority" autocomplete="off" hidden>
+  <label for="admission-code">测试码（可选，仅用于优先入场）</label>
+  <input type="password" id="admission-code" maxlength="64" autocomplete="off" spellcheck="false" required>
+  <button type="submit">申请优先入场</button>
+  <p id="admission-code-status" role="status" aria-live="polite"></p>
+ </form>
+ <button type="button" id="admission-cancel" hidden>退出队列</button>
+ <p>不用测试码也可以普通排队。队列顺序不代表预计时间。</p>
+</main>
+<script src="/static/admission.js"></script>
+</body></html>
