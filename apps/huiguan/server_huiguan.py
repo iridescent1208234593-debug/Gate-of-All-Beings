@@ -1225,6 +1225,11 @@ FAN_REVISION_PENDING_SQL = """COALESCE((
 ), '') = 'owner_revision_submitted'"""
 
 
+def fan_had_publication_intent(row):
+    # Keep the previous approved fallback for older rows without a publication clock.
+    return bool(row["is_public"] or row["published_at"] or row["review_status"] == "approved")
+
+
 def fan_needs_independent_review(conn, card_id):
     return bool(conn.execute(f"SELECT {FAN_REVISION_PENDING_SQL} FROM fan_characters WHERE id=?", (card_id,)).fetchone()[0])
 
@@ -1289,7 +1294,7 @@ def sync_fan_characters(conn, ident, code, cd, previous_code=None, *, previous_d
             continue
         # 只有公开过的设表（正在公开，或审核通过后被作者撤回）才要求另一位审核员复审；
         # 从未公开的草稿只按首次投稿规则处理，作者本人是审核员时不必再找第二个人。
-        was_public = bool(row["is_public"]) or row["review_status"] == "approved"
+        was_public = fan_had_publication_intent(row)
         if row["is_public"]:
             conn.execute(f"""UPDATE fan_characters SET {assignments}, code=?, updated_at=?, art_source=?,
                             review_status='pending' WHERE id=?""",
@@ -5990,8 +5995,9 @@ class Handler(BaseStaticHandler):
         if row["user_kind"] != ident["kind"] or row["user_uid"] != ident["uid"]:
             conn.close(); self._json(403, {"error": "只能操作自己的角色"}); return
         review = row["review_status"]
-        if is_public and review == "rejected":
-            review = "pending"  # 重新公开 = 重新提交审核
+        if is_public and (review == "rejected" or
+                          (row["type"] != "配色海报" and fan_needs_independent_review(conn, row["id"]))):
+            review = "pending"  # 退回稿或有未通过修订的原卡，重新公开仍须审核。
         conn.execute("UPDATE fan_characters SET is_public=?, updated_at=?, review_status=? WHERE id=?",
                      (is_public, fan_revision_time(), review, fid))
         if row["type"] != "配色海报":
@@ -6077,9 +6083,9 @@ class Handler(BaseStaticHandler):
                         art = fan_revision_art(old_gallery, art)
                         changed = fan_review_content_changed(old_gallery, fields, to_str(code), art)
                         # 首次公开沿用既有例外；只有公开过的设表被改动才要求另一位审核员。
-                        was_public = bool(old_gallery["is_public"]) or old_gallery["review_status"] == "approved"
-                        independent = ((changed and was_public)
-                                       or fan_needs_independent_review(conn, existing["id"]))
+                        was_public = fan_had_publication_intent(old_gallery)
+                        is_revision = changed and was_public
+                        independent = is_revision or fan_needs_independent_review(conn, existing["id"])
                         status = ("pending" if independent else
                                   "approved" if old_gallery["review_status"] == "approved" else review)
                         if changed or not existing["is_public"] or status != old_gallery["review_status"]:
@@ -6088,9 +6094,9 @@ class Handler(BaseStaticHandler):
                                 review_status=?, art_source=? WHERE id=?""",
                                 values + [to_str(code), fan_revision_time(), status, art, existing["id"]]
                             )
-                            action = FAN_REVISION_ACTION if changed else "owner_publish"
+                            action = FAN_REVISION_ACTION if is_revision else "owner_publish"
                             fan_gallery_history.record(conn, ident, action, old_gallery,
-                                                       fan_gallery_history.load(conn, existing["id"]), explicit=changed)
+                                                       fan_gallery_history.load(conn, existing["id"]), explicit=is_revision)
                         pending += status == "pending"
                         if existing["is_public"]:
                             skipped += 1

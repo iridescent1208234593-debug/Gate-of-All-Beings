@@ -151,6 +151,12 @@ class FanOwnerEditTest(unittest.TestCase):
         art_edit["data"]["story"] = "私下修改"
         self.assertFalse(self.owner.call("/api/save-character",art_edit)[1]["fan_review_pending"])
         self.assertNotIn(fid, [r["id"] for r in self.reviewer.call("/api/fan/review/queue")[1]["characters"]])
+        status, resubmitted = self.owner.call("/api/fan/toggle", {"id": fid, "is_public": True})
+        self.assertEqual((status, resubmitted["review_status"]), (200, "pending"))
+        self.assertEqual(self.public(self.other, code), [])
+        pending = self.queue_item(self.owner, fid)
+        self.assertTrue(pending["needs_independent_review"])
+        self.assertEqual(self.decide(self.owner, pending)[0], 403)
         self.assertEqual(self.publish(code)[1]["pending"], 1)
         self.assertEqual(self.public(self.owner, code), [])
         self.assertEqual(self.decide(self.reviewer, self.queue_item(self.reviewer, fid))[0], 200)
@@ -209,6 +215,42 @@ class FanOwnerEditTest(unittest.TestCase):
         self.assertEqual(self.owner.call("/api/fan/review/decide", {"id": pending[0]["id"], "decision": "approve", "review_version": pending[0]["review_version"]})[0], 200)
         mine_flags = sorted((r["name"], r["is_mine"]) for r in self.public(self.other, "B-1"))
         self.assertEqual(mine_flags, [("冒名", True), ("林风", False)])
+
+    def test_published_rejected_withdrawn_revision_still_needs_other_reviewer(self):
+        code, name = "withdrawn-rejected", "曾公开后撤回"
+        original = sheet(code, name, "此前公开")
+        self.assertEqual(self.owner.call("/api/save-character", original)[0], 200)
+        self.assertEqual(self.publish(code)[1]["pending"], 0)
+        published = self.public(self.reviewer, code)[0]
+        self.assertTrue(published["published_at"])
+        fid = published["id"]
+        self.assertEqual(self.decide(self.reviewer, published, "reject")[0], 200)
+        self.assertEqual(self.owner.call("/api/fan/toggle", {"id": fid, "is_public": False})[0], 200)
+        original["data"]["age"] = 234
+        self.assertFalse(self.owner.call("/api/save-character", original)[1]["fan_review_pending"])
+        self.assertNotIn(fid, [r["id"] for r in self.reviewer.call("/api/fan/review/queue")[1]["characters"]])
+        self.assertEqual(self.publish(code)[1]["pending"], 1)
+        item = self.queue_item(self.owner, fid)
+        self.assertTrue(item["needs_independent_review"])
+        self.assertEqual(self.decide(self.owner, item)[0], 403)
+        self.assertEqual(self.decide(self.reviewer, self.queue_item(self.reviewer, fid))[0], 200)
+        self.assertEqual(self.public(self.reviewer, code)[0]["id"], fid)
+
+    def test_first_publication_of_existing_private_unreviewed_row_has_no_revision_marker(self):
+        code, name = "private-existing", "私下投稿角色"
+        first = {**sheet(code, name, "草稿")["data"], "is_public": False}
+        status, result = self.other.call("/api/fan/submit", first)
+        self.assertEqual((status, result["review_status"]), (200, "pending"))
+        fid = result["id"]
+        self.assertEqual(self.other.call("/api/save-character", sheet(code, name, "换成首发稿"))[0], 200)
+        self.assertNotIn(fid, [r["id"] for r in self.reviewer.call("/api/fan/review/queue")[1]["characters"]])
+        status, result = self.other.call("/api/fan/publish", {"character_codes": [code]})
+        self.assertEqual((status, result["pending"]), (200, 1))
+        item = self.queue_item(self.reviewer, fid)
+        self.assertFalse(item["needs_independent_review"])
+        self.assertEqual(item["story"], "换成首发稿")
+        _, history = self.reviewer.call(f"/api/admin/fan/history?id={fid}")
+        self.assertEqual([event["action"] for event in history["events"][:2]], ["owner_publish", "owner_submit"])
 
     def test_unpublished_draft_keeps_first_submission_rule(self):
         # 从未公开过的草稿：作者本人是审核员时，改稿不需要另一位审核员。
