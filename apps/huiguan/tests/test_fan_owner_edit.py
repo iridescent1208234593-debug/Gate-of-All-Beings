@@ -3,6 +3,7 @@
 import json
 import os
 import socket
+import sqlite3
 import subprocess
 import sys
 import tempfile
@@ -15,6 +16,7 @@ from http.cookies import SimpleCookie
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "services" / "platform"))
+import fan_gallery_history  # noqa: E402
 from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
 
 HUIGUAN = Path(__file__).resolve().parents[1]
@@ -176,6 +178,116 @@ class FanOwnerEditTest(unittest.TestCase):
         _, mine = self.owner.call("/api/get-characters")
         codes = [c["code"] for c in mine["characters"]]
         self.assertEqual((codes.count(code), codes.count("A-2")), (0, 1))
+
+    def test_approval_actor_is_version_specific_and_private(self):
+        code = "approval-attribution"
+        self.assertEqual(self.other.call("/api/save-character", sheet(code, "审核归属", "固定故事"))[0], 200)
+        status, submitted = self.other.call("/api/fan/publish", {"character_codes": [code]})
+        self.assertEqual((status, submitted["pending"]), (200, 1))
+        first = next(r for r in self.owner.call("/api/fan/review/queue")[1]["characters"] if r["code"] == code)
+        fid = first["id"]
+        path = f"/api/admin/fan/history?id={fid}"
+        status, _ = self.owner.call("/api/fan/review/decide", {
+            "id": fid, "decision": "approve", "review_version": first["review_version"],
+            "reviewed_by": "fake", "actor_name": "fake"
+        })
+        self.assertEqual(status, 200)
+        status, initial = self.reviewer.call(path)
+        self.assertEqual(status, 200)
+        original = initial["current_approval"]
+        self.assertEqual(original["actor_name"], "owner_test")
+        self.assertEqual(original, {**initial["snapshots"][0]["approval"], "snapshot_id": initial["snapshots"][0]["id"]})
+        for client in (Client(self.base), self.other, self.owner):
+            status, denied = client.call(path)
+            self.assertIn(status, (401, 403))
+            self.assertNotIn("current_approval", denied)
+        for n in range(1, 4):
+            changed = sheet(code, "审核归属", "固定故事")
+            changed["data"]["age"] = 100 + n
+            self.assertTrue(self.other.call("/api/save-character", changed)[1]["fan_review_pending"])
+            pending = self.reviewer.call(path)[1]
+            self.assertIsNone(pending["current_approval"])
+            self.assertEqual(pending["current_review_status"], "pending")
+            self.assertEqual(self.decide(self.reviewer, self.queue_item(self.reviewer, fid))[0], 200)
+            if n == 1:
+                snapshots = self.reviewer.call(path)[1]["snapshots"]
+                self.assertEqual([r["approval"]["actor_name"] for r in snapshots],
+                                 ["Moderator Fixture", "owner_test"])
+                self.assertEqual(snapshots[0]["content"], snapshots[1]["content"])
+        final = self.reviewer.call(path)[1]
+        self.assertEqual(len(final["snapshots"]), 3)
+        self.assertTrue(all(row["approval"]["actor_name"] == "Moderator Fixture" for row in final["snapshots"]))
+        self.assertNotEqual(original["actor_tag"], final["current_approval"]["actor_tag"])
+        self.assertEqual(final["current_approval"], {**final["snapshots"][0]["approval"], "snapshot_id": final["snapshots"][0]["id"]})
+        self.assertEqual(sum(event["action"] == "review_approve" for event in final["events"]), 4)
+        self.assertNotIn("current_approval", self.public(self.other, code)[0])
+        self.assertEqual(self.decide(self.reviewer, self.public(self.reviewer, code)[0], "reject")[0], 200)
+        rejected = self.reviewer.call(path)[1]
+        self.assertIsNone(rejected["current_approval"])
+        self.assertEqual(rejected["snapshots"], final["snapshots"])
+
+    def test_automatic_approval_does_not_invent_a_reviewer(self):
+        code = "approval-unattributed"
+        self.assertEqual(self.owner.call("/api/save-character", sheet(code, "自动通过", "原稿"))[0], 200)
+        self.assertEqual(self.publish(code)[1]["published"], 1)
+        public = self.public(self.other, code)[0]
+        path = f"/api/admin/fan/history?id={public['id']}"
+        prior = self.reviewer.call(path)[1]
+        self.assertTrue(prior["current_is_public"])
+        self.assertEqual(prior["current_review_status"], "approved")
+        self.assertIsNone(prior["current_approval"])
+        self.assertIsNone(prior["snapshots"][0]["approval"])
+        self.assertEqual(self.decide(self.reviewer, self.public(self.reviewer, code)[0])[0], 200)
+        updated = self.reviewer.call(path)[1]
+        self.assertEqual(updated["current_approval"]["actor_name"], "Moderator Fixture")
+        self.assertEqual(updated["snapshots"][1], prior["snapshots"][0])
+
+    def test_later_explicit_approval_at_same_version_and_unchanged_republish(self):
+        code = "approval-two-reviewers"
+        self.assertEqual(self.other.call("/api/save-character", sheet(code, "两次审核", "同一稿"))[0], 200)
+        self.assertEqual(self.other.call("/api/fan/publish", {"character_codes": [code]})[1]["pending"], 1)
+        row = next(r for r in self.owner.call("/api/fan/review/queue")[1]["characters"] if r["code"] == code)
+        fid = row["id"]
+        path = f"/api/admin/fan/history?id={fid}"
+        self.assertEqual(self.decide(self.owner, row)[0], 200)
+        old = self.reviewer.call(path)[1]
+        self.assertEqual(self.decide(self.reviewer, self.public(self.reviewer, code)[0])[0], 200)
+        current = self.reviewer.call(path)[1]
+        self.assertEqual(len(current["snapshots"]), 1)
+        self.assertEqual(current["current_approval"]["snapshot_id"], old["current_approval"]["snapshot_id"])
+        self.assertEqual(current["current_approval"]["actor_name"], "Moderator Fixture")
+        self.assertEqual([e["actor_name"] for e in current["events"] if e["action"] == "review_approve"],
+                         ["Moderator Fixture", "owner_test"])
+        self.assertEqual(self.other.call("/api/fan/toggle", {"id": fid, "is_public": False})[0], 200)
+        self.assertIsNone(self.reviewer.call(path)[1]["current_approval"])
+        self.assertEqual(self.other.call("/api/fan/toggle", {"id": fid, "is_public": True})[1]["review_status"],
+                         "approved")
+        after = self.reviewer.call(path)[1]
+        self.assertEqual(after["current_approval"], current["current_approval"])
+        self.assertEqual(after["snapshots"], current["snapshots"])
+
+    def test_legacy_snapshot_keeps_unknown_actor_and_old_schema(self):
+        with sqlite3.connect(":memory:") as conn:
+            conn.row_factory = sqlite3.Row
+            conn.executescript("""
+                CREATE TABLE fan_characters(id INTEGER, review_status TEXT, is_public INTEGER);
+                CREATE TABLE fan_history_snapshots(id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    card_id INTEGER, recorded_at TEXT, fingerprint TEXT, content TEXT,
+                    legacy_observed INTEGER, truncated_fields TEXT);
+                INSERT INTO fan_history_snapshots VALUES
+                    (1, 7, '2026-11-01T01:00Z', 'old', '{}', 1, '[]');
+            """)
+            fan_gallery_history.init_schema(conn)
+            fan_gallery_history.init_schema(conn)
+            snapshot = fan_gallery_history.history(conn, 7)["snapshots"][0]
+            self.assertIsNone(snapshot["approval"])
+            self.assertIsNone(snapshot["approved_at"])
+            self.assertTrue(snapshot["legacy_observed"])
+            # The original row and schema remain untouched.
+            self.assertEqual(len(conn.execute("PRAGMA table_info(fan_history_snapshots)").fetchall()), 7)
+            row = conn.execute("""SELECT id, card_id, recorded_at, fingerprint, content,
+                                  legacy_observed, truncated_fields FROM fan_history_snapshots""").fetchone()
+            self.assertEqual(tuple(row), (1, 7, "2026-11-01T01:00Z", "old", "{}", 1, "[]"))
 
     def test_legacy_code_only_link_cannot_erase_independent_review(self):
         # Direct submissions historically have a blank gallery code.

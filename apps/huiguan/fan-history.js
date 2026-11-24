@@ -42,14 +42,52 @@
     return value;
   }
 
+  function actorLabel(entry) {
+    const role = Object.hasOwn(roles, entry.actor_role) ? roles[entry.actor_role] : "";
+    return [role, entry.actor_name, entry.actor_tag].filter(Boolean).join(" · ");
+  }
+
+  const hasApprovalActor = (approval) => Boolean(approval?.actor_name || approval?.actor_tag);
+
+  function approvalFields(container, approval, snapshotId) {
+    const verified = hasApprovalActor(approval);
+    field(container, "批准公开的审核人", verified ? actorLabel(approval) : "未记录，无法确认");
+    if (verified) field(container, "批准时间", displayDate(approval.approved_at));
+    const revision = galleryId(approval?.snapshot_id ?? snapshotId);
+    if (revision) field(container, "公开版本记录", "#" + revision);
+  }
+
+  function currentApproval(payload) {
+    const review = payload.current_review_status;
+    const visibility = payload.current_is_public;
+    if (typeof review !== "string" || typeof visibility !== "boolean") return null;
+    const section = node("section", null, "fan-history-block");
+    section.append(node("h3", "当前公开审批"));
+    if (!visibility || review !== "approved") {
+      const state = !visibility ? "当前未公开（可能尚未申请或已撤回）"
+        : review === "pending" ? "当前待审核，尚未公开"
+        : review === "rejected" ? "当前已退回，未公开" : "当前无已确认的公开审批";
+      section.append(node("p", state + "。以下留存版本不代表当前版本已公开。"));
+    } else {
+      const values = node("dl");
+      approvalFields(values, payload.current_approval);
+      section.append(values);
+    }
+    return section;
+  }
+
   function snapshot(entry, idx) {
     const box = node("details", null, "fan-history-block");
     const content = entry.content || {};
+    const version = `公开版本 ${idx + 1}${idx === 0 ? "（最近）" : ""}`;
     const title = entry.legacy_observed
       ? `历史基线（通过时间未知） · 记录于 ${displayDate(entry.recorded_at)}`
-      : `公开版本 ${idx + 1}${idx === 0 ? "（最近）" : ""} · 通过于 ${displayDate(entry.approved_at)}`;
+      : hasApprovalActor(entry.approval)
+        ? `${version} · 通过于 ${displayDate(entry.approval.approved_at)}`
+        : `${version} · 公开记录时间：${displayDate(entry.approved_at || entry.recorded_at)}`;
     box.append(node("summary", title));
     const values = node("dl");
+    if (Object.hasOwn(entry, "approval")) approvalFields(values, entry.approval, entry.id);
     for (const [key, label] of Object.entries(fields)) field(values, label, content[key]);
     if (Object.hasOwn(art, content.art_source ?? "")) field(values, "立绘来源", art[content.art_source ?? ""]);
     if (content.image_data) field(values, "立绘", "此版本附有图片，历史面板不加载图片。");
@@ -215,6 +253,8 @@
     let next = cursorValue(payload.next_before);
     const action = reopenForm(payload.reopen, id);
     if (action) output.append(action);
+    const current = currentApproval(payload);
+    if (current) output.append(current);
     output.append(node("h3", "最近 3 个正式公开版本"));
     if (snapshots.length) output.append(...snapshots.map(snapshot));
     else output.append(node("p", "没有已记录的公开版本。启用记录前的版本不会自动补齐。"));

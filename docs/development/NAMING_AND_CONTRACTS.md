@@ -155,3 +155,4 @@ character_id 表示多个不同对象
 
 - 管理员送回复审使用原画廊卡片 ID、当前复审版本及必填理由，事件名为 `moderation_reopen`。保留独立的复审与审核通过动作，详见 [同人画廊契约](FAN_GALLERY_HISTORY.md)。
 - 作者修改复审的保存响应字段为 `fan_review_pending`；审核队列以 `needs_independent_review` 表示卡片须独立复审、以 `can_approve` 表示当前审核员能否通过该版本。复用现有审核状态、画廊卡片 ID 和版本，不引入新的 owner 或状态。见 [同人画廊契约](FAN_GALLERY_HISTORY.md)。
+- 版本归属使用管理员历史中的 `snapshot.approval`、`current_approval` 与既有留存稿编号 `snapshot_id`；审核人来自受信会话的 `(kind, uid)`，只对管理员投影已核实昵称和不透明代号，未确证时留空。见 [同人画廊契约](FAN_GALLERY_HISTORY.md)。

@@ -6253,7 +6253,8 @@ class Handler(BaseStaticHandler):
                     (status, "" if status == "approved" else note, f"{ident['kind']}:{ident['uid']}", now_iso(), art, fid))
                 if row["type"] != "配色海报":
                     fan_gallery_history.record(conn, ident, "review_" + decision, row,
-                                               fan_gallery_history.load(conn, fid), reason=note, explicit=True)
+                                               fan_gallery_history.load(conn, fid), reason=note, explicit=True,
+                                               review_version=fan_review_version(row))
                 conn.commit()
             finally:
                 conn.close()
