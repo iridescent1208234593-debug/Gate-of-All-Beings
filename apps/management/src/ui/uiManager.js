@@ -393,6 +393,20 @@ export class UIManager {
     });
   }
 
+  setSaveProtection(msg) {
+    let notice = document.getElementById('save-protection');
+    if (!notice) {
+      notice = document.createElement('span');
+      notice.id = 'save-protection';
+      notice.className = 'save-hint';
+      notice.setAttribute('role', 'status');
+      this.el.btnSave.parentNode.appendChild(notice);
+    }
+    notice.textContent = msg;
+    notice.hidden = !msg;
+    this.el.btnSave.disabled = !!msg;
+  }
+
   flashSaveHint(msg, persistent = false) {
     let hint = document.getElementById('save-hint');
     if (!hint) {
