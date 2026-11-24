@@ -1,0 +1,199 @@
+/*
+ * 灵息 · 众生之门—西木会馆 shared design tokens
+ * ------------------------------------------------
+ * One source for colour, type, space, shape, motion and layering across the
+ * main site, 西木会馆, 众生之门 modules and the LAB web pages. Godot mirrors the
+ * same values (see docs/design/lingxi-design-system.md, "Godot 对应").
+ *
+ * Direction: natural light, moss, mist, paper and water — gentle, restrained,
+ * alive. No ink-wash, seals, scrolls, auspicious clouds or gold trim.
+ *
+ * Only tokens and a few opt-in primitives live here. Page layouts stay with
+ * their page; a page adopts the system by mapping its local variables onto
+ * these tokens (e.g. `--qc-accent: var(--ling-moss-500)`).
+ *
+ * Served at /shared/shared-ui/lingxi.css on every host and at
+ * /design-system/ui/lingxi.css on the 会馆 host.
+ */
+
+:root {
+  /* ---------- palette (raw) ---------- */
+  --ling-forest-950: #07140f;
+  --ling-forest-900: #0c251d;   /* 会馆夜林底 */
+  --ling-forest-800: #133a2b;
+  --ling-forest-700: #1d4d3a;
+  --ling-moss-600: #3f7d68;
+  --ling-moss-500: #5a9e8f;     /* 松绿 · 主色（沿用 --qc-accent） */
+  --ling-moss-300: #a9d1bf;
+  --ling-leaf-400: #b5d482;     /* 嫩叶 · 夜间强调 */
+  --ling-sun-500: #e0a93b;      /* 日光 · 暖强调（替代描金） */
+  --ling-sun-300: #f3d38b;
+  --ling-ember-500: #b3543f;    /* 赭红 · 警示 */
+  --ling-water-500: #4f86a8;    /* 水纹 · 信息 */
+  --ling-plum-700: #563444;
+  --ling-amber-700: #765021;
+  --ling-paper-50: #fdfaf1;
+  --ling-paper-100: #f7f1e3;    /* 纸 */
+  --ling-paper-200: #efe6d1;
+  --ling-mist-300: #d4cfbe;
+  --ling-ink-900: #22302a;      /* 墨绿正文 */
+  --ling-ink-700: #3a4a3e;
+  --ling-ink-500: #5f6f63;
+
+  /* ---------- semantic (light / paper surfaces) ---------- */
+  --ling-bg: var(--ling-paper-100);
+  --ling-surface: var(--ling-paper-50);
+  --ling-surface-sunk: var(--ling-paper-200);
+  --ling-line: rgba(58, 74, 62, .16);
+  --ling-line-strong: rgba(58, 74, 62, .30);
+  --ling-text: var(--ling-ink-900);
+  --ling-text-muted: var(--ling-ink-500);
+  --ling-accent: var(--ling-moss-600);   /* white text on it: 4.83:1 (moss-500 is only 3.12:1) */
+  --ling-accent-strong: #2f6655;
+  --ling-on-accent: #fff;
+  --ling-warm: var(--ling-sun-500);
+  --ling-danger: var(--ling-ember-500);
+  --ling-info: var(--ling-water-500);
+  --ling-success: var(--ling-moss-600);
+  --ling-focus: #2f7f6c;
+  --ling-scrim: rgba(12, 20, 16, .42);
+
+  /* ---------- type ---------- */
+  --ling-font-body: "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
+  --ling-font-hand: "LXGW WenKai", "LXGW WenKai Screen", "Kaiti SC", "STKaiti", var(--ling-font-body);
+  --ling-font-ui: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei UI", "Noto Sans SC", sans-serif;
+  --ling-font-latin: "Cormorant Garamond", Georgia, serif;
+  --ling-font-mono: "SF Mono", Consolas, "Noto Sans Mono", monospace;
+  /* modular scale 1.2 on a 15px body; display sizes are fluid */
+  --ling-fs-xs: 12px;
+  --ling-fs-sm: 13px;
+  --ling-fs-md: 15px;
+  --ling-fs-lg: 18px;
+  --ling-fs-xl: 22px;
+  --ling-fs-2xl: clamp(24px, 2.2vw + 14px, 32px);
+  --ling-fs-display: clamp(32px, 4vw + 14px, 56px);
+  --ling-lh-tight: 1.3;
+  --ling-lh-body: 1.8;
+  --ling-tracking-cjk: .04em;
+  --ling-tracking-kicker: .22em;
+
+  /* ---------- space (4px base) ---------- */
+  --ling-sp-1: 4px;
+  --ling-sp-2: 8px;
+  --ling-sp-3: 12px;
+  --ling-sp-4: 16px;
+  --ling-sp-5: 24px;
+  --ling-sp-6: 32px;
+  --ling-sp-7: 48px;
+  --ling-sp-8: 72px;
+  --ling-gutter: clamp(16px, 4vw, 48px);
+  --ling-measure: 36em;          /* comfortable CJK reading width */
+
+  /* ---------- shape ---------- */
+  --ling-r-sm: 6px;
+  --ling-r-md: 10px;
+  --ling-r-lg: 16px;
+  --ling-r-pill: 999px;
+  --ling-tap: 44px;              /* minimum touch target */
+  --ling-shadow-1: 0 1px 2px rgba(20, 32, 26, .06), 0 2px 8px rgba(20, 32, 26, .06);
+  --ling-shadow-2: 0 4px 12px rgba(20, 32, 26, .08), 0 12px 32px rgba(20, 32, 26, .10);
+  --ling-shadow-3: 0 10px 24px rgba(12, 22, 17, .14), 0 28px 64px rgba(12, 22, 17, .20);
+
+  /* ---------- motion ---------- */
+  /* "hand leads, eye follows": the guide light leaves first, the view settles after. */
+  --ling-ease-travel: cubic-bezier(.55, 0, .18, 1);  /* crisp start, soft landing */
+  --ling-ease-out: cubic-bezier(.22, .8, .24, 1);
+  --ling-ease-in: cubic-bezier(.5, 0, .75, 0);
+  --ling-ease-settle: cubic-bezier(.34, 1.36, .5, 1); /* small overshoot, only for feedback */
+  --ling-dur-1: 120ms;   /* press, hover */
+  --ling-dur-2: 220ms;   /* small state change */
+  --ling-dur-3: 420ms;   /* panel, card */
+  --ling-dur-4: 720ms;   /* travel between places */
+  --ling-dur-hold: 900ms; /* minimum dwell before the next guided step */
+
+  /* ---------- layers ---------- */
+  --ling-z-raised: 10;
+  --ling-z-nav: 1000;
+  --ling-z-guide: 9999;   /* level with the fixed site nav (later in the DOM, so above it); every dialog (≥10000) wins over a hint */
+  --ling-z-dialog: 10000;
+  --ling-z-toast: 11000;
+}
+
+/* Dark / night-forest surfaces (会馆首页、众生之门、LAB 页面) opt in with data-ling-theme="night"
+   or follow the OS when a page sets data-ling-theme="auto". */
+[data-ling-theme="night"] {
+  --ling-bg: var(--ling-forest-900);
+  --ling-surface: #133026;
+  --ling-surface-sunk: #0a1d16;
+  --ling-line: rgba(220, 236, 214, .14);
+  --ling-line-strong: rgba(220, 236, 214, .28);
+  --ling-text: #f4efd9;
+  --ling-text-muted: #b9cbbb;
+  --ling-accent: var(--ling-leaf-400);
+  --ling-accent-strong: #cfe6a6;
+  --ling-on-accent: #10241b;
+  --ling-warm: var(--ling-sun-300);
+  --ling-focus: #d7f0a8;
+  --ling-scrim: rgba(3, 9, 6, .55);
+}
+@media (prefers-color-scheme: dark) {
+  [data-ling-theme="auto"] {
+    --ling-bg: var(--ling-forest-900);
+    --ling-surface: #133026;
+    --ling-surface-sunk: #0a1d16;
+    --ling-line: rgba(220, 236, 214, .14);
+    --ling-line-strong: rgba(220, 236, 214, .28);
+    --ling-text: #f4efd9;
+    --ling-text-muted: #b9cbbb;
+    --ling-accent: var(--ling-leaf-400);
+    --ling-accent-strong: #cfe6a6;
+    --ling-on-accent: #10241b;
+    --ling-warm: var(--ling-sun-300);
+    --ling-focus: #d7f0a8;
+    --ling-scrim: rgba(3, 9, 6, .55);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ling-dur-3: 1ms;
+    --ling-dur-4: 1ms;
+    --ling-dur-hold: 0ms;
+  }
+}
+:root[data-ling-motion="reduced"] {
+  --ling-dur-3: 1ms;
+  --ling-dur-4: 1ms;
+  --ling-dur-hold: 0ms;
+}
+
+/* ---------- opt-in primitives (class-scoped; never restyle bare elements) ---------- */
+.ling-kicker {
+  font: 500 var(--ling-fs-xs)/1.4 var(--ling-font-ui);
+  letter-spacing: var(--ling-tracking-kicker);
+  text-transform: uppercase;
+  color: var(--ling-warm);
+}
+.ling-btn {
+  --_bg: transparent;
+  --_fg: var(--ling-text);
+  --_bd: var(--ling-line-strong);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--ling-sp-2);
+  min-height: var(--ling-tap); padding: 0 var(--ling-sp-5);
+  border: 1px solid var(--_bd); border-radius: var(--ling-r-pill);
+  background: var(--_bg); color: var(--_fg);
+  font: 500 var(--ling-fs-md)/1 var(--ling-font-ui); letter-spacing: .04em;
+  cursor: pointer; text-decoration: none;
+  transition: background var(--ling-dur-2) var(--ling-ease-out), border-color var(--ling-dur-2), transform var(--ling-dur-1);
+}
+.ling-btn:hover { --_bd: var(--ling-accent); }
+.ling-btn:active { transform: translateY(1px); }
+.ling-btn:focus-visible { outline: 2px solid var(--ling-focus); outline-offset: 3px; }
+.ling-btn--primary { --_bg: var(--ling-accent); --_fg: var(--ling-on-accent); --_bd: transparent; }
+.ling-btn--primary:hover { --_bg: var(--ling-accent-strong); }
+.ling-btn--quiet { --_bd: transparent; color: var(--ling-text-muted); padding: 0 var(--ling-sp-3); }
+.ling-btn--quiet:hover { color: var(--ling-text); --_bd: transparent; }
+.ling-visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}

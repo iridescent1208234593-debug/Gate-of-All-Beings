@@ -50,6 +50,7 @@ from account_profile import init_schema as init_profile_schema, get_profile, set
 import game_saves
 import account_progress
 import legal_consent
+import onboarding_progress
 import fan_gallery_history
 import creator_directory
 import lab_account_broker
@@ -441,6 +442,7 @@ def init_user_db():
         init_security_schema(conn)
         init_email_schema(conn)
         legal_consent.init_schema(conn)
+        onboarding_progress.init_schema(conn)
         fan_gallery_history.init_schema(conn)
         if CREATORS_ENABLED:
             creator_directory.init_schema(conn)
@@ -2056,6 +2058,8 @@ class Handler(BaseStaticHandler):
             return self._api_sso_user()
         if path == "/api/legal":
             return self._api_legal_status()
+        if path == "/api/onboarding":
+            return self._api_onboarding_status()
         if path == "/api/logout":
             return self._api_logout()
         if path == "/api/get-characters":
@@ -2184,6 +2188,8 @@ class Handler(BaseStaticHandler):
             return self._api_register()
         if path == "/api/legal/accept":
             return self._api_legal_accept()
+        if path == "/api/onboarding":
+            return self._api_onboarding_update()
         if path == "/api/delete-character":
             return self._api_delete_character()
         if path == "/api/save-character":
@@ -2828,6 +2834,51 @@ class Handler(BaseStaticHandler):
             finally:
                 conn.close()
         self._json(200, {"ok": True, **payload})
+
+    # ---------- /api/onboarding（新人引导进度，见 onboarding_progress.py） ----------
+    def _onboarding_has_oc(self, ident):
+        try:
+            return bool(character_store().list(ident))
+        except (oc_store.OCError, sqlite3.Error, OSError):
+            return False  # unreadable OC store: fall back to the Legal Consent signal
+
+    def _api_onboarding_status(self):
+        ident = self._require_ident_optional()
+        has_oc = (lambda: self._onboarding_has_oc(ident)) if ident else False   # read only for a first visit
+        with DB_LOCK:
+            conn = db()
+            try:
+                payload = onboarding_progress.status(conn, ident, has_oc=has_oc)
+                conn.commit()
+            finally:
+                conn.close()
+        self._json(200, payload)
+
+    def _api_onboarding_update(self):
+        ident = self._require_ident()
+        if not ident:
+            return
+        body = self._read_json(max_bytes=16 * 1024)
+        if body is None:
+            return
+        status_value = body.get("status")
+        if status_value is not None and not isinstance(status_value, str):
+            return self._json(400, {"error": "请求数据格式错误", "code": "unknown_status"})
+        has_oc = lambda: self._onboarding_has_oc(ident)
+        with DB_LOCK:
+            conn = db()
+            try:
+                onboarding_progress.status(conn, ident, has_oc=has_oc)  # records veterans first
+                chapter = onboarding_progress.update(
+                    conn, ident, body.get("chapter"), status=status_value, seen=body.get("seen"),
+                    reset=body.get("reset") is True, merge=body.get("merge") is True)
+                conn.commit()
+            except ValueError as error:
+                conn.rollback()
+                return self._json(400, {"error": "请求数据格式错误", "code": str(error)})
+            finally:
+                conn.close()
+        self._json(200, {"ok": True, "chapter": body.get("chapter"), **chapter})
 
     # ---------- /api/sso-user（共享导航显示账户） ----------
     def _api_sso_user(self):

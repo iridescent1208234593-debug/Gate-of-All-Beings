@@ -277,3 +277,42 @@ def test_private_space_invite_revoke_isolation(gateway):
     # return from private space to the hall
     a.send(json.dumps({"t": "space_enter", "space": "hall"}))
     assert recv_until(a, "welcome")["space"]["id"] == "hall"
+
+
+# ---------------------------------------------------------------- G. new-player guide (chapter "life")
+def test_life_guide_progress_is_per_player_and_survives_reconnect(gateway):
+    _, code = gateway.new_code()
+    c = gateway.login(code)
+    s, w = enter(gateway, c, "新来的")
+    assert w["guide"] == {"status": "new", "seen": []}
+    s.send(json.dumps({"t": "guide", "seen": ["move", "Bad Key!", "move", "chat"]}))
+    g = recv_until(s, "guide")
+    assert g == {"t": "guide", "status": "active", "seen": ["move", "chat"]}
+    s.send(json.dumps({"t": "guide", "status": "paused"}))
+    assert recv_until(s, "guide")["status"] == "paused"
+    s.send(json.dumps({"t": "guide", "status": "veteran"}))
+    assert recv_until(s, "error")["code"] == "bad_request", "only the server decides veteran"
+    s.close()
+    s2, w2 = enter(gateway, c, "新来的")          # another device / client of the same player
+    assert w2["guide"] == {"status": "paused", "seen": ["move", "chat"]}
+    s2.send(json.dumps({"t": "guide", "reset": True}))
+    assert recv_until(s2, "guide") == {"t": "guide", "status": "active", "seen": []}
+    _, other = gateway.new_code()
+    _, wo = enter(gateway, gateway.login(other), "别人")
+    assert wo["guide"]["status"] == "new", "progress belongs to one player"
+
+
+def test_life_guide_veteran_players_are_not_walked_through(gateway):
+    _, code = gateway.new_code()
+    c = gateway.login(code)
+    s, w = enter(gateway, c, "老玩家")
+    s.close()
+    time.sleep(0.3)
+    # simulate a player from before the guide existed: they have a nickname but no guide row yet
+    db = sqlite3.connect(gateway.tmp / "runtime" / "data" / "lab.sqlite")
+    with db:
+        db.execute("DELETE FROM life_guide WHERE pid=?", (w["pid"],))
+        db.execute("UPDATE players SET nickname='老玩家' WHERE pid=?", (w["pid"],))
+    db.close()
+    _, w2 = enter(gateway, c, "老玩家")
+    assert w2["guide"]["status"] == "veteran"
