@@ -1287,12 +1287,21 @@ def sync_fan_characters(conn, ident, code, cd, previous_code=None, *, previous_d
         art = fan_revision_art(row, fan_art_source(cd))
         if not fan_review_content_changed(row, fields, code, art, details_changed):
             continue
-        conn.execute(f"""UPDATE fan_characters SET {assignments}, code=?, updated_at=?, art_source=?,
-                        review_status='pending' WHERE id=?""",
-                     values + [code, fan_revision_time(), art, row["id"]])
-        fan_gallery_history.record(conn, ident, FAN_REVISION_ACTION, row, fan_gallery_history.load(conn, row["id"]),
-                                   explicit=True)
-        public_pending |= bool(row["is_public"])
+        # 只有公开过的设表（正在公开，或审核通过后被作者撤回）才要求另一位审核员复审；
+        # 从未公开的草稿只按首次投稿规则处理，作者本人是审核员时不必再找第二个人。
+        was_public = bool(row["is_public"]) or row["review_status"] == "approved"
+        if row["is_public"]:
+            conn.execute(f"""UPDATE fan_characters SET {assignments}, code=?, updated_at=?, art_source=?,
+                            review_status='pending' WHERE id=?""",
+                         values + [code, fan_revision_time(), art, row["id"]])
+            public_pending = True
+        else:
+            conn.execute(f"""UPDATE fan_characters SET {assignments}, code=?, updated_at=?, art_source=?
+                            WHERE id=?""",
+                         values + [code, fan_revision_time(), art, row["id"]])
+        if was_public:
+            fan_gallery_history.record(conn, ident, FAN_REVISION_ACTION, row,
+                                       fan_gallery_history.load(conn, row["id"]), explicit=True)
     return public_pending
 
 def character_store():
@@ -6067,7 +6076,10 @@ class Handler(BaseStaticHandler):
                         old_gallery = fan_gallery_history.load(conn, existing["id"])
                         art = fan_revision_art(old_gallery, art)
                         changed = fan_review_content_changed(old_gallery, fields, to_str(code), art)
-                        independent = changed or fan_needs_independent_review(conn, existing["id"])
+                        # 首次公开沿用既有例外；只有公开过的设表被改动才要求另一位审核员。
+                        was_public = bool(old_gallery["is_public"]) or old_gallery["review_status"] == "approved"
+                        independent = ((changed and was_public)
+                                       or fan_needs_independent_review(conn, existing["id"]))
                         status = ("pending" if independent else
                                   "approved" if old_gallery["review_status"] == "approved" else review)
                         if changed or not existing["is_public"] or status != old_gallery["review_status"]:
