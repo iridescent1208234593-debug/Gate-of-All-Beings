@@ -373,24 +373,6 @@
   .toast a { color: var(--gold, #d4a840); }
 
   /* 游客数据提醒：每次未登录进入都展示，不写入浏览器持久化状态。 */
-  .guest-save-mask { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; padding: 20px; background: rgba(31,43,35,.48); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); }
-  .guest-save-mask[hidden] { display: none; }
-  .guest-save-dialog { position: relative; width: min(440px, 100%); max-height: min(680px, calc(100dvh - 40px)); overflow-y: auto; padding: clamp(24px, 5vw, 34px); border: 1px solid rgba(255,255,255,.58); border-radius: 18px; background: rgba(249,246,235,.92); -webkit-backdrop-filter: blur(22px); backdrop-filter: blur(22px); box-shadow: 0 18px 60px rgba(25,36,27,.22), inset 0 1px rgba(255,255,255,.7); color: #2f4235; }
-  .guest-save-dialog h2 { margin: 0 0 14px; color: #2f4235; font-size: clamp(19px, 4vw, 23px); font-weight: 500; letter-spacing: .09em; }
-  .guest-save-dialog p { margin: 0 0 12px; font-size: 14px; line-height: 1.85; }
-  .guest-save-dialog .guest-save-kicker { margin-bottom: 8px; color: var(--gold, #9a7836); font-size: 11px; letter-spacing: .2em; }
-  .guest-save-dialog .guest-save-detail { color: #5a6c60; font-size: 12px; }
-  .guest-save-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 21px; }
-  .guest-save-actions button { min-height: 43px; padding: 9px 16px; border: 1px solid rgba(70,93,72,.28); border-radius: 999px; background: rgba(255,255,255,.2); color: #2f4235; font: inherit; font-size: 13px; cursor: pointer; transition: background .2s, border-color .2s, transform .2s; }
-  .guest-save-actions button:hover { background: rgba(255,255,255,.48); border-color: var(--accent); transform: translateY(-1px); }
-  .guest-save-actions button:focus-visible, .guest-save-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-  .guest-save-actions .guest-save-primary { color: #2f4235; border-color: rgba(158,119,49,.42); background: rgba(210,178,106,.28); }
-  .guest-save-close { position: absolute; top: 12px; right: 14px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: #5a6c60; font-size: 22px; cursor: pointer; }
-  .guest-save-confirm { padding-left: 13px; border-left: 2px solid rgba(169,116,55,.55); }
-  .guest-save-dialog[data-step="intro"] .guest-save-confirm, .guest-save-dialog[data-step="intro"] .guest-save-confirm-action { display: none; }
-  .guest-save-dialog[data-step="confirm"] .guest-save-intro-action { display: none; }
-  @media (max-width: 480px) { .guest-save-actions { flex-direction: column; } .guest-save-actions button { width: 100%; } }
-  @media (prefers-reduced-motion: reduce) { .guest-save-actions button { transition: none; } }
 
   /* 颜色选择弹窗 */
   .modal-overlay {
@@ -691,19 +673,16 @@
     .auth-input { font-size: 16px; }
   }
 /* Optional writing help uses the same tokens and native disclosure as registration. */
-.registration-guide{margin:0 0 18px;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:var(--paper)}
-.registration-guide details>summary,.writing-guide>summary{cursor:pointer;color:var(--text);line-height:1.5}
-.registration-guide details>summary:focus-visible,.writing-guide>summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-.registration-guide__lead,.registration-guide__steps,.registration-guide__notes,.writing-guide__body{font-size:13px;line-height:1.65;color:var(--text-dim)}
-.registration-guide__lead{margin:0 0 7px}
-.registration-guide__steps{display:grid;gap:7px;margin:9px 0 12px;padding-inline-start:1.5em}
-.registration-guide__notes{margin:6px 0}
+.writing-guide>summary{cursor:pointer;color:var(--text);line-height:1.5}
+.writing-guide>summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .writing-guide{margin:7px 0 4px;font-size:12px}
-.writing-guide__body{display:grid;gap:5px;margin:6px 0;padding:8px 10px;border-inline-start:2px solid var(--accent);overflow-wrap:anywhere}
+.writing-guide__body{font-size:13px;line-height:1.65;color:var(--text-dim);display:grid;gap:5px;margin:6px 0;padding:8px 10px;border-inline-start:2px solid var(--accent);overflow-wrap:anywhere}
 .writing-guide__body p{margin:0}
 .registration-submit-hint{margin:8px 0 12px}
 </style>
 <link rel="stylesheet" href="/design-system/ui/intro-controls.css?v=20261027z">
+<link rel="stylesheet" href="/shared/shared-ui/lingxi.css?v=20261125a">
+<link rel="stylesheet" href="/shared/shared-ui/guide.css?v=20261125a">
 <link rel="stylesheet" href="/homepage.css?v=20261027z">
 <link rel="stylesheet" href="/legal.css?v=20261106">
 <link rel="preload" as="script" href="/design-system/ui/lxh-intro.js?v=20261027z">
@@ -712,7 +691,7 @@
 <script>document.documentElement.classList.add('home-booting');</script>
 <script src="/oc-revisions.js?v=20261026"></script>
 </head>
-<body>
+<body data-guide-page="hall">
 <!-- ============================================
      共享导航栏组件 - iridescently.xyz 子站网络
      使用方法：在各站 HTML 的 <body> 标签后立即插入本片段
@@ -902,23 +881,6 @@
 })();
 </script>
 
-<!-- 未登录数据提醒：关闭须先阅读风险、再确认继续。 -->
-<div class="guest-save-mask" id="guestSaveMask" hidden>
-  <section class="guest-save-dialog" id="guestSaveDialog" data-step="intro" role="dialog" aria-modal="true" aria-labelledby="guestSaveTitle" aria-describedby="guestSaveDescription">
-    <button type="button" class="guest-save-close" onclick="continueGuestReminder()" aria-label="关闭账号提醒">×</button>
-    <p class="guest-save-kicker">西木会馆 · 数据保存</p>
-    <h2 id="guestSaveTitle">先给你的创作留个归处</h2>
-    <p id="guestSaveDescription">不登录也能继续，但数据可能只留在当前浏览器。想长期保存、跨设备使用，或减少丢档风险，请注册或登录会馆账号。</p>
-    <p class="guest-save-detail">登录后，提交到服务器的角色与设定才能更可靠地关联到你的账号。</p>
-    <p class="guest-save-confirm" id="guestSaveConfirm" aria-live="polite">未登录的数据主要保存在当前浏览器，本机缓存被清除、换设备或浏览器后可能无法找回。确认后仍可作为游客继续。</p>
-    <div class="guest-save-actions">
-      <button type="button" class="guest-save-primary" id="guestSaveLogin" onclick="openAuthModal('登录账号后再保存，能减少丢档风险。')">注册 / 登录并永久保存</button>
-      <button type="button" class="guest-save-intro-action" id="guestSaveContinue" onclick="continueGuestReminder()">暂不登录，继续使用</button>
-      <button type="button" class="guest-save-confirm-action" id="guestSaveConfirmAction" onclick="continueGuestReminder()">确认以游客身份继续</button>
-    </div>
-  </section>
-</div>
-
 <!-- 登录/注册弹窗：两个页签，各自一张表单 -->
 <div class="auth-mask" id="authMask" hidden onclick="if(event.target===this)closeAuthModal()">
   <div class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
@@ -1086,19 +1048,6 @@
   <div class="sub">为角色写下一份档案，让它在会馆里留下名字。</div>
 </header>
 <div class="container">
-  <div class="registration-guide" id="registrationGuide">
-    <p class="registration-guide__lead">第一次登记？可以只填标有 <span class="req">*</span> 的项目。能力、喜好和个人介绍没有想好，可以先留空。</p>
-    <details>
-      <summary>展开新手指引 <span class="hint">（可跳过，随时回来查看）</span></summary>
-      <ol class="registration-guide__steps">
-        <li><strong>从一句话开始。</strong> 代号放角色的称呼或档案标题，名字放角色名；不必从完整故事写起。</li>
-        <li><strong>写出能认出它的特点。</strong> 纯文字设写外貌即可；有立绘可以用图代替外貌描述。背景先写「从哪里来、发生了什么、现在想做什么」。</li>
-        <li><strong>登记后再决定要不要公开。</strong> 点击「提交登记」并登录，看到「登记成功」才表示存进账户。想参加同人画廊，再到<a href="/fan.html">同人画廊</a>提交公开，审核通过才会出现在画廊。</li>
-      </ol>
-      <p class="registration-guide__notes"><strong>还没写完：</strong> 未提交的内容不保证换设备或关页后还能找回；可以先把长段文字存到自己的笔记里。</p>
-      <p class="registration-guide__notes"><strong>注意隐私：</strong> 角色档案里请用角色信息或笔名。不要填自己的手机号、邮箱、住址等资料，也别把登记当成加密笔记。</p>
-    </details>
-  </div>
   <form id="charForm" novalidate>
     <div class="edit-tip" id="editTip" style="display:none;margin-bottom:14px;padding:10px 14px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-glow);color:var(--accent);font-size:13px;"></div>
 
@@ -1543,29 +1492,6 @@ const STORAGE_KEY = 'luoxiaohei_characters';
 // ========== 登录与数据同步 ==========
 var currentUser = null;
 let pendingSave = null;      // 未登录时暂存待提交的人设，登录后自动补交
-let guestReminderDismissed = false; // 仅当前页面，刷新后必须重新提醒
-function showGuestReminder() {
-  if (currentUser || guestReminderDismissed) return;
-  const mask = document.getElementById('guestSaveMask');
-  if (!mask || !mask.hidden) return;
-  document.getElementById('guestSaveDialog').dataset.step = 'intro';
-  mask.hidden = false;
-  document.getElementById('guestSaveLogin').focus();
-}
-function hideGuestReminder() {
-  document.getElementById('guestSaveMask').hidden = true;
-}
-function continueGuestReminder() {
-  const dialog = document.getElementById('guestSaveDialog');
-  if (dialog.dataset.step !== 'confirm') {
-    dialog.dataset.step = 'confirm';
-    document.getElementById('guestSaveConfirmAction').focus();
-    return;
-  }
-  guestReminderDismissed = true;
-  hideGuestReminder();
-}
-
 // 长老/编辑登录后进群确认：填群昵称才永久不提醒
 function maybeGroupReminder() {
   if (!currentUser || !currentUser.logged_in) return;
@@ -1646,8 +1572,6 @@ async function checkLogin() {
     });
     if (u.logged_in) {
       currentUser = u;
-      guestReminderDismissed = false;
-      hideGuestReminder();
       renderAuthBar(u);
       await syncFromServer();
       fixBrokenShowcase();
@@ -1657,8 +1581,8 @@ async function checkLogin() {
     } else {
       currentUser = null;
       renderAuthBar(null);
-      showGuestReminder();
     }
+    window.dispatchEvent(new CustomEvent('huiguan:auth-changed', { detail: { logged_in: !!u.logged_in } }));
   } catch(e) {
     if (attempt !== draftLoginAttempt) return;
     registrationAccountVerified = false;
@@ -1778,14 +1702,12 @@ function setAuthMode(mode, keepMessage) {
   if (open && empty) empty.focus();
 }
 function openAuthModal(notice, mode) {
-  hideGuestReminder();
   document.getElementById('authMask').hidden = false;
   setAuthMode(mode || 'login');
   if (notice) authMsgSet(notice, true);
 }
 function closeAuthModal() {
   document.getElementById('authMask').hidden = true;
-  showGuestReminder();
 }
 document.querySelectorAll('#authMask [data-auth-mode]').forEach(btn => {
   btn.addEventListener('click', () => setAuthMode(btn.dataset.authMode));
@@ -1868,7 +1790,6 @@ async function submitRegister() {
     const d = await r.json().catch(() => ({}));
     window.HuiguanTurnstile.reset();
     if (d.ok) {
-      hideGuestReminder();
       authMsgSet(d.email_sent ? '注册成功！验证邮件已发到 ' + email + '，请查收；正在进入…'
         : '注册成功（验证邮件暂时没发出去，稍后可在账户页重发）；正在进入…', true);
       ['authRegPassword', 'authRegPassword2', 'authEmail', 'authRegUsername'].forEach(id => { document.getElementById(id).value = ''; });
@@ -1902,7 +1823,6 @@ async function submitAuth() {
     const d = await r.json().catch(() => ({}));
     window.HuiguanTurnstile.reset();
     if (d.ok) {
-      hideGuestReminder();
       document.getElementById('authPassword').value = '';
       // Re-validated at use: exact approved host on this page's own root (packages/site-domains/index.js).
       const next = window.__AUTH_NEXT && window.safeAuthNext(window.__AUTH_NEXT);
@@ -4539,6 +4459,8 @@ if (new URLSearchParams(location.search).get('openauth')) initialLoginCheck.then
 <script src="/homepage-content.js?v=20261108a"></script>
 <script src="/original-image-viewer.js?v=20261027z"></script>
 <script src="/homepage-registration.js?v=20261027z"></script>
+<script src="/shared/shared-ui/guide.js?v=20261125a"></script>
+<script src="/onboarding.js?v=20261125a"></script>
 <script>
 /* 链接框（浏览器标签 / 分享链接标题）文字轮播：小猫脸眨眼 → 站点文案打字机 */
 (function () {
