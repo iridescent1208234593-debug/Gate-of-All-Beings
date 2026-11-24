@@ -34,10 +34,18 @@ candidate as part of local verification.
   seconds; issuer failure does not extend them; no immediate cross-host
   revocation or uptime guarantee is implied. Subsequent local sockets are
   closed through the same session resolver.
-- This repository baseline supports browser account login. Desktop and mobile
-  clients keep their pre-existing behavior; native account UI, export presets
-  and package delivery are a separate change. For existing browser players,
-  open the authenticated path /account-link after logging in with the legacy code.
+- Native Windows login also needs `account_direct_native_enabled: true` and
+  direct Web consent. The app owns a loopback listener on an ephemeral port
+  and holds its own verifier. The browser receives no new LAB session; the
+  app exchanges a short-lived, single-use transfer over HTTPS. No polling.
+- Android is additionally gated by `account_direct_native_android_enabled`.
+  This branch only accepts the approved origin and fixed callback path; the
+  App Link is bound to the separate public Android package and certificate.
+  The user explicitly taps the return link. The browser fallback never
+  exchanges the code. Both native flags default to `false`.
+- Native account clients, export presets and package delivery are separate.
+  For legacy browser claims, use `/account-link` with the existing code session
+  while those existing deployment gates are enabled.
 - Verification: server/tests/test_account_broker.py uses temporary SQLite and
   fake issuer responses; production not exercised. Site credentials are never
   typed in the game.
