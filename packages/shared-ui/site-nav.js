@@ -91,7 +91,7 @@
     '#qc-nav .qc-more-panel{position:absolute;left:0;top:calc(100% + 6px);display:grid;min-width:220px;max-width:min(320px,calc(100vw - 24px));max-height:72svh;overflow:auto;padding:8px;background:var(--qc-panel);border:1px solid var(--qc-edge);border-radius:12px;box-shadow:inset 0 1px 0 var(--qc-hi),0 14px 34px rgba(4,16,11,.22);-webkit-backdrop-filter:blur(16px) saturate(1.3);backdrop-filter:blur(16px) saturate(1.3)}',
     '#qc-nav .qc-more-panel>a,#qc-nav .qc-more-panel>details>summary{display:flex;align-items:center;gap:8px;padding:10px;border-radius:5px}',
     '#qc-nav .qc-more-panel .qc-panel-site,#qc-nav .qc-more-panel .qc-panel-sites-head{display:none}',
-    '#qc-nav .qc-more-panel>a:hover{background:var(--qc-hover)}',
+    '#qc-nav .qc-more-panel>a:hover{background:var(--qc-hover)}#qc-nav .qc-more-panel>.qc-guide{display:flex;align-items:center;gap:8px;padding:10px;border:0;border-radius:5px;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}#qc-nav .qc-more-panel>.qc-guide:hover{background:var(--qc-hover)}#qc-nav .qc-more-panel>.qc-guide::before{content:\"\";width:8px;height:8px;border-radius:50%;background:#f6e7a4;box-shadow:0 0 8px #f3d38b}',
     /* 面板滚动条：去掉系统原生样式，改为细的金色圆角条 */
     '#qc-nav .qc-more-panel{scrollbar-width:thin;scrollbar-color:rgba(230,192,106,.32) transparent}',
     '#qc-nav .qc-more-panel::-webkit-scrollbar{width:6px;height:6px}',
@@ -217,6 +217,14 @@
       });
     });
     var legal = el('details'); legal.innerHTML = LEGAL; panel.appendChild(legal);
+    // 新手引导: only on pages that load the guide runtime (/shared/shared-ui/guide.js), added on first open.
+    menu.addEventListener('toggle', function () {
+      if (!menu.open || panel.querySelector('.qc-guide') || !window.IridescentlyGuide) return;
+      var guide = el('button', 'qc-guide', '新手引导');
+      guide.type = 'button';
+      guide.addEventListener('click', function () { menu.open = false; window.IridescentlyGuide.openMenu(); });
+      panel.insertBefore(guide, legal);
+    });
     panel.appendChild(el('small', '', '© ' + new Date().getFullYear() + ' Iridescently'));
     menu.appendChild(panel); links.appendChild(menu); nav.appendChild(links);
 
