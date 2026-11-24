@@ -29,6 +29,7 @@ from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from PIL import Image
 
+from .admission import Admission
 from . import account_broker
 from . import config as config_mod
 from .auth import SESSION_COOKIE, Auth, load_pepper
@@ -53,7 +54,8 @@ class Lab:
         self.cfg = cfg
         self.store = Store(cfg.db_path)
         self.pepper = load_pepper(cfg.secrets)
-        self.auth = Auth(self.store, self.pepper, cfg.session_days)
+        self.auth = Auth(self.store, self.pepper, cfg.session_days,
+                         player_test_codes_enabled=cfg.player_test_codes_enabled)
         self.account = None
         if cfg.account_issuer:
             credential = (cfg.secrets / "account-broker.key").read_text(encoding="utf-8").strip()
@@ -76,6 +78,17 @@ class Lab:
         self.client_version = self._client_version()
         self.tasks: list[asyncio.Task] = []
         self.ws_handshake_rejects = 0
+        if type(cfg.admission_max_waiters) is not int or not 0 <= cfg.admission_max_waiters <= 1000:
+            raise ValueError("admission_max_waiters must be an integer from 0 through 1000")
+        if cfg.admission_max_waiters and (not self.account or type(cfg.max_players) is not int or cfg.max_players < 1):
+            raise ValueError("admission requires an approved Hall issuer and positive max_players")
+        if type(cfg.admission_legacy_players) is not bool:
+            raise ValueError("admission_legacy_players must be a boolean")
+        if cfg.admission_legacy_players and not (cfg.admission_max_waiters and cfg.player_test_codes_enabled):
+            raise ValueError("legacy admission requires enabled queue and legacy player login")
+        self.admission = (Admission(cfg.max_players, cfg.admission_max_waiters, self.auth,
+                                    legacy_players=cfg.admission_legacy_players)
+                          if cfg.admission_max_waiters else None)
 
     def _client_version(self) -> str:
         f = self.cfg.web_dir / "build-info.json"
@@ -148,6 +161,72 @@ def create_app(lab: Lab) -> FastAPI:
     def session_of(request) -> dict | None:
         return lab.auth.session(request.cookies.get(SESSION_COOKIE))
 
+    gate = lab.admission
+
+    def is_hall_player(session):
+        return (session["role"] == "player" and lab.store.one(
+            "SELECT 1 FROM account_sessions WHERE digest=?", (session["digest"],)) is not None)
+
+    def admission_mode(session):
+        if session["role"] != "player":
+            return "staff"
+        if is_hall_player(session):
+            return "hall"
+        if session["role"] == "player" and gate.legacy_available(session["code_id"]):
+            return "legacy"
+        return None
+
+    def queue_response(payload, code=200):
+        headers = {"Cache-Control": "private, no-store"}
+        if payload.get("retry_after"):
+            headers["Retry-After"] = str(payload["retry_after"])
+        return JSONResponse(payload, status_code=code, headers=headers)
+
+    @app.api_route("/api/admission", methods=["GET", "POST", "DELETE"])
+    async def admission(request: Request):
+        if gate is None:
+            return queue_response({"state": "disabled"})
+        session = session_of(request)
+        if not session:
+            return queue_response({"error": "no_session"}, 401)
+        mode = admission_mode(session)
+        if mode is None:
+            return queue_response({"error": "hall_account_required"}, 403)
+        principal = session["code_id"]
+        if request.method == "GET":
+            return queue_response(gate.status(principal, touch=True))
+        if request.headers.get("origin") not in cfg.origins():
+            return queue_response({"error": "bad_origin"}, 403)
+        if request.method == "DELETE":
+            gate.cancel(principal)
+            return queue_response(gate.status(principal))
+        try:
+            body = bytearray()
+            async for part in request.stream():
+                if len(body) + len(part) > 1024:
+                    return queue_response({"error": "body_too_large"}, 413)
+                body.extend(part)
+            data = json.loads(body or b"{}")
+            if not isinstance(data, dict):
+                raise ValueError()
+            code = data.get("priority_code", "")
+            if not isinstance(code, str) or len(code) > 64:
+                raise ValueError()
+        except (TypeError, ValueError):
+            return queue_response({"error": "bad_request"}, 400)
+        # Session may have changed during the request body await.
+        fresh = session_of(request)
+        if not fresh or fresh["code_id"] != principal or admission_mode(fresh) != mode:
+            return queue_response({"error": "no_session"}, 401)
+        if code:
+            if mode != "hall":
+                return queue_response({"error": "priority_unavailable"}, 400)
+            address = lab.ip_hint(request.client.host if request.client else None, request.headers)
+            if not gate.prove(principal, code, address):
+                return queue_response({"error": "priority_unavailable"}, 400)
+        result = gate.join(principal, legacy=mode == "legacy")
+        return queue_response(result, 503 if result["state"] == "full" else 200)
+
     @app.middleware("http")
     async def host_guard(request: Request, call_next):
         if not lab.host_ok(request.headers):
@@ -159,6 +238,9 @@ def create_app(lab: Lab) -> FastAPI:
 
     if lab.account:
         account_broker.install(app, lab, lab.account)
+        if cfg.account_direct_web_enabled is True:
+            from .account_direct_web import install
+            install(app, lab, lab.account)
 
     @app.get("/healthz")
     async def healthz():
@@ -209,6 +291,8 @@ def create_app(lab: Lab) -> FastAPI:
     @app.post("/api/logout")
     async def logout(request: Request):
         token = request.cookies.get(SESSION_COOKIE)
+        if gate and (session := session_of(request)):
+            gate.cancel(session["code_id"])
         lab.auth.logout(token)
         if lab.account:
             for c in list(lab.hub.conns.values()):
@@ -227,14 +311,44 @@ def create_app(lab: Lab) -> FastAPI:
         return {"role": s["role"], "expires_at": s["expires_at"], "client_version": lab.client_version,
                 "server_version": config_mod.VERSION}
 
+    @app.get("/admission")
+    async def admission_page(request: Request):
+        if gate is None:
+            return RedirectResponse("/play/", status_code=303)
+        session = session_of(request)
+        if not session:
+            return RedirectResponse("/", status_code=303)
+        mode = admission_mode(session)
+        if mode is None:
+            return security_headers(HTMLResponse(
+                '<!doctype html><meta charset="utf-8"><title>进入众生之门</title>'
+                '<p>此会话暂不能排队。请从<a href="/account/direct/login">会馆账户入口</a>重新验证。</p>',
+                status_code=403, headers={"Cache-Control": "no-store"}), page_csp())
+        html = (WEB_STATIC / "admission.html").read_text(encoding="utf-8")
+        return security_headers(HTMLResponse(html.replace("__LAB_QUEUE_MODE__",mode),
+                                             headers={"Cache-Control":"private, no-store"}), page_csp())
+
     @app.get("/play")
     async def play_redirect():
         return RedirectResponse("/play/", status_code=301)
 
     @app.get("/play/{path:path}")
     async def play(path: str, request: Request):
-        if not session_of(request):
+        session = session_of(request)
+        if not session:
             return RedirectResponse("/", status_code=303)
+        if gate:
+            mode = admission_mode(session)
+            if mode is None:
+                if path in ("", "index.html"):
+                    return RedirectResponse("/admission", status_code=303, headers={"Cache-Control":"no-store"})
+                return queue_response({"error": "hall_account_required"}, 403)
+            status = (gate.join(session["code_id"], legacy=mode == "legacy")
+                      if mode in ("legacy", "staff") else gate.status(session["code_id"]))
+            if status["state"] not in ("ready", "playing"):
+                if path in ("", "index.html"):
+                    return RedirectResponse("/admission", status_code=303, headers={"Cache-Control":"no-store"})
+                return queue_response(status, 409)
         path = path or "index.html"
         if not re.fullmatch(r"[A-Za-z0-9._-]+(/[A-Za-z0-9._-]+)*", path) or ".." in path:
             return Response(status_code=404)
@@ -285,19 +399,48 @@ def create_app(lab: Lab) -> FastAPI:
             reason = "session"
         if not reason and session["role"] not in ("player", "art", "monitor"):
             reason = "role"
-        if not reason and len(lab.hub.conns) >= cfg.max_players:
+        if not reason and gate is None and len(lab.hub.conns) >= cfg.max_players:
             reason = "full"
+        mode = admission_mode(session) if not reason and gate and session["role"] == "player" else None
+        if not reason and gate and session["role"] == "player" and mode is None:
+            reason = "hall_account_required"
         if reason:
             lab.ws_handshake_rejects += 1
             lab.store.security("ws_rejected", ip_hint=lab.ip_hint(ws.client.host if ws.client else None, headers),
                                reason=reason)
             await ws.close(code=4401 if reason == "session" else 4403)
             return
-        await ws.accept()
+        principal = session["code_id"]
         token = ws.cookies.get(SESSION_COOKIE)
-        conn = await lab.hub.attach(ws, session, token, lab.ip_hint(ws.client.host if ws.client else None, headers))
-        writer = asyncio.create_task(lab.hub.writer(conn))
+        lease = None
+        if gate:
+            if mode == "legacy":
+                gate.join(principal, legacy=True)  # old client can still start at /ws
+            elif session["role"] != "player":
+                # Preserve staff gameplay as an ordinary admission; never grant priority.
+                gate.join(principal)
+            lease = gate.begin(principal)  # reserve synchronously before ASGI awaits
+            if lease is None:
+                status = gate.status(principal)
+                await ws.accept()
+                await ws.send_json({"t": "admission", **status})
+                await ws.close(code=4429)
+                return
+        conn = writer = None
         try:
+            if gate:
+                await asyncio.wait_for(ws.accept(), timeout=5)
+            else:
+                await ws.accept()
+            current = lab.auth.session(token) if gate else session
+            if not current or (gate and (current["code_id"] != principal or
+                           (current["role"] == "player" and admission_mode(current) != mode))):
+                await ws.close(code=4401)
+                return
+            conn = await lab.hub.attach(ws, current, token, lab.ip_hint(ws.client.host if ws.client else None, headers))
+            if gate:
+                gate.confirm(principal, lease)
+            writer = asyncio.create_task(lab.hub.writer(conn))
             while not conn.closed:
                 msg = await ws.receive()
                 if msg["type"] == "websocket.disconnect":
@@ -313,8 +456,19 @@ def create_app(lab: Lab) -> FastAPI:
         except (WebSocketDisconnect, RuntimeError):
             pass
         finally:
-            await lab.hub.detach(conn, "closed")
-            writer.cancel()
+            try:
+                if conn is not None:
+                    await lab.hub.detach(conn, "closed")
+            finally:
+                if writer is not None:
+                    writer.cancel()
+                if gate:
+                    reconnect = False
+                    try:
+                        reconnect = conn is not None and bool(lab.auth.session(token))
+                    finally:
+                        gate.release(principal, lease, connected=reconnect)
+
 
     # -- monitor (read-only) ----------------------------------------------------------
     @app.get("/monitor")

@@ -11,6 +11,7 @@
     "huiguan": {"path": "/cb", "callbackRoots": ["iridescently.xyz"]},
     "zszm": {"path": "/api/callback", "callbackRoots": ["iridescently.xyz"]}
   },
+  "labDirect": {"host": "pc-lab.iridescently.cn", "callbackPath": "/account/direct/callback"},
   "previewHosts": [
     "pc.iridescently.xyz", "pc-www.iridescently.xyz", "pc-huiguan.iridescently.xyz",
     "pc-oc.iridescently.xyz", "pc-spirit.iridescently.xyz", "pc-zszm.iridescently.xyz",

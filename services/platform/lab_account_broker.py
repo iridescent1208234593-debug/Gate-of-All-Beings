@@ -9,6 +9,7 @@ import json
 import re
 import secrets
 import time
+import lab_account_direct_web
 from urllib.parse import parse_qs, urlsplit
 
 PREFIX = "/api/lab-auth/"
@@ -22,11 +23,14 @@ VERIFIER = re.compile(r"[A-Za-z0-9._~-]{43,128}")
 MATCH = re.compile(r"[0-9]{6}")
 
 
-def init_schema(conn):
+def init_schema(conn, *, default_all=False, direct_web_default_all=False):
     conn.execute("""CREATE TABLE IF NOT EXISTS lab_auth_access (
         kind TEXT NOT NULL, uid TEXT NOT NULL, sub TEXT NOT NULL UNIQUE,
         enabled INTEGER NOT NULL DEFAULT 0 CHECK(enabled IN (0, 1)),
+        defaulted INTEGER NOT NULL DEFAULT 0 CHECK(defaulted IN (0, 1)),
         PRIMARY KEY(kind, uid))""")
+    if not any(column[1] == "defaulted" for column in conn.execute("PRAGMA table_info(lab_auth_access)")):
+        conn.execute("ALTER TABLE lab_auth_access ADD COLUMN defaulted INTEGER NOT NULL DEFAULT 0 CHECK(defaulted IN (0, 1))")
     conn.execute("""CREATE TABLE IF NOT EXISTS lab_auth_requests (
         request_id TEXT PRIMARY KEY, state_hash TEXT NOT NULL, challenge TEXT NOT NULL,
         match_hash TEXT NOT NULL, created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL,
@@ -38,6 +42,13 @@ def init_schema(conn):
         session_rowid INTEGER NOT NULL, session_mac TEXT NOT NULL)""")
     conn.execute("CREATE INDEX IF NOT EXISTS lab_auth_grant_sub ON lab_auth_grants(sub)")
     conn.execute("CREATE INDEX IF NOT EXISTS lab_auth_request_time ON lab_auth_requests(created_at)")
+    if not default_all:
+        # Preserve subjects for later rollout, but never revive a pre-rollback grant.
+        conn.execute("""DELETE FROM lab_auth_grants WHERE sub IN
+                        (SELECT sub FROM lab_auth_access WHERE defaulted=1)""")
+        conn.execute("""UPDATE lab_auth_requests SET status='revoked' WHERE status='approved'
+                        AND sub IN (SELECT sub FROM lab_auth_access WHERE defaulted=1)""")
+    lab_account_direct_web.init_schema(conn, default_all=direct_web_default_all)
 
 
 def set_access(conn, kind, uid, enabled):
@@ -46,17 +57,22 @@ def set_access(conn, kind, uid, enabled):
         raise ValueError("invalid entitlement")
     conn.execute(
         """INSERT INTO lab_auth_access(kind, uid, sub, enabled) VALUES (?, ?, ?, ?)
-           ON CONFLICT(kind, uid) DO UPDATE SET enabled=excluded.enabled""",
+           ON CONFLICT(kind, uid) DO UPDATE SET enabled=excluded.enabled, defaulted=0""",
         (kind, str(uid), secrets.token_urlsafe(32), int(enabled)),
     )
     if not enabled:
         invalidate_account(conn, kind, uid)
 
 
-def get_access(conn, kind, uid):
-    row = conn.execute("SELECT enabled FROM lab_auth_access WHERE kind=? AND uid=?",
+def access_override(conn, kind, uid):
+    row = conn.execute("SELECT enabled,defaulted FROM lab_auth_access WHERE kind=? AND uid=?",
                        (kind, str(uid))).fetchone()
-    return bool(row and row[0])
+    return bool(row[0]) if row and not row[1] else None
+
+
+def get_access(conn, kind, uid, *, default_all=False):
+    override = access_override(conn, kind, uid)
+    return bool(default_all) if override is None else override
 
 
 def invalidate_account(conn, kind, uid):
@@ -64,6 +80,7 @@ def invalidate_account(conn, kind, uid):
     selector = "SELECT sub FROM lab_auth_access WHERE kind=? AND uid=?"
     params = (kind, str(uid))
     conn.execute(f"DELETE FROM lab_auth_grants WHERE sub IN ({selector})", params)
+    lab_account_direct_web.invalidate(conn, kind, uid)
     conn.execute(f"""UPDATE lab_auth_requests SET status='revoked'
                      WHERE sub IN ({selector}) AND status='approved'""", params)
 
@@ -79,7 +96,8 @@ def _equal(a, b):
 
 class LabAccountBroker:
     def __init__(self, db, lock, resolve_identity, service_bearer, origin, session_audience,
-                 consent_accepted, now=time.time):
+                 consent_accepted, now=time.time, *, default_all=False, direct_web_enabled=False,
+                 direct_web_default_all=False):
         self.db = db
         self.lock = lock
         self.resolve_identity = resolve_identity
@@ -88,6 +106,9 @@ class LabAccountBroker:
         self.session_audience = session_audience
         self.consent_accepted = consent_accepted
         self.now = now
+        self.default_all = default_all is True
+        self.direct_web_enabled = direct_web_enabled is True
+        self.direct_web_default_all = self.direct_web_enabled and direct_web_default_all is True
         uri = urlsplit(origin or "")
         self.enabled = bool(
             bool(re.fullmatch(r"[A-Za-z0-9_.~-]{32,512}", self.bearer))
@@ -170,8 +191,8 @@ class LabAccountBroker:
                     sha256(body["verifier"].encode("ascii")).digest()).decode("ascii").rstrip("=")
                 if not _equal(row["challenge"], challenge):
                     return 400, {"error": "invalid_grant"}
-                access = conn.execute("SELECT * FROM lab_auth_access WHERE sub=? AND enabled=1",
-                                      (row["sub"],)).fetchone()
+                access = conn.execute("SELECT * FROM lab_auth_access WHERE sub=? AND (enabled=1 OR (defaulted=1 AND ?))",
+                                      (row["sub"], self.default_all)).fetchone()
                 session_expiry = self._bound_session(conn, row, access, now) if access else 0
                 if not session_expiry:
                     return 400, {"error": "invalid_grant"}
@@ -192,7 +213,7 @@ class LabAccountBroker:
                 row = conn.execute(
                     """SELECT a.kind,a.uid,g.expires_at,g.session_rowid,g.session_mac FROM lab_auth_grants g
                        JOIN lab_auth_access a ON a.sub=g.sub
-                       WHERE g.sub=? AND g.grant_hash=? AND a.enabled=1""", params).fetchone()
+                       WHERE g.sub=? AND g.grant_hash=? AND (a.enabled=1 OR (a.defaulted=1 AND ?))""", (*params, self.default_all)).fetchone()
                 session_expiry = self._bound_session(conn, row, row, now) if row else 0
                 expires = min(row["expires_at"], session_expiry) if row else 0
                 if expires <= now:
@@ -244,20 +265,28 @@ class LabAccountBroker:
                    AND expires_at>? AND failures<5""", (request_id, now)).fetchone()
             if not row:
                 return 410
-            access = conn.execute("SELECT sub FROM lab_auth_access WHERE kind=? AND uid=? AND enabled=1",
-                                  (ident["kind"], str(ident["uid"]))).fetchone()
+            owner = (ident["kind"], str(ident["uid"]))
+            if owner[0] not in ("local", "usso") or not get_access(conn, *owner, default_all=self.default_all):
+                return 403
             session = conn.execute("SELECT rowid AS session_rowid,* FROM sessions_db WHERE sid=?",
                                    (sid,)).fetchone()
-            if not access or not self._session_expiry(session, ident, now) or not self._active_identity(conn, ident):
+            if not self._session_expiry(session, ident, now) or not self._active_identity(conn, ident):
                 return 403
             if not _equal(self._mac("match", request_id, match_code), row["match_hash"]):
                 conn.execute("UPDATE lab_auth_requests SET failures=failures+1 WHERE request_id=?",
                              (request_id,))
                 return 403
+            subject = None
+            if decision == "approve":
+                # Keep enabled=0 for implicit rows so the old binary also fails closed.
+                conn.execute("""INSERT INTO lab_auth_access(kind,uid,sub,enabled,defaulted)
+                     VALUES (?,?,?,0,1) ON CONFLICT(kind,uid) DO NOTHING""",
+                     (*owner, secrets.token_urlsafe(32)))
+                subject = conn.execute("SELECT sub FROM lab_auth_access WHERE kind=? AND uid=?", owner).fetchone()[0]
             conn.execute("""UPDATE lab_auth_requests SET status=?,sub=?,code_expires_at=?,
                             session_rowid=?,session_mac=? WHERE request_id=?""",
                          ("approved" if decision == "approve" else "denied",
-                          access["sub"], min(now + CODE_TTL, row["expires_at"]),
+                          subject, min(now + CODE_TTL, row["expires_at"]),
                           session["session_rowid"], self._mac("session", sid), request_id))
             return 200
 
@@ -269,30 +298,34 @@ class LabAccountBroker:
         value = headers.get(name)
         return [] if value is None else [value]
 
-    def _response(self, handler, status, payload, *, html=False):
+    def _response(self, handler, status, payload, *, html=False, referrer_policy="no-referrer",
+                  allow_direct_callback=False):
         data = (payload if html else json.dumps(payload, separators=(",", ":"))).encode("utf-8")
         handler.send_response(status)
         handler.send_header("Content-Type", ("text/html" if html else "application/json") + "; charset=utf-8")
         handler.send_header("Content-Length", str(len(data)))
         handler.send_header("Cache-Control", "no-store")
-        handler.send_header("Referrer-Policy", "no-referrer")
+        handler.send_header("Referrer-Policy", referrer_policy)
         if status >= 400 and getattr(handler, "command", None) == "POST":
             # Auth/validation can reject before reading the body. Do not parse its bytes as a new request.
             handler.close_connection = True
             handler.send_header("Connection", "close")
         handler.send_header("X-Content-Type-Options", "nosniff")
         if html:
+            target = " " + lab_account_direct_web.REDIRECT if allow_direct_callback else ""
             handler.send_header("Content-Security-Policy",
-                                "default-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'")
+                                "default-src 'none'; frame-ancestors 'none'; "
+                                f"form-action 'self'{target}; base-uri 'none'")
         handler.end_headers()
         handler.wfile.write(data)
         return True
 
-    def _page(self, handler, status, body):
+    def _page(self, handler, status, body, *, referrer_policy="no-referrer",
+              allow_direct_callback=False):
         return self._response(handler, status,
             '<!DOCTYPE html><html lang="zh"><meta charset="utf-8"><meta name="viewport" '
             'content="width=device-width"><title>西木会馆 · LAB</title><h1>西木会馆 · LAB 登录</h1>' + body,
-            html=True)
+            html=True, referrer_policy=referrer_policy, allow_direct_callback=allow_direct_callback)
 
     def _read(self, handler, content_type):
         types = self._headers(handler, "Content-Type")
@@ -316,6 +349,8 @@ class LabAccountBroker:
         if not self.enabled:
             return self._response(handler, 503, {"error": "lab_account_disabled"})
         action = path[len(PREFIX):]
+        if action.startswith("direct/"):
+            return lab_account_direct_web.handle(self, handler, method, path)
         if action == "approve" and method in ("GET", "POST"):
             # Browser approvals require the same origin that owns the account cookie.
             if method == "POST" and self._headers(handler, "Origin") != [self.origin]:
@@ -346,7 +381,7 @@ class LabAccountBroker:
                     '<p>只有你刚在自己的游戏里发起登录时才继续。请输入游戏屏幕显示的六位配对码。'
                     '不要使用别人发给你的配对码。</p>'
                     '<p>会馆与游戏分别保存数据。验证通过后，LAB 只会取得专用身份标识和短时访问授权，'
-                    '不会收到会馆密码、邮箱或登录凭据。注册和共创身份不等于测试资格。</p>'
+                    '不会收到会馆密码、邮箱或登录凭据。共创身份不赋予游戏管理权限。</p>'
                     '<p>普通登录不会自动绑定或合并旧存档。有旧进度时，请在游戏内从明确的旧档绑定入口发起。</p>'
                     f'<form method="post" action="{PREFIX}approve">'
                     f'<input type="hidden" name="request_id" value="{rid}">'

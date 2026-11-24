@@ -447,7 +447,8 @@ def init_user_db():
         if CREATORS_ENABLED:
             creator_directory.init_schema(conn)
         if LAB_ACCOUNT_BROKER.enabled:
-            lab_account_broker.init_schema(conn)
+            lab_account_broker.init_schema(conn, default_all=LAB_ACCOUNT_BROKER.default_all,
+                direct_web_default_all=LAB_ACCOUNT_BROKER.direct_web_default_all)
         init_recovery_schema(conn)
         init_profile_schema(conn)
         conn.execute("""
@@ -887,6 +888,9 @@ LAB_ACCOUNT_BROKER = lab_account_broker.LabAccountBroker(
     db, DB_LOCK, resolve_identity,
     os.environ.get("IRIDESCENTLY_LAB_ACCOUNT_BROKER_BEARER", ""),
     _LAB_AUTH_ORIGIN, _LAB_AUTH_ORIGINS.get(_LAB_AUTH_ORIGIN), legal_consent.accepted,
+    default_all=os.environ.get("IRIDESCENTLY_LAB_ACCOUNT_DEFAULT_ALL") == "1",
+    direct_web_enabled=os.environ.get("IRIDESCENTLY_LAB_ACCOUNT_DIRECT_WEB") == "1",
+    direct_web_default_all=os.environ.get("IRIDESCENTLY_LAB_ACCOUNT_DIRECT_WEB_DEFAULT_ALL") == "1",
 )
 
 
@@ -2036,7 +2040,8 @@ class Handler(BaseStaticHandler):
         if CREATORS_ENABLED and (path in (creator_directory.PUBLIC, creator_directory.ME)
                                  or path.startswith(creator_directory.ADMIN)):
             return creator_directory.handle(self, path, qs, globals(), avatar_url=_safe_image_reference,
-                broker=lab_account_broker if LAB_ACCOUNT_BROKER.enabled else None)
+                broker=lab_account_broker if LAB_ACCOUNT_BROKER.enabled else None,
+                lab_default_all=LAB_ACCOUNT_BROKER.default_all)
 
         if path == "/api/login":
             return self._api_sso_login()
@@ -2165,7 +2170,8 @@ class Handler(BaseStaticHandler):
         if CREATORS_ENABLED and (path in (creator_directory.PUBLIC, creator_directory.ME)
                                  or path.startswith(creator_directory.ADMIN)):
             return creator_directory.handle(self, path, {}, globals(), avatar_url=_safe_image_reference,
-                broker=lab_account_broker if LAB_ACCOUNT_BROKER.enabled else None)
+                broker=lab_account_broker if LAB_ACCOUNT_BROKER.enabled else None,
+                lab_default_all=LAB_ACCOUNT_BROKER.default_all)
 
         if path in LEGAL_GATED_POSTS and self._legal_consent_missing():
             return

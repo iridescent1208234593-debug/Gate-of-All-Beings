@@ -117,6 +117,12 @@ class BaseStaticHandler(http.server.SimpleHTTPRequestHandler):
         headers_buffer = self._headers_buffer
         # 安全头
         for k, v in SECURITY_HEADERS.items():
+            # Keep the stricter route-local policy on the direct Hall authorization response.
+            if (k == "Referrer-Policy" and request_path.startswith("/api/lab-auth/direct/")
+                    and any(isinstance(h, bytes) and h.strip().lower() in
+                            (b"referrer-policy: no-referrer",b"referrer-policy: same-origin")
+                            for h in headers_buffer)):
+                continue
             if k == "Strict-Transport-Security" and self._zszm_request():
                 v = "max-age=2592000"
             super().send_header(k, v)

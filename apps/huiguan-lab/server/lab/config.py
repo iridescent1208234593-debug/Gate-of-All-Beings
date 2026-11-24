@@ -31,13 +31,17 @@ class Config:
     runtime: Path = field(default_factory=lambda: SOURCE_ROOT.parent / "zszm-lab-v2-runtime")
     secrets: Path = field(default_factory=lambda: (_workspace_root(SOURCE_ROOT) or SOURCE_ROOT.parent) / "secrets" / "lab-v2")
     session_days: int = 7
+    player_test_codes_enabled: bool = True
     oc_max_bytes: int = 5 * 1024 * 1024
     oc_max_side: int = 2048
     oc_display_side: int = 512
     oc_cache_budget_bytes: int = 256 * 1024 * 1024
     oc_ttl_seconds: int = 6 * 3600
     max_players: int = 120
+    admission_max_waiters: int = 0  # 0 = existing admission; opt in with a measured backlog limit
+    admission_legacy_players: bool = False  # explicit old-code bridge; no double-spend
     account_issuer: str = ""
+    account_direct_web_enabled: bool = False
     r4_enabled: bool = True
     r4_python: Path = field(default_factory=lambda: (_workspace_root(SOURCE_ROOT) or SOURCE_ROOT.parents[1]) / "labs" / "iridescently-labs" / "research" / "experiments" / "zhongsheng-world-lab" / ".venv" / "Scripts" / "python.exe")
     r4_service_dir: Path = field(default_factory=lambda: (_workspace_root(SOURCE_ROOT) or SOURCE_ROOT.parents[1]) / "labs" / "iridescently-labs" / "research" / "experiments" / "living-world" / "r4")
@@ -90,6 +94,10 @@ def load(path: str | os.PathLike | None = None) -> Config:
             if key in ("runtime", "secrets", "r4_python", "r4_service_dir"):
                 value = (p.parent / value).resolve() if not Path(value).is_absolute() else Path(value)
             setattr(cfg, key, value)
+    if type(cfg.account_direct_web_enabled) is not bool:
+        raise ValueError("account_direct_web_enabled must be a boolean")
+    if type(cfg.player_test_codes_enabled) is not bool:
+        raise ValueError("player_test_codes_enabled must be a boolean")
     if os.environ.get("LAB_RUNTIME"):
         cfg.runtime = Path(os.environ["LAB_RUNTIME"]).resolve()
     if os.environ.get("LAB_SECRETS"):

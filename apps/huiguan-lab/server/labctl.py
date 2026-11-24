@@ -25,14 +25,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from lab import config as config_mod  # noqa: E402
-from lab.auth import Auth, load_pepper, restrict_file, set_admin_password  # noqa: E402
+from lab.auth import Auth, PlayerTestCodesClosed, load_pepper, restrict_file, set_admin_password  # noqa: E402
 from lab.store import Store  # noqa: E402
 
 
 def open_lab(cfg):
     cfg.ensure_dirs()
     store = Store(cfg.db_path)
-    return store, Auth(store, load_pepper(cfg.secrets), cfg.session_days)
+    return store, Auth(store, load_pepper(cfg.secrets), cfg.session_days,
+                       player_test_codes_enabled=cfg.player_test_codes_enabled)
 
 
 def fmt(t):
@@ -105,7 +106,12 @@ def main(argv=None):
 
     if a.cmd == "code-create":
         store, auth = open_lab(cfg)
-        rows = [auth.create_code(a.label, a.role, actor="labctl") for _ in range(a.count)]
+        try:
+            rows = [auth.create_code(a.label, a.role, actor="labctl") for _ in range(a.count)]
+        except PlayerTestCodesClosed as error:
+            raise SystemExit(str(error)) from None
+        finally:
+            store.close()
         if a.out:
             out = Path(a.out)
             if cfg.secrets.resolve() not in out.resolve().parents:
