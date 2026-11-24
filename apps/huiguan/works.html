@@ -146,7 +146,7 @@ function roleHTML(c, s){
     ? `<img src="${esc(s.cover)}" alt="${esc(c.name)} 的同人图" loading="lazy" decoding="async">`
     : `<span class="role-empty"><b>${esc((c.name || '?')[0])}</b>还没有同人图</span>`;
   const count = s && s.count ? `<span class="qc-tag qc-tag--gold">${s.count} 张同人图</span>` : '<span class="qc-tag">上传第一张</span>';
-  return `<a class="qc-card qc-card--hover role" href="works.html?cid=${c.id}">
+  return `<a class="qc-card qc-card--hover role" href="works.html?cid=${encodeURIComponent(c.id)}">
     <div class="role-cover">${cover}</div>
     <div class="role-body"><div class="role-name">${esc(c.name)}</div>
       <div class="role-meta"><span>${esc(c.type || '')}</span>${count}</div></div>
@@ -181,16 +181,16 @@ function onSearch(v){ roleQ = (v || '').trim(); clearTimeout(roleTimer); roleTim
 let artOffset = 0, artTotal = 0, artBusy = false, pickedFile = null;
 function artHTML(it){
   RFX.seed(it.id, it);  // 喜欢 / 点赞 / 踩 与主册角色页共用
-  return `<article class="qc-card art" data-id="${it.id}">
+  return `<article class="qc-card art" data-id="${esc(it.id)}">
     <img class="art-img" data-original-image src="${esc(it.image_url)}" alt="${esc(it.caption || '同人图')}" loading="lazy" decoding="async">
     <div class="art-body">
       ${it.caption ? `<p class="art-cap">${esc(it.caption)}</p>` : ''}
       <div class="art-meta"><span>by ${esc(it.user_name)}</span><span>${esc(String(it.created_at || '').slice(0, 10))}</span></div>
       <div class="art-acts">${RFX.bar('fanart', it.id)}</div>
       <div class="art-acts">
-        <button type="button" class="qc-btn qc-btn--sm qc-btn--ghost" aria-expanded="false" onclick="toggleCmts(${it.id}, this)">评论 <span class="cmt-n">${it.sub_comments}</span></button>
-        ${it.can_delete ? `<button type="button" class="qc-btn qc-btn--sm qc-btn--danger" onclick="delArt(${it.id}, this)">删除</button>` : ''}</div>
-      <div class="cmts" id="cmts${it.id}" hidden></div>
+        <button type="button" class="qc-btn qc-btn--sm qc-btn--ghost" aria-expanded="false" data-works-operation="toggleCmts" data-op-0="${esc(it.id)}">评论 <span class="cmt-n">${esc(it.sub_comments)}</span></button>
+        ${it.can_delete ? `<button type="button" class="qc-btn qc-btn--sm qc-btn--danger" data-works-operation="delArt" data-op-0="${esc(it.id)}">删除</button>` : ''}</div>
+      <div class="cmts" id="cmts${esc(it.id)}" hidden></div>
     </div>
   </article>`;
 }
@@ -243,6 +243,27 @@ async function submitArt(e){
   return false;
 }
 // ---------- 副册评论（thread=sub，与主册角色页评论分开存储、分开显示） ----------
+function dispatchworksOperation(event) {
+  const el = event.target.closest(event.type === "change" ? "select[data-works-operation]" : "button[data-works-operation]");
+  if (!el) return;
+  const args = [el.dataset.op0, el.dataset.op1, el.dataset.op2, el.dataset.op3];
+  const invalid = Symbol();
+  function positive(raw) {
+    const n = Number(raw);
+    if (!Number.isSafeInteger(n) || n < 1) throw invalid;
+    return n;
+  }
+  try {
+    switch (el.dataset.worksOperation) {
+    case "toggleCmts": return toggleCmts(positive(args[0]), el);
+    case "delArt": return delArt(positive(args[0]), el);
+    case "delCmt": return delCmt(positive(args[0]), positive(args[1]));
+    }
+  } catch (error) {
+    if (error !== invalid) throw error;
+  }
+}
+document.addEventListener("click", dispatchworksOperation);
 async function toggleCmts(id, btn){
   const box = $('cmts' + id);
   box.hidden = !box.hidden; btn.setAttribute('aria-expanded', String(!box.hidden));
@@ -253,7 +274,7 @@ async function renderCmts(id){
   box.innerHTML = '<span class="qc-hint">加载中…</span>';
   let list = [];
   try { list = (await (await fetch(`/api/official/fanart/comments?thread=sub&id=${id}&_=${Date.now()}`)).json()).comments || []; } catch (e) {}
-  box.innerHTML = (list.length ? list.map(c => `<div class="cmt"><b>${esc(c.user_name)}</b>：${esc(c.content)}<small>${esc(String(c.created_at || '').slice(0, 10))}</small>${c.can_delete ? `<button type="button" onclick="delCmt(${id}, ${c.id})">删除</button>` : ''}</div>`).join('') : '<span class="qc-hint">还没有评论，说说你对这张图的看法吧。</span>') +
+  box.innerHTML = (list.length ? list.map(c => `<div class="cmt"><b>${esc(c.user_name)}</b>：${esc(c.content)}<small>${esc(String(c.created_at || '').slice(0, 10))}</small>${c.can_delete ? `<button type="button" data-works-operation="delCmt" data-op-0="${esc(id)}" data-op-1="${esc(c.id)}">删除</button>` : ''}</div>`).join('') : '<span class="qc-hint">还没有评论，说说你对这张图的看法吧。</span>') +
     `<form class="cmt-form" onsubmit="return addCmt(event, ${id})"><input class="qc-input" maxlength="300" placeholder="评论这张同人图…" aria-label="评论这张同人图"><button class="qc-btn qc-btn--sm" type="submit">发送</button></form>`;
 }
 function setCmtCount(id, n){ const b = document.querySelector(`.art[data-id="${id}"] .cmt-n`); if (b) b.textContent = n; }

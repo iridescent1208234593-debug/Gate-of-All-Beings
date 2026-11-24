@@ -328,17 +328,17 @@ function faMsg(t,ok){const m=document.getElementById('faMsg'); if(m){m.textConte
 function faDate(s){return String(s||'').slice(0,10);}
 function faCardHTML(it){
   RFX.seed(it.id,it);  // 喜欢 / 点赞 / 踩 与副册共用同一份数据
-  return `<div class="fa-card" data-id="${it.id}">
+  return `<div class="fa-card" data-id="${escAttr(it.id)}">
     <img class="fa-img" data-original-image src="${escAttr(it.image_url)}" alt="${escAttr(it.caption||'同人图')}" loading="lazy" decoding="async" onclick="zoom(this.src)" onerror="this.closest('.fa-card').style.display='none'">
     <div class="fa-body">
       ${it.caption?`<div class="fa-cap">${esc(it.caption)}</div>`:''}
       <div class="fa-meta"><span>by ${esc(it.user_name)}</span><span>${esc(faDate(it.created_at))}</span></div>
       <div class="fa-acts">
         ${RFX.bar('fanart',it.id)}
-        <button type="button" class="fa-cbtn" onclick="faToggleCmts(${it.id})">💬 <span class="fa-cn">${it.comments}</span></button>
-        ${it.can_delete?`<button type="button" class="fa-del" onclick="faDelete(${it.id})" title="${it.mine?'删除我的投稿':'管理删除'}">删除</button>`:''}
+        <button type="button" class="fa-cbtn" data-char-operation="faToggleCmts" data-op-0="${escAttr(it.id)}">💬 <span class="fa-cn">${esc(it.comments)}</span></button>
+        ${it.can_delete?`<button type="button" class="fa-del" data-char-operation="faDelete" data-op-0="${escAttr(it.id)}" title="${it.mine?'删除我的投稿':'管理删除'}">删除</button>`:''}
       </div>
-      <div class="fa-cmts" id="faC${it.id}"></div>
+      <div class="fa-cmts" id="faC${escAttr(it.id)}"></div>
     </div>
   </div>`;
 }
@@ -386,6 +386,37 @@ async function faSubmit(e){
   finally{ btn.disabled=false; }
   return false;
 }
+function dispatchcharOperation(event) {
+  const el = event.target.closest(event.type === "change" ? "select[data-char-operation]" : "button[data-char-operation]");
+  if (!el) return;
+  const args = [el.dataset.op0, el.dataset.op1, el.dataset.op2, el.dataset.op3];
+  const invalid = Symbol();
+  function positive(raw) {
+    const n = Number(raw);
+    if (!Number.isSafeInteger(n) || n < 1) throw invalid;
+    return n;
+  }
+  function position(raw) {
+    const n = Number(raw);
+    if (!raw || !Number.isSafeInteger(n) || n < 0) throw invalid;
+    return n;
+  }
+  try {
+    switch (el.dataset.charOperation) {
+    case "faToggleCmts": return faToggleCmts(positive(args[0]));
+    case "faDelete": return faDelete(positive(args[0]));
+    case "faDelCmt": return faDelCmt(positive(args[0]), positive(args[1]));
+    case "askDelImg": return askDelImg(positive(args[0]), positive(args[1]));
+    case "moveImg": return moveImg(position(args[0]), args[1] === "-1" ? -1 : 1, positive(args[2]));
+    case "setAvatar": return setAvatar(positive(args[0]), positive(args[1]));
+    case "setImgType": return setImgType(positive(args[0]), el.value, position(args[2]), positive(args[3]));
+    }
+  } catch (error) {
+    if (error !== invalid) throw error;
+  }
+}
+document.addEventListener("click", dispatchcharOperation);
+document.addEventListener("change", dispatchcharOperation);
 async function faDelete(id){
   if(!confirm('确定删除这张图吗？它在主册和副册的评论，以及点赞 / 喜欢 / 踩都会一起删除。')) return;
   try{
@@ -406,7 +437,7 @@ function faSetCount(id,n){const el=document.querySelector(`.fa-card[data-id="${i
 async function faRenderCmts(id){
   const box=document.getElementById('faC'+id); if(!box) return;
   let list=[]; try{ list=(await (await fetch('/api/official/fanart/comments?id='+id+'&_='+Date.now())).json()).comments||[]; }catch(e){}
-  box.innerHTML=(list.length?list.map(c=>`<div class="fa-cmt">${c.can_delete?`<button type="button" title="删除评论" onclick="faDelCmt(${c.id},${id})">×</button>`:''}<b>${esc(c.user_name)}</b><span class="t">${esc(faDate(c.created_at))}</span><div>${esc(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--dim)">还没有评论，来说点什么吧～</div>')
+  box.innerHTML=(list.length?list.map(c=>`<div class="fa-cmt">${c.can_delete?`<button type="button" title="删除评论" data-char-operation="faDelCmt" data-op-0="${escAttr(c.id)}" data-op-1="${escAttr(id)}">×</button>`:''}<b>${esc(c.user_name)}</b><span class="t">${esc(faDate(c.created_at))}</span><div>${esc(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--dim)">还没有评论，来说点什么吧～</div>')
     +`<form class="fa-cform" onsubmit="return faPostCmt(event,${id})"><input type="text" maxlength="300" placeholder="写下你的评论…" aria-label="评论"><button type="submit" class="fa-btn" style="padding:5px 14px">发送</button></form>`;
 }
 async function faPostCmt(e,id){
@@ -472,14 +503,14 @@ let _imgOrder=[]; let _dragIdx=null;
 function _imgCard(im,idx,cid){
   const isLast=idx===_charImages.length-1;
   return `<div draggable="true" ondragstart="dragStart(event,${idx})" ondragover="event.preventDefault()" ondragenter="event.preventDefault()" ondrop="dropImg(event,${idx},${cid})" style="position:relative;text-align:center;cursor:grab;padding:2px;border:1px dashed transparent;border-radius:8px;width:110px;">
-    <img loading="lazy" decoding="async" src="/api/official/img-id?id=${im.id}&t=1" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--border);pointer-events:none;">
-    <button type="button" onclick="askDelImg(${im.id},${cid})" title="删除该图" style="position:absolute;top:-6px;right:6px;width:18px;height:18px;border-radius:50%;border:none;background:var(--danger);color:#fff;font-size:11px;cursor:pointer;line-height:1;">×</button>
+    <img loading="lazy" decoding="async" src="/api/official/img-id?id=${encodeURIComponent(im.id)}&t=1" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--border);pointer-events:none;">
+    <button type="button" data-char-operation="askDelImg" data-op-0="${escAttr(im.id)}" data-op-1="${escAttr(cid)}" title="删除该图" style="position:absolute;top:-6px;right:6px;width:18px;height:18px;border-radius:50%;border:none;background:var(--danger);color:#fff;font-size:11px;cursor:pointer;line-height:1;">×</button>
     <div style="margin-top:3px;display:flex;gap:2px;justify-content:center;">
-      <button type="button" onclick="moveImg(${idx},-1,${cid})" ${idx===0?'disabled':''} style="font-size:10px;padding:0 5px;border:1px solid var(--border);background:var(--panel);border-radius:3px;cursor:pointer;">←</button>
-      <button type="button" onclick="setAvatar(${im.id},${cid})" title="设为头像" style="font-size:10px;padding:0 5px;border:1px solid var(--gold,#d4a840);color:#b3873a;background:var(--panel);border-radius:3px;cursor:pointer;">头像</button>
-      <button type="button" onclick="moveImg(${idx},1,${cid})" ${isLast?'disabled':''} style="font-size:10px;padding:0 5px;border:1px solid var(--border);background:var(--panel);border-radius:3px;cursor:pointer;">→</button>
+      <button type="button" data-char-operation="moveImg" data-op-0="${escAttr(idx)}" data-op-1="-1" data-op-2="${escAttr(cid)}" ${idx===0?'disabled':''} style="font-size:10px;padding:0 5px;border:1px solid var(--border);background:var(--panel);border-radius:3px;cursor:pointer;">←</button>
+      <button type="button" data-char-operation="setAvatar" data-op-0="${escAttr(im.id)}" data-op-1="${escAttr(cid)}" title="设为头像" style="font-size:10px;padding:0 5px;border:1px solid var(--gold,#d4a840);color:#b3873a;background:var(--panel);border-radius:3px;cursor:pointer;">头像</button>
+      <button type="button" data-char-operation="moveImg" data-op-0="${escAttr(idx)}" data-op-1="1" data-op-2="${escAttr(cid)}" ${isLast?'disabled':''} style="font-size:10px;padding:0 5px;border:1px solid var(--border);background:var(--panel);border-radius:3px;cursor:pointer;">→</button>
     </div>
-    <select onchange="setImgType(${im.id},this.value,${idx},${cid})" title="图片分类" style="width:100%;margin-top:4px;font-size:11px;padding:1px 2px;border:1px solid var(--border);border-radius:4px;font-family:inherit;background:var(--panel);color:var(--text);">${typeOptions(im.image_type)}</select>
+    <select data-char-operation="setImgType" data-op-0="${escAttr(im.id)}" data-op-2="${escAttr(idx)}" data-op-3="${escAttr(cid)}" title="图片分类" style="width:100%;margin-top:4px;font-size:11px;padding:1px 2px;border:1px solid var(--border);border-radius:4px;font-family:inherit;background:var(--panel);color:var(--text);">${typeOptions(im.image_type)}</select>
   </div>`;
 }
 function renderImgMgr(){
