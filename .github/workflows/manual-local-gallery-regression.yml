@@ -1,0 +1,71 @@
+name: Manual local gallery regression
+
+on:
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  exact-gallery-regression:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master' && github.repository == 'iridescent1208234593-debug/Gate-of-All-Beings' }}
+    runs-on: gallery-5154-smoke-once
+    timeout-minutes: 5
+    steps:
+      - name: Verify preloaded source and run isolated gallery regression
+        working-directory: /
+        shell: /bin/bash --noprofile --norc -euo pipefail {0}
+        run: |
+          /usr/bin/env -i PATH=/usr/bin:/bin LANG=C.UTF-8 \
+            /opt/gallery-regression/python/bin/python3 -I -S - <<'PY'
+          import hashlib
+          import os
+          from pathlib import Path, PurePosixPath
+          import subprocess
+          import sys
+          import tempfile
+
+          if os.uname().sysname != "Linux" or os.geteuid() == 0:
+              raise SystemExit("Expected an unprivileged Linux runner container")
+          if any(os.path.lexists(path) for path in ("/run/docker.sock", "/var/run/docker.sock")):
+              raise SystemExit("Runner container must not expose a Docker socket")
+          if sys.version_info[:2] != (3, 12):
+              raise SystemExit("Expected preloaded Python 3.12")
+          # Build these files and the interpreter into the trusted runner image; no host bind mount.
+          base = Path("/opt/gallery-regression/5154cb2f1703c8759e094ae61e7bbba8511bcef1")
+          fixture, manifest = base / "tree", base / "verified-blobs.txt"
+          expected = "1ea054e9dec5a8b97f11d89305387220c987ef50e28002157812a1ad6e03da21"
+          if base.resolve() != base or manifest.resolve() != manifest or fixture.resolve() != fixture:
+              raise SystemExit("Preloaded fixture paths must not be symlinks")
+          raw_manifest = manifest.read_bytes()
+          if hashlib.sha256(raw_manifest).hexdigest() != expected:
+              raise SystemExit("Pinned source manifest mismatch")
+          with tempfile.TemporaryDirectory(prefix="gallery-regression-") as tmp:
+              root = Path(tmp)
+              work, home = root / "tree", root / "home"
+              home.mkdir()
+              files = raw_manifest.decode("ascii").splitlines()
+              if len(files) != 33:
+                  raise SystemExit("Unexpected pinned file count")
+              for entry in files:
+                  sha, name = entry.split(" ", 1)
+                  relative = PurePosixPath(name)
+                  if relative.is_absolute() or ".." in relative.parts:
+                      raise SystemExit("Invalid pinned source path")
+                  origin, target = fixture / relative, work / relative
+                  if origin.resolve() != origin or not origin.is_file():
+                      raise SystemExit(f"Invalid pinned source file: {name}")
+                  data = origin.read_bytes()
+                  digest = hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\0" + data).hexdigest()
+                  if digest != sha:
+                      raise SystemExit(f"Pinned source blob mismatch: {name}")
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(data)
+              print("Verified 33 source files for 5154cb2f1703c8759e094ae61e7bbba8511bcef1", flush=True)
+              subprocess.run(
+                  [sys.executable, "-m", "unittest", "discover", "-s", "apps/huiguan/tests", "-p",
+                   "test_fan_owner_edit.py", "-v"],
+                  cwd=work, check=True, timeout=180,
+                  env={"PATH": "/usr/bin:/bin", "HOME": str(home), "LANG": "C.UTF-8",
+                       "PYTHONNOUSERSITE": "1", "PYTHONDONTWRITEBYTECODE": "1"},
+              )
+          PY
