@@ -419,6 +419,7 @@ async function delUser(kind, uid, name) {
   if (await adminPost('/api/admin/user/delete', { kind, uid })) loadUsers();
 }
 
+// 审核列表会重新渲染。容器按固定动作分派，从数据属性读取并校验申请编号。
 function bindQueueActions(root) {
   root.addEventListener('click', event => {
     const button = event.target.closest('button[data-queue]');

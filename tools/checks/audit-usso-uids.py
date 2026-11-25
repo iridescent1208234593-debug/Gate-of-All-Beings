@@ -21,6 +21,7 @@ REFERENCES = {
 
 def audit_snapshot(snapshot, contract):
     snapshot = snapshot.resolve(strict=True)
+    # 不可变读取依赖独立、完整的备份。旁边有日志文件时无法保证统计覆盖已提交记录。
     if not snapshot.is_file() or any(
         Path(str(snapshot) + suffix).exists() for suffix in ("-wal", "-shm", "-journal")
     ):

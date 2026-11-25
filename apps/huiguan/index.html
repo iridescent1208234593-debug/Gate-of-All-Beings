@@ -2463,6 +2463,7 @@ function renderComboUI() {
     renderSkillTags(cl, customCombos.map(c => c.name + '（' + c.systems.join('×') + '）'), removeCustomCombo);
   }
 }
+// 自设技能名称可能来自输入或存档，使用文本节点显示并用索引绑定删除操作。
 function renderSkillTags(container, labels, remove) {
   const tags = labels.map((label, index) => {
     const tag = document.createElement('span');

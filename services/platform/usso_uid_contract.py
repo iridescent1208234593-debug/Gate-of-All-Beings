@@ -15,10 +15,12 @@ class UssoUidContract:
     allow_new_accounts: bool
 
     def read_uid(self, user):
+        """只读约定字段，保留字符串原值以精确匹配已存账户键。"""
         if not isinstance(user, dict):
             return None
         value = user.get(self.field)
         if type(value) is int and self.value_type in {"integer", "string_or_integer"}:
+            # 在转成十进制文本前限制整数大小，避免处理远超存储上限的输入。
             if value.bit_length() > MAX_UID_LENGTH * 4:
                 return None
             value = str(value)

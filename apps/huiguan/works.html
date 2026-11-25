@@ -133,6 +133,7 @@ function setState(el, text, role, retry){
     button.type = 'button';
     button.className = 'qc-btn qc-btn--sm qc-btn--ghost';
     button.textContent = '重新读取';
+    // 直接绑定调用方提供的函数，状态文本只用于显示。
     button.addEventListener('click', retry);
     actions.append(button);
     el.append(actions);

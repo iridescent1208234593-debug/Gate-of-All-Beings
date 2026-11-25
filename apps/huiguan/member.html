@@ -183,7 +183,7 @@ function render(){
   }
 
 }
-// All API values stay in attribute data, never inline script. Delegation also covers later batches.
+// 账户类型、原标识和名称通过转义后的数据属性传递。容器委托也覆盖后续渲染的行。
 const memberContent = document.getElementById('content');
 memberContent.addEventListener('change', event => {
   const el = event.target.closest('select[data-member-field]');

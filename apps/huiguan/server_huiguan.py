@@ -806,6 +806,7 @@ def verify_password(password, stored):
 # ---------- 用户 / 会话 ----------
 
 def start_usso_session(user_id, nickname, email, picture, root_domain, *, allow_new_accounts):
+    """把老账号查询、首次开户判断和会话写入放在同一事务，串行处理并发回调。"""
     with DB_LOCK, contextlib.closing(db()) as conn, conn:
         conn.execute("BEGIN IMMEDIATE")
         flag = conn.execute(
@@ -2556,6 +2557,7 @@ class Handler(BaseStaticHandler):
             return
 
         user = userinfo_result.get("data")
+        # 校验通过后才能写账户或签发会话，避免失败登录留下部分记录。
         user_id = contract.read_uid(user)
         if user_id is None:
             self._json(502, {"error": "这次登录的身份信息有误，请重新登录。若仍失败，请联系会馆管理员。"})
@@ -5606,6 +5608,7 @@ class Handler(BaseStaticHandler):
                     conn.execute("UPDATE local_users SET is_fan_reviewer=? WHERE uid=?", (int(fan_reviewer), uid))
             else:
                 if status or edit_role or role:
+                    # 插入时填写默认值，已有记录只更新本次请求传入的权限字段。
                     conn.execute("""INSERT INTO user_flags (kind, uid, status, edit_role, role) VALUES ('usso',?,?,?,?)
                                     ON CONFLICT(kind,uid) DO UPDATE SET
                                       status=COALESCE(?, status), edit_role=COALESCE(?, edit_role),

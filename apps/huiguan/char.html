@@ -352,6 +352,7 @@ function faCardHTML(it){
     </div>
   </div>`;
 }
+// 主册作品和评论有独立的固定动作，卡片重绘后继续使用同一个容器监听。
 function bindFanartActions(grid){
   grid.addEventListener('click', event => {
     const button=event.target.closest('button[data-fanart-action]');
@@ -521,6 +522,7 @@ function _imgCard(im,idx,characterId){
     <select data-image-action="type" title="图片分类" style="width:100%;margin-top:4px;font-size:11px;padding:1px 2px;border:1px solid var(--border);border-radius:4px;font-family:inherit;background:var(--panel);color:var(--text);">${typeOptions(im.image_type)}</select>
   </div>`;
 }
+// 每次渲染用当前角色绑定回调，替换容器上次的回调以免操作到旧角色。
 function bindImageActions(box,cid){
   const cardOf = event => event.target.closest('[data-image-index][data-image-id]');
   const indexOf = card => Number(card.dataset.imageIndex);
