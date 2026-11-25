@@ -180,17 +180,19 @@ function onSearch(v){ roleQ = (v || '').trim(); clearTimeout(roleTimer); roleTim
 // ---------- 单个角色的同人图（按喜欢数排序，同数时新上传的在前） ----------
 let artOffset = 0, artTotal = 0, artBusy = false, pickedFile = null;
 function artHTML(it){
-  RFX.seed(it.id, it);  // 喜欢 / 点赞 / 踩 与主册角色页共用
-  return `<article class="qc-card art" data-id="${it.id}">
+  const id = Number(it.id);
+  if (!Number.isSafeInteger(id) || id < 1) return '';
+  RFX.seed(id, it);  // 喜欢 / 点赞 / 踩 与主册角色页共用
+  return `<article class="qc-card art" data-id="${id}">
     <img class="art-img" data-original-image src="${esc(it.image_url)}" alt="${esc(it.caption || '同人图')}" loading="lazy" decoding="async">
     <div class="art-body">
       ${it.caption ? `<p class="art-cap">${esc(it.caption)}</p>` : ''}
       <div class="art-meta"><span>by ${esc(it.user_name)}</span><span>${esc(String(it.created_at || '').slice(0, 10))}</span></div>
-      <div class="art-acts">${RFX.bar('fanart', it.id)}</div>
+      <div class="art-acts">${RFX.bar('fanart', id)}</div>
       <div class="art-acts">
-        <button type="button" class="qc-btn qc-btn--sm qc-btn--ghost" aria-expanded="false" onclick="toggleCmts(${it.id}, this)">评论 <span class="cmt-n">${it.sub_comments}</span></button>
-        ${it.can_delete ? `<button type="button" class="qc-btn qc-btn--sm qc-btn--danger" onclick="delArt(${it.id}, this)">删除</button>` : ''}</div>
-      <div class="cmts" id="cmts${it.id}" hidden></div>
+        <button type="button" class="qc-btn qc-btn--sm qc-btn--ghost" aria-expanded="false" data-art-action="comments">评论 <span class="cmt-n">${esc(it.sub_comments)}</span></button>
+        ${it.can_delete ? `<button type="button" class="qc-btn qc-btn--sm qc-btn--danger" data-art-action="delete-art">删除</button>` : ''}</div>
+      <div class="cmts" id="cmts${id}" hidden></div>
     </div>
   </article>`;
 }
@@ -253,8 +255,8 @@ async function renderCmts(id){
   box.innerHTML = '<span class="qc-hint">加载中…</span>';
   let list = [];
   try { list = (await (await fetch(`/api/official/fanart/comments?thread=sub&id=${id}&_=${Date.now()}`)).json()).comments || []; } catch (e) {}
-  box.innerHTML = (list.length ? list.map(c => `<div class="cmt"><b>${esc(c.user_name)}</b>：${esc(c.content)}<small>${esc(String(c.created_at || '').slice(0, 10))}</small>${c.can_delete ? `<button type="button" onclick="delCmt(${id}, ${c.id})">删除</button>` : ''}</div>`).join('') : '<span class="qc-hint">还没有评论，说说你对这张图的看法吧。</span>') +
-    `<form class="cmt-form" onsubmit="return addCmt(event, ${id})"><input class="qc-input" maxlength="300" placeholder="评论这张同人图…" aria-label="评论这张同人图"><button class="qc-btn qc-btn--sm" type="submit">发送</button></form>`;
+  box.innerHTML = (list.length ? list.map(c => `<div class="cmt"><b>${esc(c.user_name)}</b>：${esc(c.content)}<small>${esc(String(c.created_at || '').slice(0, 10))}</small>${c.can_delete ? `<button type="button" data-art-action="delete-comment" data-comment-id="${esc(c.id)}">删除</button>` : ''}</div>`).join('') : '<span class="qc-hint">还没有评论，说说你对这张图的看法吧。</span>') +
+    `<form class="cmt-form" data-art-action="post-comment"><input class="qc-input" maxlength="300" placeholder="评论这张同人图…" aria-label="评论这张同人图"><button class="qc-btn qc-btn--sm" type="submit">发送</button></form>`;
 }
 function setCmtCount(id, n){ const b = document.querySelector(`.art[data-id="${id}"] .cmt-n`); if (b) b.textContent = n; }
 async function addCmt(e, id){
@@ -304,6 +306,29 @@ async function initChar(){
   }
   loadArt(true);
 }
+function bindArtActions(grid) {
+  grid.addEventListener('click', event => {
+    const button = event.target.closest('button[data-art-action]');
+    if (!button) return;
+    const id = Number(button.closest('.art[data-id]')?.dataset.id);
+    if (!Number.isSafeInteger(id) || id < 1) return;
+    switch (button.dataset.artAction) {
+      case 'comments': return toggleCmts(id, button);
+      case 'delete-art': return delArt(id, button);
+      case 'delete-comment': {
+        const commentId = Number(button.dataset.commentId);
+        if (Number.isSafeInteger(commentId) && commentId > 0) return delCmt(id, commentId);
+      }
+    }
+  });
+  grid.addEventListener('submit', event => {
+    if (!event.target.matches('form[data-art-action="post-comment"]')) return;
+    event.preventDefault();
+    const id = Number(event.target.closest('.art[data-id]')?.dataset.id);
+    if (Number.isSafeInteger(id) && id > 0) addCmt(event, id);
+  });
+}
+bindArtActions($('artGrid'));
 if (cid) initChar(); else loadRoles(true);
 </script>
 <script src="/shared/shared-ui/site-nav.js?v=20261109a"></script>

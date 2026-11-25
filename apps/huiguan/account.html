@@ -130,7 +130,7 @@ function render(u,emailState,justVerified){
     </div>
     <div class="qc-card" id="password-setting">
       <h2 class="qc-h2">登录密码</h2>
-      <p class="qc-hint">设置后可以用「昵称或邮箱 + 密码」直接登录，即使 USSO 单点登录不可用也能进站。${u.kind==='usso'?'<br>你当前是 USSO 账号，首次设置无需原密码。':''}</p>
+      <p class="qc-hint">设置后可以用「昵称或邮箱 + 密码」直接登录，即使统一登录暂时不可用，也能进入会馆。${u.kind==='usso'?'<br>你通过统一账号注册，首次设置会馆密码时无需输入原密码。':''}</p>
       <div class="row" style="gap:8px;flex-wrap:wrap">
         <input id="pwOld" type="password" maxlength="128" autocomplete="current-password" placeholder="原密码（首次设置可留空）" class="qc-input">
         <input id="pwNew" type="password" maxlength="128" autocomplete="new-password" placeholder="新密码（12-128 位）" class="qc-input">
@@ -163,7 +163,7 @@ function render(u,emailState,justVerified){
     <div class="qc-card">
       <h2 class="qc-h2">身份信息</h2>
       <div class="row"><span class="k">昵称</span><span>${esc(u.nickname||u.username)}</span></div>
-      <div class="row"><span class="k">账号类型</span><span>${u.kind==='local'?'站内账号':'USSO 账号'}</span></div>
+      <div class="row"><span class="k">账号类型</span><span>${u.kind==='local'?'站内账号':'统一账号'}</span></div>
       <div class="row"><span class="k">会馆身份</span><span class="qc-tag ${isAdmin?'qc-tag--gold':isElder?'qc-tag--accent':''}">${roleName[u.role]||'执行者'}</span></div>
       <div class="row"><span class="k">编辑权限</span><span class="qc-tag ${isScribe?'qc-tag--accent':''}">${isScribe?'编辑（可直接修订设定）':'无'}</span></div>
     </div>
@@ -221,8 +221,8 @@ function render(u,emailState,justVerified){
     </div>
     <div class="qc-card">
       <h2 class="qc-h2">登录方式</h2>
-      <div class="row"><span class="k">当前账户</span><span>${u.kind==='usso'?'<span class="qc-tag">既有 USSO 账户</span>':'<span class="qc-tag qc-tag--accent">会馆站内账号</span>'}</span></div>
-      <div class="qc-hint">USSO 新登录与绑定暂时停用。既有账户资料和角色记录保留；跨站会话仍由共享会话服务处理。</div>
+      <div class="row"><span class="k">当前账户</span><span>${u.kind==='usso'?'<span class="qc-tag">已有统一账号</span>':'<span class="qc-tag qc-tag--accent">会馆站内账号</span>'}</span></div>
+      <div class="qc-hint">统一登录与账号绑定暂时停用。你仍可用已设置的会馆密码登录，账户资料和角色记录照常保留。</div>
     </div>
   `;
   updatePrev();

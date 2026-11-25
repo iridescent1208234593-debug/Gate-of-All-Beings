@@ -90,6 +90,13 @@ section h2{font-size:16px;letter-spacing:2px;border-bottom:2px solid var(--accen
 <script>
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function escAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function positiveId(value){
+  if (typeof value!=='number' && typeof value!=='string') return null;
+  const raw=String(value);
+  if (!raw || /\D/.test(raw)) return null;
+  const id=Number(raw);
+  return Number.isSafeInteger(id) && id>0 ? id : null;
+}
 function badge(c){const cls=c>=6?'c-high':c>=4?'c-mid':'c-low';const t=c>=6?'设定完整':c>=4?'部分设定':'待补充';return `<span class="completeness ${cls}">${c}/8 · ${t}</span>`;}
 function zoom(src){document.getElementById('lbImg').src=src;document.getElementById('lightbox').classList.add('show');}
 
@@ -105,8 +112,8 @@ function typeOptions(cur){
 }
 let _galImgs=[], _galCid=null, _galName='', _galShown=0;
 function _galImg(i){
-  const im=_galImgs[i]; if(!im) return '';
-  const fullUrl='/api/official/img-id?id='+im.id;
+  const id=positiveId(_galImgs[i]?.id); if(!id) return '';
+  const fullUrl='/api/official/img-id?id='+id;
   return `<img data-original-image src="${fullUrl}&t=1" data-full="${fullUrl}" alt="${esc(_galName)}" loading="lazy" decoding="async" onerror="this.style.display='none'" onclick="zoom(this.dataset.full)">`;
 }
 function initGallery(imgs,cid,name){
@@ -149,7 +156,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementB
 
 async function init(){
   const params=new URLSearchParams(location.search);
-  const id=params.get('id');
+  const id=positiveId(params.get('id'));
   if(!id){location.href='gallery.html';return;}
   try{
     const r=await fetch('/api/official/character?id='+encodeURIComponent(id)+'&_='+Date.now());
@@ -160,7 +167,8 @@ async function init(){
     const relations=d.relations||[];
     const images=d.images||[];
     const events=d.events||[];
-    _charCid=String(c.id); _charData=d; _charImages=images.slice();
+    if(positiveId(c.id)!==id) throw new Error('角色标识不一致');
+    _charCid=id; _charData=d; _charImages=images.filter(im=>positiveId(im?.id));
     const completeness=[c.type,c.species,c.age,c.personality,c.appearance,c.affiliation,c.abilities_summary,c.story_summary].filter(x=>x&&x.trim()).length;
 
     // 图片画廊（渐进加载：默认3张，展开每次+5）
@@ -327,22 +335,50 @@ function faLoginToast(t){ RFX.toast(t,{label:'去登录',run:()=>{location.href=
 function faMsg(t,ok){const m=document.getElementById('faMsg'); if(m){m.textContent=t||''; m.style.color=ok?'var(--accent)':'var(--danger)';}}
 function faDate(s){return String(s||'').slice(0,10);}
 function faCardHTML(it){
-  RFX.seed(it.id,it);  // 喜欢 / 点赞 / 踩 与副册共用同一份数据
-  return `<div class="fa-card" data-id="${it.id}">
+  const id=positiveId(it.id);
+  if(!id) return '';
+  RFX.seed(id,it);  // 喜欢 / 点赞 / 踩 与副册共用同一份数据
+  return `<div class="fa-card" data-id="${id}">
     <img class="fa-img" data-original-image src="${escAttr(it.image_url)}" alt="${escAttr(it.caption||'同人图')}" loading="lazy" decoding="async" onclick="zoom(this.src)" onerror="this.closest('.fa-card').style.display='none'">
     <div class="fa-body">
       ${it.caption?`<div class="fa-cap">${esc(it.caption)}</div>`:''}
       <div class="fa-meta"><span>by ${esc(it.user_name)}</span><span>${esc(faDate(it.created_at))}</span></div>
       <div class="fa-acts">
-        ${RFX.bar('fanart',it.id)}
-        <button type="button" class="fa-cbtn" onclick="faToggleCmts(${it.id})">💬 <span class="fa-cn">${it.comments}</span></button>
-        ${it.can_delete?`<button type="button" class="fa-del" onclick="faDelete(${it.id})" title="${it.mine?'删除我的投稿':'管理删除'}">删除</button>`:''}
+        ${RFX.bar('fanart',id)}
+        <button type="button" class="fa-cbtn" data-fanart-action="comments">💬 <span class="fa-cn">${esc(it.comments)}</span></button>
+        ${it.can_delete?`<button type="button" class="fa-del" data-fanart-action="delete-art" title="${it.mine?'删除我的投稿':'管理删除'}">删除</button>`:''}
       </div>
-      <div class="fa-cmts" id="faC${it.id}"></div>
+      <div class="fa-cmts" id="faC${id}"></div>
     </div>
   </div>`;
 }
-async function initFanart(cid){ _faCid=cid; await faLoad(true); }
+function bindFanartActions(grid){
+  grid.addEventListener('click', event => {
+    const button=event.target.closest('button[data-fanart-action]');
+    if(!button) return;
+    const id=positiveId(button.closest('.fa-card[data-id]')?.dataset.id);
+    if(!id) return;
+    switch(button.dataset.fanartAction){
+      case 'comments': return faToggleCmts(id);
+      case 'delete-art': return faDelete(id);
+      case 'delete-comment': {
+        const commentId=positiveId(button.dataset.commentId);
+        if(commentId) return faDelCmt(commentId,id);
+      }
+    }
+  });
+  grid.addEventListener('submit', event => {
+    if(!event.target.matches('form[data-fanart-action="post-comment"]')) return;
+    event.preventDefault();
+    const id=positiveId(event.target.closest('.fa-card[data-id]')?.dataset.id);
+    if(id) faPostCmt(event,id);
+  });
+}
+async function initFanart(cid){
+  _faCid=cid;
+  bindFanartActions(document.getElementById('faGrid'));
+  await faLoad(true);
+}
 async function faLoad(reset){
   if(_faLoading) return; _faLoading=true;
   if(reset){_faOffset=0; document.getElementById('faGrid').innerHTML='';}
@@ -406,8 +442,8 @@ function faSetCount(id,n){const el=document.querySelector(`.fa-card[data-id="${i
 async function faRenderCmts(id){
   const box=document.getElementById('faC'+id); if(!box) return;
   let list=[]; try{ list=(await (await fetch('/api/official/fanart/comments?id='+id+'&_='+Date.now())).json()).comments||[]; }catch(e){}
-  box.innerHTML=(list.length?list.map(c=>`<div class="fa-cmt">${c.can_delete?`<button type="button" title="删除评论" onclick="faDelCmt(${c.id},${id})">×</button>`:''}<b>${esc(c.user_name)}</b><span class="t">${esc(faDate(c.created_at))}</span><div>${esc(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--dim)">还没有评论，来说点什么吧～</div>')
-    +`<form class="fa-cform" onsubmit="return faPostCmt(event,${id})"><input type="text" maxlength="300" placeholder="写下你的评论…" aria-label="评论"><button type="submit" class="fa-btn" style="padding:5px 14px">发送</button></form>`;
+  box.innerHTML=(list.length?list.map(c=>`<div class="fa-cmt">${c.can_delete?`<button type="button" title="删除评论" data-fanart-action="delete-comment" data-comment-id="${escAttr(c.id)}">×</button>`:''}<b>${esc(c.user_name)}</b><span class="t">${esc(faDate(c.created_at))}</span><div>${esc(c.content)}</div></div>`).join(''):'<div style="font-size:12px;color:var(--dim)">还没有评论，来说点什么吧～</div>')
+    +`<form class="fa-cform" data-fanart-action="post-comment"><input type="text" maxlength="300" placeholder="写下你的评论…" aria-label="评论"><button type="submit" class="fa-btn" style="padding:5px 14px">发送</button></form>`;
 }
 async function faPostCmt(e,id){
   e.preventDefault();
@@ -469,33 +505,65 @@ function openEditModal(){
 }
 function closeEditModal(){ document.getElementById('editModal').style.display='none'; }
 let _imgOrder=[]; let _dragIdx=null;
-function _imgCard(im,idx,cid){
+function _imgCard(im,idx,characterId){
+  const imageId=positiveId(im.id);
+  const cid=positiveId(characterId);
+  if (!imageId || !cid) return '';
   const isLast=idx===_charImages.length-1;
-  return `<div draggable="true" ondragstart="dragStart(event,${idx})" ondragover="event.preventDefault()" ondragenter="event.preventDefault()" ondrop="dropImg(event,${idx},${cid})" style="position:relative;text-align:center;cursor:grab;padding:2px;border:1px dashed transparent;border-radius:8px;width:110px;">
-    <img loading="lazy" decoding="async" src="/api/official/img-id?id=${im.id}&t=1" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--border);pointer-events:none;">
-    <button type="button" onclick="askDelImg(${im.id},${cid})" title="删除该图" style="position:absolute;top:-6px;right:6px;width:18px;height:18px;border-radius:50%;border:none;background:var(--danger);color:#fff;font-size:11px;cursor:pointer;line-height:1;">×</button>
+  return `<div draggable="true" data-image-index="${idx}" data-image-id="${imageId}" style="position:relative;text-align:center;cursor:grab;padding:2px;border:1px dashed transparent;border-radius:8px;width:110px;">
+    <img loading="lazy" decoding="async" src="/api/official/img-id?id=${imageId}&t=1" style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--border);pointer-events:none;">
+    <button type="button" data-image-action="delete" title="删除该图" style="position:absolute;top:-6px;right:6px;width:18px;height:18px;border-radius:50%;border:none;background:var(--danger);color:#fff;font-size:11px;cursor:pointer;line-height:1;">×</button>
     <div style="margin-top:3px;display:flex;gap:2px;justify-content:center;">
-      <button type="button" onclick="moveImg(${idx},-1,${cid})" ${idx===0?'disabled':''} style="font-size:10px;padding:0 5px;border:1px solid var(--border);background:var(--panel);border-radius:3px;cursor:pointer;">←</button>
-      <button type="button" onclick="setAvatar(${im.id},${cid})" title="设为头像" style="font-size:10px;padding:0 5px;border:1px solid var(--gold,#d4a840);color:#b3873a;background:var(--panel);border-radius:3px;cursor:pointer;">头像</button>
-      <button type="button" onclick="moveImg(${idx},1,${cid})" ${isLast?'disabled':''} style="font-size:10px;padding:0 5px;border:1px solid var(--border);background:var(--panel);border-radius:3px;cursor:pointer;">→</button>
+      <button type="button" data-image-action="previous" ${idx===0?'disabled':''} style="font-size:10px;padding:0 5px;border:1px solid var(--border);background:var(--panel);border-radius:3px;cursor:pointer;">←</button>
+      <button type="button" data-image-action="avatar" title="设为头像" style="font-size:10px;padding:0 5px;border:1px solid var(--gold,#d4a840);color:#b3873a;background:var(--panel);border-radius:3px;cursor:pointer;">头像</button>
+      <button type="button" data-image-action="next" ${isLast?'disabled':''} style="font-size:10px;padding:0 5px;border:1px solid var(--border);background:var(--panel);border-radius:3px;cursor:pointer;">→</button>
     </div>
-    <select onchange="setImgType(${im.id},this.value,${idx},${cid})" title="图片分类" style="width:100%;margin-top:4px;font-size:11px;padding:1px 2px;border:1px solid var(--border);border-radius:4px;font-family:inherit;background:var(--panel);color:var(--text);">${typeOptions(im.image_type)}</select>
+    <select data-image-action="type" title="图片分类" style="width:100%;margin-top:4px;font-size:11px;padding:1px 2px;border:1px solid var(--border);border-radius:4px;font-family:inherit;background:var(--panel);color:var(--text);">${typeOptions(im.image_type)}</select>
   </div>`;
+}
+function bindImageActions(box,cid){
+  const cardOf = event => event.target.closest('[data-image-index][data-image-id]');
+  const indexOf = card => Number(card.dataset.imageIndex);
+  box.onclick = event => {
+    const button=event.target.closest('button[data-image-action]');
+    const card=button && cardOf(event);
+    if(!card) return;
+    const imageId=positiveId(card.dataset.imageId);
+    const idx=indexOf(card);
+    switch(button.dataset.imageAction){
+      case 'delete': return askDelImg(imageId,cid);
+      case 'avatar': return setAvatar(imageId,cid);
+      case 'previous': return moveImg(idx,-1,cid);
+      case 'next': return moveImg(idx,1,cid);
+    }
+  };
+  box.onchange = event => {
+    const card=event.target.matches('select[data-image-action="type"]') && cardOf(event);
+    if(card) setImgType(positiveId(card.dataset.imageId),event.target.value,indexOf(card),cid);
+  };
+  box.ondragstart = event => { const card=cardOf(event); if(card) dragStart(event,indexOf(card)); };
+  box.ondragover = event => { if(cardOf(event)) event.preventDefault(); };
+  box.ondrop = event => { const card=cardOf(event); if(card) dropImg(event,indexOf(card),cid); };
 }
 function renderImgMgr(){
   const box=document.getElementById('imgList'); if(!box) return;
-  const cid=(_charCid!=null?_charCid:_editCharId);
+  const cid=positiveId(_charCid??_editCharId);
+  if(!cid) return;
   const imgs=_charImages||[];
   _imgOrder=imgs.map(im=>im.id);
   box.innerHTML=imgs.map((im,idx)=>_imgCard(im,idx,cid)).join('')||'<span style="font-size:12px;color:var(--dim)">暂无图片</span>';
+  bindImageActions(box,cid);
   const up=document.getElementById('imgUpload');
   if(up) up.onchange=()=>uploadImg(cid);
 }
-async function loadImgMgr(cid){
-  if(String(_charCid)===String(cid) && Array.isArray(_charImages)){ renderImgMgr(); return; }
+async function loadImgMgr(characterId){
+  const cid=positiveId(characterId);
+  if(!cid) return;
+  if(_charCid===cid && Array.isArray(_charImages)){ renderImgMgr(); return; }
   try{
     const r=await fetch('/api/official/character?id='+cid+'&_='+Date.now()); const d=await r.json();
-    _charCid=cid; _charData=d; _charImages=(d.images||[]).slice();
+    if(!r.ok || positiveId(d.character?.id)!==cid) return;
+    _charCid=cid; _charData=d; _charImages=(d.images||[]).filter(im=>positiveId(im?.id));
     renderImgMgr();
   }catch(e){ if(Array.isArray(_charImages)) renderImgMgr(); }
 }

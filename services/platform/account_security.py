@@ -35,7 +35,7 @@ def handle_security(handler, action, api):
         if not ident:
             return reply(401, {'error': '登录已失效，请重新登录'})
         if ident['kind'] != 'local':
-            return reply(400, {'error': 'USSO 账号请到 USSO 修改密码；这里仅管理站内账号'})
+            return reply(400, {'error': '你使用的是统一账号，请前往原登录服务修改密码。'})
         username = ident['username']
     # Count both per-account and per-IP attempts, persisted across restarts.
     if action != 'settings':

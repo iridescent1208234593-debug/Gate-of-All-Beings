@@ -291,8 +291,8 @@ async function loadRequests() {
         <strong>${escapeHtml(q.name || q.uid)}</strong>
         <span class="dim">${q.kind === 'local' ? '站内' : 'USSO'} · ${fmtTime(q.created_at)}</span>
         <span class="dim" style="flex:1;">${escapeHtml(q.message || '（无理由）')}</span>
-        <button class="op" onclick="decideReq(${q.id},true)">同意</button>
-        <button class="op danger" onclick="decideReq(${q.id},false)">驳回</button>
+        <button class="op" data-queue="elder" data-request-id="${escapeHtml(q.id)}" data-approve="true">同意</button>
+        <button class="op danger" data-queue="elder" data-request-id="${escapeHtml(q.id)}" data-approve="false">驳回</button>
       </div>`).join('');
   } catch(e) { box.innerHTML = ''; }
 }
@@ -317,8 +317,8 @@ async function loadHonorRequests() {
         <span class="dim">${q.kind === 'local' ? '站内' : 'USSO'} · ${fmtTime(q.created_at)}</span>
         <span class="tag local">别称：${escapeHtml(q.alias || '妖王（默认）')}</span>
         <span class="dim" style="flex:1;min-width:200px;">${escapeHtml(q.reason || '')}</span>
-        <button class="op" onclick="decideHonor(${q.id},true)">加冕</button>
-        <button class="op danger" onclick="decideHonor(${q.id},false)">驳回</button>
+        <button class="op" data-queue="honor" data-request-id="${escapeHtml(q.id)}" data-approve="true">加冕</button>
+        <button class="op danger" data-queue="honor" data-request-id="${escapeHtml(q.id)}" data-approve="false">驳回</button>
       </div>`).join('');
   } catch(e) { box.innerHTML = ''; }
 }
@@ -348,8 +348,8 @@ async function loadSupplements() {
           ${s.message?`<div style="font-size:12px;color:var(--dim);margin-top:4px;">说明：${escapeHtml(s.message)}</div>`:''}
         </div>
         <div style="display:flex;gap:6px;align-items:center;">
-          <button class="op" onclick="decideSupplement(${s.id},true)">批准</button>
-          <button class="op danger" onclick="decideSupplement(${s.id},false)">驳回</button>
+          <button class="op" data-queue="supplement" data-request-id="${escapeHtml(s.id)}" data-approve="true">批准</button>
+          <button class="op danger" data-queue="supplement" data-request-id="${escapeHtml(s.id)}" data-approve="false">驳回</button>
         </div>
       </div>`).join('');
   } catch(e) { box.innerHTML = '<div class="state-box" style="margin-top:0;">加载失败</div>'; }
@@ -375,8 +375,8 @@ async function loadScribeRequests() {
         <span class="tag">${q.requested_role==='fan_reviewer'?'同人画廊审核员':'官方画廊编辑'}</span>
         <span class="dim">${q.user_kind==='local'?'站内':'USSO'} · ${fmtTime(q.created_at)}</span>
         <span class="dim" style="flex:1;">${escapeHtml(q.message||'（无说明）')}</span>
-        <button class="op" onclick="decideScribe(${q.id},true,'${q.requested_role==='fan_reviewer'?'fan_reviewer':'scribe'}')">批准</button>
-        <button class="op danger" onclick="decideScribe(${q.id},false,'${q.requested_role==='fan_reviewer'?'fan_reviewer':'scribe'}')">驳回</button>
+        <button class="op" data-queue="scribe" data-request-id="${escapeHtml(q.id)}" data-approve="true" data-request-role="${q.requested_role==='fan_reviewer'?'fan_reviewer':'scribe'}">批准</button>
+        <button class="op danger" data-queue="scribe" data-request-id="${escapeHtml(q.id)}" data-approve="false" data-request-role="${q.requested_role==='fan_reviewer'?'fan_reviewer':'scribe'}">驳回</button>
       </div>`).join('');
   } catch(e) { box.innerHTML = '<div class="state-box" style="margin-top:0;">加载失败</div>'; }
 }
@@ -404,8 +404,8 @@ async function loadExemptRequests() {
         <span class="tag gold">${typeTxt(q.type)}</span>
         <span class="dim">${q.user_kind==='local'?'站内':'USSO'} · ${fmtTime(q.created_at)}</span>
         <span class="dim" style="flex:1;">${escapeHtml(q.message||'（无说明）')}</span>
-        <button class="op" onclick="decideExempt(${q.id},true)">批准</button>
-        <button class="op danger" onclick="decideExempt(${q.id},false)">驳回</button>
+        <button class="op" data-queue="exempt" data-request-id="${escapeHtml(q.id)}" data-approve="true">批准</button>
+        <button class="op danger" data-queue="exempt" data-request-id="${escapeHtml(q.id)}" data-approve="false">驳回</button>
       </div>`).join('');
   } catch(e) { box.innerHTML = '<div class="state-box" style="margin-top:0;">加载失败</div>'; }
 }
@@ -419,6 +419,24 @@ async function delUser(kind, uid, name) {
   if (await adminPost('/api/admin/user/delete', { kind, uid })) loadUsers();
 }
 
+function bindQueueActions(root) {
+  root.addEventListener('click', event => {
+    const button = event.target.closest('button[data-queue]');
+    if (!button) return;
+    const { queue, requestId, approve, requestRole } = button.dataset;
+    const id = Number(requestId);
+    if (!Number.isSafeInteger(id) || id < 1 || (approve !== 'true' && approve !== 'false')) return;
+    const accepted = approve === 'true';
+    switch (queue) {
+      case 'elder': return decideReq(id, accepted);
+      case 'honor': return decideHonor(id, accepted);
+      case 'supplement': return decideSupplement(id, accepted);
+      case 'scribe': return decideScribe(id, accepted, requestRole === 'fan_reviewer' ? 'fan_reviewer' : 'scribe');
+      case 'exempt': return decideExempt(id, accepted);
+    }
+  });
+}
+bindQueueActions(document);
 init();
 </script>
 <script src="/legal-consent.js?v=20261106" data-require-consent></script>
