@@ -63,6 +63,30 @@ class GalleryHistoryTest(unittest.TestCase):
         self.assertNotIn("actor_uid", str(h))
         self.assertEqual(audit.find(self.db,"Card")["matches"], [{"id":1,"name":"Card"}])
 
+    def test_new_review_keeps_safe_name_and_exact_version_without_backfilling(self):
+        with self.db:
+            self.db.execute("UPDATE local_users SET nickname='   ' WHERE uid=101")
+        self.action(ADMIN, "review_reject", "UPDATE fan_characters SET review_status='rejected'", explicit=True)
+        self.action(ADMIN, "review_approve", "UPDATE fan_characters SET review_status='approved'",
+                    explicit=True, review_version="submitted-version", content_digest="digest-a")
+        info = audit.history(self.db, 1, content_digest="digest-a")
+        approval, reject = info["events"]
+        snapshot, old = info["snapshots"]
+        self.assertEqual(approval["actor_name"], "未设置昵称")
+        self.assertEqual(reject["actor_name"], "未设置昵称")
+        self.assertEqual(approval["actor_tag"], reject["actor_tag"])
+        self.assertEqual(approval["approval_snapshot_id"], snapshot["id"])
+        self.assertEqual(info["current_approval"]["snapshot_id"], snapshot["id"])
+        self.assertIsNone(old["approval"])
+        self.assertNotIn("approval_snapshot_id", reject)
+        self.assertNotIn("private_login", str(info))
+        self.assertNotIn("actor_uid", str(info))
+        with self.db:
+            self.db.execute("UPDATE local_users SET nickname='Current Nick' WHERE uid=101")
+        info = audit.history(self.db, 1, content_digest="digest-a")
+        self.assertEqual(info["events"][0]["actor_name"], "未设置昵称")
+        self.assertIsNone(info["snapshots"][1]["approval"])
+
     def test_rollback_keeps_card_state_and_history_in_sync(self):
         with self.assertRaises(RuntimeError), self.db:
             before = audit.load(self.db, 1)

@@ -116,7 +116,13 @@ def record(conn, actor, action, before, after, *, reason="", explicit=False, pri
     kind, uid = str(actor["kind"]), str(actor["uid"])
     identity = conn.execute("SELECT nickname FROM local_users WHERE uid=?" if kind == "local" else
                             "SELECT nickname FROM users WHERE user_id=?", (uid,)).fetchone()
-    nickname = _safe(str(identity[0] or "")[:80]) if identity else ""
+    nickname = str(identity[0] or "").strip() if identity else ""
+    # Never use a private login name or internal ID as an audit display name.
+    if nickname == uid:
+        nickname = ""
+    if action in ("review_approve", "review_reject") and not nickname:
+        nickname = "未设置昵称"
+    nickname = _safe(nickname)[:80]
     approved = action == "review_approve" and _public_approved(after)
     # A pending-to-approved transition can approve an age/lore edit absent from this
     # compact projection. Retain its own evidence even when the projection is unchanged.
@@ -182,9 +188,18 @@ def history(conn, card_id, *, before_event=None, content_digest=None):
                FROM fan_history_events e WHERE e.card_id=? AND (? IS NULL OR e.id<?)
                ORDER BY e.id DESC LIMIT 51""", (card_id,before_event,before_event)).fetchall()
     for r in rows[:50]:
-        events.append({**{k:r[k] for k in ("action","actor_kind","actor_role","created_at","previous_status",
-                                          "new_status","previous_public","new_public")},
-                       "actor_name": r["actor_name"], "actor_tag": f"#{r['actor_label']}", "reason": _safe(r["reason"])})
+        event = {**{k:r[k] for k in ("action","actor_kind","actor_role","created_at","previous_status",
+                                     "new_status","previous_public","new_public")},
+                 "actor_name": r["actor_name"], "actor_tag": f"#{r['actor_label']}", "reason": _safe(r["reason"])}
+        if r["action"] == "review_approve" and r["prior_review"]:
+            try:
+                meta = json.loads(r["prior_review"])
+            except (TypeError, ValueError):
+                meta = None
+            sid = meta.get("approval_snapshot_id") if isinstance(meta, dict) else None
+            if type(sid) is int and 0 < sid < 2**63:
+                event["approval_snapshot_id"] = sid
+        events.append(event)
     return {"snapshots": snapshots, "current_approval": current_approval,
             "current_review_status": current["review_status"] if current else None,
             "current_is_public": bool(current["is_public"]) if current else None, "events": events, "next_before": rows[49]["id"] if len(rows)>50 else None}

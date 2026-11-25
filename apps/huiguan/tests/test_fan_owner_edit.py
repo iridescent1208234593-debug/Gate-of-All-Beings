@@ -257,8 +257,10 @@ class FanOwnerEditTest(unittest.TestCase):
         self.assertEqual(len(current["snapshots"]), 1)
         self.assertEqual(current["current_approval"]["snapshot_id"], old["current_approval"]["snapshot_id"])
         self.assertEqual(current["current_approval"]["actor_name"], "Moderator Fixture")
-        self.assertEqual([e["actor_name"] for e in current["events"] if e["action"] == "review_approve"],
-                         ["Moderator Fixture", "owner_test"])
+        approvals = [e for e in current["events"] if e["action"] == "review_approve"]
+        self.assertEqual([e["actor_name"] for e in approvals], ["Moderator Fixture", "owner_test"])
+        self.assertEqual([e["approval_snapshot_id"] for e in approvals],
+                         [old["current_approval"]["snapshot_id"]] * 2)
         self.assertEqual(self.other.call("/api/fan/toggle", {"id": fid, "is_public": False})[0], 200)
         self.assertIsNone(self.reviewer.call(path)[1]["current_approval"])
         self.assertEqual(self.other.call("/api/fan/toggle", {"id": fid, "is_public": True})[1]["review_status"],

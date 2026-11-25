@@ -121,6 +121,10 @@
     if (entry.previous_public != null || entry.new_public != null) {
       field(details, "公开开关", `${visibility(entry.previous_public)} → ${visibility(entry.new_public)}`);
     }
+    const approvedSnapshot = galleryId(entry.approval_snapshot_id);
+    if (entry.action === "review_approve" && approvedSnapshot) {
+      field(details, "通过的公开版本记录", "#" + approvedSnapshot);
+    }
     field(details, "理由", entry.reason);
     if (details.childElementCount) item.append(details);
     return item;
