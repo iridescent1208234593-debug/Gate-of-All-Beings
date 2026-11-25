@@ -242,6 +242,18 @@ def create_app(lab: Lab) -> FastAPI:
             from .account_direct_web import install
             install(app, lab, lab.account)
 
+    @app.get("/api/account/native/available")
+    async def native_available(request: Request):
+        enabled = (cfg.account_direct_native_enabled is True and cfg.account_direct_web_enabled is True
+                   and lab.account is not None and lab.secure(request.headers) and request.url.scheme == "https")
+        methods = ["windows_loopback"] if enabled else []
+        if (enabled and cfg.account_direct_native_android_enabled is True
+                and cfg.public_host == "pc-lab.iridescently.cn"
+                and request.headers.getlist("host") == [cfg.public_host]):
+            methods.append("android_app_link")
+        return JSONResponse({"enabled": enabled, "methods": methods},
+                            headers={"Cache-Control":"no-store"})
+
     @app.get("/healthz")
     async def healthz():
         return {"ok": True, "version": config_mod.VERSION}
