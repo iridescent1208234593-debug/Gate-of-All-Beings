@@ -651,7 +651,7 @@ class Hub:
                 changed = [c for c in members if c.dirty or full]
                 if changed:
                     rows = [[c.pid, c.x, c.z, round(c.dir, 2), c.anim] for c in changed]
-                    self.broadcast(sid, {"t": "s", "seq": self.seq, "full": full, "p": rows})
+                    self.broadcast(sid, {"t": "s", "seq": self.seq, "time": time.monotonic(), "full": full, "p": rows})
                     for c in changed:
                         c.dirty = False
                         if time.time() - c.last_move > 0.4 and c.anim != "idle":

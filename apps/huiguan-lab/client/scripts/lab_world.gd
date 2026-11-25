@@ -5,6 +5,7 @@ extends RefCounted
 ## Both the 2D and the 3D view render from this one object.
 
 const INTERP_DELAY := 0.12
+const PLAYER_SNAPSHOT_DELAY := 0.22 # two 10 Hz packets arriving together
 
 var spec: Dictionary = {}
 var template: Dictionary = {}
@@ -17,7 +18,8 @@ var npc_view: Dictionary = {}       # id -> {x, z, tx, tz, species}
 var objects: Dictionary = {}
 var clock: Dictionary = {}
 var textures: Dictionary = {}       # digest -> Texture2D
-var oc_digest: Dictionary = {}      # pid -> digest
+var oc_digest: Dictionary = {}
+var player_clock_offset := INF      # pid -> digest
 var my_texture: Texture2D = null
 var radius := 0.3
 var obstacles: Array = []
@@ -41,6 +43,7 @@ func set_space(info: Dictionary) -> void:
 	for o in template["obstacles"]:
 		obstacles.append([Vector2(o["position"][0], o["position"][2]), float(o["radius"]) + radius])
 	players.clear()
+	player_clock_offset = INF
 	npc_view.clear()
 	version += 1
 
@@ -79,14 +82,25 @@ func upsert_player(p: Dictionary) -> void:
 	cur["z"] = float(p.get("z", cur.get("z", 0.0)))
 	cur["dir"] = float(p.get("dir", 0.0))
 	cur["anim"] = p.get("anim", "idle")
-	cur["samples"] = [[now, cur["x"], cur["z"], cur["dir"]]]
+	var stamp := now if is_inf(player_clock_offset) else now - player_clock_offset - PLAYER_SNAPSHOT_DELAY
+	cur["samples"] = [[stamp, cur["x"], cur["z"], cur["dir"]]]
 	if p.has("oc"):
 		oc_digest[pid] = p["oc"]
 	players[pid] = cur
 
 
-func apply_snapshot(rows: Array) -> void:
-	var now := Time.get_ticks_msec() / 1000.0
+func apply_snapshot(rows: Array, server_time := -1.0, received_at := -1.0) -> void:
+	var now := Time.get_ticks_msec() / 1000.0 if received_at < 0.0 else received_at
+	var stamp := now
+	if server_time >= 0.0:
+		if is_inf(player_clock_offset):
+			# Welcome and older gateways use local arrival times; don't mix their time domain.
+			for p: Dictionary in players.values():
+				p["samples"].clear()
+		player_clock_offset = minf(player_clock_offset, now - server_time)
+		stamp = server_time
+	elif not is_inf(player_clock_offset):
+		stamp = now - player_clock_offset
 	for r in rows:
 		var pid: String = r[0]
 		if pid == me_pid:
@@ -95,14 +109,18 @@ func apply_snapshot(rows: Array) -> void:
 			continue
 		var cur: Dictionary = players[pid]
 		var samples: Array = cur["samples"]
-		samples.append([now, float(r[1]), float(r[2]), float(r[3])])
+		if server_time >= 0.0 and not samples.is_empty() and stamp <= float(samples[-1][0]):
+			continue
+		samples.append([stamp, float(r[1]), float(r[2]), float(r[3])])
 		while samples.size() > 12:
 			samples.pop_front()
 		cur["anim"] = r[4]
 
 
-func interpolate() -> void:
-	var t := Time.get_ticks_msec() / 1000.0 - INTERP_DELAY
+func interpolate(now: float = -1.0) -> void:
+	if now < 0.0:
+		now = Time.get_ticks_msec() / 1000.0
+	var t := now - INTERP_DELAY if is_inf(player_clock_offset) else now - player_clock_offset - PLAYER_SNAPSHOT_DELAY
 	for pid in players:
 		var cur: Dictionary = players[pid]
 		var s: Array = cur["samples"]

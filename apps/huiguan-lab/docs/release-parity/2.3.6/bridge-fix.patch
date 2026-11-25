@@ -1,0 +1,123 @@
+--- a/server/lab/world.py
++++ b/server/lab/world.py
+@@ -54,10 +54,21 @@
+         self.max = template["bounds"]["max"]
+         self.obstacles = [(o["position"][0], o["position"][2], o["radius"] + self.radius) for o in template["obstacles"]]
+         self.objects = {o["id"]: o for o in template["objects"]}
++        self.crossing = template.get("river_crossing")
++
++    def in_river(self, x: float, z: float) -> bool:
++        if self.crossing is None:
++            return False
++        west, north, width, length = self.crossing["channel"]
++        return west <= x < west + width and north <= z < north + length
+ 
+     def free(self, x: float, z: float) -> bool:
+         if not (self.min[0] <= x <= self.max[0] and self.min[2] <= z <= self.max[2]):
+             return False
++        if self.in_river(x, z):
++            lo, hi = self.crossing["deck_z"]
++            if not lo <= z < hi:
++                return False
+         for polygon in self.t.get('blocked_polygons', []):
+             if point_in_polygon(x, z, polygon):
+                 return False
+@@ -107,6 +118,7 @@
+     anim: str = "idle"
+     client: str = "?"
+     version: str = "?"
++    east_bank: bool = False
+     ip_hint: str = ""
+     connected_at: float = field(default_factory=time.time)
+     last_move: float = field(default_factory=time.time)
+@@ -327,6 +339,8 @@
+         cx, cz = x + 0.5, z + 0.5
+         if not (geo.min[0] - 0.5 <= cx <= geo.max[0] + 0.5 and geo.min[2] - 0.5 <= cz <= geo.max[2] + 0.5):
+             return "tile_blocked"
++        if geo.in_river(cx, cz):
++            return "tile_blocked"
+         for polygon in geo.t.get("blocked_polygons", []):      # never pave the house or the river
+             if point_in_polygon(cx, cz, polygon):
+                 return "tile_blocked"
+@@ -556,6 +570,13 @@
+     async def on_hello(self, c: Conn, m: dict, now: float) -> None:
+         c.client = clean_text(m.get("client", "?"), 8) or "?"
+         c.version = clean_text(m.get("version", "?"), 32) or "?"
++        c.east_bank = m.get("east_bank") is True
++        geo = self.geometry(c.space)
++        if geo.crossing is not None and not c.east_bank:
++            west, landing_z = geo.crossing["west_landing"]
++            if c.x > west:
++                # Old builds stop at the west bank even on reconnect.
++                c.x, c.z = (west, landing_z) if geo.free(west, landing_z) else geo.spawn()
+         await self.join(c)
+ 
+     async def on_hello_view(self, c: Conn, m: dict, now: float) -> None:
+@@ -605,6 +626,8 @@
+         reason = None
+         if dist > allowed:
+             reason = "too_fast"
++        elif geo.crossing is not None and not c.east_bank and x > geo.crossing["west_landing"][0]:
++            reason = "blocked"
+         elif not geo.segment_free(c.x, c.z, x, z):
+             reason = "blocked"
+         if reason:
+--- a/client/data/spaces.json
++++ b/client/data/spaces.json
+@@ -17,7 +17,7 @@
+           -8.5
+         ],
+         "max": [
+-          32,
++          46,
+           0,
+           21.5
+         ]
+@@ -29,6 +29,12 @@
+       ],
+       "spawn_spread": 1.0,
+       "ground": "grass",
++      "lily_pond": {"id": "east-bank-lily-pond", "position": [38.4, 0, 13.1], "radius": 2.0, "survey_radius": 2.85},
++      "river_crossing": {
++        "channel": [32.5, -9, 4, 31],
++        "deck_z": [9, 11],
++        "west_landing": [32, 10]
++      },
+       "obstacles": [
+         {
+           "id": "gate",
+@@ -129,7 +135,14 @@
+             2.0
+           ],
+           "radius": 2.0
+-        }
++        },
++        {"id": "bank-pine-north", "kind": "tree", "position": [38.7, 0, -5.5], "radius": 0.65},
++        {"id": "bank-oak-north", "kind": "tree", "position": [44, 0, -3.5], "radius": 0.95},
++        {"id": "bank-pine-fern", "kind": "tree", "position": [38.8, 0, 3.5], "radius": 0.65},
++        {"id": "bank-oak-flower", "kind": "tree", "position": [44.5, 0, 7], "radius": 0.95},
++        {"id": "bank-stone", "kind": "rock", "position": [41.5, 0, 14], "radius": 0.6},
++        {"id": "bank-oak-south", "kind": "tree", "position": [39, 0, 18.1], "radius": 0.95},
++        {"id": "bank-pine-south", "kind": "tree", "position": [44, 0, 20], "radius": 0.65}
+       ],
+       "objects": [
+         {
+@@ -204,7 +217,8 @@
+           "name": "东边萤火台",
+           "position": [23, 0, 12],
+           "radius": 1.6
+-        }
++        },
++        {"id": "east-bank-flower", "kind": "lantern", "name": "照料东岸灯花", "position": [41, 0, 7.5], "radius": 1.6, "stages": 4}
+       ],
+       "pasture": {
+         "origin": [
+@@ -225,7 +239,7 @@
+       "map_rect": [
+         0,
+         -18.0,
+-        32.8229,
++        46.5,
+         40.0
+       ],
+       "grass_rect": [

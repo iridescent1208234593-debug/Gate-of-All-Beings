@@ -1,0 +1,351 @@
+--- a/client/scripts/lab_world.gd
++++ b/client/scripts/lab_world.gd
+@@ -6,6 +6,7 @@
+ 
+ const INTERP_DELAY := 0.12
+ const NPC_DELAY := 0.18
++const PLAYER_SNAPSHOT_DELAY := 0.22 # up to two 10 Hz packets arriving together
+ 
+ var spec: Dictionary = {}
+ var template: Dictionary = {}
+@@ -63,6 +64,7 @@
+ var npc_view: Dictionary = {}       # id -> {x, z, tx, tz, species}
+ var npc_seq := -1
+ var npc_clock_offset := INF
++var player_clock_offset := INF
+ var objects: Dictionary = {}
+ var clock: Dictionary = {}
+ var textures: Dictionary = {}       # digest -> Texture2D
+@@ -114,6 +116,7 @@
+ 	for o in template["obstacles"]:
+ 		obstacles.append([Vector2(o["position"][0], o["position"][2]), float(o["radius"]) + radius])
+ 	players.clear()
++	player_clock_offset = INF
+ 	npc_view.clear()
+ 	npc_seq = -1
+ 	npc_clock_offset = INF
+@@ -206,14 +209,25 @@
+ 	cur["z"] = float(p.get("z", cur.get("z", 0.0)))
+ 	cur["dir"] = float(p.get("dir", 0.0))
+ 	cur["anim"] = p.get("anim", "idle")
+-	cur["samples"] = [[now, cur["x"], cur["z"], cur["dir"]]]
++	var stamp := now if is_inf(player_clock_offset) else now - player_clock_offset - PLAYER_SNAPSHOT_DELAY
++	cur["samples"] = [[stamp, cur["x"], cur["z"], cur["dir"]]]
+ 	if p.has("oc"):
+ 		oc_digest[pid] = p["oc"]
+ 	players[pid] = cur
+ 
+ 
+-func apply_snapshot(rows: Array) -> void:
+-	var now := Time.get_ticks_msec() / 1000.0
++func apply_snapshot(rows: Array, server_time := -1.0, received_at := -1.0) -> void:
++	var now := Time.get_ticks_msec() / 1000.0 if received_at < 0.0 else received_at
++	var stamp := now
++	if server_time >= 0.0:
++		if is_inf(player_clock_offset):
++			# Welcome and older gateways use local arrival times; don't mix their time domain.
++			for p: Dictionary in players.values():
++				p["samples"].clear()
++		player_clock_offset = minf(player_clock_offset, now - server_time)
++		stamp = server_time
++	elif not is_inf(player_clock_offset):
++		stamp = now - player_clock_offset
+ 	for r in rows:
+ 		var pid: String = r[0]
+ 		if pid == me_pid:
+@@ -223,14 +237,18 @@
+ 			continue
+ 		var cur: Dictionary = players[pid]
+ 		var samples: Array = cur["samples"]
+-		samples.append([now, float(r[1]), float(r[2]), float(r[3])])
++		if server_time >= 0.0 and not samples.is_empty() and stamp <= float(samples[-1][0]):
++			continue
++		samples.append([stamp, float(r[1]), float(r[2]), float(r[3])])
+ 		while samples.size() > 12:
+ 			samples.pop_front()
+ 		cur["anim"] = r[4]
+ 
+ 
+-func interpolate() -> void:
+-	var t := Time.get_ticks_msec() / 1000.0 - INTERP_DELAY
++func interpolate(now: float = -1.0) -> void:
++	if now < 0.0:
++		now = Time.get_ticks_msec() / 1000.0
++	var t := now - INTERP_DELAY if is_inf(player_clock_offset) else now - player_clock_offset - PLAYER_SNAPSHOT_DELAY
+ 	for pid in players:
+ 		var cur: Dictionary = players[pid]
+ 		var s: Array = cur["samples"]
+--- a/client/scripts/main.gd
++++ b/client/scripts/main.gd
+@@ -73,6 +73,10 @@
+ var inventory := {"seeds":1,"soil":1}
+ var garden_phase := 0
+ var action_buttons := {}
++const ACTION_WAIT_SECONDS := 3.0
++const ACTION_WAIT_TEXT := "动作确认中…"
++var pending_action := ""
++var pending_action_until := 0.0
+ var inventory_label: Label
+ var path_mode := false             # 铺路: clicks lay or lift dirt-path tiles instead of walking
+ var path_button: Button
+@@ -832,6 +836,8 @@
+ 
+ 
+ func _on_net_state(state: String, detail: String) -> void:
++	if state != "open":
++		_finish_action()
+ 	match state:
+ 		"login":
+ 			welcomed = false
+@@ -886,6 +892,7 @@
+ func _on_message(m: Dictionary) -> void:
+ 	match m.get("t"):
+ 		"welcome":
++			_finish_action()
+ 			if not welcomed:
+ 				hud.layer = 1
+ 				_clear_panels()
+@@ -971,7 +978,7 @@
+ 				world.players[m["pid"]]["part_colors"] = m.get("part_colors",{})
+ 				world.players[m["pid"]]["face"] = m.get("face",{})
+ 		"s":
+-			world.apply_snapshot(m["p"])
++			world.apply_snapshot(m["p"], float(m.get("time", -1.0)))
+ 			if m.get("full", false):
+ 				for r in m["p"]:
+ 					if r[0] != world.me_pid and not world.players.has(r[0]):
+@@ -993,6 +1000,9 @@
+ 			var target: Dictionary = world.me if m["pid"] == world.me_pid else world.players.get(m["pid"],{})
+ 			target["emote_until"] = 0.0
+ 		"emote":
++			if m["pid"] == world.me_pid and m["id"] == pending_action:
++				_finish_action()
++				_guide_event("emoted")
+ 			var target: Dictionary = world.me if m["pid"] == world.me_pid else world.players.get(m["pid"], {})
+ 			if not target.is_empty():
+ 				target["emote_id"] = m["id"]
+@@ -1085,6 +1095,8 @@
+ 				await get_tree().create_timer(2.0).timeout
+ 				WebBridge.goto_login()
+ 		"error":
++			if m.get("code") in ["emote_while_moving", "crouch_locked"]:
++				_finish_action()
+ 			var msgs := {"go_to_rainbow_door": "要在会馆的「虹之间」彩虹门前操作", "space_forbidden": "你没有这个空间的访问权限",
+ 				"too_far": "再走近一点", "chat_rate_limited": "说得太快啦", "space_exists": "你已经有自己的灵质空间了",
+ 				"not_space_owner": "只有空间主人可以调整时间", "tile_too_far": "太远了，走近一点再铺",
+@@ -1383,6 +1395,7 @@
+ 
+ 
+ func _process(delta: float) -> void:
++	_check_action_timeout(Time.get_ticks_msec() / 1000.0)
+ 	var active_color_ids := world.players.keys()
+ 	active_color_ids.append(world.me_pid)
+ 	RenmoColors.release_unused(active_color_ids)
+@@ -1442,7 +1455,7 @@
+ 	if moving: world.me["emote_until"] = 0.0
+ 	for action in action_buttons:
+ 		var locked: bool = action == "crouch" and garden_phase < 3
+-		action_buttons[action].disabled = moving or locked
++		action_buttons[action].disabled = moving or locked or pending_action != ""
+ 		if action == "crouch":
+ 			action_buttons[action].text = "下蹲（锁定）" if locked else "下蹲"
+ 			action_buttons[action].tooltip_text = "种蘑菇 → 铲回种子 → 再种蘑菇（%d/3）" % garden_phase if locked else "播放下蹲"
+@@ -1656,14 +1669,32 @@
+ 
+ 
+ func _request_action(action: String) -> void:
++	if not welcomed or Net.state != "open" or pending_action != "":
++		return
+ 	if world.me.get("anim","idle") != "idle":
+ 		toast("先停下来再做动作")
+ 		return
+ 	if action == "crouch" and garden_phase < 3:
+ 		toast("先完成种蘑菇 → 铲回种子 → 再种蘑菇")
+ 		return
++	pending_action = action
++	pending_action_until = Time.get_ticks_msec() / 1000.0 + ACTION_WAIT_SECONDS
++	toast(ACTION_WAIT_TEXT, ACTION_WAIT_SECONDS + 0.2)
+ 	Net.send({"t":"emote","id":action})
+-	_guide_event("emoted")
++
++
++func _finish_action() -> void:
++	if pending_action == "":
++		return
++	pending_action = ""
++	if toast_label.text == ACTION_WAIT_TEXT:
++		toast("", 0.0)
++
++
++func _check_action_timeout(now: float) -> void:
++	if pending_action != "" and now >= pending_action_until:
++		_finish_action()
++		toast("暂未收到动作确认，可以重试。")
+ 
+ 
+ func _open_part_colors() -> void:
+--- a/client/scripts/skills.gd
++++ b/client/scripts/skills.gd
+@@ -12,6 +12,10 @@
+ const FX_SCALE := 2.5               # one effect pixel = 2.5 hall pixels (hall: 48 px per metre)
+ const PX_PER_M := 48.0
+ const MAX_CACHED := 60
++const CAST_WAIT_SECONDS := 3.0
++const FX_WAIT_SECONDS := 4.0
++const CAST_WAIT_TEXT := "技能确认中…"
++const FX_WAIT_TEXT := "特效加载中…"
+ 
+ var catalog: Dictionary = {}        # skills.json
+ var points := 0
+@@ -21,6 +25,10 @@
+ var _state_at := 0.0
+ var cooldown_until: Dictionary = {} # id -> local seconds; "" = global
+ var ready_state := false
++var awaiting_cast := ""
++var awaiting_fx := ""
++var cast_due := 0.0
++var fx_due := 0.0
+ 
+ var fx: Dictionary = {}             # id -> {state: "loading"|"ready"|"failed", info, frames:[Texture2D], used}
+ var _http_queue: Array = []         # [id, kind("json"|"page"), page index]
+@@ -63,6 +71,7 @@
+ 	add_child(ui)
+ 	ui.setup(self)
+ 	Net.message.connect(_on_message)
++	Net.state_changed.connect(_on_net_state)
+ 
+ 
+ # ------------------------------------------------------------------ catalog helpers
+@@ -119,6 +128,8 @@
+ 
+ 
+ func cast_slot(slot: int) -> void:
++	if not ready_state or Net.state != "open" or awaiting_cast != "":
++		return
+ 	if slot < 0 or slot >= equipped.size():
+ 		return
+ 	var id: String = equipped[slot]
+@@ -127,11 +138,35 @@
+ 		return
+ 	if cooldown_left(id) > 0.05:
+ 		return
+-	var now := Time.get_ticks_msec() / 1000.0
+-	cooldown_until[""] = now + 0.8
+-	cooldown_until[id] = now + float(skill(id).get("cooldown", 1.0))
++	awaiting_cast = id
++	cast_due = Time.get_ticks_msec() / 1000.0 + CAST_WAIT_SECONDS
++	ui.toast(CAST_WAIT_TEXT, CAST_WAIT_SECONDS + 0.2)
+ 	ensure_fx(id)
+ 	Net.send({"t": "skill_cast", "id": id})
++
++
++func _on_net_state(state: String, _detail: String) -> void:
++	if state != "open":
++		ready_state = false
++		_reset_feedback()
++
++
++func _reset_feedback() -> void:
++	awaiting_cast = ""
++	awaiting_fx = ""
++	if ui.toast_label.text in [CAST_WAIT_TEXT, FX_WAIT_TEXT]:
++		ui.toast("", 0.0)
++
++
++func _check_feedback_timeout(now: float) -> void:
++	if awaiting_cast != "" and now >= cast_due:
++		awaiting_cast = ""
++		if ui.toast_label.text == CAST_WAIT_TEXT:
++			ui.toast("暂未收到技能确认，可以重试。")
++	if awaiting_fx != "" and now >= fx_due:
++		awaiting_fx = ""
++		if ui.toast_label.text == FX_WAIT_TEXT:
++			ui.toast("技能已确认，特效未能及时加载。")
+ 
+ 
+ func _unhandled_input(event: InputEvent) -> void:
+@@ -161,6 +196,7 @@
+ func _on_message(m: Dictionary) -> void:
+ 	match m.get("t"):
+ 		"welcome":
++			_reset_feedback()
+ 			ready_state = true
+ 			_attach_views()
+ 			for c in _casts:
+@@ -179,6 +215,8 @@
+ 					ensure_fx(id)
+ 			state_changed.emit()
+ 		"skill_error":
++			if m.get("code") in ["skill_cooldown", "skill_not_equipped"]:
++				awaiting_cast = ""
+ 			var msgs := {"skill_no_points": "技能点不够", "skill_needs_previous": "先解锁上一层的任意一个技能",
+ 				"skill_cooldown": "技能还在冷却", "skill_not_equipped": "先把技能装到技能栏", "skill_locked": "这个技能还没解锁",
+ 				"skill_already": "已经解锁过了", "skill_unknown": "没有这个技能", "skill_bad_slot": "没有这个技能格"}
+@@ -289,6 +327,10 @@
+ func _fail(id: String) -> void:
+ 	if fx.has(id):
+ 		fx[id]["state"] = "failed"
++	if awaiting_fx == id:
++		awaiting_fx = ""
++		if ui.toast_label.text == FX_WAIT_TEXT:
++			ui.toast("技能已确认，特效加载失败。")
+ 	for k in range(_http_queue.size() - 1, 0, -1):
+ 		if _http_queue[k][0] == id:
+ 			_http_queue.remove_at(k)
+@@ -321,8 +363,12 @@
+ 	for p in _pending.duplicate():
+ 		if p["id"] == id:
+ 			_pending.erase(p)
+-			if now - float(p["queued"]) < 4.0:
++			if now - float(p["queued"]) < FX_WAIT_SECONDS:
+ 				_play(p)
++	if awaiting_fx == id:
++		awaiting_fx = ""
++		if ui.toast_label.text == FX_WAIT_TEXT:
++			ui.toast("", 0.0)
+ 	fx_ready.emit(id)
+ 
+ 
+@@ -345,9 +391,15 @@
+ 	_attach_views()
+ 	var c := {"id": id, "pid": str(m.get("pid", "")), "x": float(m.get("x", 0.0)), "z": float(m.get("z", 0.0)),
+ 		"dir": float(m.get("dir", 0.0)), "queued": Time.get_ticks_msec() / 1000.0, "follow": true}
+-	if c["pid"] == _me_pid():
++	var mine: bool = c["pid"] == _me_pid()
++	if mine:
+ 		var now := Time.get_ticks_msec() / 1000.0
+-		cooldown_until[id] = maxf(float(cooldown_until.get(id, 0.0)), now + float(skill(id).get("cooldown", 1.0)) - 0.2)
++		cooldown_until[""] = now + 0.8
++		cooldown_until[id] = now + float(skill(id).get("cooldown", 1.0))
++		if awaiting_cast == id:
++			awaiting_cast = ""
++			if ui.toast_label.text == CAST_WAIT_TEXT:
++				ui.toast("", 0.0)
+ 	var s := skill(id)
+ 	if s.get("anchor") == "screen":
+ 		if s["branch"] == "transitions" and c["pid"] != _me_pid():
+@@ -361,6 +413,12 @@
+ 		_play(c)
+ 	elif fx[id]["state"] == "loading":
+ 		_pending.append(c)
++		if mine:
++			awaiting_fx = id
++			fx_due = float(c["queued"]) + FX_WAIT_SECONDS
++			ui.toast(FX_WAIT_TEXT, FX_WAIT_SECONDS + 0.2)
++	elif mine:
++		ui.toast("技能已确认，特效加载失败。")
+ 
+ 
+ func _me_pid() -> String:
+@@ -421,9 +479,10 @@
+ 
+ 
+ func _process(_delta: float) -> void:
++	var now := Time.get_ticks_msec() / 1000.0
++	_check_feedback_timeout(now)
+ 	if _casts.is_empty():
+ 		return
+-	var now := Time.get_ticks_msec() / 1000.0
+ 	var view3d: bool = Profile.view_mode == "3d"
+ 	for c in _casts.duplicate():
+ 		var t: float = now - float(c["start"])

@@ -563,7 +563,7 @@ func _on_message(m: Dictionary) -> void:
 			if world.players.has(m["pid"]):
 				world.players[m["pid"]]["nick"] = m["nick"]
 		"s":
-			world.apply_snapshot(m["p"])
+			world.apply_snapshot(m["p"], float(m.get("time", -1.0)))
 			if m.get("full", false):
 				for r in m["p"]:
 					if r[0] != world.me_pid and not world.players.has(r[0]):
