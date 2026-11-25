@@ -42,6 +42,8 @@ class Config:
     admission_legacy_players: bool = False  # explicit old-code bridge; no double-spend
     account_issuer: str = ""
     account_direct_web_enabled: bool = False
+    account_direct_native_enabled: bool = False
+    account_direct_native_android_enabled: bool = False
     r4_enabled: bool = True
     r4_python: Path = field(default_factory=lambda: (_workspace_root(SOURCE_ROOT) or SOURCE_ROOT.parents[1]) / "labs" / "iridescently-labs" / "research" / "experiments" / "zhongsheng-world-lab" / ".venv" / "Scripts" / "python.exe")
     r4_service_dir: Path = field(default_factory=lambda: (_workspace_root(SOURCE_ROOT) or SOURCE_ROOT.parents[1]) / "labs" / "iridescently-labs" / "research" / "experiments" / "living-world" / "r4")
@@ -94,6 +96,16 @@ def load(path: str | os.PathLike | None = None) -> Config:
             if key in ("runtime", "secrets", "r4_python", "r4_service_dir"):
                 value = (p.parent / value).resolve() if not Path(value).is_absolute() else Path(value)
             setattr(cfg, key, value)
+    if type(cfg.account_direct_native_enabled) is not bool:
+        raise ValueError("account_direct_native_enabled must be a boolean")
+    if cfg.account_direct_native_enabled and not cfg.account_direct_web_enabled:
+        raise ValueError("native account login needs direct Web consent")
+    if type(cfg.account_direct_native_android_enabled) is not bool:
+        raise ValueError("account_direct_native_android_enabled must be a boolean")
+    if cfg.account_direct_native_android_enabled and (
+        not cfg.account_direct_native_enabled or cfg.public_host != "pc-lab.iridescently.cn"
+    ):
+        raise ValueError("Android app links need native login and the approved LAB host")
     if type(cfg.account_direct_web_enabled) is not bool:
         raise ValueError("account_direct_web_enabled must be a boolean")
     if type(cfg.player_test_codes_enabled) is not bool:

@@ -405,6 +405,7 @@ func _native_login_form(detail: String) -> void:
 	box.add_child(hint)
 	var submit := func(): Net.login_native(server.text, code.text)
 	_add_button(box, "登录", submit, "NativeLogin")
+	_add_button(box, "在 GitHub 给项目点 Star", func(): OS.shell_open("https://github.com/iridescent1208234593-debug/Gate-of-All-Beings"), "GitHubStar")
 	code.text_submitted.connect(func(_value): submit.call())
 	_add_button(box, "使用西木会馆账号", func(): Net.login_account_native(server.text), "NativeAccountLogin")
 	code.grab_focus()
