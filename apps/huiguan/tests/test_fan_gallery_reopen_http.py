@@ -87,6 +87,26 @@ def run():
    ok('/api/fan/toggle','owner',{'id':fid,'is_public':False})
    assert ok(scope,'admin')[1]['reopen'] is None
    assert call(route,'admin',{**body,'review_version':eligible['review_version']})[0]==409
+   # A public approved card can be requeued without fabricating a rejection.
+   nid=ok('/api/fan/submit','owner',{'name':'Second fixture','story':'original'})[1]['id']
+   nscope=f'/api/admin/fan/history?id={nid}'
+   entry=next(r for r in ok('/api/fan/review/queue','admin')[1]['characters'] if r['id']==nid)
+   ok('/api/fan/review/decide','admin',{'id':nid,'decision':'approve','review_version':entry['review_version']})
+   approved=ok(nscope,'admin')[1]
+   assert approved['reopen']['status']=='approved' and approved['reopen']['rejection_reason']==''
+   nbody={'id':nid,'review_version':approved['reopen']['review_version'],'reason':'Check original review'}
+   assert call(route,'reviewer',nbody)[0]==403
+   ok(route,'admin',nbody)
+   assert ok('/api/fan/list?view=text')[1]['total']==0
+   assert call(route,'admin',nbody)[0]==409
+   reopened=ok(nscope,'admin')[1]
+   assert reopened['reopen'] is None
+   with closing(s.db()) as db,db:
+    audit=db.execute("SELECT previous_status,new_status FROM fan_history_events WHERE card_id=? AND action='moderation_reopen'",(nid,)).fetchone()
+    assert tuple(audit)==('approved','pending')
+    db.execute("UPDATE fan_characters SET type='配色海报', review_status='approved' WHERE id=?",(nid,))
+   eligible=ok(nscope,'admin')[1]['reopen']
+   ok(route,'admin',{**nbody,'review_version':eligible['review_version']})
    srv.shutdown()
   print('PASS Hall HTTP: admin-only, stale/duplicate/private blocked, pending not public, same ID/vote preserved, separate approval and retained rejection evidence')
 

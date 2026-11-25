@@ -39,3 +39,18 @@ assert.equal(dialog.okText, '确认通过');
 dialog.onOk();
 assert.deepEqual(posted, [['17', 'approve', {review_version: 'prior-version', art_source: 'ai'}]]);
 console.log('PASS review desk filtering and explicit approval with the exact version');
+
+const controlsStart = html.indexOf('function historyButton(c)');
+const controlsEnd = html.indexOf('function artCardHTML(', controlsStart);
+assert.ok(controlsStart >= 0 && controlsEnd > controlsStart);
+const cards = vm.createContext({currentUser: {logged_in: true, is_admin: true}});
+vm.runInContext(html.slice(controlsStart, controlsEnd), cards);
+for (const type of ['配色海报', '同人设表']) {
+  const markup = cards.ownerActions({id: 17, type, is_mine: false});
+  assert.match(markup, /data-fan-reopen-id="17"/);
+  assert.doesNotMatch(markup, /data-act="revoke"|data-reject/);
+}
+cards.currentUser = {logged_in: true, is_admin: false, can_review_fan: true};
+assert.equal(cards.ownerActions({id: 17, type: '同人设表', is_mine: false}), '');
+assert.match(html, /data-reject=/); // The pending review desk still has the reject action.
+console.log('PASS public cards only offer the admin re-review entry');
