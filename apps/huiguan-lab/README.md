@@ -26,6 +26,8 @@
 | [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) | 已知限制 |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | 下一阶段 |
 
+- [小游戏角：三波守滩与网站门牌](docs/GAME-CORNER.md)
+
 ## 目录
 
 `server/` 网关、监督进程、labctl、测试与负载测试 · `client/` Godot 4.7.2 工程 · `web/` 测试码页、管理台、监控页、美术上传页 · `scripts/` 控制、构建与 Cloudflare 脚本 · `docs/`。运行数据在 `../zszm-lab-v2-runtime/`，密钥在工作区的 `secrets/lab-v2/`，两者都不在源码目录里。

@@ -3,6 +3,8 @@ extends Control
 ## input and client prediction. The 2D and 3D views render the same LabWorld.
 
 const SEND_HZ := 12.0
+const BeachShoot = preload("res://scenes/beach_shoot.tscn")
+const GameCorner = preload("res://scripts/game_corner.gd")
 const EMOTE_TEXT := {"wave": "挥手~", "bow": "鞠躬", "heart": "★喜欢", "laugh": "哈哈", "sleep": "Zzz", "surprise": "！？", "music": "啦啦~", "sparkle": "☆闪亮"}
 const SPEED := 4.0
 var world := LabWorld.new()
@@ -37,6 +39,7 @@ var watch_t := 0.0
 var guide                          # life_guide.gd: 新人引导「开始生活」
 var hud_buttons := {}
 var emote_row: Control
+var activity_layer: CanvasLayer
 
 
 func _ready() -> void:
@@ -65,6 +68,7 @@ func _ready() -> void:
 	guide.register_target("spaces", func(): return hud_buttons["虹之间"].get_global_rect())
 	guide.register_target("view", func(): return hud_buttons["2D / 3D"].get_global_rect())
 	guide.register_target("top", func(): return top_label.get_global_rect())
+	guide.register_target("minigame", func(): return hud_buttons["小游戏"].get_global_rect())
 	guide.register_target("player", func():
 		var c := get_viewport().get_visible_rect().size * 0.5
 		return Rect2(c + Vector2(-42, -96), Vector2(84, 112)))
@@ -97,17 +101,20 @@ func _build_hud() -> void:
 	var top := PanelContainer.new()
 	top.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	root.add_child(top)
-	var bar := HBoxContainer.new()
+	var bar := HFlowContainer.new()
 	top.add_child(bar)
 	top_label = Label.new()
 	top_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	top_label.text = "西木会馆 LAB"
 	bar.add_child(top_label)
-	for b in [["2D / 3D", _toggle_view], ["虹之间", _open_spaces], ["我的形象", _open_setup], ["新手引导", _open_guide], ["本地数据", _open_data], ["退出", _logout]]:
+	for b in [["2D / 3D", _toggle_view], ["虹之间", _open_spaces], ["我的形象", _open_setup], ["新手引导", _open_guide], ["小游戏", _open_game_corner], ["本地数据", _open_data], ["退出", _logout]]:
 		var btn := Button.new()
 		btn.text = b[0]
 		hud_buttons[b[0]] = btn
 		btn.focus_mode = Control.FOCUS_NONE
+		if DisplayServer.is_touchscreen_available() or OS.has_feature("mobile"):
+			btn.custom_minimum_size.y = 44
 		btn.pressed.connect(b[1])
 		bar.add_child(btn)
 	var left := VBoxContainer.new()
@@ -180,6 +187,7 @@ func toast(text: String, seconds := 3.5) -> void:
 
 func _clear_panels() -> void:
 	for c in panel_holder.get_children():
+		c.hide()
 		c.queue_free()
 
 
@@ -438,6 +446,62 @@ func _open_guide() -> void:
 		_add_button(row, "不需要引导", func(): _clear_panels(); guide.skip(), "GuideSkip")
 
 
+func _open_game_corner() -> void:
+	if not welcomed or activity_layer != null:
+		return
+	_clear_panels()
+	chat_input.release_focus()
+	move_target = null
+	var corner := GameCorner.new()
+	corner.theme = theme
+	corner.can_play = Profile.has_profile()
+	corner.shoot_requested.connect(_open_beach_shoot)
+	corner.closed.connect(_clear_panels)
+	panel_holder.add_child(corner)
+	corner.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	guide.on_event("minigame_opened")
+
+
+func _open_beach_shoot() -> void:
+	if not _begin_activity():
+		return
+	var game = BeachShoot.instantiate()
+	game.theme = theme
+	game.exited.connect(_close_activity)
+	activity_layer.add_child(game)
+
+
+func _begin_activity() -> bool:
+	if activity_layer != null or not welcomed or not Profile.has_profile():
+		return false
+	_clear_panels()
+	chat_input.release_focus()
+	move_target = null
+	world.me["anim"] = "idle"
+	view2d.activate(false)
+	if view3d:
+		view3d.activate(false)
+	hud.hide()
+	guide.hide()
+	activity_layer = CanvasLayer.new()
+	activity_layer.layer = 30
+	add_child(activity_layer)
+	return true
+
+
+func _close_activity() -> void:
+	if activity_layer == null:
+		return
+	var closing := activity_layer
+	activity_layer = null
+	closing.hide()
+	closing.queue_free()
+	move_target = null
+	guide.show()
+	hud.show()
+	_apply_view()
+
+
 func _render_spaces() -> void:
 	var box := _panel("虹之间 · 灵质空间", 600)
 	var l := Label.new()
@@ -490,6 +554,8 @@ func _render_spaces() -> void:
 
 # ------------------------------------------------------------------ messages
 func _on_net_state(state: String, detail: String) -> void:
+	if activity_layer != null and state in ["login", "account_approval", "authenticating", "logging_out", "unauthorized"]:
+		_close_activity()
 	match state:
 		"login":
 			welcomed = false
@@ -628,6 +694,7 @@ func _on_message(m: Dictionary) -> void:
 			if m.get("code") == "access_revoked":
 				toast("空间主人收回了访问权限，你回到了会馆", 5)
 		"kicked":
+			_close_activity()
 			if m.get("reason") == "replaced":
 				status_label.text = "你在另一个窗口进入了会馆，这里已断开"
 				status_label.visible = true
@@ -690,12 +757,16 @@ func _apply_view() -> void:
 
 # ------------------------------------------------------------------ input + prediction
 func _input(event: InputEvent) -> void:
+	if activity_layer != null:
+		return
 	if event is InputEventMouseButton and event.pressed and pending_upload:
 		pending_upload = false
 		_pick_oc(null)
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if activity_layer != null:
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ENTER and not chat_input.has_focus():
 			chat_input.grab_focus()
@@ -715,7 +786,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if Time.get_ticks_msec() / 1000.0 > toast_until:
 		toast_label.text = ""
-	if not welcomed:
+	if not welcomed or activity_layer != null:
 		return
 	_run_auto(delta)
 	var wish := Vector2.ZERO

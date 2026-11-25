@@ -1,0 +1,15 @@
+[
+  {"title":"会馆案头", "entries":[
+    {"key":"cards", "title":"牌桌 · 众生牌录", "hint":"出行与卡牌构筑，沿用网站上的旅途。"},
+    {"key":"slay", "title":"试炼牌桌 · 重生之门", "hint":"打开原来的独立卡牌试炼。"},
+    {"key":"management", "title":"经营台 · 灵境会馆", "hint":"继续建造、研究和远征。"},
+    {"key":"juling", "title":"修炼台 · 聚灵", "hint":"打开原来的聚灵世界，不从 LAB 重开进度。"}
+  ]},
+  {"title":"场馆与图档", "entries":[
+    {"key":"ecology", "title":"观察窗 · 生态进化", "hint":"进入网站生态，不影响 LAB 的联机世界。"},
+    {"key":"softie", "title":"灵体间 · 灵体互动", "hint":"进入独立多人房间；浏览器需要支持 WebGPU。"},
+    {"key":"aeon", "title":"研究台 · AEON", "hint":"在网站观察神经演化文明。"},
+    {"key":"world-map", "title":"地图案 · 罗小黑世界地图", "hint":"用原来的地图查地点和档案。"},
+    {"key":"shengsheng-shoot", "title":"旧试玩 · 省省海滩射击", "hint":"打开网站原版；与 LAB 的本机纪录分开。"}
+  ]}
+]
