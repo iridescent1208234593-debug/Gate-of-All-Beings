@@ -7,7 +7,7 @@
 ## 先从哪里开始
 
 - **想玩或看设定**：在西木会馆可以浏览同人画廊、登记 OC；联机测试请从 LAB 网页进入，开放时间和登录方式以入口提示为准。
-- **想下载原生客户端**：Windows 和 Android 安装包以发布页的正式条目为准。发布页与本仓库的源码进度不同步。会馆账户登录仍在试点准备阶段，不代表已向所有馆友开放。
+- **想下载原生客户端**：Windows 和 Android 安装包以发布页的正式条目为准。发布页与本仓库的源码进度不同步。Windows 会馆账户免码登录已完成单账号线上试点，尚未向全员开放；Android 目前仍使用 LAB 测试码。
 - **想参与共创**：先看 [Issues](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/issues) 里的现有讨论；反馈时带上入口、平台和复现步骤，别贴测试码、凭证或未获授权的资料。开发者可以从 [本地开发指引](docs/development/local-onboarding.md) 和 [文档索引](docs/README.md) 开始。
 
 公开的是项目源码与开发文档；第三方代码、角色设定、插画和音乐各有授权边界，公开可见不等于可以任意转载或再分发。站内不收费、不卖作品、不做广告；自愿赞赏只用于维护，不换取站内权益。
@@ -23,13 +23,13 @@
 
 | 入口 | 内容 |
 | --- | --- |
-| <https://iridescently.xyz/> | 节气 Gallery；Connections 在 `/connections.html` |
-| <https://huiguan.iridescently.xyz/> | 西木会馆 |
-| <https://oc.iridescently.xyz/> | 佳霖馆长设定 |
-| <https://zszm.iridescently.xyz/> | 众生之门网页入口；`/app/shell/m/<key>` 为内部模块 |
-| <https://spirit.iridescently.xyz/games/spirit-playground?room=forest> | 灵体互动 |
+| <https://iridescently.cn/> | 节气 Gallery；Connections 在 `/connections.html` |
+| <https://huiguan.iridescently.cn/> | 西木会馆 |
+| <https://oc.iridescently.cn/> | 佳霖馆长设定 |
+| <https://zszm.iridescently.cn/> | 众生之门网页入口；`/app/shell/m/<key>` 为内部模块 |
+| <https://spirit.iridescently.cn/games/spirit-playground?room=forest> | 灵体互动 |
 
-同一份代码同时接受 `iridescently.xyz`、`iridescently.cn`、`iridescently.dpdns.org` 三个批准根域下的上述子域（集中配置 `packages/site-domains/domains.json`）。每个根域独立登录、Cookie 与 CSP，`.xyz` 继续运行且不强制跳转。DNS、证书与 OAuth 回调的登记状态属于上线批次，见 [domain-readiness](docs/domain-readiness.md)。
+对外请使用 `iridescently.cn`。旧域名的兼容、DNS 与认证配置单独维护，见 [域名就绪记录](docs/domain-readiness.md)。
 
 ## 快速开始
 
@@ -55,7 +55,7 @@ python tools/runtime/local-runtime.py start   # 只在本机回环启动，不�
 
 | 路径 | 模块 | 作用 | 怎么进入 |
 | --- | --- | --- | --- |
-| `apps/www` | 首页与 Gallery | 节气 Gallery 首页、Connections、DAY100／射击试玩 | 线上 `iridescently.xyz` |
+| `apps/www` | 首页与 Gallery | 节气 Gallery 首页、Connections、DAY100／射击试玩 | 线上 `iridescently.cn` |
 | `apps/www/gallery-engine` | Gallery 核心 | 正式 Atmospheric Gallery 引擎；保留上游 Git 来源，根仓库也追踪源码 | 随 `www` 构建 |
 | `apps/huiguan` | 西木会馆 | 会馆、设表、官方／同人档案、海报 | 线上 `huiguan.*` |
 | `apps/oc` | 馆长设定 | 佳霖馆长 OC 设定站 | 线上 `oc.*` |
