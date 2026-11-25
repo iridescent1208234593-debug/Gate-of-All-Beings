@@ -16,12 +16,13 @@ from fastapi.responses import HTMLResponse
 
 from .account_broker import Denied, Grant, LEASE, MAX_PENDING
 from .auth import SESSION_COOKIE
+from .site_domains import LAB_DIRECT_HOST
 
 START = "/account/native/start"
 AVAILABLE = "/api/account/native/available"
 REDEEM = "/api/account/native/redeem"
 LOCAL_PATH = "/lab-account/callback"
-ANDROID_ORIGIN = "https://pc-lab.iridescently.cn"
+ANDROID_ORIGIN = f"https://{LAB_DIRECT_HOST}"
 ANDROID_PATH = "/account/native/android/callback"
 ANDROID_METHOD = "android_app_link"
 ANDROID_ASSETLINKS = "/.well-known/assetlinks.json"
