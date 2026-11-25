@@ -42,6 +42,7 @@ class Pending:
     intent: str
     legacy: LegacyClaim | None
     until: float
+    native_target: object = None
 
 
 def opaque(value):
@@ -71,6 +72,11 @@ def install(app, lab, broker):
     redirect = origin + CALLBACK
     pending = {}
     upstream_limit = asyncio.Semaphore(8)
+    native = None
+    if lab.cfg.account_direct_native_enabled is True:
+        from .account_direct_native import Native
+        native = Native(lab, broker)
+        native.install(app)
 
     def correct_host(request):
         return lab.secure(request.headers)
@@ -100,7 +106,14 @@ def install(app, lab, broker):
             body = await bounded_json(request)
         except ValueError:
             return response(400, error="invalid_request")
-        if set(body) != {"intent"} or body["intent"] not in ("login", "restore"):
+        native_target = None
+        if set(body) == {"intent", "native"} and body["intent"] == "login" and native and native.secure(request):
+            from .account_direct_native import target
+            try:
+                native_target = target(body["native"], android=native.android(request))
+            except ValueError:
+                return response(400, error="invalid_request")
+        elif set(body) != {"intent"} or body["intent"] not in ("login", "restore"):
             return response(400, error="invalid_request")
         old = request.cookies.get(SESSION_COOKIE)
         legacy = broker.prepare_legacy_claim(old)
@@ -130,7 +143,7 @@ def install(app, lab, broker):
         previous_tx = request.cookies.get(TX_COOKIE)
         if opaque(previous_tx):
             pending.pop(lab.auth.token_digest(previous_tx), None)
-        pending[lab.auth.token_digest(tx)] = Pending(rid, state, verifier, intent, legacy, time.monotonic() + ttl)
+        pending[lab.auth.token_digest(tx)] = Pending(rid, state, verifier, intent, legacy, time.monotonic() + ttl, native_target)
         out = response(200, authorization_url=broker.issuer + ISSUER_APPROVAL + "?" + urlencode({"request_id": rid}))
         out.set_cookie(TX_COOKIE, tx, max_age=ttl, secure=True, httponly=True, samesite="lax", path="/")
         return out
@@ -179,6 +192,13 @@ def install(app, lab, broker):
             valid_grant = (subject, grant)
             if out.get("intent") != attempt.intent:
                 raise Denied
+            if attempt.native_target is not None:
+                if not native or not native.secure(request):
+                    raise Denied
+                callback = native.issue(attempt.native_target, subject, grant, valid_for)
+                result = response(200, native_callback=callback)
+                result.delete_cookie(TX_COOKIE, secure=True, httponly=True, samesite="lax", path="/")
+                return result
             if attempt.intent == "restore":
                 token, digest = broker.finish_legacy_claim(subject, attempt.legacy, old, restore_confirmed=True)
             else:

@@ -1,30 +1,35 @@
-# 众生之门 · Gate of All Beings
+# 众生之门—西木会馆 · Gate of All Beings
 
-> 罗小黑主题的站点群与八个游戏模块，共用一个仓库：一套账户与存档边界、一条发布流水线、三个批准根域。
+《众生之门—西木会馆》是一个以《罗小黑战记》为灵感的非官方同人共创项目。你可以带自己的原创角色（OC）来到西木会馆，在同人画廊分享设定，也可以在联机 LAB 和其他馆友一起生活、探索、布置灵质空间。
 
-主仓库为 private：`iridescent1208234593-debug/Gate-of-All-Beings` ｜ 文档索引：[docs/README.md](docs/README.md)
+[西木会馆](https://huiguan.iridescently.cn/) · [联机测试 LAB](https://pc-lab.iridescently.cn/) · [Windows / Android 发布页](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings-Public-public/releases) · [问题反馈](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/issues)
 
-## 这是什么
+## 先从哪里开始
 
-这个仓库不是单一游戏，而是一个**多站点工作区**：
+- **想玩或看设定**：在西木会馆可以浏览同人画廊、登记 OC；联机测试请从 LAB 网页进入，开放时间和登录方式以入口提示为准。
+- **想下载原生客户端**：Windows 和 Android 安装包以发布页的正式条目为准。发布页与本仓库的源码进度不同步。Windows 会馆账户免码登录已完成单账号线上试点，尚未向全员开放；Android 目前仍使用 LAB 测试码。
+- **想参与共创**：先看 [Issues](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/issues) 里的现有讨论；反馈时带上入口、平台和复现步骤，别贴测试码、凭证或未获授权的资料。开发者可以从 [本地开发指引](docs/development/local-onboarding.md) 和 [文档索引](docs/README.md) 开始。
 
-- **站点**：节气 Gallery 首页、西木会馆角色档案、佳霖馆长设定（`apps/www`、`apps/huiguan`、`apps/oc`）
-- **游戏**：八个模块 —— 众生之门本体（卡牌历练）、经营、生态、聚灵、AEON、世界地图、Slay、灵体互动
-- **共通层**：统一入口与 SSO（`services/platform`）、跨站共享的 UI／账户／存档／领域映射（`packages`）、构建发布与本机运行（`tools`）、入口生成物（`infra`）
+公开的是项目源码与开发文档；第三方代码、角色设定、插画和音乐各有授权边界，公开可见不等于可以任意转载或再分发。站内不收费、不卖作品、不做广告；自愿赞赏只用于维护，不换取站内权益。
 
-同一份代码与构建产物同时服务多个根域，但**每个根域独立登录、Cookie 与 CSP**；游戏模块挂载在同一个壳里，不是若干独立网站拼接而成。
+## 仓库里有什么
+
+- **联机游戏 LAB V2**（`apps/huiguan-lab`）：Godot 客户端与联机网关。2D 和 3D 是同一联机世界的两种视图，玩家可以用 OC 交流、互动，并使用「虹之间」邀请他人进入私人灵质空间。测试入口由独立 LAB 环境提供，不等同于正式站。
+- **站点与角色档案**（`apps/huiguan`、`apps/www`、`apps/oc`）：会馆账号、OC 设表、同人画廊、项目首页与馆长设定等。
+- **网页玩法**：卡牌历练、经营、生态、聚灵、AEON、世界地图、Slay、灵体互动等，由网页模块壳接入；它们不等同于 LAB 联机游戏本体。
+- **共通层**：平台服务（`services/platform`）、共享组件（`packages`）、构建与本机运行工具（`tools`）、入口配置（`infra`）。
 
 ## 在线入口
 
 | 入口 | 内容 |
 | --- | --- |
-| <https://iridescently.xyz/> | 节气 Gallery；Connections 在 `/connections.html` |
-| <https://huiguan.iridescently.xyz/> | 西木会馆 |
-| <https://oc.iridescently.xyz/> | 佳霖馆长设定 |
-| <https://zszm.iridescently.xyz/> | 众生之门本体；`/app/shell/m/<key>` 为内部模块 |
-| <https://spirit.iridescently.xyz/games/spirit-playground?room=forest> | 灵体互动 |
+| <https://iridescently.cn/> | 节气 Gallery；Connections 在 `/connections.html` |
+| <https://huiguan.iridescently.cn/> | 西木会馆 |
+| <https://oc.iridescently.cn/> | 佳霖馆长设定 |
+| <https://zszm.iridescently.cn/> | 众生之门网页入口；`/app/shell/m/<key>` 为内部模块 |
+| <https://spirit.iridescently.cn/games/spirit-playground?room=forest> | 灵体互动 |
 
-同一份代码同时接受 `iridescently.xyz`、`iridescently.cn`、`iridescently.dpdns.org` 三个批准根域下的上述子域（集中配置 `packages/site-domains/domains.json`）。每个根域独立登录、Cookie 与 CSP，`.xyz` 继续运行且不强制跳转。DNS、证书与 OAuth 回调的登记状态属于上线批次，见 [domain-readiness](docs/domain-readiness.md)。
+对外请使用 `iridescently.cn`。旧域名的兼容、DNS 与认证配置单独维护，见 [域名就绪记录](docs/domain-readiness.md)。
 
 ## 快速开始
 
@@ -50,11 +55,12 @@ python tools/runtime/local-runtime.py start   # 只在本机回环启动，不�
 
 | 路径 | 模块 | 作用 | 怎么进入 |
 | --- | --- | --- | --- |
-| `apps/www` | 首页与 Gallery | 节气 Gallery 首页、Connections、DAY100／射击试玩 | 线上 `iridescently.xyz` |
+| `apps/www` | 首页与 Gallery | 节气 Gallery 首页、Connections、DAY100／射击试玩 | 线上 `iridescently.cn` |
 | `apps/www/gallery-engine` | Gallery 核心 | 正式 Atmospheric Gallery 引擎；保留上游 Git 来源，根仓库也追踪源码 | 随 `www` 构建 |
 | `apps/huiguan` | 西木会馆 | 会馆、设表、官方／同人档案、海报 | 线上 `huiguan.*` |
 | `apps/oc` | 馆长设定 | 佳霖馆长 OC 设定站 | 线上 `oc.*` |
-| `apps/cards` | 众生之门 | 3D 门景开场、统一门庭、卡牌历练 | 线上 `zszm.*`；新版流程目前仅本地候选 |
+| `apps/huiguan-lab` | 众生之门 LAB V2 | 联机游戏本体，2D / 3D、OC、聊天和虹之间 | [LAB 测试入口](https://pc-lab.iridescently.cn/) |
+| `apps/cards` | 众生之门网页卡牌历练 | 门景开场、门庭、卡牌历练 | 线上 `zszm.*`，以实际入口为准 |
 | `apps/management` | 灵境会馆 | 灵质空间经营模拟（M0 骨架 / M1 Demo / M2 种植 / M3 时代跃迁） | 本地 `npm run dev` |
 | `apps/ecology` | 生态模拟 | Three.js 生态世界，可编辑环境与生命 | 本地 `npm run dev` |
 | `apps/juling` | 聚灵 | 文字修仙：物质灵／生灵双线成长、化形、轮回 | 本地 `npm start` |
@@ -171,9 +177,9 @@ python tools/runtime/local-runtime.py start   # 只在本机回环启动，不�
 
 ## 当前状态
 
-众生之门最新源码集成：正式门景 → 玩家初始化 → 统一门庭；原型浅滩独立为模式，成熟玩法保留原引擎和存档。开场新增可记忆的配乐选择与静音控制，配乐从开场延续到门庭。**此轮仅本地工作源码，未发布。**
+联机 LAB 是游戏本体的测试线；网页卡牌历练和其他模块保留各自玩法。GitHub 默认分支代表源码进度，不代表某个功能已部署、开放或打包。原生客户端以发布条目为准，联机与账户接入以 LAB 实际开放状态为准。
 
-## 路线图
+## 网页玩法路线图
 
 - [x] 八个游戏模块接入统一入口与统一壳
 - [x] 众生牌录三模式：同行者出行、重生之门、灵质回路
