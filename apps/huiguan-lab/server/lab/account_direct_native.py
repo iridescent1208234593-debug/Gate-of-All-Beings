@@ -1,4 +1,4 @@
-"""Same-device Windows LAB transfer; never exposes a remote polling result."""
+"""Same-device Windows and Android LAB account transfer."""
 from __future__ import annotations
 
 import base64
@@ -16,13 +16,14 @@ from fastapi.responses import HTMLResponse
 
 from .account_broker import Denied, Grant, LEASE, MAX_PENDING
 from .auth import SESSION_COOKIE
+from .site_domains import LAB_DIRECT_HOST
 
 START = "/account/native/start"
 AVAILABLE = "/api/account/native/available"
 REDEEM = "/api/account/native/redeem"
 LOCAL_PATH = "/lab-account/callback"
-ANDROID_ORIGIN = "https://pc-lab.iridescently.cn"
 ANDROID_PATH = "/account/native/android/callback"
+ANDROID_CALLBACK = f"https://{LAB_DIRECT_HOST}{ANDROID_PATH}"
 ANDROID_METHOD = "android_app_link"
 ANDROID_ASSETLINKS = "/.well-known/assetlinks.json"
 ANDROID_PACKAGE = "cn.iridescently.huiguan.lab.public"
@@ -97,7 +98,7 @@ class Native:
 
     def android(self, request):
         return (self.secure(request) and self.lab.cfg.account_direct_native_android_enabled is True
-                and f"https://{self.lab.cfg.public_host}" == ANDROID_ORIGIN
+                and self.lab.cfg.public_host == LAB_DIRECT_HOST
                 and request.headers.getlist("host") == [self.lab.cfg.public_host])
 
     def prune(self):
@@ -114,7 +115,7 @@ class Native:
         code = secrets.token_urlsafe(32)
         self.transfers[self.lab.auth.token_digest(code)] = Transfer(target, subject, grant,
             now + min(lease, LEASE), now + min(lease, TRANSFER_SECONDS))
-        callback = f"http://127.0.0.1:{target.port}{LOCAL_PATH}" if target.port is not None else ANDROID_ORIGIN + ANDROID_PATH
+        callback = f"http://127.0.0.1:{target.port}{LOCAL_PATH}" if target.port is not None else ANDROID_CALLBACK
         return callback + ("?" if target.port is not None else "#") + urlencode({"code":code, "state":target.state})
 
     async def exchange(self, body):

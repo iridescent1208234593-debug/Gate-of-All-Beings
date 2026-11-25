@@ -35,6 +35,7 @@ from . import config as config_mod
 from .auth import SESSION_COOKIE, Auth, load_pepper
 from .oc import OCCache, OCRejected, sniff
 from .r4bridge import R4Bridge
+from .site_domains import LAB_DIRECT_HOST
 from .store import Store
 from .world import Hub, clean_text
 
@@ -248,7 +249,7 @@ def create_app(lab: Lab) -> FastAPI:
                    and lab.account is not None and lab.secure(request.headers) and request.url.scheme == "https")
         methods = ["windows_loopback"] if enabled else []
         if (enabled and cfg.account_direct_native_android_enabled is True
-                and cfg.public_host == "pc-lab.iridescently.cn"
+                and cfg.public_host == LAB_DIRECT_HOST
                 and request.headers.getlist("host") == [cfg.public_host]):
             methods.append("android_app_link")
         return JSONResponse({"enabled": enabled, "methods": methods},

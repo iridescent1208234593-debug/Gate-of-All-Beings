@@ -13,11 +13,12 @@
 | `services` | 服务 → 子域前缀（`main` 为根域本身） |
 | `legacy` | 旧子域在**同一根域**内的跳转目标路径 |
 | `oauth` | 每个 OAuth 服务的回调路径与已在外部提供方登记的根域 |
+| `labDirect` | 会馆与独立 LAB 直接登录登记的精确主机和网页回调路径 |
 | `previewHosts` | PC 预览主机，只用于浏览器返回地址校验和本地 Vite；生产入口不接受 |
 | `assetHost` | R2 自定义域名（当前仅 `assets.iridescently.xyz`），不是应用入口主机 |
 | `localPorts` | development / test 下允许的本机 Origin 端口 |
 
-消费方：`services/platform/site_domains.py`（Python 入口、Cookie、SSO、OAuth、CSP、CORS）、`packages/site-domains/index.js`（由 `tools/domains/generate-domain-config.py` 生成，浏览器与 Node 共用；`--check` 检查是否过期）和 `packages/site-domains/index.mjs`。部署时可用以下环境变量收窄或选择，但不能引入未批准的根域：
+消费方：`services/platform/site_domains.py`（Python 入口、Cookie、SSO、OAuth、CSP、CORS）、`packages/site-domains/index.js`（由 `tools/domains/generate-domain-config.py` 生成，浏览器与 Node 共用；`--check` 检查是否过期）和 `packages/site-domains/index.mjs`。独立 LAB 使用同一工具生成的 `lab/site_domains.py`，网关只在 Android 返回链接可用时向回调页提供固定地址。部署时可用以下环境变量收窄或选择，但不能引入未批准的根域：
 
 - `SITE_DOMAIN`：该部署的首选根域，必须在批准列表内。
 - `IRIDESCENTLY_ALLOWED_DOMAINS`：逗号分隔，限定本部署接受的根域子集（须唯一并包含 `SITE_DOMAIN`）。

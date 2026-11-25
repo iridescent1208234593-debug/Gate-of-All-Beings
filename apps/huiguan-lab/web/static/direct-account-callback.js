@@ -22,9 +22,10 @@
         const result = await response.json();
         if (typeof result.native_callback === "string") {
             const native = new URL(result.native_callback);
-            if (native.origin === "https://pc-lab.iridescently.cn" && native.origin === location.origin &&
-                native.pathname === "/account/native/android/callback" && !native.search &&
-                !native.username && !native.password) {
+            // The gateway supplies the approved callback independently of the response URL.
+            if (native.protocol === "https:" && native.origin === location.origin &&
+                native.origin + native.pathname === status.dataset.androidCallback &&
+                !native.search && !native.username && !native.password) {
                 const grant = "[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]";
                 if (!new RegExp("^#code=" + grant + "&state=" + grant + "$").test(native.hash))
                     throw new Error("unexpected_result");

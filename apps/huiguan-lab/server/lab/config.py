@@ -10,6 +10,8 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .site_domains import LAB_DIRECT_HOST
+
 SOURCE_ROOT = Path(__file__).resolve().parents[2]          # labs/zszm-lab-v2
 VERSION = "lab-v2.0.0"
 
@@ -23,7 +25,7 @@ def _workspace_root(start: Path) -> Path | None:
 
 @dataclass
 class Config:
-    public_host: str = "pc-lab.iridescently.cn"
+    public_host: str = LAB_DIRECT_HOST
     bind: str = "127.0.0.1"
     port: int = 18300            # public game gateway (the only port the LAB tunnel reaches)
     admin_port: int = 18302      # admin console, loopback only, never routed by the tunnel
@@ -103,7 +105,7 @@ def load(path: str | os.PathLike | None = None) -> Config:
     if type(cfg.account_direct_native_android_enabled) is not bool:
         raise ValueError("account_direct_native_android_enabled must be a boolean")
     if cfg.account_direct_native_android_enabled and (
-        not cfg.account_direct_native_enabled or cfg.public_host != "pc-lab.iridescently.cn"
+        not cfg.account_direct_native_enabled or cfg.public_host != LAB_DIRECT_HOST
     ):
         raise ValueError("Android app links need native login and the approved LAB host")
     if type(cfg.account_direct_web_enabled) is not bool:
