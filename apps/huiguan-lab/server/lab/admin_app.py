@@ -16,6 +16,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 
 from . import config as config_mod
+from . import art
+from .oc import OCRejected
 from .auth import ADMIN_COOKIE, PlayerTestCodesClosed, RateLimiter, check_admin_password
 from .metrics import process_metrics, system_metrics
 
@@ -66,7 +68,7 @@ def create_admin_app(lab, supervisor_status=None) -> FastAPI:
 
     @app.get("/static/{name}")
     async def page_static(name: str):
-        if name not in ("admin.js", "lab.css"):
+        if name not in ("admin.js", "art.js", "lab.css"):
             return Response(status_code=404)
         return FileResponse(config_mod.SOURCE_ROOT / "web" / "static" / name,
                             media_type="text/javascript" if name.endswith(".js") else "text/css")
@@ -170,7 +172,7 @@ def create_admin_app(lab, supervisor_status=None) -> FastAPI:
         row = lab.hub.space_row(space)
         if not row:
             return JSONResponse({"error": "no_space"}, status_code=404)
-        branch = "public" if row["kind"] == "public" else row["r4_branch"]
+        branch = lab.hub.r4_branch(space)
         return {"space": dict(row), "objects": lab.hub.objects_state(space), "npcs": lab.hub.npcs(space),
                 "clock": lab.hub.clock(space), "r4_branch": lab.r4.branch(branch),
                 "players": [lab.hub.player_view(c) for c in lab.hub.members(space)]}
@@ -184,15 +186,17 @@ def create_admin_app(lab, supervisor_status=None) -> FastAPI:
             return JSONResponse({"error": "no_space"}, status_code=404)
         if row["kind"] == "public" and action in ("pause", "resume", "advance") and body.get("confirm") != sid:
             return JSONResponse({"error": "confirm_required", "hint": f"send confirm='{sid}' to act on the public world"}, status_code=409)
-        branch = "public" if row["kind"] == "public" else row["r4_branch"]
+        branch = lab.hub.r4_branch(sid)
         try:
             if action == "pause":
                 lab.hub.paused_spaces.add(sid)
+                lab.hub.pause_entity_growth(sid, True)
                 lab.store.exec("UPDATE spaces SET paused=1 WHERE id=?", (sid,))
                 if branch:
                     await lab.r4.set_schedule(branch, False)
             elif action == "resume":
                 lab.hub.paused_spaces.discard(sid)
+                lab.hub.pause_entity_growth(sid, False)
                 lab.store.exec("UPDATE spaces SET paused=0 WHERE id=?", (sid,))
                 if branch:
                     await lab.r4.set_schedule(branch, True)
@@ -226,7 +230,73 @@ def create_admin_app(lab, supervisor_status=None) -> FastAPI:
         audit("player.kick", pid)
         return {"ok": True}
 
+    # -- skill tree (server/lab/skills.py) ------------------------------------------------
+    @app.post("/admin/api/skills/{pid}")
+    async def skills_grant(pid: str, request: Request):
+        """body: {"points": n, "unlock_all": bool, "reset": bool}; pid "*" = everyone online."""
+        body = await request.json()
+        targets = list(lab.hub.conns) if pid == "*" else [pid]
+        if pid != "*" and not lab.store.one("SELECT 1 FROM players WHERE pid=?", (pid,)):
+            return JSONResponse({"error": "unknown_player"}, status_code=404)
+        out = {}
+        for p in targets:
+            out[p] = lab.skills.grant(p, int(body.get("points", 0)), bool(body.get("unlock_all")), bool(body.get("reset")))
+            c = lab.hub.conns.get(p)
+            if c:
+                lab.hub.send(c, out[p])
+        audit("skills.grant", pid, body=body)
+        return {"ok": True, "players": out}
+
     # -- art review ---------------------------------------------------------------------
+    @app.get('/admin/api/catalog')
+    async def art_catalog():
+        return {'assets': art.catalog(lab.store)}
+
+    @app.get('/admin/api/builtin/{aid}.png')
+    async def builtin_art(aid: str):
+        entry = next((a for a in art.catalog(lab.store) if a['id'] == aid and a.get('path')), None)
+        if not entry:
+            return Response(status_code=404)
+        return FileResponse(config_mod.SOURCE_ROOT / 'client' / entry['path'].removeprefix('res://'), media_type='image/png')
+
+    @app.get('/admin/api/backdrop/{sid}.png')
+    async def backdrop(sid: str):
+        path = lab.hub.geometry(sid).t.get('painted_ground')
+        if not path:
+            return Response(status_code=404)
+        return FileResponse(config_mod.SOURCE_ROOT / 'client' / path.removeprefix('res://'), media_type='image/png')
+
+    @app.get('/admin/api/geometry/{sid}')
+    async def geometry(sid: str):
+        return lab.hub.geometry(sid).t
+
+    @app.post('/admin/api/art/upload')
+    async def art_upload(request: Request):
+        try:
+            return await art.upload(request, lab, 'admin')
+        except OCRejected as error:
+            return JSONResponse({'error': str(error)}, status_code=413 if str(error) == 'too_large' else 400)
+
+    @app.get('/admin/api/entities')
+    async def entities(space: str = 'hall'):
+        return {'entities': [n for n in lab.hub.entities.values() if n['space'] == space],
+                'r4': [n for n in lab.hub.npcs(space) if n['source'] == 'r4']}
+
+    @app.post('/admin/api/entities/{sid}')
+    async def entity_edit(sid: str, request: Request):
+        body = await request.json()
+        try:
+            eid = body.get('id')
+            if body.get('delete'):
+                lab.hub.delete_entity(sid, eid)
+                audit('entity.delete', eid, space=sid)
+                return {'ok': True}
+            n = lab.hub.edit_entity(sid, body, eid)
+            audit('entity.edit' if eid else 'entity.create', n['id'], space=sid)
+            return {'ok': True, 'entity': n}
+        except (ValueError, TypeError) as error:
+            return JSONResponse({'error': str(error)}, status_code=400)
+
     @app.get("/admin/api/art")
     async def art_list():
         return {"assets": [dict(r) for r in lab.store.all("SELECT * FROM art_assets ORDER BY created_at DESC LIMIT 200")]}

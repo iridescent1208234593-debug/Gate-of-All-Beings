@@ -1,0 +1,21 @@
+{
+  "schema": "zszm-lab-werewolf/1",
+  "_comment": "调参用：roles 从前往后发牌，人数多于 roles 时用 filler_role 补齐；seconds 为各阶段秒数；rules 见 server/lab/werewolf.py 顶部说明。",
+  "min_players": 6,
+  "max_players": 10,
+  "roles": ["werewolf", "werewolf", "seer", "witch", "hunter", "guard", "villager", "villager"],
+  "filler_role": "villager",
+  "seconds": {
+    "lobby": 900.0,
+    "night": 45.0,
+    "speak": 25.0,
+    "vote": 30.0,
+    "hunter": 20.0,
+    "over": 120.0
+  },
+  "rules": {
+    "witch_self_save": false,
+    "guard_repeat": true,
+    "log_limit": 40
+  }
+}

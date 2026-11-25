@@ -1,0 +1,11 @@
+{
+  "id": "tic-tac-toe",
+  "title": "井字棋",
+  "description": "在九宫格里轮流落子，率先横、竖或斜连三格获胜。",
+  "columns": 3,
+  "rows": 3,
+  "line": 3,
+  "gravity": false,
+  "style": "marks",
+  "sides": ["叉", "圈"]
+}

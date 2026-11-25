@@ -1,0 +1,11 @@
+{
+  "id": "connect-four",
+  "title": "四子棋",
+  "description": "选一列投下棋子，棋子落到最低的空位。率先连成四子获胜。",
+  "columns": 7,
+  "rows": 6,
+  "line": 4,
+  "gravity": true,
+  "style": "discs",
+  "sides": ["红棋", "黄棋"]
+}

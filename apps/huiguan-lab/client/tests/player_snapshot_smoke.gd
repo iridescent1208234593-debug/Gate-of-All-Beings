@@ -1,4 +1,5 @@
 extends SceneTree
+const OLD = preload("res://tests/player_snapshot_old_replay.gd")
 const NEW = preload("res://scripts/lab_world.gd")
 const FRAME := 1.0 / 60.0
 
@@ -36,10 +37,11 @@ func run(script: Script, timed: bool, batch: bool) -> Dictionary:
 	return {"stationary_frames": stopped, "max_step_m": max_step, "progress_m": sum}
 
 func _initialize() -> void:
-	var old_batch := run(NEW,false,true)
+	var old_batch := run(OLD,true,true)
 	var new_batch := run(NEW,true,true)
+	var old_clean := run(OLD,false,false)
 	var legacy_clean := run(NEW,false,false)
 	var new_clean := run(NEW,true,false)
-	print(JSON.stringify({"baseline_batch":old_batch,"fixed_batch":new_batch,"legacy_clean":legacy_clean,"fixed_clean":new_clean}))
-	var ok: bool = old_batch.stationary_frames > 10 and old_batch.max_step_m > 0.17 and new_batch.stationary_frames == 0 and new_batch.max_step_m < 0.06 and legacy_clean.stationary_frames == 0 and new_clean.stationary_frames == 0 and new_batch.progress_m > 10
+	print(JSON.stringify({"baseline_batch":old_batch,"fixed_batch":new_batch,"baseline_clean":old_clean,"legacy_clean":legacy_clean,"fixed_clean":new_clean}))
+	var ok: bool = old_batch.stationary_frames > 10 and old_batch.max_step_m > 0.17 and new_batch.stationary_frames == 0 and new_batch.max_step_m < 0.06 and legacy_clean == old_clean and new_clean.stationary_frames == 0 and new_batch.progress_m > 10
 	quit(0 if ok else 1)

@@ -1,0 +1,9 @@
+{
+  "id": "night-watch",
+  "title": "夜巡疑云",
+  "description": "4 至 8 人推理。巡夜人点亮信标，隐灯客暗中熄灯。到棋亭召集会议，讨论并投票。",
+  "mode": "field",
+  "min_players": 4,
+  "max_players": 8,
+  "seconds": 180
+}

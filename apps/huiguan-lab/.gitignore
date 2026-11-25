@@ -6,3 +6,4 @@ build/
 client/.godot/
 lab.config.json
 scratch-import.*
+/client/android/

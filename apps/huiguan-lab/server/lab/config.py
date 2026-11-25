@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 SOURCE_ROOT = Path(__file__).resolve().parents[2]          # labs/zszm-lab-v2
-VERSION = "lab-v2.0.0"
+VERSION = "lab-v2.2.1"
 
 
 def _workspace_root(start: Path) -> Path | None:
@@ -32,8 +32,9 @@ class Config:
     secrets: Path = field(default_factory=lambda: (_workspace_root(SOURCE_ROOT) or SOURCE_ROOT.parent) / "secrets" / "lab-v2")
     session_days: int = 7
     player_test_codes_enabled: bool = True
-    oc_max_bytes: int = 5 * 1024 * 1024
-    oc_max_side: int = 2048
+    oc_max_bytes: int = 8 * 1024 * 1024
+    oc_max_side: int = 4096
+    art_max_bytes: int = 8 * 1024 * 1024
     oc_display_side: int = 512
     oc_cache_budget_bytes: int = 256 * 1024 * 1024
     oc_ttl_seconds: int = 6 * 3600
@@ -51,6 +52,7 @@ class Config:
     tunnel_enabled: bool = True
     r4_interval_seconds: int = 60
     extra_origins: list[str] = field(default_factory=list)
+    web_build: Path | None = None
 
     @property
     def data_dir(self) -> Path: return self.runtime / "data"
@@ -65,7 +67,7 @@ class Config:
     @property
     def r4_dir(self) -> Path: return self.runtime / "r4"
     @property
-    def web_dir(self) -> Path: return SOURCE_ROOT / "build" / "web"
+    def web_dir(self) -> Path: return self.web_build or SOURCE_ROOT / "build" / "web"
     @property
     def db_path(self) -> Path: return self.data_dir / "lab.sqlite"
 
@@ -93,7 +95,7 @@ def load(path: str | os.PathLike | None = None) -> Config:
                 continue
             if not hasattr(cfg, key):
                 raise ValueError(f"unknown config key {key}")
-            if key in ("runtime", "secrets", "r4_python", "r4_service_dir"):
+            if key in ("runtime", "secrets", "r4_python", "r4_service_dir", "web_build") and value is not None:
                 value = (p.parent / value).resolve() if not Path(value).is_absolute() else Path(value)
             setattr(cfg, key, value)
     if type(cfg.account_direct_native_enabled) is not bool:

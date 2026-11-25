@@ -4,12 +4,18 @@
 <title>LAB 美术测试素材</title><link rel="stylesheet" href="/static/lab.css"></head>
 <body class="console">
 <h1>美术测试素材上传</h1>
-<p>上传 PNG 或 WebP（≤10 MB，边长 ≤4096）。素材先进入待审核区，管理员通过后才会出现在共享测试资源里。原始协作文件请继续保存在素材库，这里只放测试用副本。</p>
+<p>上传 PNG、JPG 或 WebP（最多 8 MB，边长 ≤4096），也可以直接在下面画。上传后即可用于 LAB，管理员可调整或移除。原始协作文件请继续保存在素材库，这里保留测试用副本。</p>
 <p>
-  <select id="cat"><option value="tree">树木</option><option value="bridge">桥梁</option><option value="ground">地表</option><option value="building">建筑</option><option value="character">角色贴图</option><option value="prop">道具</option><option value="other">其他</option></select>
-  <input id="file" type="file" accept="image/png,image/webp"> <button id="up">上传</button> <span id="msg"></span>
+  <select id="cat"><option value="creature">生物</option><option value="plant">植物</option><option value="tree">树木</option><option value="bridge">桥梁</option><option value="ground">地表</option><option value="building">建筑</option><option value="character">角色贴图</option><option value="prop">道具</option><option value="other">其他</option></select>
+  <input id="file" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp"> <button id="up">上传</button> <span id="msg" role="status"></span>
 </p>
+<p><label><input id="placeNow" type="checkbox" checked>上传后立即放入世界</label>
+<select id="space"><option value="hall">西木会馆（含玩家初始场）</option></select>
+<label>高度（米）<input id="height" type="number" value="1.2" min="0.1" max="12" step="0.1" style="width:70px"></label></p>
+<p><input id="ink" type="color" value="#344c35" aria-label="画笔颜色"> <label>笔宽 <input id="brush" type="range" min="1" max="60" value="8"></label>
+<label><input id="eraser" type="checkbox">橡皮</label> <button id="clearDrawing">清空画布</button> <button id="uploadDrawing">上传画布</button></p>
+<canvas id="drawing" width="640" height="480" style="max-width:100%;touch-action:none;background:repeating-conic-gradient(#d5ddd0 0% 25%,#f2f5ee 0% 50%) 0/20px 20px;border:1px solid #9cac8c"></canvas>
 <h2>已通过的共享测试素材</h2>
 <div id="list" class="grid"></div>
-<script src="/static/art.js"></script>
+<script src="/static/art.js?v=2.2.0"></script>
 </body></html>

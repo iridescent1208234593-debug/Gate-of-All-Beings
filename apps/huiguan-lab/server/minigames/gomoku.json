@@ -1,0 +1,11 @@
+{
+  "id": "gomoku",
+  "title": "五子棋",
+  "description": "15 × 15 棋盘，先连成五子或以上的一方获胜。自由规则，无禁手。",
+  "columns": 15,
+  "rows": 15,
+  "line": 5,
+  "gravity": false,
+  "style": "intersections",
+  "sides": ["黑棋", "白棋"]
+}

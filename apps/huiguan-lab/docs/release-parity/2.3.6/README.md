@@ -1,17 +1,7 @@
-# LAB 2.3.6 runtime parity
+# LAB 2.3.6 source reconciliation
 
-The public 2.3.6 build (build 7) was cut from the newer LAB runtime, not the legacy LAB source currently tracked on master. Do not ship a public build from master until the baseline is reconciled. No live configuration, save data, credentials or binaries are needed for source reconciliation.
+The client, hall geometry, multiplayer timestamp and action/skill feedback are restored from the artifacts used to build public 2.3.6 (build 7). The gateway is reconciled against the live bridge and timestamp update. Existing tracked Hall login, direct native session handling, admission and their tests are retained. No state, full installation packages, tool caches, local signing configuration or private keys are tracked.
 
-This PR backports the compatible snapshot protocol and interpolation to the tracked client and gateway. The optional timestamp leaves the old position row and local-player authority unchanged; the client still accepts older packets without a timestamp.
+The source includes rendered gameplay assets and the runtime MIT skill FX pack with its license. Tool and map authoring experiments are not required. Android requires the matching official Godot 4.7.2 Android build template; apply the checked-in overlay before exporting. Store the release signing key separately. The Web export uses the existing authenticated bridge file. The team bamboo source model and texture are not added to the public source tree without confirmed redistribution rights; the same licensed Kenney fallback used by low-detail mode covers this optional prop on a clean checkout. This does not change play or collision.
 
-The two source patches in this directory are **release-parity inputs, not patches to apply blindly to master**:
-
-- bridge-fix.patch: authoritative east bridge geometry, preserving old clients and keeping water impassable. It needs the newer hall geometry and matching client take for 2D, 3D and the east_bank hello capability. The legacy hall currently has different coordinates.
-- native-feedback-and-snapshot.patch: immediate action or skill confirmation, distinct effect download feedback, and native snapshot interpolation. It needs the newer action and skill client, including skills.gd and its server contract. Master does not currently have those skill modules.
-
-Reconcile the newer baseline separately. Reapply the related behavior only where absent, verify the exact geometry of the package and gateway, then test bridge crossing both ways, old-client reconnect, off-bridge water, two-player snapshot fallback, action/skill acceptance, rejection, timeout and effect loading before a public build. Do not wholesale overwrite master with the runtime folder.
-
-Run the tests added by this PR:
-
-- Gateway: pytest on server/tests/test_snapshot_stamp.py.
-- Client: Godot headless with the client project path and --script res://tests/player_snapshot_smoke.gd.
+Before creating a new public release, run the gateway auth, queue, skill, bridge and movement tests and the Godot snapshot and pending-feedback smokes. Reuse the server JSON geometry in the client rather than maintaining a separate collision table. Keep released build numbers monotonic; do not replace source under an existing release tag.

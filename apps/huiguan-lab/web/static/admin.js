@@ -44,11 +44,128 @@
   };
   window.kick = async (pid) => { if (confirm("断开该玩家？")) { await post(`/admin/api/kick/${pid}`); refresh(); } };
   window.art = async (id, d) => { await post(`/admin/api/art/${id}/${d}`); refresh(); };
+  window.skills = async (pid, what) => {
+    const body = what === "all" ? { unlock_all: true } : what === "reset" ? { reset: true } : { points: +(prompt("发放多少技能点", "10") || 0) };
+    if (what === "reset" && !confirm("重置该玩家的技能树？")) return;
+    try { await post(`/admin/api/skills/${pid}`, body); } catch (e) { alert(e.message); }
+  };
+
+  let entityRows = [], entityCatalog = [], geometry = null, backdrop = null;
+  const entityFields = {species:'entityName', kind:'entityKind', asset:'entityAsset', x:'entityX', z:'entityZ',
+    height:'entityHeight', behavior:'entityBehavior', speed:'entitySpeed', stage:'entityStage', grow_seconds:'entityGrow'};
+  function fillEntity(n) {
+    $("entityId").value = n.id || "";
+    for (const [key, id] of Object.entries(entityFields)) if (n[key] !== undefined) $(id).value = n[key];
+    $("entityVisible").checked = n.visible !== false;
+    $("entityMsg").textContent = n.id ? "正在编辑 " + n.species : "新对象：点选位置后保存";
+    drawMap();
+  }
+  $("newEntity").onclick = () => fillEntity({id:"", species:"新生物", visible:true});
+  $("entityAsset").onchange = () => {
+    const a = entityCatalog.find(a => a.id === $("entityAsset").value);
+    if (!a) return;
+    $("entityName").value = a.name;
+    $("entityKind").value = a.category === "plant" ? "plant" : a.category === "creature" ? "creature" : "prop";
+    if (a.category === "plant") $("entityBehavior").value = "idle";
+    if (a.display_height) $("entityHeight").value = a.display_height;
+  };
+  $("entityForm").onsubmit = async e => {
+    e.preventDefault();
+    const body = {visible:$("entityVisible").checked};
+    for (const [key,id] of Object.entries(entityFields)) body[key] = $(id).value;
+    if ($("entityId").value) body.id = $("entityId").value;
+    try {
+      const d = await post(`/admin/api/entities/${encodeURIComponent($("entitySpace").value)}`, body);
+      fillEntity(d.entity); $("entityMsg").textContent = "已保存，在线玩家同步更新"; await refreshEntities();
+    } catch(e) { $("entityMsg").textContent = e.message; }
+  };
+  $("entities").onclick = async e => {
+    const b = e.target.closest("button[data-entity]"); if (!b) return;
+    const n = entityRows.find(n => n.id === b.dataset.entity); if (!n) return;
+    if (b.dataset.remove) {
+      if (!confirm(`移除「${n.species}」？`)) return;
+      await post(`/admin/api/entities/${encodeURIComponent(n.space)}`, {id:n.id, delete:true}); await refreshEntities();
+    } else fillEntity(n);
+  };
+  $("entitySpace").onchange = async () => {
+    const sid = $("entitySpace").value;
+    geometry = await api(`/admin/api/geometry/${encodeURIComponent(sid)}`);
+    $("entityPlot").innerHTML = '<option value="">自由摆放</option>' + (geometry.planting_plots || []).map((p,i) => `<option value="${i}">第 ${p.row} 行 · 第 ${p.column} 列</option>`).join('');
+    backdrop = null;
+    if (geometry.painted_ground) {
+      const img = new Image(); img.onload = () => { backdrop = img; drawMap(); };
+      img.src = `/admin/api/backdrop/${encodeURIComponent(sid)}.png`;
+    }
+    $("entityX").value = geometry.spawn[0]; $("entityZ").value = geometry.spawn[2]; $("entityId").value = "";
+    await refreshEntities();
+  };
+  // [x0, z0, width, height] in metres; the hall now reaches north (negative z) into the painted home field
+  function mapRect() { return geometry?.map_rect || [0, 0, ...(geometry?.painted_size || [geometry?.bounds.max[0]+.5 || 32, geometry?.bounds.max[2]+.5 || 22])]; }
+  function mapSize() { const r = mapRect(); return [r[2], r[3]]; }
+  $("entityPlot").onchange = () => {
+    const i = $("entityPlot").value; if (i === "") return;
+    const p = geometry.planting_plots[+i];
+    $("entityX").value = p.x.toFixed(3); $("entityZ").value = p.z.toFixed(3);
+    $("entityKind").value = 'plant'; $("entityBehavior").value = 'idle'; drawMap();
+  };
+  $("entityMap").addEventListener("pointerdown", e => {
+    if (!geometry) return;
+    const r = e.currentTarget.getBoundingClientRect(), [w,h] = mapSize();
+    const [x0,z0] = mapRect();
+    $("entityX").value = (x0+(e.clientX-r.left)/r.width*w).toFixed(1);
+    $("entityZ").value = (z0+(e.clientY-r.top)/r.height*h).toFixed(1); drawMap();
+  });
+  function drawMap() {
+    const c = $("entityMap"), ctx = c.getContext("2d"), [x0,z0,w,h] = mapRect();
+    const tall = Math.round(c.width*h/w); if (c.height !== tall) c.height = tall;    // keep metres square
+    const X = x => (x-x0)/w*c.width, Z = z => (z-z0)/h*c.height;
+    ctx.clearRect(0,0,c.width,c.height);
+    if (geometry?.grass_rect) { const g = geometry.grass_rect; ctx.fillStyle = "#8aa86a"; ctx.fillRect(X(g[0]),Z(g[1]),g[2]/w*c.width,g[3]/h*c.height); }
+    if (backdrop) { const o = geometry.painted_origin || [0,0], s = geometry.painted_size; ctx.drawImage(backdrop,X(o[0]),Z(o[1]),s[0]/w*c.width,s[1]/h*c.height); }
+    ctx.fillStyle = "#9a403966";
+    for (const poly of geometry?.blocked_polygons || []) {
+      ctx.beginPath(); poly.forEach(([x,z],i) => ctx[i ? 'lineTo' : 'moveTo'](X(x),Z(z))); ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = "#3d6f8a88";
+    for (const o of geometry?.obstacles || []) if (o.kind === "water") { ctx.beginPath(); ctx.arc(X(o.position[0]),Z(o.position[2]),o.radius/w*c.width,0,Math.PI*2); ctx.fill(); }
+    ctx.font = "12px sans-serif";
+    for (const n of entityRows) {
+      ctx.fillStyle = n.visible ? (n.kind === "plant" ? "#e4f88c" : "#f8eedb") : "#555";
+      const x=X(n.x), y=Z(n.z);
+      ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle="#17251c"; ctx.fillText(n.species,x+7,y);
+    }
+    ctx.strokeStyle="#df5338"; ctx.lineWidth=2;
+    const x=X(+$("entityX").value), y=Z(+$("entityZ").value);
+    ctx.strokeRect(x-7,y-7,14,14);
+  }
+  async function refreshEntities() {
+    const sid = $("entitySpace").value; if (!sid) return;
+    const d = await api(`/admin/api/entities?space=${encodeURIComponent(sid)}`); entityRows=d.entities;
+    $("entities").innerHTML = '<tr><th>名称</th><th>类型</th><th>位置</th><th>行为</th><th>显示</th><th></th></tr>' + entityRows.map(n =>
+      `<tr><td>${esc(n.species)}</td><td>${esc(n.kind)}</td><td>${n.x.toFixed(1)}, ${n.z.toFixed(1)}</td><td>${esc(n.behavior)}</td><td>${n.visible?'是':'隐藏'}</td><td><button data-entity="${esc(n.id)}">编辑</button><button data-entity="${esc(n.id)}" data-remove="1">移除</button></td></tr>`).join('');
+    $("r4Entities").textContent = `R4 自然演化生物：${d.r4.length} 个，沿用上方的世界暂停/恢复控制。此处摆放的 LAB 对象使用游走/跟随和分阶段生长。`;
+    drawMap();
+  }
+  async function refreshCatalog(selectId) {
+    entityCatalog = (await api('/admin/api/catalog')).assets;
+    const chosen = selectId || $("entityAsset").value;
+    $("entityAsset").innerHTML = entityCatalog.map(a => `<option value="${esc(a.id)}">${esc(a.name)}${a.author?' · '+esc(a.author):''}</option>`).join('');
+    if (entityCatalog.some(a=>a.id===chosen)) $("entityAsset").value=chosen;
+  }
+  document.addEventListener('lab-art-uploaded', async e => {
+    await refreshCatalog(e.detail.id); $("entityAsset").onchange(); $("entityId").value='';
+  });
 
   async function refresh() {
     let o;
     try { o = await api("/admin/api/overview"); } catch (e) { return; }
     show(true);
+    const oldSpace = $("entitySpace").value;
+    $("entitySpace").innerHTML = o.spaces.map(s => `<option value="${esc(s.id)}">${esc(s.title)}</option>`).join('');
+    if (oldSpace) $("entitySpace").value = oldSpace;
+    if (!geometry) { await refreshCatalog(); await $("entitySpace").onchange(); }
+    else await refreshEntities();
     $("ver").textContent = `服务端 ${o.server_version} · 客户端 ${o.client_version}`;
     const s = o.system, h = o.hub;
     const tiles = [["在线玩家", h.online], ["Tick p50 / p99 ms", `${h.tick_ms_p50} / ${h.tick_ms_p99}`],
@@ -63,7 +180,7 @@
         (c.status === "active" ? `<button data-call="codeAction('${esc(c.id)}','disable')">停用</button>` : c.status === "disabled" ? `<button data-call="codeAction('${esc(c.id)}','enable')">恢复</button>` : "") +
         (c.status !== "revoked" ? `<button class="danger" data-call="codeAction('${esc(c.id)}','revoke')">撤销</button>` : "") + "</td></tr>").join("");
     $("players").innerHTML = "<tr><th>PID</th><th>昵称</th><th>空间</th><th>客户端</th><th>位置</th><th>RTT</th><th>在线 s</th><th>纠正</th><th>发送/接收 KB</th><th></th></tr>" +
-      o.players.map((p) => `<tr><td>${esc(p.pid)}</td><td>${esc(p.nick)}</td><td>${esc(p.space)}</td><td>${esc(p.client)} ${esc(p.version)}</td><td>${p.x.toFixed(1)}, ${p.z.toFixed(1)}</td><td>${p.rtt_ms}</td><td>${p.connected_s}</td><td>${p.corrections}</td><td>${p.sent_kb} / ${p.recv_kb}</td><td><button data-call="kick('${esc(p.pid)}')">断开</button></td></tr>`).join("");
+      o.players.map((p) => `<tr><td>${esc(p.pid)}</td><td>${esc(p.nick)}</td><td>${esc(p.space)}</td><td>${esc(p.client)} ${esc(p.version)}</td><td>${p.x.toFixed(1)}, ${p.z.toFixed(1)}</td><td>${p.rtt_ms}</td><td>${p.connected_s}</td><td>${p.corrections}</td><td>${p.sent_kb} / ${p.recv_kb}</td><td><button data-call="kick('${esc(p.pid)}')">断开</button> <button data-call="skills('${esc(p.pid)}','points')">发技能点</button> <button data-call="skills('${esc(p.pid)}','all')">解锁全部技能</button> <button data-call="skills('${esc(p.pid)}','reset')">重置技能</button></td></tr>`).join("");
     $("spaces").innerHTML = "<tr><th>ID</th><th>类型</th><th>名称</th><th>拥有者</th><th>受邀</th><th>R4 分支</th><th>在线</th><th>暂停</th><th>调试</th></tr>" +
       o.spaces.map((sp) => `<tr><td>${esc(sp.id)}</td><td>${esc(sp.kind)}</td><td>${esc(sp.title)}</td><td>${esc(sp.owner_pid)}</td><td>${esc(sp.guests.join(", "))}</td><td>${esc((sp.r4_branch || "").slice(0, 10))}</td><td>${sp.online}</td><td>${sp.paused ? "是" : ""}</td><td>` +
         `<button data-call="spaceAction('${esc(sp.id)}','${sp.paused ? "resume" : "pause"}','${esc(sp.kind)}')">${sp.paused ? "恢复" : "暂停"}</button>` +
@@ -84,7 +201,7 @@
     const el = event.target.closest("[data-call]");
     if (!el) return;
     const m = /^(\w+)\((.*)\)$/.exec(el.getAttribute("data-call"));
-    if (!m || !["codeAction", "spaceAction", "kick", "art"].includes(m[1])) return;
+    if (!m || !["codeAction", "spaceAction", "kick", "art", "skills"].includes(m[1])) return;
     const args = m[2].split(",").map((a) => a.trim().replace(/^'|'$/g, ""));
     window[m[1]](...args);
   });

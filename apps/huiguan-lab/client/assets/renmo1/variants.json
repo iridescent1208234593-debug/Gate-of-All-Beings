@@ -1,0 +1,576 @@
+{
+  "body": "body",
+  "frame": {
+    "width": 256,
+    "height": 320,
+    "fps": 12
+  },
+  "slots": [
+    {
+      "id": "wings",
+      "label": "翅膀",
+      "group": "装扮",
+      "default": "none",
+      "z": 1,
+      "back_z": 1,
+      "options": [
+        {
+          "id": "none",
+          "label": "无"
+        },
+        {
+          "id": "w1",
+          "label": "蝙蝠翅膀1",
+          "back_dir": "face/wings_w1_back"
+        },
+        {
+          "id": "w2",
+          "label": "蝙蝠翅膀2",
+          "back_dir": "face/wings_w2_back"
+        }
+      ]
+    },
+    {
+      "id": "hair",
+      "label": "发型",
+      "group": "装扮",
+      "default": "none",
+      "z": 90,
+      "back_z": 5,
+      "options": [
+        {
+          "id": "none",
+          "label": "无（光头）"
+        },
+        {
+          "id": "shanxin",
+          "label": "山新发型",
+          "dir": "face/hair_shanxin",
+          "back_dir": "face/hair_shanxin_back"
+        },
+        {
+          "id": "fengxi",
+          "label": "风息发型",
+          "dir": "face/hair_fengxi",
+          "back_dir": "face/hair_fengxi_back"
+        },
+        {
+          "id": "shouji",
+          "label": "手记管理员发型",
+          "dir": "face/hair_shouji",
+          "back_dir": "face/hair_shouji_back"
+        }
+      ]
+    },
+    {
+      "id": "ears",
+      "label": "耳朵",
+      "group": "装扮",
+      "default": "human",
+      "z": 95,
+      "back_z": 3,
+      "options": [
+        {
+          "id": "human",
+          "label": "人耳",
+          "dir": "face/ears_human"
+        },
+        {
+          "id": "fox",
+          "label": "狐耳",
+          "dir": "face/ears_fox",
+          "back_dir": "face/ears_fox_back"
+        },
+        {
+          "id": "pointed_up",
+          "label": "尖耳（上）",
+          "dir": "face/ears_pointed_up",
+          "back_dir": "face/ears_pointed_up_back"
+        },
+        {
+          "id": "pointed_mid",
+          "label": "尖耳（中）",
+          "dir": "face/ears_pointed_mid",
+          "back_dir": "face/ears_pointed_mid_back"
+        },
+        {
+          "id": "pointed_down",
+          "label": "尖耳（下）",
+          "dir": "face/ears_pointed_down",
+          "back_dir": "face/ears_pointed_down_back"
+        },
+        {
+          "id": "lop",
+          "label": "垂耳",
+          "dir": "face/ears_lop",
+          "back_dir": "face/ears_lop_back"
+        },
+        {
+          "id": "wing",
+          "label": "翼耳",
+          "dir": "face/ears_wing",
+          "back_dir": "face/ears_wing_back"
+        }
+      ]
+    },
+    {
+      "id": "horns",
+      "label": "角",
+      "group": "装扮",
+      "default": "none",
+      "z": 92,
+      "back_z": 92,
+      "options": [
+        {
+          "id": "none",
+          "label": "无"
+        },
+        {
+          "id": "double",
+          "label": "双角",
+          "dir": "face/horns_double"
+        },
+        {
+          "id": "single",
+          "label": "独角",
+          "dir": "face/horns_single"
+        }
+      ]
+    },
+    {
+      "id": "top",
+      "label": "上衣",
+      "group": "装扮",
+      "default": "none",
+      "z": 20,
+      "back_z": 2,
+      "options": [
+        {
+          "id": "none",
+          "label": "无"
+        },
+        {
+          "id": "tee",
+          "label": "短袖T恤",
+          "dir": "face/top_tee"
+        },
+        {
+          "id": "sailor",
+          "label": "水手领短袖",
+          "dir": "face/top_sailor"
+        },
+        {
+          "id": "sailor_stripe",
+          "label": "水手领短袖（领花纹）",
+          "dir": "face/top_sailor_stripe"
+        },
+        {
+          "id": "doll",
+          "label": "娃娃领短袖",
+          "dir": "face/top_doll"
+        },
+        {
+          "id": "vest",
+          "label": "无袖背心",
+          "dir": "face/top_vest"
+        },
+        {
+          "id": "shanxin",
+          "label": "山新上衣",
+          "dir": "face/top_shanxin"
+        },
+        {
+          "id": "infinite",
+          "label": "无限服装上衣",
+          "dir": "face/top_infinite",
+          "back_dir": "face/top_infinite_back"
+        },
+        {
+          "id": "hoodie",
+          "label": "连帽短袖",
+          "dir": "face/top_hoodie"
+        },
+        {
+          "id": "huiguan",
+          "label": "会馆制服",
+          "dir": "face/top_huiguan"
+        },
+        {
+          "id": "shouji",
+          "label": "手记管理员衬衣",
+          "dir": "face/top_shouji"
+        },
+        {
+          "id": "song_hanfu",
+          "label": "宋制汉服上衣",
+          "dir": "face/top_song_hanfu"
+        },
+        {
+          "id": "huiguan_skirt",
+          "label": "会馆裙装上衣",
+          "dir": "face/top_huiguan_skirt"
+        }
+      ]
+    },
+    {
+      "id": "top_pattern",
+      "label": "袖子花纹",
+      "group": "装扮",
+      "default": "none",
+      "z": 21,
+      "back_z": 21,
+      "options": [
+        {
+          "id": "none",
+          "label": "无"
+        },
+        {
+          "id": "p1",
+          "label": "花纹1",
+          "dir": "face/top_pattern_p1",
+          "requires": {
+            "top": [
+              "tee",
+              "sailor",
+              "sailor_stripe",
+              "doll"
+            ]
+          }
+        },
+        {
+          "id": "p2",
+          "label": "花纹2",
+          "dir": "face/top_pattern_p2",
+          "requires": {
+            "top": [
+              "tee",
+              "sailor",
+              "sailor_stripe",
+              "doll"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bottom",
+      "label": "下装",
+      "group": "装扮",
+      "default": "none",
+      "z": 10,
+      "back_z": 10,
+      "options": [
+        {
+          "id": "none",
+          "label": "无"
+        },
+        {
+          "id": "shorts",
+          "label": "短裤",
+          "dir": "face/bottom_shorts"
+        },
+        {
+          "id": "pants",
+          "label": "直筒长裤",
+          "dir": "face/bottom_pants"
+        },
+        {
+          "id": "shanxin",
+          "label": "山新裤子",
+          "dir": "face/bottom_shanxin"
+        },
+        {
+          "id": "infinite",
+          "label": "无限服装裤子",
+          "dir": "face/bottom_infinite"
+        },
+        {
+          "id": "huiguan",
+          "label": "会馆制服裤（裤腿优化版）",
+          "dir": "face/bottom_huiguan"
+        },
+        {
+          "id": "song_hanfu",
+          "label": "宋制汉服长裙",
+          "dir": "face/bottom_song_hanfu"
+        },
+        {
+          "id": "huiguan_skirt",
+          "label": "会馆裙装",
+          "dir": "face/bottom_huiguan_skirt"
+        }
+      ]
+    },
+    {
+      "id": "bottom_pattern",
+      "label": "裤子花纹",
+      "group": "装扮",
+      "default": "none",
+      "z": 11,
+      "back_z": 11,
+      "options": [
+        {
+          "id": "none",
+          "label": "无"
+        },
+        {
+          "id": "shorts_p1",
+          "label": "短裤花纹1",
+          "dir": "face/bottom_pattern_shorts_p1",
+          "requires": {
+            "bottom": [
+              "shorts"
+            ]
+          }
+        },
+        {
+          "id": "shorts_p2",
+          "label": "短裤花纹2",
+          "dir": "face/bottom_pattern_shorts_p2",
+          "requires": {
+            "bottom": [
+              "shorts"
+            ]
+          }
+        },
+        {
+          "id": "shorts_stripe",
+          "label": "短裤竖纹",
+          "dir": "face/bottom_pattern_shorts_stripe",
+          "requires": {
+            "bottom": [
+              "shorts"
+            ]
+          }
+        },
+        {
+          "id": "pants_stripe",
+          "label": "长裤竖条纹",
+          "dir": "face/bottom_pattern_pants_stripe",
+          "requires": {
+            "bottom": [
+              "pants"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "shoes",
+      "label": "鞋子",
+      "group": "装扮",
+      "default": "none",
+      "z": 5,
+      "back_z": 5,
+      "options": [
+        {
+          "id": "none",
+          "label": "无"
+        },
+        {
+          "id": "shanxin",
+          "label": "山新鞋",
+          "dir": "face/shoes_shanxin"
+        },
+        {
+          "id": "infinite",
+          "label": "无限服装鞋",
+          "dir": "face/shoes_infinite"
+        },
+        {
+          "id": "huiguan",
+          "label": "会馆制服鞋",
+          "dir": "face/shoes_huiguan"
+        },
+        {
+          "id": "huiguan_skirt",
+          "label": "会馆裙装鞋",
+          "dir": "face/shoes_huiguan_skirt"
+        }
+      ]
+    },
+    {
+      "id": "eyes",
+      "label": "眼睛",
+      "group": "表情",
+      "default": "round",
+      "z": 50,
+      "back_z": 50,
+      "options": [
+        {
+          "id": "round",
+          "label": "圆眼",
+          "dir": "face/eyes_round"
+        },
+        {
+          "id": "flat",
+          "label": "直眼",
+          "dir": "face/eyes_flat"
+        },
+        {
+          "id": "squint",
+          "label": "眯眼",
+          "dir": "face/eyes_squint"
+        },
+        {
+          "id": "shock",
+          "label": "震惊眼",
+          "dir": "face/eyes_shock"
+        }
+      ]
+    },
+    {
+      "id": "brows",
+      "label": "眉毛",
+      "group": "表情",
+      "default": "basic",
+      "z": 51,
+      "back_z": 51,
+      "options": [
+        {
+          "id": "basic",
+          "label": "基础眉",
+          "dir": "face/brows_basic"
+        },
+        {
+          "id": "dot",
+          "label": "豆豆眉",
+          "dir": "face/brows_dot"
+        },
+        {
+          "id": "thick",
+          "label": "粗眉",
+          "dir": "face/brows_thick"
+        },
+        {
+          "id": "long",
+          "label": "长眉",
+          "dir": "face/brows_long"
+        },
+        {
+          "id": "whisker",
+          "label": "胡须眉",
+          "dir": "face/brows_whisker"
+        },
+        {
+          "id": "thick_long",
+          "label": "粗长眉",
+          "dir": "face/brows_thick_long"
+        }
+      ]
+    },
+    {
+      "id": "mouth",
+      "label": "嘴",
+      "group": "表情",
+      "default": "closed",
+      "z": 52,
+      "back_z": 52,
+      "options": [
+        {
+          "id": "closed",
+          "label": "闭嘴",
+          "dir": "face/mouth_closed"
+        },
+        {
+          "id": "open",
+          "label": "张嘴",
+          "dir": "face/mouth_open"
+        },
+        {
+          "id": "smile",
+          "label": "微笑",
+          "dir": "face/mouth_smile"
+        },
+        {
+          "id": "laugh",
+          "label": "大笑",
+          "dir": "face/mouth_laugh"
+        },
+        {
+          "id": "smirk",
+          "label": "坏笑",
+          "dir": "face/mouth_smirk"
+        },
+        {
+          "id": "grin",
+          "label": "张嘴笑",
+          "dir": "face/mouth_grin"
+        },
+        {
+          "id": "cat",
+          "label": "三瓣嘴",
+          "dir": "face/mouth_cat"
+        },
+        {
+          "id": "cat_smile",
+          "label": "三瓣嘴微笑",
+          "dir": "face/mouth_cat_smile"
+        },
+        {
+          "id": "cat_laugh",
+          "label": "三瓣嘴大笑",
+          "dir": "face/mouth_cat_laugh"
+        },
+        {
+          "id": "cat_smirk",
+          "label": "三瓣嘴坏笑",
+          "dir": "face/mouth_cat_smirk"
+        },
+        {
+          "id": "cat_grin",
+          "label": "三瓣嘴张嘴笑",
+          "dir": "face/mouth_cat_grin"
+        },
+        {
+          "id": "shock",
+          "label": "震惊嘴",
+          "dir": "face/mouth_shock"
+        }
+      ]
+    },
+    {
+      "id": "headwear",
+      "label": "头饰",
+      "group": "装扮",
+      "default": "none",
+      "z": 96,
+      "back_z": 4,
+      "options": [
+        {
+          "id": "none",
+          "label": "无"
+        },
+        {
+          "id": "pearl_bows",
+          "label": "双蝴蝶结珍珠",
+          "dir": "face/headwear_pearl_bows"
+        },
+        {
+          "id": "heixiu",
+          "label": "嘿咻发卡",
+          "dir": "face/headwear_heixiu"
+        }
+      ]
+    },
+    {
+      "id": "tail",
+      "label": "尾巴",
+      "group": "装扮",
+      "default": "none",
+      "z": 3,
+      "back_z": 0,
+      "options": [
+        {
+          "id": "none",
+          "label": "无"
+        },
+        {
+          "id": "short_bird",
+          "label": "短鸟尾",
+          "back_dir": "face/tail_short_bird_back"
+        }
+      ]
+    }
+  ]
+}

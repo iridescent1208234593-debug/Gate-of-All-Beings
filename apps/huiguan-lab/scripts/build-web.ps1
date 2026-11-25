@@ -1,4 +1,4 @@
-﻿$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Stop'
 # Builds the Godot web client into build/web (single-threaded Compatibility export: no
 # SharedArrayBuffer, so no COOP/COEP requirement; works through the plain Cloudflare Tunnel).
 $Lab = Split-Path -Parent $PSScriptRoot
@@ -15,7 +15,11 @@ if ($p.ExitCode -ne 0 -or !(Test-Path (Join-Path $Out 'index.pck')) -or $errors)
 Copy-Item (Join-Path $Lab 'web\play\lab-bridge.js') $Out
 # Pre-compress the large files once so the gateway never compresses per request.
 & (Join-Path $Lab 'server\.venv\Scripts\python.exe') -c "import brotli,gzip,sys,pathlib; d=pathlib.Path(sys.argv[1]); [ (p.with_name(p.name+'.br').write_bytes(brotli.compress(p.read_bytes(), quality=9)), p.with_name(p.name+'.gz').write_bytes(gzip.compress(p.read_bytes(), 9))) for p in d.iterdir() if p.suffix in ('.wasm','.pck','.js')]" $Out
-$version = 'lab-client-2.0.0+' + (Get-Date -Format 'yyyyMMddHHmm')
+$presets = [IO.File]::ReadAllText((Join-Path $Client 'export_presets.cfg'))
+$public = [regex]::Match($presets,'(?ms)^\[preset\.\d+\]\s+name="Android Public \(unsigned\)"(?<preset>.*?)(?=^\[preset\.\d+\]\s|\z)')
+$release = [regex]::Match($public.Groups['preset'].Value,'(?m)^version/name="(\d+\.\d+\.\d+)"\r?$')
+if (!$release.Success) { throw 'Public version missing from Android Public export preset' }
+$version = 'lab-v' + $release.Groups[1].Value + '+' + (Get-Date -Format 'yyyyMMddHHmm')
 $files = Get-ChildItem $Out -File | ForEach-Object { @{ name = $_.Name; bytes = $_.Length; sha256 = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower() } }
 @{ version = $version; built_at = (Get-Date).ToUniversalTime().ToString('o'); godot = '4.7.2.stable'; files = $files } | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $Out 'build-info.json') -Encoding UTF8
 Get-ChildItem $Out | Select-Object Name, @{ n = 'KB'; e = { [math]::Round($_.Length / 1KB) } } | Format-Table -AutoSize

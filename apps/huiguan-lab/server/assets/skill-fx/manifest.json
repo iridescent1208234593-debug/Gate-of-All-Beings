@@ -1,0 +1,1222 @@
+{
+ "arcane/arcane-beam": {
+  "bytes": 216422,
+  "pages": 1,
+  "n": 18
+ },
+ "arcane/arcane-missiles": {
+  "bytes": 230190,
+  "pages": 1,
+  "n": 28
+ },
+ "arcane/arcane-orb": {
+  "bytes": 264784,
+  "pages": 1,
+  "n": 36
+ },
+ "arcane/blink-in": {
+  "bytes": 44964,
+  "pages": 1,
+  "n": 22
+ },
+ "arcane/blink-out": {
+  "bytes": 105538,
+  "pages": 1,
+  "n": 25
+ },
+ "arcane/magic-circle-cast": {
+  "bytes": 574718,
+  "pages": 1,
+  "n": 60
+ },
+ "arcane/mana-burst": {
+  "bytes": 241578,
+  "pages": 1,
+  "n": 28
+ },
+ "arcane/portal": {
+  "bytes": 381722,
+  "pages": 1,
+  "n": 36
+ },
+ "arcane/rune-circle": {
+  "bytes": 638926,
+  "pages": 1,
+  "n": 60
+ },
+ "arcane/spell-charge": {
+  "bytes": 105594,
+  "pages": 1,
+  "n": 24
+ },
+ "arcane/star-fall": {
+  "bytes": 364010,
+  "pages": 1,
+  "n": 39
+ },
+ "arcane/time-stop": {
+  "bytes": 334110,
+  "pages": 1,
+  "n": 55
+ },
+ "critters/bat": {
+  "bytes": 22402,
+  "pages": 1,
+  "n": 36
+ },
+ "critters/bird": {
+  "bytes": 22874,
+  "pages": 1,
+  "n": 36
+ },
+ "critters/butterfly": {
+  "bytes": 114494,
+  "pages": 1,
+  "n": 48
+ },
+ "critters/eyeball": {
+  "bytes": 176128,
+  "pages": 1,
+  "n": 48
+ },
+ "critters/fish-school": {
+  "bytes": 400182,
+  "pages": 1,
+  "n": 72
+ },
+ "critters/flying-skull": {
+  "bytes": 328608,
+  "pages": 1,
+  "n": 36
+ },
+ "critters/frog": {
+  "bytes": 12458,
+  "pages": 1,
+  "n": 39
+ },
+ "critters/ghost": {
+  "bytes": 166678,
+  "pages": 1,
+  "n": 36
+ },
+ "critters/jellyfish": {
+  "bytes": 202896,
+  "pages": 1,
+  "n": 48
+ },
+ "critters/slime": {
+  "bytes": 138296,
+  "pages": 1,
+  "n": 27
+ },
+ "critters/snake": {
+  "bytes": 11478,
+  "pages": 1,
+  "n": 36
+ },
+ "critters/wisp": {
+  "bytes": 236858,
+  "pages": 1,
+  "n": 48
+ },
+ "explosions/barrel-explosion": {
+  "bytes": 649452,
+  "pages": 2,
+  "n": 79
+ },
+ "explosions/big-explosion": {
+  "bytes": 1372242,
+  "pages": 2,
+  "n": 73
+ },
+ "explosions/cartoon-pow": {
+  "bytes": 78842,
+  "pages": 1,
+  "n": 17
+ },
+ "explosions/dirt-explosion": {
+  "bytes": 267282,
+  "pages": 1,
+  "n": 55
+ },
+ "explosions/firework-burst": {
+  "bytes": 477662,
+  "pages": 1,
+  "n": 55
+ },
+ "explosions/firework-rocket": {
+  "bytes": 294456,
+  "pages": 2,
+  "n": 58
+ },
+ "explosions/grenade": {
+  "bytes": 181566,
+  "pages": 1,
+  "n": 64
+ },
+ "explosions/implosion": {
+  "bytes": 190514,
+  "pages": 1,
+  "n": 26
+ },
+ "explosions/nuke": {
+  "bytes": 1755656,
+  "pages": 4,
+  "n": 91
+ },
+ "explosions/plasma-explosion": {
+  "bytes": 185578,
+  "pages": 1,
+  "n": 27
+ },
+ "explosions/small-explosion": {
+  "bytes": 352470,
+  "pages": 2,
+  "n": 82
+ },
+ "explosions/smoke-bomb": {
+  "bytes": 241872,
+  "pages": 1,
+  "n": 76
+ },
+ "fire/brazier": {
+  "bytes": 555392,
+  "pages": 1,
+  "n": 45
+ },
+ "fire/campfire": {
+  "bytes": 439854,
+  "pages": 1,
+  "n": 45
+ },
+ "fire/candle": {
+  "bytes": 184074,
+  "pages": 1,
+  "n": 60
+ },
+ "fire/fire-breath": {
+  "bytes": 345048,
+  "pages": 1,
+  "n": 23
+ },
+ "fire/fire-ring": {
+  "bytes": 595668,
+  "pages": 1,
+  "n": 60
+ },
+ "fire/fire-tornado": {
+  "bytes": 409682,
+  "pages": 1,
+  "n": 30
+ },
+ "fire/fireball": {
+  "bytes": 90072,
+  "pages": 1,
+  "n": 18
+ },
+ "fire/flame-pillar": {
+  "bytes": 826178,
+  "pages": 1,
+  "n": 76
+ },
+ "fire/flamethrower": {
+  "bytes": 292148,
+  "pages": 1,
+  "n": 24
+ },
+ "fire/meteor": {
+  "bytes": 676312,
+  "pages": 2,
+  "n": 76
+ },
+ "fire/spirit-flame": {
+  "bytes": 201236,
+  "pages": 1,
+  "n": 45
+ },
+ "fire/torch": {
+  "bytes": 209200,
+  "pages": 1,
+  "n": 30
+ },
+ "holy/blessing": {
+  "bytes": 173350,
+  "pages": 1,
+  "n": 45
+ },
+ "holy/divine-shield": {
+  "bytes": 77364,
+  "pages": 1,
+  "n": 36
+ },
+ "holy/feather-burst": {
+  "bytes": 171896,
+  "pages": 1,
+  "n": 46
+ },
+ "holy/halo": {
+  "bytes": 33076,
+  "pages": 1,
+  "n": 30
+ },
+ "holy/heal-aoe": {
+  "bytes": 388462,
+  "pages": 1,
+  "n": 45
+ },
+ "holy/heal": {
+  "bytes": 57676,
+  "pages": 1,
+  "n": 30
+ },
+ "holy/holy-pillar": {
+  "bytes": 302828,
+  "pages": 1,
+  "n": 54
+ },
+ "holy/resurrection": {
+  "bytes": 678030,
+  "pages": 1,
+  "n": 73
+ },
+ "holy/smite": {
+  "bytes": 216632,
+  "pages": 1,
+  "n": 43
+ },
+ "holy/sunburst": {
+  "bytes": 472536,
+  "pages": 1,
+  "n": 60
+ },
+ "ice/blizzard-vortex": {
+  "bytes": 198662,
+  "pages": 1,
+  "n": 30
+ },
+ "ice/freeze": {
+  "bytes": 273520,
+  "pages": 1,
+  "n": 61
+ },
+ "ice/frost-breath": {
+  "bytes": 150720,
+  "pages": 1,
+  "n": 18
+ },
+ "ice/frost-nova": {
+  "bytes": 272710,
+  "pages": 1,
+  "n": 52
+ },
+ "ice/ice-crystal": {
+  "bytes": 147602,
+  "pages": 1,
+  "n": 45
+ },
+ "ice/ice-lance": {
+  "bytes": 32434,
+  "pages": 1,
+  "n": 12
+ },
+ "ice/ice-shatter": {
+  "bytes": 104398,
+  "pages": 1,
+  "n": 43
+ },
+ "ice/ice-spikes": {
+  "bytes": 514030,
+  "pages": 1,
+  "n": 46
+ },
+ "ice/icicle-fall": {
+  "bytes": 49730,
+  "pages": 1,
+  "n": 40
+ },
+ "ice/snowflake-burst": {
+  "bytes": 166532,
+  "pages": 1,
+  "n": 49
+ },
+ "impacts/blunt-hit": {
+  "bytes": 49620,
+  "pages": 1,
+  "n": 15
+ },
+ "impacts/bullet-impact": {
+  "bytes": 18552,
+  "pages": 1,
+  "n": 22
+ },
+ "impacts/crit-hit": {
+  "bytes": 67866,
+  "pages": 1,
+  "n": 15
+ },
+ "impacts/ground-slam": {
+  "bytes": 391090,
+  "pages": 1,
+  "n": 49
+ },
+ "impacts/heavy-landing": {
+  "bytes": 21590,
+  "pages": 1,
+  "n": 25
+ },
+ "impacts/hit-flash": {
+  "bytes": 11422,
+  "pages": 1,
+  "n": 9
+ },
+ "impacts/hit-spark": {
+  "bytes": 11146,
+  "pages": 1,
+  "n": 9
+ },
+ "impacts/impact-frame": {
+  "bytes": 11146,
+  "pages": 1,
+  "n": 6
+ },
+ "impacts/parry": {
+  "bytes": 23548,
+  "pages": 1,
+  "n": 16
+ },
+ "impacts/ricochet": {
+  "bytes": 17670,
+  "pages": 1,
+  "n": 18
+ },
+ "impacts/shield-block": {
+  "bytes": 41530,
+  "pages": 1,
+  "n": 18
+ },
+ "lightning/ball-lightning": {
+  "bytes": 239070,
+  "pages": 1,
+  "n": 60
+ },
+ "lightning/chain-lightning": {
+  "bytes": 171510,
+  "pages": 1,
+  "n": 28
+ },
+ "lightning/charge-up": {
+  "bytes": 241316,
+  "pages": 1,
+  "n": 42
+ },
+ "lightning/electrified": {
+  "bytes": 69968,
+  "pages": 1,
+  "n": 30
+ },
+ "lightning/lightning-strike": {
+  "bytes": 500374,
+  "pages": 1,
+  "n": 46
+ },
+ "lightning/plasma-ball": {
+  "bytes": 371622,
+  "pages": 1,
+  "n": 45
+ },
+ "lightning/spark-arc": {
+  "bytes": 143838,
+  "pages": 1,
+  "n": 30
+ },
+ "lightning/storm-cloud": {
+  "bytes": 189514,
+  "pages": 1,
+  "n": 45
+ },
+ "lightning/tesla-coil": {
+  "bytes": 332184,
+  "pages": 1,
+  "n": 36
+ },
+ "lightning/thunderclap": {
+  "bytes": 182890,
+  "pages": 1,
+  "n": 30
+ },
+ "lightning/zap-hit": {
+  "bytes": 48586,
+  "pages": 1,
+  "n": 15
+ },
+ "melee/claw-swipe": {
+  "bytes": 16906,
+  "pages": 1,
+  "n": 15
+ },
+ "melee/dagger-flurry": {
+  "bytes": 38954,
+  "pages": 1,
+  "n": 16
+ },
+ "melee/double-slash": {
+  "bytes": 36842,
+  "pages": 1,
+  "n": 13
+ },
+ "melee/hammer-smash": {
+  "bytes": 124906,
+  "pages": 1,
+  "n": 31
+ },
+ "melee/heavy-cleave": {
+  "bytes": 139568,
+  "pages": 1,
+  "n": 30
+ },
+ "melee/scythe-reap": {
+  "bytes": 97190,
+  "pages": 1,
+  "n": 33
+ },
+ "melee/spear-sweep": {
+  "bytes": 67842,
+  "pages": 1,
+  "n": 24
+ },
+ "melee/spin-slash": {
+  "bytes": 66466,
+  "pages": 1,
+  "n": 13
+ },
+ "melee/sword-slash": {
+  "bytes": 29744,
+  "pages": 1,
+  "n": 13
+ },
+ "melee/thrust": {
+  "bytes": 11754,
+  "pages": 1,
+  "n": 13
+ },
+ "melee/uppercut": {
+  "bytes": 33136,
+  "pages": 1,
+  "n": 14
+ },
+ "melee/whip-crack": {
+  "bytes": 11936,
+  "pages": 1,
+  "n": 14
+ },
+ "moves/arrow-shot": {
+  "bytes": 5852,
+  "pages": 1,
+  "n": 30
+ },
+ "moves/dash-strike": {
+  "bytes": 81708,
+  "pages": 1,
+  "n": 36
+ },
+ "moves/earth-stomp": {
+  "bytes": 162472,
+  "pages": 1,
+  "n": 53
+ },
+ "moves/fireball-throw": {
+  "bytes": 344322,
+  "pages": 2,
+  "n": 69
+ },
+ "moves/ground-pound": {
+  "bytes": 384816,
+  "pages": 1,
+  "n": 59
+ },
+ "moves/holy-smite": {
+  "bytes": 209930,
+  "pages": 1,
+  "n": 43
+ },
+ "moves/ice-lance-throw": {
+  "bytes": 236494,
+  "pages": 1,
+  "n": 66
+ },
+ "moves/lightning-call": {
+  "bytes": 478586,
+  "pages": 1,
+  "n": 46
+ },
+ "moves/meteor-call": {
+  "bytes": 861332,
+  "pages": 2,
+  "n": 66
+ },
+ "moves/pistol-shots": {
+  "bytes": 70968,
+  "pages": 1,
+  "n": 40
+ },
+ "moves/rocket-launcher": {
+  "bytes": 327222,
+  "pages": 3,
+  "n": 67
+ },
+ "moves/sword-combo": {
+  "bytes": 224194,
+  "pages": 1,
+  "n": 46
+ },
+ "nature/acid-splash": {
+  "bytes": 162576,
+  "pages": 1,
+  "n": 43
+ },
+ "nature/boulder": {
+  "bytes": 88684,
+  "pages": 1,
+  "n": 36
+ },
+ "nature/earth-spike": {
+  "bytes": 159036,
+  "pages": 1,
+  "n": 52
+ },
+ "nature/healing-bloom": {
+  "bytes": 243492,
+  "pages": 1,
+  "n": 51
+ },
+ "nature/leaf-storm": {
+  "bytes": 111018,
+  "pages": 1,
+  "n": 36
+ },
+ "nature/poison-cloud": {
+  "bytes": 709234,
+  "pages": 1,
+  "n": 60
+ },
+ "nature/quake": {
+  "bytes": 277492,
+  "pages": 1,
+  "n": 48
+ },
+ "nature/root-snare": {
+  "bytes": 97296,
+  "pages": 1,
+  "n": 42
+ },
+ "nature/spore-burst": {
+  "bytes": 311062,
+  "pages": 1,
+  "n": 49
+ },
+ "nature/thorns": {
+  "bytes": 198884,
+  "pages": 1,
+  "n": 37
+ },
+ "nature/tornado": {
+  "bytes": 358390,
+  "pages": 1,
+  "n": 30
+ },
+ "nature/toxic-puddle": {
+  "bytes": 271720,
+  "pages": 1,
+  "n": 60
+ },
+ "nature/vine-whip": {
+  "bytes": 25636,
+  "pages": 1,
+  "n": 22
+ },
+ "pickups/chest-open": {
+  "bytes": 408818,
+  "pages": 1,
+  "n": 70
+ },
+ "pickups/coin-spin": {
+  "bytes": 17808,
+  "pages": 1,
+  "n": 24
+ },
+ "pickups/collect-burst": {
+  "bytes": 25024,
+  "pages": 1,
+  "n": 22
+ },
+ "pickups/crystal-shard": {
+  "bytes": 60312,
+  "pages": 1,
+  "n": 48
+ },
+ "pickups/gem-spin": {
+  "bytes": 60404,
+  "pages": 1,
+  "n": 36
+ },
+ "pickups/heart-pickup": {
+  "bytes": 11662,
+  "pages": 1,
+  "n": 18
+ },
+ "pickups/key-glint": {
+  "bytes": 29552,
+  "pages": 1,
+  "n": 30
+ },
+ "pickups/loot-beam": {
+  "bytes": 260432,
+  "pages": 1,
+  "n": 36
+ },
+ "pickups/potion": {
+  "bytes": 31102,
+  "pages": 1,
+  "n": 36
+ },
+ "pickups/power-star": {
+  "bytes": 124654,
+  "pages": 1,
+  "n": 24
+ },
+ "pickups/xp-orb": {
+  "bytes": 24864,
+  "pages": 1,
+  "n": 27
+ },
+ "projectiles/arrow": {
+  "bytes": 1020,
+  "pages": 1,
+  "n": 9
+ },
+ "projectiles/bullet-tracer": {
+  "bytes": 12506,
+  "pages": 1,
+  "n": 9
+ },
+ "projectiles/cannonball": {
+  "bytes": 92824,
+  "pages": 1,
+  "n": 58
+ },
+ "projectiles/energy-disc": {
+  "bytes": 7698,
+  "pages": 1,
+  "n": 8
+ },
+ "projectiles/flare": {
+  "bytes": 382360,
+  "pages": 1,
+  "n": 76
+ },
+ "projectiles/homing-missile": {
+  "bytes": 204998,
+  "pages": 1,
+  "n": 58
+ },
+ "projectiles/laser-bolt": {
+  "bytes": 13530,
+  "pages": 1,
+  "n": 8
+ },
+ "projectiles/magic-missile": {
+  "bytes": 74498,
+  "pages": 1,
+  "n": 30
+ },
+ "projectiles/muzzle-pistol": {
+  "bytes": 8810,
+  "pages": 1,
+  "n": 28
+ },
+ "projectiles/muzzle-shotgun": {
+  "bytes": 44016,
+  "pages": 1,
+  "n": 49
+ },
+ "projectiles/muzzle-smg": {
+  "bytes": 38208,
+  "pages": 1,
+  "n": 15
+ },
+ "projectiles/plasma-shot": {
+  "bytes": 33026,
+  "pages": 1,
+  "n": 12
+ },
+ "projectiles/rocket": {
+  "bytes": 129266,
+  "pages": 1,
+  "n": 18
+ },
+ "scifi/emp-blast": {
+  "bytes": 182160,
+  "pages": 1,
+  "n": 49
+ },
+ "scifi/energy-core": {
+  "bytes": 224626,
+  "pages": 1,
+  "n": 36
+ },
+ "scifi/force-field": {
+  "bytes": 352540,
+  "pages": 1,
+  "n": 36
+ },
+ "scifi/glitch": {
+  "bytes": 21206,
+  "pages": 1,
+  "n": 36
+ },
+ "scifi/hologram": {
+  "bytes": 193568,
+  "pages": 1,
+  "n": 60
+ },
+ "scifi/jetpack": {
+  "bytes": 174096,
+  "pages": 1,
+  "n": 30
+ },
+ "scifi/laser-grid": {
+  "bytes": 420172,
+  "pages": 1,
+  "n": 45
+ },
+ "scifi/scanner": {
+  "bytes": 17080,
+  "pages": 1,
+  "n": 48
+ },
+ "scifi/teleporter-pad": {
+  "bytes": 217506,
+  "pages": 1,
+  "n": 36
+ },
+ "scifi/tractor-beam": {
+  "bytes": 368506,
+  "pages": 1,
+  "n": 45
+ },
+ "scifi/warp-in": {
+  "bytes": 504364,
+  "pages": 1,
+  "n": 46
+ },
+ "scifi/warp-out": {
+  "bytes": 145166,
+  "pages": 1,
+  "n": 40
+ },
+ "shadow/black-hole": {
+  "bytes": 580852,
+  "pages": 1,
+  "n": 60
+ },
+ "shadow/curse": {
+  "bytes": 187888,
+  "pages": 1,
+  "n": 52
+ },
+ "shadow/dark-explosion": {
+  "bytes": 952400,
+  "pages": 1,
+  "n": 58
+ },
+ "shadow/eclipse": {
+  "bytes": 621554,
+  "pages": 1,
+  "n": 60
+ },
+ "shadow/grasping-hands": {
+  "bytes": 267976,
+  "pages": 1,
+  "n": 48
+ },
+ "shadow/hex-sigil": {
+  "bytes": 265888,
+  "pages": 1,
+  "n": 64
+ },
+ "shadow/life-steal": {
+  "bytes": 113290,
+  "pages": 1,
+  "n": 34
+ },
+ "shadow/necro-skulls": {
+  "bytes": 242272,
+  "pages": 1,
+  "n": 45
+ },
+ "shadow/shadow-flames": {
+  "bytes": 224018,
+  "pages": 1,
+  "n": 36
+ },
+ "shadow/shadow-tendrils": {
+  "bytes": 468150,
+  "pages": 1,
+  "n": 49
+ },
+ "shadow/soul-drain": {
+  "bytes": 348310,
+  "pages": 1,
+  "n": 48
+ },
+ "shadow/void-orb": {
+  "bytes": 643756,
+  "pages": 1,
+  "n": 48
+ },
+ "spawn/coin-drop": {
+  "bytes": 64422,
+  "pages": 1,
+  "n": 46
+ },
+ "spawn/disintegrate": {
+  "bytes": 117554,
+  "pages": 1,
+  "n": 52
+ },
+ "spawn/dissolve-burn": {
+  "bytes": 189162,
+  "pages": 1,
+  "n": 55
+ },
+ "spawn/egg-hatch": {
+  "bytes": 77606,
+  "pages": 1,
+  "n": 48
+ },
+ "spawn/poof": {
+  "bytes": 50042,
+  "pages": 1,
+  "n": 25
+ },
+ "spawn/respawn-beam": {
+  "bytes": 184544,
+  "pages": 1,
+  "n": 39
+ },
+ "spawn/shatter-death": {
+  "bytes": 129682,
+  "pages": 1,
+  "n": 51
+ },
+ "spawn/soul-rise": {
+  "bytes": 124902,
+  "pages": 1,
+  "n": 49
+ },
+ "spawn/spawn-portal": {
+  "bytes": 552232,
+  "pages": 1,
+  "n": 58
+ },
+ "spawn/summon-rise": {
+  "bytes": 614148,
+  "pages": 1,
+  "n": 70
+ },
+ "status/bleeding": {
+  "bytes": 2032,
+  "pages": 1,
+  "n": 36
+ },
+ "status/burning": {
+  "bytes": 26010,
+  "pages": 1,
+  "n": 18
+ },
+ "status/charmed": {
+  "bytes": 52960,
+  "pages": 1,
+  "n": 36
+ },
+ "status/confused": {
+  "bytes": 54908,
+  "pages": 1,
+  "n": 36
+ },
+ "status/cursed": {
+  "bytes": 157892,
+  "pages": 1,
+  "n": 36
+ },
+ "status/frozen": {
+  "bytes": 27478,
+  "pages": 1,
+  "n": 30
+ },
+ "status/haste": {
+  "bytes": 21094,
+  "pages": 1,
+  "n": 18
+ },
+ "status/petrified": {
+  "bytes": 40310,
+  "pages": 1,
+  "n": 58
+ },
+ "status/poisoned": {
+  "bytes": 29356,
+  "pages": 1,
+  "n": 24
+ },
+ "status/rage": {
+  "bytes": 43954,
+  "pages": 1,
+  "n": 18
+ },
+ "status/sleep": {
+  "bytes": 46644,
+  "pages": 1,
+  "n": 36
+ },
+ "status/slowed": {
+  "bytes": 33582,
+  "pages": 1,
+  "n": 36
+ },
+ "status/stunned": {
+  "bytes": 33726,
+  "pages": 1,
+  "n": 30
+ },
+ "transitions/blinds": {
+  "bytes": 24788,
+  "pages": 1,
+  "n": 31
+ },
+ "transitions/burn-away": {
+  "bytes": 1052436,
+  "pages": 1,
+  "n": 46
+ },
+ "transitions/crt-off": {
+  "bytes": 34884,
+  "pages": 1,
+  "n": 31
+ },
+ "transitions/diamond-wipe": {
+  "bytes": 704678,
+  "pages": 1,
+  "n": 31
+ },
+ "transitions/glitch-wipe": {
+  "bytes": 139094,
+  "pages": 1,
+  "n": 28
+ },
+ "transitions/iris": {
+  "bytes": 190412,
+  "pages": 1,
+  "n": 34
+ },
+ "transitions/pixel-dissolve": {
+  "bytes": 1020564,
+  "pages": 1,
+  "n": 34
+ },
+ "transitions/shatter-wipe": {
+  "bytes": 560676,
+  "pages": 1,
+  "n": 43
+ },
+ "transitions/slash-wipe": {
+  "bytes": 193884,
+  "pages": 1,
+  "n": 27
+ },
+ "transitions/star-iris": {
+  "bytes": 136864,
+  "pages": 1,
+  "n": 34
+ },
+ "ui/achievement": {
+  "bytes": 47272,
+  "pages": 1,
+  "n": 37
+ },
+ "ui/coin-collect": {
+  "bytes": 121966,
+  "pages": 1,
+  "n": 38
+ },
+ "ui/combo-counter": {
+  "bytes": 110326,
+  "pages": 1,
+  "n": 23
+ },
+ "ui/confetti": {
+  "bytes": 101112,
+  "pages": 1,
+  "n": 52
+ },
+ "ui/countdown": {
+  "bytes": 360160,
+  "pages": 1,
+  "n": 48
+ },
+ "ui/crit-number": {
+  "bytes": 107142,
+  "pages": 1,
+  "n": 24
+ },
+ "ui/damage-number": {
+  "bytes": 13990,
+  "pages": 1,
+  "n": 17
+ },
+ "ui/exclamation": {
+  "bytes": 15604,
+  "pages": 1,
+  "n": 22
+ },
+ "ui/health-bar-hit": {
+  "bytes": 30476,
+  "pages": 1,
+  "n": 31
+ },
+ "ui/heart-lost": {
+  "bytes": 35106,
+  "pages": 1,
+  "n": 24
+ },
+ "ui/level-up": {
+  "bytes": 366052,
+  "pages": 1,
+  "n": 49
+ },
+ "ui/quest-complete": {
+  "bytes": 115948,
+  "pages": 1,
+  "n": 40
+ },
+ "water/bubbles": {
+  "bytes": 404390,
+  "pages": 1,
+  "n": 60
+ },
+ "water/drip": {
+  "bytes": 16160,
+  "pages": 1,
+  "n": 24
+ },
+ "water/fountain": {
+  "bytes": 156372,
+  "pages": 1,
+  "n": 30
+ },
+ "water/geyser": {
+  "bytes": 491676,
+  "pages": 1,
+  "n": 76
+ },
+ "water/rain-splash": {
+  "bytes": 164132,
+  "pages": 1,
+  "n": 36
+ },
+ "water/ripples": {
+  "bytes": 95308,
+  "pages": 1,
+  "n": 30
+ },
+ "water/splash": {
+  "bytes": 129464,
+  "pages": 1,
+  "n": 39
+ },
+ "water/water-jet": {
+  "bytes": 59944,
+  "pages": 1,
+  "n": 15
+ },
+ "water/water-orb": {
+  "bytes": 226344,
+  "pages": 1,
+  "n": 45
+ },
+ "water/waterfall": {
+  "bytes": 258116,
+  "pages": 1,
+  "n": 30
+ },
+ "water/wave-crash": {
+  "bytes": 150200,
+  "pages": 1,
+  "n": 49
+ },
+ "water/whirlpool": {
+  "bytes": 228358,
+  "pages": 1,
+  "n": 45
+ },
+ "weather/aurora": {
+  "bytes": 3369016,
+  "pages": 2,
+  "n": 90
+ },
+ "weather/blizzard": {
+  "bytes": 1442048,
+  "pages": 2,
+  "n": 80
+ },
+ "weather/cherry-blossoms": {
+  "bytes": 324078,
+  "pages": 2,
+  "n": 75
+ },
+ "weather/clouds": {
+  "bytes": 453494,
+  "pages": 2,
+  "n": 90
+ },
+ "weather/falling-leaves": {
+  "bytes": 252896,
+  "pages": 2,
+  "n": 75
+ },
+ "weather/fireflies": {
+  "bytes": 796734,
+  "pages": 2,
+  "n": 90
+ },
+ "weather/fog": {
+  "bytes": 466164,
+  "pages": 1,
+  "n": 90
+ },
+ "weather/god-rays": {
+  "bytes": 2552338,
+  "pages": 2,
+  "n": 75
+ },
+ "weather/rain": {
+  "bytes": 1021534,
+  "pages": 2,
+  "n": 80
+ },
+ "weather/shooting-stars": {
+  "bytes": 399790,
+  "pages": 2,
+  "n": 75
+ },
+ "weather/snow": {
+  "bytes": 843452,
+  "pages": 2,
+  "n": 90
+ },
+ "weather/storm": {
+  "bytes": 1483374,
+  "pages": 2,
+  "n": 75
+ }
+}
