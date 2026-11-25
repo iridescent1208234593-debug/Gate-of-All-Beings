@@ -74,7 +74,12 @@ async function main() {
   await new Promise((resolve,reject) => server.listen(0,'127.0.0.1',resolve).once('error',reject));
   try {
     const host = `http://127.0.0.1:${server.address().port}`;
-    browser = await chromium.launch({executablePath: process.env.CHROMIUM_EXECUTABLE || undefined});
+    browser = await chromium.launch({
+      executablePath: process.env.CHROMIUM_EXECUTABLE || undefined,
+      // Playwright disables BFCache by default. Enable it only for the optional
+      // cache-permitted probe, and still measure whether restoration occurred.
+      ignoreDefaultArgs: process.env.SHELL_SMOKE_BFCACHE === '1' ? ['--disable-back-forward-cache'] : undefined,
+    });
     for (const m of modules) {
       const context = await browser.newContext({serviceWorkers:'block'});
       try {
@@ -82,6 +87,15 @@ async function main() {
           if (new URL(route.request().url()).origin === host) return route.continue();
           rejects.push(route.request().url());
           return route.abort();
+        });
+        await context.addInitScript(() => {
+          if (window !== window.top) return;
+          window.addEventListener('pagehide', () => {
+            window.__issue95PageShowPersisted = null;
+          });
+          window.addEventListener('pageshow', event => {
+            window.__issue95PageShowPersisted = event.persisted;
+          });
         });
         const page = await context.newPage();
         const errors = [];
@@ -101,6 +115,19 @@ async function main() {
         const mounted = await expect(m,0);
         await Promise.all([page.waitForResponse(r => r.url() === host + '/__fixture/report' && r.ok()),
                            mounted.locator('[data-complete]').click()]);
+        await page.locator('#iridescently-shell-return').click();
+        await page.waitForURL(host + '/#home');
+        // Cross-document Back returns to the Shell, not just another route in
+        // the same Shell document. Check the save that predates that return.
+        await page.goBack({waitUntil:'commit'});
+        await expect(m,1);
+        await page.waitForFunction(() => typeof window.__issue95PageShowPersisted === 'boolean');
+        const restored = await page.evaluate(() => window.__issue95PageShowPersisted);
+        await page.goForward({waitUntil:'commit'});
+        await page.waitForURL(host + '/#home');
+        await page.locator('#home').waitFor();
+        await page.locator(`[data-play="${m.key}"]`).click();
+        await expect(m,1);
         const neighbor = modules.find(target => target.key !== m.key && target.key === 'management') ||
                          modules.find(target => target.key === 'ecology');
         await anchor(neighbor.key).click();
@@ -109,13 +136,9 @@ async function main() {
         await expect(m,1);
         await page.goForward();
         await expect(neighbor,0);
-        await page.locator('#iridescently-shell-return').click();
-        await page.waitForURL(host + '/#home');
-        await page.locator(`[data-play="${m.key}"]`).click();
-        await expect(m,1);
         assert.equal(reports.get('issue95:' + m.key),1);
         assert.deepEqual(errors,[]);
-        console.log(`PASS shell route/history + synthetic save fixture: ${m.key} (${m.embed ? 'embed' : 'iframe'})`);
+        console.log(`PASS shell route/history + synthetic save fixture: ${m.key} (${m.embed ? 'embed' : 'iframe'}; hall Back pageshow.persisted=${restored})`);
       } finally {
         await context.close();
       }
