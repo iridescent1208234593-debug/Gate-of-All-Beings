@@ -2,7 +2,13 @@
 
 感谢你参与《众生之门》的开发。本文档面向团队成员与新加入的协作者，涵盖从报告问题、提交代码到合并的完整流程与规范；为了不让任何人的努力白费，请先花一分钟读完本文，无论你是人类，大肥鱼，还是硅基生命！
 
-> **重要**：本项目是团队协作的私有生产工作区，官方仓库为 [iridescent1208234593-debug/Gate-of-All-Beings](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings)。**所有贡献请一律通过 GitHub 提交**。合并 PR 不等于部署——生产变更（香港生产、Cloudflare、DNS、Tunnel、OAuth 登记）需负责人显式授权。
+> **重要**：这是公开的主源码仓库，不是生产工作区。代码和文档通过 GitHub PR 提交；用户数据、未授权素材和部署凭证不要上传。合并 PR 不等于部署，生产变更仍需负责人显式授权。
+
+| 你想参与的方向 | 从这里开始 |
+| --- | --- |
+| 玩法、世界观、美术、音乐或共创提案 | 在 [Discussions](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/discussions) 说明想做什么、涉及哪个模块。未授权的原件不要直接公开。 |
+| 试玩或报告问题 | [先查 Issues](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/issues)，再用 [问题表单](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/issues/new/choose) 提交平台、版本和复现步骤。 |
+| 开发、文档或测试 | 从 [本地开发指引](docs/development/local-onboarding.md) 或 [Godot LAB 指南](apps/huiguan-lab/README.md) 开始。没有主库写权限可以先 Fork，再向 `master` 提 PR。 |
 
 ---
 
@@ -129,7 +135,7 @@ Windows 用户使用 PowerShell。仓库同时被 Linux CI 使用，脚本不要
 - [ ] 新增逻辑已补充对应测试
 - [ ] 未引入不必要的新依赖
 
-> **提 PR 之前必须自己跑完这些命令，并在 PR 中附上实际执行的命令与结果。** 不能只说"测过了"，也不能把跑不了当成通过。
+> **按改动范围附上实际执行的检查和结果。** 纯文档改动检查链接、格式和命令是否与仓库一致；不需要为此构建全部模块。没跑的检查不算通过。
 
 ---
 
