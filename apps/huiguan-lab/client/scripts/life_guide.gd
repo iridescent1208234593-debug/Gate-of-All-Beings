@@ -10,12 +10,12 @@ extends CanvasLayer
 ##
 ## Events: welcome, profile_ready, moved(distance), chatted, emoted, near_object(name), interacted,
 ## spaces_opened, space_entered(kind), view_toggled(mode), garden_tool(tool), planted,
-## minigame_opened, journal_opened.
+## minigame_opened, journal_opened, character_saved.
 ## Steps whose events an older client never sends simply never appear.
 
 signal changed(status: String, seen: Array)
 
-const ALL_REQUIRED := ["move", "chat", "interact", "spaces"]
+const ALL_REQUIRED := ["character", "move", "chat", "interact", "spaces"]
 const FINISHED := ["completed", "skipped", "veteran"]
 ## Notes answering something the player has just done; they take precedence over a waiting suggestion.
 const IN_THE_MOMENT := ["interact", "space-rules", "view", "garden", "minigame", "journal"]
@@ -106,6 +106,7 @@ func _step(key: String) -> Dictionary:
 	var chat_how := "点下面的输入框，写一句话发送" if touch else "按 Enter，写一句话再按 Enter 发送"
 	var act_how := "点屏幕上的「互动」" if touch else "按 E"     # touch without a button never gets this step
 	match key:
+		"character": return {"key": key, "target": "character", "title": "捏一个自己的形象", "body": "点上方的「捏人」，试试换部件颜色或五官，再在「动作试玩」里看看它怎么走路、跑步或挥手。满意后点「保存并使用」。也可以保留现在的形象。", "done_text": "以后随时可以再来捏人。"}
 		"move": return {"key": key, "target": "player", "title": "先走两步", "body": "这里是西木会馆的院子。" + move_how + "。", "done_text": "很好，就这样走。"}
 		"chat": return {"key": key, "target": "chat", "title": "和大家打个招呼", "body": "院子里的人都能看到你说的话，头顶也会冒出气泡。" + chat_how + "。", "done_text": "大家都看到了。"}
 		"emote": return {"key": key, "target": "emotes", "title": "不想打字时", "body": "这排动作可以挥手、鞠躬、表示喜欢。点一个试试。", "done_text": "对方会看到你的动作。"}
@@ -124,8 +125,11 @@ func on_event(name: String, data = null) -> void:
 		return
 	match name:
 		"profile_ready", "welcome":
+			_offer("character", 0.8)
 			if not "move" in seen:
 				_offer("move", 1.2)
+		"character_saved":
+			_done("character")
 		"moved":
 			_moved += float(data if data != null else 0.0)
 			if _current.get("key", "") == "move" and _moved >= 2.0:
@@ -197,7 +201,7 @@ func _done(key: String) -> void:
 		send.call(msg)
 	changed.emit(status, seen)
 	# once the everyday basics are done, point at 虹之间
-	if not "spaces" in seen and _required().filter(func(k): return k != "spaces").all(func(k): return k in seen):
+	if not "spaces" in seen and _required().filter(func(k): return k != "spaces" and k != "character").all(func(k): return k in seen):
 		_offer("spaces", 6.0)
 	if _current.get("key", "") == key:
 		var text: String = _current.get("done_text", "")
@@ -254,7 +258,7 @@ func review() -> void:
 
 
 func summary() -> String:
-	var names := {"move": "走路", "chat": "聊天", "interact": "互动", "spaces": "虹之间"}
+	var names := {"character": "捏人", "move": "走路", "chat": "聊天", "interact": "互动", "spaces": "虹之间"}
 	var parts: Array = []
 	for k in _required():
 		parts.append(names[k] + ("（已会）" if k in seen else ""))
@@ -343,7 +347,11 @@ func _build() -> void:
 	_primary.add_theme_stylebox_override("pressed", ph)
 	_primary.add_theme_color_override("font_color", Color.WHITE)
 	_primary.add_theme_color_override("font_hover_color", Color.WHITE)
-	_primary.pressed.connect(_dismiss)
+	_primary.pressed.connect(func():
+		if _current.get("key") == "character":
+			_done("character")
+		else:
+			_dismiss())
 	row.add_child(_primary)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -375,7 +383,7 @@ func _show(step: Dictionary) -> void:
 	_body.remove_theme_color_override("font_color")
 	_body.add_theme_color_override("font_color", INK_SOFT)
 	_try.visible = false
-	_primary.text = "知道了" if step.get("ack", false) else "好"
+	_primary.text = "保留原形象" if step["key"] == "character" else ("知道了" if step.get("ack", false) else "好")
 	_note.visible = true
 	_note.modulate.a = 0.0
 	_place()
