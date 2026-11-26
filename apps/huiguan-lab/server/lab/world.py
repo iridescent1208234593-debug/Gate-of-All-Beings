@@ -4,6 +4,7 @@ Protocol: JSON text frames over one WebSocket per player (protocol version 1, se
 The server owns every shared fact; clients only propose moves and actions.
 """
 from __future__ import annotations
+from pathlib import Path
 
 import asyncio
 import base64
@@ -21,6 +22,7 @@ from pathlib import Path
 
 from .oc import OCCache, OCRejected, normalize_image
 from .store import Store
+from .art import catalog
 
 log = logging.getLogger("lab.world")
 PROTOCOL = 1
@@ -35,6 +37,14 @@ def clean_text(text: str, limit: int) -> str:
     return text[:limit]
 
 
+def point_in_polygon(x, z, polygon):
+    inside = False
+    for a, b in zip(polygon, polygon[1:] + polygon[:1]):
+        if (a[1] > z) != (b[1] > z) and x < (b[0]-a[0]) * (z-a[1]) / (b[1]-a[1]) + a[0]:
+            inside = not inside
+    return inside
+
+
 class Geometry:
     def __init__(self, template: dict, player: dict):
         self.t = template
@@ -44,10 +54,24 @@ class Geometry:
         self.max = template["bounds"]["max"]
         self.obstacles = [(o["position"][0], o["position"][2], o["radius"] + self.radius) for o in template["obstacles"]]
         self.objects = {o["id"]: o for o in template["objects"]}
+        self.crossing = template.get("river_crossing")
+
+    def in_river(self, x: float, z: float) -> bool:
+        if self.crossing is None:
+            return False
+        west, north, width, length = self.crossing["channel"]
+        return west <= x < west + width and north <= z < north + length
 
     def free(self, x: float, z: float) -> bool:
         if not (self.min[0] <= x <= self.max[0] and self.min[2] <= z <= self.max[2]):
             return False
+        if self.in_river(x, z):
+            lo, hi = self.crossing["deck_z"]
+            if not lo <= z < hi:
+                return False
+        for polygon in self.t.get('blocked_polygons', []):
+            if point_in_polygon(x, z, polygon):
+                return False
         return all((x - ox) ** 2 + (z - oz) ** 2 >= r * r for ox, oz, r in self.obstacles)
 
     def segment_free(self, x0, z0, x1, z1) -> bool:
@@ -94,6 +118,7 @@ class Conn:
     anim: str = "idle"
     client: str = "?"
     version: str = "?"
+    east_bank: bool = False
     ip_hint: str = ""
     connected_at: float = field(default_factory=time.time)
     last_move: float = field(default_factory=time.time)
@@ -103,6 +128,9 @@ class Conn:
     chat_times: deque = field(default_factory=lambda: deque(maxlen=20))
     oc_times: deque = field(default_factory=lambda: deque(maxlen=10))
     corrections: int = 0
+    part_colors: dict = field(default_factory=dict)
+    face: dict = field(default_factory=dict)
+    tile_times: deque = field(default_factory=lambda: deque(maxlen=64))
     queue: asyncio.Queue = field(default_factory=lambda: asyncio.Queue(maxsize=400))
     sent_bytes: int = 0
     recv_bytes: int = 0
@@ -116,11 +144,27 @@ class Hub:
         self.spec = data
         self.geo = {name: Geometry(t, data["player"]) for name, t in data["templates"].items()}
         self.emotes = set(data["emotes"])
+        self.color_parts = {part["mesh"] for part in json.loads((Path(__file__).parents[2]/"client/assets/renmo1/parts.json").read_text(encoding="utf-8"))}
+        # Face slots (eyes / brows / mouth ...) baked by the renmo pipeline (renmo1-live2d/pipeline); re-read on restart.
+        variants = json.loads((Path(__file__).parents[2]/"client/assets/renmo1/variants.json").read_text(encoding="utf-8"))
+        self.face_options = {s["id"]: {o["id"] for o in s["options"]} for s in variants["slots"]}
+        self.face_defaults = {s["id"]: s["default"] for s in variants["slots"]}
         self.store, self.oc, self.r4, self.version = store, oc, r4, version
         self.conns: dict[str, Conn] = {}
         self.chat: dict[str, deque] = {}
         self.test_npcs: dict[str, dict] = {}      # admin-spawned, gateway-only, non-persistent
+        self.entities = {r['id']: json.loads(r['state']) for r in store.all('SELECT id,state FROM lab_entities')}
+        for n in self.entities.values():
+            if n.get('asset') == 'b_mushroom':
+                n.update(kind='plant', behavior='idle', speed=0)
+                self.save_entity(n)
+        self.paths = data.get("paths", {"kinds": {"dirt": "泥土路"}, "reach": 4.0, "max_per_space": 3000, "per_10s": 24})
+        self.tiles: dict[str, dict[tuple[int, int], dict]] = {}
+        for r in store.all("SELECT space_id,x,z,kind,placed_by FROM lab_tiles"):
+            self.tiles.setdefault(r["space_id"], {})[(r["x"], r["z"])] = {"kind": r["kind"], "by": r["placed_by"]}
+        self.art_dir = None
         self.seq = 0
+        self.creature_states: dict[str, dict] = {}
         self.tick_ms = deque(maxlen=300)
         self.counters = {"connects": 0, "disconnects": 0, "kicks": 0, "rejected_moves": 0, "chat": 0,
                          "oc_accepted": 0, "oc_rejected": 0, "send_overflow": 0, "errors": 0, "reconnects": 0}
@@ -136,6 +180,12 @@ class Hub:
     def geometry(self, sid: str) -> Geometry:
         row = self.space_row(sid)
         return self.geo[row["template"] if row else "hall"]
+
+    def r4_branch(self, sid):
+        row = self.space_row(sid)
+        if not row or row['template'] == 'initial':
+            return None
+        return 'public' if row['kind'] == 'public' else row['r4_branch']
 
     def members(self, sid: str) -> list[Conn]:
         return [c for c in self.conns.values() if c.space == sid and not c.closed]
@@ -166,7 +216,7 @@ class Hub:
     def player_view(self, c: Conn) -> dict:
         oc = self.oc.get(c.pid)
         return {"pid": c.pid, "nick": c.nick, "x": c.x, "z": c.z, "dir": round(c.dir, 2), "anim": c.anim,
-                "client": c.client, "oc": oc.digest if oc else None}
+                "client": c.client, "oc": oc.digest if oc else None, "part_colors":c.part_colors, "face": self.face_of(c)}
 
     def objects_state(self, sid: str) -> dict:
         return {r["object_id"]: json.loads(r["state"]) for r in
@@ -177,7 +227,7 @@ class Hub:
         out = []
         if row and self.r4:
             geo = self.geo[row["template"]]
-            branch = "public" if row["kind"] == "public" else row["r4_branch"]
+            branch = self.r4_branch(sid)
             for a in self.r4.actors(branch):
                 if a["alive"]:
                     x, z = geo.pasture(a["cell"])
@@ -186,13 +236,137 @@ class Hub:
             if n["space"] == sid:
                 out.append({"id": n["id"], "species": n["species"], "x": round(n["x"], 2), "z": round(n["z"], 2),
                             "source": "test"})
+        for n in self.entities.values():
+            if n['space'] != sid or not n.get('visible', True):
+                continue
+            view = dict(n, x=round(n['x'], 2), z=round(n['z'], 2), source='lab')
+            if n.get('stages'):
+                stage = n['stage']
+                if n.get('grow_seconds', 0):
+                    stage = min(len(n['stages'])-1, stage + int((n.get('growth_paused', time.time())-n['growth_at'])/n['grow_seconds']))
+                view['asset'] = n['stages'][stage]
+                view['stage'] = stage
+            out.append(view)
         return out
+
+    def save_entity(self, n):
+        self.store.exec('INSERT OR REPLACE INTO lab_entities(id,space_id,state,updated_at) VALUES(?,?,?,?)',
+                        (n['id'], n['space'], json.dumps(n, ensure_ascii=False), time.time()))
+
+    def save_entities(self):
+        with self.store.tx():
+            for n in self.entities.values():
+                self.save_entity(n)
+
+    def edit_entity(self, sid, body, eid=None):
+        if not self.space_row(sid):
+            raise ValueError('空间不存在')
+        old = self.entities.get(eid) if eid else None
+        if eid and (not old or old['space'] != sid):
+            raise ValueError('找不到这个 LAB 生物/植物')
+        if not old and sum(n['space'] == sid for n in self.entities.values()) >= 500:
+            raise ValueError('这个空间已放置 500 个对象')
+        x, z = self.geometry(sid).spawn()
+        n = dict(old or {'id': 'e_' + secrets.token_hex(6), 'space': sid, 'x': x, 'z': z,
+                         'species': '小灵体', 'kind': 'creature', 'asset': 'b_spirit', 'height': 1.0,
+                         'speed': 0.8, 'behavior': 'wander', 'heading': 0.0, 'visible': True,
+                         'stage': 0, 'grow_seconds': 0, 'growth_at': time.time(), 'stages': []})
+        for k in ('species', 'asset', 'kind', 'behavior'):
+            if k in body:
+                n[k] = clean_text(body[k], 80)
+        if n['kind'] not in ('creature', 'plant', 'prop') or n['behavior'] not in ('idle', 'wander', 'follow'):
+            raise ValueError('类型或行为无效')
+        assets = {a['id']: a for a in catalog(self.store)}
+        if n['asset'] not in assets:
+            raise ValueError('请选择已发布的素材')
+        if not old or n['asset'] != old['asset']:
+            n['stages'] = assets[n['asset']].get('stages', [])
+            n['growth_at'] = time.time()
+        for k, lo, hi in [('x', -1000, 1000), ('z', -1000, 1000), ('height', 0.1, 12), ('speed', 0, 10), ('grow_seconds', 0, 86400)]:
+            if k in body:
+                v = float(body[k])
+                if not math.isfinite(v) or not lo <= v <= hi:
+                    raise ValueError(f'{k} 超出范围')
+                n[k] = v
+        if n["asset"] == "b_mushroom":
+            n.update(kind="plant", behavior="idle", speed=0)
+        geo = self.geometry(sid)
+        if not (geo.min[0] <= n['x'] <= geo.max[0] and geo.min[2] <= n['z'] <= geo.max[2]):
+            raise ValueError('位置超出地图')
+        if n['kind'] == 'creature' and not geo.free(n['x'], n['z']):
+            raise ValueError('生物位置被房屋或水域挡住，请换一个位置')
+        if 'stage' in body:
+            n['stage'] = max(0, min(2, int(body['stage'])))
+            n['growth_at'] = time.time()
+        if 'visible' in body:
+            n['visible'] = bool(body['visible'])
+        if sid in self.paused_spaces:
+            paused_now = time.time()
+            if old and 'growth_paused' in old and 'stage' not in body and n['asset'] == old['asset']:
+                n['growth_at'] += paused_now - old['growth_paused']
+            n['growth_paused'] = paused_now
+        self.entities[n['id']] = n
+        self.save_entity(n)
+        self.broadcast(sid, {'t': 'npcs', 'npcs': self.npcs(sid), 'clock': self.clock(sid)})
+        return n
+
+    def pause_entity_growth(self, sid, paused):
+        now = time.time()
+        for n in self.entities.values():
+            if n['space'] != sid:
+                continue
+            if paused:
+                n.setdefault('growth_paused', now)
+            elif 'growth_paused' in n:
+                n['growth_at'] += now - n.pop('growth_paused')
+            self.save_entity(n)
+
+    def delete_entity(self, sid, eid):
+        n = self.entities.get(eid)
+        if not n or n['space'] != sid:
+            raise ValueError('对象不存在')
+        self.store.exec('DELETE FROM lab_entities WHERE id=?', (eid,))
+        self.entities.pop(eid)
+        self.creature_states.pop(eid, None)
+        self.broadcast(sid, {'t': 'npcs', 'npcs': self.npcs(sid), 'clock': self.clock(sid)})
+
+    # ------------------------------------------------------------------ ground tiles (player-placed dirt path)
+    def tiles_view(self, sid: str) -> list:
+        return [[x, z, t["kind"], t["by"]] for (x, z), t in sorted(self.tiles.get(sid, {}).items())]
+
+    def tile_check(self, sid: str, x: int, z: int) -> str | None:
+        geo = self.geometry(sid)
+        cx, cz = x + 0.5, z + 0.5
+        if not (geo.min[0] - 0.5 <= cx <= geo.max[0] + 0.5 and geo.min[2] - 0.5 <= cz <= geo.max[2] + 0.5):
+            return "tile_blocked"
+        if geo.in_river(cx, cz):
+            return "tile_blocked"
+        for polygon in geo.t.get("blocked_polygons", []):      # never pave the house or the river
+            if point_in_polygon(cx, cz, polygon):
+                return "tile_blocked"
+        for o in geo.t["obstacles"]:
+            if o["kind"] == "water" and math.dist((cx, cz), (o["position"][0], o["position"][2])) < o["radius"]:
+                return "tile_blocked"
+        return None
+
+    def set_tile(self, sid: str, x: int, z: int, on: bool, by: str, kind: str = "dirt") -> bool:
+        cells = self.tiles.setdefault(sid, {})
+        if on:
+            cells[(x, z)] = {"kind": kind, "by": by}
+            self.store.exec("INSERT OR REPLACE INTO lab_tiles(space_id,x,z,kind,placed_by,placed_at) VALUES(?,?,?,?,?,?)",
+                            (sid, x, z, kind, by, time.time()))
+        else:
+            if cells.pop((x, z), None) is None:
+                return False
+            self.store.exec("DELETE FROM lab_tiles WHERE space_id=? AND x=? AND z=?", (sid, x, z))
+        self.broadcast(sid, {"t": "tile", "x": x, "z": z, "on": on, "kind": kind, "by": by})
+        return True
 
     def clock(self, sid: str) -> dict:
         row = self.space_row(sid)
         if not row or not self.r4:
             return {"available": False}
-        branch = "public" if row["kind"] == "public" else row["r4_branch"]
+        branch = self.r4_branch(sid)
         clock = self.r4.clock(branch)
         clock["paused"] = sid in self.paused_spaces
         return clock
@@ -293,7 +467,7 @@ class Hub:
                 "needs_profile": not c.nick, "space": self.space_info(row), "you": self.player_view(c),
                 "players": [self.player_view(m) for m in self.members(c.space) if m.pid != c.pid],
                 "objects": self.objects_state(c.space), "npcs": self.npcs(c.space),
-                "chat": list(self.chat.get(c.space, [])), "spaces": self.visible_spaces(c.pid),
+                "garden_phase":self.garden_phase(c.pid), "inventory": self.inventory(c.pid), "tiles": self.tiles_view(c.space), "chat": list(self.chat.get(c.space, [])), "spaces": self.visible_spaces(c.pid),
                 "clock": self.clock(c.space), "emotes": sorted(self.emotes), "tick_hz": TICK_HZ,
                 "guide": self.guide_state(c)}
 
@@ -390,9 +564,19 @@ class Hub:
             log.exception("handler failed")
             self.send(c, {"t": "error", "code": "server_error"})
 
+    async def on_minigame(self, c: Conn, m: dict, now: float) -> None:
+        self.minigames.handle(self, c, m, now)
+
     async def on_hello(self, c: Conn, m: dict, now: float) -> None:
         c.client = clean_text(m.get("client", "?"), 8) or "?"
         c.version = clean_text(m.get("version", "?"), 32) or "?"
+        c.east_bank = m.get("east_bank") is True
+        geo = self.geometry(c.space)
+        if geo.crossing is not None and not c.east_bank:
+            west, landing_z = geo.crossing["west_landing"]
+            if c.x > west:
+                # Old builds stop at the west bank even on reconnect.
+                c.x, c.z = (west, landing_z) if geo.free(west, landing_z) else geo.spawn()
         await self.join(c)
 
     async def on_hello_view(self, c: Conn, m: dict, now: float) -> None:
@@ -406,14 +590,30 @@ class Hub:
         if 0 <= v < 60000:
             c.rtt_ms = v
 
+    def face_of(self, c: Conn) -> dict:
+        return {k: c.face.get(k, d) for k, d in self.face_defaults.items()}
+
     async def on_profile(self, c: Conn, m: dict, now: float) -> None:
         nick = clean_text(m.get("nick", ""), 16)
         if len(nick) < 1:
             self.send(c, {"t": "error", "code": "nick_required"})
             return
+        colors = m.get("part_colors",c.part_colors)
+        allowed = self.color_parts
+        if not isinstance(colors,dict) or len(colors)>len(allowed) or any(k not in allowed or not isinstance(v,str) or not re.fullmatch(r'[0-9a-fA-F]{6}',v) for k,v in colors.items()):
+            raise ValueError('part_colors')
+        face = self.face_of(c)
+        req = m.get("face", {})
+        if "mouth" in m and isinstance(req, dict) and "mouth" not in req:
+            req = {**req, "mouth": m["mouth"]}  # clients from before face slots
+        if not isinstance(req, dict) or any(k not in self.face_options or not isinstance(v, str) or v not in self.face_options[k] for k, v in req.items()):
+            raise ValueError('face')
+        face.update(req)
+        c.part_colors = dict(colors)
+        c.face = face
         c.nick = nick
         self.save_player(c)
-        self.broadcast(c.space, {"t": "profile", "pid": c.pid, "nick": nick})
+        self.broadcast(c.space, {"t": "profile", "pid": c.pid, "nick": nick, "part_colors":c.part_colors, "face": self.face_of(c)})
 
     async def on_move(self, c: Conn, m: dict, now: float) -> None:
         x, z = float(m["x"]), float(m["z"])
@@ -426,6 +626,8 @@ class Hub:
         reason = None
         if dist > allowed:
             reason = "too_fast"
+        elif geo.crossing is not None and not c.east_bank and x > geo.crossing["west_landing"][0]:
+            reason = "blocked"
         elif not geo.segment_free(c.x, c.z, x, z):
             reason = "blocked"
         if reason:
@@ -433,10 +635,14 @@ class Hub:
             self.counters["rejected_moves"] += 1
             self.send(c, {"t": "correct", "x": c.x, "z": c.z, "reason": reason, "seq": m.get("seq")})
             return
+        was_idle = c.anim == "idle"
         c.x, c.z = round(x, 3), round(z, 3)
         c.dir = float(m.get("dir", c.dir)) % (2 * math.pi)
         anim = m.get("anim", "walk")
         c.anim = anim if anim in ("idle", "walk", "run") else "walk"
+        if dist > 0.001 and c.anim == "idle": c.anim = "walk"
+        if was_idle and c.anim != "idle":
+            self.broadcast(c.space, {"t":"emote_cancel","pid":c.pid})
         c.last_move = now
         c.dirty = c.moved_since_save = True
 
@@ -455,6 +661,12 @@ class Hub:
 
     async def on_emote(self, c: Conn, m: dict, now: float) -> None:
         eid = m.get("id")
+        if c.anim != "idle":
+            self.send(c, {"t":"error","code":"emote_while_moving"})
+            return
+        if eid == "crouch" and self.garden_phase(c.pid) < 3:
+            self.send(c, {"t":"error","code":"crouch_locked"})
+            return
         if eid in self.emotes:
             self.broadcast(c.space, {"t": "emote", "pid": c.pid, "id": eid})
 
@@ -496,14 +708,52 @@ class Hub:
         self.oc.drop(c.pid)
         self.broadcast(c.space, {"t": "oc_changed", "pid": c.pid, "digest": None})
 
+    async def on_asset_get(self, c: Conn, m: dict, now: float) -> None:
+        aid = str(m.get('id', ''))
+        if not re.fullmatch(r'a_[0-9a-f]{12}', aid) or not self.art_dir:
+            return
+        if not any(n.get('asset') == aid for n in self.npcs(c.space)):
+            return
+        row = self.store.one("SELECT status FROM art_assets WHERE id=?", (aid,))
+        if not row or row['status'] != 'approved':
+            return
+        f = self.art_dir / 'approved' / f'{aid}.preview.png'
+        if not f.exists():
+            original = self.art_dir / 'approved' / f'{aid}.png'
+            if not original.exists():
+                return
+            png, _, _, _ = await asyncio.to_thread(normalize_image, original.read_bytes(), 32*1024*1024, 4096, 512)
+            f.write_bytes(png)
+        self.send(c, {'t': 'asset', 'id': aid, 'png': base64.b64encode(f.read_bytes()).decode()})
+
     async def on_interact(self, c: Conn, m: dict, now: float) -> None:
         oid = m.get("object")
+        if not isinstance(oid, str):
+            raise ValueError("object")
+        plant = self.entities.get(oid)
+        if plant and plant['space'] == c.space and plant['kind'] == 'plant' and plant['visible']:
+            if math.dist((c.x, c.z), (plant['x'], plant['z'])) > 1.9:
+                self.send(c, {'t':'error','code':'too_far'})
+                return
+            plant['stage'] = (plant['stage'] + 1) % 3
+            plant['growth_at'] = now
+            if c.space in self.paused_spaces:
+                plant['growth_paused'] = now
+            self.save_entity(plant)
+            self.broadcast(c.space, {'t':'npcs','npcs':self.npcs(c.space),'clock':self.clock(c.space)})
+            return
         geo = self.geometry(c.space)
         if not geo.near(oid, c.x, c.z):
             self.send(c, {"t": "error", "code": "too_far"})
             return
         obj = geo.objects[oid]
         kind = obj["kind"]
+        if kind == "game_pavilion":
+            self.send(c, {"t": "minigame_open"})
+            return
+        if kind == "game_relay":
+            self.minigames.field.interact(self, c, oid, now)
+            return
         state = self.objects_state(c.space).get(oid, {})
         if kind == "lantern":
             state = {"stage": (int(state.get("stage", 0)) + 1) % obj.get("stages", 4),
@@ -524,6 +774,126 @@ class Hub:
                         "state=excluded.state, updated_at=excluded.updated_at",
                         (c.space, oid, json.dumps(state, ensure_ascii=False), now))
         self.broadcast(c.space, {"t": "object", "id": oid, "state": state, "by": c.pid})
+
+    def inventory(self, pid):
+        self.store.exec("INSERT OR IGNORE INTO garden_inventory(pid) VALUES(?)", (pid,))
+        r = self.store.one("SELECT seeds,soil FROM garden_inventory WHERE pid=?", (pid,))
+        return dict(r)
+
+    def garden_phase(self, pid):
+        self.store.exec("INSERT OR IGNORE INTO garden_progress(pid) VALUES(?)",(pid,))
+        return self.store.one("SELECT phase FROM garden_progress WHERE pid=?",(pid,))['phase']
+
+    def send_inventory(self, c):
+        self.send(c, {"t": "inventory", **self.inventory(c.pid), "garden_phase":self.garden_phase(c.pid)})
+
+    def planted_at(self, sid, x, z):
+        return next((n for n in self.entities.values() if n['space'] == sid and
+                     n.get('planted_by') and math.floor(n['x']) == x and math.floor(n['z']) == z), None)
+
+    async def on_garden(self, c, m, now):
+        action = m.get('action')
+        if action not in ('plant', 'shovel'):
+            raise ValueError('action')
+        x, z = m['x'], m['z']
+        if any(isinstance(v, bool) or not isinstance(v, (int,float)) or not math.isfinite(v) or v != int(v) or abs(v)>1000 for v in (x,z)):
+            raise ValueError('cell')
+        x,z = int(x),int(z)
+        def fail(code): self.send(c, {"t":"error", "code":code})
+        if math.dist((c.x,c.z),(x+.5,z+.5)) > float(self.paths['reach']):
+            return fail('tile_too_far')
+        plant = self.planted_at(c.space,x,z)
+        inv = self.inventory(c.pid)
+        if action == 'plant':
+            tile = self.tiles.get(c.space,{}).get((x,z))
+            if not tile or tile['kind'] != 'dirt': return fail('need_dirt')
+            if tile['by'] not in (c.pid,'lab'): return fail('tile_not_yours')
+            if plant: return fail('plant_occupied')
+            if inv['seeds'] < 1: return fail('no_seeds')
+            if sum(n['space']==c.space for n in self.entities.values()) >= 500: return fail('plant_limit')
+            plant = {'id':'e_'+secrets.token_hex(6),'space':c.space,'x':x+.5,'z':z+.5,
+                     'species':'蘑菇','kind':'plant','asset':'b_mushroom','height':.8,
+                     'speed':0,'behavior':'idle','heading':0,'visible':True,'stage':0,
+                     'grow_seconds':0,'growth_at':now,'stages':[],'planted_by':c.pid}
+            with self.store.tx():
+                self.store.exec('UPDATE garden_inventory SET seeds=seeds-1 WHERE pid=?',(c.pid,))
+                self.save_entity(plant)
+                phase = self.garden_phase(c.pid)
+                self.store.exec('UPDATE garden_progress SET phase=? WHERE pid=?',(3 if phase>=2 else 1,c.pid))
+            self.entities[plant['id']] = plant
+        else:
+            if not plant: return fail('no_mushroom')
+            if plant['planted_by'] != c.pid: return fail('plant_not_yours')
+            with self.store.tx():
+                self.store.exec('DELETE FROM lab_entities WHERE id=?',(plant['id'],))
+                self.store.exec('UPDATE garden_inventory SET seeds=seeds+1 WHERE pid=?',(c.pid,))
+                phase = self.garden_phase(c.pid)
+                if phase == 1: self.store.exec('UPDATE garden_progress SET phase=2 WHERE pid=?',(c.pid,))
+            self.entities.pop(plant['id'])
+        self.send_inventory(c)
+        self.broadcast(c.space, {'t':'npcs','npcs':self.npcs(c.space),'clock':self.clock(c.space)})
+
+    async def on_tile(self, c: Conn, m: dict, now: float) -> None:
+        """Place or lift one 1 m ground tile. The cell (x, z) covers [x, x+1) x [z, z+1) in metres."""
+        def cell(v):
+            # Godot may send 3 or 3.0; anything that is not a whole number is refused
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v != int(v):
+                raise ValueError("cell")
+            v = int(v)
+            if not -1000 <= v <= 1000:
+                raise ValueError("cell")
+            return v
+        x, z, on = cell(m["x"]), cell(m["z"]), m.get("on", True)
+        if not isinstance(on, bool):
+            raise ValueError("on")
+        kind = str(m.get("kind", "dirt"))
+        if kind not in self.paths["kinds"]:
+            raise ValueError("kind")
+        if math.dist((c.x, c.z), (x + 0.5, z + 0.5)) > float(self.paths["reach"]):
+            self.send(c, {"t": "error", "code": "tile_too_far"})
+            return
+        c.tile_times.append(now)
+        limit = int(self.paths["per_10s"])
+        if len(c.tile_times) > limit and now - c.tile_times[-limit - 1] < 10:
+            self.send(c, {"t": "error", "code": "tile_rate_limited"})
+            return
+        cells = self.tiles.get(c.space, {})
+        current = cells.get((x, z))
+        if on:
+            if current:
+                return
+            blocked = self.tile_check(c.space, x, z)
+            if blocked:
+                self.send(c, {"t": "error", "code": blocked})
+                return
+            if len(cells) >= int(self.paths["max_per_space"]):
+                self.send(c, {"t": "error", "code": "tile_limit"})
+                return
+            if self.inventory(c.pid)['soil'] < 1:
+                self.send(c, {"t":"error","code":"no_soil"})
+                return
+            with self.store.tx():
+                self.store.exec('UPDATE garden_inventory SET soil=soil-1 WHERE pid=?',(c.pid,))
+                self.set_tile(c.space, x, z, True, c.pid, kind)
+            self.send_inventory(c)
+        else:
+            if not current:
+                return
+            row = self.space_row(c.space)
+            # your own tiles, tiles the LAB laid, or anything in a space you own
+            if current["by"] not in (c.pid, "lab") and not (row and row["owner_pid"] == c.pid):
+                self.send(c, {"t": "error", "code": "tile_not_yours"})
+                return
+            if self.planted_at(c.space,x,z):
+                self.send(c, {"t":"error","code":"soil_has_mushroom"})
+                return
+            with self.store.tx():
+                self.set_tile(c.space, x, z, False, c.pid, current["kind"])
+                # Only lifting your own placed soil refunds an item; public roads cannot mint soil.
+                if current['by'] == c.pid:
+                    self.inventory(c.pid)
+                    self.store.exec('UPDATE garden_inventory SET soil=soil+1 WHERE pid=?',(c.pid,))
+            self.send_inventory(c)
 
     async def move_to(self, c: Conn, sid: str, reason: str) -> None:
         old = c.space
@@ -569,7 +939,7 @@ class Hub:
             self.store.security("space_denied", code_id=c.code_id, pid=c.pid, space=str(sid)[:20])
             self.send(c, {"t": "error", "code": "space_forbidden"})
             return
-        if sid != "hall" and c.space == "hall" and not self.geometry("hall").near("rainbow-door", c.x, c.z, 1.2):
+        if self.space_row(sid)['kind'] == 'private' and c.space == "hall" and not self.geometry("hall").near("rainbow-door", c.x, c.z, 1.2):
             self.send(c, {"t": "error", "code": "go_to_rainbow_door"})
             return
         await self.move_to(c, sid, "enter")
@@ -651,14 +1021,21 @@ class Hub:
                 changed = [c for c in members if c.dirty or full]
                 if changed:
                     rows = [[c.pid, c.x, c.z, round(c.dir, 2), c.anim] for c in changed]
-                    self.broadcast(sid, {"t": "s", "seq": self.seq, "full": full, "p": rows})
+                    self.broadcast(sid, {"t": "s", "seq": self.seq, "time": time.monotonic(), "full": full, "p": rows})
                     for c in changed:
                         c.dirty = False
                         if time.time() - c.last_move > 0.4 and c.anim != "idle":
                             c.anim = "idle"
                             c.dirty = True
+                npcs = self.npcs(sid)
+                now = time.monotonic()
+                motion = [[a['id'], a['x'], a['z'], a.get('heading', 0),
+                           self.creature_states.get(a['id'], {}).get('action', 'idle'),
+                           a.get('speed', 0)] for a in npcs if a.get('kind') == 'creature' and a.get('source') == 'lab']
+                if motion:
+                    self.broadcast(sid, {"t": "npc_motion", "space": sid, "seq": self.seq,
+                                         "time": now, "motions": motion})
                 if n % 10 == 0:
-                    npcs = self.npcs(sid)
                     key = json.dumps(npcs, sort_keys=True)
                     if key != last_npcs.get(sid) or n % 50 == 0:
                         last_npcs[sid] = key
@@ -676,6 +1053,53 @@ class Hub:
                 n["x"], n["z"] = nx, nz
             else:
                 n["heading"] += math.pi / 2
+        for n in self.entities.values():
+            state = self.creature_states.setdefault(n['id'], {'action': 'idle', 'until': 0.0})
+            if n.get('asset') == 'b_mushroom' or n['space'] in self.paused_spaces or n['kind'] != 'creature' or n['behavior'] == 'idle' or not n['visible']:
+                state['action'] = 'idle'
+                continue
+            geo = self.geometry(n['space'])
+            if n.get('asset') == 'b_frog' and n['behavior'] == 'wander':
+                now = time.monotonic()
+                members = self.members(n['space'])
+                near = min(members, key=lambda c: math.hypot(n['x']-c.x, n['z']-c.z), default=None)
+                if now >= state['until']:
+                    if state['action'] == 'watch' and near:
+                        state.update(action='retreat', until=now+1.0)
+                        n['heading'] = math.atan2(n['z']-near.z, n['x']-near.x)
+                    elif state['action'] == 'retreat':
+                        state.update(action='rest', until=now+1.5)
+                    elif near and math.hypot(n['x']-near.x, n['z']-near.z) < 2.4:
+                        state.update(action='watch', until=now+0.8)
+                        n['heading'] = math.atan2(near.z-n['z'], near.x-n['x'])
+                    elif state['action'] in ('walk', 'idle'):
+                        state.update(action='rest', until=now+random.uniform(0.8, 1.8))
+                    else:
+                        state.update(action='walk', until=now+random.uniform(2.0, 4.0))
+                        n['heading'] = random.uniform(0, math.tau)
+                if state['action'] in ('watch', 'rest'):
+                    continue
+            if n['behavior'] == 'follow':
+                members = self.members(n['space'])
+                if not members:
+                    state['action'] = 'idle'
+                    continue
+                target = min(members, key=lambda c: math.dist((n['x'], n['z']), (c.x, c.z)))
+                if math.dist((n['x'], n['z']), (target.x, target.z)) < 1.2:
+                    state['action'] = 'idle'
+                    continue
+                n['heading'] = math.atan2(target.z-n['z'], target.x-n['x'])
+            elif n.get('asset') != 'b_frog' and random.random() < .03:
+                n['heading'] = random.uniform(0, math.tau)
+            nx = n['x'] + math.cos(n['heading']) * n['speed'] * dt
+            nz = n['z'] + math.sin(n['heading']) * n['speed'] * dt
+            if geo.segment_free(n['x'], n['z'], nx, nz):
+                n['x'], n['z'] = nx, nz
+                if state['action'] != 'retreat':
+                    state['action'] = 'walk' if n['speed'] > 0 else 'idle'
+            else:
+                n['heading'] += math.pi / 2
+                state.update(action='rest', until=time.monotonic()+0.5)
 
     def spawn_test_npc(self, sid: str, species: str = "Spirit") -> dict:
         geo = self.geometry(sid)
@@ -687,6 +1111,7 @@ class Hub:
     async def persist_loop(self) -> None:
         while True:
             await asyncio.sleep(5)
+            self.save_entities()
             for c in list(self.conns.values()):
                 if c.moved_since_save:
                     self.save_player(c)
@@ -698,7 +1123,7 @@ class Hub:
             if self.r4 and self.r4.enabled:
                 world = await self.r4.poll()
                 for sid_row in self.store.all("SELECT id, kind, r4_branch FROM spaces"):
-                    branch = "public" if sid_row["kind"] == "public" else sid_row["r4_branch"]
+                    branch = self.r4_branch(sid_row['id'])
                     b = self.r4.branch(branch) if world else None
                     runner = (b or {}).get("runner") or {}
                     err = runner.get("error")

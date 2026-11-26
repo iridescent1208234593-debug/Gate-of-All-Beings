@@ -52,6 +52,7 @@ var _queue: Array = []
 var _moved := 0.0
 var _tween: Tween
 var _ring_t := 0.0
+var _session_generation := 0
 
 
 func setup(p_font: Font, p_send: Callable) -> void:
@@ -81,6 +82,18 @@ func apply_server_state(state: Dictionary) -> void:
 	changed.emit(status, seen)
 	if is_finished() or status == "paused":
 		_hide()
+
+
+func reset_session() -> void:
+	_session_generation += 1
+	status = "new"
+	seen.clear()
+	_queue.clear()
+	_moved = 0.0
+	if _tween and _tween.is_running():
+		_tween.kill()
+	_hide()
+	changed.emit(status, seen)
 
 
 func is_finished() -> bool:
@@ -151,7 +164,10 @@ func _offer(key: String, delay: float) -> void:
 	if key in seen or _queue.has(key) or _current.get("key", "") == key:
 		return
 	_queue.append(key)
+	var generation := _session_generation
 	await get_tree().create_timer(delay).timeout
+	if generation != _session_generation:
+		return
 	_queue.erase(key)
 	if key in seen or is_finished() or status == "paused":
 		return
@@ -189,7 +205,10 @@ func _done(key: String) -> void:
 			_body.text = text
 			_body.add_theme_color_override("font_color", MOSS)
 			_sprout()
+			var generation := _session_generation
 			await get_tree().create_timer(1.4).timeout
+			if generation != _session_generation:
+				return
 		if _current.get("key", "") == key:
 			_hide()
 			_next_in_queue()

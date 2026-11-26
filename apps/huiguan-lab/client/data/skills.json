@@ -1,0 +1,4837 @@
+{
+ "version": 1,
+ "source": "PixelFX (MIT) patch-gg/pixelfx 044e12a, winkidney/pixelfx-godot babe913",
+ "slots": 4,
+ "tier_size": 3,
+ "start_points": 10,
+ "minutes_per_point": 10,
+ "branches": [
+  {
+   "id": "melee",
+   "name": "近战",
+   "blurb": "刀光与拳风",
+   "anchor": "front",
+   "skills": [
+    "melee/sword-slash",
+    "melee/claw-swipe",
+    "melee/thrust",
+    "melee/whip-crack",
+    "melee/double-slash",
+    "melee/uppercut",
+    "melee/dagger-flurry",
+    "melee/spin-slash",
+    "melee/spear-sweep",
+    "melee/scythe-reap",
+    "melee/heavy-cleave",
+    "melee/hammer-smash"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "moves",
+   "name": "招式",
+   "blurb": "完整的出招动作",
+   "anchor": "front",
+   "skills": [
+    "moves/arrow-shot",
+    "moves/pistol-shots",
+    "moves/sword-combo",
+    "moves/holy-smite",
+    "moves/dash-strike",
+    "moves/earth-stomp",
+    "moves/ice-lance-throw",
+    "moves/lightning-call",
+    "moves/ground-pound",
+    "moves/meteor-call",
+    "moves/fireball-throw",
+    "moves/rocket-launcher"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "impacts",
+   "name": "冲击",
+   "blurb": "命中瞬间的火花",
+   "anchor": "front",
+   "skills": [
+    "impacts/hit-flash",
+    "impacts/hit-spark",
+    "impacts/blunt-hit",
+    "impacts/shield-block",
+    "impacts/impact-frame",
+    "impacts/bullet-impact",
+    "impacts/ricochet",
+    "impacts/parry",
+    "impacts/heavy-landing",
+    "impacts/crit-hit",
+    "impacts/ground-slam"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "projectiles",
+   "name": "弹道",
+   "blurb": "飞出去的东西",
+   "anchor": "front",
+   "skills": [
+    "projectiles/laser-bolt",
+    "projectiles/arrow",
+    "projectiles/energy-disc",
+    "projectiles/bullet-tracer",
+    "projectiles/plasma-shot",
+    "projectiles/muzzle-smg",
+    "projectiles/muzzle-pistol",
+    "projectiles/rocket",
+    "projectiles/magic-missile",
+    "projectiles/muzzle-shotgun",
+    "projectiles/cannonball",
+    "projectiles/homing-missile",
+    "projectiles/flare"
+   ],
+   "tiers": 5
+  },
+  {
+   "id": "fire",
+   "name": "火焰",
+   "blurb": "炬火、吐息与烈焰",
+   "anchor": "front",
+   "skills": [
+    "fire/fireball",
+    "fire/candle",
+    "fire/torch",
+    "fire/fire-breath",
+    "fire/spirit-flame",
+    "fire/flamethrower",
+    "fire/fire-tornado",
+    "fire/campfire",
+    "fire/brazier",
+    "fire/fire-ring",
+    "fire/flame-pillar",
+    "fire/meteor"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "ice",
+   "name": "冰霜",
+   "blurb": "冰枪、冰刺与霜环",
+   "anchor": "front",
+   "skills": [
+    "ice/ice-lance",
+    "ice/frost-breath",
+    "ice/ice-crystal",
+    "ice/blizzard-vortex",
+    "ice/icicle-fall",
+    "ice/snowflake-burst",
+    "ice/ice-shatter",
+    "ice/ice-spikes",
+    "ice/freeze",
+    "ice/frost-nova"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "lightning",
+   "name": "雷电",
+   "blurb": "电弧、落雷与雷暴",
+   "anchor": "front",
+   "skills": [
+    "lightning/zap-hit",
+    "lightning/electrified",
+    "lightning/spark-arc",
+    "lightning/plasma-ball",
+    "lightning/chain-lightning",
+    "lightning/ball-lightning",
+    "lightning/tesla-coil",
+    "lightning/thunderclap",
+    "lightning/storm-cloud",
+    "lightning/charge-up",
+    "lightning/lightning-strike"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "water",
+   "name": "水流",
+   "blurb": "水球、喷泉与浪涌",
+   "anchor": "front",
+   "skills": [
+    "water/drip",
+    "water/ripples",
+    "water/water-jet",
+    "water/fountain",
+    "water/whirlpool",
+    "water/water-orb",
+    "water/rain-splash",
+    "water/waterfall",
+    "water/splash",
+    "water/bubbles",
+    "water/wave-crash",
+    "water/geyser"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "nature",
+   "name": "自然",
+   "blurb": "藤蔓、岩刺与孢子",
+   "anchor": "front",
+   "skills": [
+    "nature/leaf-storm",
+    "nature/root-snare",
+    "nature/vine-whip",
+    "nature/healing-bloom",
+    "nature/thorns",
+    "nature/acid-splash",
+    "nature/tornado",
+    "nature/toxic-puddle",
+    "nature/boulder",
+    "nature/spore-burst",
+    "nature/quake",
+    "nature/poison-cloud",
+    "nature/earth-spike"
+   ],
+   "tiers": 5
+  },
+  {
+   "id": "arcane",
+   "name": "奥术",
+   "blurb": "法阵、传送与星落",
+   "anchor": "self",
+   "skills": [
+    "arcane/spell-charge",
+    "arcane/blink-in",
+    "arcane/blink-out",
+    "arcane/arcane-beam",
+    "arcane/arcane-orb",
+    "arcane/portal",
+    "arcane/arcane-missiles",
+    "arcane/rune-circle",
+    "arcane/mana-burst",
+    "arcane/time-stop",
+    "arcane/star-fall",
+    "arcane/magic-circle-cast"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "holy",
+   "name": "神圣",
+   "blurb": "治愈、光柱与圣盾",
+   "anchor": "self",
+   "skills": [
+    "holy/halo",
+    "holy/heal",
+    "holy/divine-shield",
+    "holy/blessing",
+    "holy/sunburst",
+    "holy/feather-burst",
+    "holy/heal-aoe",
+    "holy/smite",
+    "holy/resurrection",
+    "holy/holy-pillar"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "shadow",
+   "name": "暗影",
+   "blurb": "诅咒、黑洞与亡魂",
+   "anchor": "self",
+   "skills": [
+    "shadow/shadow-flames",
+    "shadow/life-steal",
+    "shadow/curse",
+    "shadow/necro-skulls",
+    "shadow/grasping-hands",
+    "shadow/soul-drain",
+    "shadow/void-orb",
+    "shadow/shadow-tendrils",
+    "shadow/hex-sigil",
+    "shadow/eclipse",
+    "shadow/black-hole",
+    "shadow/dark-explosion"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "explosions",
+   "name": "爆破",
+   "blurb": "从小爆竹到核爆",
+   "anchor": "front",
+   "skills": [
+    "explosions/cartoon-pow",
+    "explosions/implosion",
+    "explosions/plasma-explosion",
+    "explosions/firework-burst",
+    "explosions/dirt-explosion",
+    "explosions/smoke-bomb",
+    "explosions/grenade",
+    "explosions/firework-rocket",
+    "explosions/barrel-explosion",
+    "explosions/small-explosion",
+    "explosions/big-explosion",
+    "explosions/nuke"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "scifi",
+   "name": "科幻",
+   "blurb": "力场、全息与跃迁",
+   "anchor": "self",
+   "skills": [
+    "scifi/glitch",
+    "scifi/jetpack",
+    "scifi/teleporter-pad",
+    "scifi/energy-core",
+    "scifi/scanner",
+    "scifi/laser-grid",
+    "scifi/force-field",
+    "scifi/hologram",
+    "scifi/tractor-beam",
+    "scifi/warp-out",
+    "scifi/emp-blast",
+    "scifi/warp-in"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "status",
+   "name": "状态",
+   "blurb": "头顶的状态标记",
+   "anchor": "self",
+   "skills": [
+    "status/haste",
+    "status/burning",
+    "status/poisoned",
+    "status/rage",
+    "status/stunned",
+    "status/bleeding",
+    "status/frozen",
+    "status/charmed",
+    "status/confused",
+    "status/slowed",
+    "status/sleep",
+    "status/cursed",
+    "status/petrified"
+   ],
+   "tiers": 5
+  },
+  {
+   "id": "spawn",
+   "name": "出入场",
+   "blurb": "登场与谢幕",
+   "anchor": "self",
+   "skills": [
+    "spawn/poof",
+    "spawn/egg-hatch",
+    "spawn/dissolve-burn",
+    "spawn/coin-drop",
+    "spawn/soul-rise",
+    "spawn/respawn-beam",
+    "spawn/shatter-death",
+    "spawn/disintegrate",
+    "spawn/summon-rise",
+    "spawn/spawn-portal"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "pickups",
+   "name": "宝物",
+   "blurb": "金币、宝石与宝箱",
+   "anchor": "self",
+   "skills": [
+    "pickups/heart-pickup",
+    "pickups/coin-spin",
+    "pickups/xp-orb",
+    "pickups/key-glint",
+    "pickups/potion",
+    "pickups/gem-spin",
+    "pickups/power-star",
+    "pickups/crystal-shard",
+    "pickups/collect-burst",
+    "pickups/loot-beam",
+    "pickups/chest-open"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "ui",
+   "name": "提示",
+   "blurb": "飘字、升级与成就",
+   "anchor": "self",
+   "skills": [
+    "ui/damage-number",
+    "ui/exclamation",
+    "ui/heart-lost",
+    "ui/health-bar-hit",
+    "ui/crit-number",
+    "ui/combo-counter",
+    "ui/achievement",
+    "ui/quest-complete",
+    "ui/coin-collect",
+    "ui/countdown",
+    "ui/level-up",
+    "ui/confetti"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "critters",
+   "name": "灵宠",
+   "blurb": "召唤小动物陪你一会儿",
+   "anchor": "self",
+   "skills": [
+    "critters/slime",
+    "critters/snake",
+    "critters/bat",
+    "critters/bird",
+    "critters/ghost",
+    "critters/frog",
+    "critters/flying-skull",
+    "critters/eyeball",
+    "critters/butterfly",
+    "critters/jellyfish",
+    "critters/wisp",
+    "critters/fish-school"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "weather",
+   "name": "天象",
+   "blurb": "改变身边的天气",
+   "anchor": "screen",
+   "skills": [
+    "weather/blizzard",
+    "weather/rain",
+    "weather/cherry-blossoms",
+    "weather/falling-leaves",
+    "weather/god-rays",
+    "weather/shooting-stars",
+    "weather/storm",
+    "weather/aurora",
+    "weather/clouds",
+    "weather/fireflies",
+    "weather/fog",
+    "weather/snow"
+   ],
+   "tiers": 4
+  },
+  {
+   "id": "transitions",
+   "name": "转场",
+   "blurb": "只在自己屏幕上的镜头转场",
+   "anchor": "screen",
+   "skills": [
+    "transitions/slash-wipe",
+    "transitions/glitch-wipe",
+    "transitions/blinds",
+    "transitions/crt-off",
+    "transitions/diamond-wipe",
+    "transitions/iris",
+    "transitions/pixel-dissolve",
+    "transitions/star-iris",
+    "transitions/shatter-wipe",
+    "transitions/burn-away"
+   ],
+   "tiers": 4
+  }
+ ],
+ "skills": {
+  "melee/sword-slash": {
+   "id": "melee/sword-slash",
+   "branch": "melee",
+   "name": "斩击",
+   "en": "Sword slash",
+   "desc": "A tilted crescent whips round in two frames, cools from white to deep blue as it trails off, glints at the tip and throws sparks.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 0.75,
+   "play": 0.75,
+   "cooldown": 1.0,
+   "size": [
+    136,
+    104
+   ],
+   "anchor": "front"
+  },
+  "melee/claw-swipe": {
+   "id": "melee/claw-swipe",
+   "branch": "melee",
+   "name": "爪击",
+   "en": "Claw swipe",
+   "desc": "Three claw marks rake down one after another, white-hot, cooling through orange to red, then close up from both ends and leave a dotted scar, with hot flecks and drips.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 0.9,
+   "play": 0.9,
+   "cooldown": 1.0,
+   "size": [
+    128,
+    96
+   ],
+   "anchor": "front"
+  },
+  "melee/thrust": {
+   "id": "melee/thrust",
+   "branch": "melee",
+   "name": "突刺",
+   "en": "Thrust",
+   "desc": "A piercing stab: a bundle of streaks shoots out from the hand to a point, a long four-point star flares at the tip with a pierce ring, sparks and speed lines.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 0.75,
+   "play": 0.75,
+   "cooldown": 1.0,
+   "size": [
+    196,
+    76
+   ],
+   "anchor": "front"
+  },
+  "melee/whip-crack": {
+   "id": "melee/whip-crack",
+   "branch": "melee",
+   "name": "鞭击",
+   "en": "Whip crack",
+   "desc": "A whip rolls out to the right as a loop running down its length, faster and faster, until the tip flips over and cracks: a white pop, a ring of air, sparks and a puff of smoke.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 0.85,
+   "play": 0.85,
+   "cooldown": 1.0,
+   "size": [
+    192,
+    80
+   ],
+   "anchor": "front"
+  },
+  "melee/double-slash": {
+   "id": "melee/double-slash",
+   "branch": "melee",
+   "name": "双斩",
+   "en": "Double slash",
+   "desc": "A down cut, then an up cut that crosses it: the moment the X closes both strokes flash white, the crossing bursts with light and sparks, and a dotted X lingers.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 0.8,
+   "play": 0.8,
+   "cooldown": 1.0,
+   "size": [
+    164,
+    108
+   ],
+   "anchor": "front"
+  },
+  "melee/uppercut": {
+   "id": "melee/uppercut",
+   "branch": "melee",
+   "name": "上勾拳",
+   "en": "Uppercut",
+   "desc": "A crescent rises from the floor past the face, and at the top a comic impact star bursts: bold outline, hot core, burst lines, twinkles and sparks.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 0.85,
+   "play": 0.85,
+   "cooldown": 1.0,
+   "size": [
+    132,
+    128
+   ],
+   "anchor": "front"
+  },
+  "melee/dagger-flurry": {
+   "id": "melee/dagger-flurry",
+   "branch": "melee",
+   "name": "匕首乱舞",
+   "en": "Dagger flurry",
+   "desc": "A flurry of small quick crescents at every angle in front of the fighter, each with a flick of sparks, finished by one big cut that glints and bursts.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 0.95,
+   "play": 0.95,
+   "cooldown": 1.0,
+   "size": [
+    148,
+    104
+   ],
+   "anchor": "front"
+  },
+  "melee/spin-slash": {
+   "id": "melee/spin-slash",
+   "branch": "melee",
+   "name": "回旋斩",
+   "en": "Spin slash",
+   "desc": "The blade whirls once round the waist on a tilted plane, behind the body and back in front; the closed ring flares white, dissolves into a dotted trace and throws sparks.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 0.8,
+   "play": 0.8,
+   "cooldown": 1.0,
+   "size": [
+    208,
+    104
+   ],
+   "anchor": "front"
+  },
+  "melee/spear-sweep": {
+   "id": "melee/spear-sweep",
+   "branch": "melee",
+   "name": "横扫枪",
+   "en": "Spear sweep",
+   "desc": "A wide low sweep at shin height: a long flat crescent swings from behind the legs round the front, and the wind of it kicks a wake of dust and grit along the floor.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 1.5,
+   "play": 1.5,
+   "cooldown": 1.5,
+   "size": [
+    216,
+    84
+   ],
+   "anchor": "front"
+  },
+  "melee/scythe-reap": {
+   "id": "melee/scythe-reap",
+   "branch": "melee",
+   "name": "镰刀收割",
+   "en": "Scythe reap",
+   "desc": "A slow, huge dark crescent reaps round the front with a pale ghostly edge; it hangs, then tears away from the tail into curling wisps and cold vapour.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 2.1,
+   "play": 2.1,
+   "cooldown": 2.1,
+   "size": [
+    184,
+    116
+   ],
+   "anchor": "front"
+  },
+  "melee/heavy-cleave": {
+   "id": "melee/heavy-cleave",
+   "branch": "melee",
+   "name": "重劈",
+   "en": "Heavy cleave",
+   "desc": "A glint over the head, then a thick ember arc accelerates over the top into the floor: a white slam, glowing cracks, dust rolling both ways, grit and rising embers.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 1.9,
+   "play": 1.9,
+   "cooldown": 1.9,
+   "size": [
+    208,
+    116
+   ],
+   "anchor": "front"
+  },
+  "melee/hammer-smash": {
+   "id": "melee/hammer-smash",
+   "branch": "melee",
+   "name": "锤击",
+   "en": "Hammer smash",
+   "desc": "A hammer drops in front in a wedge of motion: a white slam with rays, a dome of force, a dent with cracks, rocks thrown up that bounce and settle, and dust.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 2.0,
+   "play": 2.0,
+   "cooldown": 2.0,
+   "size": [
+    208,
+    112
+   ],
+   "anchor": "front"
+  },
+  "moves/arrow-shot": {
+   "id": "moves/arrow-shot",
+   "branch": "moves",
+   "name": "张弓射箭",
+   "en": "Arrow shot",
+   "desc": "He raises the bow, draws to his cheek, holds his breath and looses: the string snaps forward, the arrow crosses the floor and thuds home.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.9,
+   "play": 1.9,
+   "cooldown": 1.9,
+   "size": [
+    300,
+    74
+   ],
+   "anchor": "front"
+  },
+  "moves/pistol-shots": {
+   "id": "moves/pistol-shots",
+   "branch": "moves",
+   "name": "三连射",
+   "en": "Pistol shots",
+   "desc": "Three aimed shots: the gun kicks up each time and settles, tracers cross the floor, and the target staggers under each hit.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 2.6,
+   "play": 2.6,
+   "cooldown": 2.6,
+   "size": [
+    378,
+    76
+   ],
+   "anchor": "front"
+  },
+  "moves/sword-combo": {
+   "id": "moves/sword-combo",
+   "branch": "moves",
+   "name": "三段剑舞",
+   "en": "Sword combo",
+   "desc": "Three strokes walking forward: a slash, a crossing double cut, and a two-handed cleave into the floor that throws the target about.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 2.98,
+   "play": 2.98,
+   "cooldown": 2.98,
+   "size": [
+    264,
+    150
+   ],
+   "anchor": "front"
+  },
+  "moves/holy-smite": {
+   "id": "moves/holy-smite",
+   "branch": "moves",
+   "name": "圣光裁决",
+   "en": "Holy smite",
+   "desc": "Both hands go up and a glint marks the target; he brings them down and a bolt of light drops like a hammer, leaving the target blanched.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 2.8,
+   "play": 2.8,
+   "cooldown": 2.8,
+   "size": [
+    252,
+    182
+   ],
+   "anchor": "front"
+  },
+  "moves/dash-strike": {
+   "id": "moves/dash-strike",
+   "branch": "moves",
+   "name": "突进斩",
+   "en": "Dash strike",
+   "desc": "A crouch, then he's across the floor in a blur of after-images and already cutting: a critical hit, a beat, and he hops back to where he started.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 2.3,
+   "play": 2.3,
+   "cooldown": 2.3,
+   "size": [
+    372,
+    156
+   ],
+   "anchor": "front"
+  },
+  "moves/earth-stomp": {
+   "id": "moves/earth-stomp",
+   "branch": "moves",
+   "name": "震地践踏",
+   "en": "Earth stomp",
+   "desc": "A knee comes up, the boot slams down, the floor heaves under the target and a stone spike rams up through it.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 3.46,
+   "play": 3.46,
+   "cooldown": 3.46,
+   "size": [
+    290,
+    142
+   ],
+   "anchor": "front"
+  },
+  "moves/ice-lance-throw": {
+   "id": "moves/ice-lance-throw",
+   "branch": "moves",
+   "name": "掷冰枪",
+   "en": "Ice lance throw",
+   "desc": "Frost gathers into a spear in his hand, he throws it like a javelin, and the target ices over in a burst of snowflakes and shivers.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 4.34,
+   "play": 4.34,
+   "cooldown": 4.34,
+   "size": [
+    310,
+    136
+   ],
+   "anchor": "front"
+  },
+  "moves/lightning-call": {
+   "id": "moves/lightning-call",
+   "branch": "moves",
+   "name": "引雷",
+   "en": "Lightning call",
+   "desc": "An arm goes up, a sigil lights under the target, and on the downswing a thick bolt comes down on it; the target jolts through the aftershocks.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 3.0,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    290,
+    266
+   ],
+   "anchor": "front"
+  },
+  "moves/ground-pound": {
+   "id": "moves/ground-pound",
+   "branch": "moves",
+   "name": "腾跃重击",
+   "en": "Ground pound",
+   "desc": "He coils, leaps out of frame height, hangs, and comes down like a rock: the floor cracks, shock waves race out and throw the target about as they pass.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 3.82,
+   "play": 3.82,
+   "cooldown": 3.82,
+   "size": [
+    304,
+    204
+   ],
+   "anchor": "front"
+  },
+  "moves/meteor-call": {
+   "id": "moves/meteor-call",
+   "branch": "moves",
+   "name": "召唤陨石",
+   "en": "Meteor call",
+   "desc": "A long chant: a circle draws itself round him, it flares, he points, and a burning rock comes down on the target and flattens the scene.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 6.43,
+   "play": 6.43,
+   "cooldown": 6.43,
+   "size": [
+    380,
+    240
+   ],
+   "anchor": "front"
+  },
+  "moves/fireball-throw": {
+   "id": "moves/fireball-throw",
+   "branch": "moves",
+   "name": "投掷火球",
+   "en": "Fireball throw",
+   "desc": "He gathers fire in his hand, leans back and hurls it: the ball flies, the target takes it in a blast and comes out charred.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 6.81,
+   "play": 6.81,
+   "cooldown": 6.81,
+   "size": [
+    356,
+    244
+   ],
+   "anchor": "front"
+  },
+  "moves/rocket-launcher": {
+   "id": "moves/rocket-launcher",
+   "branch": "moves",
+   "name": "火箭筒",
+   "en": "Rocket launcher",
+   "desc": "He drops to one knee, shoulders the tube and fires: the kick shoves him back along the floor, the rocket crawls out on its jet and the target goes up.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 6.56,
+   "play": 6.56,
+   "cooldown": 6.56,
+   "size": [
+    480,
+    244
+   ],
+   "anchor": "front"
+  },
+  "impacts/hit-flash": {
+   "id": "impacts/hit-flash",
+   "branch": "impacts",
+   "name": "受击闪光",
+   "en": "Hit flash",
+   "desc": "The character takes damage: a white frame, then their own colors flushed red and blinking white, cooling off, while comic hit lines jab in at them.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 0.5,
+   "play": 0.5,
+   "cooldown": 1.0,
+   "size": [
+    80,
+    64
+   ],
+   "anchor": "front"
+  },
+  "impacts/hit-spark": {
+   "id": "impacts/hit-spark",
+   "branch": "impacts",
+   "name": "命中火花",
+   "en": "Hit spark",
+   "desc": "The everyday hit: a sharp, lopsided cross flare with one long ray along the blow round a white diamond core, then a cone of sparks and hot chips that fall and bounce.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 0.5,
+   "play": 0.5,
+   "cooldown": 1.0,
+   "size": [
+    136,
+    80
+   ],
+   "anchor": "front"
+  },
+  "impacts/blunt-hit": {
+   "id": "impacts/blunt-hit",
+   "branch": "impacts",
+   "name": "钝击",
+   "en": "Blunt hit",
+   "desc": "A heavy, soft thud: a white-hot lumpy blob cools to cream in a warm pool of light, inked wedges jab out and snap back, a squashed ring of dust puffs swells and drifts, clods drop.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 0.9,
+   "play": 0.9,
+   "cooldown": 1.0,
+   "size": [
+    128,
+    88
+   ],
+   "anchor": "front"
+  },
+  "impacts/shield-block": {
+   "id": "impacts/shield-block",
+   "branch": "impacts",
+   "name": "盾挡",
+   "en": "Shield block",
+   "desc": "A blow is caught on a half-dome of energy in front of the character: its diamond lattice flashes, a ripple runs over it, sparks glance off, then it blinks out cell by cell.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 1.1,
+   "play": 1.1,
+   "cooldown": 1.1,
+   "size": [
+    148,
+    104
+   ],
+   "anchor": "front"
+  },
+  "impacts/impact-frame": {
+   "id": "impacts/impact-frame",
+   "branch": "impacts",
+   "name": "冲击帧",
+   "en": "Impact frame",
+   "desc": "An anime impact: two frames of white with black burst lines rushing at the hit, two frames inverted, then the lines pull out past the edges and vanish.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 0.3,
+   "play": 0.3,
+   "cooldown": 1.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "front"
+  },
+  "impacts/bullet-impact": {
+   "id": "impacts/bullet-impact",
+   "branch": "impacts",
+   "name": "弹着点",
+   "en": "Bullet impact",
+   "desc": "A bullet hits a wall on the right: a hot half-star, sparks sprayed back in a cone, a puff of grit, chips that fall and bounce, a pock mark cooling to soot.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 1.4,
+   "play": 1.4,
+   "cooldown": 1.4,
+   "size": [
+    152,
+    100
+   ],
+   "anchor": "front"
+  },
+  "impacts/ricochet": {
+   "id": "impacts/ricochet",
+   "branch": "impacts",
+   "name": "跳弹",
+   "en": "Ricochet",
+   "desc": "A tracer streaks down onto the floor, glances off with a white-hot star and skips away at an angle, leaving a glowing skid while sparks skitter along the ground.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 1.1,
+   "play": 1.1,
+   "cooldown": 1.1,
+   "size": [
+    232,
+    84
+   ],
+   "anchor": "front"
+  },
+  "impacts/parry": {
+   "id": "impacts/parry",
+   "branch": "impacts",
+   "name": "格挡反击",
+   "en": "Parry",
+   "desc": "Two blades clash: their edges flash in an X, a white four-point star rings out, a ring breaks into arcs and a fan of gold sparks sprays up and rains down.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 1.0,
+   "play": 1.0,
+   "cooldown": 1.0,
+   "size": [
+    200,
+    112
+   ],
+   "anchor": "front"
+  },
+  "impacts/heavy-landing": {
+   "id": "impacts/heavy-landing",
+   "branch": "impacts",
+   "name": "重落地",
+   "en": "Heavy landing",
+   "desc": "A character lands hard: the floor dents and cracks under their feet, two rings of dust roll out along the floor one after the other, and pebbles hop away.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 1.6,
+   "play": 1.6,
+   "cooldown": 1.6,
+   "size": [
+    176,
+    80
+   ],
+   "anchor": "front"
+  },
+  "impacts/crit-hit": {
+   "id": "impacts/crit-hit",
+   "branch": "impacts",
+   "name": "暴击",
+   "en": "Critical hit",
+   "desc": "A critical hit: a jagged starburst slams in white and overshoots, a ring breaks into flying arcs, sparks streak off, shards tumble to the floor under a big flare.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 0.9,
+   "play": 0.9,
+   "cooldown": 1.0,
+   "size": [
+    216,
+    136
+   ],
+   "anchor": "front"
+  },
+  "impacts/ground-slam": {
+   "id": "impacts/ground-slam",
+   "branch": "impacts",
+   "name": "地面猛击",
+   "en": "Ground slam",
+   "desc": "Something lands hard: the floor flashes and cracks, two crescent shock waves race out along it, a dust wave and a tall dust cloud rise, rocks erupt, bounce and settle.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.2,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    288,
+    208
+   ],
+   "anchor": "front"
+  },
+  "projectiles/laser-bolt": {
+   "id": "projectiles/laser-bolt",
+   "branch": "projectiles",
+   "name": "激光弹",
+   "en": "Laser bolt",
+   "desc": "A red laser bolt: a white-hot core in a rounded head, red bands tapering back, pulses racing down it, a tail that shimmers apart into wavering dashes.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 0.5,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    128,
+    32
+   ],
+   "anchor": "front"
+  },
+  "projectiles/arrow": {
+   "id": "projectiles/arrow",
+   "branch": "projectiles",
+   "name": "飞箭",
+   "en": "Arrow",
+   "desc": "An arrow in flight: a steel broadhead catching the light, a wooden shaft, fletching fluttering in the wind, streaks of air peeling off its head and swirling off its feathers.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 0.6,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    112,
+    32
+   ],
+   "anchor": "front"
+  },
+  "projectiles/energy-disc": {
+   "id": "projectiles/energy-disc",
+   "branch": "projectiles",
+   "name": "能量飞盘",
+   "en": "Energy disc",
+   "desc": "A sawblade of crackling energy spinning flat out as it flies: hooked teeth bright on their leading edges, a white hub, spiral arms churning, sparks flung off the teeth.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 0.5,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    120,
+    52
+   ],
+   "anchor": "front"
+  },
+  "projectiles/bullet-tracer": {
+   "id": "projectiles/bullet-tracer",
+   "branch": "projectiles",
+   "name": "曳光弹",
+   "en": "Bullet tracer",
+   "desc": "A white-hot slug tearing along, its tracer burning behind it in a long streak that sputters and cools from white through gold to red, shedding sparks and a thread of smoke.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 0.6,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    200,
+    40
+   ],
+   "anchor": "front"
+  },
+  "projectiles/plasma-shot": {
+   "id": "projectiles/plasma-shot",
+   "branch": "projectiles",
+   "name": "等离子弹",
+   "en": "Plasma shot",
+   "desc": "A glowing plasma blob: hot knots churning in its core, a corona crackling over its skin, its tail necking into droplets that tear off, cool and wink out behind.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 0.8,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    144,
+    60
+   ],
+   "anchor": "front"
+  },
+  "projectiles/muzzle-smg": {
+   "id": "projectiles/muzzle-smg",
+   "branch": "projectiles",
+   "name": "冲锋枪",
+   "en": "SMG burst",
+   "desc": "Sustained fire at twelve rounds a second: each shot a different spiky flash with a white core, sparks, smoke wisps piling up and drifting, brass casings bouncing on the floor.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 1.0,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    112,
+    72
+   ],
+   "anchor": "front"
+  },
+  "projectiles/muzzle-pistol": {
+   "id": "projectiles/muzzle-pistol",
+   "branch": "projectiles",
+   "name": "手枪",
+   "en": "Pistol shot",
+   "desc": "One pistol shot from a muzzle `height` px above the floor (the origin): a spiky white-cored flash, sparks, a curl of smoke hooking up and back, a casing that bounces and settles.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 1.8,
+   "play": 1.8,
+   "cooldown": 1.8,
+   "size": [
+    96,
+    72
+   ],
+   "anchor": "front"
+  },
+  "projectiles/rocket": {
+   "id": "projectiles/rocket",
+   "branch": "projectiles",
+   "name": "火箭弹",
+   "en": "Rocket",
+   "desc": "A steel rocket roars along: a flickering jet with shock diamonds and a white-hot nozzle, a thick billowing smoke trail lit by the flame, sparks shed behind.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 1.2,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    288,
+    76
+   ],
+   "anchor": "front"
+  },
+  "projectiles/magic-missile": {
+   "id": "projectiles/magic-missile",
+   "branch": "projectiles",
+   "name": "魔法飞弹",
+   "en": "Magic missile",
+   "desc": "Motes gather into an arcane orb at a hand `height` px above the floor (the origin); it weaves to its target trailing a twisting ribbon and bursts into a star of light.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 1.9,
+   "play": 1.9,
+   "cooldown": 1.9,
+   "size": [
+    208,
+    112
+   ],
+   "anchor": "front"
+  },
+  "projectiles/muzzle-shotgun": {
+   "id": "projectiles/muzzle-shotgun",
+   "branch": "projectiles",
+   "name": "霰弹",
+   "en": "Shotgun blast",
+   "desc": "A shotgun blast from a muzzle `height` px above the floor (the origin): a wide ragged fan of flame, pellet streaks, a heavy rolling smoke cloud, a red shell kicked out on the pump.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.2,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    160,
+    88
+   ],
+   "anchor": "front"
+  },
+  "projectiles/cannonball": {
+   "id": "projectiles/cannonball",
+   "branch": "projectiles",
+   "name": "炮弹",
+   "en": "Cannon shot",
+   "desc": "A cannon fires from a muzzle `height` px above the floor (the origin): a white flash, a tongue of flame, the ball arcing off trailing smoke, a big gunsmoke cloud rolling out.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.8,
+   "play": 3.8,
+   "cooldown": 3.8,
+   "size": [
+    208,
+    116
+   ],
+   "anchor": "front"
+  },
+  "projectiles/homing-missile": {
+   "id": "projectiles/homing-missile",
+   "branch": "projectiles",
+   "name": "追踪导弹",
+   "en": "Homing missile",
+   "desc": "A missile kicks off, arcs up, rolls over and dives onto its target (the origin), its smoke trail left hanging in the air, and hits in a fiery blast of flame, sparks and rocks.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.8,
+   "play": 3.8,
+   "cooldown": 3.8,
+   "size": [
+    248,
+    140
+   ],
+   "anchor": "front"
+  },
+  "projectiles/flare": {
+   "id": "projectiles/flare",
+   "branch": "projectiles",
+   "name": "信号弹",
+   "en": "Signal flare",
+   "desc": "A signal flare streaks up off the ground trailing sparks and smoke, bursts, and hangs as a pulsing red star that drips sparks under its own red-lit smoke, then gutters out.",
+   "tier": 5,
+   "cost": 5,
+   "loop": false,
+   "duration": 5.0,
+   "play": 5.0,
+   "cooldown": 5.0,
+   "size": [
+    152,
+    232
+   ],
+   "anchor": "front"
+  },
+  "fire/fireball": {
+   "id": "fire/fireball",
+   "branch": "fire",
+   "name": "火球",
+   "en": "Fireball",
+   "desc": "A fireball flying right: a churning white-hot head with a corona of flame, a long torn tail of flame puffs cooling into smoke, embers shed behind.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.2,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    136,
+    56
+   ],
+   "anchor": "front"
+  },
+  "fire/candle": {
+   "id": "fire/candle",
+   "branch": "fire",
+   "name": "烛火",
+   "en": "Candle",
+   "desc": "A wax candle in a brass dish: a calm flame with a blue root that sways and stretches, a halo of light, motes drifting in it, a bead of wax running down a drip.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 4.0,
+   "play": 8.0,
+   "cooldown": 8.0,
+   "size": [
+    56,
+    76
+   ],
+   "anchor": "front"
+  },
+  "fire/torch": {
+   "id": "fire/torch",
+   "branch": "fire",
+   "name": "火把",
+   "en": "Torch",
+   "desc": "A wall torch on an iron bracket: a licking flame leaping off a pitch-soaked wrap, licks and puffs torn off its tips, smoke, embers, a flickering light on the wall.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    72,
+    120
+   ],
+   "anchor": "front"
+  },
+  "fire/fire-breath": {
+   "id": "fire/fire-breath",
+   "branch": "fire",
+   "name": "火焰吐息",
+   "en": "Fire breath",
+   "desc": "A roaring cone of fire streaming right from the mouth: white-hot at the lips, billowing out and cooling to red and smoke at its edges, sparks thrown out ahead.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 1.5,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    160,
+    116
+   ],
+   "anchor": "front"
+  },
+  "fire/spirit-flame": {
+   "id": "fire/spirit-flame",
+   "branch": "fire",
+   "name": "灵火",
+   "en": "Spirit flame",
+   "desc": "A cold blue-teal ghost fire floating in the air: a bright rim round a hollow dark heart, a wave climbing its wispy tail, curls breaking off, cold sparks rising.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    80,
+    124
+   ],
+   "anchor": "front"
+  },
+  "fire/flamethrower": {
+   "id": "fire/flamethrower",
+   "branch": "fire",
+   "name": "喷火",
+   "en": "Flamethrower",
+   "desc": "A pressurised jet shooting right: a blue pilot at the nozzle, a tight stream with surges racing down it, a sputter, burning drops falling off, a tip that curls up into smoke.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 1.6,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    184,
+    104
+   ],
+   "anchor": "front"
+  },
+  "fire/fire-tornado": {
+   "id": "fire/fire-tornado",
+   "branch": "fire",
+   "name": "火焰旋风",
+   "en": "Fire tornado",
+   "desc": "A spinning funnel of fire: spiral bands turning round it, licks flung off its sides, a ring of flame whirling at its foot, embers orbiting it in and out of view.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    120,
+    152
+   ],
+   "anchor": "front"
+  },
+  "fire/campfire": {
+   "id": "fire/campfire",
+   "branch": "fire",
+   "name": "篝火",
+   "en": "Campfire",
+   "desc": "Crossed logs on a bed of coals and a lively fire: tongues that lick and leap, popping sparks, embers drifting up, smoke curling off, a warm pool of light.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    128,
+    128
+   ],
+   "anchor": "front"
+  },
+  "fire/brazier": {
+   "id": "fire/brazier",
+   "branch": "fire",
+   "name": "火盆",
+   "en": "Brazier",
+   "desc": "An iron bowl on a tripod heaped with glowing coals and a big roaring fire, sparks and embers streaming up off it, light on the iron and the floor.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    112,
+    148
+   ],
+   "anchor": "front"
+  },
+  "fire/fire-ring": {
+   "id": "fire/fire-ring",
+   "branch": "fire",
+   "name": "火环",
+   "en": "Fire ring",
+   "desc": "A white flash at the feet, then flames race outward along the floor in a ring, flaring as the front passes and burning down behind it over a smouldering scorch.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.9,
+   "play": 3.9,
+   "cooldown": 3.9,
+   "size": [
+    224,
+    128
+   ],
+   "anchor": "front"
+  },
+  "fire/flame-pillar": {
+   "id": "fire/flame-pillar",
+   "branch": "fire",
+   "name": "炎柱",
+   "en": "Flame pillar",
+   "desc": "The floor cracks and glows, a column of fire erupts white-hot and roars, spewing embers and shedding flame, then collapses into rolling smoke.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 5.0,
+   "play": 5.0,
+   "cooldown": 5.0,
+   "size": [
+    184,
+    256
+   ],
+   "anchor": "front"
+  },
+  "fire/meteor": {
+   "id": "fire/meteor",
+   "branch": "fire",
+   "name": "陨石",
+   "en": "Meteor",
+   "desc": "A burning rock streaks in from the upper left in a comet of fire and smashes into the floor: a white flash, a fireball, rocks and brands thrown, a glowing crater that cools.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 5.0,
+   "play": 5.0,
+   "cooldown": 5.0,
+   "size": [
+    272,
+    232
+   ],
+   "anchor": "front"
+  },
+  "ice/ice-lance": {
+   "id": "ice/ice-lance",
+   "branch": "ice",
+   "name": "冰枪",
+   "en": "Ice lance",
+   "desc": "A faceted ice spear flying right: a light pulse runs through its core, rings of cold air shear off the tip, frost peels off into a wake and crystals shed behind it.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 0.8,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    176,
+    64
+   ],
+   "anchor": "front"
+  },
+  "ice/frost-breath": {
+   "id": "ice/frost-breath",
+   "branch": "ice",
+   "name": "寒霜吐息",
+   "en": "Frost breath",
+   "desc": "A cone of icy wind blowing right: frost puffs billow out, swell and sink, wind streaks race through, ice crystals tumble and glint off a white-hot mouth.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.2,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    184,
+    104
+   ],
+   "anchor": "front"
+  },
+  "ice/ice-crystal": {
+   "id": "ice/ice-crystal",
+   "branch": "ice",
+   "name": "冰晶",
+   "en": "Ice crystal",
+   "desc": "A floating ice crystal turning slowly in its own cold light: its facets brighten and darken as they turn, glints flash on them, frost motes circle it.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    96,
+    100
+   ],
+   "anchor": "front"
+  },
+  "ice/blizzard-vortex": {
+   "id": "ice/blizzard-vortex",
+   "branch": "ice",
+   "name": "暴雪漩涡",
+   "en": "Blizzard vortex",
+   "desc": "A swirling snow tornado: wind bands spin up a leaning funnel, flakes and ice crystals orbit in front and behind, snow boils at its foot and cold light fills its throat.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    128,
+    116
+   ],
+   "anchor": "front"
+  },
+  "ice/icicle-fall": {
+   "id": "ice/icicle-fall",
+   "branch": "ice",
+   "name": "冰锥坠落",
+   "en": "Icicle fall",
+   "desc": "An icicle drips and trembles, snaps off its frosted root, drops, stabs the floor and bursts into skidding shards, splinters and rolling frost.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 2.6,
+   "play": 2.6,
+   "cooldown": 2.6,
+   "size": [
+    152,
+    120
+   ],
+   "anchor": "front"
+  },
+  "ice/snowflake-burst": {
+   "id": "ice/snowflake-burst",
+   "branch": "ice",
+   "name": "雪花迸散",
+   "en": "Snowflake burst",
+   "desc": "A cold pop: frost gathers and flashes white in a ring, then crisp six-armed snowflakes spin out, slow, twinkle and drift down to settle and melt.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 3.2,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    140,
+    120
+   ],
+   "anchor": "front"
+  },
+  "ice/ice-shatter": {
+   "id": "ice/ice-shatter",
+   "branch": "ice",
+   "name": "碎冰",
+   "en": "Ice shatter",
+   "desc": "A block of ice takes a hit from the left: it jolts, cracks race over its faces, it flashes white and bursts into chunks that tumble, bounce and skid off in a roll of ice dust.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.8,
+   "play": 2.8,
+   "cooldown": 2.8,
+   "size": [
+    224,
+    112
+   ],
+   "anchor": "front"
+  },
+  "ice/ice-spikes": {
+   "id": "ice/ice-spikes",
+   "branch": "ice",
+   "name": "冰刺",
+   "en": "Ice spikes",
+   "desc": "A frost line races along the floor and clusters of jagged ice blades burst up behind it in a rising wave, glint, flash white together and shatter into toppling shards.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 3.0,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    264,
+    112
+   ],
+   "anchor": "front"
+  },
+  "ice/freeze": {
+   "id": "ice/freeze",
+   "branch": "ice",
+   "name": "冰封",
+   "en": "Freeze",
+   "desc": "Frost races in and climbs the character, turning it to ice; a faceted block crystallizes round it pane by pane, glints, cracks and bursts, and the character thaws free.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 4.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    176,
+    128
+   ],
+   "anchor": "front"
+  },
+  "ice/frost-nova": {
+   "id": "ice/frost-nova",
+   "branch": "ice",
+   "name": "霜之新星",
+   "en": "Frost nova",
+   "desc": "Frost spirals into a spinning snowflake, then a wave blooms three rings of ice crystals round the caster; snow drifts, frost creeps, and the ice melts back into the floor.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.4,
+   "play": 3.4,
+   "cooldown": 3.4,
+   "size": [
+    288,
+    192
+   ],
+   "anchor": "front"
+  },
+  "lightning/zap-hit": {
+   "id": "lightning/zap-hit",
+   "branch": "lightning",
+   "name": "电击",
+   "en": "Zap hit",
+   "desc": "A contact zap: an arc snaps in from the left, the hit point overloads into a knot of tiny crackling zigzags, a fern of burn marks glows outward, sparks jink away, ozone puffs.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 0.9,
+   "play": 0.9,
+   "cooldown": 1.0,
+   "size": [
+    144,
+    112
+   ],
+   "anchor": "front"
+  },
+  "lightning/electrified": {
+   "id": "lightning/electrified",
+   "branch": "lightning",
+   "name": "带电",
+   "en": "Electrified",
+   "desc": "Current runs through a character: arcs crawl over and leap across the body, sparks spit off, the body flares to an electric silhouette on each jolt, and the feet ground out.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    108,
+    92
+   ],
+   "anchor": "front"
+  },
+  "lightning/spark-arc": {
+   "id": "lightning/spark-arc",
+   "branch": "lightning",
+   "name": "电弧",
+   "en": "Spark arc",
+   "desc": "A climbing arc between two rods: it strikes white at their narrow foot, climbs on rising heat as it stretches and bows, sputters and snaps at the top, then strikes again.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    124,
+    120
+   ],
+   "anchor": "front"
+  },
+  "lightning/plasma-ball": {
+   "id": "lightning/plasma-ball",
+   "branch": "lightning",
+   "name": "等离子球",
+   "en": "Plasma ball",
+   "desc": "A glass globe on a dark pedestal: wandering plasma tendrils reach from the core to the glass and fan out in bright feet where they touch it, lighting the stand and floor.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    112,
+    104
+   ],
+   "anchor": "front"
+  },
+  "lightning/chain-lightning": {
+   "id": "lightning/chain-lightning",
+   "branch": "lightning",
+   "name": "闪电链",
+   "en": "Chain lightning",
+   "desc": "A bolt leaps from the caster's hand through three targets in turn; each flashes, sparks and grounds itself to the floor while the arcs between them flicker, then the chain snaps.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 1.8,
+   "play": 1.8,
+   "cooldown": 1.8,
+   "size": [
+    248,
+    104
+   ],
+   "anchor": "front"
+  },
+  "lightning/ball-lightning": {
+   "id": "lightning/ball-lightning",
+   "branch": "lightning",
+   "name": "球状闪电",
+   "en": "Ball lightning",
+   "desc": "A crackling ball of plasma drifts on a wandering loop, spitting arcs off its skin and leaving a wake of fading motes, and zaps the floor when it dips low.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 4.0,
+   "play": 8.0,
+   "cooldown": 8.0,
+   "size": [
+    136,
+    104
+   ],
+   "anchor": "front"
+  },
+  "lightning/tesla-coil": {
+   "id": "lightning/tesla-coil",
+   "branch": "lightning",
+   "name": "特斯拉线圈",
+   "en": "Tesla coil",
+   "desc": "A copper coil under a steel torus throws branching arcs that lash out in volleys and now and then strike the floor in a spray of sparks, lighting the metal and the ground.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    224,
+    136
+   ],
+   "anchor": "front"
+  },
+  "lightning/thunderclap": {
+   "id": "lightning/thunderclap",
+   "branch": "lightning",
+   "name": "雷鸣",
+   "en": "Thunderclap",
+   "desc": "A thunderclap round the caster: a white flash, forked bolts burst out and stab the floor, a heavy shock ring tears across the ground raising dust and grit, sparks streak away.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 1.9,
+   "play": 1.9,
+   "cooldown": 1.9,
+   "size": [
+    288,
+    156
+   ],
+   "anchor": "front"
+  },
+  "lightning/storm-cloud": {
+   "id": "lightning/storm-cloud",
+   "branch": "lightning",
+   "name": "雷云",
+   "en": "Storm cloud",
+   "desc": "A storm cloud boils overhead, billows lit from inside by flickering discharges, ragged scud under its flat dark base; rain slants down and once a loop a bolt cracks to the floor.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    168,
+    176
+   ],
+   "anchor": "front"
+  },
+  "lightning/charge-up": {
+   "id": "lightning/charge-up",
+   "branch": "lightning",
+   "name": "蓄电",
+   "en": "Charge up",
+   "desc": "Sparks streak and arcs whip in to a crackling core at the caster's hand that swells and pulses faster, then it flashes and bursts: bolts every way, a ring, a spray of sparks.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 2.7,
+   "play": 2.7,
+   "cooldown": 2.7,
+   "size": [
+    272,
+    184
+   ],
+   "anchor": "front"
+  },
+  "lightning/lightning-strike": {
+   "id": "lightning/lightning-strike",
+   "branch": "lightning",
+   "name": "落雷",
+   "en": "Lightning strike",
+   "desc": "A targeted strike: a sigil charges on the floor, the scene darkens, a thick bolt slams into it, arcs race out along the cracks it splits, the channel crumbles to a scorch.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.0,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    240,
+    264
+   ],
+   "anchor": "front"
+  },
+  "water/drip": {
+   "id": "water/drip",
+   "branch": "water",
+   "name": "水滴",
+   "en": "Drip",
+   "desc": "A bead swells under a wet stone tip and catches the light, pinches off, falls stretched by its speed and plinks into a puddle with a crown, a ring and a tiny rebound.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.6,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    72,
+    88
+   ],
+   "anchor": "front"
+  },
+  "water/ripples": {
+   "id": "water/ripples",
+   "branch": "water",
+   "name": "涟漪",
+   "en": "Ripples",
+   "desc": "A drop plinks on still dark water and rings spread out across it at a low angle: the swell of each ring catches the light, crests glint, and they fade into the calm.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    136,
+    52
+   ],
+   "anchor": "front"
+  },
+  "water/water-jet": {
+   "id": "water/water-jet",
+   "branch": "water",
+   "name": "水柱",
+   "en": "Water jet",
+   "desc": "A pressurised stream blasts right: a tight glassy rod with surges running down it that swells, roughens, bends under its weight and breaks into chunks, spray and mist.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.0,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    188,
+    80
+   ],
+   "anchor": "front"
+  },
+  "water/fountain": {
+   "id": "water/fountain",
+   "branch": "water",
+   "name": "喷泉",
+   "en": "Fountain",
+   "desc": "A stone basin; a jet rises from its spout and blooms into glassy arcs that break into beads, fall back and plink into the water with rings.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    120,
+    104
+   ],
+   "anchor": "front"
+  },
+  "water/whirlpool": {
+   "id": "water/whirlpool",
+   "branch": "water",
+   "name": "漩涡",
+   "en": "Whirlpool",
+   "desc": "Seen from above, dark water winds into a vortex: foam arms spiral in, darkening as they're drawn down into a deep eye with a lit far rim, flecks of foam circling in after them.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    128,
+    84
+   ],
+   "anchor": "front"
+  },
+  "water/water-orb": {
+   "id": "water/water-orb",
+   "branch": "water",
+   "name": "水球",
+   "en": "Water orb",
+   "desc": "A sphere of water floats and wobbles: a current circles inside it, the floor shows upside down through it, it shines, light gathers on the floor under it, and drips fall and plink.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    100,
+    108
+   ],
+   "anchor": "front"
+  },
+  "water/rain-splash": {
+   "id": "water/rain-splash",
+   "branch": "water",
+   "name": "雨溅",
+   "en": "Rain splash",
+   "desc": "A low close-up on one puddle in the rain: big drops land in crowns that throw beads and a rebound jet, rings spread and interfere, a lamp's reflection wobbles on the water.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    176,
+    80
+   ],
+   "anchor": "front"
+  },
+  "water/waterfall": {
+   "id": "water/waterfall",
+   "branch": "water",
+   "name": "瀑布",
+   "en": "Waterfall",
+   "desc": "A river pours from a notch in a rock outcrop: a white curl, a deep sheet that splits into strands, churning foam, spray, drifting mist and rings on a dark pool.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    144,
+    136
+   ],
+   "anchor": "front"
+  },
+  "water/splash": {
+   "id": "water/splash",
+   "branch": "water",
+   "name": "水花",
+   "en": "Splash",
+   "desc": "A stone drops into still water: a white hit, a crown that tears into droplets arcing out to plink down with rings, a jet that bounces back, foam and drifting mist.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.5,
+   "play": 2.5,
+   "cooldown": 2.5,
+   "size": [
+    176,
+    100
+   ],
+   "anchor": "front"
+  },
+  "water/bubbles": {
+   "id": "water/bubbles",
+   "branch": "water",
+   "name": "泡泡",
+   "en": "Bubbles",
+   "desc": "Bubbles stream up from a vent of pebbles, wobbling and swelling as they rise, flare as they cross shafts of light from the surface, then dome up and pop there.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 4.0,
+   "play": 8.0,
+   "cooldown": 8.0,
+   "size": [
+    104,
+    112
+   ],
+   "anchor": "front"
+  },
+  "water/wave-crash": {
+   "id": "water/wave-crash",
+   "branch": "water",
+   "name": "浪涌",
+   "en": "Wave crash",
+   "desc": "A swell rolls in and steepens, its lip throws forward and curls over a dark barrel, then crashes into a burst of white foam and spray that surges on and fades to lace.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.2,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    224,
+    104
+   ],
+   "anchor": "front"
+  },
+  "water/geyser": {
+   "id": "water/geyser",
+   "branch": "water",
+   "name": "间歇泉",
+   "en": "Geyser",
+   "desc": "A pool heaves and burbles faster and faster, then blasts a white column of water skyward with a churning foam head; it rains back down in drops and steam, slumps and sputters out.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 5.0,
+   "play": 5.0,
+   "cooldown": 5.0,
+   "size": [
+    184,
+    168
+   ],
+   "anchor": "front"
+  },
+  "nature/leaf-storm": {
+   "id": "nature/leaf-storm",
+   "branch": "nature",
+   "name": "落叶风暴",
+   "en": "Leaf storm",
+   "desc": "Leaves tumble up a rising spiral round the character, passing behind and in front, turning and flipping, wrapped in bright bands of wind; litter swirls at their feet.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    112,
+    104
+   ],
+   "anchor": "front"
+  },
+  "nature/root-snare": {
+   "id": "nature/root-snare",
+   "branch": "nature",
+   "name": "根须缠绕",
+   "en": "Root snare",
+   "desc": "The floor cracks and roots burst up round the character, spiralling round its legs; they cinch tight with a snap, hold, then crack and crumble into bark and dust.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 2.7,
+   "play": 2.7,
+   "cooldown": 2.7,
+   "size": [
+    128,
+    96
+   ],
+   "anchor": "front"
+  },
+  "nature/vine-whip": {
+   "id": "nature/vine-whip",
+   "branch": "nature",
+   "name": "藤鞭",
+   "en": "Vine whip",
+   "desc": "A thorny vine bursts from the floor, rears back coiled, then lashes out right in a whip crack that sprays sap and tears off leaves, before sliding back into the ground.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.4,
+   "play": 1.4,
+   "cooldown": 1.4,
+   "size": [
+    216,
+    128
+   ],
+   "anchor": "front"
+  },
+  "nature/healing-bloom": {
+   "id": "nature/healing-bloom",
+   "branch": "nature",
+   "name": "愈花",
+   "en": "Healing bloom",
+   "desc": "A sprout pushes up and unfurls, a bud swells and opens round a glowing golden heart in a flare of healing light; its petals lift away one by one as motes.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 3.3,
+   "play": 3.3,
+   "cooldown": 3.3,
+   "size": [
+    124,
+    120
+   ],
+   "anchor": "front"
+  },
+  "nature/thorns": {
+   "id": "nature/thorns",
+   "branch": "nature",
+   "name": "荆棘",
+   "en": "Thorns",
+   "desc": "A seam races along the floor and hooked thorns punch up out of it one after another, each bigger than the last, in bursts of dirt and green light; they hold, then sink.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 2.4,
+   "play": 2.4,
+   "cooldown": 2.4,
+   "size": [
+    232,
+    92
+   ],
+   "anchor": "front"
+  },
+  "nature/acid-splash": {
+   "id": "nature/acid-splash",
+   "branch": "nature",
+   "name": "酸液",
+   "en": "Acid splash",
+   "desc": "A gob of acid bursts into a crown and spatters; it eats a glowing, smoking pit into the floor and boils down into it, spitting bright beads, pale steam curling off.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 2.8,
+   "play": 2.8,
+   "cooldown": 2.8,
+   "size": [
+    184,
+    116
+   ],
+   "anchor": "front"
+  },
+  "nature/tornado": {
+   "id": "nature/tornado",
+   "branch": "nature",
+   "name": "龙卷风",
+   "en": "Tornado",
+   "desc": "A snaking funnel of spinning wind bands under a flared, churning top that flickers with lightning; leaves and debris whirl round it front and back, dust boils at its foot.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    196,
+    168
+   ],
+   "anchor": "front"
+  },
+  "nature/toxic-puddle": {
+   "id": "nature/toxic-puddle",
+   "branch": "nature",
+   "name": "毒潭",
+   "en": "Toxic puddle",
+   "desc": "Black tar lit from inside by chartreuse veins and a glowing rim, an oily sheen drifting on it; glossy bubbles dome, stretch and pop, vapour curls up in fraying ribbons.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 4.0,
+   "play": 8.0,
+   "cooldown": 8.0,
+   "size": [
+    176,
+    100
+   ],
+   "anchor": "front"
+  },
+  "nature/boulder": {
+   "id": "nature/boulder",
+   "branch": "nature",
+   "name": "滚石",
+   "en": "Boulder",
+   "desc": "A spinning boulder arcs right shedding dust and pebbles, smashes into the floor in a white flash and bursts into tumbling chunks, gravel and rolling dust.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.3,
+   "play": 2.3,
+   "cooldown": 2.3,
+   "size": [
+    264,
+    120
+   ],
+   "anchor": "front"
+  },
+  "nature/spore-burst": {
+   "id": "nature/spore-burst",
+   "branch": "nature",
+   "name": "孢子爆",
+   "en": "Spore burst",
+   "desc": "A toadstool pushes up, swells and trembles as its gills glow, then squashes and puffs a lumpy cloud of glowing spores that billows up and drifts down twinkling.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.2,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    212,
+    132
+   ],
+   "anchor": "front"
+  },
+  "nature/quake": {
+   "id": "nature/quake",
+   "branch": "nature",
+   "name": "地震",
+   "en": "Quake",
+   "desc": "The ground jolts three times: a rift tears out along the floor glowing deep inside, slabs of floor heave up and drop back askew, pebbles hop and dust bursts out of the split.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.1,
+   "play": 3.1,
+   "cooldown": 3.1,
+   "size": [
+    288,
+    104
+   ],
+   "anchor": "front"
+  },
+  "nature/poison-cloud": {
+   "id": "nature/poison-cloud",
+   "branch": "nature",
+   "name": "毒云",
+   "en": "Poison cloud",
+   "desc": "A miasma hugging the floor: ragged sheets of gas lit yellow-green from within, fading to violet, creep out in tongues that curl over at their tips; plumes twist up as ribbons.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 4.0,
+   "play": 8.0,
+   "cooldown": 8.0,
+   "size": [
+    256,
+    100
+   ],
+   "anchor": "front"
+  },
+  "nature/earth-spike": {
+   "id": "nature/earth-spike",
+   "branch": "nature",
+   "name": "地刺",
+   "en": "Earth spike",
+   "desc": "The floor cracks with light and heaves, a faceted stone spike rams up with two side shards in a burst of chips, grit and dust; rubble rains, then it splits and crumbles.",
+   "tier": 5,
+   "cost": 5,
+   "loop": false,
+   "duration": 3.4,
+   "play": 3.4,
+   "cooldown": 3.4,
+   "size": [
+    272,
+    150
+   ],
+   "anchor": "front"
+  },
+  "arcane/spell-charge": {
+   "id": "arcane/spell-charge",
+   "branch": "arcane",
+   "name": "蓄力",
+   "en": "Spell charge",
+   "desc": "Energy gathers in the caster's hand: streaks and motes spiral in, rings collapse into a swelling orb that crackles with arcs, ready to fire.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.6,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    120,
+    86
+   ],
+   "anchor": "self"
+  },
+  "arcane/blink-in": {
+   "id": "arcane/blink-in",
+   "branch": "arcane",
+   "name": "闪现出现",
+   "en": "Blink in",
+   "desc": "Glittering bits spiral in to a point of light that opens into a line, then into a white silhouette that cools into the caster.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.4,
+   "play": 1.4,
+   "cooldown": 1.4,
+   "size": [
+    136,
+    96
+   ],
+   "anchor": "self"
+  },
+  "arcane/blink-out": {
+   "id": "arcane/blink-out",
+   "branch": "arcane",
+   "name": "闪现消失",
+   "en": "Blink out",
+   "desc": "The caster crackles with gathering light, flashes white, squeezes into a line of light that collapses and pops away in sparks.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.6,
+   "play": 1.6,
+   "cooldown": 1.6,
+   "size": [
+    136,
+    96
+   ],
+   "anchor": "self"
+  },
+  "arcane/arcane-beam": {
+   "id": "arcane/arcane-beam",
+   "branch": "arcane",
+   "name": "奥术射线",
+   "en": "Arcane beam",
+   "desc": "A beam fires right from the hand: a white core, strands twisting round it, pulses running down it, a flaring source and an end that sprays sparks.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 1.2,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    264,
+    100
+   ],
+   "anchor": "self"
+  },
+  "arcane/arcane-orb": {
+   "id": "arcane/arcane-orb",
+   "branch": "arcane",
+   "name": "奥术球",
+   "en": "Arcane orb",
+   "desc": "A floating orb of smoky violet glass with a swirl turning round a white-hot heart, two tilted rings of light orbiting behind and in front.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    136,
+    112
+   ],
+   "anchor": "self"
+  },
+  "arcane/portal": {
+   "id": "arcane/portal",
+   "branch": "arcane",
+   "name": "传送门",
+   "en": "Portal",
+   "desc": "An upright rift: fibrous spiral arms wind down into the dark, a lit rim wobbles, motes and streaks are pulled in, the floor glows.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    152,
+    116
+   ],
+   "anchor": "self"
+  },
+  "arcane/arcane-missiles": {
+   "id": "arcane/arcane-missiles",
+   "branch": "arcane",
+   "name": "奥术飞弹",
+   "en": "Arcane missiles",
+   "desc": "A volley of violet bolts fans out of the hand, curls round on twisting ribbons and pops on the target one after another.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 1.75,
+   "play": 1.75,
+   "cooldown": 1.75,
+   "size": [
+    240,
+    116
+   ],
+   "anchor": "self"
+  },
+  "arcane/rune-circle": {
+   "id": "arcane/rune-circle",
+   "branch": "arcane",
+   "name": "符文环",
+   "en": "Rune circle",
+   "desc": "A rune circle turns on the floor in perspective: a carousel of runes lit by chasing light, a turning square, ticks, motes rising off it.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 4.0,
+   "play": 8.0,
+   "cooldown": 8.0,
+   "size": [
+    136,
+    100
+   ],
+   "anchor": "self"
+  },
+  "arcane/mana-burst": {
+   "id": "arcane/mana-burst",
+   "branch": "arcane",
+   "name": "魔力爆发",
+   "en": "Mana burst",
+   "desc": "Energy rushes into a point and blows out in a white flash and rings, flinging glowing runes that flare and pop into sparks one after another.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 1.8,
+   "play": 1.8,
+   "cooldown": 1.8,
+   "size": [
+    208,
+    150
+   ],
+   "anchor": "self"
+  },
+  "arcane/time-stop": {
+   "id": "arcane/time-stop",
+   "branch": "arcane",
+   "name": "时停",
+   "en": "Time stop",
+   "desc": "A clock face springs open, ticks slower and slower, freezes drained of colour, cracks, then shatters into falling shards.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.6,
+   "play": 3.6,
+   "cooldown": 3.6,
+   "size": [
+    196,
+    136
+   ],
+   "anchor": "self"
+  },
+  "arcane/star-fall": {
+   "id": "arcane/star-fall",
+   "branch": "arcane",
+   "name": "星落",
+   "en": "Star fall",
+   "desc": "Stars streak down on long trails across an area, each landing with a white flash, a ring across the floor and a kick of sparks.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 2.5,
+   "play": 2.5,
+   "cooldown": 2.5,
+   "size": [
+    232,
+    172
+   ],
+   "anchor": "self"
+  },
+  "arcane/magic-circle-cast": {
+   "id": "arcane/magic-circle-cast",
+   "branch": "arcane",
+   "name": "法阵咏唱",
+   "en": "Magic circle cast",
+   "desc": "A circle draws itself on the floor, runes ignite one by one, it flashes, and a column of light fires up and breaks apart into glints.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.9,
+   "play": 3.9,
+   "cooldown": 3.9,
+   "size": [
+    200,
+    220
+   ],
+   "anchor": "self"
+  },
+  "holy/halo": {
+   "id": "holy/halo",
+   "branch": "holy",
+   "name": "光环",
+   "en": "Halo",
+   "desc": "A ring of gold light floats over the head with a glint running round it; fine dust sifts down from it and the head catches its light.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    56,
+    80
+   ],
+   "anchor": "self"
+  },
+  "holy/heal": {
+   "id": "holy/heal",
+   "branch": "holy",
+   "name": "治疗",
+   "en": "Heal",
+   "desc": "Petals of light bloom under the feet, a hoop of light rises up the body restoring its colour and leaving sparkles, and motes spiral up and pop into tiny hearts.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.9,
+   "play": 1.9,
+   "cooldown": 1.9,
+   "size": [
+    80,
+    104
+   ],
+   "anchor": "self"
+  },
+  "holy/divine-shield": {
+   "id": "holy/divine-shield",
+   "branch": "holy",
+   "name": "圣盾",
+   "en": "Divine shield",
+   "desc": "A bubble of gold light round the character: a bright rim and a thin gold film, meridians turning like a slow globe, a sheen sweeping across and sparkles winking on it.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    88,
+    84
+   ],
+   "anchor": "self"
+  },
+  "holy/blessing": {
+   "id": "holy/blessing",
+   "branch": "holy",
+   "name": "祝福",
+   "en": "Blessing",
+   "desc": "A soft cone of light rests on the character from above; sparkles drift down through it, twinkling, and wink out where they land on the head and shoulders.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    80,
+    128
+   ],
+   "anchor": "self"
+  },
+  "holy/sunburst": {
+   "id": "holy/sunburst",
+   "branch": "holy",
+   "name": "日耀",
+   "en": "Sunburst",
+   "desc": "A white-hot core in a gold corona; long and short rays turn slowly round it, breathing, with glints running out along them that wink at the tips.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 4.0,
+   "play": 8.0,
+   "cooldown": 8.0,
+   "size": [
+    128,
+    128
+   ],
+   "anchor": "self"
+  },
+  "holy/feather-burst": {
+   "id": "holy/feather-burst",
+   "branch": "holy",
+   "name": "羽散",
+   "en": "Feather burst",
+   "desc": "A white puff pops and throws feathers that brake hard, then rock from side to side as they sink and fade, with down drifting after them.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 3.0,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    160,
+    160
+   ],
+   "anchor": "self"
+  },
+  "holy/heal-aoe": {
+   "id": "holy/heal-aoe",
+   "branch": "holy",
+   "name": "治愈之环",
+   "en": "Healing ring",
+   "desc": "A seed of green light sinks into the floor and a soft ring rolls out from it; the floor glows where it passes and plus signs sprout and float up.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.9,
+   "play": 2.9,
+   "cooldown": 2.9,
+   "size": [
+    256,
+    136
+   ],
+   "anchor": "self"
+  },
+  "holy/smite": {
+   "id": "holy/smite",
+   "branch": "holy",
+   "name": "惩击",
+   "en": "Smite",
+   "desc": "A glint marks the spot, then a bolt of light drops like a hammer: a white flash, a shockwave over the floor, stone chips flying and cracks that glow and cool.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.8,
+   "play": 2.8,
+   "cooldown": 2.8,
+   "size": [
+    224,
+    176
+   ],
+   "anchor": "self"
+  },
+  "holy/resurrection": {
+   "id": "holy/resurrection",
+   "branch": "holy",
+   "name": "复活",
+   "en": "Resurrection",
+   "desc": "Light pours down on the fallen and life climbs back up the body; wings of light unfold, a halo forms, one great wingbeat, then the wings scatter into feathers.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 4.8,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    192,
+    160
+   ],
+   "anchor": "self"
+  },
+  "holy/holy-pillar": {
+   "id": "holy/holy-pillar",
+   "branch": "holy",
+   "name": "圣光柱",
+   "en": "Holy pillar",
+   "desc": "Light breaks through from above: a sun opens at the top and a fan of shafts converges on the mark, pulsing, while a sigil burns on the floor; then the fan folds shut.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.5,
+   "play": 3.5,
+   "cooldown": 3.5,
+   "size": [
+    192,
+    232
+   ],
+   "anchor": "self"
+  },
+  "shadow/shadow-flames": {
+   "id": "shadow/shadow-flames",
+   "branch": "shadow",
+   "name": "暗焰",
+   "en": "Shadow flames",
+   "desc": "Inside-out fire on the floor: a black heart wrapped in violet flame with pale skin and tips, shedding embers and dark smoke.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    104,
+    112
+   ],
+   "anchor": "self"
+  },
+  "shadow/life-steal": {
+   "id": "shadow/life-steal",
+   "branch": "shadow",
+   "name": "生命汲取",
+   "en": "Life steal",
+   "desc": "A target on the right is struck and bleeds red orbs; they hang a moment, then whip home as comet streaks and flood the caster crimson.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 2.2,
+   "play": 2.2,
+   "cooldown": 2.2,
+   "size": [
+    184,
+    100
+   ],
+   "anchor": "self"
+  },
+  "shadow/curse": {
+   "id": "shadow/curse",
+   "branch": "shadow",
+   "name": "诅咒",
+   "en": "Curse",
+   "desc": "Wisps gather over the head, a skull stamps down with a flash, its eyes burn as the curse floods the body violet, then it cracks and crumbles.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 3.4,
+   "play": 3.4,
+   "cooldown": 3.4,
+   "size": [
+    112,
+    124
+   ],
+   "anchor": "self"
+  },
+  "shadow/necro-skulls": {
+   "id": "shadow/necro-skulls",
+   "branch": "shadow",
+   "name": "亡灵骷髅",
+   "en": "Necro skulls",
+   "desc": "Spectral skulls circle a cold green flame on a tilted orbit, passing behind and before it, eyes lit, trailing curls of ghost smoke.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    136,
+    116
+   ],
+   "anchor": "self"
+  },
+  "shadow/grasping-hands": {
+   "id": "shadow/grasping-hands",
+   "branch": "shadow",
+   "name": "冥手",
+   "en": "Grasping hands",
+   "desc": "Shadow arms burst up out of a dark pool with a splash, clench their hands into claws, strain, and are dragged back under, fingers clawing at the air.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 3.1,
+   "play": 3.1,
+   "cooldown": 3.1,
+   "size": [
+    200,
+    116
+   ],
+   "anchor": "self"
+  },
+  "shadow/soul-drain": {
+   "id": "shadow/soul-drain",
+   "branch": "shadow",
+   "name": "灵魂吸取",
+   "en": "Soul drain",
+   "desc": "Pale souls are torn loose on the right and dragged down a funnel of streaks into a black crystal vessel, which flares violet as each one lands.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 3.2,
+   "play": 6.4,
+   "cooldown": 6.4,
+   "size": [
+    208,
+    120
+   ],
+   "anchor": "self"
+  },
+  "shadow/void-orb": {
+   "id": "shadow/void-orb",
+   "branch": "shadow",
+   "name": "虚空球",
+   "en": "Void orb",
+   "desc": "A black orb hangs in the air, a pale rim crawling round it; a dark vortex winds into it, motes and streaks are pulled in, and light bends round its edge.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 3.2,
+   "play": 6.4,
+   "cooldown": 6.4,
+   "size": [
+    168,
+    160
+   ],
+   "anchor": "self"
+  },
+  "shadow/shadow-tendrils": {
+   "id": "shadow/shadow-tendrils",
+   "branch": "shadow",
+   "name": "暗影触手",
+   "en": "Shadow tendrils",
+   "desc": "A dark pool opens on the floor; tentacles with lit rims and hooked tips lash up out of it with a splash, writhe, and sink back as it closes.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 3.2,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    208,
+    130
+   ],
+   "anchor": "self"
+  },
+  "shadow/hex-sigil": {
+   "id": "shadow/hex-sigil",
+   "branch": "shadow",
+   "name": "咒印",
+   "en": "Hex sigil",
+   "desc": "A burning pen traces a cursed sigil in the air, its glyphs pop in one by one, then it flares white and crumbles into falling embers.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 4.2,
+   "play": 4.2,
+   "cooldown": 4.2,
+   "size": [
+    168,
+    128
+   ],
+   "anchor": "self"
+  },
+  "shadow/eclipse": {
+   "id": "shadow/eclipse",
+   "branch": "shadow",
+   "name": "日蚀",
+   "en": "Eclipse",
+   "desc": "A black moon over the sun: a breathing pearl corona with long streamers, a thin white rim, and one diamond bead blazing on its edge.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 4.0,
+   "play": 8.0,
+   "cooldown": 8.0,
+   "size": [
+    160,
+    144
+   ],
+   "anchor": "self"
+  },
+  "shadow/black-hole": {
+   "id": "shadow/black-hole",
+   "branch": "shadow",
+   "name": "黑洞",
+   "en": "Black hole",
+   "desc": "A tilted disk of banded rings turns round a black hole, its far side bent up over the top and under the bottom; debris spirals in, stretches and is swallowed.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 4.0,
+   "play": 8.0,
+   "cooldown": 8.0,
+   "size": [
+    184,
+    132
+   ],
+   "anchor": "self"
+  },
+  "shadow/dark-explosion": {
+   "id": "shadow/dark-explosion",
+   "branch": "shadow",
+   "name": "暗爆",
+   "en": "Dark explosion",
+   "desc": "Motes swirl into a pulsing core, a black star cuts across a violet-white flash, and a black sphere burns at the rim, throws lit shards and smoke, then collapses.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.8,
+   "play": 3.8,
+   "cooldown": 3.8,
+   "size": [
+    280,
+    248
+   ],
+   "anchor": "self"
+  },
+  "explosions/cartoon-pow": {
+   "id": "explosions/cartoon-pow",
+   "branch": "explosions",
+   "name": "砰！",
+   "en": "Cartoon POW",
+   "desc": "A comic-book hit: a jagged two-tone burst star slams in with a shake and boiling edges, POW! drops in letter by letter, action lines fly, then it all snaps away.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.05,
+   "play": 1.05,
+   "cooldown": 1.05,
+   "size": [
+    184,
+    144
+   ],
+   "anchor": "front"
+  },
+  "explosions/implosion": {
+   "id": "explosions/implosion",
+   "branch": "explosions",
+   "name": "内爆",
+   "en": "Implosion",
+   "desc": "Everything is sucked in: streaks and grit rush inward, rings contract and a dark sphere collapses onto a crushed white point; a beat of stillness, then a sharp pop.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.65,
+   "play": 1.65,
+   "cooldown": 1.65,
+   "size": [
+    208,
+    184
+   ],
+   "anchor": "front"
+  },
+  "explosions/plasma-explosion": {
+   "id": "explosions/plasma-explosion",
+   "branch": "explosions",
+   "name": "等离子爆",
+   "en": "Plasma explosion",
+   "desc": "A blue-violet energy blast with no smoke: a white flash, a ball of plasma swelling into a thinning shell, shock rings in and out of depth, lightning arcs crackling off it.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.7,
+   "play": 1.7,
+   "cooldown": 1.7,
+   "size": [
+    224,
+    200
+   ],
+   "anchor": "front"
+  },
+  "explosions/firework-burst": {
+   "id": "explosions/firework-burst",
+   "branch": "explosions",
+   "name": "烟花绽放",
+   "en": "Firework burst",
+   "desc": "A shell climbs, slows and bursts into a sphere of coloured trailing stars round a gold core; they droop, crackle into white pops and fade, leaving glitter.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 3.6,
+   "play": 3.6,
+   "cooldown": 3.6,
+   "size": [
+    240,
+    248
+   ],
+   "anchor": "front"
+  },
+  "explosions/dirt-explosion": {
+   "id": "explosions/dirt-explosion",
+   "branch": "explosions",
+   "name": "尘土爆",
+   "en": "Dirt explosion",
+   "desc": "A buried charge goes off: a flash under the floor, a V of dirt clods and grit thrown high, a brown dust plume that billows and settles, and a crater left behind.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 3.6,
+   "play": 3.6,
+   "cooldown": 3.6,
+   "size": [
+    260,
+    240
+   ],
+   "anchor": "front"
+  },
+  "explosions/smoke-bomb": {
+   "id": "explosions/smoke-bomb",
+   "branch": "explosions",
+   "name": "烟雾弹",
+   "en": "Smoke bomb",
+   "desc": "A round canister clinks down, fuse sparking, and pops: thick grey-violet smoke gushes out, rolls along the floor, billows into a cloud that hides all, then thins to wisps.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 5.0,
+   "play": 5.0,
+   "cooldown": 5.0,
+   "size": [
+    260,
+    176
+   ],
+   "anchor": "front"
+  },
+  "explosions/grenade": {
+   "id": "explosions/grenade",
+   "branch": "explosions",
+   "name": "手雷",
+   "en": "Grenade",
+   "desc": "A grenade is lobbed in, bounces, rolls to a stop with its fuse fizzing, shudders, then blows: a white flash, shrapnel streaks, sparks, a small fireball and a scorch.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 4.2,
+   "play": 4.2,
+   "cooldown": 4.2,
+   "size": [
+    300,
+    200
+   ],
+   "anchor": "front"
+  },
+  "explosions/firework-rocket": {
+   "id": "explosions/firework-rocket",
+   "branch": "explosions",
+   "name": "烟花升空",
+   "en": "Firework rocket",
+   "desc": "A rocket fizzes off the ground on a sparkling gold trail, coasts, and bursts into a palm: heavy gold fronds arc out, droop on glittering trails and crackle at the tips.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 3.8,
+   "play": 3.8,
+   "cooldown": 3.8,
+   "size": [
+    300,
+    300
+   ],
+   "anchor": "front"
+  },
+  "explosions/barrel-explosion": {
+   "id": "explosions/barrel-explosion",
+   "branch": "explosions",
+   "name": "炸药桶",
+   "en": "Barrel explosion",
+   "desc": "An explosive barrel shudders, its lid bulging and spitting flame, then blows: a fireball column, staves and the lid flying, burning fuel splashed over the floor.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 5.2,
+   "play": 5.2,
+   "cooldown": 5.2,
+   "size": [
+    300,
+    240
+   ],
+   "anchor": "front"
+  },
+  "explosions/small-explosion": {
+   "id": "explosions/small-explosion",
+   "branch": "explosions",
+   "name": "爆炸",
+   "en": "Explosion",
+   "desc": "A ground blast: a white flash and shock rings, fire that cools into a rolling smoke column, sparks, burning brands that land and keep burning, tumbling rocks and a glowing scorch.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 5.4,
+   "play": 5.4,
+   "cooldown": 5.4,
+   "size": [
+    300,
+    240
+   ],
+   "anchor": "front"
+  },
+  "explosions/big-explosion": {
+   "id": "explosions/big-explosion",
+   "branch": "explosions",
+   "name": "大爆炸",
+   "en": "Big explosion",
+   "desc": "A huge ground blast in three beats: a white dome, a rolling fireball that climbs into a mushrooming smoke column, heavy rocks, and fires left burning.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 7.2,
+   "play": 7.2,
+   "cooldown": 7.2,
+   "size": [
+    360,
+    300
+   ],
+   "anchor": "front"
+  },
+  "explosions/nuke": {
+   "id": "explosions/nuke",
+   "branch": "explosions",
+   "name": "核爆",
+   "en": "Nuke",
+   "desc": "A blinding white frame, then a fireball lifts on a thin stem into a wide rolling cap that glows from inside; a white skirt flashes and a dust surge sweeps the floor.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 9.0,
+   "play": 9.0,
+   "cooldown": 8.0,
+   "size": [
+    400,
+    320
+   ],
+   "anchor": "front"
+  },
+  "scifi/glitch": {
+   "id": "scifi/glitch",
+   "branch": "scifi",
+   "name": "故障",
+   "en": "Glitch",
+   "desc": "The hero's signal breaks up in bursts: an RGB split, slices torn sideways, rows smeared out, junk blocks and dead pixels, then snaps back clean.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    88,
+    64
+   ],
+   "anchor": "self"
+  },
+  "scifi/jetpack": {
+   "id": "scifi/jetpack",
+   "branch": "scifi",
+   "name": "喷气背包",
+   "en": "Jetpack",
+   "desc": "Twin thrusters fire straight down: white-hot cores with shock diamonds inside ragged flames, puffs that cool into smoke billowing below, lit by the fire.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    96,
+    116
+   ],
+   "anchor": "self"
+  },
+  "scifi/teleporter-pad": {
+   "id": "scifi/teleporter-pad",
+   "branch": "scifi",
+   "name": "传送台",
+   "en": "Teleporter pad",
+   "desc": "A steel pad glows on the floor, its rings rippling outward; a soft column of light rises off it and rings of light lift away, sparkles drifting up through them.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    96,
+    104
+   ],
+   "anchor": "self"
+  },
+  "scifi/energy-core": {
+   "id": "scifi/energy-core",
+   "branch": "scifi",
+   "name": "能量核心",
+   "en": "Energy core",
+   "desc": "A plasma core beating in a steel cage: it swells and throws a shock ring on each beat, two tilted rings orbit it, and arcs jump to the bars and spark.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    112,
+    100
+   ],
+   "anchor": "self"
+  },
+  "scifi/scanner": {
+   "id": "scifi/scanner",
+   "branch": "scifi",
+   "name": "扫描",
+   "en": "Scanner",
+   "desc": "Brackets snap onto the hero, a scan line sweeps head to toe leaving a cooling outline, and a readout counts up to OK before it all lets go.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 3.2,
+   "play": 6.4,
+   "cooldown": 6.4,
+   "size": [
+    112,
+    78
+   ],
+   "anchor": "self"
+  },
+  "scifi/laser-grid": {
+   "id": "scifi/laser-grid",
+   "branch": "scifi",
+   "name": "激光网",
+   "en": "Laser grid",
+   "desc": "Security lasers between two steel posts: red beams slide and scissor across, dust and haze light up only where they cut through, and the floor sweepers scorch and spark.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    128,
+    84
+   ],
+   "anchor": "self"
+  },
+  "scifi/force-field": {
+   "id": "scifi/force-field",
+   "branch": "scifi",
+   "name": "力场",
+   "en": "Force field",
+   "desc": "A glassy dome of hex plates over the hero: plates glint, tracers from the right slam into it, a ripple and cracks of light race across, sparks glance off.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    184,
+    104
+   ],
+   "anchor": "self"
+  },
+  "scifi/hologram": {
+   "id": "scifi/hologram",
+   "branch": "scifi",
+   "name": "全息投影",
+   "en": "Hologram",
+   "desc": "A floor projector throws a cone of light holding a turning wireframe model: scanlines roll through it, a data ring circles it, and it flickers, tears and jitters.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 4.0,
+   "play": 8.0,
+   "cooldown": 8.0,
+   "size": [
+    112,
+    104
+   ],
+   "anchor": "self"
+  },
+  "scifi/tractor-beam": {
+   "id": "scifi/tractor-beam",
+   "branch": "scifi",
+   "name": "牵引光束",
+   "en": "Tractor beam",
+   "desc": "A hovering pod projects a cone of light to the floor; rocks tear loose in puffs of dust and spiral up spinning into the lens while rings of light climb the beam.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 3.0,
+   "play": 6.0,
+   "cooldown": 6.0,
+   "size": [
+    120,
+    132
+   ],
+   "anchor": "self"
+  },
+  "scifi/warp-out": {
+   "id": "scifi/warp-out",
+   "branch": "scifi",
+   "name": "跃迁离场",
+   "en": "Warp out",
+   "desc": "The hero's outline flickers on, they flash white and break into light from the head down, streaming up a beam that lifts off the floor and pinches shut.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 2.6,
+   "play": 2.6,
+   "cooldown": 2.6,
+   "size": [
+    128,
+    168
+   ],
+   "anchor": "self"
+  },
+  "scifi/emp-blast": {
+   "id": "scifi/emp-blast",
+   "branch": "scifi",
+   "name": "电磁脉冲",
+   "en": "EMP blast",
+   "desc": "A disc charge ticks, pops white, and a bubble of rolling scanlines swells out with arcs crawling its skin; it strobes, tears and shorts out into falling dead pixels.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.2,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    152,
+    116
+   ],
+   "anchor": "self"
+  },
+  "scifi/warp-in": {
+   "id": "scifi/warp-in",
+   "branch": "scifi",
+   "name": "跃迁登场",
+   "en": "Warp in",
+   "desc": "A beam slams down, rings run down it and a scanline paints the hero in from head to toe, white-hot pixels cooling to their own colors; the beam pinches shut in sparks.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.0,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    192,
+    168
+   ],
+   "anchor": "self"
+  },
+  "status/haste": {
+   "id": "status/haste",
+   "branch": "status",
+   "name": "加速",
+   "en": "Haste",
+   "desc": "Sped up: striped after-images stream out behind, speed lines whip past, dust kicks off the heels and the leading edge catches the wind. Faces right.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.2,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    100,
+    56
+   ],
+   "anchor": "self"
+  },
+  "status/burning": {
+   "id": "status/burning",
+   "branch": "status",
+   "name": "燃烧",
+   "en": "Burning",
+   "desc": "Burning over time: small flames lick from four hot spots, trailing sparks and thin smoke; every 0.6 s they flare, the body flashes white then orange, scorch marks spread.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.2,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    72,
+    80
+   ],
+   "anchor": "self"
+  },
+  "status/poisoned": {
+   "id": "status/poisoned",
+   "branch": "status",
+   "name": "中毒",
+   "en": "Poisoned",
+   "desc": "Sick to the bone: green rolls up the body in waves, dark veins creep from a wound, toxic sweat drips and hisses; every 0.8 s it wobbles, blisters pop and a ring pulses out.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.6,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    72,
+    64
+   ],
+   "anchor": "self"
+  },
+  "status/rage": {
+   "id": "status/rage",
+   "branch": "status",
+   "name": "狂怒",
+   "en": "Rage",
+   "desc": "Seething: the body judders on every heartbeat, an anger mark throbs at the temple, eyes burn, steam jets off the head, stress lines flash out and the floor cracks hot underfoot.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 1.2,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    80,
+    80
+   ],
+   "anchor": "self"
+  },
+  "status/stunned": {
+   "id": "status/stunned",
+   "branch": "status",
+   "name": "眩晕",
+   "en": "Stunned",
+   "desc": "Seeing stars: three spinning stars and two little birds circle the head on a tilted ring, ducking behind it and sweeping round in front, trailing glitter.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    60,
+    64
+   ],
+   "anchor": "self"
+  },
+  "status/bleeding": {
+   "id": "status/bleeding",
+   "branch": "status",
+   "name": "流血",
+   "en": "Bleeding",
+   "desc": "Bleeding out: beads swell at three wounds, run, let go and fall to spatter into a glossy pool that ripples; each heartbeat spurts a little and flashes the body red.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    60,
+    56
+   ],
+   "anchor": "self"
+  },
+  "status/frozen": {
+   "id": "status/frozen",
+   "branch": "status",
+   "name": "冻结",
+   "en": "Frozen",
+   "desc": "Chilled to the bone: frost ferns creep over the body, icicles hang from chin and hands and drip, breath steams, snow settles, a shiver every second, frost spreads underfoot.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    72,
+    64
+   ],
+   "anchor": "self"
+  },
+  "status/charmed": {
+   "id": "status/charmed",
+   "branch": "status",
+   "name": "魅惑",
+   "en": "Charmed",
+   "desc": "Smitten: a big heart beats over the head, throwing a ring and a flush of light with every beat, little hearts float up, the eyes go pink and the cheeks blush.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    60,
+    76
+   ],
+   "anchor": "self"
+  },
+  "status/confused": {
+   "id": "status/confused",
+   "branch": "status",
+   "name": "混乱",
+   "en": "Confused",
+   "desc": "Head in a spin: a glowing spiral whirls over the head, question marks pop up round it and bob, the eyes dart left and right.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    60,
+    78
+   ],
+   "anchor": "self"
+  },
+  "status/slowed": {
+   "id": "status/slowed",
+   "branch": "status",
+   "name": "减速",
+   "en": "Slowed",
+   "desc": "Dragged through time: a glassy clock dial behind the head ticks round in heavy steps, flashing with each, while drops sink in slow motion and spread slow rings.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    64,
+    76
+   ],
+   "anchor": "self"
+  },
+  "status/sleep": {
+   "id": "status/sleep",
+   "branch": "status",
+   "name": "睡眠",
+   "en": "Sleep",
+   "desc": "Fast asleep: eyes shut, soft outlined Zs float up off the head one after another, swaying and growing as they rise, dream motes drift, a slow breathing glow.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    60,
+    82
+   ],
+   "anchor": "self"
+  },
+  "status/cursed": {
+   "id": "status/cursed",
+   "branch": "status",
+   "name": "受诅",
+   "en": "Cursed",
+   "desc": "Hexed: violet smoke rises off the body in winding trails, a dark stain creeps up from the feet with a glowing edge, the eyes burn, a skull glitches in overhead.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    64,
+    84
+   ],
+   "anchor": "self"
+  },
+  "status/petrified": {
+   "id": "status/petrified",
+   "branch": "status",
+   "name": "石化",
+   "en": "Petrified",
+   "desc": "Turned to stone: grey creeps up from the feet behind a crackling edge that spits grit, the statue holds, cracks run through it, and it bursts into tumbling chunks and dust.",
+   "tier": 5,
+   "cost": 5,
+   "loop": false,
+   "duration": 3.8,
+   "play": 3.8,
+   "cooldown": 3.8,
+   "size": [
+    120,
+    74
+   ],
+   "anchor": "self"
+  },
+  "spawn/poof": {
+   "id": "spawn/poof",
+   "branch": "spawn",
+   "name": "噗",
+   "en": "Poof",
+   "desc": "A cartoon death poof: a white pop, a ring of soft round smoke balls bursting out between speed lines, little stars spinning off, and the cloud lifting and thinning away.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.6,
+   "play": 1.6,
+   "cooldown": 1.6,
+   "size": [
+    112,
+    92
+   ],
+   "anchor": "self"
+  },
+  "spawn/egg-hatch": {
+   "id": "spawn/egg-hatch",
+   "branch": "spawn",
+   "name": "破壳",
+   "en": "Egg hatch",
+   "desc": "A speckled egg rocks three times, each rock cracking it further with warm light leaking out, then pops: light pours out of the opening and lit shell halves tumble away.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 3.1,
+   "play": 3.1,
+   "cooldown": 3.1,
+   "size": [
+    120,
+    96
+   ],
+   "anchor": "self"
+  },
+  "spawn/dissolve-burn": {
+   "id": "spawn/dissolve-burn",
+   "branch": "spawn",
+   "name": "焚化",
+   "en": "Dissolve burn",
+   "desc": "An ember seam lights at the feet and climbs the body: above it the body scorches and smoulders, at it flames lick up, below it there's only falling ash, embers and smoke.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 3.6,
+   "play": 3.6,
+   "cooldown": 3.6,
+   "size": [
+    96,
+    112
+   ],
+   "anchor": "self"
+  },
+  "spawn/coin-drop": {
+   "id": "spawn/coin-drop",
+   "branch": "spawn",
+   "name": "掉落金币",
+   "en": "Coin drop",
+   "desc": "An enemy goes up in a soft poof and gold coins spin out of it, bounce with a glint on each hit, settle on the floor, twinkle, and wink out one by one.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 3.0,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    160,
+    88
+   ],
+   "anchor": "self"
+  },
+  "spawn/soul-rise": {
+   "id": "spawn/soul-rise",
+   "branch": "spawn",
+   "name": "魂升",
+   "en": "Soul rise",
+   "desc": "The body's outline flares and dims, then a pale glowing copy of it lifts out, stretching as its legs melt into a rippling wisp, shedding motes until it thins into light.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 3.2,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    96,
+    140
+   ],
+   "anchor": "self"
+  },
+  "spawn/respawn-beam": {
+   "id": "spawn/respawn-beam",
+   "branch": "spawn",
+   "name": "复活光柱",
+   "en": "Respawn beam",
+   "desc": "A guide line drops, a pillar of light slams onto the spot, and a scan bar climbs from the feet writing the character back in row by row, white-hot lines cooling to its colors.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 2.5,
+   "play": 2.5,
+   "cooldown": 2.5,
+   "size": [
+    128,
+    150
+   ],
+   "anchor": "self"
+  },
+  "spawn/shatter-death": {
+   "id": "spawn/shatter-death",
+   "branch": "spawn",
+   "name": "碎裂",
+   "en": "Shatter death",
+   "desc": "Frost races up the body and seals it in faceted ice, a glint sweeps it, cracks spread from the chest, then it bursts into its own facets that tumble, bounce and melt.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 3.3,
+   "play": 3.3,
+   "cooldown": 3.3,
+   "size": [
+    172,
+    96
+   ],
+   "anchor": "self"
+  },
+  "spawn/disintegrate": {
+   "id": "spawn/disintegrate",
+   "branch": "spawn",
+   "name": "瓦解",
+   "en": "Disintegrate",
+   "desc": "The character crackles with light, flashes white, then peels away from the head down: each pixel flares white-hot and streams off on the wind as a cooling mote of light.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 3.4,
+   "play": 3.4,
+   "cooldown": 3.4,
+   "size": [
+    176,
+    100
+   ],
+   "anchor": "self"
+  },
+  "spawn/summon-rise": {
+   "id": "spawn/summon-rise",
+   "branch": "spawn",
+   "name": "召唤升起",
+   "en": "Summon rise",
+   "desc": "A rune circle burns into the floor, the ground bursts, and a horned brute heaves up out of it through dust and rubble, lit from below, until its eyes flare.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 4.6,
+   "play": 4.6,
+   "cooldown": 4.6,
+   "size": [
+    176,
+    116
+   ],
+   "anchor": "self"
+  },
+  "spawn/spawn-portal": {
+   "id": "spawn/spawn-portal",
+   "branch": "spawn",
+   "name": "出生门",
+   "en": "Spawn portal",
+   "desc": "A rift tears open on the floor and swirls, belches violet smoke and sparks, spits a fountain of wisps up out of itself, then twists shut with a pop.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.8,
+   "play": 3.8,
+   "cooldown": 3.8,
+   "size": [
+    208,
+    150
+   ],
+   "anchor": "self"
+  },
+  "pickups/heart-pickup": {
+   "id": "pickups/heart-pickup",
+   "branch": "pickups",
+   "name": "爱心",
+   "en": "Heart pickup",
+   "desc": "A plump glossy heart hovering over its shadow beats lub-dub: a big squash and stretch, a smaller echo, light and a thin ring pulsing out, tiny hearts drifting off.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.2,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    56,
+    60
+   ],
+   "anchor": "self"
+  },
+  "pickups/coin-spin": {
+   "id": "pickups/coin-spin",
+   "branch": "pickups",
+   "name": "旋转金币",
+   "en": "Coin spin",
+   "desc": "A thick gold coin turning on its edge: an embossed star face, a reeded rim showing as it goes edge-on, a flash sweeping the face, bobbing over its shadow.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.6,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    56,
+    56
+   ],
+   "anchor": "self"
+  },
+  "pickups/xp-orb": {
+   "id": "pickups/xp-orb",
+   "branch": "pickups",
+   "name": "经验球",
+   "en": "XP orb",
+   "desc": "A small glowing orb races a figure-eight, a comet tail tapering behind it along its path, flecks shed from the tail winking out, its light following it over the floor.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.8,
+   "play": 3.6,
+   "cooldown": 3.6,
+   "size": [
+    72,
+    56
+   ],
+   "anchor": "self"
+  },
+  "pickups/key-glint": {
+   "id": "pickups/key-glint",
+   "branch": "pickups",
+   "name": "钥匙",
+   "en": "Key glint",
+   "desc": "An ornate silver key hovering and rocking; a glint runs from its bow down the shaft to the teeth and bursts off the tip as falling sparks.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.0,
+   "play": 4.0,
+   "cooldown": 4.0,
+   "size": [
+    72,
+    60
+   ],
+   "anchor": "self"
+  },
+  "pickups/potion": {
+   "id": "pickups/potion",
+   "branch": "pickups",
+   "name": "药水",
+   "en": "Potion",
+   "desc": "A round glass flask of glowing brew rocks in the air: the brew sloshes behind the rock, bubbles rise and pop, light glows through the glass, wisps curl off the cork.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    56,
+    72
+   ],
+   "anchor": "self"
+  },
+  "pickups/gem-spin": {
+   "id": "pickups/gem-spin",
+   "branch": "pickups",
+   "name": "宝石",
+   "en": "Gem spin",
+   "desc": "A brilliant-cut ruby turning on its axis: real facets catch the light in turn, flashes roll over the crown, refracted light slides across the floor, sparkles wink round it.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    64,
+    64
+   ],
+   "anchor": "self"
+  },
+  "pickups/power-star": {
+   "id": "pickups/power-star",
+   "branch": "pickups",
+   "name": "无敌星",
+   "en": "Power star",
+   "desc": "A fat bevelled star rocks side to side and swells on each beat, rays of light turning slowly behind it, sparks spinning off its points.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 1.6,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    88,
+    84
+   ],
+   "anchor": "self"
+  },
+  "pickups/crystal-shard": {
+   "id": "pickups/crystal-shard",
+   "branch": "pickups",
+   "name": "水晶碎片",
+   "en": "Crystal shard",
+   "desc": "A broken amber shard hovers and sways: chipped uneven faces, its top sheared off, light pulsing up through glowing cracks and flaring out of the break; splinters orbit it.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 3.2,
+   "play": 6.4,
+   "cooldown": 6.4,
+   "size": [
+    64,
+    76
+   ],
+   "anchor": "self"
+  },
+  "pickups/collect-burst": {
+   "id": "pickups/collect-burst",
+   "branch": "pickups",
+   "name": "拾取闪光",
+   "en": "Collect burst",
+   "desc": "The moment of pickup: a white flash and a cross of light, a thin ring snapping out ahead of a softer one, twinkles thrown wide on curving paths that brake, hang and wink out.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 1.35,
+   "play": 1.35,
+   "cooldown": 1.35,
+   "size": [
+    112,
+    108
+   ],
+   "anchor": "self"
+  },
+  "pickups/loot-beam": {
+   "id": "pickups/loot-beam",
+   "branch": "pickups",
+   "name": "战利品光柱",
+   "en": "Loot beam",
+   "desc": "A dropped sword in a tall pillar of rarity light: a white core thinning to the sky, rings pulsing across the floor, motes streaming up, a glint racing up the shaft.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    96,
+    176
+   ],
+   "anchor": "self"
+  },
+  "pickups/chest-open": {
+   "id": "pickups/chest-open",
+   "branch": "pickups",
+   "name": "开宝箱",
+   "en": "Chest open",
+   "desc": "A banded chest rattles with gold light leaking from its seam, the lid kicks open, rays fan up, and coins and gems arc out, bounce, glint and get collected.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 4.6,
+   "play": 4.6,
+   "cooldown": 4.6,
+   "size": [
+    176,
+    112
+   ],
+   "anchor": "self"
+  },
+  "ui/damage-number": {
+   "id": "ui/damage-number",
+   "branch": "ui",
+   "name": "伤害数字",
+   "en": "Damage number",
+   "desc": "A red -27 punches out of a hit spark, white for a frame, arcs up, lands with a squash and a little hop, then fades as it lifts away.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.05,
+   "play": 1.05,
+   "cooldown": 1.05,
+   "size": [
+    76,
+    68
+   ],
+   "anchor": "self"
+  },
+  "ui/exclamation": {
+   "id": "ui/exclamation",
+   "branch": "ui",
+   "name": "感叹号",
+   "en": "Exclamation",
+   "desc": "A bold ! springs up off the hero's head, stretching as it shoots up and squashing as it lands; surprise ticks flick out, it wobbles, then pops away.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.4,
+   "play": 1.4,
+   "cooldown": 1.4,
+   "size": [
+    84,
+    104
+   ],
+   "anchor": "self"
+  },
+  "ui/heart-lost": {
+   "id": "ui/heart-lost",
+   "branch": "ui",
+   "name": "失去一颗心",
+   "en": "Heart lost",
+   "desc": "A HUD heart is hit: it flashes white and jolts, a crack runs down it, it splits into two halves that tumble away, leaving an empty socket that fades.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.5,
+   "play": 1.5,
+   "cooldown": 1.5,
+   "size": [
+    96,
+    88
+   ],
+   "anchor": "self"
+  },
+  "ui/health-bar-hit": {
+   "id": "ui/health-bar-hit",
+   "branch": "ui",
+   "name": "掉血条",
+   "en": "Health bar hit",
+   "desc": "A segmented health bar takes a hit: it jolts and dips, the lost chunk flashes white and sheds chips, holds, then drains away behind a sparking edge.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 2.0,
+   "play": 2.0,
+   "cooldown": 2.0,
+   "size": [
+    160,
+    64
+   ],
+   "anchor": "self"
+  },
+  "ui/crit-number": {
+   "id": "ui/crit-number",
+   "branch": "ui",
+   "name": "暴击数字",
+   "en": "Crit number",
+   "desc": "CRIT 128! slams in huge and white over a jagged starburst with a hard shake and speed lines, cools to fire, holds with a shine, then pops into sparks.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 1.5,
+   "play": 1.5,
+   "cooldown": 1.5,
+   "size": [
+    152,
+    120
+   ],
+   "anchor": "self"
+  },
+  "ui/combo-counter": {
+   "id": "ui/combo-counter",
+   "branch": "ui",
+   "name": "连击数",
+   "en": "Combo counter",
+   "desc": "x5 COMBO rockets in on streaming speed lines, smearing, and slams to a stop: a white flash, a ring, sparks; it pulses while a timer bar drains, then whooshes out.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 1.45,
+   "play": 1.45,
+   "cooldown": 1.45,
+   "size": [
+    208,
+    100
+   ],
+   "anchor": "self"
+  },
+  "ui/achievement": {
+   "id": "ui/achievement",
+   "branch": "ui",
+   "name": "成就达成",
+   "en": "Achievement",
+   "desc": "A toast slides in on speed lines and settles; a gold medal pops onto it in a burst of sparkles, a shine sweeps the whole toast, then it slides away.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.4,
+   "play": 2.4,
+   "cooldown": 2.4,
+   "size": [
+    220,
+    72
+   ],
+   "anchor": "self"
+  },
+  "ui/quest-complete": {
+   "id": "ui/quest-complete",
+   "branch": "ui",
+   "name": "任务完成",
+   "en": "Quest complete",
+   "desc": "A stitched ribbon unrolls from the middle, QUEST COMPLETE types on letter by letter, a gold seal stamps down and ticks, stars pop; then it all rolls away.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.6,
+   "play": 2.6,
+   "cooldown": 2.6,
+   "size": [
+    204,
+    92
+   ],
+   "anchor": "self"
+  },
+  "ui/coin-collect": {
+   "id": "ui/coin-collect",
+   "branch": "ui",
+   "name": "收集金币",
+   "en": "Coin collect",
+   "desc": "A coin bursts into a fountain of spinning coins that hang, then zip one by one into a HUD counter that pops and ticks up, glints and folds away.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.45,
+   "play": 2.45,
+   "cooldown": 2.45,
+   "size": [
+    176,
+    116
+   ],
+   "anchor": "self"
+  },
+  "ui/countdown": {
+   "id": "ui/countdown",
+   "branch": "ui",
+   "name": "倒计时",
+   "en": "Countdown",
+   "desc": "3, 2, 1 slam into a timer ring that drains like a burning fuse, throwing sparks; then GO! bursts out as the ring blows into a shockwave with rays.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.1,
+   "play": 3.1,
+   "cooldown": 3.1,
+   "size": [
+    152,
+    136
+   ],
+   "anchor": "self"
+  },
+  "ui/level-up": {
+   "id": "ui/level-up",
+   "branch": "ui",
+   "name": "升级",
+   "en": "Level up",
+   "desc": "Gold gathers at the feet and bursts up as a pillar of light round the hero; rings climb it, LEVEL UP! drops in letter by letter, a shine sweeps it, sparkles twinkle.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.2,
+   "play": 3.2,
+   "cooldown": 3.2,
+   "size": [
+    176,
+    138
+   ],
+   "anchor": "self"
+  },
+  "ui/confetti": {
+   "id": "ui/confetti",
+   "branch": "ui",
+   "name": "彩带",
+   "en": "Confetti",
+   "desc": "Two party poppers bang one after the other: paper bits and curly streamers burst out, stall, then tumble and flutter down, flipping, and settle on the floor.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.4,
+   "play": 3.4,
+   "cooldown": 3.4,
+   "size": [
+    200,
+    140
+   ],
+   "anchor": "self"
+  },
+  "critters/slime": {
+   "id": "critters/slime",
+   "branch": "critters",
+   "name": "史莱姆",
+   "en": "Slime",
+   "desc": "A glossy slime hops in place: it squashes to wind up, stretches into the jump, rounds out in the air, splats down flinging droplets that creep back, then wobbles and blinks.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 1.8,
+   "play": 3.6,
+   "cooldown": 3.6,
+   "size": [
+    112,
+    88
+   ],
+   "anchor": "self"
+  },
+  "critters/snake": {
+   "id": "critters/snake",
+   "branch": "critters",
+   "name": "小蛇",
+   "en": "Snake",
+   "desc": "A snake slithers along the floor, head raised: humps rise and roll back down its patterned body to the tail, dust puffs where it touches down, its forked tongue flicks.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    136,
+    56
+   ],
+   "anchor": "self"
+  },
+  "critters/bat": {
+   "id": "critters/bat",
+   "branch": "critters",
+   "name": "蝙蝠",
+   "en": "Bat",
+   "desc": "A bat flaps in four snappy wing frames along a figure-eight, its body lifting on each downbeat, moonlight on its wing bones, red eyes glowing and glinting.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    112,
+    80
+   ],
+   "anchor": "self"
+  },
+  "critters/bird": {
+   "id": "critters/bird",
+   "branch": "critters",
+   "name": "小鸟",
+   "en": "Bird",
+   "desc": "A songbird flies in place: bursts of wingbeats that lift its body on each downstroke, a glide on spread wings, its tail fanning, a loose feather drifting away.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    112,
+    80
+   ],
+   "anchor": "self"
+  },
+  "critters/ghost": {
+   "id": "critters/ghost",
+   "branch": "critters",
+   "name": "幽灵",
+   "en": "Ghost",
+   "desc": "A sheet ghost bobs over the floor: its scalloped hem ripples and trails its drift, little arms flutter, it glances about and blinks, motes trickle off its hem.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    96,
+    100
+   ],
+   "anchor": "self"
+  },
+  "critters/frog": {
+   "id": "critters/frog",
+   "branch": "critters",
+   "name": "青蛙",
+   "en": "Frog",
+   "desc": "A frog puffs its throat, blinks, crouches and leaps to snap a buzzing fly out of the air, then lands with a squash and a puff of dust, gulps and settles.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 2.6,
+   "play": 5.2,
+   "cooldown": 5.2,
+   "size": [
+    112,
+    88
+   ],
+   "anchor": "self"
+  },
+  "critters/flying-skull": {
+   "id": "critters/flying-skull",
+   "branch": "critters",
+   "name": "飞颅",
+   "en": "Flying skull",
+   "desc": "A cracked bone skull bobs in the air, jaw chattering, eyes burning, a fire roaring off its crown that sheds flame puffs, embers and smoke and throws warm light.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 2.4,
+   "play": 4.8,
+   "cooldown": 4.8,
+   "size": [
+    96,
+    132
+   ],
+   "anchor": "self"
+  },
+  "critters/eyeball": {
+   "id": "critters/eyeball",
+   "branch": "critters",
+   "name": "眼球怪",
+   "en": "Eyeball",
+   "desc": "A bloodshot eyeball floats in its fleshy lids: its glowing iris snaps from one look to the next, it blinks, and its nerve sways behind it as it bobs.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 3.2,
+   "play": 6.4,
+   "cooldown": 6.4,
+   "size": [
+    96,
+    108
+   ],
+   "anchor": "self"
+  },
+  "critters/butterfly": {
+   "id": "critters/butterfly",
+   "branch": "critters",
+   "name": "蝴蝶",
+   "en": "Butterfly",
+   "desc": "An iridescent butterfly wanders a loop in bursts of quick wingbeats and open-winged glides, its veined, spotted wings shedding a twinkling trail of glowing dust.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 3.2,
+   "play": 6.4,
+   "cooldown": 6.4,
+   "size": [
+    128,
+    88
+   ],
+   "anchor": "self"
+  },
+  "critters/jellyfish": {
+   "id": "critters/jellyfish",
+   "branch": "critters",
+   "name": "水母",
+   "en": "Jellyfish",
+   "desc": "A see-through jellyfish pulses: its bell squeezes to shove it up and relaxes as it sinks, frilled arms and long tentacles trailing, a glow inside, bubbles drifting by.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 3.2,
+   "play": 6.4,
+   "cooldown": 6.4,
+   "size": [
+    96,
+    120
+   ],
+   "anchor": "self"
+  },
+  "critters/wisp": {
+   "id": "critters/wisp",
+   "branch": "critters",
+   "name": "鬼火",
+   "en": "Wisp",
+   "desc": "A will-o'-the-wisp loops a figure-eight over the floor: a little soul-flame with a face, its flame tail licking up and streaming behind, shedding puffs and sparks.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 3.2,
+   "play": 6.4,
+   "cooldown": 6.4,
+   "size": [
+    128,
+    104
+   ],
+   "anchor": "self"
+  },
+  "critters/fish-school": {
+   "id": "critters/fish-school",
+   "branch": "critters",
+   "name": "鱼群",
+   "en": "Fish school",
+   "desc": "A school of fish holds station in two depth rows: bodies wag into swinging tails, one darts ahead now and then, bubbles rise and caustic light ripples over them.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 4.8,
+   "play": 9.6,
+   "cooldown": 8.0,
+   "size": [
+    136,
+    80
+   ],
+   "anchor": "self"
+  },
+  "weather/blizzard": {
+   "id": "weather/blizzard",
+   "branch": "weather",
+   "name": "暴风雪",
+   "en": "Blizzard",
+   "desc": "Snow driven almost flat by a gale: streaks at three depths race past, gusts throw translucent sheets of snow across the sky and spindrift streams off the drifts.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 8.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/rain": {
+   "id": "weather/rain",
+   "branch": "weather",
+   "name": "雨",
+   "en": "Rain",
+   "desc": "Slanted rain at four depths: far drops fade into the dark, near ones glint and splash, drops ring the puddles and a low mist drifts over the wet floor.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 8.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/cherry-blossoms": {
+   "id": "weather/cherry-blossoms",
+   "branch": "weather",
+   "name": "樱吹雪",
+   "en": "Cherry blossoms",
+   "desc": "Pink petals flutter down on a spring breeze, tumbling in little spirals and flashing as they catch the light, with a few whole blossoms spinning among them.",
+   "tier": 1,
+   "cost": 1,
+   "loop": true,
+   "duration": 10.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/falling-leaves": {
+   "id": "weather/falling-leaves",
+   "branch": "weather",
+   "name": "落叶",
+   "en": "Falling leaves",
+   "desc": "Autumn leaves swing down through the air, tilting and flipping to show their pale backs, ride a gust, land flat in the litter and fade.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 10.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/god-rays": {
+   "id": "weather/god-rays",
+   "branch": "weather",
+   "name": "丁达尔光",
+   "en": "God rays",
+   "desc": "Shafts of light slant down from high on the left, breathing and swaying, pooling on the floor, as drifting dust motes light up whenever they cross a beam.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 10.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/shooting-stars": {
+   "id": "weather/shooting-stars",
+   "branch": "weather",
+   "name": "流星雨",
+   "en": "Shooting stars",
+   "desc": "Meteors burn across a starry sky, white heads trailing gold and rose; the big ones flare and break up, and each leaves a glowing train that twists and fades.",
+   "tier": 2,
+   "cost": 2,
+   "loop": true,
+   "duration": 10.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/storm": {
+   "id": "weather/storm",
+   "branch": "weather",
+   "name": "雷暴",
+   "en": "Storm",
+   "desc": "Driving rain at two depths under a churning cloud deck; a forked bolt strikes in a double flash that lights the sky and the rain, then sheet lightning glows in the clouds.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 10.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/aurora": {
+   "id": "weather/aurora",
+   "branch": "weather",
+   "name": "极光",
+   "en": "Aurora",
+   "desc": "Rippling curtains of green-to-violet light over a starfield: folding hems burn bright, rays shimmer up into violet, and the whole sky slowly breathes.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 12.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/clouds": {
+   "id": "weather/clouds",
+   "branch": "weather",
+   "name": "流云",
+   "en": "Clouds",
+   "desc": "Layers of clouds drift past a bright moon at night: silver-lit tops, dark bellies, edges that flare where they cross the moon, forming and thinning as they go.",
+   "tier": 3,
+   "cost": 3,
+   "loop": true,
+   "duration": 12.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/fireflies": {
+   "id": "weather/fireflies",
+   "branch": "weather",
+   "name": "萤火",
+   "en": "Fireflies",
+   "desc": "Fireflies wander over a meadow at night, each glowing up and fading on its own rhythm, trailing light and lighting the grass tips beneath them.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 12.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/fog": {
+   "id": "weather/fog",
+   "branch": "weather",
+   "name": "雾",
+   "en": "Fog",
+   "desc": "Slow banks of moonlit fog at three depths drift past each other, crests catching the light, while thin streaks of mist slide by in front.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 12.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "weather/snow": {
+   "id": "weather/snow",
+   "branch": "weather",
+   "name": "雪",
+   "en": "Snow",
+   "desc": "Snow at three depths in a gusty breeze: far specks, drifting flakes, big near crystals that spin and glow; they settle on a sparkling drift and melt away.",
+   "tier": 4,
+   "cost": 4,
+   "loop": true,
+   "duration": 12.0,
+   "play": 10.0,
+   "cooldown": 8.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "transitions/slash-wipe": {
+   "id": "transitions/slash-wipe",
+   "branch": "transitions",
+   "name": "斩屏",
+   "en": "Slash wipe",
+   "desc": "A white-hot blade edge slices across the screen, light ahead of it and sparks spraying back over the cover; a second cut flashes through and the cover splits apart.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.7,
+   "play": 1.7,
+   "cooldown": 1.7,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "transitions/glitch-wipe": {
+   "id": "transitions/glitch-wipe",
+   "branch": "transitions",
+   "name": "故障擦除",
+   "en": "Glitch wipe",
+   "desc": "Torn bands of black stutter across the screen, freezing and jerking back, their ragged edges split into magenta and cyan ghosts spitting data slivers; then they tear on through.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 1.8,
+   "play": 1.8,
+   "cooldown": 1.8,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "transitions/blinds": {
+   "id": "transitions/blinds",
+   "branch": "transitions",
+   "name": "百叶窗",
+   "en": "Blinds",
+   "desc": "Slats catch the light edge-on, then tilt shut top to bottom, lit rims glinting as warm light squeezes through the closing gaps with dust in it; then they tilt open and fade.",
+   "tier": 1,
+   "cost": 1,
+   "loop": false,
+   "duration": 2.0,
+   "play": 2.0,
+   "cooldown": 2.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "transitions/crt-off": {
+   "id": "transitions/crt-off",
+   "branch": "transitions",
+   "name": "关显像管",
+   "en": "CRT off",
+   "desc": "The picture squeezes into a white-hot glowing line, the line into a dot that lingers as a fading afterglow; then it switches back on, dot to line to picture, with a warm-up glow.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 2.0,
+   "play": 2.0,
+   "cooldown": 2.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "transitions/diamond-wipe": {
+   "id": "transitions/diamond-wipe",
+   "branch": "transitions",
+   "name": "菱形擦除",
+   "en": "Diamond wipe",
+   "desc": "A wave of faceted diamonds swells across the screen, rims bright and ridges lit, cooling to black as they lock; then they rise as gems again and shrink away with glints.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 2.0,
+   "play": 2.0,
+   "cooldown": 2.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "transitions/iris": {
+   "id": "transitions/iris",
+   "branch": "transitions",
+   "name": "光圈",
+   "en": "Iris",
+   "desc": "A lit iris closes onto a warm spotlight where dust drifts, holds as its rim twinkles, snaps shut into a glint, then pops open from a flash with a white-hot rim throwing sparks.",
+   "tier": 2,
+   "cost": 2,
+   "loop": false,
+   "duration": 2.2,
+   "play": 2.2,
+   "cooldown": 2.2,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "transitions/pixel-dissolve": {
+   "id": "transitions/pixel-dissolve",
+   "branch": "transitions",
+   "name": "像素溶解",
+   "en": "Pixel dissolve",
+   "desc": "Clumps of blocks wink in, each drawn in a white outline that fills black and cools, with glints; then they wink out, outlines collapsing, the last small ones sparkling away.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.2,
+   "play": 2.2,
+   "cooldown": 2.2,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "transitions/star-iris": {
+   "id": "transitions/star-iris",
+   "branch": "transitions",
+   "name": "星形光圈",
+   "en": "Star iris",
+   "desc": "A five-point star iris spins shut on the middle of the screen, its gold rim lit and its tips twinkling and shedding motes; it closes on a glint and spins open again from a flash.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.2,
+   "play": 2.2,
+   "cooldown": 2.2,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "transitions/shatter-wipe": {
+   "id": "transitions/shatter-wipe",
+   "branch": "transitions",
+   "name": "碎屏",
+   "en": "Shatter wipe",
+   "desc": "A dark glass pane drops over the screen and bounces; cracks race out from an impact with a flash, then it bursts into tumbling glass shards with lit edges that fall away.",
+   "tier": 3,
+   "cost": 3,
+   "loop": false,
+   "duration": 2.8,
+   "play": 2.8,
+   "cooldown": 2.8,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  },
+  "transitions/burn-away": {
+   "id": "transitions/burn-away",
+   "branch": "transitions",
+   "name": "焚尽",
+   "en": "Burn away",
+   "desc": "The screen burns in from its edges behind a ragged ember line of licking flames, embers and smoke; then the black smoulders and burns open from the middle.",
+   "tier": 4,
+   "cost": 4,
+   "loop": false,
+   "duration": 3.0,
+   "play": 3.0,
+   "cooldown": 3.0,
+   "size": [
+    320,
+    180
+   ],
+   "anchor": "screen"
+  }
+ }
+}

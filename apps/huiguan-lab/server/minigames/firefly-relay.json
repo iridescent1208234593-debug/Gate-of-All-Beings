@@ -1,0 +1,9 @@
+{
+  "id": "firefly-relay",
+  "title": "萤火接力",
+  "description": "2 至 6 人合作。到场景里的萤火台依次接力，同一人不能连跑两棒。",
+  "mode": "field",
+  "min_players": 2,
+  "max_players": 6,
+  "seconds": 120
+}

@@ -1,0 +1,3 @@
+# Android public export overlay
+
+Install the official Godot 4.7.2 Android build template into the client project first (Project > Install Android Build Template). Run the sibling Install-AndroidOverlay.ps1 from PowerShell. It verifies the template version and copies only the reviewed source overrides into client/android/build/src/main. Do not copy over the Gradle toolchain or check in the generated Android build directory. Export using Android Public (unsigned), align before signing, and use the existing protected public release key. The same signing certificate is required by the verified App Link and updater.

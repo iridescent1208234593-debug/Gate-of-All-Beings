@@ -93,7 +93,8 @@ def test_ws_requires_session_origin_and_host(gateway):
     with pytest.raises(Exception):
         s = connect(f"ws://127.0.0.1:{gateway.port}/ws", additional_headers=headers, open_timeout=5)
         s.recv(timeout=2)
-    r = httpx.get(gateway.base + "/healthz", headers={"Host": "evil.example"})
+    # The fixture is loopback; host proxy settings must not intercept this request.
+    r = httpx.get(gateway.base + "/healthz", headers={"Host": "evil.example"}, trust_env=False)
     assert r.status_code == 421
     # Through-the-tunnel requests without an Origin are refused (browsers always send one).
     headers = {"Cookie": gateway.cookie_header(c), "CF-Ray": "test"}
@@ -182,12 +183,13 @@ def test_persistence_across_restart(gateway):
     me = w["you"]
     # walk to the lantern flower (12.5, 12.5) in legal steps
     x, z = me["x"], me["z"]
-    target = (13.3, 13.3)
     seq = 0
-    while abs(x - target[0]) > 0.01 or abs(z - target[1]) > 0.01:
-        x += max(-0.35, min(0.35, target[0] - x)); z += max(-0.35, min(0.35, target[1] - z)); seq += 1
-        s.send(json.dumps({"t": "move", "x": x, "z": z, "seq": seq}))
-        time.sleep(0.12)
+    # west first, then north: a diagonal from the spread spawn can clip the gate
+    for target in ((13.3, z), (13.3, 13.3)):
+        while abs(x - target[0]) > 0.01 or abs(z - target[1]) > 0.01:
+            x += max(-0.35, min(0.35, target[0] - x)); z += max(-0.35, min(0.35, target[1] - z)); seq += 1
+            s.send(json.dumps({"t": "move", "x": x, "z": z, "seq": seq}))
+            time.sleep(0.12)
     s.send(json.dumps({"t": "interact", "object": "lantern-flower"}))
     obj = recv_until(s, "object")
     assert obj["state"]["stage"] == 1
@@ -213,12 +215,12 @@ def test_oc_upload_and_visibility(gateway):
     assert oc["digest"] == changed["digest"] and base64.b64decode(oc["png"])[:8] == b"\x89PNG\r\n\x1a\n"
     # forged file: script renamed to PNG
     a.send(json.dumps({"t": "oc_set", "data": base64.b64encode(b"<script>alert(1)</script>" * 10).decode()}))
-    assert recv_until(a, "oc_result")["reason"] == "not_png_or_webp"
+    assert recv_until(a, "oc_result")["reason"] == "not_png_jpeg_or_webp"
     # PNG magic followed by garbage
     a.send(json.dumps({"t": "oc_set", "data": base64.b64encode(b"\x89PNG\r\n\x1a\n" + b"\0" * 200).decode()}))
     assert recv_until(a, "oc_result")["reason"] == "undecodable"
     # oversized dimensions
-    a.send(json.dumps({"t": "oc_set", "data": base64.b64encode(png_bytes(2100, 40, False)).decode()}))
+    a.send(json.dumps({"t": "oc_set", "data": base64.b64encode(png_bytes(4097, 40, False)).decode()}))
     assert recv_until(a, "oc_result")["reason"] == "dimensions_exceeded"
 
 

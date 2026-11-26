@@ -1,0 +1,297 @@
+[
+  {
+    "id": "b_spirit",
+    "name": "小灵体",
+    "category": "creature",
+    "path": "res://assets/shared/b_spirit.png",
+    "width": 474,
+    "height": 468,
+    "author": "水煮鱼",
+    "display_height": 1.2
+  },
+  {
+    "id": "b_dragon",
+    "name": "灵体龙",
+    "category": "creature",
+    "path": "res://assets/shared/b_dragon.png",
+    "width": 768,
+    "height": 677,
+    "author": "水煮鱼",
+    "display_height": 3.5
+  },
+  {
+    "id": "b_frog",
+    "name": "青蛙",
+    "category": "creature",
+    "path": "res://assets/shared/b_frog.png",
+    "width": 629,
+    "height": 568,
+    "author": "白鹤",
+    "display_height": 1.2
+  },
+  {
+    "id": "b_mushroom",
+    "name": "蘑菇生物",
+    "category": "creature",
+    "path": "res://assets/shared/b_mushroom.png",
+    "width": 581,
+    "height": 710,
+    "author": "白鹤",
+    "display_height": 1.2
+  },
+  {
+    "id": "b_fish_side",
+    "name": "鱼 · 侧游",
+    "category": "creature",
+    "path": "res://assets/shared/b_fish_side.png",
+    "width": 768,
+    "height": 509,
+    "author": "白鹤",
+    "display_height": 1.2
+  },
+  {
+    "id": "b_fish_soft",
+    "name": "鱼 · 柔边俯视",
+    "category": "creature",
+    "path": "res://assets/shared/b_fish_soft.png",
+    "width": 377,
+    "height": 768,
+    "author": "白鹤",
+    "display_height": 1.2
+  },
+  {
+    "id": "b_fish_top",
+    "name": "鱼 · 俯视",
+    "category": "creature",
+    "path": "res://assets/shared/b_fish_top.png",
+    "width": 313,
+    "height": 768,
+    "author": "白鹤",
+    "display_height": 1.2
+  },
+  {
+    "id": "b_dragonfly",
+    "name": "蜻蜓 · 侧面",
+    "category": "creature",
+    "path": "res://assets/shared/b_dragonfly.png",
+    "width": 521,
+    "height": 418,
+    "author": "吱吱",
+    "display_height": 0.4
+  },
+  {
+    "id": "b_dragonfly_blue",
+    "name": "蜻蜓 · 蓝色",
+    "category": "creature",
+    "path": "res://assets/shared/b_dragonfly_blue.png",
+    "width": 764,
+    "height": 768,
+    "author": "吱吱",
+    "display_height": 0.4
+  },
+  {
+    "id": "b_dragonfly_front",
+    "name": "蜻蜓 · 正面",
+    "category": "creature",
+    "path": "res://assets/shared/b_dragonfly_front.png",
+    "width": 391,
+    "height": 231,
+    "author": "吱吱",
+    "display_height": 0.4
+  },
+  {
+    "id": "b_beetle",
+    "name": "甲虫",
+    "category": "creature",
+    "path": "res://assets/shared/b_beetle.png",
+    "width": 649,
+    "height": 535,
+    "author": "吱吱",
+    "display_height": 0.4
+  },
+  {
+    "id": "b_fly",
+    "name": "苍蝇",
+    "category": "creature",
+    "path": "res://assets/shared/b_fly.png",
+    "width": 546,
+    "height": 365,
+    "author": "吱吱",
+    "display_height": 0.4
+  },
+  {
+    "id": "b_mouse",
+    "name": "奶鼠",
+    "category": "creature",
+    "path": "res://assets/shared/b_mouse.png",
+    "width": 304,
+    "height": 476,
+    "author": "浮笙",
+    "display_height": 1.2
+  },
+  {
+    "id": "b_cactus",
+    "name": "仙人掌",
+    "category": "plant",
+    "path": "res://assets/shared/b_cactus.png",
+    "width": 388,
+    "height": 704,
+    "author": "白鹤",
+    "display_height": 0.9
+  },
+  {
+    "id": "b_rock_bush",
+    "name": "石头与灌木",
+    "category": "prop",
+    "path": "res://assets/shared/b_rock_bush.png",
+    "width": 768,
+    "height": 429,
+    "author": "白鹤",
+    "display_height": 1.2
+  },
+  {
+    "id": "b_oxalis_1",
+    "name": "酢浆草 · 阶段1",
+    "category": "plant",
+    "path": "res://assets/shared/b_oxalis_1.png",
+    "width": 38,
+    "height": 44,
+    "author": "车库",
+    "display_height": 0.9,
+    "stages": [
+      "b_oxalis_1",
+      "b_oxalis_2",
+      "b_oxalis_3"
+    ]
+  },
+  {
+    "id": "b_oxalis_2",
+    "name": "酢浆草 · 阶段2",
+    "category": "plant",
+    "path": "res://assets/shared/b_oxalis_2.png",
+    "width": 59,
+    "height": 64,
+    "author": "车库",
+    "display_height": 0.9,
+    "stages": [
+      "b_oxalis_1",
+      "b_oxalis_2",
+      "b_oxalis_3"
+    ]
+  },
+  {
+    "id": "b_oxalis_3",
+    "name": "酢浆草 · 阶段3",
+    "category": "plant",
+    "path": "res://assets/shared/b_oxalis_3.png",
+    "width": 81,
+    "height": 86,
+    "author": "车库",
+    "display_height": 0.9,
+    "stages": [
+      "b_oxalis_1",
+      "b_oxalis_2",
+      "b_oxalis_3"
+    ]
+  },
+  {
+    "id": "b_narcissus_1",
+    "name": "水仙 · 阶段1",
+    "category": "plant",
+    "path": "res://assets/shared/b_narcissus_1.png",
+    "width": 27,
+    "height": 44,
+    "author": "车库",
+    "display_height": 0.9,
+    "stages": [
+      "b_narcissus_1",
+      "b_narcissus_2",
+      "b_narcissus_3"
+    ]
+  },
+  {
+    "id": "b_narcissus_2",
+    "name": "水仙 · 阶段2",
+    "category": "plant",
+    "path": "res://assets/shared/b_narcissus_2.png",
+    "width": 28,
+    "height": 64,
+    "author": "车库",
+    "display_height": 0.9,
+    "stages": [
+      "b_narcissus_1",
+      "b_narcissus_2",
+      "b_narcissus_3"
+    ]
+  },
+  {
+    "id": "b_narcissus_3",
+    "name": "水仙 · 阶段3",
+    "category": "plant",
+    "path": "res://assets/shared/b_narcissus_3.png",
+    "width": 52,
+    "height": 86,
+    "author": "车库",
+    "display_height": 0.9,
+    "stages": [
+      "b_narcissus_1",
+      "b_narcissus_2",
+      "b_narcissus_3"
+    ]
+  },
+  {
+    "id": "b_dandelion_1",
+    "name": "蒲公英 · 阶段1",
+    "category": "plant",
+    "path": "res://assets/shared/b_dandelion_1.png",
+    "width": 43,
+    "height": 44,
+    "author": "车库",
+    "display_height": 0.9,
+    "stages": [
+      "b_dandelion_1",
+      "b_dandelion_2",
+      "b_dandelion_3"
+    ]
+  },
+  {
+    "id": "b_dandelion_2",
+    "name": "蒲公英 · 阶段2",
+    "category": "plant",
+    "path": "res://assets/shared/b_dandelion_2.png",
+    "width": 54,
+    "height": 64,
+    "author": "车库",
+    "display_height": 0.9,
+    "stages": [
+      "b_dandelion_1",
+      "b_dandelion_2",
+      "b_dandelion_3"
+    ]
+  },
+  {
+    "id": "b_dandelion_3",
+    "name": "蒲公英 · 阶段3",
+    "category": "plant",
+    "path": "res://assets/shared/b_dandelion_3.png",
+    "width": 82,
+    "height": 86,
+    "author": "车库",
+    "display_height": 0.9,
+    "stages": [
+      "b_dandelion_1",
+      "b_dandelion_2",
+      "b_dandelion_3"
+    ]
+  },
+  {
+    "id": "b_initial_house",
+    "name": "玩家初始场 · 房屋",
+    "category": "building",
+    "path": "res://assets/shared/b_initial_house.png",
+    "width": 1280,
+    "height": 904,
+    "author": "不是很懂",
+    "display_height": 1.2
+  }
+]

@@ -1,0 +1,7 @@
+# LAB 2.3.6 source reconciliation
+
+The client, hall geometry, multiplayer timestamp and action/skill feedback are restored from the artifacts used to build public 2.3.6 (build 7). The gateway is reconciled against the live bridge and timestamp update. Existing tracked Hall login, direct native session handling, admission and their tests are retained. No state, full installation packages, tool caches, local signing configuration or private keys are tracked.
+
+The source includes rendered gameplay assets and the runtime MIT skill FX pack with its license. Tool and map authoring experiments are not required. Android requires the matching official Godot 4.7.2 Android build template; apply the checked-in overlay before exporting. Store the release signing key separately. The Web export uses the existing authenticated bridge file. The team bamboo source model and texture are not added to the public source tree without confirmed redistribution rights; the same licensed Kenney fallback used by low-detail mode covers this optional prop on a clean checkout. This does not change play or collision.
+
+Before creating a new public release, run the gateway auth, queue, skill, bridge and movement tests and the Godot snapshot and pending-feedback smokes. Reuse the server JSON geometry in the client rather than maintaining a separate collision table. Keep released build numbers monotonic; do not replace source under an existing release tag.

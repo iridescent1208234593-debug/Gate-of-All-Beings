@@ -205,7 +205,10 @@ func _test_hall_entry() -> void:
 	profile.oc_png = icon.save_png_to_buffer()
 	hall.welcomed = true
 	hall.hud.show()
-	hall.hud_buttons["小游戏"].pressed.emit()
+	var menu := hall.hud.find_child("GameCornerEntry", true, false) as Button
+	_check(menu != null, "game corner has a HUD entry")
+	if menu != null:
+		menu.pressed.emit()
 	var button := hall.panel_holder.find_child("PlayBeachShoot", true, false) as Button
 	_check(button != null and not button.disabled, "hall HUD opens the playable game corner")
 	if button != null:

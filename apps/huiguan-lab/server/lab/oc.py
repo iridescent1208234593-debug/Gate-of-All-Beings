@@ -16,7 +16,7 @@ from pathlib import Path
 
 from PIL import Image, UnidentifiedImageError
 
-Image.MAX_IMAGE_PIXELS = 2048 * 2048 + 1
+Image.MAX_IMAGE_PIXELS = 4096 * 4096 + 1
 
 
 class OCRejected(ValueError):
@@ -28,6 +28,8 @@ def sniff(data: bytes) -> str | None:
         return "png"
     if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
         return "webp"
+    if data[:3] == b"\xff\xd8\xff":
+        return "jpeg"
     return None
 
 
@@ -39,7 +41,7 @@ def normalize_image(data: bytes, max_bytes: int, max_side: int, display_side: in
         raise OCRejected("too_large")
     kind = sniff(data)
     if kind is None:
-        raise OCRejected("not_png_or_webp")
+        raise OCRejected("not_png_jpeg_or_webp")
     try:
         with Image.open(io.BytesIO(data)) as probe:
             fmt = (probe.format or "").lower()

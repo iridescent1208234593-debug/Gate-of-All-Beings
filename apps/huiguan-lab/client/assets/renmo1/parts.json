@@ -1,0 +1,152 @@
+[
+    {
+        "id":  1,
+        "mesh":  "ArtMeshFace",
+        "name":  "脸"
+    },
+    {
+        "id":  2,
+        "mesh":  "ArtMeshEars",
+        "name":  "耳朵"
+    },
+    {
+        "id":  3,
+        "mesh":  "ArtMeshNeck",
+        "name":  "脖子"
+    },
+    {
+        "id":  4,
+        "mesh":  "ArtMeshLayer",
+        "name":  "胸腔"
+    },
+    {
+        "id":  5,
+        "mesh":  "ArtMeshLayer2",
+        "name":  "腰胯"
+    },
+    {
+        "id":  6,
+        "mesh":  "ArtMeshLayerL2",
+        "name":  "左大臂"
+    },
+    {
+        "id":  7,
+        "mesh":  "ArtMeshLayerL",
+        "name":  "左小臂"
+    },
+    {
+        "id":  8,
+        "mesh":  "ArtMeshHandwearL",
+        "name":  "左手"
+    },
+    {
+        "id":  9,
+        "mesh":  "ArtMeshLayerR2",
+        "name":  "右大臂"
+    },
+    {
+        "id":  10,
+        "mesh":  "ArtMeshLayerR",
+        "name":  "右小臂"
+    },
+    {
+        "id":  11,
+        "mesh":  "ArtMeshHandwearR",
+        "name":  "右手"
+    },
+    {
+        "id":  12,
+        "mesh":  "ArtMeshLegwearL2",
+        "name":  "左大腿"
+    },
+    {
+        "id":  13,
+        "mesh":  "ArtMeshLegwearL",
+        "name":  "左小腿"
+    },
+    {
+        "id":  14,
+        "mesh":  "ArtMeshFootwearL",
+        "name":  "左脚"
+    },
+    {
+        "id":  15,
+        "mesh":  "ArtMeshLegwearR2",
+        "name":  "右大腿"
+    },
+    {
+        "id":  16,
+        "mesh":  "ArtMeshLegwearR",
+        "name":  "右小腿"
+    },
+    {
+        "id":  17,
+        "mesh":  "ArtMeshFootwearR",
+        "name":  "右脚"
+    },
+    {
+        "id":  18,
+        "mesh":  "ArtMeshEyewhiteL",
+        "name":  "左眼"
+    },
+    {
+        "id":  19,
+        "mesh":  "ArtMeshEyewhiteR",
+        "name":  "右眼"
+    },
+    {
+        "id":  20,
+        "mesh":  "ArtMeshEyelashL",
+        "name":  "左睫毛"
+    },
+    {
+        "id":  21,
+        "mesh":  "ArtMeshEyelashR",
+        "name":  "右睫毛"
+    },
+    {
+        "id":  22,
+        "mesh":  "ArtMeshEyebrowL",
+        "name":  "左眉毛"
+    },
+    {
+        "id":  23,
+        "mesh":  "ArtMeshEyebrowR",
+        "name":  "右眉毛"
+    },
+    {
+        "id":  24,
+        "mesh":  "ArtMeshMouthClose",
+        "name":  "嘴"
+    },
+    {
+        "name":  "头发",
+        "id":  25,
+        "mesh":  "WearHair"
+    },
+    {
+        "name":  "兽耳/垂耳",
+        "id":  26,
+        "mesh":  "WearEars"
+    },
+    {
+        "name":  "上衣",
+        "id":  27,
+        "mesh":  "WearTop"
+    },
+    {
+        "name":  "上衣领子/花纹",
+        "id":  28,
+        "mesh":  "WearTopDetail"
+    },
+    {
+        "name":  "下装",
+        "id":  29,
+        "mesh":  "WearBottom"
+    },
+    {
+        "name":  "下装花纹",
+        "id":  30,
+        "mesh":  "WearBottomDetail"
+    }
+]

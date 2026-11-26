@@ -10,6 +10,7 @@ What lives here (server-shared world + security, never personal OC data):
   audit            admin operations
   security_events  auth failures, lockouts, revocations (never plaintext codes)
   art_assets       art-team test uploads awaiting review
+  lab_tiles        ground tiles players place (dirt path), one per 1 m cell
 """
 from __future__ import annotations
 
@@ -60,6 +61,15 @@ CREATE TABLE IF NOT EXISTS art_assets(
   mime TEXT NOT NULL, width INTEGER NOT NULL, height INTEGER NOT NULL, bytes INTEGER NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending','approved','rejected')),
   created_at REAL NOT NULL, reviewed_at REAL, reviewer TEXT);
+CREATE TABLE IF NOT EXISTS lab_tiles(
+  space_id TEXT NOT NULL REFERENCES spaces(id) ON DELETE CASCADE, x INTEGER NOT NULL, z INTEGER NOT NULL,
+  kind TEXT NOT NULL DEFAULT 'dirt', placed_by TEXT NOT NULL, placed_at REAL NOT NULL, PRIMARY KEY(space_id, x, z));
+CREATE TABLE IF NOT EXISTS garden_progress(pid TEXT PRIMARY KEY, phase INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS garden_inventory(
+  pid TEXT PRIMARY KEY, seeds INTEGER NOT NULL DEFAULT 1 CHECK(seeds>=0), soil INTEGER NOT NULL DEFAULT 1 CHECK(soil>=0));
+CREATE TABLE IF NOT EXISTS lab_entities(
+  id TEXT PRIMARY KEY, space_id TEXT NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
+  state TEXT NOT NULL, updated_at REAL NOT NULL);
 """
 
 

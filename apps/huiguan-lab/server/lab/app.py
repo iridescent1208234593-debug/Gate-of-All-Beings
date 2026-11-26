@@ -29,19 +29,30 @@ from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from PIL import Image
 
-from .admission import Admission
 from . import account_broker
+from .admission import Admission
 from . import config as config_mod
+from . import jump as jump_mod
+from . import art
 from .auth import SESSION_COOKIE, Auth, load_pepper
+from .jump import JumpArena
+from .minigames import Minigames
 from .oc import OCCache, OCRejected, sniff
 from .r4bridge import R4Bridge
 from .site_domains import LAB_DIRECT_HOST
 from .store import Store
 from .world import Hub, clean_text
+from . import skills as skills_mod
+from . import werewolf as werewolf_mod
 
 log = logging.getLogger("lab.app")
 WEB_STATIC = config_mod.SOURCE_ROOT / "web"
 SPACES_FILE = config_mod.SOURCE_ROOT / "client" / "data" / "spaces.json"
+SKILLS_FILE = config_mod.SOURCE_ROOT / "client" / "data" / "skills.json"
+WEREWOLF_FILE = config_mod.SOURCE_ROOT / "client" / "data" / "werewolf.json"
+SKILL_FX_DIR = config_mod.SOURCE_ROOT / "build" / "skill-fx"
+if not SKILL_FX_DIR.is_dir():
+    SKILL_FX_DIR = config_mod.SOURCE_ROOT / "server" / "assets" / "skill-fx"     # output of scripts/pack_skill_fx.py
 MIME = {".html": "text/html; charset=utf-8", ".js": "text/javascript", ".wasm": "application/wasm",
         ".pck": "application/octet-stream", ".png": "image/png", ".svg": "image/svg+xml", ".css": "text/css",
         ".json": "application/json", ".ico": "image/x-icon", ".webp": "image/webp", ".woff2": "font/woff2"}
@@ -74,8 +85,36 @@ class Lab:
         self.oc = OCCache(cfg.oc_dir, cfg.oc_cache_budget_bytes, cfg.oc_ttl_seconds)
         self.r4 = R4Bridge(cfg.r4_port, cfg.secrets, cfg.r4_enabled)
         self.hub = Hub(self.store, SPACES_FILE, self.oc, self.r4, config_mod.VERSION)
+        self.hub.minigames = Minigames(config_mod.SOURCE_ROOT / "server" / "minigames")
         self.hub.oc_limits = {"max_bytes": cfg.oc_max_bytes, "max_side": cfg.oc_max_side,
                               "display_side": cfg.oc_display_side}
+        self.hub.art_dir = cfg.art_dir
+        self.skills = skills_mod.install(Hub, self.store, SKILLS_FILE)
+        self.werewolf = werewolf_mod.install(Hub, self.store, WEREWOLF_FILE)
+        self.jump = jump_mod.install(Hub, JumpArena())
+        self._merge_initial_into_hall()
+        if not self.store.one("SELECT 1 FROM meta WHERE key='art-entities-v1'") and art.catalog(self.store):
+            # Fresh LAB: put the shared creatures and the eight field plants into the hall's home field.
+            sx, _, sz = self.hub.geo['hall'].t['spawn']
+            creatures = [a for a in art.catalog(self.store) if a['category'] == 'creature']
+            plants = [a for a in art.catalog(self.store) if a['category'] == 'plant' and (not a.get('stages') or a['id'].endswith('_1'))]
+            for i, a in enumerate(creatures):
+                self.hub.edit_entity('hall', {'species': a['name'], 'asset': a['id'],
+                    'kind': 'creature', 'x': sx - 2 + (i % 5)*1.8, 'z': sz + (i // 5)*.8,
+                    'height': a.get('display_height',1.2), 'behavior':'wander', 'speed': .35})
+            for i, plot in enumerate(self.hub.geo['hall'].t.get('planting_plots', [])):
+                a=plants[i%len(plants)]
+                self.hub.edit_entity('hall', {'species':a['name'],'asset':a['id'],'kind':'plant',
+                    'x':plot['x'],'z':plot['z'],'height':a.get('display_height',.9),'behavior':'idle',
+                    'grow_seconds':90 if a.get('stages') else 0})
+            self.store.exec("INSERT INTO meta(key,value) VALUES('art-entities-v1','seeded')")
+        if not self.store.one("SELECT 1 FROM meta WHERE key='dirt-path-seed-v1'"):
+            # One dirt road from the home field down past the gate to the campfire, laid by the LAB.
+            # Players can lift these and lay their own; see Hub.on_tile.
+            for x, z in [(18, z) for z in range(0, 10)] + [(17, 10), (16, 10)]:
+                if not self.hub.tiles.get('hall', {}).get((x, z)) and not self.hub.tile_check('hall', x, z):
+                    self.hub.set_tile('hall', x, z, True, 'lab')
+            self.store.exec("INSERT INTO meta(key,value) VALUES('dirt-path-seed-v1','seeded')")
         self.client_version = self._client_version()
         self.tasks: list[asyncio.Task] = []
         self.ws_handshake_rejects = 0
@@ -91,11 +130,37 @@ class Lab:
                                     legacy_players=cfg.admission_legacy_players)
                           if cfg.admission_max_waiters else None)
 
+    def _merge_initial_into_hall(self) -> None:
+        """LAB 2.2: the separate 玩家初始场 became the north part of 西木会馆.
+
+        Moves what lived in the old 'initial' space (placed creatures/plants, players standing there,
+        any tiles) into the hall at the same spot of the painting, then removes the empty space row.
+        Runs once; a database that never had the old space is left alone.
+        """
+        stub = self.hub.spec['templates'].get('initial', {})
+        if stub.get('merged_into') != 'hall' or not self.store.one("SELECT 1 FROM spaces WHERE id='initial'"):
+            return
+        dx, _, dz = stub['merge_offset']
+        moved = [n for n in self.hub.entities.values() if n['space'] == 'initial']
+        with self.store.tx():
+            for n in moved:
+                n['space'], n['x'], n['z'] = 'hall', n['x'] + dx, n['z'] + dz
+                self.hub.save_entity(n)
+            players = self.store.exec("UPDATE players SET space='hall', x=x+?, z=z+? WHERE space='initial'", (dx, dz)).rowcount
+            for r in self.store.all("SELECT x,z,kind,placed_by,placed_at FROM lab_tiles WHERE space_id='initial'"):
+                self.store.exec("INSERT OR IGNORE INTO lab_tiles(space_id,x,z,kind,placed_by,placed_at) VALUES('hall',?,?,?,?,?)",
+                                (r['x'] + int(dx), r['z'] + int(dz), r['kind'], r['placed_by'], r['placed_at']))
+            self.store.exec("DELETE FROM spaces WHERE id='initial'")
+        self.hub.tiles = {}
+        for r in self.store.all("SELECT space_id,x,z,kind,placed_by FROM lab_tiles"):
+            self.hub.tiles.setdefault(r["space_id"], {})[(r["x"], r["z"])] = {"kind": r["kind"], "by": r["placed_by"]}
+        self.store.audit('system', 'space.merge_initial_into_hall', 'initial', entities=len(moved), players=players, offset=[dx, dz])
+
     def _client_version(self) -> str:
         f = self.cfg.web_dir / "build-info.json"
         if f.is_file():
             try:
-                return json.loads(f.read_text(encoding="utf-8")).get("version", "?")
+                return json.loads(f.read_text(encoding="utf-8-sig")).get("version", "?")
             except ValueError:
                 return "?"
         return "not-built"
@@ -103,11 +168,16 @@ class Lab:
     def start(self) -> None:
         loop = asyncio.get_running_loop()
         self.tasks = [loop.create_task(self.hub.tick_loop()), loop.create_task(self.hub.persist_loop()),
-                      loop.create_task(self.hub.r4_loop()), loop.create_task(self.hub.housekeeping_loop(self.auth))]
+                      loop.create_task(self.hub.r4_loop()), loop.create_task(self.hub.housekeeping_loop(self.auth)),
+                      loop.create_task(skills_mod.online_loop(self.hub, self.skills)),
+                      loop.create_task(werewolf_mod.tick_loop(self.hub, self.werewolf)),
+                      loop.create_task(self.hub.minigames.maintain(self.hub)),
+                      loop.create_task(jump_mod.maintain(self.hub, self.jump))]
         if self.account:
             self.tasks.append(loop.create_task(self.account.maintain(self.hub)))
 
     async def stop(self) -> None:
+        self.hub.save_entities()
         for c in list(self.hub.conns.values()):
             self.hub.save_player(c)
         for t in self.tasks:
@@ -219,6 +289,8 @@ def create_app(lab: Lab) -> FastAPI:
         fresh = session_of(request)
         if not fresh or fresh["code_id"] != principal or admission_mode(fresh) != mode:
             return queue_response({"error": "no_session"}, 401)
+        if code and mode == "legacy":
+            return queue_response({"error": "priority_unavailable"}, 400)
         if code:
             if mode != "hall":
                 return queue_response({"error": "priority_unavailable"}, 400)
@@ -324,6 +396,21 @@ def create_app(lab: Lab) -> FastAPI:
         return {"role": s["role"], "expires_at": s["expires_at"], "client_version": lab.client_version,
                 "server_version": config_mod.VERSION}
 
+    @app.get("/api/updates/android/{version_code}")
+    async def android_update(request: Request, version_code: str):
+        headers = {"Cache-Control": "private, no-store", "Vary": "Cookie",
+                   "X-Content-Type-Options": "nosniff"}
+        if not session_of(request):
+            return JSONResponse({"error": "no_session"}, status_code=401, headers=headers)
+        if not re.fullmatch(r"[1-9][0-9]{0,8}", version_code):
+            return Response(status_code=404, headers=headers)
+        directory = cfg.runtime.resolve() / "android-updates"
+        f = directory / f"huiguan-android-{version_code}.apk"
+        # Release artifacts are ordinary files staged by the operator, never a web upload.
+        if f.resolve() != f or not f.is_file():
+            return Response(status_code=404, headers=headers)
+        return FileResponse(f, media_type="application/vnd.android.package-archive", headers=headers)
+
     @app.get("/admission")
     async def admission_page(request: Request):
         if gate is None:
@@ -396,6 +483,32 @@ def create_app(lab: Lab) -> FastAPI:
         resp.headers["Cross-Origin-Resource-Policy"] = "same-origin"
         return resp
 
+    @app.get("/fx/{path:path}")
+    async def skill_fx(path: str, request: Request):
+        # PixelFX skill effects, fetched by the client on first use (not in the .pck); session required.
+        session = session_of(request)
+        if not session:
+            return Response(status_code=401)
+        if gate and session["role"] == "player" and (not admission_mode(session)
+                or gate.status(session["code_id"])["state"] not in ("ready", "playing")):
+            return Response(status_code=403)
+        if not re.fullmatch(r"[a-z]+/[a-z0-9-]+(_[0-9]+\.webp|\.json)", path):
+            return Response(status_code=404)
+        root = SKILL_FX_DIR.resolve()
+        f = (root / path).resolve()
+        if root not in f.parents or not f.is_file():
+            return Response(status_code=404)
+        st = f.stat()
+        etag = f'"{st.st_size:x}-{st.st_mtime_ns:x}"'
+        if request.headers.get("if-none-match") == etag:
+            return Response(status_code=304, headers={"ETag": etag, "Cache-Control": "private, max-age=86400"})
+        resp = FileResponse(f, media_type=MIME.get(f.suffix, "application/octet-stream"))
+        resp.headers["Cache-Control"] = "private, max-age=86400"
+        resp.headers["ETag"] = etag
+        resp.headers["X-Content-Type-Options"] = "nosniff"
+        resp.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+        return resp
+
     @app.websocket("/ws")
     async def ws_endpoint(ws: WebSocket):
         headers = ws.headers
@@ -463,10 +576,10 @@ def create_app(lab: Lab) -> FastAPI:
                     text = msg["bytes"].decode("utf-8", "replace")
                 if text is None:
                     continue
-                if len(text) > 8 * 1024 * 1024:
+                if len(text) > 12 * 1024 * 1024:
                     break
                 await lab.hub.handle(conn, text)
-        except (WebSocketDisconnect, RuntimeError):
+        except (WebSocketDisconnect, RuntimeError, TimeoutError):
             pass
         finally:
             try:
@@ -481,7 +594,6 @@ def create_app(lab: Lab) -> FastAPI:
                         reconnect = conn is not None and bool(lab.auth.session(token))
                     finally:
                         gate.release(principal, lease, connected=reconnect)
-
 
     # -- monitor (read-only) ----------------------------------------------------------
     @app.get("/monitor")
@@ -517,30 +629,31 @@ def create_app(lab: Lab) -> FastAPI:
             return JSONResponse({"error": "forbidden"}, status_code=403)
         if request.headers.get("origin") not in cfg.origins():
             return JSONResponse({"error": "bad_origin"}, status_code=403)
-        category = request.headers.get("x-art-category", "other")
-        if category not in ("tree", "bridge", "ground", "building", "character", "prop", "other"):
-            return JSONResponse({"error": "bad_category"}, status_code=400)
-        data = await request.body()
-        if len(data) > 10 * 1024 * 1024:
-            return JSONResponse({"error": "too_large"}, status_code=413)
-        kind = sniff(data)
         try:
-            with Image.open(io.BytesIO(data)) as img:
-                if kind is None or (img.format or "").lower() != kind or max(img.size) > 4096:
-                    raise OCRejected("format")
-                img.load()
-                w, h = img.size
-                out = io.BytesIO()
-                img.convert("RGBA").save(out, "PNG", optimize=True)
-        except Exception:
-            return JSONResponse({"error": "invalid_image"}, status_code=400)
-        aid = "a_" + secrets.token_hex(6)
-        name = clean_text(request.headers.get("x-art-name", "untitled"), 40)
-        (cfg.art_dir / "pending" / f"{aid}.png").write_bytes(out.getvalue())
-        lab.store.exec("INSERT INTO art_assets(id,uploader,category,filename,mime,width,height,bytes,created_at) "
-                       "VALUES(?,?,?,?,?,?,?,?,?)", (aid, s["code_id"], category, name, "image/png", w, h,
-                                                     len(out.getvalue()), time.time()))
-        return {"ok": True, "id": aid, "status": "pending"}
+            return await art.upload(request, lab, s['code_id'])
+        except OCRejected as error:
+            return JSONResponse({'error': str(error)}, status_code=413 if str(error) == 'too_large' else 400)
+
+    @app.post('/api/art/place')
+    async def art_place(request: Request):
+        s = session_of(request)
+        if not s or s['role'] != 'art' or request.headers.get('origin') not in cfg.origins():
+            return JSONResponse({'error': 'forbidden'}, status_code=403)
+        body = await request.json()
+        sid = str(body.get('space', 'hall'))
+        player = lab.hub.player_record(s['code_id'])
+        if not lab.hub.can_enter(player['pid'], sid):
+            return JSONResponse({'error': 'forbidden'}, status_code=403)
+        # Art codes can place their own uploads; admin retains edit/remove controls.
+        row = lab.store.one("SELECT uploader,status FROM art_assets WHERE id=?", (body.get('asset'),))
+        if not row or row['uploader'] != s['code_id'] or row['status'] != 'approved':
+            return JSONResponse({'error': '请选择自己上传的素材'}, status_code=400)
+        try:
+            entity = lab.hub.edit_entity(sid, body)
+        except (ValueError, TypeError) as error:
+            return JSONResponse({'error': str(error)}, status_code=400)
+        lab.store.audit(s['code_id'], 'entity.place', entity['id'], space=sid)
+        return {'ok': True, 'entity': entity}
 
     @app.get("/api/art/approved")
     async def art_list(request: Request):

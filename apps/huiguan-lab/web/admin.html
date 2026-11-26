@@ -34,10 +34,43 @@
   <p><button id="report">导出匿名测试报告</button> <button id="snap">查看会馆快照</button></p>
   <pre id="snapshot" hidden></pre>
 
+  <h2>生物、植物与场景摆放</h2>
+  <p>选择素材，在地图点选位置后放置。改位置、大小、行为或生长阶段会同步给同一空间的玩家，并在重启后保留。</p>
+  <label>空间 <select id="entitySpace"></select></label>
+  <label>种植位置 <select id="entityPlot"><option value="">自由摆放</option></select></label>
+  <button id="newEntity">新建对象</button>
+  <canvas id="entityMap" width="800" height="450" style="display:block;max-width:100%;background:#749270;border:1px solid #9cac8c;margin:10px 0;touch-action:none"></canvas>
+  <form id="entityForm">
+    <input id="entityId" type="hidden">
+    <label>名称 <input id="entityName" value="小灵体" maxlength="80"></label>
+    <label>类型 <select id="entityKind"><option value="creature">生物</option><option value="plant">植物</option><option value="prop">摆件</option></select></label>
+    <label>素材 <select id="entityAsset"></select></label>
+    <label>X <input id="entityX" type="number" step="0.1" value="16" style="width:75px"></label>
+    <label>Z <input id="entityZ" type="number" step="0.1" value="15" style="width:75px"></label>
+    <label>高度（米）<input id="entityHeight" type="number" step="0.1" min="0.1" max="12" value="1.2" style="width:75px"></label>
+    <label>行为 <select id="entityBehavior"><option value="idle">停留</option><option value="wander">游走</option><option value="follow">跟随最近玩家</option></select></label>
+    <label>速度 <input id="entitySpeed" type="number" step="0.1" min="0" max="10" value="0.8" style="width:70px"></label>
+    <label>生长阶段 <select id="entityStage"><option value="0">1 · 幼苗</option><option value="1">2 · 成长</option><option value="2">3 · 成熟</option></select></label>
+    <label>每阶段秒数（0 为手动）<input id="entityGrow" type="number" min="0" max="86400" value="0" style="width:80px"></label>
+    <label><input id="entityVisible" type="checkbox" checked>显示</label>
+    <button type="submit">保存并同步</button> <span id="entityMsg" role="status"></span>
+  </form>
+  <div class="scroll"><table id="entities"></table></div>
+  <p id="r4Entities"></p>
+
+  <h2>随画随传（最多 8 MB）</h2>
+  <p>PNG、JPG、WebP。上传后即可选作生物、植物或摆件；原件仍请保存在素材库。</p>
+  <select id="cat"><option value="creature">生物</option><option value="plant">植物</option><option value="prop">摆件</option><option value="building">建筑</option><option value="ground">地表</option></select>
+  <input id="file" type="file" accept="image/png,image/jpeg,image/webp,.png,.jpg,.jpeg,.webp"><button id="up">上传文件</button>
+  <p><input id="ink" type="color" value="#344c35" aria-label="画笔颜色"> <label>笔宽 <input id="brush" type="range" min="1" max="60" value="8"></label>
+  <label><input id="eraser" type="checkbox">橡皮</label> <button id="clearDrawing">清空画布</button> <button id="uploadDrawing">上传画布</button> <span id="msg" role="status"></span></p>
+  <canvas id="drawing" width="640" height="480" style="max-width:100%;touch-action:none;background:repeating-conic-gradient(#d5ddd0 0% 25%,#f2f5ee 0% 50%) 0/20px 20px;border:1px solid #9cac8c"></canvas>
+  <p>上传完成后素材会自动选中，再在上方点击“保存并同步”放入世界。</p>
+
   <h2>R4 世界模拟</h2>
   <pre id="r4"></pre>
 
-  <h2>美术测试素材（待审核）</h2>
+  <h2>共享素材与旧待审核项</h2>
   <div class="scroll"><table id="art"></table></div>
 
   <h2>日志</h2>
@@ -46,6 +79,7 @@
   <pre id="audit"></pre>
   <pre id="tail"></pre>
 </section>
-<script src="/static/admin.js"></script>
+<script src="/static/admin.js?v=2.2.0"></script>
+<script src="/static/art.js"></script>
 </body>
 </html>
