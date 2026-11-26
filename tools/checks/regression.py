@@ -121,6 +121,8 @@ def main():
             commands.extend([
                 ("OAuth return allowlist", [npm, "run", "test:huiguan-auth-next"]),
                 ("OAuth mock browser", [npm, "run", "test:oauth-mock"]),
+                ("OAuth existing-only browser", [node, "apps/huiguan/tests/oauth-e2e.cjs", "--existing-only"]),
+                ("Huiguan event data browser", [node, "apps/huiguan/tests/safe-event-data.cjs"]),
                 ("Gallery attribute escaping browser", [npm, "run", "test:huiguan-gallery-escape"]),
                 ("Official gallery search and pagination browser", [node, "--test", "apps/huiguan/tests/official-gallery-browser.cjs"]),
             ])

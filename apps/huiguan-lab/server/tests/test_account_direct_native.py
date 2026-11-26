@@ -8,7 +8,7 @@ import test_account_direct_hall_e2e as e2e
 from test_account_direct_hall_e2e import hall
 from lab.app import create_app
 from lab.auth import SESSION_COOKIE
-from lab.account_direct_web import START
+from lab.account_direct_web import CALLBACK, START
 from lab.account_direct_native import START as ENTRY,REDEEM,AVAILABLE,encode,Native,TRANSFER_SECONDS,ANDROID_ASSETLINKS,ANDROID_PATH
 from lab import r4bridge
 
@@ -122,10 +122,15 @@ class NativeGateway(e2e.HallAndGateway):
         self.assertEqual(off.get(AVAILABLE).json()["methods"], ["windows_loopback"])
         self.assertEqual(off.get(ENTRY, params=payload).status_code, 400)
         self.assertEqual(off.get(ANDROID_ASSETLINKS).status_code, 404)
+        self.assertIn('data-android-callback=""', off.get(CALLBACK).text)
         self.lab.cfg.account_direct_native_android_enabled = True
         self.client = TestClient(create_app(self.lab), base_url=self.origin)
         self.addCleanup(self.client.close)
         self.assertEqual(self.client.get(AVAILABLE).json()["methods"], ["windows_loopback", "android_app_link"])
+        callback_page = self.client.get(CALLBACK)
+        self.assertEqual(callback_page.status_code, 200)
+        self.assertIn(f'data-android-callback="{self.origin}{ANDROID_PATH}"', callback_page.text)
+        self.assertEqual(callback_page.headers["cache-control"], "no-store")
         document = self.client.get(ANDROID_ASSETLINKS)
         self.assertEqual(document.status_code, 200)
         self.assertEqual(document.headers["content-type"], "application/json")

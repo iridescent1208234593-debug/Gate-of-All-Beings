@@ -37,6 +37,7 @@ from http.cookies import SimpleCookie
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "services", "platform"))
 import hx_sso
+from usso_uid_contract import parse_usso_uid_contract
 import oc_store
 from functools import wraps
 from site_domains import (SITE_DOMAIN, PRODUCTION_HOSTS, cookie_domain, request_host, request_root,
@@ -86,6 +87,7 @@ CODE_ROOT = os.path.dirname(os.path.dirname(STATIC_DIR))
 CLIENT_ID = "client_6e6b9df8063a9bc2"
 CLIENT_SECRET = os.environ.get("USSO_CLIENT_SECRET", "")
 USSO_LOGIN_ENABLED = os.environ.get("USSO_LOGIN_ENABLED", "0").strip().lower() in ("1", "true", "yes", "on")
+USSO_UID_CONTRACT = parse_usso_uid_contract(os.environ.get("IRIDESCENTLY_USSO_UID_CONTRACT", ""))
 SCOPE = "openid basic email profile"
 
 # 回调地址（必须与 USSO 后台配置完全一致）
@@ -803,9 +805,20 @@ def verify_password(password, stored):
 
 # ---------- 用户 / 会话 ----------
 
-def upsert_user(user_id, nickname, email, picture):
-    with DB_LOCK:
-        conn = db()
+def start_usso_session(user_id, nickname, email, picture, root_domain, *, allow_new_accounts):
+    """把老账号查询、首次开户判断和会话写入放在同一事务，串行处理并发回调。"""
+    with DB_LOCK, contextlib.closing(db()) as conn, conn:
+        conn.execute("BEGIN IMMEDIATE")
+        flag = conn.execute(
+            "SELECT status FROM user_flags WHERE kind='usso' AND uid=?", (user_id,),
+        ).fetchone()
+        if flag and flag["status"] == "banned":
+            return None, "该账号已被封禁"
+        exists = conn.execute("SELECT 1 FROM users WHERE user_id=?", (user_id,)).fetchone()
+        if not exists and not allow_new_accounts:
+            return None, "暂时无法确认这个账号的归属，请联系会馆管理员核验。"
+
+        now = now_iso()
         conn.execute("""
             INSERT INTO users (user_id, nickname, email, picture, first_login, last_login)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -814,9 +827,8 @@ def upsert_user(user_id, nickname, email, picture):
                 email=excluded.email,
                 picture=excluded.picture,
                 last_login=excluded.last_login
-        """, (user_id, nickname, email, picture, now_iso(), now_iso()))
-        conn.commit()
-        conn.close()
+        """, (user_id, nickname, email, picture, now, now))
+        return _insert_session(conn, "usso", user_id, root_domain), None
 
 
 def get_local_user_by_name(username):
@@ -951,16 +963,17 @@ def get_usso_password_hash(user_id):
     conn.close()
     return row["pass_hash"] if row else None
 
-def create_session(kind, uid, root_domain=None):
+def _insert_session(conn, kind, uid, root_domain):
     sid = secrets.token_urlsafe(32)
-    exp = (datetime.now(timezone.utc) + timedelta(days=SESSION_DAYS)).isoformat()
-    with DB_LOCK:
-        conn = db()
-        conn.execute("INSERT INTO sessions_db (sid, kind, uid, created_at, expires_at, audience) VALUES (?,?,?,?,?,?)",
-                     (sid, kind, str(uid), now_iso(), exp, root_domain or SITE_DOMAIN))
-        conn.commit()
-        conn.close()
+    expires_at = (datetime.now(timezone.utc) + timedelta(days=SESSION_DAYS)).isoformat()
+    conn.execute("INSERT INTO sessions_db (sid, kind, uid, created_at, expires_at, audience) VALUES (?,?,?,?,?,?)",
+                 (sid, kind, str(uid), now_iso(), expires_at, root_domain or SITE_DOMAIN))
     return sid
+
+
+def create_session(kind, uid, root_domain=None):
+    with DB_LOCK, contextlib.closing(db()) as conn, conn:
+        return _insert_session(conn, kind, uid, root_domain)
 
 
 def read_session(sid, root_domain=None):
@@ -2467,10 +2480,13 @@ class Handler(BaseStaticHandler):
     # ---------- USSO 登录 ----------
     def _api_sso_login(self):
         if not USSO_LOGIN_ENABLED:
-            self._json(410, {"error": "USSO 登录暂时停用，请使用会馆站内账号"})
+            self._json(410, {"error": "统一登录暂时不可用，请使用会馆账号登录。"})
+            return
+        if USSO_UID_CONTRACT is None:
+            self._json(503, {"error": "统一登录暂未开放，请使用会馆账号登录。"})
             return
         if not CLIENT_ID or not CLIENT_SECRET:
-            self._json(400, {"error": "服务器未配置 CLIENT_ID/CLIENT_SECRET"})
+            self._json(400, {"error": "统一登录暂时不可用，请使用会馆账号登录。"})
             return
         state = secrets.token_hex(16)
         try:
@@ -2495,13 +2511,13 @@ class Handler(BaseStaticHandler):
 
     def _api_callback(self, qs):
         if not USSO_LOGIN_ENABLED:
-            self._json(410, {"error": "USSO 登录暂时停用，请使用会馆站内账号"})
+            self._json(410, {"error": "统一登录暂时不可用，请使用会馆账号登录。"})
             return
         code = qs.get("code", [None])[0]
         state = qs.get("state", [None])[0]
         error = qs.get("error", [None])[0]
         if not state:
-            self._json(400, {"error": "缺少 code 或 state"})
+            self._json(400, {"error": "登录请求不完整，请重新登录。"})
             return
 
         with OAUTH_LOCK:
@@ -2511,13 +2527,18 @@ class Handler(BaseStaticHandler):
         except OAuthUnavailable:
             callback = None
         if not pending or time.time() - pending["created"] > 600 or pending["callback"] != callback:
-            self._json(400, {"error": "state 校验失败"})
+            self._json(400, {"error": "这次登录已失效，请重新登录。"})
             return
         if error:
-            self._json(400, {"error": f"用户拒绝了授权: {error}"})
+            self._json(400, {"error": "授权未完成，请重新登录。"})
             return
         if not code:
-            self._json(400, {"error": "缺少 code 或 state"})
+            self._json(400, {"error": "登录请求不完整，请重新登录。"})
+            return
+
+        contract = USSO_UID_CONTRACT
+        if contract is None:
+            self._json(503, {"error": "统一登录暂未开放，请使用会馆账号登录。"})
             return
 
         token_result = sso_post(SSO_TOKEN, {
@@ -2525,34 +2546,33 @@ class Handler(BaseStaticHandler):
             "client_id": CLIENT_ID, "client_secret": CLIENT_SECRET,
             "redirect_uri": pending["callback"],
         })
-        if token_result.get("code") != 200:
-            self._json(500, token_result)
+        access_token = token_result.get("access_token") if isinstance(token_result, dict) and token_result.get("code") == 200 else None
+        if not isinstance(access_token, str) or not access_token:
+            self._json(502, {"error": "暂时无法完成登录，请稍后重试。"})
             return
 
-        access_token = token_result.get("access_token", "")
         userinfo_result = sso_get_userinfo(access_token)
-        if userinfo_result.get("code") != 200:
-            self._json(500, userinfo_result)
+        if not isinstance(userinfo_result, dict) or userinfo_result.get("code") != 200:
+            self._json(502, {"error": "暂时无法读取你的账号资料，请稍后重试。"})
             return
 
-        user = userinfo_result.get("data", {})
-        user_id = str(user.get("id", user.get("sub", user.get("social_uid", ""))))
-
-        if not user_id:
-            self._json(500, {"error": "USSO 未返回用户 ID"})
-            return
-
-        flag = get_flag("usso", user_id)
-        if flag and flag.get("status") == "banned":
-            self._json(403, {"error": "该账号已被封禁"})
+        user = userinfo_result.get("data")
+        # 校验通过后才能写账户或签发会话，避免失败登录留下部分记录。
+        user_id = contract.read_uid(user)
+        if user_id is None:
+            self._json(502, {"error": "这次登录的身份信息有误，请重新登录。若仍失败，请联系会馆管理员。"})
             return
 
         nickname = user.get("nickname", user.get("name", "未知用户"))
         email = user.get("email", "")
         picture = user.get("picture", user.get("avatar", ""))
-        upsert_user(user_id, nickname, email, picture)
-
-        session_id = create_session("usso", user_id, request_root(self))
+        session_id, error = start_usso_session(
+            user_id, nickname, email, picture, request_root(self),
+            allow_new_accounts=contract.allow_new_accounts,
+        )
+        if error:
+            self._json(403, {"error": error})
+            return
         self.send_response(302)
         self.send_header("Location", "/")
         self.send_header("Set-Cookie", self._session_cookie(session_id))
@@ -2609,7 +2629,7 @@ class Handler(BaseStaticHandler):
             return
         email_norm = email.casefold()
         if find_usso_password_login(username) or _usso_nickname_exists(username):
-            self._json(409, {"error": "「" + username + "」是既有的 USSO 账号名号，请直接使用「登录」入口"}); return
+            self._json(409, {"error": "「" + username + "」已有账号，请直接登录。"}); return
         if get_local_user_by_name(username):
             self._json(409, {"error": "该用户名已被注册"})
             return
@@ -2786,7 +2806,7 @@ class Handler(BaseStaticHandler):
         # 兜底：该标识属于既有 USSO 账号时，绝不新建站内账号
         # （旧客户端可能仍向 /api/auth 提交「昵称+密码」，此时应提示去登录而不是建号）
         if find_usso_password_login(username) or _usso_nickname_exists(username):
-            self._json(409, {"error": "「" + username + "」是既有的 USSO 账号，请改用「登录」入口，不要走注册"}); return
+            self._json(409, {"error": "「" + username + "」已有账号，请直接登录。"}); return
 
         # /api/auth 不再承担注册职责：未知用户名一律拒绝，避免任何客户端误建账号
         self._json(410, {"error": "该入口只用于登录；没有账号请使用「注册账号」入口"})
@@ -5588,10 +5608,12 @@ class Handler(BaseStaticHandler):
                     conn.execute("UPDATE local_users SET is_fan_reviewer=? WHERE uid=?", (int(fan_reviewer), uid))
             else:
                 if status or edit_role or role:
-                    conn.execute("""INSERT INTO user_flags (kind, uid, status, edit_role) VALUES ('usso',?,?,?,?)
+                    # 插入时填写默认值，已有记录只更新本次请求传入的权限字段。
+                    conn.execute("""INSERT INTO user_flags (kind, uid, status, edit_role, role) VALUES ('usso',?,?,?,?)
                                     ON CONFLICT(kind,uid) DO UPDATE SET
-                                      status=COALESCE(?, status), edit_role=COALESCE(?, edit_role)""",
-                                 (uid, status or "active", edit_role or "none", status, edit_role))
+                                      status=COALESCE(?, status), edit_role=COALESCE(?, edit_role),
+                                      role=COALESCE(?, role)""",
+                                 (uid, status or "active", edit_role or "none", role or "executor", status, edit_role, role))
                 if fan_reviewer is not None:
                     conn.execute("""INSERT INTO user_flags (kind, uid, is_fan_reviewer) VALUES ('usso',?,?)
                                     ON CONFLICT(kind,uid) DO UPDATE SET is_fan_reviewer=excluded.is_fan_reviewer""",
@@ -6723,7 +6745,7 @@ class Handler(BaseStaticHandler):
         self.end_headers()
 
     def log_message(self, fmt, *args):
-        if self.path.startswith(lab_account_broker.PREFIX):
+        if self.path.partition("?")[0] == "/cb" or self.path.startswith(lab_account_broker.PREFIX):
             print(f"[huiguan-8089] {self.command} {self.path.partition('?')[0]}", flush=True)
             return
         print(f"[huiguan-8089] {args[0]}", flush=True)

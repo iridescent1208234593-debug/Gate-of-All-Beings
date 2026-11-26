@@ -44,6 +44,9 @@
 - 不新增 `account_id` 来悄悄替代 `(kind, uid)`；若未来引入真正独立的全局 Account ID，必须做架构决策与迁移。
 - 比较账户 owner 时比较 `kind + id`，不得只比较裸数字/字符串。
 
+会馆 USSO 回调使用部署核实的单一权威 UID 字段，精确匹配现有 `(usso, uid)`。
+站内账号和其他模块继续使用同一账户归属语义。USSO 首次开户的启用条件、配置及迁移边界见 [认证契约](../auth.md#会馆-usso-uid-与首次开户)。
+
 ## 3. `player_id` 的边界
 
 仓库中已有 activation-core / player session 等历史接口使用 `player_id`。它不是全仓库统一账户主键。

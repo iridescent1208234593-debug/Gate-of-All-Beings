@@ -6,9 +6,9 @@ const domain = "https://pc-lab.iridescently.cn";
 const route = "/account/native/android/callback";
 const code = "A".repeat(43);
 const fields = `code=${code}&state=${code}`;
-async function run(native_callback, origin=domain) {
+async function run(native_callback, origin=domain, androidCallback=domain+route) {
     const anchors = [], redirects = [];
-    const status = {textContent:"", after: a => anchors.push(a)};
+    const status = {textContent:"", dataset:{androidCallback}, after: a => anchors.push(a)};
     const context = {
         URL, URLSearchParams,
         location:{origin, hash:"#"+fields, pathname:"/account/direct/callback", replace:v=>redirects.push(v)},
@@ -37,8 +37,13 @@ async function run(native_callback, origin=domain) {
     }
     const badOrigin=await run(correct,"https://example.invalid");
     assert.deepEqual(badOrigin.anchors,[]);
+    const alternate = "https://example.invalid";
+    const sameOriginButUnapproved = await run(alternate+route+"#"+fields, alternate);
+    assert.deepEqual(sameOriginButUnapproved, {anchors:[], redirects:[]});
+    const disabled = await run(correct, domain, "");
+    assert.deepEqual(disabled, {anchors:[], redirects:[]});
     const windows="http://127.0.0.1:53001/lab-account/callback?"+fields;
-    const win=await run(windows);
+    const win=await run(windows, domain, "");
     assert.deepEqual(win.anchors,[]);
     assert.deepEqual(win.redirects,[windows]);
     console.log("Android explicit-tap and fixed fragment; Windows loopback behavior preserved");

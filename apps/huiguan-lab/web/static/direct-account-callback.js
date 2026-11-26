@@ -25,7 +25,8 @@
             const native = new URL(result.native_callback);
             if (native.protocol === "https:" && native.host === "pc-lab.iridescently.cn" &&
                 native.origin === location.origin &&
-                native.pathname === "/account/native/android/callback" && !native.search &&
+                native.pathname === "/account/native/android/callback" &&
+                native.origin + native.pathname === status.dataset.androidCallback && !native.search &&
                 !native.username && !native.password) {
                 const grant = "[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]";
                 if (!new RegExp("^#code=" + grant + "&state=" + grant + "$").test(native.hash))
