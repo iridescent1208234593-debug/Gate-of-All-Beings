@@ -3,6 +3,7 @@ from contextlib import closing
 from http.client import HTTPConnection
 from http.server import ThreadingHTTPServer
 import json
+import logging
 import os
 from pathlib import Path
 import sqlite3
@@ -69,6 +70,9 @@ def run():
                     print(f"Rows {size}: first filtered HTTP page {elapsed:.2f} ms; {len(actual)} exact/unique results.", flush=True)
             finally:
                 server.shutdown()
+                server.server_close()
+                # Windows 不允许删除仍被日志处理器打开的临时文件。
+                logging.shutdown()
 
 
 if __name__ == "__main__":

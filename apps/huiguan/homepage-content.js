@@ -7,9 +7,11 @@
   var more = document.getElementById('homeOfficialMore');
   if (!officialGrid || !fanGrid || !personal) return;
   var controller = new AbortController();
-  var officialPage = 1;
+  var officialPage = 0;
   var officialQuery = '';
   var officialGeneration = 0;
+  var officialController;
+  var officialLoading = false;
   var accountGeneration = 0;
   var searchTimer;
   var loaded = 0;
@@ -36,8 +38,8 @@
       return url.href;
     } catch (error) { return value; }
   }
-  async function read(url) {
-    var response = await fetch(url, { credentials: 'same-origin', signal: controller.signal });
+  async function read(url, signal) {
+    var response = await fetch(url, { credentials: 'same-origin', signal: signal || controller.signal });
     if (!response.ok) throw new Error('HTTP ' + response.status);
     return response.json();
   }
@@ -51,24 +53,47 @@
       (source ? '<img data-original-image src="' + esc(type === 'official' ? source : thumbURL(source)) + '" data-full="' + esc(source) + '" alt="' + esc(character.name) + '" loading="lazy" decoding="async">' : '<span class="character-initial">' + esc((character.name || '档')[0]) + '</span>') +
       '</figure><span class="character-name">' + esc(character.name) + '</span><small>' + esc(character.user_name || character.species || character.type || '角色档案') + '</small></a>';
   }
+  // 输入变化时立即撤销旧查询，不能等防抖结束后才阻止旧响应写入。
+  function resetOfficial() {
+    officialGeneration++;
+    if (officialController) officialController.abort();
+    officialController = null; officialLoading = false;
+    officialPage = 0; loaded = 0;
+    officialGrid.innerHTML = '<p class="archive-note">正在查阅官方档案…</p>';
+    document.getElementById('homeOfficialCount').textContent = '';
+    more.hidden = true; more.disabled = true;
+  }
   async function loadOfficial(reset) {
-    var generation = ++officialGeneration;
-    if (reset) { officialPage = 1; loaded = 0; }
+    if (!reset && (officialLoading || searchTimer || more.hidden)) return;
+    if (reset) resetOfficial();
+    var generation = officialGeneration;
+    var page = officialPage + 1;
+    officialController = new AbortController();
+    officialLoading = true;
     more.disabled = true;
     try {
-      var params = new URLSearchParams({ limit: '24', page: String(officialPage), q: officialQuery, min: '0', max: '8' });
-      var data = await read('/api/official/characters?' + params);
+      var params = new URLSearchParams({ limit: '24', page: String(page), q: officialQuery, min: '0', max: '8' });
+      var data = await read('/api/official/characters?' + params, officialController.signal);
       if (generation !== officialGeneration) return;
       var list = data.characters || [];
       if (reset) officialGrid.innerHTML = '';
       officialGrid.insertAdjacentHTML('beforeend', list.map(function (c) { return card(c, 'official'); }).join(''));
       if (!list.length && reset) officialGrid.innerHTML = '<p class="archive-note">没有匹配的角色。</p>';
       loaded += list.length;
+      officialPage = page;
       document.getElementById('homeOfficialCount').textContent = data.total + ' 份档案';
       more.hidden = loaded >= data.total;
+      more.textContent = '更多角色 ↓';
     } catch (error) {
-      if (error.name !== 'AbortError' && generation === officialGeneration) officialGrid.innerHTML = '<p class="archive-note">官方档案暂时无法加载。<a href="/gallery.html">打开角色画廊重试</a></p>';
-    } finally { if (generation === officialGeneration) more.disabled = false; }
+      if (error.name !== 'AbortError' && generation === officialGeneration) {
+        if (reset) officialGrid.innerHTML = '<p class="archive-note">官方档案暂时无法加载。<a href="/gallery.html">打开角色画廊重试</a></p>';
+        else more.textContent = '加载失败，点击重试';
+      }
+    } finally {
+      if (generation === officialGeneration) {
+        officialLoading = false; officialController = null; more.disabled = false;
+      }
+    }
   }
   async function loadPublic() {
     try {
@@ -113,9 +138,10 @@
   document.getElementById('homeOfficialSearch').addEventListener('input', function (event) {
     officialQuery = event.target.value.trim();
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(function () { loadOfficial(true); }, 250);
+    resetOfficial();
+    searchTimer = setTimeout(function () { searchTimer = null; loadOfficial(true); }, 250);
   });
-  more.addEventListener('click', function () { officialPage++; loadOfficial(false); });
+  more.addEventListener('click', function () { loadOfficial(false); });
   document.getElementById('homeScribeApply').addEventListener('click', applyScribe);
   personal.addEventListener('click', function (event) {
     if (event.target.closest('[data-home-login]')) window.openAuthModal();
@@ -128,6 +154,7 @@
   loadOfficial(true);
   loadPublic();
   window.addEventListener('pagehide', function () {
-    controller.abort(); clearTimeout(searchTimer); document.removeEventListener('huiguan:auth-change', onAuthChange);
+    controller.abort(); if (officialController) officialController.abort();
+    clearTimeout(searchTimer); document.removeEventListener('huiguan:auth-change', onAuthChange);
   }, { once: true });
 })();
