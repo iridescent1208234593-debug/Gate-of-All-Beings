@@ -93,7 +93,8 @@ def test_ws_requires_session_origin_and_host(gateway):
     with pytest.raises(Exception):
         s = connect(f"ws://127.0.0.1:{gateway.port}/ws", additional_headers=headers, open_timeout=5)
         s.recv(timeout=2)
-    r = httpx.get(gateway.base + "/healthz", headers={"Host": "evil.example"})
+    # The fixture is loopback; host proxy settings must not intercept this request.
+    r = httpx.get(gateway.base + "/healthz", headers={"Host": "evil.example"}, trust_env=False)
     assert r.status_code == 421
     # Through-the-tunnel requests without an Origin are refused (browsers always send one).
     headers = {"Cookie": gateway.cookie_header(c), "CF-Ray": "test"}
