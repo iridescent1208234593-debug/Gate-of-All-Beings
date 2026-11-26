@@ -2,7 +2,14 @@
 server/.venv/
 **/__pycache__/
 .pytest_cache/
-build/
+# 只忽略本 LAB 目录下的导出产物。client/android/build 是 Godot 的
+# Gradle 构建模板（含 OTA 的 Java 源码），必须进版本控制。
+/build/
+client/android/build/build/
+client/android/build/.gradle/
+client/android/build/local.properties
+client/android/build/src/main/assets/
+client/android/build/libs/**/*.aar
 client/.godot/
 lab.config.json
 scratch-import.*
