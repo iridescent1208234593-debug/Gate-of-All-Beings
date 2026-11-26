@@ -372,7 +372,7 @@ button{font-family:inherit}
 <script src="reactions-fx.js?v=20261027z"></script>
 <script src="group-reminder.js?v=20261106c"></script>
 <script src="legal-consent.js?v=20261106" data-require-consent></script>
-<script src="fan-history.js?v=20261124-approval"></script>
+<script src="fan-history.js?v=20261126-public-rereview"></script>
 <script>
 const PAGE = 12;
 const $ = id => document.getElementById(id);
@@ -468,8 +468,11 @@ function ownerActions(c) {
   const isPoster = c.type === '配色海报';
   let html = '';
   if (c.is_mine && !isPoster && c.code) html += `<a class="mini-btn" href="${esc(editHref(c.code))}" data-stop>编辑</a>`;
-  if (currentUser?.logged_in && currentUser.is_admin) html += historyButton(c);
-  if (canReview) html += `<button type="button" class="mini-btn danger" data-act="revoke" data-id="${c.id}">退回</button>`;
+  if (currentUser?.logged_in && currentUser.is_admin) {
+    html += historyButton(c);
+    const id = String(c.id);
+    if (/^[1-9][0-9]{0,18}$/.test(id)) html += `<button type="button" class="mini-btn" data-fan-reopen-id="${id}">重新送审</button>`;
+  }
   return html ? `<div class="card-actions">${html}</div>` : '';
 }
 function artCardHTML(c, rank) {
@@ -611,8 +614,6 @@ function openCard(el) {
   else location.href = showHref(c.code);
 }
 document.addEventListener('click', e => {
-  const revoke = e.target.closest('[data-act="revoke"]');
-  if (revoke) { e.stopPropagation(); askReject(revoke.dataset.id, true); return; }
   if (e.target.closest('[data-stop],.rfx-bar,a,button')) return;
   const card = e.target.closest('[data-open]');
   if (card) openCard(card);
@@ -880,11 +881,11 @@ async function decide(id, decision, extra) {
     controls.forEach(el => { el.disabled = reviewControlDisabled(el, reviewed, false); });
   }
 }
-function askReject(id, fromGallery) {
+function askReject(id) {
   const c = { ...(rowCache.get(String(id)) || {}) };
-  if (!fromGallery) c.review_version = document.querySelector(`[data-review="${Number(id)}"]`)?.dataset.reviewVersion;
+  c.review_version = document.querySelector(`[data-review="${Number(id)}"]`)?.dataset.reviewVersion;
   openModal({
-    title: (fromGallery ? '从画廊退回「' : '退回「') + (c.name || '') + '」',
+    title: '退回「' + (c.name || '') + '」',
     body: '写一句理由，作者会在「我的已登记人设」里看到。作者修改画廊内容后会自动重新提交审核。',
     input: true, minLength: 2, placeholder: '例如：立绘疑似 AI，请在登记表里把立绘来源改为 AI', okText: '确认退回',
     onOk: note => decide(id, 'reject', { note, review_version: c.review_version }),
@@ -905,7 +906,7 @@ $('reviewList').addEventListener('click', e => {
     return;
   }
   const rj = e.target.closest('[data-reject]');
-  if (rj && !rj.disabled) askReject(rj.dataset.reject, false);
+  if (rj && !rj.disabled) askReject(rj.dataset.reject);
 });
 function syncQueueIfVisible() {
   if (document.visibilityState === 'visible' && $('reviewDesk').open) loadQueue();

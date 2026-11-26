@@ -114,7 +114,7 @@ func _step(key: String) -> Dictionary:
 		"space-rules": return {"key": key, "target": "top", "title": "这是你的灵质空间", "body": "它是世界的一条独立历史：只有你邀请的人能进来，你可以暂停或快进它的时间，会馆那边不受影响。随时可以从虹之间回去。", "ack": true}
 		"view": return {"key": key, "target": "view", "title": "同一个世界，两种看法", "body": "2D 和 3D 只是换个角度看，大家站的位置、说的话都一样。" + ("" if touch else "也可以按 F3 切换。"), "ack": true}
 		"garden": return {"key": key, "target": "garden", "title": "种点什么吧", "body": "先放一块泥土，再种下蘑菇；铲子能把自己种的收回成种子。", "ack": true}
-		"minigame": return {"key": key, "target": "minigame", "title": "一起玩一局", "body": "小游戏的房间是大家共用的。人到齐了再开始，中途离开也没关系。", "ack": true}
+		"minigame": return {"key": key, "target": "minigame", "title": "到小游戏角逛逛", "body": "省省海滩射击可以在会馆里单人玩，其他门牌会带你去原来的网站。", "ack": true}
 		"journal": return {"key": key, "target": "journal", "title": "你的会馆手记", "body": "去过的地方、遇见的生灵和大家的约定都会记在这里，换设备也在。", "ack": true}
 	return {}
 

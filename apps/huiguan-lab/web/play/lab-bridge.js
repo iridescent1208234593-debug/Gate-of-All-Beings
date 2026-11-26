@@ -85,6 +85,23 @@ window.zszmLab = {
     document.body.appendChild(input);
     input.click();
   },
+  openPublicPage(value) {
+    try {
+      const url = new URL(value);
+      if (url.protocol !== "https:" || url.username || url.password || url.search) return false;
+      // The link is activated in the user's button handler; it cannot access the LAB opener.
+      const link = document.createElement("a");
+      link.href = url.href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      return true;
+    } catch {
+      return false;
+    }
+  },
   logout() {
     fetch("/api/logout", { method: "POST", credentials: "same-origin" }).finally(() => location.replace("/"));
   },

@@ -23,11 +23,14 @@ WebBridge="*res://scripts/web_bridge.gd"
 Net="*res://scripts/net.gd"
 Skills="*res://scripts/skills.gd"
 Werewolf="*res://scripts/werewolf.gd"
+UiScale="*res://scripts/ui_scale.gd"
+Ota="*res://scripts/ota.gd"
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
 [editor]

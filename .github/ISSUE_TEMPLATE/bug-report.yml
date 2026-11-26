@@ -1,0 +1,42 @@
+name: 报告问题
+description: 反馈 LAB、会馆网站或网页玩法中遇到的问题。
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先搜索是否已有同类问题。这个 Issue 是公开的，请勿附上密码、测试码、未打码的日志、他人个人信息或未授权素材。
+  - type: dropdown
+    id: area
+    attributes:
+      label: 在哪里遇到问题？
+      options:
+        - LAB / Windows
+        - LAB / Android
+        - LAB / 浏览器
+        - 西木会馆 / 网站与画廊
+        - 众生之门 / 网页玩法
+        - GitHub / 文档
+        - 其他
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 版本与设备
+      description: 客户端版本或网页地址（去掉私密参数），以及操作系统、浏览器或机型。
+      placeholder: LAB 2.3.6，Windows 11
+  - type: textarea
+    id: steps
+    attributes:
+      label: 怎么复现？
+      placeholder: |
+        1. 从哪个入口打开？
+        2. 点了什么？
+        3. 你预期发生什么？实际发生了什么？
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 截图或报错（选填）
+      description: 上传前请遮住账号、测试码、凭证和其他个人信息。

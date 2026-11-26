@@ -129,7 +129,8 @@ h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
 <script>
 let curMin=0, curMax=8, curQ='', timer=null;
 const PAGE=30;
-let curPage=1, loaded=0, total=0, loading=false;
+let curPage=0, loaded=0, total=0, loading=false;
+let loadGeneration=0, loadController=null;
 const badgeCls = c => c>=6?'high':c>=4?'mid':'low';
 const badgeText = c => c>=6?'设定完整':c>=4?'部分设定':'待补充';
 
@@ -148,29 +149,52 @@ function cardHTML(c){
     </div>
   </a>`;
 }
+// 搜索意图一变化就使旧响应失效，包含防抖等待的这段时间。
+function resetList(){
+  loadGeneration++;
+  if(loadController) loadController.abort();
+  loadController=null; loading=false; curPage=0; loaded=0; total=0;
+  document.getElementById('grid').innerHTML='<div class="loading">加载中…</div>';
+  document.getElementById('stat').textContent='';
+  document.getElementById('loadMore').disabled=true;
+  hideMore();
+}
 async function load(reset=true){
-  if(loading) return;
+  if(!reset && (loading || timer || loaded>=total)) return;
+  if(reset) resetList();
+  const generation=loadGeneration, page=curPage+1;
+  const request=new AbortController();
+  loadController=request;
   const grid=document.getElementById('grid');
-  if(reset){ curPage=1; loaded=0; grid.innerHTML='<div class="loading">加载中…</div>'; }
   loading=true;
-  const params=new URLSearchParams({min:curMin, max:curMax, limit:PAGE, page:curPage});
+  document.getElementById('loadMore').disabled=true;
+  const params=new URLSearchParams({min:curMin, max:curMax, limit:PAGE, page});
   if(curQ) params.set('q', curQ);
   try{
-    const r=await fetch('/api/official/characters?'+params);
+    const r=await fetch('/api/official/characters?'+params,{signal:request.signal});
+    if(!r.ok) throw new Error('HTTP '+r.status);
     const d=await r.json();
+    if(generation!==loadGeneration) return;
     const list=d.characters||[]; total=d.total||0;
     if(reset){ grid.innerHTML=''; loaded=0; }
     document.getElementById('stat').textContent=`共 ${total} 个角色`;
-    if(reset && !list.length){ grid.innerHTML='<div class="empty">没有匹配的角色。</div>'; hideMore(); loading=false; return; }
+    if(reset && !list.length){ grid.innerHTML='<div class="empty">没有匹配的角色。</div>'; hideMore(); return; }
     grid.insertAdjacentHTML('beforeend', list.map(cardHTML).join(''));
     loaded+=list.length;
+    curPage=page;
     updateMore();
   }catch(e){
+    if(generation!==loadGeneration || e.name==='AbortError') return;
     if(reset) grid.innerHTML='<div class="empty">加载失败，请刷新重试。</div>';
+    else document.getElementById('loadMore').textContent='加载失败，点击重试';
+  }finally{
+    if(generation===loadGeneration){
+      loading=false; loadController=null;
+      document.getElementById('loadMore').disabled=false;
+    }
   }
-  loading=false;
 }
-function loadMore(){ curPage++; load(false); }
+function loadMore(){ load(false); }
 function updateMore(){
   const b=document.getElementById('loadMore');
   if(loaded<total){ b.style.display='block'; b.textContent=`加载更多 · 已显示 ${loaded}/${total}`; }
@@ -180,6 +204,7 @@ function hideMore(){ document.getElementById('loadMore').style.display='none'; }
 function escAttr(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function setFilter(min,max,btn){
+  clearTimeout(timer); timer=null;
   curMin=min; curMax=max;
   document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
@@ -188,7 +213,8 @@ function setFilter(min,max,btn){
 function onSearch(v){
   curQ=(v||'').trim();
   clearTimeout(timer);
-  timer=setTimeout(()=>load(true), 300);
+  resetList();
+  timer=setTimeout(()=>{timer=null; load(true);}, 300);
 }
 async function applyScribe(){
   try{
@@ -250,7 +276,7 @@ async function loadUnclassified(){
   }catch(e){}
 }
 loadUnclassified();
-RFX.load('official').then(()=>load(true));
+RFX.load('official').then(()=>{if(loadGeneration===0) load(true);});
 </script>
 <script src="/shared/shared-ui/site-nav.js?v=20261109a"></script>
 <script src="/original-image-viewer.js?v=20261027z"></script>

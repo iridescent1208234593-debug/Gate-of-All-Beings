@@ -5,6 +5,8 @@ extends Control
 const SEND_HZ := 12.0
 const Minigames = preload("res://scripts/minigames.gd")
 const EMOTE_TEXT := {"idle": "待机", "idleCute": "可爱待机", "walk": "走路", "run": "跑步", "blink": "眨眼", "nod": "点头", "shake": "摇头", "crouch": "下蹲", "weightShift": "重心转移", "shy": "害羞", "wave": "挥手", "headTilt": "歪头", "cheer": "欢呼", "legKick": "踢腿", "sway": "摇摆"}
+const BeachShoot = preload("res://scenes/beach_shoot.tscn")
+const GameCorner = preload("res://scripts/game_corner.gd")
 const SPEED := 4.0
 var world := LabWorld.new()
 var font: Font
@@ -86,6 +88,7 @@ var guide_enabled := false
 var guide_pid := ""
 var guide_button: Button
 var public_updater: CanvasLayer
+var activity_layer: CanvasLayer
 
 
 func _ready() -> void:
@@ -98,10 +101,8 @@ func _ready() -> void:
 		get_window().size_changed.connect(_layout_mobile)
 		_layout_mobile()
 	font = load("res://assets/fonts/NotoSansSC-lab.woff2")
-	var theme := Theme.new()
-	theme.default_font = font
+	theme = UiTheme.make_theme(font)
 	theme.default_font_size = 18 if mobile else 16
-	self.theme = theme
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	view2d = load("res://scripts/hall2d.gd").new()
 	add_child(view2d)
@@ -138,6 +139,12 @@ func _ready() -> void:
 	WebBridge.chat_submitted.connect(_send_chat)
 	WebBridge.file_error.connect(func(detail): toast(detail, 6))
 	WebBridge.file_picked.connect(_on_file_picked)
+	UiScale.changed.connect(_layout_panel)
+	if Ota.feature_enabled():
+		Ota.update_available.connect(_show_update)
+		Ota.download_progress.connect(_on_download_progress)
+		Ota.download_failed.connect(func(reason: String): _ota_fail(reason))
+		Ota.download_ready.connect(_ota_ready)
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--lab-auto="):
 			auto_actions = Array(arg.trim_prefix("--lab-auto=").split(";"))
@@ -157,17 +164,19 @@ func _build_hud() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(root)
-	root.size = get_viewport_rect().size
-	get_viewport().size_changed.connect(func(): root.size = get_viewport_rect().size)
 	var top := PanelContainer.new()
 	top.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	top.add_theme_stylebox_override("panel", UiTheme.hud_pill())
 	root.add_child(top)
 	var header_stack := VBoxContainer.new()
 	top.add_child(header_stack)
 	var bar := VBoxContainer.new()
 	header_stack.add_child(bar)
 	top_label = Label.new()
-	top_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# 不要 EXPAND_FILL：那会把按钮全推到右边，整条就不对称了。
+	top_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	top_label.add_theme_font_size_override("font_size", 15)
+	top_label.add_theme_color_override("font_color", UiTheme.TEXT_DIM)
 	top_label.text = "西木会馆 LAB"
 	bar.add_child(top_label)
 	var actions := HFlowContainer.new()
@@ -182,6 +191,7 @@ func _build_hud() -> void:
 	buttons.append(["动画素体", _toggle_renmo])
 	buttons.append(["铺路", _toggle_path_mode])
 	buttons.append(["小游戏", func(): minigames.open(self); _guide_event("minigame_opened")])
+	buttons.append(["网页玩法 / 海滩", _open_game_corner])
 	buttons.append(["新手引导", _open_guide])
 	if OS.has_feature("lab_public_release") and not OS.is_debug_build():
 		buttons.append(["检查更新", func():
@@ -200,6 +210,8 @@ func _build_hud() -> void:
 		elif b[0] == "小游戏":
 			btn.name = "MinigamesEntry"
 			minigames.entry = btn
+		elif b[0] == "网页玩法 / 海滩":
+			btn.name = "GameCornerEntry"
 		elif b[0] == "新手引导":
 			guide_button = btn
 			btn.hide()
@@ -209,6 +221,8 @@ func _build_hud() -> void:
 		btn.focus_mode = Control.FOCUS_NONE
 		if mobile:
 			btn.custom_minimum_size.y = 40
+		for state in ["normal", "hover", "pressed", "disabled"]:
+			btn.add_theme_stylebox_override(state, UiTheme.button_box(state, UiTheme.R_PILL, 12))
 		btn.pressed.connect(b[1])
 		actions.add_child(btn)
 	var garden_bar := HBoxContainer.new()
@@ -267,7 +281,7 @@ func _build_hud() -> void:
 	trail_status = Label.new()
 	trail_hud.add_child(trail_status)
 	var left := VBoxContainer.new()
-	left.anchor_top = 0.0; left.anchor_bottom = 0.0
+	left.anchor_top = 1.0; left.anchor_bottom = 1.0
 	left.offset_left = 12; left.offset_top = -340; left.offset_right = 430; left.offset_bottom = -12
 	root.add_child(left)
 	chat_panel = left
@@ -283,6 +297,7 @@ func _build_hud() -> void:
 	chat_log.add_theme_constant_override("outline_size", 4)
 	chat_log.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	chat_log.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chat_log.add_theme_stylebox_override("normal", UiTheme.chat_box())
 	left.add_child(chat_log)
 	var crow := HBoxContainer.new()
 	left.add_child(crow)
@@ -290,6 +305,7 @@ func _build_hud() -> void:
 	chat_input.placeholder_text = "按 Enter 聊天"
 	chat_input.max_length = 200
 	chat_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	chat_input.custom_minimum_size.y = UiScale.min_touch
 	chat_input.text_submitted.connect(_send_chat)
 	crow.add_child(chat_input)
 	if not WebBridge.is_web():
@@ -429,7 +445,8 @@ func _toggle_mobile_chat() -> void:
 func _layout_panel() -> void:
 	if not is_instance_valid(panel_scroll):
 		return
-	var available := get_viewport_rect().size - Vector2(32, 32)
+	var pad := UiScale.insets
+	var available := get_viewport_rect().size - Vector2(pad.x + pad.z + 32.0, pad.y + pad.w + 32.0)
 	var content := panel_scroll.get_child(0) as Control
 	panel_scroll.custom_minimum_size = Vector2(minf(float(panel_scroll.get_meta("width")), available.x), minf(content.get_combined_minimum_size().y, available.y))
 
@@ -448,6 +465,12 @@ func _clear_panels() -> void:
 
 func _panel(title: String, width := 520.0, closable := true) -> VBoxContainer:
 	_clear_panels()
+	var vp := get_viewport().get_visible_rect().size
+	var pad := UiScale.insets
+	# 可用区域（虚拟像素）：安全区内留 12 的余量。
+	var avail_w := vp.x - pad.x - pad.z - 24.0
+	var avail_h := vp.y - pad.y - pad.w - 24.0
+	width = clampf(width, 240.0, avail_w)
 	var shade := ColorRect.new()
 	shade.color = Color(0, 0, 0, 0.35) if closable else Color(0.11, 0.16, 0.13)
 	panel_holder.add_child(shade)
@@ -467,9 +490,12 @@ func _panel(title: String, width := 520.0, closable := true) -> VBoxContainer:
 	box.add_theme_constant_override("separation", 8)
 	panel_scroll.add_child(box)
 	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 10)
 	box.add_child(head)
 	var l := Label.new(); l.text = title; l.add_theme_font_size_override("font_size", 20)
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size.x = width - 140.0
 	head.add_child(l)
 	if closable:
 		var x := Button.new(); x.text = "关闭"; x.pressed.connect(_clear_panels); head.add_child(x)
@@ -617,12 +643,16 @@ func _open_data() -> void:
 	var l := Label.new()
 	l.text = "昵称、OC 图片和显示设置保存在本机，可导出备份。清除应用或浏览器数据会移除它们。公共世界和灵质空间保存在 LAB 服务器上。"
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(480, 0)
+	l.custom_minimum_size = Vector2(0, 0)
 	box.add_child(l)
 	_add_button(box, "导出本地数据", func(): WebBridge.download_text("zszm-lab-profile.json", Profile.export_json()); toast("已导出"))
 	_add_button(box, "导入本地数据", func():
 		WebBridge.pick_file("application/json,.json"))
 	_add_button(box, "绑定旧测试码进度", _confirm_account_link)
+	# 自更新暂时关闭（包体 145 MB，OTA 下载体验差）。实现保留在 scripts/ota.gd，
+	# 把那里的 FEATURE_ENABLED 改回 true 即可恢复，这里不用动。
+	if Ota.feature_enabled():
+		_add_button(box, "检查更新", _check_update_manual, "CheckUpdate")
 	var names := CheckBox.new(); names.text = "显示名字"; names.button_pressed = Profile.show_names
 	names.toggled.connect(func(on): Profile.show_names = on; Profile.save_local())
 	box.add_child(names)
@@ -638,7 +668,7 @@ func _confirm_account_link() -> void:
 	var box := _panel("绑定旧测试码进度", 520)
 	var note := Label.new()
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.custom_minimum_size.x = 455
+	note.custom_minimum_size.x = 0
 	note.text = "绑定成功后，旧进度和 OC 归入会馆账号；旧测试码不再单独登录。已有两个档案时不会合并。"
 	box.add_child(note)
 	_add_button(box, "确认开始绑定", func():
@@ -664,6 +694,80 @@ func _logout() -> void:
 		Net.logout_native()
 
 
+# ------------------------------------------------------------------ OTA
+var _ota_box: VBoxContainer
+var _ota_progress: ProgressBar
+var _ota_note: Label
+
+
+func _show_update(info: Dictionary) -> void:
+	var ver := str(info.get("versionName", ""))
+	var box := _panel("发现新版本 %s" % ver, 460.0)
+	_ota_box = box
+	var body := Label.new()
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var lines := PackedStringArray()
+	lines.append("当前版本：%s（%d）" % [Ota.local_name, Ota.local_code])
+	lines.append("新版本：%s（%d）" % [ver, int(info.get("versionCode", 0))])
+	var notes := Ota.changelog_of(info)
+	if notes.size() > 0:
+		lines.append("")
+		for n in notes:
+			lines.append("· " + str(n))
+	var size := int(info.get("size", 0))
+	if size > 0:
+		lines.append("")
+		lines.append("安装包约 %.1f MB" % (float(size) / 1048576.0))
+	body.text = "\n".join(lines)
+	box.add_child(body)
+	_ota_note = Label.new()
+	_ota_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_ota_note.text = ""
+	box.add_child(_ota_note)
+	_ota_progress = ProgressBar.new()
+	_ota_progress.min_value = 0
+	_ota_progress.max_value = 100
+	_ota_progress.custom_minimum_size.y = 18
+	_ota_progress.visible = false
+	box.add_child(_ota_progress)
+	_add_button(box, "立即更新", _ota_begin, "OtaNow")
+	# force 时不给「稍后」，与拾灵一致：只有确实必须才这么发版。
+	if not Ota.is_forced(info):
+		_add_button(box, "稍后", func(): _clear_panels(), "OtaLater")
+
+
+func _ota_begin() -> void:
+	if _ota_progress != null:
+		_ota_progress.visible = true
+	if _ota_note != null:
+		_ota_note.text = "正在下载，可在通知栏查看进度。"
+	Ota.start_download()
+
+
+func _on_download_progress(percent: int) -> void:
+	if _ota_progress != null:
+		_ota_progress.value = percent
+	if _ota_note != null:
+		_ota_note.text = "正在下载 %d%%" % percent
+
+
+func _ota_ready() -> void:
+	if _ota_note != null:
+		_ota_note.text = "下载完成，校验通过。按系统提示安装即可。"
+	Ota.install()
+
+
+func _ota_fail(reason: String) -> void:
+	if _ota_note != null:
+		_ota_note.text = reason
+	else:
+		toast(reason)
+
+
+func _check_update_manual() -> void:
+	Ota.check_manual(func(latest: String): toast("已是最新版本 %s" % latest, 4))
+
+
 func _native_login_form(detail: String) -> void:
 	var box := _panel("登录西木会馆", 460.0, false)
 	panel_holder.move_to_front()
@@ -671,28 +775,44 @@ func _native_login_form(detail: String) -> void:
 	server.name = "NativeServer"
 	server.placeholder_text = "服务器地址（https://…）"
 	server.text = Net.http_base()
-	box.add_child(server)
+
+	var account := _add_button(box, "使用西木会馆账户登录", func():
+		if Net.can_direct_native(server.text):
+			Net.login_account_direct(server.text)
+		else:
+			Net.login_account_native(server.text), "NativeAccountLogin")
+	account.custom_minimum_size.y = UiScale.min_touch
+	if not detail.is_empty():
+		var hint := Label.new()
+		hint.text = detail
+		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(hint)
+
+	var legacy := VBoxContainer.new()
+	legacy.name = "NativeLegacyOptions"
+	legacy.hide()
+	var toggle := Button.new()
+	toggle.name = "NativeLegacyToggle"
+	toggle.text = "有旧测试码？展开其他登录方式"
+	toggle.toggle_mode = true
+	toggle.custom_minimum_size.y = UiScale.min_touch
+	box.add_child(toggle)
+	box.add_child(legacy)
+	toggle.toggled.connect(func(expanded: bool):
+		legacy.visible = expanded
+		toggle.text = "收起其他登录方式" if expanded else "有旧测试码？展开其他登录方式")
+
 	var code := LineEdit.new()
 	code.name = "NativeCode"
 	code.placeholder_text = "输入 LAB 测试码"
 	code.secret = true
 	code.max_length = 64
-	box.add_child(code)
-	var hint := Label.new()
-	hint.text = detail
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(hint)
+	legacy.add_child(code)
 	var submit := func(): Net.login_native(server.text, code.text)
-	_add_button(box, "登录", submit, "NativeLogin")
-	_add_button(box, "在 GitHub 给项目点 Star", func(): OS.shell_open("https://github.com/iridescent1208234593-debug/Gate-of-All-Beings"), "GitHubStar")
+	_add_button(legacy, "用测试码登录", submit, "NativeLogin")
 	code.text_submitted.connect(func(_value): submit.call())
-	if Net.can_direct_native(server.text):
-		_add_button(box, "用西木会馆账号登录（免码）", func():
-			if Net.can_direct_native(server.text):
-				Net.login_account_direct(server.text), "NativeDirectLogin")
-	_add_button(box, "旧版会馆账号授权", func(): Net.login_account_native(server.text), "NativeAccountLogin")
-	if not mobile:
-		code.grab_focus()
+	legacy.add_child(server)
+	_add_button(box, "在 GitHub 给项目点 Star", func(): OS.shell_open("https://github.com/iridescent1208234593-debug/Gate-of-All-Beings"), "GitHubStar")
 	if local_test_driver:
 		server.text_changed.connect(func(value: String):
 			_write_test_json("user://lab-loopback.json", {"endpoint": value if value.begins_with("http://127.0.0.1:") else ""}))
@@ -727,7 +847,7 @@ func _open_guide() -> void:
 	l.text = "边玩边学：走路、聊天、互动、虹之间。每样东西第一次用到时，会有一点灵光来提示。
 " + guide.summary()
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(480, 0)
+	l.custom_minimum_size = Vector2(0, 0)
 	box.add_child(l)
 	var row := HBoxContainer.new()
 	box.add_child(row)
@@ -740,12 +860,68 @@ func _open_guide() -> void:
 		_add_button(row, "不需要引导", func(): _clear_panels(); guide.skip(), "GuideSkip")
 
 
+func _open_game_corner() -> void:
+	if not welcomed or activity_layer != null:
+		return
+	_clear_panels()
+	chat_input.release_focus()
+	move_target = null
+	var corner := GameCorner.new()
+	corner.theme = theme
+	corner.can_play = Profile.has_profile()
+	corner.shoot_requested.connect(_open_beach_shoot)
+	corner.closed.connect(_clear_panels)
+	panel_holder.add_child(corner)
+	corner.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	guide.on_event("minigame_opened")
+
+
+func _open_beach_shoot() -> void:
+	if not _begin_activity():
+		return
+	var game = BeachShoot.instantiate()
+	game.theme = theme
+	game.exited.connect(_close_activity)
+	activity_layer.add_child(game)
+
+
+func _begin_activity() -> bool:
+	if activity_layer != null or not welcomed or not Profile.has_profile():
+		return false
+	_clear_panels()
+	chat_input.release_focus()
+	move_target = null
+	world.me["anim"] = "idle"
+	view2d.activate(false)
+	if view3d:
+		view3d.activate(false)
+	hud.hide()
+	guide.hide()
+	activity_layer = CanvasLayer.new()
+	activity_layer.layer = 30
+	add_child(activity_layer)
+	return true
+
+
+func _close_activity() -> void:
+	if activity_layer == null:
+		return
+	var closing := activity_layer
+	activity_layer = null
+	closing.hide()
+	closing.queue_free()
+	move_target = null
+	guide.show()
+	hud.show()
+	_apply_view()
+
+
 func _render_spaces() -> void:
 	var box := _panel("虹之间 · 灵质空间", 600)
 	var l := Label.new()
 	l.text = "馆长虹把开辟灵质空间的能力分享给了每位访客。在会馆的「虹之间」彩虹门前，可以开辟自己的空间（世界的一条独立历史分支），邀请朋友，或返回会馆。"
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(560, 0)
+	l.custom_minimum_size = Vector2(0, 0)
 	box.add_child(l)
 	var mine = null
 	for s in space_spaces:
@@ -838,6 +1014,8 @@ func _native_admission_panel() -> void:
 func _on_net_state(state: String, detail: String) -> void:
 	if state != "open":
 		_finish_action()
+	if activity_layer != null and state in ["login", "account_approval", "authenticating", "logging_out", "unauthorized"]:
+		_close_activity()
 	match state:
 		"login":
 			welcomed = false
@@ -1066,7 +1244,7 @@ func _on_message(m: Dictionary) -> void:
 		"board":
 			var box := _panel("会馆告示", 480)
 			var l := Label.new(); l.text = m["text"]; l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			l.custom_minimum_size = Vector2(440, 0); box.add_child(l)
+			l.custom_minimum_size = Vector2(0, 0); box.add_child(l)
 		"portal", "spaces":
 			space_spaces = m["spaces"]
 			if m["t"] == "portal" or panel_holder.get_child_count() > 0:
@@ -1081,6 +1259,7 @@ func _on_message(m: Dictionary) -> void:
 			if m.get("code") == "access_revoked":
 				toast("空间主人收回了访问权限，你回到了会馆", 5)
 		"kicked":
+			_close_activity()
 			if m.get("reason") == "replaced":
 				status_label.text = "你在另一个窗口进入了会馆，这里已断开"
 				status_label.visible = true
@@ -1214,6 +1393,8 @@ func _apply_view() -> void:
 func _input(event: InputEvent) -> void:
 	if view_loading and view_loading.visible:
 		get_viewport().set_input_as_handled()
+		return
+	if activity_layer != null:
 		return
 	if event is InputEventMouseButton and event.pressed and pending_upload:
 		pending_upload = false
@@ -1366,7 +1547,7 @@ func _swim_fish(wish: Vector2, delta: float) -> void:
 	Net.send({"t": "species_move", "x": nxt.x, "z": nxt.y})
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not welcomed:
+	if not welcomed or activity_layer != null:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ENTER and not chat_input.has_focus():
@@ -1409,7 +1590,7 @@ func _process(delta: float) -> void:
 		joystick.visible = welcomed and not view_loading.visible and panel_holder.get_child_count() == 0 and not chat_panel.visible
 	if Time.get_ticks_msec() / 1000.0 > toast_until:
 		toast_label.text = ""
-	if not welcomed:
+	if not welcomed or activity_layer != null:
 		fish_bar.hide()
 		pond_hud.hide()
 		trail_hud.hide()

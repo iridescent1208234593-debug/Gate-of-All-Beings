@@ -2,13 +2,27 @@
 
 《众生之门—西木会馆》是一个以《罗小黑战记》为灵感的非官方同人共创项目。你可以带自己的原创角色（OC）来到西木会馆，在同人画廊分享设定，也可以在联机 LAB 和其他馆友一起生活、探索、布置灵质空间。
 
-[西木会馆](https://huiguan.iridescently.cn/) · [联机测试 LAB](https://pc-lab.iridescently.cn/) · [Windows / Android 发布页](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings-Public-public/releases) · [问题反馈](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/issues)
+## 从这里开始
 
-## 先从哪里开始
+| 想做什么 | 去哪里 |
+| --- | --- |
+| 登记 OC、看馆友的设定 | [西木会馆](https://huiguan.iridescently.cn/) · [同人画廊](https://huiguan.iridescently.cn/fan.html) |
+| 和馆友联机 | [浏览器打开 LAB](https://pc-lab.iridescently.cn/) · [Windows EXE][lab-windows] · [Android APK][lab-android] |
+| 玩卡牌、经营或探索网页玩法 | [众生之门网页入口](https://zszm.iridescently.cn/) |
+| 参与共创或反馈 | [共创讨论][discussions] · [查已有问题][issues] · [提交问题][new-issue] · [贡献指南](CONTRIBUTING.md) |
 
-- **想玩或看设定**：在西木会馆可以浏览同人画廊、登记 OC；联机测试请从 LAB 网页进入，开放时间和登录方式以入口提示为准。
-- **想下载原生客户端**：Windows 和 Android 安装包以发布页的正式条目为准。发布页与本仓库的源码进度不同步。Windows 会馆账户免码登录已完成单账号线上试点，尚未向全员开放；Android 目前仍使用 LAB 测试码。
-- **想参与共创**：先看 [Issues](https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/issues) 里的现有讨论；反馈时带上入口、平台和复现步骤，别贴测试码、凭证或未获授权的资料。开发者可以从 [本地开发指引](docs/development/local-onboarding.md) 和 [文档索引](docs/README.md) 开始。
+**第一次玩 LAB？** 按入口提示，用西木会馆账户登录。有效的旧测试码用于优先排队。LAB 是联机测试服，能否进入以及排队情况以实时提示为准。浏览器和客户端连接同一个 LAB；网页小游戏另有自己的入口。
+
+**已经装了 LAB？** 可在游戏内检查更新，也可从 [LAB 最新发布][lab-release] 下载。这里是主源码仓库，安装包在单独的发布仓库，不在本库的 Packages；合并 PR 不等于客户端已发包。
+
+**第一次改代码？** 先看 [本地开发指引](docs/development/local-onboarding.md) 或 [Godot LAB 指南](apps/huiguan-lab/README.md)。建议先选一个小问题，在 Issue 里确认有没有人在做，再开始改。
+
+[lab-release]: https://github.com/iridescent1208234593-debug/Gate-of-All-Beings-Public-public/releases/latest
+[lab-windows]: https://github.com/iridescent1208234593-debug/Gate-of-All-Beings-Public-public/releases/latest/download/Huiguan-LAB-Windows-x86_64.exe
+[lab-android]: https://github.com/iridescent1208234593-debug/Gate-of-All-Beings-Public-public/releases/latest/download/Huiguan-LAB-Android.apk
+[discussions]: https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/discussions
+[issues]: https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/issues
+[new-issue]: https://github.com/iridescent1208234593-debug/Gate-of-All-Beings/issues/new/choose
 
 公开的是项目源码与开发文档；第三方代码、角色设定、插画和音乐各有授权边界，公开可见不等于可以任意转载或再分发。站内不收费、不卖作品、不做广告；自愿赞赏只用于维护，不换取站内权益。
 
@@ -34,8 +48,6 @@
 ## 快速开始
 
 新成员从零安装、启动 Portal/Cards/会馆和独立游戏的完整步骤与实际验证矩阵见[本地开发环境与启动矩阵](docs/development/local-onboarding.md)。
-
-**只想看**：直接用上面的在线入口，不需要本地环境。
 
 **想改某个模块**：进入对应目录，按该目录自己的 README 启动。八个模块的技术栈并不统一（Vite + React、原生 JS + Canvas、Python 服务、Next.js），没有一条命令能覆盖全部。
 
