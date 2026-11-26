@@ -423,6 +423,37 @@ async function faSubmit(e){
   finally{ btn.disabled=false; }
   return false;
 }
+function dispatchcharOperation(event) {
+  const el = event.target.closest(event.type === "change" ? "select[data-char-operation]" : "button[data-char-operation]");
+  if (!el) return;
+  const args = [0, 1, 2, 3].map((index) => el.getAttribute("data-op-" + index));
+  const invalid = Symbol();
+  function positive(raw) {
+    const n = Number(raw);
+    if (!Number.isSafeInteger(n) || n < 1) throw invalid;
+    return n;
+  }
+  function position(raw) {
+    const n = Number(raw);
+    if (!raw || !Number.isSafeInteger(n) || n < 0) throw invalid;
+    return n;
+  }
+  try {
+    switch (el.dataset.charOperation) {
+    case "faToggleCmts": return faToggleCmts(positive(args[0]));
+    case "faDelete": return faDelete(positive(args[0]));
+    case "faDelCmt": return faDelCmt(positive(args[0]), positive(args[1]));
+    case "askDelImg": return askDelImg(positive(args[0]), positive(args[1]));
+    case "moveImg": return moveImg(position(args[0]), args[1] === "-1" ? -1 : 1, positive(args[2]));
+    case "setAvatar": return setAvatar(positive(args[0]), positive(args[1]));
+    case "setImgType": return setImgType(positive(args[0]), el.value, position(args[2]), positive(args[3]));
+    }
+  } catch (error) {
+    if (error !== invalid) throw error;
+  }
+}
+document.addEventListener("click", dispatchcharOperation);
+document.addEventListener("change", dispatchcharOperation);
 async function faDelete(id){
   if(!confirm('确定删除这张图吗？它在主册和副册的评论，以及点赞 / 喜欢 / 踩都会一起删除。')) return;
   try{

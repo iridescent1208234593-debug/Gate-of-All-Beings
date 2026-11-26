@@ -79,7 +79,10 @@ const loop = new GameLoop({
     state = reducer(state, { type: 'TICK' });
     ui.onTick(state);
     if(!switchingAccount && slot?.writable && performance.now()-lastAutoSave>15000){
-      if(!saveGame(state, slot))ui.flashSaveHint('自动保存失败，请核对账号与浏览器存储');
+      if (!saveGame(state, slot)) {
+        ui.setSaveProtection(slot.writable ? '' : slot.hint);
+        ui.flashSaveHint(slot.hint || '自动保存失败，请核对账号与浏览器存储');
+      }
       lastAutoSave=performance.now();
     }
   },
@@ -93,7 +96,9 @@ const loop = new GameLoop({
 
 function saveCurrent() {
   if (switchingAccount || !slot?.writable) return slot?.hint || '存档正在恢复，请稍后再试';
-  return saveGame(state, slot) ? '已存档' : '存档失败，请核对账号与浏览器存储';
+  if (saveGame(state, slot)) return '已存档到本地';
+  ui.setSaveProtection(slot.writable ? '' : slot.hint);
+  return slot.hint || '存档失败，请核对账号与浏览器存储';
 }
 function loadCurrent() {
   if (switchingAccount || !slot || !sameOwner(slot.user, currentUser())) {
@@ -112,7 +117,8 @@ async function enterSlot(user) {
   engine.setState(state);
   ui.onUserChange(currentUser());
   ui.refresh();
-  ui.flashSaveHint(next?.hint || (next ? '' : '账号已变更，请重新进入后再存档'), !!next && !next.writable);
+  ui.setSaveProtection(next?.writable ? '' : next?.hint || '账号已变化，请重新进入游戏');
+  if (next?.writable) ui.flashSaveHint(next.hint);
 }
 async function changeAccount(change) {
   if (switchingAccount || engine.disposed) return;
@@ -121,6 +127,8 @@ async function changeAccount(change) {
   switchingAccount = true;
   loop.stop();
   try {
+    await slot?.pendingCloud;
+    if (engine.disposed) return;
     const user = await change();
     await enterSlot(user);
   } finally {

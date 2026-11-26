@@ -1,0 +1,38 @@
+{
+  "aeon": {
+    "host": "zszm.iridescently.cn",
+    "path": "/app/shell/m/aeon"
+  },
+  "cards": {
+    "host": "zszm.iridescently.cn",
+    "path": "/#journal"
+  },
+  "ecology": {
+    "host": "zszm.iridescently.cn",
+    "path": "/#ecosystem"
+  },
+  "juling": {
+    "host": "zszm.iridescently.cn",
+    "path": "/app/shell/m/juling"
+  },
+  "management": {
+    "host": "zszm.iridescently.cn",
+    "path": "/#management"
+  },
+  "shengsheng-shoot": {
+    "host": "iridescently.cn",
+    "path": "/playtest/shengsheng-shoot/"
+  },
+  "slay": {
+    "host": "zszm.iridescently.cn",
+    "path": "/app/shell/m/slay"
+  },
+  "softie": {
+    "host": "zszm.iridescently.cn",
+    "path": "/app/shell/m/softie"
+  },
+  "world-map": {
+    "host": "zszm.iridescently.cn",
+    "path": "/app/shell/m/world-map"
+  }
+}

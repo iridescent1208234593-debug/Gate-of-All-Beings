@@ -6369,7 +6369,7 @@ class Handler(BaseStaticHandler):
 
     @staticmethod
     def _fan_reopen_revision(row):
-        if row is None or not row["is_public"] or row["review_status"] != "rejected" or row["type"] == "配色海报":
+        if row is None or not row["is_public"] or row["review_status"] not in ("approved", "rejected"):
             return None
         data = [row["id"], fan_review_version(row), row["updated_at"], row["reviewed_at"], row["reviewed_by"], row["review_note"]]
         return hashlib.sha256(json.dumps(data, ensure_ascii=False).encode("utf-8")).hexdigest()
@@ -6406,11 +6406,13 @@ class Handler(BaseStaticHandler):
                 result = fan_gallery_history.history(conn, fid, before_event=cursor)
         finally:
             conn.close()
-        if (current is None or current["type"] == "配色海报") and not result["events"] and not result["snapshots"]:
+        if current is None and not result["events"] and not result["snapshots"]:
             self._json(404, {"error": "找不到该同人设表"})
             return
         revision = self._fan_reopen_revision(current)
-        result["reopen"] = ({"review_version": revision, "rejection_reason": fan_gallery_history.safe_text(current["review_note"])}
+        result["reopen"] = ({"review_version": revision, "status": current["review_status"],
+                              "rejection_reason": fan_gallery_history.safe_text(current["review_note"])
+                              if current["review_status"] == "rejected" else ""}
                             if revision else None)
         self._json(200, result)
 
@@ -6441,7 +6443,7 @@ class Handler(BaseStaticHandler):
                     self._json(404, {"error": "找不到该同人设表"})
                     return
                 if self._fan_reopen_revision(current) != version:
-                    self._json(409, {"error": "仅可复审仍申请公开的退回稿；状态或版本变化时请刷新"})
+                    self._json(409, {"error": "仅可重新送审仍申请公开的通过稿或退回稿；已待审或状态、版本变化时请先刷新"})
                     return
                 # Leave the original moderation fields intact until the separate review decision.
                 conn.execute("UPDATE fan_characters SET review_status='pending', updated_at=? WHERE id=?",

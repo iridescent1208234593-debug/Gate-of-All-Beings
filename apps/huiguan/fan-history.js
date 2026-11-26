@@ -121,6 +121,10 @@
     if (entry.previous_public != null || entry.new_public != null) {
       field(details, "公开开关", `${visibility(entry.previous_public)} → ${visibility(entry.new_public)}`);
     }
+    const approvedSnapshot = galleryId(entry.approval_snapshot_id);
+    if (entry.action === "review_approve" && approvedSnapshot) {
+      field(details, "通过的公开版本记录", "#" + approvedSnapshot);
+    }
     field(details, "理由", entry.reason);
     if (details.childElementCount) item.append(details);
     return item;
@@ -171,10 +175,16 @@
     const cardId = Number(id);
     if (!Number.isSafeInteger(cardId) || cardId <= 0) return null;
     const box = node("section", null, "fan-history-block");
-    box.append(node("h3", "已退回设表 · 送回复审"));
-    const details = node("dl");
-    field(details, "当前退回理由", eligible.rejection_reason || "未记录");
-    box.append(details, node("p", "将这份原设表交回复审队列，记录为管理员操作。不会代作者提交、修改设表或直接公开。"));
+    const wasPublic = eligible.status === "approved";
+    box.append(node("h3", "重新送审"));
+    if (!wasPublic) {
+      const details = node("dl");
+      field(details, "当前退回理由", eligible.rejection_reason || "未记录");
+      box.append(details);
+    }
+    box.append(node("p", wasPublic
+      ? "送审后会从公开画廊暂时隐藏，原稿、互动和审核记录会保留。审核通过后重新展示。"
+      : "将原稿交回复审队列，并记录这次操作。不会修改设表或直接公开。"));
 
     const controls = node("form");
     const label = node("label", "本次复审理由（必填）");
@@ -184,7 +194,7 @@
     reason.maxLength = 200;
     reason.rows = 2;
     label.append(reason);
-    const submit = node("button", "送回复审", "pb-btn ghost");
+    const submit = node("button", "确认重新送审", "pb-btn ghost");
     submit.type = "submit";
     controls.append(label, submit);
     const note = node("p");
@@ -200,7 +210,7 @@
         reason.focus();
         return;
       }
-      if (!window.confirm(`确定将画廊 #${id} 的当前退回版本送回复审？这不会直接公开设表。`)) return;
+      if (!window.confirm(`确定将画廊 #${id} 的当前版本重新送审？复审通过前不会公开展示。`)) return;
 
       reopenPending = true;
       submit.disabled = true;
@@ -233,6 +243,7 @@
           const data = response.ok ? await response.json() : null;
           if (!data?.ok || String(data.id) !== id || data.review_status !== "pending") throw new Error();
           result = "已送回复审，尚未公开。";
+          window.reloadPublic?.();
           void window.loadQueue?.();
         }
       } catch {
@@ -310,7 +321,7 @@
     } else status.textContent = "没有找到完全同名的设表。";
   }
 
-  async function load(rawValue, byName = false, notice = "") {
+  async function load(rawValue, byName = false, notice = "", focusReopen = false) {
     if (!enabled || reopenPending) return;
     activeRequest?.abort();
     activeRequest = null;
@@ -336,6 +347,11 @@
         if (!Array.isArray(data.snapshots) || !Array.isArray(data.events)) throw new Error(errorFor(0));
         render(data, value);
         if (notice) status.textContent = notice + " " + status.textContent;
+        if (focusReopen) {
+          const reason = output.querySelector("textarea");
+          if (reason) reason.focus();
+          else status.textContent = "此稿暂不可重新送审，请刷新画廊确认状态。";
+        }
       }
     } catch (error) {
       status.textContent = (notice ? notice + " " : "") + error.message;
@@ -356,16 +372,16 @@
   });
   document.addEventListener("click", (event) => {
     if (!enabled || reopenPending) return;
-    const button = event.target.closest("[data-fan-history-id]");
+    const button = event.target.closest("[data-fan-history-id],[data-fan-reopen-id]");
     if (!button) return;
     panel.closest("#reviewDesk").open = true;
     panel.open = true;
     mode.value = "id";
     configureSearch();
-    input.value = button.dataset.fanHistoryId;
+    input.value = button.dataset.fanReopenId || button.dataset.fanHistoryId;
     panel.scrollIntoView({ block: "start" });
     panel.querySelector("summary").focus({ preventScroll: true });
-    void load(input.value);
+    void load(input.value, false, "", Boolean(button.dataset.fanReopenId));
   });
   window.HuiguanFanHistory = {
     enable() {

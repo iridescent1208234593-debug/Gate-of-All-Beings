@@ -124,6 +124,7 @@ def main():
                 ("OAuth existing-only browser", [node, "apps/huiguan/tests/oauth-e2e.cjs", "--existing-only"]),
                 ("Huiguan event data browser", [node, "apps/huiguan/tests/safe-event-data.cjs"]),
                 ("Gallery attribute escaping browser", [npm, "run", "test:huiguan-gallery-escape"]),
+                ("Official gallery search and pagination browser", [node, "--test", "apps/huiguan/tests/official-gallery-browser.cjs"]),
             ])
             for name, command in commands:
                 run(name, command)

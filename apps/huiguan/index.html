@@ -804,6 +804,7 @@
     <a href="/" data-site-service="huiguan" data-site-path="/" data-site="huiguan">西木会馆</a>
     <a href="/" data-site-service="oc" data-site-path="/" data-site="oc">佳霖馆长设定</a>
     <a href="/" data-site-service="zszm" data-site-path="/" data-site="zszm"><span class="beta-wrap">众生之门<i class="beta">beta</i></span></a>
+    <a href="https://github.com/iridescent1208234593-debug/Gate-of-All-Beings" target="_blank" rel="noopener noreferrer">在 GitHub 给项目点 Star ↗</a>
   </div>
   <div class="auth-bar" id="authBar">
     <a class="btn-login" href="javascript:void(0)" onclick="openAuthModal()">登录 / 注册</a>
@@ -3993,7 +3994,13 @@ function showToast(type, html, ms) {
 })();
 
 // ========== 提交 ==========
-document.getElementById('charForm').addEventListener('submit', function(e) {
+const registrationForm = document.getElementById('charForm');
+let registrationFormRevision = 0;
+for (const event of ['input', 'change', 'reset']) {
+  registrationForm.addEventListener(event, () => { registrationFormRevision++; });
+}
+document.getElementById('characterTextDraftRestore').addEventListener('click', () => { registrationFormRevision++; });
+registrationForm.addEventListener('submit', function(e) {
   e.preventDefault();
   if (document.getElementById('btnSubmit').disabled) return;
   window.clearSubmissionProblem?.();
@@ -4054,6 +4061,7 @@ function generateAndSave(data, colors) {
 async function postSave(data, html, previousCode = '', version = OCRevisions.version(previousCode || data.code), draftTicket = null) {
   const button = document.getElementById('btnSubmit');
   if (button.disabled) return false;
+  const submittedFormRevision = registrationFormRevision;
   button.disabled = true;
   const label = button.textContent;
   button.textContent = '正在保存…';
@@ -4092,7 +4100,8 @@ async function postSave(data, html, previousCode = '', version = OCRevisions.ver
     const local = loadAll();
     const index = local.findIndex(item => item.code === data.code);
     if (index >= 0) { local[index] = data; saveAll(local); }
-    resetForm();
+    // An older success must not erase input typed, restored, or opened while it was pending.
+    if (registrationFormRevision === submittedFormRevision) resetForm();
     renderList();
     return true;
   } catch (error) {
@@ -4469,7 +4478,7 @@ if (new URLSearchParams(location.search).get('openauth')) initialLoginCheck.then
 <script src="/homepage.js?v=20261027z"></script>
 <script src="/shared/shared-ui/site-nav.js?v=20261109a"></script>
 <script src="/homepage-chrome.js?v=20261027z"></script>
-<script src="/homepage-content.js?v=20261108a"></script>
+<script src="/homepage-content.js?v=20261126a"></script>
 <script src="/original-image-viewer.js?v=20261027z"></script>
 <script src="/homepage-registration.js?v=20261027z"></script>
 <script src="/shared/shared-ui/guide.js?v=20261125a"></script>

@@ -227,6 +227,29 @@ function ownerChars(u) {
   return charMap[key] || [];
 }
 function onSearch(v) { searchTerm = (v || '').trim().toLowerCase(); renderUsers(); }
+function dispatchadminOperation(event) {
+  const el = event.target.closest(event.type === "change" ? "select[data-admin-operation]" : "button[data-admin-operation]");
+  if (!el) return;
+  const args = [0, 1, 2, 3].map((index) => el.getAttribute("data-op-" + index));
+  const invalid = Symbol();
+  function positive(raw) {
+    const n = Number(raw);
+    if (!Number.isSafeInteger(n) || n < 1) throw invalid;
+    return n;
+  }
+  try {
+    switch (el.dataset.adminOperation) {
+    case "decideReq": return decideReq(positive(args[0]), args[1] === "true");
+    case "decideHonor": return decideHonor(positive(args[0]), args[1] === "true");
+    case "decideSupplement": return decideSupplement(positive(args[0]), args[1] === "true");
+    case "decideScribe": return decideScribe(positive(args[0]), args[1] === "true", args[2] === "fan_reviewer" ? "fan_reviewer" : "scribe");
+    case "decideExempt": return decideExempt(positive(args[0]), args[1] === "true");
+    }
+  } catch (error) {
+    if (error !== invalid) throw error;
+  }
+}
+document.addEventListener("click", dispatchadminOperation);
 function refresh() { loadUsers(); loadRequests(); loadHonorRequests(); loadSupplements(); loadScribeRequests(); loadExemptRequests(); }
 
 function renderUsers() {
