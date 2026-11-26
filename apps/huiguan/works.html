@@ -246,7 +246,7 @@ async function submitArt(e){
 function dispatchworksOperation(event) {
   const el = event.target.closest(event.type === "change" ? "select[data-works-operation]" : "button[data-works-operation]");
   if (!el) return;
-  const args = [el.dataset.op0, el.dataset.op1, el.dataset.op2, el.dataset.op3];
+  const args = [0, 1, 2, 3].map((index) => el.getAttribute("data-op-" + index));
   const invalid = Symbol();
   function positive(raw) {
     const n = Number(raw);
