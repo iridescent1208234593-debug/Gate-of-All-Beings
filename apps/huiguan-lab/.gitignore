@@ -13,3 +13,6 @@ client/android/build/libs/**/*.aar
 client/.godot/
 lab.config.json
 scratch-import.*
+# Godot 导出时按 launcher_icons 从源图重新生成的图标资源
+client/android/build/res/mipmap*/
+client/android/build/res/drawable/splash_icon.webp
