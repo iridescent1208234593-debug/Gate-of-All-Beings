@@ -40,14 +40,20 @@ var guide                          # life_guide.gd: 新人引导「开始生活�
 var hud_buttons := {}
 var emote_row: Control
 var activity_layer: CanvasLayer
+# 屏幕适配：安全区、触控控件与重排用的引用（见 ui_scale.gd）
+var _hud_root: Control
+var _top_bar: PanelContainer
+var _left_panel: PanelContainer
+var _left_dock: VBoxContainer
+var _joystick: Control
+var _stick_dir := Vector2.ZERO
+var _touch_active_id := -2
+var _touch_interact_btn: Button
 
 
 func _ready() -> void:
 	font = load("res://assets/fonts/NotoSansSC-lab.woff2")
-	var theme := Theme.new()
-	theme.default_font = font
-	theme.default_font_size = 16
-	self.theme = theme
+	theme = UiTheme.make_theme(font)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	view2d = load("res://scripts/hall2d.gd").new()
 	add_child(view2d)
@@ -79,6 +85,12 @@ func _ready() -> void:
 	Net.account_link_result.connect(func(ok: bool):
 		_clear_panels()
 		toast("已绑定，游戏进度不变。" if ok else "未绑定。此测试码可能不在迁移名单，或会馆授权未完成。"))
+	UiScale.changed.connect(_layout_hud)
+	if Ota.feature_enabled():
+		Ota.update_available.connect(_show_update)
+		Ota.download_progress.connect(_on_download_progress)
+		Ota.download_failed.connect(func(reason: String): _ota_fail(reason))
+		Ota.download_ready.connect(_ota_ready)
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--lab-auto="):
 			auto_actions = Array(arg.trim_prefix("--lab-auto=").split(";"))
@@ -98,29 +110,56 @@ func _build_hud() -> void:
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud.add_child(root)
-	var top := PanelContainer.new()
-	top.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	root.add_child(top)
+	_top_bar = PanelContainer.new()
+	_top_bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	# 胶囊圆角的悬浮条：不贴屏幕边缘，四周留白，看起来才像一块浮在场景上的板
+	_top_bar.add_theme_stylebox_override("panel", UiTheme.hud_pill())
+	root.add_child(_top_bar)
 	var bar := HFlowContainer.new()
-	top.add_child(bar)
+	bar.alignment = FlowContainer.ALIGNMENT_CENTER
+	# 撑满胶囊内部，让这一行在垂直方向居中，而不是贴着上沿
+	bar.set_anchors_preset(Control.PRESET_FULL_RECT)
+	bar.offset_left = 14
+	bar.offset_right = -14
+	bar.offset_top = 0
+	bar.offset_bottom = 0
+	bar.add_theme_constant_override("h_separation", 6)
+	bar.add_theme_constant_override("v_separation", 2)
+	_top_bar.add_child(bar)
 	top_label = Label.new()
-	top_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	top_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# 不要 EXPAND_FILL：那会把按钮全推到右边，整条就不对称了。
+	top_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	top_label.add_theme_font_size_override("font_size", 15)
+	top_label.add_theme_color_override("font_color", UiTheme.TEXT_DIM)
 	top_label.text = "西木会馆 LAB"
 	bar.add_child(top_label)
+	# 状态文字和按钮之间留一道分隔，视觉上分两组
+	var sep := VSeparator.new()
+	sep.custom_minimum_size.x = 1
+	bar.add_child(sep)
 	for b in [["2D / 3D", _toggle_view], ["虹之间", _open_spaces], ["我的形象", _open_setup], ["新手引导", _open_guide], ["小游戏", _open_game_corner], ["本地数据", _open_data], ["退出", _logout]]:
 		var btn := Button.new()
 		btn.text = b[0]
 		hud_buttons[b[0]] = btn
 		btn.focus_mode = Control.FOCUS_NONE
-		if DisplayServer.is_touchscreen_available() or OS.has_feature("mobile"):
-			btn.custom_minimum_size.y = 44
+		btn.custom_minimum_size = Vector2(0, UiScale.min_touch - 6)
+		# 顶栏按钮用胶囊形，和条本身的圆角呼应
+		for state in ["normal", "hover", "pressed", "disabled"]:
+			btn.add_theme_stylebox_override(state, UiTheme.button_box(state, UiTheme.R_PILL, 12))
+		btn.add_theme_font_size_override("font_size", 15)
 		btn.pressed.connect(b[1])
 		bar.add_child(btn)
+	# 聊天区整体是一块圆角板：面板容器包住 记录 + 输入 + 表情，
+	# 让文字有落点，不再悬在场景上。
+	var dock_panel := PanelContainer.new()
+	dock_panel.anchor_top = 1.0; dock_panel.anchor_bottom = 1.0
+	dock_panel.add_theme_stylebox_override("panel", UiTheme.hud_pill(UiTheme.R_PANEL))
+	root.add_child(dock_panel)
 	var left := VBoxContainer.new()
-	left.anchor_top = 1.0; left.anchor_bottom = 1.0
-	left.offset_left = 12; left.offset_top = -260; left.offset_right = 430; left.offset_bottom = -12
-	root.add_child(left)
+	left.add_theme_constant_override("separation", 6)
+	dock_panel.add_child(left)
+	_left_dock = left
+	_left_panel = dock_panel
 	chat_log = RichTextLabel.new()
 	chat_log.custom_minimum_size = Vector2(410, 170)
 	chat_log.scroll_following = true
@@ -129,6 +168,7 @@ func _build_hud() -> void:
 	chat_log.add_theme_constant_override("outline_size", 4)
 	chat_log.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.7))
 	chat_log.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chat_log.add_theme_stylebox_override("normal", UiTheme.chat_box())
 	left.add_child(chat_log)
 	var crow := HBoxContainer.new()
 	left.add_child(crow)
@@ -136,16 +176,22 @@ func _build_hud() -> void:
 	chat_input.placeholder_text = "按 Enter 聊天"
 	chat_input.max_length = 200
 	chat_input.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	chat_input.custom_minimum_size.y = UiScale.min_touch
 	chat_input.text_submitted.connect(_send_chat)
 	crow.add_child(chat_input)
 	var emotes := HBoxContainer.new()
 	emote_row = emotes
+	emotes.add_theme_constant_override("h_separation", 4)
 	left.add_child(emotes)
 	for e in ["wave", "bow", "heart", "laugh", "sleep", "surprise", "music", "sparkle"]:
 		var eb := Button.new()
 		eb.text = EMOTE_TEXT[e]
 		eb.focus_mode = Control.FOCUS_NONE
 		eb.add_theme_font_size_override("font_size", 13)
+		eb.custom_minimum_size.y = UiScale.min_touch
+		for state in ["normal", "hover", "pressed", "disabled"]:
+			var s := UiTheme.button_box(state, UiTheme.R_BTN, 8)
+			eb.add_theme_stylebox_override(state, s)
 		eb.pressed.connect(func():
 			Net.send({"t": "emote", "id": e})
 			guide.on_event("emoted"))
@@ -177,7 +223,138 @@ func _build_hud() -> void:
 	panel_holder = Control.new()
 	panel_holder.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel_holder.pass_on_pickable = true
 	root.add_child(panel_holder)
+	_build_touch_controls(root)
+	_hud_root = root
+	_layout_hud()
+
+
+## 触屏专用：左下虚拟摇杆、右下互动键。桌面端不创建，键鼠照旧。
+func _build_touch_controls(root: Control) -> void:
+	if not UiScale.touch:
+		return
+	_joystick = Control.new()
+	_joystick.anchor_top = 1.0; _joystick.anchor_bottom = 1.0
+	_joystick.anchor_right = 0.0
+	_joystick.mouse_filter = Control.MOUSE_FILTER_STOP
+	_joystick.draw.connect(_draw_joystick)
+	_joystick.gui_input.connect(_on_joystick_input)
+	root.add_child(_joystick)
+	_touch_interact_btn = Button.new()
+	_touch_interact_btn.text = "互动"
+	_touch_interact_btn.focus_mode = Control.FOCUS_NONE
+	_touch_interact_btn.add_theme_font_size_override("font_size", 17)
+	# 圆形按钮：圆角开到尺寸的一半以上即成正圆
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		_touch_interact_btn.add_theme_stylebox_override(state, UiTheme.button_box(state, 999, 6))
+	_touch_interact_btn.pressed.connect(func():
+		if near_object != "":
+			Net.send({"t": "interact", "object": near_object})
+			guide.on_event("interacted"))
+	root.add_child(_touch_interact_btn)
+	guide.has_touch_interact = true
+
+
+func _draw_joystick() -> void:
+	if _joystick == null:
+		return
+	var c := _joystick.size * 0.5
+	var r := _joystick.size.x * 0.5
+	# 底圈：一层深色玻璃 + 一圈细描边，和面板的语言一致
+	_joystick.draw_circle(c, r, Color(UiTheme.BG_DEEP, 0.42))
+	_joystick.draw_arc(c, r - 1.0, 0, TAU, 48, UiTheme.EDGE_SOFT, 1.5, true)
+	# 摇杆头：按下时换成强调色，给即时反馈
+	var active := _stick_dir != Vector2.ZERO
+	var knob := c + _stick_dir * (r * 0.30)
+	var kr := r * 0.30
+	_joystick.draw_circle(knob, kr, Color(UiTheme.ACCENT if active else UiTheme.TEXT_DIM, 0.85 if active else 0.55))
+	_joystick.draw_arc(knob, kr - 1.0, 0, TAU, 32, Color(1, 1, 1, 0.35), 1.2, true)
+
+
+func _on_joystick_input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch or event is InputEventMouseButton:
+		var down: bool = event.pressed
+		if down:
+			_touch_active_id = event.index if event is InputEventScreenTouch else -1
+			_apply_stick(event.position)
+		elif event.index == _touch_active_id or _touch_active_id == -1:
+			_touch_active_id = -2
+			_stick_dir = Vector2.ZERO
+			_joystick.queue_redraw()
+	elif event is InputEventScreenDrag:
+		if event.index == _touch_active_id:
+			_apply_stick(event.position)
+
+
+func _apply_stick(pos: Vector2) -> void:
+	var c := _joystick.size * 0.5
+	var d := (pos - c) / maxf(1.0, _joystick.size.x * 0.5)
+	_stick_dir = d.limit_length(1.0)
+	_joystick.queue_redraw()
+
+
+## 依据安全区与横竖屏重排 HUD。手机横屏时底部左右分栏，竖屏时改为上下堆叠。
+func _layout_hud() -> void:
+	if _hud_root == null:
+		return
+	var vp := get_viewport().get_visible_rect().size
+	var pad := UiScale.insets
+	var gap := 12.0
+	var top_h := UiScale.min_touch + 6.0
+	# 顶栏是一颗居中的胶囊：给定宽度由内容居中排布，不横贯全屏。
+	# 宽度取「够放下所有按钮」与「屏幕可用宽度」的较小值。
+	var bar_w := minf(vp.x - pad.x - pad.z - 24.0, 1000.0)
+	_top_bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_top_bar.offset_left = -bar_w * 0.5
+	_top_bar.offset_right = bar_w * 0.5
+	_top_bar.offset_top = pad.y + 8.0
+	_top_bar.offset_bottom = pad.y + 8.0 + top_h
+	toast_label.offset_left = -vp.x * 0.45
+	toast_label.offset_top = _top_bar.offset_bottom + 10.0
+	toast_label.offset_bottom = toast_label.offset_top + 40.0
+	toast_label.offset_right = vp.x * 0.45
+	status_label.offset_left = -vp.x * 0.45
+	status_label.offset_top = -20.0
+	status_label.offset_bottom = 20.0
+	status_label.offset_right = vp.x * 0.45
+	# 聊天区：横屏让开左下摇杆，竖屏占满底部一条。
+	var portrait := vp.y > vp.x
+	var stick := 0.0
+	if _joystick != null:
+		stick = clampf(vp.x * 0.22, 110.0, 180.0)
+	# 高度要容得下 记录 + 输入框 + 表情行，外加面板内边距。
+	var chat_h := minf(248.0, vp.y * 0.44)
+	var dock_left := pad.x + gap
+	if not portrait and stick > 0.0:
+		dock_left += stick + gap
+	var chat_w := minf(430.0, vp.x - dock_left - pad.z - gap)
+	if portrait:
+		chat_w = vp.x - pad.x - pad.z - gap * 2
+		dock_left = pad.x + gap
+	_left_panel.offset_left = dock_left
+	_left_panel.offset_right = dock_left + chat_w
+	_left_panel.offset_top = -(pad.w + gap + chat_h)
+	_left_panel.offset_bottom = -(pad.w + gap)
+	# 面板内有左右各 18 的内边距，文字可用宽度要扣掉
+	chat_log.custom_minimum_size = Vector2(chat_w - 40.0, chat_h - UiScale.min_touch * 2 - 34.0)
+	hint_label.offset_top = -pad.w - 84.0
+	hint_label.offset_left = -vp.x * 0.35
+	hint_label.offset_right = vp.x * 0.35
+	if _joystick != null:
+		# 摇杆锚在底边（anchor_top/bottom = 1.0），偏移量必须相对底边取负值。
+		_joystick.offset_left = pad.x + gap
+		_joystick.offset_right = pad.x + gap + stick
+		_joystick.offset_top = -(pad.w + gap + stick)
+		_joystick.offset_bottom = -(pad.w + gap)
+		_joystick.queue_redraw()
+	if _touch_interact_btn != null:
+		# 互动键默认锚在左上，直接用绝对坐标。
+		var bs := clampf(stick * 0.62, 74.0, 110.0)
+		_touch_interact_btn.offset_left = vp.x - pad.z - gap - bs
+		_touch_interact_btn.offset_right = vp.x - pad.z - gap
+		_touch_interact_btn.offset_top = vp.y - pad.w - gap - bs
+		_touch_interact_btn.offset_bottom = vp.y - pad.w - gap
 
 
 func toast(text: String, seconds := 3.5) -> void:
@@ -193,24 +370,54 @@ func _clear_panels() -> void:
 
 func _panel(title: String, width := 520.0) -> VBoxContainer:
 	_clear_panels()
+	var vp := get_viewport().get_visible_rect().size
+	var pad := UiScale.insets
+	# 可用区域（虚拟像素）：安全区内留 12 的余量。
+	var avail_w := vp.x - pad.x - pad.z - 24.0
+	var avail_h := vp.y - pad.y - pad.w - 24.0
+	width = clampf(width, 240.0, avail_w)
 	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.35)
+	shade.color = Color(0, 0, 0, 0.45)
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	# 遮罩只压暗背景，不接收点击，否则整屏 STOP 会吃掉下面所有按钮。
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel_holder.add_child(shade)
+	# 显式摆位，不依赖容器最小尺寸推导，避免内容把面板撑出屏幕。
 	var p := PanelContainer.new()
-	p.set_anchors_preset(Control.PRESET_CENTER)
-	p.custom_minimum_size = Vector2(width, 0)
-	p.position = Vector2(-width * 0.5, -230)
+	p.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	p.mouse_filter = Control.MOUSE_FILTER_STOP
+	p.add_theme_stylebox_override("panel", UiTheme.panel())
+	var cx := pad.x + 12.0 + (avail_w - width) * 0.5
+	var ch := minf(avail_h, 340.0)
+	var cy := pad.y + 12.0 + maxf(0.0, (avail_h - ch) * 0.5)
+	p.offset_left = cx
+	p.offset_top = cy
+	p.offset_right = cx + width
+	p.offset_bottom = cy + ch
 	panel_holder.add_child(p)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.set_anchors_preset(Control.PRESET_FULL_RECT)
+	p.add_child(scroll)
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 8)
-	p.add_child(box)
+	# 宽度跟着可视区走，文字才能按面板宽度换行。
+	box.custom_minimum_size.x = width - 44.0
+	box.add_theme_constant_override("separation", 10)
+	scroll.add_child(box)
 	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 10)
 	box.add_child(head)
 	var l := Label.new(); l.text = title; l.add_theme_font_size_override("font_size", 20)
 	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size.x = width - 140.0
 	head.add_child(l)
-	var x := Button.new(); x.text = "关闭"; x.pressed.connect(_clear_panels); head.add_child(x)
+	var x := Button.new(); x.text = "关闭"; x.custom_minimum_size = Vector2(76, UiScale.min_touch - 4)
+	for state in ["normal", "hover", "pressed", "disabled"]:
+		x.add_theme_stylebox_override(state, UiTheme.button_box(state, UiTheme.R_BTN, 12))
+	x.add_theme_font_size_override("font_size", 14)
+	x.pressed.connect(_clear_panels); head.add_child(x)
 	return box
 
 
@@ -230,7 +437,7 @@ func _open_setup() -> void:
 	var info := Label.new()
 	info.text = "OC 原图只保存在这台设备的浏览器中。联机时服务器只临时转发一份缩小的展示副本给同一空间的玩家，不建立素材库。"
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	info.custom_minimum_size = Vector2(520, 0)
+	info.custom_minimum_size = Vector2(0, 0)
 	box.add_child(info)
 	var nick := LineEdit.new()
 	nick.name = "Nick"
@@ -344,7 +551,7 @@ func _open_data() -> void:
 	var l := Label.new()
 	l.text = "昵称、OC 图片、捏人配置和显示设置只保存在这台设备的浏览器里。清除浏览器数据会让它们消失，服务器无法帮你恢复；可以先导出备份。公共世界和灵质空间保存在 LAB 服务器上，不受影响。"
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(480, 0)
+	l.custom_minimum_size = Vector2(0, 0)
 	box.add_child(l)
 	_add_button(box, "导出本地数据", func(): WebBridge.download_text("zszm-lab-profile.json", Profile.export_json()); toast("已导出"))
 	_add_button(box, "导入本地数据", func():
@@ -352,6 +559,10 @@ func _open_data() -> void:
 			WebBridge.file_picked.connect(_on_file_picked)
 		WebBridge.pick_file("application/json,.json"))
 	_add_button(box, "绑定旧测试码进度", _confirm_account_link)
+	# 自更新暂时关闭（包体 145 MB，OTA 下载体验差）。实现保留在 scripts/ota.gd，
+	# 把那里的 FEATURE_ENABLED 改回 true 即可恢复，这里不用动。
+	if Ota.feature_enabled():
+		_add_button(box, "检查更新", _check_update_manual, "CheckUpdate")
 	var names := CheckBox.new(); names.text = "显示名字"; names.button_pressed = Profile.show_names
 	names.toggled.connect(func(on): Profile.show_names = on; Profile.save_local())
 	box.add_child(names)
@@ -367,7 +578,7 @@ func _confirm_account_link() -> void:
 	var box := _panel("绑定旧测试码进度", 520)
 	var note := Label.new()
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.custom_minimum_size.x = 455
+	note.custom_minimum_size.x = 0
 	note.text = "绑定成功后，旧进度和 OC 归入会馆账号；旧测试码不再单独登录。已有两个档案时不会合并。"
 	box.add_child(note)
 	_add_button(box, "确认开始绑定", func():
@@ -391,6 +602,80 @@ func _logout() -> void:
 		WebBridge.logout()
 	elif not Net.cookie.is_empty():
 		Net.logout_native()
+
+
+# ------------------------------------------------------------------ OTA
+var _ota_box: VBoxContainer
+var _ota_progress: ProgressBar
+var _ota_note: Label
+
+
+func _show_update(info: Dictionary) -> void:
+	var ver := str(info.get("versionName", ""))
+	var box := _panel("发现新版本 %s" % ver, 460.0)
+	_ota_box = box
+	var body := Label.new()
+	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var lines := PackedStringArray()
+	lines.append("当前版本：%s（%d）" % [Ota.local_name, Ota.local_code])
+	lines.append("新版本：%s（%d）" % [ver, int(info.get("versionCode", 0))])
+	var notes := Ota.changelog_of(info)
+	if notes.size() > 0:
+		lines.append("")
+		for n in notes:
+			lines.append("· " + str(n))
+	var size := int(info.get("size", 0))
+	if size > 0:
+		lines.append("")
+		lines.append("安装包约 %.1f MB" % (float(size) / 1048576.0))
+	body.text = "\n".join(lines)
+	box.add_child(body)
+	_ota_note = Label.new()
+	_ota_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_ota_note.text = ""
+	box.add_child(_ota_note)
+	_ota_progress = ProgressBar.new()
+	_ota_progress.min_value = 0
+	_ota_progress.max_value = 100
+	_ota_progress.custom_minimum_size.y = 18
+	_ota_progress.visible = false
+	box.add_child(_ota_progress)
+	_add_button(box, "立即更新", _ota_begin, "OtaNow")
+	# force 时不给「稍后」，与拾灵一致：只有确实必须才这么发版。
+	if not Ota.is_forced(info):
+		_add_button(box, "稍后", func(): _clear_panels(), "OtaLater")
+
+
+func _ota_begin() -> void:
+	if _ota_progress != null:
+		_ota_progress.visible = true
+	if _ota_note != null:
+		_ota_note.text = "正在下载，可在通知栏查看进度。"
+	Ota.start_download()
+
+
+func _on_download_progress(percent: int) -> void:
+	if _ota_progress != null:
+		_ota_progress.value = percent
+	if _ota_note != null:
+		_ota_note.text = "正在下载 %d%%" % percent
+
+
+func _ota_ready() -> void:
+	if _ota_note != null:
+		_ota_note.text = "下载完成，校验通过。按系统提示安装即可。"
+	Ota.install()
+
+
+func _ota_fail(reason: String) -> void:
+	if _ota_note != null:
+		_ota_note.text = reason
+	else:
+		toast(reason)
+
+
+func _check_update_manual() -> void:
+	Ota.check_manual(func(latest: String): toast("已是最新版本 %s" % latest, 4))
 
 
 func _native_login_form(detail: String) -> void:
@@ -433,7 +718,7 @@ func _open_guide() -> void:
 	l.text = "边玩边学：走路、聊天、互动、虹之间。每样东西第一次用到时，会有一点灵光来提示。
 " + guide.summary()
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(480, 0)
+	l.custom_minimum_size = Vector2(0, 0)
 	box.add_child(l)
 	var row := HBoxContainer.new()
 	box.add_child(row)
@@ -507,7 +792,7 @@ func _render_spaces() -> void:
 	var l := Label.new()
 	l.text = "馆长虹把开辟灵质空间的能力分享给了每位访客。在会馆的「虹之间」彩虹门前，可以开辟自己的空间（世界的一条独立历史分支），邀请朋友，或返回会馆。"
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	l.custom_minimum_size = Vector2(560, 0)
+	l.custom_minimum_size = Vector2(0, 0)
 	box.add_child(l)
 	var mine = null
 	for s in space_spaces:
@@ -679,7 +964,7 @@ func _on_message(m: Dictionary) -> void:
 		"board":
 			var box := _panel("会馆告示", 480)
 			var l := Label.new(); l.text = m["text"]; l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			l.custom_minimum_size = Vector2(440, 0); box.add_child(l)
+			l.custom_minimum_size = Vector2(0, 0); box.add_child(l)
 		"portal", "spaces":
 			space_spaces = m["spaces"]
 			if m["t"] == "portal" or panel_holder.get_child_count() > 0:
@@ -796,6 +1081,8 @@ func _process(delta: float) -> void:
 		if Input.is_key_pressed(KEY_D): wish.x += 1
 		if Input.is_key_pressed(KEY_W): wish.y -= 1
 		if Input.is_key_pressed(KEY_S): wish.y += 1
+		if wish == Vector2.ZERO and _stick_dir != Vector2.ZERO:
+			wish = _stick_dir          # 触屏摇杆
 	if wish != Vector2.ZERO:
 		move_target = null
 	elif move_target != null:
@@ -910,3 +1197,4 @@ func _run_auto(delta: float) -> void:
 				"objects": world.objects, "chat": chat_log.get_parsed_text().right(300), "nick": Profile.nick,
 				"oc_bytes": Profile.oc_png.size(), "fps": Engine.get_frames_per_second(), "rtt": Net.rtt_ms,
 				"guide": {"status": guide.status, "seen": guide.seen, "showing": guide._current.get("key", "")}}))
+

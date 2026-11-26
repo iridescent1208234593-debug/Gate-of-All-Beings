@@ -3,6 +3,7 @@ config_version=5
 [application]
 config/name="西木会馆 LAB"
 config/description="众生之门—西木会馆 OC 联机生活 LAB（测试世界）"
+config/icon="res://icon.svg"
 run/main_scene="res://scenes/main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 
@@ -10,11 +11,13 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 Profile="*res://scripts/profile.gd"
 WebBridge="*res://scripts/web_bridge.gd"
 Net="*res://scripts/net.gd"
+UiScale="*res://scripts/ui_scale.gd"
+Ota="*res://scripts/ota.gd"
 
 [display]
 window/size/viewport_width=1280
 window/size/viewport_height=720
-window/stretch/mode="disabled"
+window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=0
 
