@@ -230,7 +230,7 @@ function onSearch(v) { searchTerm = (v || '').trim().toLowerCase(); renderUsers(
 function dispatchadminOperation(event) {
   const el = event.target.closest(event.type === "change" ? "select[data-admin-operation]" : "button[data-admin-operation]");
   if (!el) return;
-  const args = [el.dataset.op0, el.dataset.op1, el.dataset.op2, el.dataset.op3];
+  const args = [0, 1, 2, 3].map((index) => el.getAttribute("data-op-" + index));
   const invalid = Symbol();
   function positive(raw) {
     const n = Number(raw);
