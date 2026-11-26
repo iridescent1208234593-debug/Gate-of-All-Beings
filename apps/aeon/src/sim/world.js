@@ -13,6 +13,18 @@ export const BIOME = {
   SNOW:   7,
 };
 
+// --- city production gate --------------------------------------------------
+// A settlement's production focus only pays out while the city still has
+// RESIDENTS. A tribe can be perfectly healthy elsewhere while one of its towns
+// has emptied out (settlers marched away, famine, siege), so `tr.members > 0`
+// is not a sufficient check: the payout switch must look at `s.pop`.
+// This lives in the coremech-owned world module (already imported by sim.js)
+// so the integrator can flip the FOCUS-GATE-WIRE switch without reaching into
+// settlement internals.
+export function focusPayoutAllowed(settlement) {
+  return !!settlement && settlement.pop > 0;
+}
+
 // base biome palette (stylized, limited hues — research: 1-5 hues, value contrast)
 export const BIOME_COLOR = {
   [BIOME.DEEP]:    [40, 78, 120],
