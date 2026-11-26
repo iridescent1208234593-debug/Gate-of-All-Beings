@@ -223,7 +223,6 @@ func _build_hud() -> void:
 	panel_holder = Control.new()
 	panel_holder.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel_holder.pass_on_pickable = true
 	root.add_child(panel_holder)
 	_build_touch_controls(root)
 	_hud_root = root
@@ -679,29 +678,46 @@ func _check_update_manual() -> void:
 
 
 func _native_login_form(detail: String) -> void:
-	var box := _panel("登录西木会馆", 460.0)
+	var box := _panel("登录西木会馆 LAB", 460.0)
 	panel_holder.move_to_front()
 	var server := LineEdit.new()
 	server.name = "NativeServer"
 	server.placeholder_text = "服务器地址（https://…）"
 	server.text = Net.http_base()
-	box.add_child(server)
+
+	var account := _add_button(box, "使用西木会馆账户登录", func(): Net.login_account_native(server.text), "NativeAccountLogin")
+	account.custom_minimum_size.y = UiScale.min_touch
+	if not detail.is_empty():
+		var hint := Label.new()
+		hint.text = detail
+		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(hint)
+
+	var legacy := VBoxContainer.new()
+	legacy.name = "NativeLegacyOptions"
+	legacy.hide()
+	var toggle := Button.new()
+	toggle.name = "NativeLegacyToggle"
+	toggle.text = "有旧测试码？展开其他登录方式"
+	toggle.toggle_mode = true
+	toggle.custom_minimum_size.y = UiScale.min_touch
+	box.add_child(toggle)
+	box.add_child(legacy)
+	toggle.toggled.connect(func(expanded: bool):
+		legacy.visible = expanded
+		toggle.text = "收起其他登录方式" if expanded else "有旧测试码？展开其他登录方式")
+
 	var code := LineEdit.new()
 	code.name = "NativeCode"
 	code.placeholder_text = "输入 LAB 测试码"
 	code.secret = true
 	code.max_length = 64
-	box.add_child(code)
-	var hint := Label.new()
-	hint.text = detail
-	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(hint)
+	legacy.add_child(code)
 	var submit := func(): Net.login_native(server.text, code.text)
-	_add_button(box, "登录", submit, "NativeLogin")
-	_add_button(box, "在 GitHub 给项目点 Star", func(): OS.shell_open("https://github.com/iridescent1208234593-debug/Gate-of-All-Beings"), "GitHubStar")
+	_add_button(legacy, "用测试码登录", submit, "NativeLogin")
 	code.text_submitted.connect(func(_value): submit.call())
-	_add_button(box, "使用西木会馆账号", func(): Net.login_account_native(server.text), "NativeAccountLogin")
-	code.grab_focus()
+	legacy.add_child(server)
+	_add_button(box, "在 GitHub 给项目点 Star", func(): OS.shell_open("https://github.com/iridescent1208234593-debug/Gate-of-All-Beings"), "GitHubStar")
 
 
 # ------------------------------------------------------------------ spaces
