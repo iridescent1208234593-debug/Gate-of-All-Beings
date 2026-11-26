@@ -1,4 +1,4 @@
-"""Generate the browser/Node copy of the explicit shared domain map."""
+"""Generate the browser/Node domain map and the standalone LAB host configuration."""
 import json
 from pathlib import Path
 import sys

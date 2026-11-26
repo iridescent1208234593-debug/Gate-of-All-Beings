@@ -8,7 +8,10 @@ const { chromium } = require('playwright');
 
 const fixture = path.join(__dirname, 'oauth-mock-server.py');
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'huiguan-oauth-e2e-'));
-const child = spawn(process.env.PYTHON || 'python', ['-X', 'utf8', fixture], {
+const existingOnly = process.argv.includes('--existing-only');
+const fixtureArgs = ['-B', '-X', 'utf8', fixture];
+if (existingOnly) fixtureArgs.push('--existing-only');
+const child = spawn(process.env.PYTHON || 'python', fixtureArgs, {
   env: { ...process.env, OAUTH_TEST_PARENT: temp },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
@@ -29,11 +32,38 @@ function nextLine(stream) {
   try {
     const info = JSON.parse(await nextLine(child.stdout));
     assert(info.dataRoot.startsWith(temp), 'test database must be inside the disposable test directory');
-    browser = await chromium.launch({ headless: true });
+    browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_EXECUTABLE });
     const context = await browser.newContext();
-    await context.route('https://**/*', (route) => route.abort());
+    await context.route('**/*', (route) => {
+      const origin = new URL(route.request().url()).origin;
+      return [info.app, info.provider].includes(origin) ? route.continue() : route.abort();
+    });
     const page = await context.newPage();
     const app = info.app;
+    const user = async () => page.evaluate(async () => (await fetch('/api/user')).json());
+    const counts = async () => (await context.request.get(info.provider + '/__test__/counts')).json();
+
+    if (existingOnly) {
+      const before = await counts();
+      await page.goto(`${app}/api/login`);
+      const [refused] = await Promise.all([
+        page.waitForResponse(response => response.url().startsWith(`${app}/cb?`)),
+        page.getByRole('button', {name: '无法确认账号归属'}).click(),
+      ]);
+      assert.equal(refused.status(), 403);
+      assert.equal((await refused.json()).error, '暂时无法确认这个账号的归属，请联系会馆管理员核验。');
+      assert.equal((await user()).logged_in, false);
+      assert(!(await context.cookies(app)).some(cookie => ['session', 'hx_sso'].includes(cookie.name)));
+      assert.deepEqual(await counts(), before);
+      await page.goto(`${app}/api/login`);
+      await page.getByRole('button', {name: '老用户登录'}).click();
+      await page.waitForURL(`${app}/`);
+      assert.equal((await user()).user_id, 'mock-existing-137');
+      assert.deepEqual(await counts(), {users: before.users, sessions: before.sessions + 1});
+      await context.close();
+      console.log('Huiguan OAuth browser E2E PASS (existing-only policy, refusal without writes, existing account login)');
+      return;
+    }
 
     await page.goto(`${app}/api/login`);
     assert(page.url().startsWith(info.provider + '/authorize.php?'), 'login starts at local mock Provider');
@@ -42,12 +72,12 @@ function nextLine(stream) {
     assert.match(state || '', /^[0-9a-f]{32}$/, 'OAuth state has expected random format');
     assert.equal(authorization.searchParams.get('client_id'), 'mock-client-id');
     assert.equal(authorization.searchParams.get('redirect_uri'), `${app}/cb`);
-    await page.getByRole('button', { name: 'Authorize mock identity' }).click();
+    await page.getByRole('button', { name: '新用户开户' }).click();
     await page.waitForURL(`${app}/`);
 
-    const user = async () => page.evaluate(async () => (await fetch('/api/user')).json());
     assert.equal((await user()).logged_in, true, 'callback establishes authenticated session');
     assert.equal((await user()).user_id, 'mock-user-123');
+    assert.equal((await counts()).users, 2, 'one new account plus the seeded account');
     let cookies = await context.cookies(app);
     for (const name of ['session', 'hx_sso']) {
       const cookie = cookies.find((item) => item.name === name);
@@ -69,7 +99,7 @@ function nextLine(stream) {
     assert.equal((await user()).logged_in, false, 'expired session is rejected');
 
     await page.goto(`${app}/api/login`);
-    await page.getByRole('button', { name: 'Authorize mock identity' }).click();
+    await page.getByRole('button', { name: '新用户开户' }).click();
     await page.waitForURL(`${app}/`);
     assert.equal((await user()).logged_in, true, 'a new mock login recovers from expiration');
     await page.goto(`${app}/api/logout`);
@@ -77,6 +107,41 @@ function nextLine(stream) {
     assert.equal((await user()).logged_in, false, 'logout clears the session');
     cookies = await context.cookies(app);
     assert(!cookies.some((item) => item.name === 'session'), 'logout removes the session cookie');
+    assert.equal((await counts()).users, 2, 'repeated first-user login does not create another account');
+
+    await page.goto(`${app}/api/login`);
+    await page.getByRole('button', { name: '老用户登录' }).click();
+    await page.waitForURL(`${app}/`);
+    assert.equal((await user()).user_id, 'mock-existing-137', 'old login returns the existing UID');
+    assert.equal((await counts()).users, 2);
+    const members = async () => {
+      const result = await context.request.get(`${app}/api/member/users`);
+      assert.equal(result.status(), 200);
+      return (await result.json()).users;
+    };
+    assert((await members()).some(member => member.kind === 'usso' && member.uid === 'mock-existing-137' && member.role === 'admin'));
+    for (const update of [{edit_role: 'scribe'}, {role: 'elder'}]) {
+      const status = await page.evaluate(async set => (await fetch('/api/member/user/update', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({kind: 'usso', uid: 'mock-user-123', set}),
+      })).status, update);
+      assert.equal(status, 200);
+    }
+    const member = (await members()).find(member => member.kind === 'usso' && member.uid === 'mock-user-123');
+    assert.equal(member.edit_role, 'scribe');
+    assert.equal(member.role, 'elder');
+    await page.goto(`${app}/api/logout`);
+
+    for (const name of ['登录身份信息缺失', '登录身份信息有误']) {
+      const before = await counts();
+      await page.goto(`${app}/api/login`);
+      await page.getByRole('button', { name }).click();
+      assert.match(await page.locator('body').innerText(), /这次登录的身份信息有误，请重新登录。若仍失败，请联系会馆管理员。/);
+      assert.equal((await user()).logged_in, false);
+      assert.deepEqual(await counts(), before, 'identity rejection creates no account or session');
+      assert(!(await context.cookies(app)).some((item) => ['session', 'hx_sso'].includes(item.name)));
+    }
 
     const badState = await context.request.get(`${app}/cb?code=mock-code&state=not-issued`);
     assert.equal(badState.status(), 400, 'callback rejects an unknown state');
@@ -91,21 +156,21 @@ function nextLine(stream) {
 
     await page.goto(`${app}/api/login`);
     const deniedState = new URL(page.url()).searchParams.get('state');
-    await page.getByRole('button', { name: 'Deny' }).click();
+    await page.getByRole('button', { name: '取消授权' }).click();
     const deniedBody = await page.locator('body').innerText();
-    assert(deniedBody.includes('用户拒绝了授权'), `provider denial is surfaced: ${deniedBody}`);
+    assert(deniedBody.includes('授权未完成，请重新登录。'), `provider denial is surfaced: ${deniedBody}`);
     assert.equal((await user()).logged_in, false, 'denied authorization does not create a session');
     const replayedDenial = await context.request.get(`${app}/cb?error=access_denied&state=${deniedState}`);
     assert.equal(replayedDenial.status(), 400, 'denied callback consumes state and cannot be replayed');
 
     await page.goto(`${app}/api/login`);
-    await page.getByRole('button', { name: 'Simulate token failure' }).click();
+    await page.getByRole('button', { name: '模拟登录服务异常' }).click();
     const tokenFailureBody = await page.locator('body').innerText();
-    assert(tokenFailureBody.includes('HTTP Error 400'), `token exchange errors are surfaced: ${tokenFailureBody}`);
+    assert(tokenFailureBody.includes('暂时无法完成登录，请稍后重试。'), `token exchange errors are surfaced: ${tokenFailureBody}`);
     assert.equal((await user()).logged_in, false, 'token failure does not create a session');
 
     await context.close();
-    console.log('Huiguan OAuth mock browser E2E PASS (login, state, cookies, restart, expiry, logout, denial, token error)');
+    console.log('Huiguan OAuth browser E2E PASS (new, repeat, existing, member management, rejected UID, state, session lifecycle, provider errors)');
   } finally {
     if (browser) await browser.close();
     child.kill();

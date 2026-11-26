@@ -45,6 +45,43 @@ if (-not $OutFile) {
 $outDir = Split-Path $OutFile -Parent
 if (-not (Test-Path $outDir)) { New-Item -ItemType Directory -Force $outDir | Out-Null }
 
+# ---------------------------------------------------------------------------
+# Godot 引擎库（godot-lib.template_*.aar，约 100 MB 各一份）不在版本控制里。
+# 干净检出直接构建会在 compileStandardReleaseJavaWithJavac 阶段失败：
+#   GodotApp.java: 方法不会覆盖或实现超类型的方法
+# 因为 GodotActivity 等基类来自那个 aar。首次构建必须先「安装 Android 构建
+# 模板」，把模板包里的 libs/ 解到 client/android/build/libs/。
+# 这里做前置检查，缺了就从导出模板里自动补，避免每次都要手工处理。
+# ---------------------------------------------------------------------------
+$Libs = Join-Path $Client 'android\build\libs'
+$ReleaseAar = Join-Path $Libs 'release\godot-lib.template_release.aar'
+if (-not (Test-Path $ReleaseAar)) {
+    Write-Host '== 缺少 godot-lib aar，尝试从导出模板补装'
+    $tplDir = Join-Path $env:APPDATA 'Godot\export_templates\4.7.2.stable'
+    $srcZip = Join-Path $tplDir 'android_source.zip'
+    if (-not (Test-Path $srcZip)) {
+        throw @"
+缺少 Godot 引擎库，且找不到导出模板：
+  $srcZip
+请先在 Godot 里「编辑器 → 管理导出模板 → 下载并安装」，或用 -TemplateZip 指定 android_source.zip。
+"@
+    }
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $zip = [IO.Compression.ZipFile]::OpenRead($srcZip)
+    try {
+        $wanted = $zip.Entries | Where-Object { $_.FullName -match '^libs/.*\.aar$' }
+        if (-not $wanted) { throw "模板包里没有 libs/*.aar：$srcZip" }
+        foreach ($e in $wanted) {
+            $dstPath = Join-Path (Join-Path $Client 'android\build') ($e.FullName -replace '/', '\')
+            New-Item -ItemType Directory -Force (Split-Path $dstPath -Parent) | Out-Null
+            [IO.Compression.ZipFileExtensions]::ExtractToFile($e, $dstPath, $true)
+            Write-Host ("   " + $e.FullName + "  " + [math]::Round($e.Length / 1MB, 1) + " MB")
+        }
+    }
+    finally { $zip.Dispose() }
+    Write-Host '== 引擎库已补齐'
+}
+
 # 版本号从预设里读出来，避免脚本与预设各写一份
 $presetText = Get-Content $Preset -Raw
 $verCode = [regex]::Match($presetText, '(?m)^version/code=(\d+)').Groups[1].Value

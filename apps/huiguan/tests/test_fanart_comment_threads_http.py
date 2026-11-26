@@ -1,7 +1,8 @@
 """Run as a separate process: python -B this_file.py. Synthetic loopback only."""
-from contextlib import closing
+from contextlib import closing, ExitStack
 from pathlib import Path
 import json
+import logging
 import http.client
 import os
 import sys
@@ -11,7 +12,13 @@ import threading
 
 def run():
  root = Path(__file__).resolve().parents[3]
- with tempfile.TemporaryDirectory(prefix='gallery-comment-thread-fixture-') as d:
+ with tempfile.TemporaryDirectory(prefix='gallery-comment-thread-fixture-') as d, ExitStack() as cleanup:
+  def close_fixture_logs():
+   logger = logging.getLogger("scraping_observe")
+   for handler in list(logger.handlers):
+    logger.removeHandler(handler)
+    handler.close()
+  cleanup.callback(close_fixture_logs)
   for k in list(os.environ):
    if k.startswith(('IRIDESCENTLY_','LAB_','USSO_','HX_','TURNSTILE_')): os.environ.pop(k)
   os.environ.update(IRIDESCENTLY_STORAGE_ROOT=str(Path(d)/'synthetic-storage'), IRIDESCENTLY_ENVIRONMENT='test')

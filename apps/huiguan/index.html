@@ -2316,9 +2316,11 @@ function renderExtraBranches() {
   extraOrder.forEach(sys => {
     const branches = ABILITY_BRANCHES[sys] || [];
     // 合璧技能作为占位分支显示在所系下面
-    const comboChips = getActiveCombos().filter(c => c.systems.includes(sys)).map(c =>
-      `<label><input type="checkbox" name="ability_${sys}" value="${c.name}" data-combo="1" checked disabled><span>${c.name}（合璧）</span></label>`
-    ).join('');
+    const comboChips = getActiveCombos().filter(c => c.systems.includes(sys)).map(c => {
+      const name = escapeHtml(c.name);
+      const value = name.replaceAll('"', '&quot;');
+      return `<label><input type="checkbox" name="ability_${sys}" value="${value}" data-combo="1" checked disabled><span>${name}（合璧）</span></label>`;
+    }).join('');
     const branchChecks = branches.map(b => {
       const key = 'ability_' + sys + '::' + b;
       const checkedAttr = state[key] ? ' checked' : '';
@@ -2459,10 +2461,23 @@ function renderComboUI() {
   }
   const cl = document.getElementById('customComboList');
   if (cl) {
-    cl.innerHTML = customCombos.map((c, i) =>
-      '<span class="combo-tag">' + c.name + '（' + c.systems.join('×') + '）<button type="button" onclick="removeCustomCombo(' + i + ')">×</button></span>'
-    ).join('');
+    renderSkillTags(cl, customCombos.map(c => c.name + '（' + c.systems.join('×') + '）'), removeCustomCombo);
   }
+}
+// 自设技能名称可能来自输入或存档，使用文本节点显示并用索引绑定删除操作。
+function renderSkillTags(container, labels, remove) {
+  const tags = labels.map((label, index) => {
+    const tag = document.createElement('span');
+    tag.className = 'combo-tag';
+    tag.textContent = label;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = '×';
+    button.addEventListener('click', () => remove(index));
+    tag.append(button);
+    return tag;
+  });
+  container.replaceChildren(...tags);
 }
 function addCustomCombo() {
   const name = document.getElementById('comboName').value.trim();
@@ -2521,7 +2536,7 @@ function removeCustomBranch(sys, i) { (customBranches[sys] = customBranches[sys]
 function renderCustomBranchTags(sys) {
   const t = document.getElementById('cbTags_' + sys);
   if (!t) return;
-  t.innerHTML = (customBranches[sys] || []).map((w, i) => '<span class="combo-tag">' + w + '<button type="button" onclick="removeCustomBranch(\'' + sys + '\',' + i + ')">×</button></span>').join('');
+  renderSkillTags(t, customBranches[sys] || [], index => removeCustomBranch(sys, index));
 }
 function onComboChange() {
   // 合璧默认仅 1 个：有自设合璧时取消预设合璧，避免叠加超限

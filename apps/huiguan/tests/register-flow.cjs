@@ -101,7 +101,7 @@ async function run(browser, width) {
 }
 (async () => {
   for (const width of [1440,390]) {
-    const browser = await chromium.launch({headless:true});
+    const browser = await chromium.launch({headless:true, executablePath:process.env.CHROMIUM_EXECUTABLE});
     try {
       await run(browser, width);
     } finally {

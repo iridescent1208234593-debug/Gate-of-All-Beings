@@ -5,6 +5,7 @@ import asyncio
 import base64
 from dataclasses import dataclass
 from hashlib import sha256
+from html import escape
 import json
 import secrets
 import time
@@ -15,6 +16,7 @@ from fastapi import Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 from .account_broker import Denied, Grant, LEASE, MAX_PENDING, POLL, LegacyClaim, LegacyClaimConflict
+from .account_direct_native import ANDROID_CALLBACK, Native, target
 from .auth import SESSION_COOKIE
 
 TX_COOKIE = "__Host-zszm_lab_flow"
@@ -30,7 +32,7 @@ CLIENT_ID = "lab-web"
 TTL = 300
 CALLBACK_PAGE = """<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>会馆账户登录</title>
-<p id="status">正在验证西木会馆账户…</p>
+<p id="status" data-android-callback="{android_callback}">正在验证西木会馆账户…</p>
 <script src="/static/direct-account-callback.js" defer></script></html>"""
 
 
@@ -74,7 +76,6 @@ def install(app, lab, broker):
     upstream_limit = asyncio.Semaphore(8)
     native = None
     if lab.cfg.account_direct_native_enabled is True:
-        from .account_direct_native import Native
         native = Native(lab, broker)
         native.install(app)
 
@@ -108,7 +109,6 @@ def install(app, lab, broker):
             return response(400, error="invalid_request")
         native_target = None
         if set(body) == {"intent", "native"} and body["intent"] == "login" and native and native.secure(request):
-            from .account_direct_native import target
             try:
                 native_target = target(body["native"], android=native.android(request))
             except ValueError:
@@ -152,7 +152,10 @@ def install(app, lab, broker):
     async def direct_callback(request: Request):
         if not correct_host(request) or request.url.query:
             return response(400, error="invalid_callback")
-        return HTMLResponse(CALLBACK_PAGE, headers=HEADERS | {
+        # Mirror the same gateway policy as the native endpoints for this page.
+        android_callback = ANDROID_CALLBACK if native and native.android(request) else ""
+        page = CALLBACK_PAGE.format(android_callback=escape(android_callback, quote=True))
+        return HTMLResponse(page, headers=HEADERS | {
             "Content-Security-Policy": "default-src 'none'; script-src 'self'; connect-src 'self'; "
                                       "base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
         })

@@ -72,7 +72,7 @@ label{display:block;margin-top:var(--qc-sp-3)}.qc-input{margin-top:var(--qc-sp-1
 <label>再次输入新密码<input class="qc-input" name="confirm_password" type="password" autocomplete="new-password" required minlength="12" maxlength="128"></label>
 <div class="actions"><button class="qc-btn" type="submit">重置密码</button></div><p class="message" role="status"></p>
 </form>
-<p class="qc-hint">未设置过找回问题的账号无法使用此方式。可在仍能登录的设备上，进入“账户安全”设置问题。USSO 账号请使用 USSO 的密码找回功能。</p>
+<p class="qc-hint">未设置过找回问题的账号无法使用此方式。可在仍能登录的设备上，进入“账户安全”设置问题。通过统一账号登录的用户，请前往原登录服务找回密码。</p>
 </details>
 </section>
 <div class="actions"><a class="qc-btn qc-btn--ghost" href="/?openauth=1">返回登录</a><a id="recoverLink" href="?mode=recover">忘记密码？</a></div>
@@ -156,7 +156,7 @@ async function load(){
  try{
   const r=await fetch('/api/user');const u=await r.json();
   if(!u.logged_in)return pageState('请先登录后再设置账户安全。',[{label:'去登录',href:'/?openauth=1'},{label:'忘记密码',href:'?mode=recover'}],true);
-  if(u.kind!=='local')return pageState('你正在使用 USSO 账号，密码与找回方式请在 USSO 管理。',[{label:'返回个人账户',href:'/account.html'}],true);
+  if(u.kind!=='local')return pageState('你使用的是统一账号，请前往原登录服务管理密码和找回方式。',[{label:'返回个人账户',href:'/account.html'}],true);
   const d=await api('settings',{});$('identity').textContent='当前账号：'+u.username;
   $('configured').textContent=d.configured?'已设置：'+d.question:'尚未设置找回问题';
   if(d.configured)$('setupForm').elements.question.value=d.question;
