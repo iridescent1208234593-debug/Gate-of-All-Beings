@@ -50,4 +50,6 @@ npm run build --prefix apps/softie -- --base /app/modules/softie/
 PLAYWRIGHT_MODULE="$PWD/apps/management/node_modules/playwright" node apps/shell/tests/navigation-real-save-smoke.cjs
 ~~~
 
+merge-gate / regression 会按上面的命令构建并运行这个测试（#234）。在 Windows 的 Git Bash 里运行时要加 `MSYS_NO_PATHCONV=1`，否则 `--base /app/modules/softie/` 会被改写成本机路径，iframe 里的资源全部 404。
+
 构建输出必须位于各模块的 dist。若 Playwright 没有自带浏览器，用 CHROMIUM_EXECUTABLE 指向已安装的 Chrome 或 Chromium。
