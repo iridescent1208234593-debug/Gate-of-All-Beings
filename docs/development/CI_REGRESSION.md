@@ -20,7 +20,12 @@ python -X utf8 tools/checks/regression.py --full --report $env:TEMP\regression-r
 python -X utf8 tools/checks/regression.py --full `
   --modules <candidate>\modules `
   --report $env:TEMP\regression-report.json
+
+# LAB Godot 客户端测试：apps/huiguan-lab/client/tests/ 下所有 `extends SceneTree` 的脚本
+python -X utf8 tools/checks/lab-godot-client.py --godot E:\Iridescently\labs\Godot\Godot_v4.7.2-stable_win64.exe
 ```
+
+LAB 客户端测试在 CI 中下载固定的 Godot 4.7.2（校验 SHA512），先 headless 导入工程再逐个运行。退出码非 0，或输出 `SCRIPT ERROR` / `Parse Error`，都算失败。新测试只要放进 `client/tests/`、首行写 `extends SceneTree`，就会自动纳入；只被 preload 的辅助脚本不用这样写。
 
 ## 失败定位
 
