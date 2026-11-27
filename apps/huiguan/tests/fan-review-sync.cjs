@@ -60,8 +60,11 @@ async function run(browser) {
     const [a, b] = pages;
     await b.locator('[data-review="2"] select').selectOption('ai');
     await b.evaluate(() => { window.savedRow = document.querySelector('[data-review="2"]'); });
+    // 「通过」先弹确认框（#187）；决定由确认按钮发出，重复点击只能发出一次。
     await a.locator('[data-approve="1"]').click();
-    await a.waitForFunction(() => document.querySelector('[data-approve="1"]').disabled);
+    await a.locator('#modalOk').click();
+    await a.waitForFunction(() => document.querySelector('[data-approve="1"]').disabled && document.querySelector('#modalOk').disabled);
+    await a.locator('#modalOk').evaluate(button => { button.click(); button.click(); });
     await a.locator('[data-approve="1"]').evaluate(button => { button.click(); button.click(); });
     assert.equal(posts, 1, 'repeated clicks send only one decision');
     assert.ok(releaseDecision);
@@ -99,6 +102,7 @@ async function run(browser) {
     await b.evaluate(() => window.dispatchEvent(new Event('focus')));
     await waitUntil(() => releaseQueue);
     await b.locator('[data-approve="3"]').click();
+    await b.locator('#modalOk').click();
     await waitUntil(() => posts >= 3);
     releaseDecision();
     await b.waitForFunction(() => !document.querySelector('[data-review="3"]'));

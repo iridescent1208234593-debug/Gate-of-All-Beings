@@ -25,6 +25,12 @@ for name,value in [('USER_DB',str(temp/'users.db')),('DATA_FILE',str(temp/'chara
 module=types.ModuleType('poster_flow');module.__file__=str(root/'apps/huiguan/server_huiguan.py');sys.modules[module.__name__]=module
 exec(compile(source,module.__file__,'exec'),module.__dict__)
 module.init_user_db()
+# /api/auth only signs existing Accounts in (it answers 410 for unknown names), so the two
+# test-only Accounts are created here, with consent to the current terms like a real sign-up.
+with module.db() as db:
+ for width in (390,1440):
+  uid=db.execute("INSERT INTO local_users (username,nickname,pass_hash,role,status) VALUES(?,?,?,?,?)",('poster_'+str(width),'poster_'+str(width),module.hash_password('test-only-password'),'user','active')).lastrowid
+  module.legal_consent.record(db,'local',uid)
 class Handler(module.Handler):
  def _session_cookie(self,sid):return super()._session_cookie(sid).replace('; Domain=.iridescently.xyz','')
  def _sso_cookie(self,*args):return super()._sso_cookie(*args).replace('; Domain=.iridescently.xyz','')
@@ -53,6 +59,13 @@ const server = spawn('python', ['-u', '-c', fixture, root, temp], { cwd: root, w
    await context.route('https://iridescently.xyz/**', route => route.fulfill({ contentType: 'application/javascript', body: '' }));
    // Cloudflare supplies this analytics endpoint in production, outside the application.
    await context.route('**/cdn-cgi/rum*', route => route.fulfill({ status: 204, body: '' }));
+   // nginx serves /shared/ from packages/; the bare Hall handler does not.
+   await context.route(base + '/shared/**', route => {
+    const rel = new URL(route.request().url()).pathname.slice('/shared/'.length);
+    const file = path.join(root, 'packages', rel);
+    if (rel.split('/').includes('..') || !fs.existsSync(file) || !fs.statSync(file).isFile()) return route.fulfill({ status: 404, body: '' });
+    return route.fulfill({ path: file, contentType: { '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2' }[path.extname(file)] || 'application/octet-stream' });
+   });
    await context.route('**/api/official/**', route => route.request().method() === 'GET' ? route.fulfill({ contentType: 'application/json', body: '{"characters":[],"stickers":[],"nodes":[],"links":[]}' }) : route.continue());
    assert.equal((await context.request.post(base + '/api/auth', { data: { username: 'poster_' + width, password: 'test-only-password' }, timeout: 60000 })).status(), 200);
    const page = await context.newPage();
