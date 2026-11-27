@@ -9,11 +9,13 @@ const LAST_TRACK_KEY = 'zszm.door.bgm.last';
 const CROSSFADE = 1.2;
 const MUTE_FADE = 0.8;
 const MAIN_VOLUME = 0.7;
+// A looped section is the track plus its loop bounds; `first` only sets where playback joins it.
+const sectionOf = (plan: TrackPlan) => `${plan.track}:${plan.from}-${plan.to}`;
 const SPLIT_MODE = new URLSearchParams(window.location.search).get('bgm') === 'split';
 
 export type MusicChoice = 'auto' | 'ext' | 'demo2' | 'mute';
 type TrackPlan = { track: 'ext' | 'demo2'; first: number; from: number; to: number; crossfade: number };
-type AudioVoice = { gain: GainNode; track: TrackPlan['track']; sources: Set<AudioBufferSourceNode>; timer: number; alive: boolean; stop: (seconds: number) => void };
+type AudioVoice = { gain: GainNode; track: TrackPlan['track']; section: string; sources: Set<AudioBufferSourceNode>; timer: number; alive: boolean; stop: (seconds: number) => void };
 type OpeningMusicApi = {
   choice: MusicChoice;
   muted: boolean;
@@ -105,7 +107,7 @@ export function OpeningMusicProvider({ children }: { children: ReactNode }) {
     const buffer = cache.current.get(TRACKS[plan.track])!;
     const gain = ctx.createGain();
     gain.connect(master.current!);
-    const active: AudioVoice = { gain, track: plan.track, sources: new Set(), timer: 0, alive: true, stop: () => {} };
+    const active: AudioVoice = { gain, track: plan.track, section: sectionOf(plan), sources: new Set(), timer: 0, alive: true, stop: () => {} };
     const up = new Float32Array(64), down = new Float32Array(64);
     for (let i = 0; i < up.length; i++) { const p = i / (up.length - 1); up[i] = Math.sin(p * Math.PI / 2); down[i] = Math.cos(p * Math.PI / 2); }
     const schedule = (when: number, offset: number, initialFade: number) => {
@@ -191,7 +193,8 @@ export function OpeningMusicProvider({ children }: { children: ReactNode }) {
     try { await getBuffer(plan.track); } catch { return; }
     if (sequenceId !== sequence.current || !context.current || !voice.current) return;
     const current = voice.current;
-    if (current.track === plan.track) return;
+    // The door and inside plans can share one track; only the same looped section is a no-op (#246).
+    if (current.section === sectionOf(plan)) return;
     current.stop(CROSSFADE);
     voice.current = makeVoice(plan, CROSSFADE);
   }, [getBuffer, makeVoice, start, started]);
