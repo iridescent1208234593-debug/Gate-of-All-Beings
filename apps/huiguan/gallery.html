@@ -107,7 +107,7 @@ h1{font-size:22px;letter-spacing:3px;margin-bottom:4px}
     <span class="sb-btn" style="display:inline-block;">进入 →</span>
   </a>
   <div class="toolbar">
-    <input class="search" id="search" placeholder="搜索角色名…" oninput="onSearch(this.value)">
+    <input class="search" id="search" type="search" placeholder="搜索角色名…" aria-label="搜索角色名" oninput="onSearch(this.value)">
     <div class="filter-btns">
       <button class="fbtn active" onclick="setFilter(0,8,this)">全部</button>
       <button class="fbtn" onclick="setFilter(1,3,this)">设定少</button>
@@ -272,7 +272,7 @@ async function loadUnclassified(){
     if(!imgs.length){wrap.style.display='none';return;}
     wrap.style.display='block';
     document.getElementById('unclassBox').innerHTML=imgs.map(im=>
-      `<div style="position:relative" title="${escAttr(im.reason||'待归类')}"><img data-original-image src="/api/official/unclassified-img?id=${escAttr(encodeURIComponent(im.id))}" style="width:110px;height:110px;object-fit:contain;border-radius:8px;border:1px solid var(--border);background:#ece4d6" loading="lazy"></div>`).join('');
+      `<div style="position:relative" title="${escAttr(im.reason||'待归类')}"><img data-original-image src="/api/official/unclassified-img?id=${escAttr(encodeURIComponent(im.id))}" alt="${escAttr('待归类图片：'+(im.reason||'原因未注明'))}" style="width:110px;height:110px;object-fit:contain;border-radius:8px;border:1px solid var(--border);background:#ece4d6" loading="lazy"></div>`).join('');
   }catch(e){}
 }
 loadUnclassified();
