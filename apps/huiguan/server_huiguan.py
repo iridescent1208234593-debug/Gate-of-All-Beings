@@ -1246,20 +1246,6 @@ def fan_reject_cooldown(conn, kind, uid, code="", name=""):
     return int(left) if left > 0 else 0
 
 
-def fan_owner_has_review_rights(conn, kind, uid):
-    """作者本人是否属于审核人员（管理员 / 长老 / 同人审核员）。"""
-    if kind == "local":
-        row = conn.execute("SELECT role, COALESCE(is_fan_reviewer,0) AS flag FROM local_users WHERE uid=?",
-                           (uid,)).fetchone()
-    else:
-        row = conn.execute(
-            "SELECT role, COALESCE(is_fan_reviewer,0) AS flag FROM user_flags WHERE kind='usso' AND uid=?",
-            (uid,)).fetchone()
-    if not row:
-        return False
-    return row["role"] in ("admin", "elder") or bool(row["flag"])
-
-
 def fan_review_version(row):
     fields = (*FAN_SYNC_COLUMNS, "id", "code", "art_source", "review_status", "updated_at")
     content = [row[field] for field in fields]
@@ -1317,6 +1303,14 @@ FAN_REVIEW_DETAILS = ("age", "ageNum", "height", "species_type", "personality", 
 # A transactional audit action distinguishes new revisions from original submissions without
 # interpreting old history as a new obligation or storing a second moderation state.
 FAN_REVISION_ACTION = "owner_revision_submitted"
+FAN_SELF_REVIEW_CODE = "fan_self_review_forbidden"
+FAN_SELF_REVIEW_ERROR = "不能审核自己提交的设表，请交给另一位审核员或管理员。"
+
+
+def fan_is_own_card(row, ident):
+    """这条设表是否就是审核员自己名下的。"""
+    return bool(ident) and (row["user_kind"] == ident["kind"]
+                            and str(row["user_uid"]) == str(ident["uid"]))
 FAN_REVISION_PENDING_SQL = """COALESCE((
     SELECT action FROM fan_history_events WHERE card_id=fan_characters.id
       AND action IN ('owner_revision_submitted','review_approve') ORDER BY id DESC LIMIT 1
@@ -5847,7 +5841,8 @@ class Handler(BaseStaticHandler):
         is_public = bool(body.get("is_public"))
         if not pid:
             self._json(400, {"error": "缺少 id"}); return
-        review = "approved" if self._can_review_fan(ident) else "pending"
+        # 审核人员自己的设表同样要经他人审核，不再提交即通过。
+        review = "pending"
         with DB_LOCK:
             conn = db()
             row = conn.execute("SELECT * FROM posters WHERE id=?", (pid,)).fetchone()
@@ -6114,7 +6109,8 @@ class Handler(BaseStaticHandler):
         if (image_data or "").strip() and not art:
             self._json(400, {"code": "fan_art_source_required", "error": FAN_ART_SOURCE_REQUIRED})
             return
-        review = "approved" if self._can_review_fan(ident) else "pending"
+        # 审核人员自己的设表同样要经他人审核，不再提交即通过。
+        review = "pending"
         with contextlib.closing(db()) as conn, conn:
             left = fan_reject_cooldown(conn, ident["kind"], ident["uid"], "", name)
             if left:
@@ -6223,8 +6219,9 @@ class Handler(BaseStaticHandler):
                 return
             remaining = dict.fromkeys(codes)
             issues = []
-            auto_approve = self._can_review_fan(ident)
-            review = "approved" if auto_approve else "pending"
+            # 所有人（含审核人员）的首次公开都进入待审，由他人决定。
+            auto_approve = False
+            review = "pending"
             pending = 0
             with character_store().transaction(write=True) as session:
                 chars = session.list(ident)
@@ -6370,7 +6367,8 @@ class Handler(BaseStaticHandler):
             item = dict(row, review_version=fan_review_version(row))
             own = item.pop("is_own_revision")
             item["needs_independent_review"] = bool(item["needs_independent_review"])
-            item["can_approve"] = not (own and item["needs_independent_review"])
+            # 自己提交的设表一律不能自己下决定，必须由另一位审核员或管理员处理。
+            item["can_approve"] = not own
             characters.append(item)
         self._json(200, {"characters": characters, "total": total, "counts": counts})
 
@@ -6443,16 +6441,10 @@ class Handler(BaseStaticHandler):
                         self._json(404, {"error": "这条记录不存在或已取消公开"}); return
                     if body.get("review_version") != fan_review_version(row):
                         self._json(409, {"error": "设表内容或审核状态已变化，请刷新后重新审核"}); return
-                    # 自己的修订稿先判「自审」：这句话比「审核员人设需管理员」更贴近作者遇到的情况。
-                    if (row["user_kind"] == ident["kind"] and str(row["user_uid"]) == str(ident["uid"])
-                            and fan_needs_independent_review(conn, fid)):
-                        self._json(403, {"code": "fan_revision_self_review_forbidden",
-                                         "error": "自己修改的设表需由另一名审核员审核。"}); return
-                    # 审核人员自己的人设（组长未设时按文档由管理员代行）。
-                    if (fan_owner_has_review_rights(conn, row["user_kind"], row["user_uid"])
-                            and not ident.get("is_admin")):
-                        self._json(403, {"code": "fan_reviewer_sheet_requires_admin",
-                                         "error": "审核人员提交的设表需由管理员审核。"}); return
+                    # 自审一律禁止：审核员不能给自己名下的设表下决定，必须由另一位处理。
+                    if fan_is_own_card(row, ident):
+                        self._json(403, {"code": FAN_SELF_REVIEW_CODE,
+                                         "error": FAN_SELF_REVIEW_ERROR}); return
                     status = "approved" if decision == "approve" else "rejected"
                     conn.execute(
                         "UPDATE fan_characters SET review_status=?, review_note=?, reviewed_by=?, reviewed_at=?, "
