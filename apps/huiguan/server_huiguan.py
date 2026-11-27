@@ -1205,6 +1205,61 @@ def fan_art_source(cd):
     return value if value in FAN_ART_SOURCES else ""
 
 
+# 审核规则文档《人设审核规则大集》：
+#   · 有立绘必须声明来源（手绘/约稿、AI），落库前就拦，不再靠事后驳回；
+#   · 被驳回的 AI 立绘 / 纯文字设冷却 5 分钟才能重新提交，立绘/约稿不受限。
+FAN_REJECT_COOLDOWN_SECONDS = 300
+FAN_COOLDOWN_KINDS = ("ai", "text")
+FAN_ART_SOURCE_REQUIRED = "有立绘时必须选择立绘来源（手绘/约稿 或 AI 生成）。"
+FAN_COOLDOWN_MESSAGE = "这份设表刚被退回，请等待 %d 秒后再提交；可以先按退回理由修改。"
+
+
+def fan_review_kind(row):
+    """审核台分类：art=立绘/约稿，ai=AI 立绘，text=纯文字，poster=配色海报。"""
+    if (row["type"] or "") == "配色海报":
+        return "poster"
+    if not (row["image_data"] or "").strip():
+        return "text"
+    return "ai" if (row["art_source"] or "") == "ai" else "art"
+
+
+def fan_reject_cooldown(conn, kind, uid, code="", name=""):
+    """同一作者、同编号或同名且被驳回的 AI 立绘 / 纯文字设，返回剩余冷却秒数（0=可提交）。"""
+    if not code and not name:
+        return 0
+    row = conn.execute(
+        """SELECT id, reviewed_at, art_source, COALESCE(image_data,'') AS image_data,
+                  COALESCE(type,'') AS type
+             FROM fan_characters
+            WHERE user_kind=? AND user_uid=? AND review_status='rejected'
+              AND COALESCE(type,'')!='配色海报'
+              AND ((?<>'' AND code=?) OR (?<>'' AND name=?))
+            ORDER BY id DESC LIMIT 1""",
+        (kind, str(uid), code, code, name, name)).fetchone()
+    if not row or fan_review_kind(row) not in FAN_COOLDOWN_KINDS:
+        return 0
+    try:
+        passed = (datetime.now(timezone.utc) - datetime.fromisoformat(row["reviewed_at"] or "")).total_seconds()
+    except (TypeError, ValueError):
+        return 0
+    left = FAN_REJECT_COOLDOWN_SECONDS - passed
+    return int(left) if left > 0 else 0
+
+
+def fan_owner_has_review_rights(conn, kind, uid):
+    """作者本人是否属于审核人员（管理员 / 长老 / 同人审核员）。"""
+    if kind == "local":
+        row = conn.execute("SELECT role, COALESCE(is_fan_reviewer,0) AS flag FROM local_users WHERE uid=?",
+                           (uid,)).fetchone()
+    else:
+        row = conn.execute(
+            "SELECT role, COALESCE(is_fan_reviewer,0) AS flag FROM user_flags WHERE kind='usso' AND uid=?",
+            (uid,)).fetchone()
+    if not row:
+        return False
+    return row["role"] in ("admin", "elder") or bool(row["flag"])
+
+
 def fan_review_version(row):
     fields = (*FAN_SYNC_COLUMNS, "id", "code", "art_source", "review_status", "updated_at")
     content = [row[field] for field in fields]
@@ -1334,6 +1389,10 @@ def sync_fan_characters(conn, ident, code, cd, previous_code=None, *, previous_d
     for row in rows:
         art = fan_revision_art(row, fan_art_source(cd))
         if not fan_review_content_changed(row, fields, code, art, details_changed):
+            continue
+        if row["review_status"] == "rejected" and fan_reject_cooldown(
+                conn, ident["kind"], ident["uid"], code, fields["name"]):
+            # 冷却中：内容先留在作者自己的名册里，冷却结束再提交复审。
             continue
         # 只有公开过的设表（正在公开，或审核通过后被作者撤回）才要求另一位审核员复审；
         # 从未公开的草稿只按首次投稿规则处理，作者本人是审核员时不必再找第二个人。
@@ -6051,9 +6110,17 @@ class Handler(BaseStaticHandler):
         except ValueError as error:
             self._oc_action_image_error(error, "image_data")
             return
-        review = "approved" if self._can_review_fan(ident) else "pending"
         art = fan_art_source(body)
+        if (image_data or "").strip() and not art:
+            self._json(400, {"code": "fan_art_source_required", "error": FAN_ART_SOURCE_REQUIRED})
+            return
+        review = "approved" if self._can_review_fan(ident) else "pending"
         with contextlib.closing(db()) as conn, conn:
+            left = fan_reject_cooldown(conn, ident["kind"], ident["uid"], "", name)
+            if left:
+                self._json(429, {"code": "fan_review_cooldown", "error": FAN_COOLDOWN_MESSAGE % left,
+                                 "retry_after": left})
+                return
             conn.execute(
                 """INSERT INTO fan_characters
                    (user_kind, user_uid, user_name, name, type, species, gender, faction,
@@ -6097,6 +6164,13 @@ class Handler(BaseStaticHandler):
             conn.close(); self._json(404, {"error": "角色不存在"}); return
         if row["user_kind"] != ident["kind"] or row["user_uid"] != ident["uid"]:
             conn.close(); self._json(403, {"error": "只能操作自己的角色"}); return
+        if is_public and row["review_status"] == "rejected":
+            left = fan_reject_cooldown(conn, ident["kind"], ident["uid"], row["code"] or "", row["name"] or "")
+            if left:
+                conn.rollback(); conn.close()
+                self._json(429, {"code": "fan_review_cooldown", "error": FAN_COOLDOWN_MESSAGE % left,
+                                 "retry_after": left})
+                return
         review = row["review_status"]
         if is_public and (review == "rejected" or
                           (row["type"] != "配色海报" and fan_needs_independent_review(conn, row["id"]))):
@@ -6172,6 +6246,10 @@ class Handler(BaseStaticHandler):
                         continue
                     # 同一角色只保留一条画廊记录：先按编号找，旧记录（无编号）再按名字找
                     art = fan_art_source(cd)
+                    if (fields["image_data"] or "").strip() and not art:
+                        issues.append({"character_code": code, "code": "fan_art_source_required",
+                                       "message": FAN_ART_SOURCE_REQUIRED})
+                        continue
                     values = [fields[col] for col in FAN_SYNC_COLUMNS]
                     existing = conn.execute(
                         "SELECT id, is_public FROM fan_characters WHERE user_kind=? AND user_uid=? AND code=? AND COALESCE(type,'')!='配色海报' ORDER BY id LIMIT 1",
@@ -6183,6 +6261,14 @@ class Handler(BaseStaticHandler):
                     if existing:
                         sets = ", ".join(f"{col}=?" for col in FAN_SYNC_COLUMNS)
                         old_gallery = fan_gallery_history.load(conn, existing["id"])
+                        if old_gallery["review_status"] == "rejected":
+                            left = fan_reject_cooldown(conn, ident["kind"], ident["uid"],
+                                                       to_str(code), fields["name"])
+                            if left:
+                                issues.append({"character_code": code, "code": "fan_review_cooldown",
+                                               "message": FAN_COOLDOWN_MESSAGE % left,
+                                               "retry_after": left})
+                                continue
                         art = fan_revision_art(old_gallery, art)
                         changed = fan_review_content_changed(old_gallery, fields, to_str(code), art)
                         # 首次公开沿用既有例外；只有公开过的设表被改动才要求另一位审核员。
@@ -6258,15 +6344,25 @@ class Handler(BaseStaticHandler):
             return
         conn = db()
         try:
+            # 按规则文档的顺序审：立绘/约稿 → AI 立绘 → 纯文字 → 配色海报。
+            kind_sql = """CASE WHEN COALESCE(type,'')='配色海报' THEN 'poster'
+                                WHEN COALESCE(image_data,'')='' THEN 'text'
+                                WHEN COALESCE(art_source,'')='ai' THEN 'ai'
+                                ELSE 'art' END"""
             rows = conn.execute(
                 f"""SELECT id, user_name, name, type, species, gender, faction, ability, appearance, story, image_data,
                            code, art_source, review_status, created_at, updated_at,
                            ({FAN_REVISION_PENDING_SQL}) AS needs_independent_review,
-                           (user_kind=? AND user_uid=?) AS is_own_revision
+                           (user_kind=? AND user_uid=?) AS is_own_revision,
+                           {kind_sql} AS kind
                    FROM fan_characters WHERE is_public=1 AND review_status='pending'
-                   ORDER BY updated_at, id LIMIT 100""",
+                   ORDER BY CASE {kind_sql} WHEN 'art' THEN 0 WHEN 'ai' THEN 1 WHEN 'text' THEN 2 ELSE 3 END,
+                            updated_at, id LIMIT 100""",
                 (ident["kind"], str(ident["uid"]))).fetchall()
             total = conn.execute("SELECT COUNT(*) FROM fan_characters WHERE is_public=1 AND review_status='pending'").fetchone()[0]
+            counts = {row["kind"]: row["n"] for row in conn.execute(
+                f"""SELECT {kind_sql} AS kind, COUNT(*) AS n FROM fan_characters
+                    WHERE is_public=1 AND review_status='pending' GROUP BY kind""")}
         finally:
             conn.close()
         characters = []
@@ -6276,7 +6372,7 @@ class Handler(BaseStaticHandler):
             item["needs_independent_review"] = bool(item["needs_independent_review"])
             item["can_approve"] = not (own and item["needs_independent_review"])
             characters.append(item)
-        self._json(200, {"characters": characters, "total": total})
+        self._json(200, {"characters": characters, "total": total, "counts": counts})
 
     def _api_fan_review_preview(self, qs):
         if not self._require_fan_reviewer():
@@ -6345,6 +6441,10 @@ class Handler(BaseStaticHandler):
                     row = conn.execute("SELECT * FROM fan_characters WHERE id=?", (fid,)).fetchone()
                     if not row or not row["is_public"]:
                         self._json(404, {"error": "这条记录不存在或已取消公开"}); return
+                    if (fan_owner_has_review_rights(conn, row["user_kind"], row["user_uid"])
+                            and not ident.get("is_admin")):
+                        self._json(403, {"code": "fan_reviewer_sheet_requires_admin",
+                                         "error": "审核人员提交的设表需由管理员审核。"}); return
                     if body.get("review_version") != fan_review_version(row):
                         self._json(409, {"error": "设表内容或审核状态已变化，请刷新后重新审核"}); return
                     if (row["user_kind"] == ident["kind"] and str(row["user_uid"]) == str(ident["uid"])
