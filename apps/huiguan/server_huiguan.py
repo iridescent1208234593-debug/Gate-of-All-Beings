@@ -5212,8 +5212,10 @@ class Handler(BaseStaticHandler):
                 "my_fav": bool(myfav and (multi_fav or myfav["character_id"] == cid)),
                 "my_vote": myvote["vote"] if myvote else 0}
 
-    def _do_react(self, w, fav_t, vote_t, ident, allow_multiple_favorites=False):
-        """喜欢（每人仅 1 个，可转移/取消）与赞踩（可取消/互换）的统一实现。"""
+    def _do_react(self, w, fav_t, vote_t, ident, allow_multiple_favorites=False, visible=None):
+        """喜欢（每人仅 1 个，可转移/取消）与赞踩（可取消/互换）的统一实现。
+
+        visible(w, cid) 为假时拒绝：只有公开画廊实际展示的条目能收到新的互动。"""
         body = self._read_json() or {}
         try:
             cid = int(body.get("character_id"))
@@ -5222,6 +5224,8 @@ class Handler(BaseStaticHandler):
         rtype = body.get("type")
         if cid <= 0 or rtype not in ("fav", "up", "down"):
             w.close(); self._json(400, {"error": "参数错误"}); return
+        if visible and not visible(w, cid):
+            w.close(); self._json(404, {"error": "这份设表未公开或已不存在"}); return
         now = int(time.time())
         k, u = ident["kind"], ident["uid"]
         prev_fav = None
@@ -6641,7 +6645,11 @@ class Handler(BaseStaticHandler):
         rate_add(f"react:{ident['kind']}:{ident['uid']}")
         w = db()
         self._ensure_fan_reaction_tables(w)
-        self._do_react(w, "fan_char_favorites", "fan_char_votes", ident, allow_multiple_favorites=bool(ident.get("is_admin")))
+        # 待审、退回、未公开或不存在的设表不在公开画廊里，不接受新的喜欢或赞踩（#86）。
+        public = lambda conn, cid: conn.execute(
+            "SELECT 1 FROM fan_characters WHERE id=? AND is_public=1 AND review_status='approved'", (cid,)).fetchone()
+        self._do_react(w, "fan_char_favorites", "fan_char_votes", ident,
+                       allow_multiple_favorites=bool(ident.get("is_admin")), visible=public)
 
     # ---------- 辅助 ----------
     def _oauth_callback(self):
