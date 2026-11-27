@@ -84,3 +84,24 @@ assert.deepEqual(posted, [['17', 'reject', {note: '理由足够长', review_vers
 
 assert.match(html, /data-reject=/); // The pending review desk still has the reject action.
 console.log('PASS public cards let reviewers reject, re-review stays admin-only');
+
+// #239：自己名下的待审稿（首次提交或修订）按钮禁用，并且要说明原因；他人的修订只提示“重新送审”。
+const itemStart = html.indexOf('function reviewItemHTML(c)');
+const itemEnd = html.indexOf('function filterReviewQueue()', itemStart);
+assert.ok(itemStart >= 0 && itemEnd > itemStart);
+const items = vm.createContext({
+  rowCache: new Map(), ART_LABEL: {human: '手绘', ai: 'AI'}, currentUser: {logged_in: true, is_admin: false},
+  esc: value => String(value ?? '').replace(/[&<>"']/g, ch => `&#${ch.charCodeAt(0)};`),
+  previewImg: () => '<img alt="">', reviewHref: () => '/show?code=x', historyButton: () => '',
+});
+vm.runInContext(html.slice(itemStart, itemEnd), items);
+const row = extra => items.reviewItemHTML({id: 5, name: '自审样例', review_version: 'v5', ...extra});
+const ownFirst = row({can_approve: false, needs_independent_review: false});
+assert.match(ownFirst, /data-approve="5" disabled/);
+assert.match(ownFirst, /data-self-review>这是你自己提交的设表，需要另一位审核员处理。/);
+assert.match(row({can_approve: false, needs_independent_review: true}), /data-self-review>这是你自己提交的修订，需要另一位审核员处理。/);
+const othersRevision = row({can_approve: true, needs_independent_review: true});
+assert.doesNotMatch(othersRevision, /data-self-review|disabled/);
+assert.match(othersRevision, /这是修改后重新送审的版本。/);
+assert.doesNotMatch(row({can_approve: true}), /data-self-review|重新送审|disabled/);
+console.log('PASS own pending sheets explain why approve/reject are disabled; revisions by others keep the re-review hint');
