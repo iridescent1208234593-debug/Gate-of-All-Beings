@@ -187,8 +187,7 @@ func _build_hud() -> void:
 		buttons.append(["聊天", _toggle_mobile_chat])
 		if WebBridge.is_web():
 			buttons.append(["横屏", WebBridge.landscape])
-	buttons.append(["部件配色", _open_part_colors])
-	buttons.append(["动画素体", _toggle_renmo])
+	buttons.append(["捏人", _open_character_editor])
 	buttons.append(["铺路", _toggle_path_mode])
 	buttons.append(["小游戏", func(): minigames.open(self); _guide_event("minigame_opened")])
 	buttons.append(["网页玩法 / 海滩", _open_game_corner])
@@ -203,6 +202,8 @@ func _build_hud() -> void:
 			btn.name = "Landscape"
 		elif b[0] == "聊天":
 			btn.name = "ChatToggle"
+		elif b[0] == "捏人":
+			btn.name = "CharacterEditorEntry"
 		elif b[0] == "铺路":
 			btn.name = "PathMode"
 			btn.toggle_mode = true
@@ -215,7 +216,7 @@ func _build_hud() -> void:
 		elif b[0] == "新手引导":
 			guide_button = btn
 			btn.hide()
-		var guide_target: String = {"视图": "view", "2D / 3D": "view", "空间": "spaces", "虹之间": "spaces", "小游戏": "minigame"}.get(b[0], "")
+		var guide_target: String = {"视图": "view", "2D / 3D": "view", "空间": "spaces", "虹之间": "spaces", "小游戏": "minigame", "捏人": "character"}.get(b[0], "")
 		if not guide_target.is_empty():
 			guide.register_target(guide_target, btn.get_global_rect)
 		btn.focus_mode = Control.FOCUS_NONE
@@ -463,7 +464,7 @@ func _clear_panels() -> void:
 		c.queue_free()
 
 
-func _panel(title: String, width := 520.0, closable := true) -> VBoxContainer:
+func _panel(title: String, width := 520.0, closable := true, on_close := Callable()) -> VBoxContainer:
 	_clear_panels()
 	var vp := get_viewport().get_visible_rect().size
 	var pad := UiScale.insets
@@ -498,7 +499,7 @@ func _panel(title: String, width := 520.0, closable := true) -> VBoxContainer:
 	l.custom_minimum_size.x = width - 140.0
 	head.add_child(l)
 	if closable:
-		var x := Button.new(); x.text = "关闭"; x.pressed.connect(_clear_panels); head.add_child(x)
+		var x := Button.new(); x.text = "关闭"; x.pressed.connect(on_close if on_close.is_valid() else _clear_panels); head.add_child(x)
 	_layout_panel.call_deferred()
 	return box
 
@@ -516,7 +517,7 @@ func _add_button(box: Control, text: String, cb: Callable, name := "") -> Button
 
 
 # ------------------------------------------------------------------ setup / OC
-func _open_setup() -> void:
+func _open_setup(draft_nick := "") -> void:
 	var box := _panel("你的昵称与 OC", 560)
 	var info := Label.new()
 	info.text = "OC 原图只保存在本机。联机时服务器临时转发一份缩小的展示副本给同一空间的玩家。"
@@ -527,7 +528,7 @@ func _open_setup() -> void:
 	nick.name = "Nick"
 	nick.placeholder_text = "昵称（1-16 字）"
 	nick.max_length = 16
-	nick.text = Profile.nick
+	nick.text = draft_nick if not draft_nick.is_empty() else Profile.nick
 	box.add_child(nick)
 	if mobile and WebBridge.is_web():
 		_add_button(box, "输入昵称", func():
@@ -551,12 +552,15 @@ func _open_setup() -> void:
 	var row: BoxContainer = VBoxContainer.new() if mobile else HBoxContainer.new()
 	box.add_child(row)
 	_add_button(row, "上传 PNG / JPG / WebP（≤8 MB）", func(): Profile.nick = nick.text.strip_edges(); _pick_oc(preview), "Upload")
-	_add_button(row, "使用动画素体", func():
-		Profile.nick = nick.text.strip_edges()
-		Profile.use_renmo = true
-		Profile.save_local()
-		if welcomed: _send_oc()
-		_open_setup(), "Renmo")
+	_add_button(row, "捏人", func():
+		var current_nick := nick.text.strip_edges()
+		_open_character_editor(true, current_nick), "Renmo")
+	if Profile.use_renmo and Profile.oc_source == "upload" and not Profile.oc_png.is_empty():
+		_add_button(box, "使用原来的 OC 图片", func():
+			Profile.use_renmo = false
+			Profile.save_local()
+			if welcomed: _send_oc()
+			_open_setup(nick.text), "RestoreUploadedOC")
 	var go := _add_button(box, "进入会馆", func():
 		var n := nick.text.strip_edges()
 		if n == "":
@@ -844,11 +848,12 @@ func _open_guide() -> void:
 		return
 	var box := _panel("新手引导 · 开始生活", 520)
 	var l := Label.new()
-	l.text = "边玩边学：走路、聊天、互动、虹之间。每样东西第一次用到时，会有一点灵光来提示。
+	l.text = "边玩边学：捏人、走路、聊天、互动、虹之间。每样东西第一次用到时，会有一点灵光来提示。
 " + guide.summary()
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.custom_minimum_size = Vector2(0, 0)
 	box.add_child(l)
+	_add_button(box, "捏人教程", func(): _open_character_editor(false, "", _open_guide), "GuideCharacterEditor")
 	var row := HBoxContainer.new()
 	box.add_child(row)
 	if guide.status == "paused":
@@ -1833,14 +1838,6 @@ func _run_auto(delta: float) -> void:
 				_write_test_json("user://lab-state.json", report)
 
 
-func _toggle_renmo() -> void:
-	Profile.use_renmo = not Profile.use_renmo if Profile.oc_source == "upload" and not Profile.oc_png.is_empty() else true
-	Profile.save_local()
-	_send_oc()
-	toast("动画素体已开启，Shift + 方向键跑步" if Profile.use_renmo else "已恢复原 OC")
-
-
-
 func _refresh_inventory() -> void:
 	if inventory_label:
 		inventory_label.text = "种子 %d · 泥土 %d  " % [inventory.get("seeds",0),inventory.get("soil",0)]
@@ -1878,8 +1875,14 @@ func _check_action_timeout(now: float) -> void:
 		toast("暂未收到动作确认，可以重试。")
 
 
-func _open_part_colors() -> void:
-	var box := _panel("动画素体 · 部件配色",900)
+func _open_character_editor(from_setup := false, draft_nick := "", return_to := Callable()) -> void:
+	if from_setup:
+		return_to = _open_setup.bind(draft_nick)
+	var box := _panel("捏人", 900, true, return_to)
+	var hint := Label.new()
+	hint.text = "① 选部件、换颜色或调整五官。\n② 在「动作试玩」里试走路、跑步和挥手，只在这里预览。\n③ 满意后点「保存并使用」，才会换成你捏的形象。"
+	hint.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
+	box.add_child(hint)
 	var editor = preload("res://scripts/part_color_editor.gd").new()
 	box.add_child(editor)
 	editor.setup(Profile.part_colors,mobile or get_viewport_rect().size.x < 760,Profile.face)
@@ -1888,8 +1891,11 @@ func _open_part_colors() -> void:
 		Profile.face = editor.face.duplicate()
 		Profile.use_renmo = true
 		Profile.save_local()
-		_send_oc()
-		_clear_panels()
-		toast("部件配色已保存并同步")
-		if Profile.nick == "": _open_setup())
+		if welcomed and not Profile.nick.is_empty(): _send_oc()
+		_guide_event("character_saved")
+		if return_to.is_valid():
+			return_to.call()
+		else:
+			_clear_panels()
+		toast("捏人形象已保存"))
 	_layout_panel.call_deferred()
