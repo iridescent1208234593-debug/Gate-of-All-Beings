@@ -246,27 +246,6 @@ async function submitArt(e){
   return false;
 }
 // ---------- 副册评论（thread=sub，与主册角色页评论分开存储、分开显示） ----------
-function dispatchworksOperation(event) {
-  const el = event.target.closest(event.type === "change" ? "select[data-works-operation]" : "button[data-works-operation]");
-  if (!el) return;
-  const args = [0, 1, 2, 3].map((index) => el.getAttribute("data-op-" + index));
-  const invalid = Symbol();
-  function positive(raw) {
-    const n = Number(raw);
-    if (!Number.isSafeInteger(n) || n < 1) throw invalid;
-    return n;
-  }
-  try {
-    switch (el.dataset.worksOperation) {
-    case "toggleCmts": return toggleCmts(positive(args[0]), el);
-    case "delArt": return delArt(positive(args[0]), el);
-    case "delCmt": return delCmt(positive(args[0]), positive(args[1]));
-    }
-  } catch (error) {
-    if (error !== invalid) throw error;
-  }
-}
-document.addEventListener("click", dispatchworksOperation);
 async function toggleCmts(id, btn){
   const box = $('cmts' + id);
   box.hidden = !box.hidden; btn.setAttribute('aria-expanded', String(!box.hidden));

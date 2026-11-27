@@ -38,7 +38,7 @@ const server = spawn(process.env.PYTHON || 'python', ['-u', '-c', python, root, 
       server.stderr.on('data', data => process.stderr.write(data));
       server.once('exit', code => reject(Error('Test server exited: ' + code)));
     });
-    browser = await chromium.launch({ channel: 'chrome', headless: true });
+    browser = await chromium.launch(process.env.CHROMIUM_EXECUTABLE ? { executablePath: process.env.CHROMIUM_EXECUTABLE } : {});
     const origin = 'http://127.0.0.1:' + fixture.port;
     for (const [i, width] of [1440, 390].entries()) {
       const context = await browser.newContext({ viewport: { width, height: 900 }, reducedMotion: 'reduce' });

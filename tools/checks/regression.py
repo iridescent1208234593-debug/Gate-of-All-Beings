@@ -126,6 +126,11 @@ def main():
                 ("Gallery attribute escaping browser", [npm, "run", "test:huiguan-gallery-escape"]),
                 ("Official gallery search and pagination browser", [node, "--test", "apps/huiguan/tests/official-gallery-browser.cjs"]),
             ])
+            # Hall checks that used to run only by hand (#236); each one starts its own temporary fixture.
+            for test in ("character-text-draft", "form-flow", "fan-dialog-focus", "fan-owner-status",
+                         "fan-review-desk", "fan-review-sync", "member-action-wiring", "oc-revisions",
+                         "poster-color-flow"):
+                commands.append(("Huiguan " + test, [node, f"apps/huiguan/tests/{test}.cjs"]))
             for name, command in commands:
                 run(name, command)
             if modules:
