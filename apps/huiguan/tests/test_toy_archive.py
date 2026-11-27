@@ -20,7 +20,7 @@ from legal_consent import CURRENT_VERSION as LEGAL_VERSION  # noqa: E402
 HUIGUAN = Path(__file__).resolve().parents[1]
 LAUNCH = (
     "import sys, http.server; sys.path.insert(0, sys.argv[1]); sys.path.insert(0, str(__import__('pathlib').Path(sys.argv[1]).parents[1] / 'services' / 'platform')); from storage_paths import initialize_storage; initialize_storage(); import server_huiguan as s; "
-    "s.init_user_db(); c = s.db(); c.execute(\"INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES ('toy_owner', ?, '作者甲', 'admin', 'active', '', '')\", (s.hash_password('test-password-123'),)); s.legal_consent.record(c, 'local', c.execute(\"SELECT uid FROM local_users WHERE username='toy_owner'\").fetchone()[0]); c.commit(); c.close(); "
+    "s.init_user_db(); c = s.db(); c.execute(\"INSERT INTO local_users (username, pass_hash, nickname, role, status, created_at, last_login) VALUES ('toy_owner', ?, '作者甲', 'admin', 'active', '', '')\", (s.hash_password('test-password-123'),)); c.execute(\"INSERT INTO local_users (username, pass_hash, nickname, role, status, is_fan_reviewer, created_at, last_login) VALUES ('toy_reviewer', ?, '审核乙', 'executor', 'active', 1, '', '')\", (s.hash_password('test-password-123'),)); [s.legal_consent.record(c, 'local', r[0]) for r in c.execute(\"SELECT uid FROM local_users\").fetchall()]; c.commit(); c.close(); "
     "from PIL import Image; __import__('pathlib').Path(s.UPLOAD_DIR).mkdir(parents=True, exist_ok=True); [Image.new('RGB', (800, 600), 'green').save(__import__('pathlib').Path(s.UPLOAD_DIR) / (format(i, '032x') + '.png')) for i in range(12)]; "
     "http.server.ThreadingHTTPServer(('127.0.0.1', int(sys.argv[2])), s.Handler).serve_forever()"
 )
@@ -100,7 +100,16 @@ class ToyArchiveTest(unittest.TestCase):
         cls.owner.call("/api/save-character", sheet("T-TEXT", "文字设", "只有文字"))
         cls.owner.call("/api/save-character", sheet("T-AI", "AI 设", "AI 立绘", "/assets/uploads/" + "a" * 32 + ".png", "ai"))
         status, result = cls.owner.call("/api/fan/publish", {"character_codes": codes + ["T-TEXT", "T-AI"]})
-        assert status == 200 and result["published"] == 14, result
+        # 管理员自己也不能自审：首发一律进待审，由另一个审核员通过。
+        assert status == 200 and result["published"] == 14 and result["pending"] == 14, result
+        cls.reviewer = Client(cls.base)
+        status, _ = cls.reviewer.call("/api/auth", {"username": "toy_reviewer", "password": "test-password-123"})
+        assert status == 200, status
+        _, queue = cls.reviewer.call("/api/fan/review/queue")
+        for item in queue["characters"]:
+            status, _ = cls.reviewer.call("/api/fan/review/decide", {
+                "id": item["id"], "decision": "approve", "review_version": item["review_version"]})
+            assert status == 200, status
         _, listing = cls.owner.call("/api/fan/list?limit=60")
         private = next(c for c in listing["characters"] if c["code"] == "T-11")
         status, _ = cls.owner.call("/api/fan/toggle", {"id": private["id"], "is_public": False})
