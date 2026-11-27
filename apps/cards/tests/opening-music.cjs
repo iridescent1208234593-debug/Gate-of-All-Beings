@@ -68,7 +68,9 @@ async function browserHarness(js) {
         <button id="unlock">unlock</button>
         <button id="ext" onClick={() => music.choose('ext')}>track 1</button>
         <button id="demo2" onClick={() => music.choose('demo2')}>track 2</button>
-        <button id="mute" onClick={music.toggleMute}>mute</button></>;
+        <button id="mute" onClick={music.toggleMute}>mute</button>
+        <button id="enter" onClick={() => music.setInside(true)}>enter</button>
+        <button id="leave" onClick={() => music.setInside(false)}>leave</button></>;
     }
     window.mount = () => {
       const root = createRoot(document.querySelector('#root'));
@@ -110,12 +112,12 @@ async function browserHarness(js) {
         connect() {}, disconnect() {},
       });
       window.AudioContext = class {
-        constructor() { this.state = 'suspended'; this.started = 0; this.currentTime = 0; contexts.push(this); }
+        constructor() { this.state = 'suspended'; this.started = 0; this.offsets = []; this.currentTime = 0; contexts.push(this); }
         async resume() { if (!allowed) throw new Error('Autoplay blocked'); this.state = 'running'; }
         async suspend() { this.state = 'suspended'; }
         async close() { this.state = 'closed'; }
         createGain() { return gain(); }
-        createBufferSource() { return { start: () => { this.started += 1; }, stop() {}, connect() {}, disconnect() {} }; }
+        createBufferSource() { return { start: (_when, offset) => { this.started += 1; this.offsets.push(offset); }, stop() {}, connect() {}, disconnect() {} }; }
         async decodeAudioData() { return { duration: 60 }; }
       };
       window.fetch = async (url, options) => {
@@ -145,6 +147,20 @@ async function browserHarness(js) {
     await page.waitForFunction(() => document.querySelector('#choice').textContent === 'mute');
     await page.click('#mute');
     await page.waitForFunction(() => document.querySelector('#choice').textContent === 'auto');
+    // #246: the default track plays the door loop (from 0 s); entering or Skip crossfades into the
+    // inside section of the same track (19.3 s), entering again adds nothing, and replaying the
+    // opening goes back to the door loop. One context and one new voice per switch.
+    const playing = () => page.evaluate(() => { const c = check.contexts.filter(x => x.state === 'running'); return c.length === 1 ? { started: c[0].started, offsets: c[0].offsets.slice() } : null; });
+    assert.deepEqual(await playing(), { started: 1, offsets: [0] });
+    await page.click('#enter');
+    await page.waitForFunction(() => check.contexts.find(c => c.state === 'running')?.started === 2);
+    assert.deepEqual(await playing(), { started: 2, offsets: [0, 19.3] });
+    await page.click('#enter');
+    await new Promise(resolve => setTimeout(resolve, 200));
+    assert.deepEqual(await playing(), { started: 2, offsets: [0, 19.3] }, 'entering twice must not stack voices');
+    await page.click('#leave');
+    await page.waitForFunction(() => check.contexts.find(c => c.state === 'running')?.started === 3);
+    assert.deepEqual(await playing(), { started: 3, offsets: [0, 19.3, 0] });
     await page.click('#demo2');
     await page.waitForFunction(() => pendingAudio.has('demo2'));
     await page.evaluate(() => dispose());
@@ -157,7 +173,7 @@ async function browserHarness(js) {
     await page.waitForFunction(() => check.contexts.find(c => c.state === 'running').started === 2);
     await page.evaluate(() => dispose());
     await page.waitForFunction(() => check.contexts.every(c => c.state === 'closed') && !audioTimers.size);
-    console.log('Opening music: unlock, mute, visibility, async abort, repeat mount and track switch PASS');
+    console.log('Opening music: unlock, mute, visibility, door→inside→door sections, async abort, repeat mount and track switch PASS');
   } finally {
     await harness.close();
   }
