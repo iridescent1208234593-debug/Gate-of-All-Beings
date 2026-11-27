@@ -1208,7 +1208,7 @@ def fan_art_source(cd):
 # 审核规则文档《人设审核规则大集》：
 #   · 有立绘必须声明来源（手绘/约稿、AI），落库前就拦，不再靠事后驳回；
 #   · 被驳回的 AI 立绘 / 纯文字设冷却 5 分钟才能重新提交，立绘/约稿不受限。
-FAN_REJECT_COOLDOWN_SECONDS = 300
+FAN_REJECT_COOLDOWN_SECONDS = max(0, int(os.environ.get("IRIDESCENTLY_FAN_REJECT_COOLDOWN_SECONDS") or 300))
 FAN_COOLDOWN_KINDS = ("ai", "text")
 FAN_ART_SOURCE_REQUIRED = "有立绘时必须选择立绘来源（手绘/约稿 或 AI 生成）。"
 FAN_COOLDOWN_MESSAGE = "这份设表刚被退回，请等待 %d 秒后再提交；可以先按退回理由修改。"
@@ -6441,16 +6441,18 @@ class Handler(BaseStaticHandler):
                     row = conn.execute("SELECT * FROM fan_characters WHERE id=?", (fid,)).fetchone()
                     if not row or not row["is_public"]:
                         self._json(404, {"error": "这条记录不存在或已取消公开"}); return
-                    if (fan_owner_has_review_rights(conn, row["user_kind"], row["user_uid"])
-                            and not ident.get("is_admin")):
-                        self._json(403, {"code": "fan_reviewer_sheet_requires_admin",
-                                         "error": "审核人员提交的设表需由管理员审核。"}); return
                     if body.get("review_version") != fan_review_version(row):
                         self._json(409, {"error": "设表内容或审核状态已变化，请刷新后重新审核"}); return
+                    # 自己的修订稿先判「自审」：这句话比「审核员人设需管理员」更贴近作者遇到的情况。
                     if (row["user_kind"] == ident["kind"] and str(row["user_uid"]) == str(ident["uid"])
                             and fan_needs_independent_review(conn, fid)):
                         self._json(403, {"code": "fan_revision_self_review_forbidden",
                                          "error": "自己修改的设表需由另一名审核员审核。"}); return
+                    # 审核人员自己的人设（组长未设时按文档由管理员代行）。
+                    if (fan_owner_has_review_rights(conn, row["user_kind"], row["user_uid"])
+                            and not ident.get("is_admin")):
+                        self._json(403, {"code": "fan_reviewer_sheet_requires_admin",
+                                         "error": "审核人员提交的设表需由管理员审核。"}); return
                     status = "approved" if decision == "approve" else "rejected"
                     conn.execute(
                         "UPDATE fan_characters SET review_status=?, review_note=?, reviewed_by=?, reviewed_at=?, "

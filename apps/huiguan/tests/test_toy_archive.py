@@ -94,7 +94,7 @@ class ToyArchiveTest(unittest.TestCase):
         codes = [f"T-{i:02d}" for i in range(12)]
         for i, code in enumerate(codes):
             image = f"/assets/uploads/{i:032x}.png"
-            status, _ = cls.owner.call("/api/save-character", sheet(code, "角色" + code, "故事" * 200, image))
+            status, _ = cls.owner.call("/api/save-character", sheet(code, "角色" + code, "故事" * 200, image, "human"))
             assert status == 200, status
         # 纯文字设与 AI 立绘不进 Toy（与画廊默认分区同一口径）
         cls.owner.call("/api/save-character", sheet("T-TEXT", "文字设", "只有文字"))
@@ -109,7 +109,7 @@ class ToyArchiveTest(unittest.TestCase):
         cls.author = Client(cls.base)
         status, _ = cls.author.call("/api/register", {"legal_version": LEGAL_VERSION, "username": "toy_author", "password": "test-password-123", "nickname": "作者乙", "email": "t@example.com"})
         assert status == 200, status
-        cls.author.call("/api/save-character", sheet("T-PEND", "待审", "待审", "/assets/uploads/" + "b" * 32 + ".png"))
+        cls.author.call("/api/save-character", sheet("T-PEND", "待审", "待审", "/assets/uploads/" + "b" * 32 + ".png", "human"))
         status, result = cls.author.call("/api/fan/publish", {"character_codes": ["T-PEND"]})
         assert status == 200 and result["pending"] == 1, result
 
