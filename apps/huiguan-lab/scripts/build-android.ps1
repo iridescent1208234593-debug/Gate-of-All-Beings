@@ -20,7 +20,8 @@ param(
     [string]$StorePass = "",
     [string]$Alias = "",
     [string]$OutFile = "",
-    [string]$Godot = ""
+    [string]$Godot = "",
+    [string]$PresetName = ""
 )
 
 $ErrorActionPreference = 'Stop'
@@ -88,6 +89,20 @@ $verCode = [regex]::Match($presetText, '(?m)^version/code=(\d+)').Groups[1].Valu
 $verName = [regex]::Match($presetText, '(?m)^version/name="([^"]*)"').Groups[1].Value
 Write-Host "== 版本 $verName（versionCode $verCode）"
 
+# 预设名会随仓库演进变动（曾经叫 "Android Preview"，后来改成 "Android"），
+# 默认按顺序找一个存在的 Android 预设，避免硬编码。
+if (-not $PresetName) {
+    foreach ($cand in @('Android', 'Android Preview')) {
+        if ($presetText -match "(?m)^name=`"$([regex]::Escape($cand))`"\s*$") {
+            # 确认它属于 platform="Android" 的那一段
+            $PresetName = $cand
+            break
+        }
+    }
+}
+if (-not $PresetName) { throw "在 $Preset 里找不到 Android 预设，请用 -PresetName 指定。" }
+Write-Host "== 使用预设：$PresetName"
+
 Copy-Item $Preset $Backup -Force
 try {
     if ($Keystore) {
@@ -96,13 +111,28 @@ try {
         if (-not $Alias) { throw '传了 -Keystore 就必须同时给 -Alias' }
         # 路径统一成正斜杠，Godot 的 cfg 解析不接受反斜杠转义
         $ksPath = $Keystore -replace '\\', '/'
+        # 必须插进目标预设自己的 [preset.N.options] 段，不能追加到文件末尾——
+        # 预设现在有多个，追加会落进最后一个预设，签名参数就丢了。
+        $raw = Get-Content $Preset -Raw
+        $idx = [regex]::Match($raw, "(?m)^name=`"$([regex]::Escape($PresetName))`"\s*$").Index
+        if ($idx -lt 0) { throw "在预设文件里定位不到 name=`"$PresetName`"" }
+        # 从该 name 之后找最近的 [preset.N.options] 段尾（下一个 [preset. 或文件末）
+        $tail = $raw.Substring($idx)
+        $nextPreset = [regex]::Match($tail, '(?m)^\[preset\.\d+\]')
+        $blockEnd = if ($nextPreset.Success) { $idx + $nextPreset.Index } else { $raw.Length }
+        $head = $raw.Substring(0, $blockEnd).TrimEnd()
+        $rest = $raw.Substring($blockEnd)
         $inject = @"
 
 keystore/release="$ksPath"
 keystore/release_user="$Alias"
 keystore/release_password="$StorePass"
+
+
 "@
-        Add-Content -Path $Preset -Value $inject -Encoding UTF8
+        $merged = $head + $inject.TrimEnd() + "`n"
+        if ($rest) { $merged += "`n" + $rest.TrimStart() }
+        Set-Content -Path $Preset -Value $merged -Encoding UTF8 -NoNewline
         Write-Host '== 已注入签名参数（构建后自动还原预设）'
     } else {
         Write-Warning '未传签名参数：本次产出为未签名包，只能本地调试，不能分发。'
@@ -113,7 +143,8 @@ keystore/release_password="$StorePass"
     if ($LASTEXITCODE -ne 0) { throw '资源导入失败' }
 
     Write-Host "== 导出 APK"
-    & $Godot --headless --path $Client --export-release 'Android Preview' $OutFile 2>&1 |
+    Write-Host "== 导出 APK（预设：$PresetName）"
+    & $Godot --headless --path $Client --export-release $PresetName $OutFile 2>&1 |
         ForEach-Object { if ($_ -match 'ERROR|WARNING|DONE') { Write-Host "   $_" } }
     $code = $LASTEXITCODE
 
