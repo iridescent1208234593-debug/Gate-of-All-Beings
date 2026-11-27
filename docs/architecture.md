@@ -26,15 +26,16 @@
   2. 复制其 `<link rel=stylesheet>` / `<style>` 到壳 head；
   3. 注入 `<body>` 内容到容器，并把相对 `src` / `link href` 转为绝对模块路径；
   4. 设置 `<base href="<模块 url>">`（让运行期动态创建的相对资源也按模块解析）；
-  5. 依次执行模块脚本：`type=module src` 用动态 `import`（带 `?embed=<ts>` 触发热重跑），classic `src` 用新建 `<script>`，内联脚本用 `textContent` 执行；
+  5. 依次执行模块脚本：`type=module src` 用动态 `import`。**第一次按原 URL 导入**：Vite 分包 chunk 按这个 URL 引用入口 chunk，换成别的 URL 会让入口（以及挂载）执行两次（#94）。导出 `__iridescentlyMount` 的模块之后直接复用它；没有导出的模块再次进入时才加 `?embed=<版本>` 取新实例。classic `src` 用新建 `<script>`（**每次挂载都会重新执行**），内联脚本用 `textContent` 执行；
   6. 挂载方通过 `window.__iridescentlyEmbed`（容器）与 `window.__iridescentlyDispose`（卸载函数）对接壳。
-- 切换模块时壳先调用 `embedDispose()` 再渲染新模块，避免循环/监听泄漏。
+- 切换模块时壳先调用 `embedDispose()` 再渲染新模块，避免循环/监听泄漏。每个脚本执行后壳都会收集一次 `window.__iridescentlyDispose`，所以 classic 脚本也可以登记自己的卸载函数。
+- 回归：`apps/shell/tests/module-lifecycle-real.mjs` 用真实构建的 cards / management / softie 在壳内连续切换 20 轮，每轮在 softie（iframe）里统计页面级的 RAF、定时器、window/document 监听、AudioContext、Worker、未释放的 WebGL 上下文和页面错误，要求卸载后归零、监听不增长。`apps/shell/tests/lifecycle.mjs` 用合成模块检查壳的卸载约定。返回门庭是整页跳转，不会累积资源，所以这两项检查都在壳内切换模块。
 
 各模块的挂载实现：
 
 | 模块 | 挂载/卸载 |
 | --- | --- |
-| cards | React `createRoot`（入口即挂载，无需改壳） |
+| cards | React `createRoot`，入口导出 `__iridescentlyMount` 与 `__iridescentlyDispose`（`root.unmount()`）；门景场景 `destroy()` 释放 three.js 渲染器与上下文，`hasWebGL()` 探测后立即释放探测上下文；classic `install.js` 用 `AbortController` 绑定监听并登记卸载函数（断开 MutationObserver、移除对话框） |
 | management | `main.js` 暴露 `window.__iridescentlyDispose = dispose` |
 | ecology | `main.js` 的 RAF 循环加 `disposed` 闸门 |
 | aeon | `main.js` 帧循环加 `__aeonDisposed` 闸门 |

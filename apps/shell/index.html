@@ -103,6 +103,7 @@ let mountVersion = 0;
 let activeMount = null;
 let mountQueue = Promise.resolve();
 const scriptMounts = new Map();
+const importedEntries = new Set();
 const baseEl = document.createElement('base');
 baseEl.href = BASE_PATH;
 document.head.prepend(baseEl);
@@ -266,7 +267,11 @@ function mountEmbed(link) {
             await mount();
           } else {
             window.__iridescentlyMount = null;
-            url.searchParams.set('embed', String(context.version));
+            // Import an entry under its own URL the first time: Vite chunks import the entry chunk by
+            // that URL, and a different URL would evaluate the entry (and mount the app) twice (#94).
+            // Only a module without __iridescentlyMount needs a fresh instance to run again later.
+            if (importedEntries.has(identity)) url.searchParams.set('embed', String(context.version));
+            importedEntries.add(identity);
             await import(url.href);
             if (typeof window.__iridescentlyMount === 'function') scriptMounts.set(identity, window.__iridescentlyMount);
           }
