@@ -70,7 +70,7 @@ class FanOwnerEditTest(unittest.TestCase):
         (Path(cls.root.name) / "apps" / "huiguan").mkdir(parents=True)
         port = free_port()
         env = dict(os.environ, IRIDESCENTLY_STORAGE_ROOT=cls.root.name, IRIDESCENTLY_ENVIRONMENT="test",
-                   HX_SSO_SECRET="test-only-secret")
+                   HX_SSO_SECRET="test-only-secret", IRIDESCENTLY_FAN_REJECT_COOLDOWN_SECONDS="0")
         for key in ("DATA", "ASSETS", "CACHE", "RELEASE", "BACKUP", "PROJECT"):
             env.pop(f"IRIDESCENTLY_{key}_ROOT", None)
         cls.env = env
