@@ -5,7 +5,8 @@ What lives here (server-shared world + security, never personal OC data):
   sessions         7-day sessions (token digest only), bound to a code
   players          minimal player identity: nickname + last space/position
   spaces           public hall + private 灵质空间, owner, linked R4 branch
-  space_acl        invites to private spaces
+  space_acl        accepted access to private spaces (granted only when the invitee accepts)
+  space_invites    pending invitations awaiting accept/decline; they expire, access never does
   world_objects    shared interaction results per space
   audit            admin operations
   security_events  auth failures, lockouts, revocations (never plaintext codes)
@@ -44,6 +45,9 @@ CREATE TABLE IF NOT EXISTS spaces(
 CREATE TABLE IF NOT EXISTS space_acl(
   space_id TEXT NOT NULL REFERENCES spaces(id) ON DELETE CASCADE, pid TEXT NOT NULL,
   granted_at REAL NOT NULL, PRIMARY KEY(space_id, pid));
+CREATE TABLE IF NOT EXISTS space_invites(
+  space_id TEXT NOT NULL REFERENCES spaces(id) ON DELETE CASCADE, pid TEXT NOT NULL,
+  invited_at REAL NOT NULL, expires_at REAL NOT NULL, PRIMARY KEY(space_id, pid));
 CREATE TABLE IF NOT EXISTS world_objects(
   space_id TEXT NOT NULL REFERENCES spaces(id) ON DELETE CASCADE, object_id TEXT NOT NULL,
   state TEXT NOT NULL, updated_at REAL NOT NULL, PRIMARY KEY(space_id, object_id));

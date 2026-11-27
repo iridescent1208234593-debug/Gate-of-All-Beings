@@ -51,11 +51,11 @@
 | emote | id | 必须在白名单内 |
 | interact | object | 必须离物件足够近（半径加 0.6 m） |
 | oc_set / oc_get / oc_clear | data(base64) / pid | 见 SECURITY.md。只能取同一空间玩家的 OC |
-| space_create / space_enter / space_invite / space_revoke / spaces / space_time | … | 开辟空间和从会馆进入灵质空间都要站在虹之间附近。只有拥有者能邀请、撤销和调整时间。进入私人空间要么是拥有者，要么在访问名单上 |
+| space_create / space_enter / space_invite / space_invite_accept / space_invite_decline / space_revoke / spaces / space_time | … | 开辟空间和从会馆进入灵质空间都要站在虹之间附近。只有拥有者能邀请、撤销和调整时间。邀请先进入待确认（`space_invites`，7 天过期），来客接受后才写入访问名单（`space_acl`），拒绝或过期不授权。进入私人空间要么是拥有者，要么在访问名单上。访客在别人的私人空间里只能互动，铺路和种植返回 `visitor_read_only` |
 | ping / rtt | id / ms | 测量往返延迟 |
 | guide | seen?, status?, reset? | 新人引导「开始生活」章。`seen` 只做并集，键为小写 `[a-z0-9._-]`、1–24 字符、最多 32 个；`status` 只接受 active/paused/completed/skipped（`veteran` 只由服务端判定）；`reset:true` 重新开始。回 `guide` |
 
-服务端推送：`welcome`（空间、自己、在场玩家、物件、NPC、最近聊天、可见空间、时钟、`guide` 引导进度），`guide`，`s`（每秒 10 次的位置快照：只发变化的玩家，每 2 秒发一次全量），`join`、`leave`、`profile`、`chat`、`emote`、`object`、`npcs`（每秒一次，有变化才发）、`clock`、`oc_changed`、`oc`、`oc_result`、`portal`、`spaces`、`space_created`、`invited`、`notice`、`correct`、`kicked`、`error`。
+服务端推送：`welcome`（空间、自己、在场玩家、物件、NPC、最近聊天、可见空间、时钟、`guide` 引导进度），`guide`，`s`（每秒 10 次的位置快照：只发变化的玩家，每 2 秒发一次全量），`join`、`leave`、`profile`、`chat`、`emote`、`object`、`npcs`（每秒一次，有变化才发）、`clock`、`oc_changed`、`oc`、`oc_result`、`portal`、`spaces`（拥有者的空间带 `guests` 和 `pending`）、`invites`（自己待确认的邀请；`welcome` 里也带 `invites`）、`space_created`、`invited`、`notice`、`correct`、`kicked`、`error`。
 
 客户端先在本地按同一套几何预测移动，每秒最多上报 12 次。其他玩家的位置延后 120 ms 做插值显示。同一测试码再次连接时，旧连接会收到 `kicked: replaced`，因此不会留下幽灵角色。断线后按 0.5、1、2、4…秒（最长 10 秒）重连。关闭码 4401 或 4403 表示会话失效，客户端会回到测试码页。
 

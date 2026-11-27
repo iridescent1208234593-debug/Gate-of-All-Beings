@@ -38,6 +38,7 @@ var seq := 0
 var requested_oc := {}
 var near_object := ""
 var space_spaces: Array = []
+var space_invites: Array = []        # pending invitations to other players' spaces (#101)
 var toast_until := 0.0
 var auto_actions: Array = []       # --lab-auto=... scripted input for automated browser tests
 var auto_t := 0.0
@@ -928,6 +929,18 @@ func _render_spaces() -> void:
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	l.custom_minimum_size = Vector2(0, 0)
 	box.add_child(l)
+	if not space_invites.is_empty():
+		var ih := Label.new(); ih.text = "收到的邀请（接受后才能进入）："; box.add_child(ih)
+		for inv in space_invites:
+			var sid: String = inv["space"]["id"]
+			var irow := HBoxContainer.new()
+			box.add_child(irow)
+			var il := Label.new()
+			il.text = "%s 邀请你去「%s」" % [inv.get("from", ""), inv["space"]["title"]]
+			il.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			irow.add_child(il)
+			_add_button(irow, "接受", func(): Net.send({"t": "space_invite_accept", "space": sid}), "Accept_" + sid)
+			_add_button(irow, "拒绝", func(): Net.send({"t": "space_invite_decline", "space": sid}), "Decline_" + sid)
 	var mine = null
 	for s in space_spaces:
 		var row := HBoxContainer.new()
@@ -954,14 +967,23 @@ func _render_spaces() -> void:
 			row.add_child(n)
 			if pid in mine.get("guests", []):
 				_add_button(row, "撤销访问", func(): Net.send({"t": "space_revoke", "pid": pid}))
+			elif pid in mine.get("pending", []):
+				var wait := Label.new(); wait.text = "等待对方确认"; row.add_child(wait)
+				_add_button(row, "撤销邀请", func(): Net.send({"t": "space_revoke", "pid": pid}))
 			else:
 				_add_button(row, "邀请", func(): Net.send({"t": "space_invite", "pid": pid}), "Invite_" + pid)
 		for g in mine.get("guests", []):
 			if not world.players.has(g):
 				var row := HBoxContainer.new()
 				box.add_child(row)
-				var n := Label.new(); n.text = "已邀请 " + g; n.size_flags_horizontal = Control.SIZE_EXPAND_FILL; row.add_child(n)
+				var n := Label.new(); n.text = "已接受 " + g; n.size_flags_horizontal = Control.SIZE_EXPAND_FILL; row.add_child(n)
 				_add_button(row, "撤销访问", func(): Net.send({"t": "space_revoke", "pid": g}))
+		for g in mine.get("pending", []):
+			if not world.players.has(g):
+				var row := HBoxContainer.new()
+				box.add_child(row)
+				var n := Label.new(); n.text = "等待确认 " + g; n.size_flags_horizontal = Control.SIZE_EXPAND_FILL; row.add_child(n)
+				_add_button(row, "撤销邀请", func(): Net.send({"t": "space_revoke", "pid": g}))
 		if world.space.get("id", "") == mine["id"]:
 			var trow := HBoxContainer.new()
 			box.add_child(trow)
@@ -1104,6 +1126,7 @@ func _on_message(m: Dictionary) -> void:
 			_refresh_inventory()
 			world.clock = m.get("clock", {})
 			space_spaces = m.get("spaces", [])
+			space_invites = m.get("invites", [])
 			move_target = null
 			chat_log.clear()
 			for c in m.get("chat", []):
@@ -1259,7 +1282,11 @@ func _on_message(m: Dictionary) -> void:
 			toast("灵质空间「%s」已开辟" % m["space"]["title"])
 			_render_spaces()
 		"invited":
-			toast("%s 邀请你去「%s」，到虹之间前往" % [m["from"], m["space"]["title"]], 6)
+			toast("%s 邀请你去「%s」，打开虹之间接受或拒绝" % [m["from"], m["space"]["title"]], 6)
+		"invites":
+			space_invites = m["invites"]
+			if panel_holder.get_child_count() > 0:
+				_render_spaces()
 		"notice":
 			if m.get("code") == "access_revoked":
 				toast("空间主人收回了访问权限，你回到了会馆", 5)
@@ -1785,6 +1812,9 @@ func _run_auto(delta: float) -> void:
 					Net.send({"t": "space_invite" if parts[0] == "invite" else "space_revoke", "pid": pid})
 		"revoke_guest":
 			Net.send({"t": "space_revoke", "pid": parts[1]})
+		"accept_invites":
+			for inv in space_invites:
+				Net.send({"t": "space_invite_accept", "space": inv["space"]["id"]})
 		"enter_invited":
 			for s in space_spaces:
 				if s["kind"] == "private" and not s.get("mine", false):
