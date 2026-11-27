@@ -129,7 +129,7 @@ def main():
             # Hall checks that used to run only by hand (#236); each one starts its own temporary fixture.
             for test in ("character-text-draft", "form-flow", "fan-dialog-focus", "fan-owner-status",
                          "fan-review-desk", "fan-review-sync", "member-action-wiring", "oc-revisions",
-                         "poster-color-flow"):
+                         "poster-color-flow", "gallery-a11y-browser"):
                 commands.append(("Huiguan " + test, [node, f"apps/huiguan/tests/{test}.cjs"]))
             for name, command in commands:
                 run(name, command)
