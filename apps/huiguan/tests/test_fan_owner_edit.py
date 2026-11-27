@@ -119,8 +119,13 @@ class FanOwnerEditTest(unittest.TestCase):
         original = sheet(code, "阿青", "旧故事")
         self.assertEqual(self.owner.call("/api/save-character", original)[0], 200)
         self.assertEqual(self.publish(code)[1]["published"], 1)
+        # 审核员自己提交的人设也要经他人审核。
+        self.assertEqual(self.public(self.other, code), [])
+        fid = self.queue_item(self.reviewer, next(
+            r["id"] for r in self.reviewer.call("/api/fan/review/queue")[1]["characters"]
+            if r["code"] == code))["id"]
+        self.assertEqual(self.decide(self.reviewer, self.queue_item(self.reviewer, fid))[0], 200)
         published = self.public(self.other, code)[0]
-        fid = published["id"]  # Existing reviewer first-publication rule remains.
         self.assertEqual(self.other.call("/api/fan/react", {"character_id": fid, "type": "up"})[0], 200)
         self.assertEqual(self.other.call("/api/fan/react", {"character_id": fid, "type": "fav"})[0], 200)
         self.assertEqual(self.other.call("/api/fan/reactions")[1]["up"][str(fid)], 1)
@@ -135,7 +140,7 @@ class FanOwnerEditTest(unittest.TestCase):
         own = self.queue_item(self.owner, fid)
         self.assertTrue(first_revision["needs_independent_review"] and first_revision["can_approve"])
         self.assertFalse(own["can_approve"])
-        self.assertEqual(self.decide(self.owner, own)[1]["code"], "fan_revision_self_review_forbidden")
+        self.assertEqual(self.decide(self.owner, own)[1]["code"], "fan_self_review_forbidden")
 
         art_edit = sheet(code, "阿青", "旧故事")
         art_edit["data"].update(age=123, art_source="ai")
@@ -227,21 +232,18 @@ class FanOwnerEditTest(unittest.TestCase):
         self.assertIsNone(rejected["current_approval"])
         self.assertEqual(rejected["snapshots"], final["snapshots"])
 
-    def test_automatic_approval_does_not_invent_a_reviewer(self):
+    def test_first_approval_attributes_the_reviewer(self):
+        # 不再存在「提交即通过」，首审一定是某个人点下的，必须记录审核人。
         code = "approval-unattributed"
         self.assertEqual(self.owner.call("/api/save-character", sheet(code, "自动通过", "原稿"))[0], 200)
-        self.assertEqual(self.publish(code)[1]["published"], 1)
-        public = self.public(self.other, code)[0]
-        path = f"/api/admin/fan/history?id={public['id']}"
-        prior = self.reviewer.call(path)[1]
-        self.assertTrue(prior["current_is_public"])
-        self.assertEqual(prior["current_review_status"], "approved")
-        self.assertIsNone(prior["current_approval"])
-        self.assertIsNone(prior["snapshots"][0]["approval"])
-        self.assertEqual(self.decide(self.reviewer, self.public(self.reviewer, code)[0])[0], 200)
+        self.assertEqual(self.publish(code)[1]["pending"], 1)
+        self.assertEqual(self.public(self.other, code), [])
+        item = next(r for r in self.reviewer.call("/api/fan/review/queue")[1]["characters"] if r["code"] == code)
+        path = f"/api/admin/fan/history?id={item['id']}"
+        self.assertEqual(self.decide(self.reviewer, item)[0], 200)
         updated = self.reviewer.call(path)[1]
         self.assertEqual(updated["current_approval"]["actor_name"], "Moderator Fixture")
-        self.assertEqual(updated["snapshots"][1], prior["snapshots"][0])
+        self.assertEqual(updated["current_review_status"], "approved")
 
     def test_later_explicit_approval_at_same_version_and_unchanged_republish(self):
         code = "approval-two-reviewers"
@@ -263,6 +265,7 @@ class FanOwnerEditTest(unittest.TestCase):
                          [old["current_approval"]["snapshot_id"]] * 2)
         self.assertEqual(self.other.call("/api/fan/toggle", {"id": fid, "is_public": False})[0], 200)
         self.assertIsNone(self.reviewer.call(path)[1]["current_approval"])
+        # 已通过的稿子只是取消公开再公开，内容没变，保持通过。
         self.assertEqual(self.other.call("/api/fan/toggle", {"id": fid, "is_public": True})[1]["review_status"],
                          "approved")
         after = self.reviewer.call(path)[1]
@@ -333,10 +336,10 @@ with s.character_store().transaction(write=True) as store:
         # Direct submissions historically have a blank gallery code.
         draft = sheet("legacy-link", "未编号原稿", "同一段")["data"]
         status, created = self.owner.call("/api/fan/submit", draft)
-        self.assertEqual((status, created["review_status"]), (200, "approved"))
+        # 提交不再直接通过，先由他人审核。
+        self.assertEqual((status, created["review_status"]), (200, "pending"))
         fid = created["id"]
-        _, gallery = self.reviewer.call("/api/fan/list?view=text")
-        row = next(r for r in gallery["characters"] if r["id"] == fid)
+        row = next(r for r in self.reviewer.call("/api/fan/review/queue")[1]["characters"] if r["code"] == "")
         self.assertEqual(self.decide(self.reviewer, row, "reject")[0], 200)
         self.assertEqual(self.owner.call("/api/fan/toggle", {"id": fid, "is_public": True})[1]["review_status"], "pending")
         self.assertFalse(self.queue_item(self.owner, fid)["needs_independent_review"])
@@ -352,6 +355,8 @@ with s.character_store().transaction(write=True) as store:
     def test_non_owner_cannot_change_public_record(self):
         self.owner.call("/api/save-character", sheet("B-1", "林风", "原文"))
         self.owner.call("/api/fan/publish", {"character_codes": ["B-1"]})
+        base = next(r for r in self.reviewer.call("/api/fan/review/queue")[1]["characters"] if r["code"] == "B-1")
+        self.assertEqual(self.decide(self.reviewer, base)[0], 200)
         fid = self.public(self.owner, "B-1")[0]["id"]
 
         # 同编号保存只写进自己的名册，不改别人的公开记录
@@ -372,7 +377,9 @@ with s.character_store().transaction(write=True) as store:
         code, name = "withdrawn-rejected", "曾公开后撤回"
         original = sheet(code, name, "此前公开")
         self.assertEqual(self.owner.call("/api/save-character", original)[0], 200)
-        self.assertEqual(self.publish(code)[1]["pending"], 0)
+        self.assertEqual(self.publish(code)[1]["pending"], 1)
+        first = next(r for r in self.reviewer.call("/api/fan/review/queue")[1]["characters"] if r["code"] == code)
+        self.assertEqual(self.decide(self.reviewer, first)[0], 200)
         published = self.public(self.reviewer, code)[0]
         self.assertTrue(published["published_at"])
         fid = published["id"]
@@ -410,17 +417,24 @@ with s.character_store().transaction(write=True) as store:
         self.assertEqual(self.owner.call("/api/save-character", sheet(code, "草稿角色", "初稿"))[0], 200)
         self.assertFalse(self.owner.call("/api/save-character", sheet(code, "草稿角色", "改过一遍"))[1]["fan_review_pending"])
         body = self.publish(code)[1]
-        self.assertEqual((body["published"], body["pending"]), (1, 0))
-        published = self.public(self.other, code)
-        self.assertEqual(len(published), 1)
-        fid = published[0]["id"]
+        # 审核员自己的首发同样进入待审；改稿阶段不额外要求独立复审。
+        self.assertEqual((body["published"], body["pending"]), (1, 1))
+        self.assertEqual(self.public(self.other, code), [])
+        first = next(r for r in self.reviewer.call("/api/fan/review/queue")[1]["characters"] if r["code"] == code)
+        fid = first["id"]
+        # 作者自己在队列里看到这张卡时，不能批准自己。
+        self.assertFalse(self.queue_item(self.owner, fid)["can_approve"])
+        self.assertEqual(self.decide(self.owner, self.queue_item(self.owner, fid))[1]["code"],
+                         "fan_self_review_forbidden")
+        self.assertEqual(self.decide(self.reviewer, first)[0], 200)
+        self.assertEqual(self.public(self.other, code)[0]["id"], fid)
 
         # 公开之后再改，才要求另一位审核员处理。
         self.assertTrue(self.owner.call("/api/save-character", sheet(code, "草稿角色", "公开后再改"))[1]["fan_review_pending"])
         self.assertEqual(self.public(self.other, code), [])
         self.assertTrue(self.queue_item(self.reviewer, fid)["needs_independent_review"])
         self.assertFalse(self.queue_item(self.owner, fid)["can_approve"])
-        self.assertEqual(self.decide(self.owner, self.queue_item(self.owner, fid))[1]["code"], "fan_revision_self_review_forbidden")
+        self.assertEqual(self.decide(self.owner, self.queue_item(self.owner, fid))[1]["code"], "fan_self_review_forbidden")
         self.assertEqual(self.decide(self.reviewer, self.queue_item(self.reviewer, fid))[0], 200)
         self.assertEqual(self.public(self.other, code)[0]["id"], fid)
 
