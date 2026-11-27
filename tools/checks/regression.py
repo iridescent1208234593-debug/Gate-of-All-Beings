@@ -114,6 +114,9 @@ def main():
                 ("Cards frontend", [npm, "test", "--prefix", "apps/cards"]),
                 ("Cards backend", [npm, "run", "test:backend", "--prefix", "apps/cards"]),
                 ("Cards game types", [npm, "run", "check:game", "--prefix", "apps/cards"]),
+                # Cards browser checks that used to run only by hand (#244).
+                *[("Cards " + test, [node, f"apps/cards/tests/{test}.cjs"])
+                  for test in ("onboarding-browser", "opening-music", "orientation", "install-guide")],
                 ("World Map", [npm, "run", "check:world-map"]),
             ]
             for module in ("management", "ecology", "softie"):
