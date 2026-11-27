@@ -30,6 +30,7 @@ SEED = PRELUDE + r'''
 s.init_user_db()
 conn = s.db()
 for username, role, reviewer in (("admin_user", "admin", 0), ("reviewer_user", "executor", 1),
+                                 ("reviewer2_user", "executor", 1),
                                  ("author_user", "executor", 0), ("applicant_user", "executor", 0),
                                  ("elder_user", "elder", 0)):
     conn.execute("INSERT INTO local_users (username, pass_hash, nickname, role, status, is_fan_reviewer, created_at, last_login) VALUES (?,?,?,?,?,?,?,?)",
@@ -163,7 +164,7 @@ class FanReviewTest(unittest.TestCase):
 
     def test_author_entry_waits_for_review_then_shows(self):
         author, reviewer = self.login("author_user"), self.login("reviewer_user")
-        result = self.publish(author, sheet("R-1", "青岚", "第一版", upload(1)))
+        result = self.publish(author, sheet("R-1", "青岚", "第一版", upload(1), "human"))
         self.assertEqual((result["published"], result["pending"]), (1, 1))
         self.assertNotIn("R-1", self.codes())
         row = self.my_row(author, "R-1")
@@ -182,17 +183,17 @@ class FanReviewTest(unittest.TestCase):
         self.assertIn("R-1", self.codes())
 
         # 作者修改已通过的设表：内容变了就重新进入审核，审核前不在画廊
-        self.assertEqual(author.call("/api/save-character", sheet("R-1", "青岚", "第二版", upload(1)))[0], 200)
+        self.assertEqual(author.call("/api/save-character", sheet("R-1", "青岚", "第二版", upload(1), "human"))[0], 200)
         self.assertEqual(self.my_row(author, "R-1")["review_status"], "pending")
         self.assertNotIn("R-1", self.codes())
 
     def test_stale_review_cannot_approve_edited_content(self):
         author, reviewer = self.login("author_user"), self.login("reviewer_user")
-        self.publish(author, sheet("R-STALE", "旧稿", "审核员看到的内容", upload(3)))
+        self.publish(author, sheet("R-STALE", "旧稿", "审核员看到的内容", upload(3), "human"))
         _, queue = reviewer.call("/api/fan/review/queue")
         item = next(r for r in queue["characters"] if r["code"] == "R-STALE")
         body = {"id": item["id"], "decision": "approve", "review_version": item["review_version"]}
-        self.assertEqual(author.call("/api/save-character", sheet("R-STALE", "新稿", "尚未审核的新内容", upload(3)))[0], 200)
+        self.assertEqual(author.call("/api/save-character", sheet("R-STALE", "新稿", "尚未审核的新内容", upload(3), "human"))[0], 200)
         self.assertEqual(reviewer.call("/api/fan/review/decide", body)[0], 409)
         self.assertEqual(self.my_row(author, "R-STALE")["review_status"], "pending")
         self.assertNotIn("R-STALE", self.codes())
@@ -206,7 +207,7 @@ class FanReviewTest(unittest.TestCase):
     def test_other_reviewer_cannot_overwrite_a_completed_review(self):
         author = self.login("author_user")
         first, second = self.login("reviewer_user"), self.login("elder_user")
-        self.publish(author, sheet("R-TWO", "双人审核", "设定", upload(8)))
+        self.publish(author, sheet("R-TWO", "双人审核", "设定", upload(8), "human"))
         _, queue = first.call("/api/fan/review/queue")
         item = next(r for r in queue["characters"] if r["code"] == "R-TWO")
         body = {"id": item["id"], "review_version": item["review_version"]}
@@ -218,7 +219,7 @@ class FanReviewTest(unittest.TestCase):
 
     def test_reject_needs_a_note_and_republish_resubmits(self):
         author, reviewer = self.login("author_user"), self.login("reviewer_user")
-        self.publish(author, sheet("R-2", "赤羽", "设定", upload(2)))
+        self.publish(author, sheet("R-2", "赤羽", "设定", upload(2), "human"))
         fid = self.my_row(author, "R-2")["id"]
         _, queue = reviewer.call("/api/fan/review/queue")
         version = next(r["review_version"] for r in queue["characters"] if r["id"] == fid)
@@ -235,7 +236,7 @@ class FanReviewTest(unittest.TestCase):
 
     def test_views_split_art_text_and_ai(self):
         admin = self.login("admin_user")
-        result = self.publish(admin, sheet("V-ART", "有图", "有图", upload(10)),
+        result = self.publish(admin, sheet("V-ART", "有图", "有图", upload(10), "human"),
                               sheet("V-TEXT", "文字设", "只有文字"),
                               sheet("V-AI", "AI 立绘", "AI", upload(11), "ai"))
         self.assertEqual(result["pending"], 0)  # 管理员自己的公开直接通过
@@ -247,11 +248,10 @@ class FanReviewTest(unittest.TestCase):
         listing = self.listed("art")
         self.assertEqual(set(listing["counts"]), {"art", "text", "ai"})
         self.assertEqual(Client(self.base).call("/api/fan/list?view=bogus")[0], 400)
-        # 审核员把已通过的设表更正为 AI：移到 AI 分区
-        reviewer = self.login("reviewer_user")
+        # 审核人员的设表只能由管理员复审；这里由管理员把已通过的设表更正为 AI。
         fid = self.my_row(admin, "V-ART")["id"]
-        item = next(r for r in self.listed(client=reviewer)["characters"] if r["id"] == fid)
-        status, _ = reviewer.call("/api/fan/review/decide", {"id": fid, "decision": "approve", "art_source": "ai", "review_version": item["review_version"]})
+        item = next(r for r in self.listed(client=admin)["characters"] if r["id"] == fid)
+        status, _ = admin.call("/api/fan/review/decide", {"id": fid, "decision": "approve", "art_source": "ai", "review_version": item["review_version"]})
         self.assertEqual(status, 200)
         self.assertNotIn("V-ART", self.codes("art"))
         self.assertIn("V-ART", self.codes("ai"))
@@ -290,6 +290,59 @@ class FanReviewTest(unittest.TestCase):
         self.assertFalse(me["can_review_fan"])
         self.assertEqual(elder.call("/api/member/user/update", {"kind": "local", "uid": target["uid"], "set": {"is_fan_reviewer": "yes"}})[0], 400)
 
+
+    def test_image_requires_declared_art_source(self):
+        author = self.login("author_user")
+        self.assertEqual(author.call("/api/save-character", sheet("S-SRC", "无来源立绘", "有图但不声明", upload(7)))[0], 200)
+        status, result = author.call("/api/fan/publish", {"character_codes": ["S-SRC"]})
+        self.assertEqual(status, 400, result)
+        self.assertEqual(result["issues"][0]["code"], "fan_art_source_required")
+        self.assertNotIn("S-SRC", self.codes())
+
+    def test_rejected_ai_sheet_waits_before_resubmit(self):
+        author, reviewer = self.login("author_user"), self.login("reviewer_user")
+        self.publish(author, sheet("S-AI", "AI角色", "第一版", upload(8), "ai"))
+        _, queue = reviewer.call("/api/fan/review/queue")
+        item = next(r for r in queue["characters"] if r["code"] == "S-AI")
+        self.assertEqual(reviewer.call("/api/fan/review/decide", {
+            "id": item["id"], "decision": "reject", "note": "立绘存在角色或 IP 侵权风险",
+            "review_version": item["review_version"]})[0], 200)
+        status, result = author.call("/api/fan/publish", {"character_codes": ["S-AI"]})
+        self.assertEqual(status, 400, result)
+        self.assertEqual(result["issues"][0]["code"], "fan_review_cooldown")
+        self.assertGreater(result["issues"][0]["retry_after"], 0)
+        # 改稿保存同样受冷却约束，不会把卡片重新送回待审
+        self.assertEqual(author.call("/api/save-character", sheet("S-AI", "AI角色", "改一版", upload(8), "ai"))[0], 200)
+        self.assertEqual(self.my_row(author, "S-AI")["review_status"], "rejected")
+
+    def test_reviewer_owned_sheet_only_admin_can_review(self):
+        owner, reviewer, admin = self.login("reviewer2_user"), self.login("reviewer_user"), self.login("admin_user")
+        self.publish(owner, sheet("S-RV", "审核员的人设", "我自己也是审核员", upload(9), "human"))
+        self.assertEqual(self.my_row(owner, "S-RV")["review_status"], "approved")
+        # 审核员自己的设表改稿后回到待审，但只有管理员能审。
+        self.assertEqual(owner.call("/api/save-character", sheet("S-RV", "审核员的人设", "改一版", upload(9), "human"))[0], 200)
+        self.assertEqual(self.my_row(owner, "S-RV")["review_status"], "pending")
+        _, queue = reviewer.call("/api/fan/review/queue")
+        item = next(r for r in queue["characters"] if r["code"] == "S-RV")
+        status, result = reviewer.call("/api/fan/review/decide", {
+            "id": item["id"], "decision": "approve", "review_version": item["review_version"]})
+        self.assertEqual(status, 403, result)
+        self.assertEqual(result["code"], "fan_reviewer_sheet_requires_admin")
+        self.assertEqual(admin.call("/api/fan/review/decide", {
+            "id": item["id"], "decision": "approve", "review_version": item["review_version"]})[0], 200)
+
+    def test_queue_orders_art_before_ai_before_text(self):
+        author = self.login("author_user")
+        self.publish(author, sheet("S-ORD-T", "纯文字稿", "没有立绘", None, None))
+        self.publish(author, sheet("S-ORD-A", "AI 稿", "AI 立绘", upload(10), "ai"))
+        self.publish(author, sheet("S-ORD-H", "手绘稿", "手绘立绘", upload(11), "human"))
+        reviewer = self.login("reviewer_user")
+        _, queue = reviewer.call("/api/fan/review/queue")
+        mine = {"S-ORD-H", "S-ORD-A", "S-ORD-T"}
+        self.assertEqual([r["code"] for r in queue["characters"] if r["code"] in mine],
+                         ["S-ORD-H", "S-ORD-A", "S-ORD-T"])
+        for kind in ("art", "ai", "text"):
+            self.assertGreaterEqual(queue["counts"].get(kind, 0), 1)
 
 class FanReviewMigrationTest(unittest.TestCase):
     """Owner decision 2026-11-06: every entry from before review existed goes to review; none is deleted or unpublished."""
