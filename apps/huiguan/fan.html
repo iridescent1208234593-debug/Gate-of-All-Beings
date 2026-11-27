@@ -473,6 +473,11 @@ function ownerActions(c) {
     const id = String(c.id);
     if (/^[1-9][0-9]{0,18}$/.test(id)) html += `<button type="button" class="mini-btn" data-fan-reopen-id="${id}">重新送审</button>`;
   }
+  // 审核员 / 长老 / 管理员都能退回已通过的稿；退回理由沿用审核台的弹窗。
+  if (canReview && c.review_version) {
+    const rid = String(c.id);
+    if (/^[1-9][0-9]{0,18}$/.test(rid)) html += `<button type="button" class="mini-btn danger" data-fan-revoke-id="${rid}">退回</button>`;
+  }
   return html ? `<div class="card-actions">${html}</div>` : '';
 }
 function artCardHTML(c, rank) {
@@ -883,7 +888,8 @@ async function decide(id, decision, extra) {
 }
 function askReject(id) {
   const c = { ...(rowCache.get(String(id)) || {}) };
-  c.review_version = document.querySelector(`[data-review="${Number(id)}"]`)?.dataset.reviewVersion;
+  // 审核台的行带 data-review-version；画廊卡片没有那一行，直接用列表下发的版本号。
+  c.review_version = document.querySelector(`[data-review="${Number(id)}"]`)?.dataset.reviewVersion || c.review_version;
   openModal({
     title: '退回「' + (c.name || '') + '」',
     body: '写一句理由，作者会在「我的已登记人设」里看到。作者修改画廊内容后会自动重新提交审核。',
@@ -914,6 +920,13 @@ function syncQueueIfVisible() {
 $('reviewRefresh').onclick = () => loadQueue();
 $('reviewDesk').addEventListener('toggle', () => { if (!$('reviewDesk').hidden) syncQueueIfVisible(); });
 document.addEventListener('visibilitychange', syncQueueIfVisible);
+// 画廊卡片上的「退回」：与审核台共用同一个弹窗与接口。
+document.addEventListener('click', e => {
+  const rv = e.target.closest('[data-fan-revoke-id]');
+  if (!rv || rv.disabled) return;
+  e.stopPropagation();
+  askReject(rv.dataset.fanRevokeId);
+});
 window.addEventListener('focus', syncQueueIfVisible);
 setInterval(syncQueueIfVisible, 5000);
 
