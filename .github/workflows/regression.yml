@@ -109,6 +109,15 @@ jobs:
           python tools/domains/check-domain-hardcodes.py
           "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/modules"
           "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/homepage"
+      - name: Real-build save and navigation browsers
+        # apps/management pins its own Playwright (not the root one), so its Chromium is installed
+        # separately. Management builds with base ./; Softie must use its Shell path.
+        run: |
+          node apps/management/node_modules/playwright/cli.js install chromium
+          npm run build --prefix apps/management
+          npm run build --prefix apps/softie -- --base /app/modules/softie/
+          node apps/management/tests/save-browser.mjs
+          PLAYWRIGHT_MODULE="$PWD/apps/management/node_modules/playwright" node apps/shell/tests/navigation-real-save-smoke.cjs
       - name: Regression suite (one module per process; print command diagnostics)
         run: >-
           python tools/checks/regression.py --full

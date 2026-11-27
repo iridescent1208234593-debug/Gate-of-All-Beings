@@ -6,3 +6,5 @@
 - 本次测试覆盖当前模块内的账号切换和同一来源的已确认退出。没有改变历史的本地 UID 槽位命名；跨身份提供方 UID 冲突及跨标签页同时改变服务器 cookie 属于不同边界，若需在启用第二身份提供方后支持需另审数据兼容与服务端原子约束。
 
 使用 `node --test apps/management/tests/save-game.test.js` 验证本地格式、云接口回退与重新联网、账号切换和退出保护；测试只使用进程内存储及假服务。模块回归 `npm test --prefix apps/management`。
+
+浏览器回归 `node apps/management/tests/save-browser.mjs` 需要先运行 `npm run build --prefix apps/management`，覆盖登录、退出、重入、本地与云端分歧时的保存保护和 `#save-protection` 提示。merge-gate / regression 会运行它（#234）。
