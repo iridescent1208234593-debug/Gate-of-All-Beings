@@ -79,16 +79,17 @@
 
 | 事件 | 触发的步骤 | 完成条件 |
 |---|---|---|
+| welcome / profile_ready | character 捏一个自己的形象 | 捏人面板保存，或选择保留原形象 |
 | welcome / profile_ready | move 先走两步 | 走满 2 m |
 | （move 完成后） | chat 打个招呼 | 发出一条聊天 |
 | （chat 完成后） | emote 动作 | 点任一动作 |
 | near_object | interact 靠近就能互动 | 互动一次（触屏版本没有互动按钮时不出现、不计入完成） |
-| （基础都完成后） | spaces 彩虹门 | 打开「虹之间」 |
+| （走路、聊天、互动完成后） | spaces 彩虹门 | 打开「虹之间」 |
 | space_entered(private) | space-rules 你的灵质空间 | 知道了 |
 | view_toggled | view 两种看法 | 知道了 |
 | garden_tool / planted · minigame_opened · journal_opened | garden · minigame · journal | 知道了 / 种下 |
 
-必修四步（move、chat、interact、spaces）完成即 `completed`。顶栏「新手引导」面板可以暂停、继续、重新查看、不需要引导。外壳通过 `has_joystick`、`has_touch_interact` 说明本版本触屏有哪些控件，引导不教不存在的操作。
+当前客户端的完成步骤包括 character、move、chat、interact、spaces。已完成、跳过的玩家不重开引导，可从「新手引导 → 捏人教程」回看。顶栏「新手引导」面板可以暂停、继续、重新查看、不需要引导。外壳通过 `has_joystick`、`has_touch_interact` 说明本版本触屏有哪些控件，引导不教不存在的操作。
 
 **接入较新的客户端线**（运行副本、`feat/huiguan-native-world`）：加载 `life_guide.gd`，照 `main.gd` 里带 `guide.` 的十余行接上事件和目标；有摇杆、触屏互动键时把两个开关设为 `true`；在园艺工具切换、种下蘑菇、打开小游戏的地方分别调用 `on_event("garden_tool")`、`on_event("planted")`、`on_event("minigame_opened")`。服务端只需本分支 `store.py` 的表和 `world.py` 的 `guide_state` / `on_guide`。
 
