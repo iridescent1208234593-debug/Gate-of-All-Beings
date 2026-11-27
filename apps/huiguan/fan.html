@@ -799,7 +799,8 @@ function reviewItemHTML(c) {
       <div class="t">${esc(c.name)} <span class="m">— ${esc(c.user_name || '匿名')}</span></div>
       ${meta ? `<div class="m">${esc(meta)}</div>` : ''}
       ${c.story ? `<div class="s">${esc(c.story)}</div>` : ''}
-      ${c.needs_independent_review === true ? `<div class="m">${c.can_approve === false ? '这是你提交的修订，需要其他审核员处理。' : '这是修改后重新送审的版本。'}</div>` : ''}
+      ${c.can_approve === false ? `<div class="m" data-self-review>这是你自己提交的${c.needs_independent_review === true ? '修订' : '设表'}，需要另一位审核员处理。</div>`
+        : (c.needs_independent_review === true ? '<div class="m">这是修改后重新送审的版本。</div>' : '')}
       <div class="review-ops">
         ${c.type === '配色海报' ? '' : `<a class="mini-btn" href="${esc(reviewHref(c))}" target="_blank" rel="noopener">查看待审设表</a>`}
         ${c.image_data ? `<select aria-label="立绘来源" data-art>${opts}</select>` : ''}
