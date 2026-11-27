@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 import sqlite3
 import time
 
@@ -258,11 +259,16 @@ def test_private_space_invite_revoke_isolation(gateway):
     to_door(c, wc)
     c.send(json.dumps({"t": "space_enter", "space": sid}))
     assert recv_until(c, "error")["code"] == "space_forbidden"
-    # invite b
+    # invite b: the invitation is pending and grants nothing until b accepts (#101)
     a.send(json.dumps({"t": "space_invite", "pid": wb["pid"]}))
     inv = recv_until(b, "invited")
-    assert inv["space"]["id"] == sid
+    assert inv["space"]["id"] == sid and inv["pending"] is True
+    assert recv_until(a, "spaces", pred=lambda m: any(s["mine"] for s in m["spaces"]))
     to_door(b, wb)
+    b.send(json.dumps({"t": "space_enter", "space": sid}))
+    assert recv_until(b, "error")["code"] == "space_forbidden", "a pending invitation is not access"
+    b.send(json.dumps({"t": "space_invite_accept", "space": sid}))
+    assert any(s["id"] == sid for s in recv_until(b, "spaces", pred=lambda m: any(s["id"] == sid for s in m["spaces"]))["spaces"])
     b.send(json.dumps({"t": "space_enter", "space": sid}))
     wb2 = recv_until(b, "welcome")
     assert wb2["space"]["id"] == sid and any(p["pid"] == wa["pid"] for p in wb2["players"])
@@ -279,6 +285,117 @@ def test_private_space_invite_revoke_isolation(gateway):
     # return from private space to the hall
     a.send(json.dumps({"t": "space_enter", "space": "hall"}))
     assert recv_until(a, "welcome")["space"]["id"] == "hall"
+
+
+def _own_space(sock, welcome):
+    to_door(sock, welcome)
+    sock.send(json.dumps({"t": "space_create", "title": "院子"}))
+    return recv_until(sock, "space_created")["space"]["id"]
+
+
+def _mine(msg):
+    return next(s for s in msg["spaces"] if s["mine"])
+
+
+def test_pending_invite_decline_expiry_and_reinvite(gateway):
+    """#101: accept-before-access, explicit decline, expiry and re-invitation (RFC #100, approved 2026-11-28)."""
+    _, ca = gateway.new_code(); _, cb = gateway.new_code()
+    a, wa = enter(gateway, gateway.login(ca), "主人")
+    lb = gateway.login(cb)
+    b, wb = enter(gateway, lb, "客人")
+    sid = _own_space(a, wa)
+    to_door(b, wb)
+    # decline: nothing is granted, the owner sees the invitation gone, declining again is a no-op
+    a.send(json.dumps({"t": "space_invite", "pid": wb["pid"]}))
+    assert _mine(recv_until(a, "spaces", pred=lambda m: wb["pid"] in _mine(m)["pending"]))["guests"] == []
+    assert recv_until(b, "invites", pred=lambda m: m["invites"])["invites"][0]["space"]["id"] == sid
+    b.send(json.dumps({"t": "space_invite_decline", "space": sid}))
+    assert recv_until(b, "invites")["invites"] == []
+    assert _mine(recv_until(a, "spaces", pred=lambda m: not _mine(m)["pending"]))["guests"] == []
+    b.send(json.dumps({"t": "space_invite_decline", "space": sid}))
+    assert recv_until(b, "invites")["invites"] == []
+    b.send(json.dumps({"t": "space_enter", "space": sid}))
+    assert recv_until(b, "error")["code"] == "space_forbidden"
+    b.send(json.dumps({"t": "space_invite_accept", "space": sid}))
+    assert recv_until(b, "error")["code"] == "invite_not_found", "a declined invitation cannot be accepted"
+    # repeated invitations are idempotent: one row, one notice
+    a.send(json.dumps({"t": "space_invite", "pid": wb["pid"]}))
+    recv_until(b, "invited")
+    a.send(json.dumps({"t": "space_invite", "pid": wb["pid"]}))
+    recv_until(a, "spaces")
+    db = sqlite3.connect(gateway.tmp / "runtime" / "data" / "lab.sqlite", isolation_level=None)
+    assert db.execute("SELECT COUNT(*) FROM space_invites WHERE space_id=? AND pid=?", (sid, wb["pid"])).fetchone()[0] == 1
+    # expiry: an expired invitation grants nothing, is not listed after reconnecting, and can be sent again
+    db.execute("UPDATE space_invites SET expires_at=? WHERE space_id=?", (time.time() - 1, sid))
+    b.close()
+    b, wb = enter(gateway, lb, "客人")
+    assert wb["invites"] == []
+    b.send(json.dumps({"t": "space_invite_accept", "space": sid}))
+    assert recv_until(b, "error")["code"] == "invite_not_found"
+    a.send(json.dumps({"t": "space_invite", "pid": wb["pid"]}))
+    assert recv_until(b, "invited")["space"]["id"] == sid
+    b.send(json.dumps({"t": "space_invite_accept", "space": sid}))
+    recv_until(b, "spaces", pred=lambda m: any(s["id"] == sid for s in m["spaces"]))
+    assert _mine(recv_until(a, "spaces", pred=lambda m: wb["pid"] in _mine(m)["guests"]))["pending"] == []
+    # accepted access does not expire with the old invitation clock
+    assert db.execute("SELECT COUNT(*) FROM space_invites").fetchone()[0] == 0
+    assert db.execute("SELECT COUNT(*) FROM space_acl WHERE space_id=? AND pid=?", (sid, wb["pid"])).fetchone()[0] == 1
+    # a stranger cannot accept someone else's invitation
+    _, cc = gateway.new_code()
+    c, wc = enter(gateway, gateway.login(cc), "路人")
+    c.send(json.dumps({"t": "space_invite_accept", "space": sid}))
+    assert recv_until(c, "error")["code"] == "invite_not_found"
+
+
+def test_visitor_only_interacts_and_offline_revoke_returns_to_hall(gateway):
+    """#101: guests interact but cannot arrange or change time; a revoked guest reconnects in the hall once."""
+    _, ca = gateway.new_code(); _, cb = gateway.new_code()
+    la, lb = gateway.login(ca), gateway.login(cb)
+    a, wa = enter(gateway, la, "主人")
+    b, wb = enter(gateway, lb, "客人")
+    sid = _own_space(a, wa)
+    a.send(json.dumps({"t": "space_invite", "pid": wb["pid"]}))
+    recv_until(b, "invited")
+    b.send(json.dumps({"t": "space_invite_accept", "space": sid}))
+    recv_until(b, "spaces", pred=lambda m: any(s["id"] == sid for s in m["spaces"]))
+    to_door(b, wb)
+    b.send(json.dumps({"t": "space_enter", "space": sid}))
+    inside = recv_until(b, "welcome")
+    assert inside["space"]["id"] == sid
+    x, z = int(inside["you"]["x"]), int(inside["you"]["z"])
+    for msg in ({"t": "tile", "x": x, "z": z, "on": True}, {"t": "garden", "action": "plant", "x": x, "z": z}):
+        b.send(json.dumps(msg))
+        assert recv_until(b, "error")["code"] == "visitor_read_only", msg["t"]
+    b.send(json.dumps({"t": "space_time", "action": "pause"}))
+    assert recv_until(b, "error")["code"] == "not_space_owner"
+    b.send(json.dumps({"t": "space_invite", "pid": wa["pid"]}))
+    assert recv_until(b, "error")["code"] == "no_space", "guests cannot invite into someone else's space"
+    b.send(json.dumps({"t": "chat", "text": "你好"}))
+    assert recv_until(b, "chat")["text"] == "你好", "guests can still talk"
+    # the owner can still arrange their own space
+    a.send(json.dumps({"t": "space_enter", "space": sid}))
+    own = recv_until(a, "welcome")
+    a.send(json.dumps({"t": "tile", "x": int(own["you"]["x"]), "z": int(own["you"]["z"]), "on": True}))
+    end = time.time() + 5
+    while True:
+        msg = json.loads(a.recv(timeout=max(0.05, end - time.time())))
+        if msg["t"] in ("tile", "error"):
+            break
+    assert msg["t"] == "tile" or msg["code"] != "visitor_read_only", "owners keep arranging their own space"
+    # revoke while the guest is offline: on reconnect they are in the hall at the public spawn, once
+    b.close()
+    a.send(json.dumps({"t": "space_revoke", "pid": wb["pid"]}))
+    recv_until(a, "spaces", pred=lambda m: not _mine(m)["guests"])
+    a.send(json.dumps({"t": "space_enter", "space": "hall"}))
+    recv_until(a, "welcome")
+    b, back = enter(gateway, lb, "客人")
+    assert back["space"]["id"] == "hall" and back["pid"] == wb["pid"]
+    joined = recv_until(a, "join", pred=lambda m: m["player"]["pid"] == wb["pid"])
+    assert joined["player"]["pid"] == wb["pid"]
+    b.send(json.dumps({"t": "space_enter", "space": sid}))
+    assert recv_until(b, "error")["code"] in ("space_forbidden", "go_to_rainbow_door")
+    a2, wa2 = enter(gateway, la, "主人")
+    assert [p["pid"] for p in wa2["players"]].count(wb["pid"]) == 1, "reconnecting never duplicates a player"
 
 
 # ---------------------------------------------------------------- G. new-player guide (chapter "life")

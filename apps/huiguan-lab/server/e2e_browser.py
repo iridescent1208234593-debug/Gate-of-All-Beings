@@ -138,7 +138,7 @@ def main():
               json.dumps(sb5["players"][sa["pid"]]))
         # private space: A opens a space at the rainbow door and invites B
         A.play("wait:3;goto:13.2:15.5;arrive;goto:13.2:6.4;arrive;goto:15.5:6.4;arrive;wait:1;create;wait:4;invite_all;wait:8;enter_mine;wait:4;report")
-        B.play("view:2d;wait:3;goto:13.2:15.5;arrive;goto:13.2:6.4;arrive;goto:15.4:6.6;arrive;wait:14;enter_invited;wait:5;report")
+        B.play("view:2d;wait:3;goto:13.2:15.5;arrive;goto:13.2:6.4;arrive;goto:15.4:6.6;arrive;wait:12;accept_invites;wait:2;enter_invited;wait:5;report")
         sa6 = A.wait_state(lambda s: s["space"].startswith("sp_"), timeout=max(120, float(os.environ.get("LAB_E2E_TIMEOUT", "90"))))
         sb6 = B.wait_state(lambda s: s["space"] == sa6["space"] and sa6["pid"] in s["players"], timeout=max(120, float(os.environ.get("LAB_E2E_TIMEOUT", "90"))))
         check("D1 private space created and entered", True, sa6["space"])

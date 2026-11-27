@@ -26,6 +26,9 @@ from .art import catalog
 
 log = logging.getLogger("lab.world")
 PROTOCOL = 1
+# A pending invitation to a private space lapses after this long; the owner may invite again.
+# Accepted access never expires (#100 RFC, approved 2026-11-28).
+INVITE_TTL = 7 * 86400
 TICK_HZ = 10
 FULL_EVERY = 20          # full snapshot every 2 s heals any lost delta
 CONTROL_RE = re.compile(r"[\u0000-\u001f\u007f-\u009f​-‏‪-‮⁦-⁩]")
@@ -200,16 +203,24 @@ class Hub:
             return True
         return bool(self.store.one("SELECT 1 FROM space_acl WHERE space_id=? AND pid=?", (sid, pid)))
 
+    def is_visitor(self, c: Conn) -> bool:
+        """A guest in someone else's private space may interact but not arrange it (tiles, garden)."""
+        row = self.space_row(c.space)
+        return bool(row and row["kind"] == "private" and row["owner_pid"] != c.pid)
+
     def visible_spaces(self, pid: str) -> list[dict]:
         rows = self.store.all(
             "SELECT s.* FROM spaces s WHERE s.kind='public' OR s.owner_pid=? OR s.id IN "
             "(SELECT space_id FROM space_acl WHERE pid=?) ORDER BY s.kind DESC, s.created_at", (pid, pid))
         out = []
         for r in rows:
+            mine = r["owner_pid"] == pid
             guests = [g["pid"] for g in self.store.all("SELECT pid FROM space_acl WHERE space_id=?", (r["id"],))] \
-                if r["owner_pid"] == pid else []
+                if mine else []
+            pending = [g["pid"] for g in self.store.all(
+                "SELECT pid FROM space_invites WHERE space_id=? AND expires_at>?", (r["id"], time.time()))] if mine else []
             out.append({"id": r["id"], "kind": r["kind"], "title": r["title"], "owner": r["owner_pid"],
-                        "mine": r["owner_pid"] == pid, "guests": guests, "online": len(self.members(r["id"])),
+                        "mine": mine, "guests": guests, "pending": pending, "online": len(self.members(r["id"])),
                         "r4_branch": bool(r["r4_branch"])})
         return out
 
@@ -467,7 +478,7 @@ class Hub:
                 "needs_profile": not c.nick, "space": self.space_info(row), "you": self.player_view(c),
                 "players": [self.player_view(m) for m in self.members(c.space) if m.pid != c.pid],
                 "objects": self.objects_state(c.space), "npcs": self.npcs(c.space),
-                "garden_phase":self.garden_phase(c.pid), "inventory": self.inventory(c.pid), "tiles": self.tiles_view(c.space), "chat": list(self.chat.get(c.space, [])), "spaces": self.visible_spaces(c.pid),
+                "garden_phase":self.garden_phase(c.pid), "inventory": self.inventory(c.pid), "tiles": self.tiles_view(c.space), "chat": list(self.chat.get(c.space, [])), "spaces": self.visible_spaces(c.pid), "invites": self.pending_invites(c.pid),
                 "clock": self.clock(c.space), "emotes": sorted(self.emotes), "tick_hz": TICK_HZ,
                 "guide": self.guide_state(c)}
 
@@ -800,6 +811,8 @@ class Hub:
             raise ValueError('cell')
         x,z = int(x),int(z)
         def fail(code): self.send(c, {"t":"error", "code":code})
+        if self.is_visitor(c):
+            return fail('visitor_read_only')
         if math.dist((c.x,c.z),(x+.5,z+.5)) > float(self.paths['reach']):
             return fail('tile_too_far')
         plant = self.planted_at(c.space,x,z)
@@ -843,6 +856,9 @@ class Hub:
             if not -1000 <= v <= 1000:
                 raise ValueError("cell")
             return v
+        if self.is_visitor(c):
+            self.send(c, {"t": "error", "code": "visitor_read_only"})
+            return
         x, z, on = cell(m["x"]), cell(m["z"]), m.get("on", True)
         if not isinstance(on, bool):
             raise ValueError("on")
@@ -944,22 +960,68 @@ class Hub:
             return
         await self.move_to(c, sid, "enter")
 
+    def pending_invites(self, pid: str) -> list[dict]:
+        """Unexpired invitations this player has not answered yet. They grant nothing until accepted."""
+        rows = self.store.all(
+            "SELECT i.space_id, i.expires_at, s.title, p.nickname FROM space_invites i JOIN spaces s ON s.id=i.space_id "
+            "LEFT JOIN players p ON p.pid=s.owner_pid WHERE i.pid=? AND i.expires_at>? ORDER BY i.invited_at",
+            (pid, time.time()))
+        return [{"space": {"id": r["space_id"], "title": r["title"]}, "from": r["nickname"] or "",
+                 "expires_at": r["expires_at"]} for r in rows]
+
+    def send_spaces(self, pid: str) -> None:
+        conn = self.conns.get(pid)
+        if conn:
+            self.send(conn, {"t": "spaces", "spaces": self.visible_spaces(pid)})
+            self.send(conn, {"t": "invites", "invites": self.pending_invites(pid)})
+
     async def on_space_invite(self, c: Conn, m: dict, now: float) -> None:
+        """Owner invites a player. The invitation waits for the guest's answer; access starts only on accept."""
         row = self.store.one("SELECT * FROM spaces WHERE owner_pid=?", (c.pid,))
         target = m.get("pid")
         if not row:
             self.send(c, {"t": "error", "code": "no_space"})
             return
-        if not self.store.one("SELECT 1 FROM players WHERE pid=?", (target,)) or target == c.pid:
+        if not isinstance(target, str) or target == c.pid or not self.store.one("SELECT 1 FROM players WHERE pid=?", (target,)):
             self.send(c, {"t": "error", "code": "unknown_player"})
             return
-        self.store.exec("INSERT OR IGNORE INTO space_acl VALUES(?,?,?)", (row["id"], target, now))
-        self.note("space_invite", owner=c.pid, guest=target, space=row["id"])
-        self.send(c, {"t": "spaces", "spaces": self.visible_spaces(c.pid)})
+        if self.store.one("SELECT 1 FROM space_acl WHERE space_id=? AND pid=?", (row["id"], target)):
+            self.send_spaces(c.pid)          # already a guest: repeating the invite changes nothing
+            return
+        # Repeating a live invitation is idempotent; an expired one is replaced by a fresh invitation.
+        self.store.exec("DELETE FROM space_invites WHERE space_id=? AND pid=? AND expires_at<=?", (row["id"], target, now))
+        fresh = self.store.exec("INSERT OR IGNORE INTO space_invites VALUES(?,?,?,?)",
+                                (row["id"], target, now, now + INVITE_TTL)).rowcount
+        if fresh:
+            self.note("space_invite", owner=c.pid, guest=target, space=row["id"])
+        self.send_spaces(c.pid)
         guest = self.conns.get(target)
-        if guest:
-            self.send(guest, {"t": "invited", "space": {"id": row["id"], "title": row["title"]}, "from": c.nick})
-            self.send(guest, {"t": "spaces", "spaces": self.visible_spaces(target)})
+        if guest and fresh:
+            self.send(guest, {"t": "invited", "space": {"id": row["id"], "title": row["title"]}, "from": c.nick,
+                              "pending": True, "expires_at": now + INVITE_TTL})
+        self.send_spaces(target)
+
+    async def on_space_invite_accept(self, c: Conn, m: dict, now: float) -> None:
+        sid = m.get("space")
+        invite = self.store.one("SELECT * FROM space_invites WHERE space_id=? AND pid=? AND expires_at>?",
+                                (sid, c.pid, now)) if isinstance(sid, str) else None
+        if not invite:
+            self.send(c, {"t": "error", "code": "invite_not_found"})
+            return
+        self.store.exec("DELETE FROM space_invites WHERE space_id=? AND pid=?", (sid, c.pid))
+        self.store.exec("INSERT OR IGNORE INTO space_acl VALUES(?,?,?)", (sid, c.pid, now))
+        row = self.space_row(sid)
+        self.note("space_invite_accept", owner=row["owner_pid"], guest=c.pid, space=sid)
+        self.send_spaces(c.pid)
+        self.send_spaces(row["owner_pid"])
+
+    async def on_space_invite_decline(self, c: Conn, m: dict, now: float) -> None:
+        sid = m.get("space")
+        row = self.space_row(sid) if isinstance(sid, str) else None
+        if row and self.store.exec("DELETE FROM space_invites WHERE space_id=? AND pid=?", (sid, c.pid)).rowcount:
+            self.note("space_invite_decline", owner=row["owner_pid"], guest=c.pid, space=sid)
+            self.send_spaces(row["owner_pid"])
+        self.send_spaces(c.pid)              # declining twice, or after expiry, is a no-op
 
     async def on_space_revoke(self, c: Conn, m: dict, now: float) -> None:
         row = self.store.one("SELECT * FROM spaces WHERE owner_pid=?", (c.pid,))
@@ -968,11 +1030,12 @@ class Hub:
             self.send(c, {"t": "error", "code": "no_space"})
             return
         self.store.exec("DELETE FROM space_acl WHERE space_id=? AND pid=?", (row["id"], target))
+        self.store.exec("DELETE FROM space_invites WHERE space_id=? AND pid=?", (row["id"], target))
         self.note("space_revoke", owner=c.pid, guest=target, space=row["id"])
-        self.send(c, {"t": "spaces", "spaces": self.visible_spaces(c.pid)})
+        self.send_spaces(c.pid)
+        self.send_spaces(target)
         guest = self.conns.get(target)
         if guest:
-            self.send(guest, {"t": "spaces", "spaces": self.visible_spaces(target)})
             if guest.space == row["id"]:
                 self.send(guest, {"t": "notice", "code": "access_revoked"})
                 await self.move_to(guest, "hall", "revoked")

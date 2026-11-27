@@ -1,15 +1,36 @@
-# #101 双人隔离 PoC：可复用证据及待验
+# #101 双人隔离 PoC：实现与证据
 
-**状态：待 [#100 RFC](MULTIPLAYER-RFC.md) 审定。本页不是完成报告，不更改协议。** 既有测试报告和新版源码只可作为起点；不能替代这一轮选定构建的原始输出。
+**状态：按 [#100 RFC](MULTIPLAYER-RFC.md) 2026-11-28 的审定实现。** 只使用临时 runtime、虚构测试码和本机环回，不接生产，不新增账号体系，R4 关闭（`LAB_R4=0`，所以不能证明 R4 分支隔离）。
 
-| 验收 | 可复用证据 | 本轮结论 |
-| --- | --- | --- |
-| 双人同场、移动、表情 | 已登记 [LAB 测试报告](TEST-REPORT.md) 有合成测试码双浏览器同场与位置/聊天，权威协议有 `emote` | 旧测试或源码；本轮需保留两个身份的收发日志，不能用「聊天通过」替代「表情通过」 |
-| 两个私人空间、未经授权不可查看或修改 | 网关的 `can_enter`、`visible_spaces` 与同房广播，旧报告有开辟、邀请、撤销，单独的账号桥隔离测试验证旧 pid 关联及授权撤销 | 需新版双人同时各建房；明确跨房读取、写入（物件、聊天、OC、时钟）、在线和离线撤销的负向证据 |
-| 邀请／拒绝／撤销 | 当前直接授予 ACL，不自动传送；访客可不进，但没有显式拒绝 | **缺项**：等 RFC 决定，不能以不进入冒充拒绝 |
-| 重连、无重复玩家，无存档污染 | 旧报告已记录重连及同码替换；新版 `Hub.attach` 按有效会话复用 pid、检查空间 ACL | 需验证撤销后重连、两个同时连接、服务重启后数据与空间仍隔离；未经批准前不改协议 |
-| 可复现、本机录像／日志和资源记录 | 旧记录和测试脚本存在，不是本轮录像或资源数据 | 需记录运行命令、源提交、fixture 类型、脱敏消息日志、录像或机器日志、RSS/带宽采样方法与结果 |
+## 协议变化
 
-## 审定后执行
+- `space_invite`：只写待确认邀请（`space_invites`，`INVITE_TTL` = 7 天），不授予访问；重复邀请幂等，过期后可再邀。
+- `space_invite_accept` / `space_invite_decline`：来客接受后才写 `space_acl`；拒绝删除邀请，不授权；已接受的访问不会过期。
+- `space_revoke`：同时删除访问与待确认邀请；在场访客回到公共会馆出生点，离线访客在重连时复验后回到会馆。
+- 访客在别人的私人空间里可以聊天、表情、互动，铺路与种植返回 `visitor_read_only`，调整时间返回 `not_space_owner`，不能邀请他人。
+- 推送：`invited`（带 `pending`、`expires_at`）、`invites`、`spaces` 中拥有者可见 `pending`；`welcome` 带 `invites`。
+- 客户端「虹之间」面板列出收到的邀请（接受 / 拒绝），拥有者看到「等待对方确认」与「撤销邀请」。
 
-按 [LAB README](../README.md) 用锁定依赖、临时测试运行目录和本机环回启动，关闭 Tunnel 与外网连接；生成两个虚构 `player` 身份，先跑契约与假 transport（按 RFC 是否引入待确认决定用例），再按需跑双 WebSocket 或双 Godot。禁用 R4 的测试不能宣称证明 R4 分支；不能用真实账号、生产配置或日志。保留每项机器回执、差异和未验项；公开证据不含会话、测试码、账户或私人内容。本轮仅静态复核，未执行新的 PoC，也没有资源使用数字。
+## 验收与证据
+
+| 验收 | 证据 |
+| --- | --- |
+| 双人同场、移动、聊天 | `server/tests/test_gateway.py`：同场位置快照与聊天；`test_private_space_invite_revoke_isolation` 私人空间聊天不外泄到会馆 |
+| 未经授权不能查看或修改他人私人空间 | 同上：未受邀与「待确认」都返回 `space_forbidden`；`test_pending_invite_decline_expiry_and_reinvite`：拒绝后、过期后、他人代接受都不授权（`invite_not_found`） |
+| 邀请 / 拒绝 / 撤销 | `test_pending_invite_decline_expiry_and_reinvite`：拒绝两次幂等、重复邀请只有一行、过期后可续邀、接受后才在 ACL |
+| 访客只互动 | `test_visitor_only_interacts_and_offline_revoke_returns_to_hall`：铺路 / 种植 `visitor_read_only`，`space_time` 与邀请被拒，聊天可用；拥有者仍可布置 |
+| 重连不复制玩家、不污染存档 | 同上：离线撤销后重连回到 hall、pid 不变，另一方在场名单里该玩家只出现一次 |
+| 客户端 | `client/tests/test_space_invites_ui.gd`：待确认邀请有接受 / 拒绝、不作为可进入空间；接受后可前往；拥有者看到等待确认 |
+| 浏览器双开 | `server/e2e_browser.py` 的 B 先 `accept_invites` 再 `enter_invited` |
+
+以上服务端测试由 merge-gate 运行（#248），客户端测试由 `tools/checks/lab-godot-client.py` 运行（#232）。
+
+## 资源使用（2026-11-28，本机）
+
+`python -B loadtest.py --stages 2 --seconds 20 --out <临时目录>`（两名机器人玩家：真实登录 + WebSocket，持续移动、偶尔聊天；Windows，24 核 / 31.7 GB；网关自起于临时 runtime）：
+
+| 玩家 | 网关 CPU 平均 / 峰值 | RSS 峰值 | tick p50 / p99 | RTT p50 / p95 | 每人快照 | 每人下行 |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2 | 2.1 % / 6.2 % | 68.1 MB | 0.82 / 1.38 ms | 1.3 / 3.0 ms | 9.51 次/秒 | 119.6 kbps |
+
+环回网络，不代表外网或手机；未录屏，以测试日志与上表代替。
