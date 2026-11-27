@@ -114,6 +114,21 @@ jobs:
           python tools/checks/regression.py --full
           --modules "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/modules"
           --report "$RUNNER_TEMP/regression-report.json"
+      - name: Install Godot for LAB client tests
+        # Pinned to the engine in apps/huiguan-lab/client/project.godot; checksum from the
+        # release's SHA512-SUMS.txt.
+        shell: bash
+        env:
+          GODOT_ZIP: Godot_v4.7.2-stable_linux.x86_64.zip
+          GODOT_SHA512: 9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -fsSL -o "$GODOT_ZIP" "https://github.com/godotengine/godot/releases/download/4.7.2-stable/$GODOT_ZIP"
+          echo "$GODOT_SHA512  $GODOT_ZIP" | sha512sum -c -
+          unzip -q "$GODOT_ZIP"
+          echo "GODOT=$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" >> "$GITHUB_ENV"
+      - name: LAB Godot client tests
+        run: python tools/checks/lab-godot-client.py
       - name: Audit production npm dependencies
         run: npm audit --omit=dev --audit-level=high
       - name: Audit Gallery Engine build dependencies
