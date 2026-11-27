@@ -107,18 +107,25 @@ export interface GateSceneHandle {
  * 能力探测
  * ------------------------------------------------------------------ */
 
+let webglSupport: boolean | undefined;
+
 export function hasWebGL(): boolean {
   if (typeof document === 'undefined') return false;
+  if (webglSupport !== undefined) return webglSupport;
   try {
     const canvas = document.createElement('canvas');
     const gl =
       canvas.getContext('webgl2') ||
       canvas.getContext('webgl') ||
       (canvas.getContext('experimental-webgl') as WebGLRenderingContext | null);
-    return !!gl;
+    // Release the probe at once: browsers cap live WebGL contexts, and the Shell mounts the Gate
+    // again on every visit, so an unreleased probe per mount evicts real scenes (#94).
+    gl?.getExtension('WEBGL_lose_context')?.loseContext();
+    webglSupport = !!gl;
   } catch (e) {
-    return false;
+    webglSupport = false;
   }
+  return webglSupport;
 }
 
 /* ------------------------------------------------------------------ *

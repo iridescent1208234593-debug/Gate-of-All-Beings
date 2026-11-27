@@ -10,6 +10,11 @@
   const hostService = window.IridescentlyDomains?.service(location.hostname);
   const gateHost = hostService === 'zszm' || ['127.0.0.1', 'localhost', '[::1]'].includes(location.hostname);
   let promptEvent = null, busy = false, dialog = null, expanded = false, automatic = false, timer, guidePromise;
+  // The Shell runs this script again on every mount of the Gate: everything registered on window,
+  // document or body is tied to this mount and released by the dispose hook at the end (#94).
+  const lifetime = new AbortController();
+  const signal = lifetime.signal;
+  let observer = null;
   let installed = standalone();
   const page = document.querySelector('[data-install-guide]');
   function remember() { try { localStorage.setItem(key, 'seen'); } catch (_) {} }
@@ -53,14 +58,14 @@
   window.addEventListener('beforeinstallprompt', event => {
     if (!gateHost || ios || embedded) return;
     event.preventDefault(); promptEvent = event; refresh();
-  });
+  }, { signal });
   window.addEventListener('appinstalled', () => {
     promptEvent = null; installed = true; remember(); status(mobile ? '已添加，请到手机主屏幕查看图标。' : '应用已安装，可从系统的应用列表中打开。'); refresh();
-  });
+  }, { signal });
   matchMedia('(display-mode: standalone)').addEventListener('change', () => {
     if (standalone()) { installed = true; if (dialog?.open) dialog.close(); status('当前已在独立窗口中打开，无需再次添加。'); }
     refresh();
-  });
+  }, { signal });
   function bindGuide(root) {
     const select = platform => {
       root.querySelectorAll('[data-platform]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.platform === platform)));
@@ -173,10 +178,18 @@
     // Reuse the game's worker; never replace its asset-cache registration.
     if (gateHost && !embedded && 'serviceWorker' in navigator && isSecureContext) navigator.serviceWorker.register('/zszm-sw.js', { scope: '/' }).catch(() => {});
   } else if (gateHost) {
-    window.addEventListener('gate:install-ready', schedule);
-    window.addEventListener('gate:open-install', () => setTimeout(() => open(true), 0));
-    document.addEventListener('visibilitychange', schedule);
-    new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'open', 'aria-modal'] });
+    window.addEventListener('gate:install-ready', schedule, { signal });
+    window.addEventListener('gate:open-install', () => setTimeout(() => open(true), 0), { signal });
+    document.addEventListener('visibilitychange', schedule, { signal });
+    observer = new MutationObserver(schedule);
+    observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden', 'open', 'aria-modal'] });
     schedule();
   }
+  window.__iridescentlyDispose = () => {
+    lifetime.abort();
+    observer?.disconnect();
+    clearTimeout(timer);
+    if (dialog) { if (dialog.open) dialog.close(); dialog.remove(); dialog = null; }
+    document.body.classList.remove('gate-install-open');
+  };
 })();

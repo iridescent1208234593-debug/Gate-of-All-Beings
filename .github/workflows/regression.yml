@@ -109,6 +109,9 @@ jobs:
           python tools/domains/check-domain-hardcodes.py
           "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/modules"
           "$IRIDESCENTLY_STORAGE_ROOT/test/releases/candidate/homepage"
+      - name: Real modules leave nothing behind after unmount
+        # Built candidate modules, mounted and switched 20 times inside the real Shell (#94).
+        run: node apps/shell/tests/module-lifecycle-real.mjs
       - name: Real-build save and navigation browsers
         # apps/management pins its own Playwright (not the root one), so its Chromium is installed
         # separately. Management builds with base ./; Softie must use its Shell path.
