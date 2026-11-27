@@ -138,6 +138,14 @@ jobs:
           echo "GODOT=$RUNNER_TEMP/Godot_v4.7.2-stable_linux.x86_64" >> "$GITHUB_ENV"
       - name: LAB Godot client tests
         run: python tools/checks/lab-godot-client.py
+      - name: LAB gateway server tests
+        # LAB pins its own server stack (pillow 11, fastapi, websockets), so it gets a separate venv
+        # instead of sharing the Python that the rest of the suite uses (#248).
+        run: |
+          python -m venv "$RUNNER_TEMP/lab-venv"
+          "$RUNNER_TEMP/lab-venv/bin/python" -m pip install -q -r apps/huiguan-lab/server/requirements.txt
+          cd apps/huiguan-lab/server
+          "$RUNNER_TEMP/lab-venv/bin/python" -m pytest -q -p no:cacheprovider tests
       - name: Audit production npm dependencies
         run: npm audit --omit=dev --audit-level=high
       - name: Audit Gallery Engine build dependencies
