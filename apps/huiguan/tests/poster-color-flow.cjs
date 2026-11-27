@@ -203,7 +203,12 @@ const server = spawn('python', ['-u', '-c', fixture, root, temp], { cwd: root, w
    assert.equal(await frame.locator('#saveImgBtn').isDisabled(), false);
    if (evidence) await page.screenshot({ path: path.join(evidence, 'display-' + width + '.png'), fullPage: true });
    await page.goto(base + '/#charForm', { waitUntil: 'domcontentloaded' });
-   await page.waitForFunction(() => window.currentUser?.logged_in && loadAll().length > 0);
+   // loadAll() starts as the page's local copy; wait until syncFromServer() has merged the server's
+   // saved colours into it (#242), so the check reads what the account actually saved.
+   const serverSaved = (await (await context.request.get(base + '/api/get-characters')).json()).characters[0].data;
+   await page.waitForFunction(saved => window.currentUser?.logged_in && loadAll().length > 0 &&
+     String(loadAll()[0].colorPrimary).toLowerCase() === String(saved.colorPrimary).toLowerCase() &&
+     String(loadAll()[0].colorAccent).toLowerCase() === String(saved.colorAccent).toLowerCase(), serverSaved);
    assert.deepEqual(await page.evaluate(() => { fillFormFromData(loadAll()[0]); return [selectedColor.primary, selectedColor.accent]; }), ['#b83e4e', '#0eb83a']);
    const unauthorized = await browser.newContext();
    assert.equal((await unauthorized.request.post(base + '/api/images/upload', { multipart: { metadata: '{}', image: { name: 'test-only.png', mimeType: 'image/png', buffer: image } } })).status(), 401);
